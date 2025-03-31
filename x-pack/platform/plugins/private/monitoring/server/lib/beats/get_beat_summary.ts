@@ -123,24 +123,22 @@ export async function getBeatSummary(
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
       'hits.hits.inner_hits.first_hit.hits.hits._source.beat.stats.libbeat.output.write.bytes',
     ],
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createBeatsQuery({
-        start,
-        end,
-        clusterUuid,
-        filters,
-      }),
-      collapse: {
-        field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
-        inner_hits: {
-          name: 'first_hit',
-          size: 1,
-          sort: [
-            { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
-            { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
-          ],
-        },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createBeatsQuery({
+      start,
+      end,
+      clusterUuid,
+      filters,
+    }),
+    collapse: {
+      field: 'beats_stats.metrics.beat.info.ephemeral_id', // collapse on ephemeral_id to handle restart
+      inner_hits: {
+        name: 'first_hit',
+        size: 1,
+        sort: [
+          { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
+          { '@timestamp': { order: 'asc', unmapped_type: 'long' } },
+        ],
       },
     },
   };

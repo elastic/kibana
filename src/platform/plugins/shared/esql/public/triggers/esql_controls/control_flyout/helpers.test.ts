@@ -19,7 +19,7 @@ describe('helpers', () => {
   describe('updateQueryStringWithVariable', () => {
     it('should update the query string with the variable for an one line query string', () => {
       const queryString = 'FROM my_index | STATS BY ';
-      const variable = 'my_variable';
+      const variable = '?my_variable';
       const cursorPosition = { column: 26, lineNumber: 1 } as monaco.Position;
       const updatedQueryString = updateQueryStringWithVariable(
         queryString,
@@ -31,7 +31,7 @@ describe('helpers', () => {
 
     it('should update the query string with the variable for multiline query string', () => {
       const queryString = 'FROM my_index \n| STATS BY ';
-      const variable = 'my_variable';
+      const variable = '?my_variable';
       const cursorPosition = { column: 12, lineNumber: 2 } as monaco.Position;
       const updatedQueryString = updateQueryStringWithVariable(
         queryString,
@@ -75,14 +75,14 @@ describe('helpers', () => {
   describe('getRecurrentVariableName', () => {
     it('should return a new name if the name already exists', () => {
       const name = 'field';
-      const existingNames = ['field', 'field1', 'field2'];
+      const existingNames = new Set(['field', 'field1', 'field2']);
       const newName = getRecurrentVariableName(name, existingNames);
       expect(newName).toBe('field3');
     });
 
     it('should return the same name if the name does not exist', () => {
       const name = 'field';
-      const existingNames = ['field1', 'field2'];
+      const existingNames = new Set(['field1', 'field2']);
       const newName = getRecurrentVariableName(name, existingNames);
       expect(newName).toBe('field');
     });
@@ -90,18 +90,28 @@ describe('helpers', () => {
 
   describe('validateVariableName', () => {
     it('should return the variable without special characters', () => {
-      const variable = validateVariableName('my_variable/123');
-      expect(variable).toBe('my_variable123');
+      const variable = validateVariableName('?my_variable/123', '?');
+      expect(variable).toBe('?my_variable123');
     });
 
-    it('should remove the questionarks', () => {
-      const variable = validateVariableName('?my_variable');
-      expect(variable).toBe('my_variable');
+    it('should add questionarks if they dont exist', () => {
+      const variable = validateVariableName('my_variable', '?');
+      expect(variable).toBe('?my_variable');
     });
 
-    it('should remove the _ in the first char', () => {
-      const variable = validateVariableName('?_my_variable');
-      expect(variable).toBe('my_variable');
+    it('should remove the _ after the ? prefix', () => {
+      const variable = validateVariableName('?_my_variable', '?');
+      expect(variable).toBe('?my_variable');
+    });
+
+    it('should remove the _ after the ?? prefix', () => {
+      const variable = validateVariableName('??_my_variable', '??');
+      expect(variable).toBe('??my_variable');
+    });
+
+    it('should not allow more than 2 questiomarks', () => {
+      const variable = validateVariableName('???my_variable', '??');
+      expect(variable).toBe('??my_variable');
     });
   });
 });

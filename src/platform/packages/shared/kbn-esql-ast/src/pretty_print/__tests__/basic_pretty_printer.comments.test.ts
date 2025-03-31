@@ -188,11 +188,11 @@ describe('rename expressions', () => {
 describe('commands', () => {
   describe('JOIN', () => {
     test('around JOIN targets', () => {
-      assertPrint('FROM a | LEFT JOIN /*1*/ a /*2*/ AS /*3*/ b /*4*/ ON c');
+      assertPrint('FROM a | LEFT JOIN /*1*/ a /*2*/ /*3*/ /*4*/');
     });
 
     test('around JOIN conditions', () => {
-      assertPrint('FROM a | LEFT JOIN a AS b ON /*1*/ c /*2*/, /*3*/ d /*4*/');
+      assertPrint('FROM a | LEFT JOIN a /*1*/ /*2*/ /*3*/ /*4*/');
     });
   });
 });

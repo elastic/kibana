@@ -48,7 +48,7 @@ export async function getDegradedFields({
             size: 1,
             field: INDEX,
             order: {
-              _key: 'desc',
+              _key: 'desc' as const,
             },
           },
         },

@@ -13,14 +13,12 @@ import type { EntitiesESClient } from '../../lib/helpers/create_es_client/create
 
 function getSearchRequest(filters: estypes.QueryDslQueryContainer[]) {
   return {
-    body: {
-      track_total_hits: false,
-      terminate_after: 1,
-      size: 1,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    track_total_hits: false,
+    terminate_after: 1,
+    size: 1,
+    query: {
+      bool: {
+        filter: filters,
       },
     },
   };

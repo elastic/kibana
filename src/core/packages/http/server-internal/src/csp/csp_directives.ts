@@ -22,13 +22,15 @@ export type CspDirectiveName =
   | 'img-src'
   | 'report-uri'
   | 'report-to'
-  | 'form-action';
+  | 'form-action'
+  | 'object-src';
 
 /**
  * The default report only directives rules
  */
 export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>> = {
   'form-action': [`'report-sample'`, `'self'`],
+  'object-src': [`'report-sample'`, `'none'`],
 };
 
 /**
@@ -187,6 +189,10 @@ const parseConfigDirectives = (cspConfig: CspConfigType): CspConfigDirectives =>
 
   if (cspConfig.report_only?.form_action?.length) {
     reportOnlyDirectives.set('form-action', cspConfig.report_only?.form_action);
+  }
+
+  if (cspConfig.report_only?.object_src?.length) {
+    reportOnlyDirectives.set('object-src', cspConfig.report_only?.object_src);
   }
 
   return {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { PROCESS_COMMANDLINE_FIELD } from '../../../../../common/constants';
+
 export const parseSearchString = (query: string) => {
   if (query.trim() === '') {
     return [
@@ -22,7 +24,7 @@ export const parseSearchString = (query: string) => {
   return [
     ...cmdlineFilters.map((clause) => ({
       query_string: {
-        fields: ['system.process.cmdline'],
+        fields: [PROCESS_COMMANDLINE_FIELD],
         query: `*${escapeReservedCharacters(clause)}*`,
         minimum_should_match: 1,
       },

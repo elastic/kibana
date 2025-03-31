@@ -15,9 +15,8 @@ import {
 import { css } from '@emotion/css';
 import { InvestigationNoteResponse } from '@kbn/investigation-shared';
 import { UserProfile } from '@kbn/security-plugin/common';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import { formatDistance } from 'date-fns';
 import React, { useState } from 'react';
+import moment from 'moment';
 import { useTheme } from '../../../../hooks/use_theme';
 import { useInvestigation } from '../../contexts/investigation_context';
 import { EditNoteForm } from './edit_note_form';
@@ -78,7 +77,7 @@ export function Note({ note, isOwner, userProfile, userProfileLoading }: Props) 
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="xs" className={timestampClassName}>
-              {formatDistance(new Date(note.createdAt), new Date(), { addSuffix: true })}
+              {moment(new Date(note.createdAt)).fromNow()}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

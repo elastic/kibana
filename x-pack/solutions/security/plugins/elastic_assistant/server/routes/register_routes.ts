@@ -38,6 +38,9 @@ import {
   getDefendInsightsRoute,
   postDefendInsightsRoute,
 } from './defend_insights';
+import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
+import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
+import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
@@ -71,8 +74,11 @@ export const registerRoutes = (
   postKnowledgeBaseRoute(router);
 
   // Knowledge Base Entries
+  getKnowledgeBaseEntryRoute(router);
   findKnowledgeBaseEntriesRoute(router);
   createKnowledgeBaseEntryRoute(router);
+  updateKnowledgeBaseEntryRoute(router);
+  deleteKnowledgeBaseEntryRoute(router);
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)

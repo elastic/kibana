@@ -7,11 +7,11 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiProgress } from '@elastic/eui';
+import { EuiProgress, useEuiTheme, VISUALIZATION_COLORS } from '@elastic/eui';
 
 import { TooltipTable, TooltipHeader, TooltipValue, TooltipContainer } from '@elastic/charts';
 
-import { MonitorStatusTimeBin, SUCCESS_VIZ_COLOR, DANGER_VIZ_COLOR } from './monitor_status_data';
+import { MonitorStatusTimeBin } from './monitor_status_data';
 import * as labels from './labels';
 
 export const MonitorStatusCellTooltip = ({
@@ -21,6 +21,14 @@ export const MonitorStatusCellTooltip = ({
   timeBin?: MonitorStatusTimeBin;
   isLoading: boolean;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
+
+  const SUCCESS_COLOR = isAmsterdam ? VISUALIZATION_COLORS[0] : euiTheme.colors.success;
+  const DANGER_COLOR = isAmsterdam
+    ? VISUALIZATION_COLORS[VISUALIZATION_COLORS.length - 1]
+    : euiTheme.colors.danger;
   if (!timeBin) {
     return <>{''}</>;
   }
@@ -58,14 +66,14 @@ export const MonitorStatusCellTooltip = ({
           ...commonTooltipValuesProps,
         },
         {
-          color: SUCCESS_VIZ_COLOR,
+          color: SUCCESS_COLOR,
           label: labels.COMPLETE_LABEL,
           value: timeBin.ups,
           formattedValue: `${timeBin.ups}`,
           ...commonTooltipValuesProps,
         },
         {
-          color: DANGER_VIZ_COLOR,
+          color: DANGER_COLOR,
           label: labels.FAILED_LABEL,
           value: timeBin.downs,
           formattedValue: `${timeBin.downs}`,

@@ -22,9 +22,6 @@ jest
 
 const render = () => {
   return renderHook(() => useRootProfile(), {
-    initialProps: { solutionNavId: 'solutionNavId' } as React.PropsWithChildren<{
-      solutionNavId: string;
-    }>,
     wrapper: ({ children }) => (
       <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
     ),
@@ -40,6 +37,7 @@ describe('useRootProfile', () => {
     const { result } = render();
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
     // avoid act warning
     await waitFor(() => new Promise((resolve) => resolve(null)));
   });
@@ -49,6 +47,7 @@ describe('useRootProfile', () => {
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
       expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
     });
   });
 
@@ -57,14 +56,17 @@ describe('useRootProfile', () => {
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
       expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
     });
     act(() => mockSolutionNavId$.next('newSolutionNavId'));
     rerender();
     expect(result.current.rootProfileLoading).toBe(true);
     expect((result.current as Record<string, unknown>).AppWrapper).toBeUndefined();
+    expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeUndefined();
     await waitFor(() => {
       expect(result.current.rootProfileLoading).toBe(false);
       expect((result.current as Record<string, unknown>).AppWrapper).toBeDefined();
+      expect((result.current as Record<string, unknown>).getDefaultAdHocDataViews).toBeDefined();
     });
   });
 });

@@ -108,7 +108,6 @@ export const TableFieldValueCell = memo(
                   fieldFromBrowserField={fieldFromBrowserField}
                   fieldType={data.type}
                   isAggregatable={fieldFromBrowserField.aggregatable}
-                  isDraggable={false}
                   isObjectArray={data.isObjectArray}
                   value={value}
                   linkValue={getLinkValue && getLinkValue(data.field)}

@@ -17,8 +17,10 @@ import type {
 import type { IRuleSourceImporter } from '../import/rule_source_importer';
 import type { RuleImportErrorObject } from '../import/errors';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export interface IDetectionRulesClient {
+  getRuleCustomizationStatus: () => PrebuiltRulesCustomizationStatus;
   createCustomRule: (args: CreateCustomRuleArgs) => Promise<RuleResponse>;
   createPrebuiltRule: (args: CreatePrebuiltRuleArgs) => Promise<RuleResponse>;
   updateRule: (args: UpdateRuleArgs) => Promise<RuleResponse>;

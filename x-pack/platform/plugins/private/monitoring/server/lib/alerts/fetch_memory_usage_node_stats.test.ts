@@ -119,40 +119,38 @@ describe('fetchMemoryUsageNodeStats', () => {
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.node_stats-*,metrics-elasticsearch.stack_monitoring.node_stats-*',
       filter_path: ['aggregations'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['abc123'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'node_stats' } },
-                    { term: { 'metricset.name': 'node_stats' } },
-                    {
-                      term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['abc123'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'node_stats' } },
+                  { term: { 'metricset.name': 'node_stats' } },
+                  {
+                    term: { 'data_stream.dataset': 'elasticsearch.stack_monitoring.node_stats' },
+                  },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
-            ],
-          },
+            },
+            { range: { timestamp: { format: 'epoch_millis', gte: 0, lte: 0 } } },
+          ],
         },
-        aggs: {
-          clusters: {
-            terms: { field: 'cluster_uuid', size: 10 },
-            aggs: {
-              nodes: {
-                terms: { field: 'source_node.uuid', size: 10 },
-                aggs: {
-                  index: { terms: { field: '_index', size: 1 } },
-                  avg_heap: { avg: { field: 'node_stats.jvm.mem.heap_used_percent' } },
-                  cluster_uuid: { terms: { field: 'cluster_uuid', size: 1 } },
-                  name: { terms: { field: 'source_node.name', size: 1 } },
-                },
+      },
+      aggs: {
+        clusters: {
+          terms: { field: 'cluster_uuid', size: 10 },
+          aggs: {
+            nodes: {
+              terms: { field: 'source_node.uuid', size: 10 },
+              aggs: {
+                index: { terms: { field: '_index', size: 1 } },
+                avg_heap: { avg: { field: 'node_stats.jvm.mem.heap_used_percent' } },
+                cluster_uuid: { terms: { field: 'cluster_uuid', size: 1 } },
+                name: { terms: { field: 'source_node.name', size: 1 } },
               },
             },
           },

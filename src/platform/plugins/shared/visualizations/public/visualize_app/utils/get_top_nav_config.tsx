@@ -49,7 +49,6 @@ interface VisualizeCapabilities {
   createShortUrl: boolean;
   delete: boolean;
   save: boolean;
-  saveQuery: boolean;
   show: boolean;
 }
 
@@ -76,9 +75,9 @@ export interface TopNavConfigParams {
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.visualize) return false;
+  if (!anonymousUserCapabilities.visualize_v2) return false;
 
-  const visualize = anonymousUserCapabilities.visualize as unknown as VisualizeCapabilities;
+  const visualize = anonymousUserCapabilities.visualize_v2 as unknown as VisualizeCapabilities;
 
   return !!visualize.show;
 };
@@ -187,7 +186,10 @@ export const getTopNavConfig = (
             stateTransfer.navigateToWithEmbeddablePackage(app, {
               state: {
                 type: VISUALIZE_EMBEDDABLE_TYPE,
-                input: { savedObjectId: id },
+                input: {
+                  serializedVis: vis.serialize(),
+                  savedObjectId: id,
+                },
                 embeddableId: saveOptions.copyOnSave ? undefined : embeddableId,
                 searchSessionId: data.search.session.getSessionId(),
               },
@@ -399,6 +401,11 @@ export const getTopNavConfig = (
               title: i18n.translate('visualizations.share.shareModal.title', {
                 defaultMessage: 'Share this visualization',
               }),
+              config: {
+                embed: {
+                  computeAnonymousCapabilities: showPublicUrlSwitch,
+                },
+              },
             },
             sharingData: {
               title:
@@ -414,7 +421,6 @@ export const getTopNavConfig = (
               },
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
-            showPublicUrlSwitch,
             toasts: toastNotifications,
           });
         }

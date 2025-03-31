@@ -7,10 +7,31 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const COLLECTION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.collectionLabel',
+  {
+    defaultMessage: 'Collection',
+  }
+);
+
 export const COMMAND_AND_CONTROL = i18n.translate(
   'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.commandAndControlLabel',
   {
     defaultMessage: 'Command & Control',
+  }
+);
+
+export const CREDENTIAL_ACCESS = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.credentialAccessLabel',
+  {
+    defaultMessage: 'Credential Access',
+  }
+);
+
+export const DEFENSE_EVASION = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.defenseEvasionLabel',
+  {
+    defaultMessage: 'Defense Evasion',
   }
 );
 
@@ -42,6 +63,12 @@ export const LATERAL_MOVEMENT = i18n.translate(
   }
 );
 
+export const IMPACT = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.impactLabel',
+  {
+    defaultMessage: 'Impact',
+  }
+);
 export const INITIAL_ACCESS = i18n.translate(
   'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.initialAccessLabel',
   {
@@ -67,5 +94,12 @@ export const RECONNAISSANCE = i18n.translate(
   'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.reconnaissanceLabel',
   {
     defaultMessage: 'Reconnaissance',
+  }
+);
+
+export const RESOURCE_DEVELOPMENT = i18n.translate(
+  'xpack.securitySolution.attackDiscovery.mitre.attack.tactics.resourceDevelopmentLabel',
+  {
+    defaultMessage: 'Resource Development',
   }
 );

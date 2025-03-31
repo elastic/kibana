@@ -108,18 +108,16 @@ export class DeleteUnenrolledAgentsTask {
     const response = await esClient.deleteByQuery(
       {
         index: AGENTS_INDEX,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    active: false,
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  active: false,
                 },
-                { exists: { field: 'unenrolled_at' } },
-              ],
-            },
+              },
+              { exists: { field: 'unenrolled_at' } },
+            ],
           },
         },
       },

@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiText,
   EuiSpacer,
   EuiCodeBlock,
-  EuiButtonGroup,
   EuiCallOut,
   EuiButton,
   EuiCopy,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiPopover,
+  EuiSelectable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,19 +26,20 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
-import { type PLATFORM_TYPE } from '../hooks';
-import { REDUCED_PLATFORM_OPTIONS, PLATFORM_OPTIONS, usePlatform } from '../hooks';
+import {
+  usePlatform,
+  VISIBLE_PALFORM_OPTIONS,
+  EXTENDED_PLATFORM_OPTIONS,
+  KUBERNETES_PLATFORM_OPTION,
+} from '../hooks';
+
+import type { CommandsByPlatform } from '../applications/fleet/components/fleet_server_instructions/utils';
 
 import { KubernetesInstructions } from './agent_enrollment_flyout/kubernetes_instructions';
 import type { CloudSecurityIntegration } from './agent_enrollment_flyout/types';
 
 interface Props {
-  linuxCommand: string;
-  macCommand: string;
-  windowsCommand: string;
-  linuxDebCommand: string;
-  linuxRpmCommand: string;
-  k8sCommand: string;
+  installCommand: CommandsByPlatform;
   hasK8sIntegration: boolean;
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   hasK8sIntegrationMultiPage: boolean;
@@ -48,12 +52,7 @@ interface Props {
 }
 
 export const PlatformSelector: React.FunctionComponent<Props> = ({
-  linuxCommand,
-  macCommand,
-  windowsCommand,
-  linuxDebCommand,
-  linuxRpmCommand,
-  k8sCommand,
+  installCommand,
   hasK8sIntegration,
   cloudSecurityIntegration,
   hasK8sIntegrationMultiPage,
@@ -64,30 +63,27 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   fullCopyButton,
   onCopy,
 }) => {
-  const getInitialPlatform = useCallback(() => {
+  const { platform, setPlatform } = usePlatform();
+  const [showExtendedPlatforms, setShowExtendedPlatforms] = useState(false);
+
+  useEffect(() => {
     if (
       hasK8sIntegration ||
       (cloudSecurityIntegration?.integrationType ===
         FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE &&
         isManaged)
-    )
-      return 'kubernetes';
+    ) {
+      setPlatform('kubernetes');
+    }
+  }, [hasK8sIntegration, cloudSecurityIntegration, isManaged, setPlatform]);
 
-    return 'linux';
-  }, [hasK8sIntegration, cloudSecurityIntegration?.integrationType, isManaged]);
-
-  const { platform, setPlatform } = usePlatform(getInitialPlatform());
-
-  // In case of fleet server installation or standalone agent without
-  // Kubernetes integration in the policy use reduced platform options
-  // If it has Cloud Shell URL, then it should show platform options with Cloudshell in it
-  const isReduced = hasFleetServer || (!isManaged && !hasK8sIntegration);
-
-  const getPlatformOptions = useCallback(() => {
-    const platformOptions = isReduced ? REDUCED_PLATFORM_OPTIONS : PLATFORM_OPTIONS;
-
-    return platformOptions;
-  }, [isReduced]);
+  // Show K8 as a platform option if policy has K8s integration or is managed
+  const showK8 = !hasFleetServer && (isManaged || hasK8sIntegration);
+  const extendedPlatformOptions = [
+    ...(showK8 ? [KUBERNETES_PLATFORM_OPTION] : []),
+    ...EXTENDED_PLATFORM_OPTIONS,
+  ];
+  const extendedPlatforms = extendedPlatformOptions.map((option) => option.id);
 
   const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
@@ -135,14 +131,6 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
-  const commandsByPlatform: Record<PLATFORM_TYPE, string> = {
-    linux: linuxCommand,
-    mac: macCommand,
-    windows: windowsCommand,
-    deb: linuxDebCommand,
-    rpm: linuxRpmCommand,
-    kubernetes: k8sCommand,
-  };
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
   };
@@ -156,23 +144,75 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     <>
       <>
         {!hasK8sIntegrationMultiPage && (
-          <EuiButtonGroup
-            options={getPlatformOptions()}
-            idSelected={platform}
-            onChange={(id) => setPlatform(id as PLATFORM_TYPE)}
-            legend={i18n.translate('xpack.fleet.enrollmentInstructions.platformSelectAriaLabel', {
-              defaultMessage: 'Platform',
+          <EuiFilterGroup
+            aria-label={i18n.translate('xpack.fleet.agentEnrollment.visiblePlatformSelectorLabel', {
+              defaultMessage: 'Platform options',
             })}
-          />
+          >
+            {VISIBLE_PALFORM_OPTIONS.map((option) => (
+              <EuiFilterButton
+                key={option.id}
+                hasActiveFilters={platform === option.id}
+                onClick={() => setPlatform(option.id)}
+                data-test-subj={option['data-test-subj']}
+              >
+                {option.label}
+              </EuiFilterButton>
+            ))}
+            <EuiPopover
+              button={
+                <EuiFilterButton
+                  iconType="arrowDown"
+                  data-test-subj="platformSelectorExtended"
+                  onClick={() => setShowExtendedPlatforms(!showExtendedPlatforms)}
+                  isSelected={showExtendedPlatforms}
+                  hasActiveFilters={extendedPlatforms.includes(platform)}
+                  numActiveFilters={extendedPlatforms.includes(platform) ? 1 : 0}
+                  css={css`
+                    .euiFilterButton__text {
+                      min-inline-size: 0;
+                    }
+                  `}
+                >
+                  &hellip;
+                </EuiFilterButton>
+              }
+              isOpen={showExtendedPlatforms}
+              closePopover={() => setShowExtendedPlatforms(false)}
+              panelPaddingSize="none"
+              repositionOnScroll={true}
+            >
+              <EuiSelectable
+                aria-label={i18n.translate(
+                  'xpack.fleet.agentEnrollment.extendedPlatformSelectorLabel',
+                  {
+                    defaultMessage: 'Additional platform options',
+                  }
+                )}
+                singleSelection={true}
+                options={extendedPlatformOptions.map((option) => ({
+                  key: option.id,
+                  label: option.label,
+                  checked: platform === option.id ? 'on' : undefined,
+                  'data-test-subj': option['data-test-subj'],
+                }))}
+                onChange={(_allOptions, _event, option) => setPlatform(option.key)}
+                style={{ width: 150 }}
+                listProps={{ paddingSize: 'none', onFocusBadge: false }}
+              >
+                {(list) => list}
+              </EuiSelectable>
+            </EuiPopover>
+          </EuiFilterGroup>
         )}
-        <EuiSpacer size="s" />
-        {(platform === 'deb' || platform === 'rpm') && (
+        <EuiSpacer size="m" />
+        {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && (
           <>
             {systemPackageCallout}
             <EuiSpacer size="m" />
           </>
         )}
-        {platform === 'mac' &&
+        {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
           (cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
             cloudSecurityIntegration?.integrationType ===
@@ -230,12 +270,12 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               `}
               whiteSpace="pre"
             >
-              {commandsByPlatform[platform]}
+              {installCommand[platform]}
             </EuiCodeBlock>
 
             <EuiSpacer size="s" />
             {fullCopyButton && (
-              <EuiCopy textToCopy={commandsByPlatform[platform]}>
+              <EuiCopy textToCopy={installCommand[platform]}>
                 {(copy) => (
                   <EuiButton
                     color="primary"

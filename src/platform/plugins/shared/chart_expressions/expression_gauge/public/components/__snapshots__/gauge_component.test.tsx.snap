@@ -97,24 +97,6 @@ exports[`GaugeComponent renders the chart 1`] = `
               "strokeWidth": 1,
               "visible": true,
             },
-            "lumaSteps": Array [
-              224,
-              184,
-              128,
-              96,
-              64,
-              32,
-              16,
-              8,
-              4,
-              2,
-              1,
-              0,
-              0,
-              0,
-              0,
-              0,
-            ],
             "vertical": Object {
               "dash": Array [
                 0,
@@ -568,8 +550,8 @@ exports[`GaugeComponent renders the chart 1`] = `
   <Bullet
     colorBands={
       Array [
-        "#D3DAE6",
-        "#D3DAE6",
+        "#CAD3E2",
+        "#CAD3E2",
       ]
     }
     data={

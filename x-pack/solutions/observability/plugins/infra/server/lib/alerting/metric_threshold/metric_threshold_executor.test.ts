@@ -31,7 +31,7 @@ import {
   ALERT_REASON,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
-import { type Group } from '@kbn/observability-alerting-rule-utils';
+import { type Group } from '@kbn/alerting-rule-utils';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import type {
   AssetDetailsLocatorParams,

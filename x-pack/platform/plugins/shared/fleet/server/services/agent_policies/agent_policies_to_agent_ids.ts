@@ -28,17 +28,15 @@ export const getAgentIdsForAgentPolicies = async (
     ignore_unavailable: true,
     size: 100, // TODO: check if reasonable value
     _source: false,
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                policy_id: agentPolicyIds,
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              policy_id: agentPolicyIds,
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

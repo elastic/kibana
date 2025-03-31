@@ -6,10 +6,15 @@
  */
 
 /** @type {import('@jest/types').Config.InitialOptions} */
+
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/cloud_security_posture'],
+  // setupFilesAfterEnv is a list of scripts that are executed after JSDOM is initialized.
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/plugins/cloud_security_posture/jest.setup.js',
+  ],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/cloud_security_posture',
   coverageReporters: ['text', 'html'],

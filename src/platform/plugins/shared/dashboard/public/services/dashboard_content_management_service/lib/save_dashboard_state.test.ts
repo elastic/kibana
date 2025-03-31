@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardContainerInput } from '../../../../common';
 import { getSampleDashboardState } from '../../../mocks';
 import {
   contentManagementService,
@@ -16,6 +15,7 @@ import {
   embeddableService,
 } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
+import { DashboardPanelMap } from '../../../../common/dashboard_container/types';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {
   if (options.id === undefined) {
@@ -50,7 +50,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BOO',
-      } as unknown as DashboardContainerInput,
+      },
       lastSavedId: 'Boogaloo',
       saveOptions: {},
     });
@@ -71,7 +71,7 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooToo',
-      } as unknown as DashboardContainerInput,
+      },
       lastSavedId: 'Boogaloonie',
       saveOptions: { saveAsCopy: true },
     });
@@ -95,8 +95,8 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: { aVerySpecialVeryUniqueId: { type: 'boop' } },
-      } as unknown as DashboardContainerInput,
+        panels: { aVerySpecialVeryUniqueId: { type: 'boop' } } as unknown as DashboardPanelMap,
+      },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
     });
@@ -121,8 +121,8 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooFour',
-        panels: { idOne: { type: 'boop' } },
-      } as unknown as DashboardContainerInput,
+        panels: { idOne: { type: 'boop' } } as unknown as DashboardPanelMap,
+      },
       panelReferences: [{ name: 'idOne:panel_idOne', type: 'boop', id: 'idOne' }],
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
@@ -149,8 +149,8 @@ describe('Save dashboard state', () => {
       dashboardState: {
         ...getSampleDashboardState(),
         title: 'BooThree',
-        panels: { idOne: { type: 'boop' } },
-      } as unknown as DashboardContainerInput,
+        panels: { idOne: { type: 'boop' } } as unknown as DashboardPanelMap,
+      },
       lastSavedId: 'Boogatoonie',
       saveOptions: { saveAsCopy: true },
     });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -15,8 +15,7 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { css } from '@emotion/react';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
-import * as i18nAssistant from '../../../../detections/pages/detection_engine/translations';
-import type { DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import type { DefineStepRule } from '../../../common/types';
 import type { FormHook, ValidationError } from '../../../../shared_imports';
 
 import * as i18n from './translations';
@@ -91,6 +90,11 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
     },
     [getFields, setFieldValue]
   );
+  const chatTitle = useMemo(() => {
+    const queryField = getFields().queryBar;
+    const { query } = (queryField.value as DefineStepRule['queryBar']).query;
+    return `${i18n.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID} - ${query ?? 'query'}`;
+  }, [getFields]);
 
   if (!hasAssistantPrivilege) {
     return null;
@@ -108,7 +112,7 @@ Proposed solution should be valid and must not contain new line symbols (\\n)`;
             <NewChat
               asLink={true}
               category="detection-rules"
-              conversationId={i18nAssistant.DETECTION_RULES_CREATE_FORM_CONVERSATION_ID}
+              conversationTitle={chatTitle}
               description={i18n.ASK_ASSISTANT_DESCRIPTION}
               getPromptContext={getPromptContext}
               suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT(languageName)}

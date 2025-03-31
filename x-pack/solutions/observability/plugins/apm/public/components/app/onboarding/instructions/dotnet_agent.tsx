@@ -25,15 +25,15 @@ export const createDotNetAgentInstructions = (commonOptions: AgentInstructions):
     agentStatus,
     agentStatusLoading,
   } = commonOptions;
-  const codeBlock = `public class Startup
-{
-  public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-  {
-    app.UseAllElasticApm(Configuration);
-    //…rest of the method
-  }
-  //…rest of the class
-}`;
+  const codeBlock = `var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddAllElasticApm();
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+
+app.Run();`;
   return [
     {
       title: i18n.translate('xpack.apm.onboarding.dotNet.download.title', {
@@ -72,8 +72,8 @@ export const createDotNetAgentInstructions = (commonOptions: AgentInstructions):
           <EuiMarkdownFormat>
             {i18n.translate('xpack.apm.onboarding.dotNet.configureApplication.textPre', {
               defaultMessage:
-                'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `UseAllElasticApm` \
-      method in the `Configure` method within the `Startup.cs` file.',
+                'In case of ASP.NET Core with the `Elastic.Apm.NetCoreAll` package, call the `AddAllElasticApm` \
+      extension method on the `IServiceCollection` within the `Program.cs` file.',
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
@@ -84,7 +84,7 @@ export const createDotNetAgentInstructions = (commonOptions: AgentInstructions):
           <EuiMarkdownFormat>
             {i18n.translate('xpack.apm.onboarding.dotNet.configureApplication.textPost', {
               defaultMessage:
-                'Passing an `IConfiguration` instance is optional and by doing so, the agent will read config settings through this \
+                'The agent will implicitly read config settings through the application’s \
       `IConfiguration` instance (e.g. from the `appsettings.json` file).',
             })}
           </EuiMarkdownFormat>
@@ -119,8 +119,7 @@ export const createDotNetAgentInstructions = (commonOptions: AgentInstructions):
           <EuiMarkdownFormat>
             {i18n.translate('xpack.apm.onboarding.dotNet.configureAgent.textPost', {
               defaultMessage:
-                'In case you don’t pass an `IConfiguration` instance to the agent (e.g. in case of non ASP.NET Core applications) \
-      you can also configure the agent through environment variables. \n \
+                'You can also configure the agent through environment variables. \n \
       See [the documentation]({documentationLink}) for advanced usage, including the [Profiler Auto instrumentation]({profilerLink}) quick start.',
               values: {
                 documentationLink: `${baseUrl}guide/en/apm/agent/dotnet/current/configuration.html`,

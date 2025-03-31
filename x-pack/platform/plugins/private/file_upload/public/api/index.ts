@@ -8,11 +8,7 @@
 import { fromByteArray } from 'base64-js';
 import { lazyLoadModules } from '../lazy_load_bundle';
 import type { IImporter, ImportFactoryOptions } from '../importer';
-import type {
-  HasImportPermission,
-  FindFileStructureResponse,
-  PreviewTikaResponse,
-} from '../../common/types';
+import type { HasImportPermission, PreviewTikaResponse, AnalysisResult } from '../../common/types';
 import type {
   getMaxBytes,
   getMaxBytesFormatted,
@@ -63,10 +59,10 @@ interface HasImportPermissionParams {
 export async function analyzeFile(
   file: string,
   params: Record<string, string> = {}
-): Promise<FindFileStructureResponse> {
+): Promise<AnalysisResult> {
   const { getHttp } = await lazyLoadModules();
   const body = JSON.stringify(file);
-  return await getHttp().fetch<FindFileStructureResponse>({
+  return await getHttp().fetch<AnalysisResult>({
     path: `/internal/file_upload/analyze_file`,
     method: 'POST',
     version: '1',

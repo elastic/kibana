@@ -12,6 +12,7 @@ import SemVer from 'semver/classes/semver';
 
 import { CoreStart, CoreSetup, ApplicationStart } from '@kbn/core/public';
 
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { API_BASE_PATH } from '../../common';
 import {
   createKibanaReactContext,
@@ -81,15 +82,17 @@ export const IndexManagementAppContext: React.FC<IndexManagementAppContextProps>
   return (
     <KibanaRenderContextProvider {...core}>
       <KibanaReactContextProvider>
-        <Provider store={indexManagementStore(services)}>
-          <AppContextProvider value={{ ...dependencies, overlays }}>
-            <MappingsEditorProvider>
-              <ComponentTemplatesProvider value={componentTemplateProviderValues}>
-                <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
-              </ComponentTemplatesProvider>
-            </MappingsEditorProvider>
-          </AppContextProvider>
-        </Provider>
+        <RedirectAppLinks coreStart={core}>
+          <Provider store={indexManagementStore(services)}>
+            <AppContextProvider value={{ ...dependencies, overlays }}>
+              <MappingsEditorProvider>
+                <ComponentTemplatesProvider value={componentTemplateProviderValues}>
+                  <GlobalFlyoutProvider>{children}</GlobalFlyoutProvider>
+                </ComponentTemplatesProvider>
+              </MappingsEditorProvider>
+            </AppContextProvider>
+          </Provider>
+        </RedirectAppLinks>
       </KibanaReactContextProvider>
     </KibanaRenderContextProvider>
   );

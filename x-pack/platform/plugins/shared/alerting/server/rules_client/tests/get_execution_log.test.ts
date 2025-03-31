@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RulesClient, ConstructorOptions } from '../rules_client';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { ConstructorOptions } from '../rules_client';
+import { RulesClient } from '../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -18,11 +19,11 @@ import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
-import { SavedObject } from '@kbn/core/server';
-import { RawRule } from '../../types';
+import type { SavedObject } from '@kbn/core/server';
+import type { RawRule } from '../../types';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 import { getExecutionLogAggregation } from '../../lib/get_execution_log_aggregation';

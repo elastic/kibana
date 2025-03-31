@@ -27,7 +27,7 @@
         "label": "CellActions",
         "description": [],
         "signature": [
-          "({ data, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, }: ",
+          "({ data, triggerId, children, mode, showActionTooltips, visibleCellActions, disabledActionTypes, metadata, className, extraActionsIconType, extraActionsColor, }: ",
           {
             "pluginId": "@kbn/cell-actions",
             "scope": "common",
@@ -46,7 +46,7 @@
             "id": "def-common.CellActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  data,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActionTypes = [],\n  metadata,\n  className,\n}",
+            "label": "{\n  data,\n  triggerId,\n  children,\n  mode,\n  showActionTooltips = true,\n  visibleCellActions = 3,\n  disabledActionTypes = [],\n  metadata,\n  className,\n  extraActionsIconType,\n  extraActionsColor,\n}",
             "description": [],
             "signature": [
               {
@@ -785,7 +785,7 @@
             "signature": [
               "React.MutableRefObject<",
               "EuiDataGridRefProps",
-              " | null>"
+              " | null> | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-cell-actions/src/hooks/use_data_grid_column_cell_actions.tsx",
             "deprecated": false,
@@ -863,7 +863,9 @@
           },
           "[]; triggerId: string; mode: ",
           "CellActionsMode",
-          "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; } & { children?: React.ReactNode; }"
+          "; showActionTooltips?: boolean | undefined; visibleCellActions?: number | undefined; disabledActionTypes?: string[] | undefined; metadata?: Metadata | undefined; className?: string | undefined; extraActionsIconType?: ",
+          "IconType",
+          " | undefined; extraActionsColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined; } & { children?: React.ReactNode; }"
         ],
         "path": "src/platform/packages/shared/kbn-cell-actions/src/types.ts",
         "deprecated": false,

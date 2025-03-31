@@ -30,6 +30,7 @@ import { Fields, Choice } from '../lib/servicenow/types';
 import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from '../lib/servicenow/helpers';
 import { DeprecatedCallout } from '../lib/servicenow/deprecated_callout';
 import { AdditionalFields } from '../lib/servicenow/additional_fields';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -181,7 +182,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         />
       </EuiFormRow>
       <EuiSpacer size="m" />
-      <EuiFormRow fullWidth label={i18n.PRIORITY_LABEL}>
+      <EuiFormRow fullWidth label={i18n.PRIORITY_LABEL} labelAppend={OptionalFieldLabel}>
         <EuiSelect
           fullWidth
           data-test-subj="prioritySelect"
@@ -196,7 +197,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.CATEGORY_LABEL}>
+          <EuiFormRow fullWidth label={i18n.CATEGORY_LABEL} labelAppend={OptionalFieldLabel}>
             <EuiSelect
               fullWidth
               data-test-subj="categorySelect"
@@ -220,7 +221,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         </EuiFlexItem>
         <EuiFlexItem>
           {subcategoryOptions?.length > 0 ? (
-            <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
+            <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL} labelAppend={OptionalFieldLabel}>
               <EuiSelect
                 fullWidth
                 data-test-subj="subcategorySelect"
@@ -244,6 +245,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
               <EuiFormRow
                 fullWidth
                 label={i18n.CORRELATION_ID}
+                labelAppend={OptionalFieldLabel}
                 helpText={
                   <EuiLink href={docLinks.links.alerting.serviceNowSIRAction} target="_blank">
                     <FormattedMessage
@@ -263,7 +265,11 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
+              <EuiFormRow
+                fullWidth
+                label={i18n.CORRELATION_DISPLAY}
+                labelAppend={OptionalFieldLabel}
+              >
                 <TextFieldWithMessageVariables
                   index={index}
                   editAction={editSubActionProperty}
@@ -284,6 +290,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         paramsProperty={'description'}
         inputTargetValue={incident.description ?? undefined}
         label={i18n.DESCRIPTION_LABEL}
+        isOptionalField
       />
       <TextAreaWithMessageVariables
         index={index}
@@ -292,6 +299,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
         paramsProperty={'comments'}
         inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
         label={i18n.COMMENTS_LABEL}
+        isOptionalField
       />
       <EuiSpacer size="m" />
       {!isDeprecatedActionConnector && (
@@ -300,6 +308,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           messageVariables={messageVariables}
           errors={errors['subActionParams.incident.additional_fields'] as string[]}
           onChange={additionalFieldsOnChange}
+          isOptionalField
         />
       )}
     </>

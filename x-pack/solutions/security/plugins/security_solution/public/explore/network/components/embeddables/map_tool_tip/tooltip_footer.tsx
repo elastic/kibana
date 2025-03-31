@@ -6,23 +6,8 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiText,
-} from '@elastic/eui';
-import { euiLightVars as theme } from '@kbn/ui-theme';
-import styled from 'styled-components';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText } from '@elastic/eui';
 import * as i18n from '../translations';
-
-export const Icon = styled(EuiIcon)`
-  margin-right: ${theme.euiSizeS};
-`;
-
-Icon.displayName = 'Icon';
 
 interface MapToolTipFooterProps {
   featureIndex: number;

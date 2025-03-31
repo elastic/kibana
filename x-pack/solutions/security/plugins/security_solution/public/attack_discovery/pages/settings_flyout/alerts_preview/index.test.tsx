@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import { render } from '@testing-library/react';
 import React from 'react';
 import * as uuid from 'uuid';
 
 import { AlertsPreview } from '.';
-import { useKibana } from '../../../../common/lib/kibana';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
+
+jest.mock('../../../../detections/components/alerts_table', () => ({
+  DetectionEngineAlertsTable: jest.fn().mockReturnValue(<div>{'Mocked Alerts Table'}</div>),
+}));
 
 jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('mocked-uuid'),
@@ -28,17 +31,6 @@ jest.mock('../../../../common/lib/kibana', () => ({
           get: jest.fn(),
           list: jest.fn(),
         },
-        alertsTableConfigurationRegistry: {
-          objectTypes: {},
-          has: jest.fn(),
-          register: jest.fn(),
-          get: jest.fn(),
-          getActions: jest.fn(),
-          list: jest.fn(),
-          update: jest.fn(),
-          getAlertConfigIdPerRuleTypes: jest.fn(),
-        },
-        getAlertsStateTable: jest.fn().mockReturnValue(<div>{'Mocked Alerts Table'}</div>),
         ruleTypeRegistry: {
           has: jest.fn(),
           register: jest.fn(),
@@ -60,22 +52,21 @@ describe('AlertsPreview', () => {
     expect(getByTestId('alertsPreview')).toBeInTheDocument();
   });
 
-  it('invokes getAlertsStateTable with the expected props', () => {
+  it('renders the alerts table component with the expected props', () => {
     const query = { bool: {} };
     const size = 10;
 
     render(<AlertsPreview query={query} size={size} />);
 
-    expect(useKibana().services.triggersActionsUi.getAlertsStateTable).toHaveBeenCalledWith({
-      alertsTableConfigurationRegistry:
-        useKibana().services.triggersActionsUi.alertsTableConfigurationRegistry,
-      configurationId: 'securitySolution-rule-details',
-      consumers: [AlertConsumers.SIEM],
-      id: `attack-discovery-alerts-preview-${uuid.v4()}`,
-      initialPageSize: size,
-      query,
-      ruleTypeIds: SECURITY_SOLUTION_RULE_TYPE_IDS,
-      showAlertStatusWithFlapping: false,
-    });
+    expect(DetectionEngineAlertsTable).toHaveBeenCalledWith(
+      {
+        id: `attack-discovery-alerts-preview-${uuid.v4()}`,
+        tableType: TableId.alertsOnRuleDetailsPage,
+        initialPageSize: size,
+        query,
+        showAlertStatusWithFlapping: false,
+      },
+      expect.anything()
+    );
   });
 });

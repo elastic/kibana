@@ -29,4 +29,22 @@ describe('PY_LANG_CLIENT function', () => {
 
     expect(container.firstChild?.textContent).toMatchSnapshot();
   });
+  test('renders with correct content for multiple context fields', () => {
+    // Mocking necessary values for your function
+    const formValues = {
+      elasticsearch_query: { query: {} },
+      indices: ['index1', 'index2'],
+      doc_size: 10,
+      source_fields: { index1: ['field1', 'field3', 'field4'], index2: ['field2'] },
+      prompt: 'Your prompt',
+      citations: true,
+      summarization_model: 'Your-new-model',
+    } as unknown as ChatForm;
+
+    const clientDetails = ES_CLIENT_DETAILS('http://my-local-cloud-instance');
+
+    const { container } = render(PY_LANG_CLIENT(formValues, clientDetails));
+
+    expect(container.firstChild?.textContent).toMatchSnapshot();
+  });
 });

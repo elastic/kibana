@@ -30,6 +30,19 @@ paths:
               required:
                 - ids
                 - tags
+            examples:
+              add:
+                value:
+                  tags:
+                    tags_to_add: ['Duplicate']
+                    tags_to_remove: []
+                  ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
+              remove:
+                value:
+                  tags:
+                    tags_to_add: []
+                    tags_to_remove: ['Duplicate']
+                  ids: ['549c7129c76cbd554aba1bd638f8a49dde95088f5832e50218358e7eca1cf16e']
       responses:
         200:
           description: Successful response
@@ -39,6 +52,24 @@ paths:
                 type: object
                 additionalProperties: true
                 description: Elasticsearch update by query response
+              examples:
+                success:
+                  value:
+                    took: 68,
+                    timed_out: false,
+                    total: 1,
+                    updated: 1,
+                    deleted: 0,
+                    batches: 1,
+                    version_conflicts: 0,
+                    noops: 0,
+                    retries:
+                      bulk: 0,
+                      search: 0
+                    throttled_millis: 0,
+                    requests_per_second: -1,
+                    throttled_until_millis: 0,
+                    failures: []
         400:
           description: Invalid input data response
           content:
@@ -63,6 +94,7 @@ paths:
 components:
   schemas:
     SetAlertTags:
+      description: Object with list of tags to add and remove.
       type: object
       properties:
         tags_to_add:

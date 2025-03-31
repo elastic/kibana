@@ -100,6 +100,7 @@ export class CasePlugin
       const casesFeatures = getCasesKibanaFeatures();
       plugins.features.registerKibanaFeature(casesFeatures.v1);
       plugins.features.registerKibanaFeature(casesFeatures.v2);
+      plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
 
     registerSavedObjects({

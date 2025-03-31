@@ -11,6 +11,7 @@ import { TestProviders } from '../../../../../../common/mock';
 
 import { EndgameSecurityEventDetailsLine } from './endgame_security_event_details_line';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
+import { CellActionsWrapper } from '../../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../../common/lib/kibana');
 
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('EndgameSecurityEventDetailsLine', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   const mount = useMountAppended();
 
   test('it renders the expected text when all properties are provided and event action is admin_logon', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -60,6 +75,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -91,6 +107,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={undefined}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -122,6 +139,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName={undefined}
@@ -153,6 +171,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -184,6 +203,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -215,6 +235,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -246,6 +267,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -277,6 +299,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -308,6 +331,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -339,6 +363,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -370,6 +395,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -401,6 +427,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -432,6 +459,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -463,6 +491,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -494,6 +523,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -525,6 +555,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -556,6 +587,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -587,6 +619,7 @@ describe('EndgameSecurityEventDetailsLine', () => {
     const wrapper = mount(
       <TestProviders>
         <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
           contextId="test"
           endgameLogonType={2}
           endgameSubjectDomainName="[endgameSubjectDomainName]"
@@ -611,6 +644,42 @@ describe('EndgameSecurityEventDetailsLine', () => {
     );
     expect(wrapper.text()).toEqual(
       'With special privileges,[userName]\\[userDomain]@[hostName]successfully logged inusing logon type2 - Interactive(target logon ID[endgameTargetLogonId])via[processName](123)as requested by subject[endgameSubjectUserName]\\[endgameSubjectDomainName](subject logon ID[endgameSubjectLogonId])'
+    );
+  });
+
+  test('should passing correct scopeId to cell actions', () => {
+    mount(
+      <TestProviders>
+        <EndgameSecurityEventDetailsLine
+          scopeId="some_scope"
+          contextId="test"
+          endgameLogonType={2}
+          endgameSubjectDomainName="[endgameSubjectDomainName]"
+          endgameSubjectLogonId="[endgameSubjectLogonId]"
+          endgameSubjectUserName="[endgameSubjectUserName]"
+          endgameTargetDomainName="[endgameTargetDomainName]"
+          endgameTargetLogonId="[endgameTargetLogonId]"
+          endgameTargetUserName="[endgameTargetUserName]"
+          eventAction="admin_logon"
+          eventCode={undefined}
+          eventOutcome={undefined}
+          hostName="[hostName]"
+          id="1"
+          processExecutable="[processExecutable]"
+          processName="[processName]"
+          processPid={123}
+          userDomain="[userDomain]"
+          userName="[userName]"
+          winlogEventId={undefined}
+        />
+      </TestProviders>
+    );
+
+    expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+      expect.objectContaining({
+        scopeId: 'some_scope',
+      }),
+      {}
     );
   });
 });

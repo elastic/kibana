@@ -45,7 +45,6 @@ describe('<ProjectAPIKeys />', () => {
   });
 
   it('shows appropriate content when user does not have correct uptime save permissions', () => {
-    // const apiKey = 'sampleApiKey';
     render(<ProjectAPIKeys />, {
       state,
       core: makeUptimePermissionsCore({ save: false }),

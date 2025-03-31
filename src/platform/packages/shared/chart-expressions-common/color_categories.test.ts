@@ -7,27 +7,38 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DatatableRow } from '@kbn/expressions-plugin/common';
+import { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { getColorCategories } from './color_categories';
 
-const extensions = ['gz', 'css', '', 'rpm', 'deb', 'zip', null];
-const getExtension = (i: number) => extensions[i % extensions.length];
+const getNextExtension = (() => {
+  let i = 0;
+  const extensions = ['gz', 'css', '', 'rpm', 'deb', 'zip', null];
+  return () => extensions[i++ % extensions.length];
+})();
 
-const basicDatatableRows: DatatableRow[] = Array.from({ length: 30 }).map((_, i) => ({
-  count: i,
-  extension: getExtension(i),
-}));
-
-const isTransposedDatatableRows: DatatableRow[] = Array.from({ length: 30 }).map((_, i) => ({
-  count: i,
-  ['safari---extension']: getExtension(i),
-  ['chrome---extension']: getExtension(i + 1),
-  ['firefox---extension']: getExtension(i + 2),
-}));
+const basicDatatable = {
+  columns: ['count', 'extension'].map((id) => ({ id } as DatatableColumn)),
+  rows: Array.from({ length: 10 }).map((_, i) => ({
+    count: i,
+    extension: getNextExtension(),
+  })) as DatatableRow[],
+};
 
 describe('getColorCategories', () => {
-  it('should return all categories from datatable rows', () => {
-    expect(getColorCategories(basicDatatableRows, 'extension')).toEqual([
+  it('should return no categories when accessor is undefined', () => {
+    expect(getColorCategories(basicDatatable.rows)).toEqual([]);
+  });
+
+  it('should return no categories when accessor is not found', () => {
+    expect(getColorCategories(basicDatatable.rows, 'N/A')).toEqual([]);
+  });
+
+  it('should return no categories when no rows are defined', () => {
+    expect(getColorCategories(undefined, 'extension')).toEqual([]);
+  });
+
+  it('should return all categories from non-transpose datatable', () => {
+    expect(getColorCategories(basicDatatable.rows, 'extension')).toEqual([
       'gz',
       'css',
       '',
@@ -38,30 +49,8 @@ describe('getColorCategories', () => {
     ]);
   });
 
-  it('should exclude selected categories from datatable rows', () => {
-    expect(getColorCategories(basicDatatableRows, 'extension', false, ['', null])).toEqual([
-      'gz',
-      'css',
-      'rpm',
-      'deb',
-      'zip',
-    ]);
-  });
-
-  it('should return categories across all transpose columns of datatable rows', () => {
-    expect(getColorCategories(isTransposedDatatableRows, 'extension', true)).toEqual([
-      'gz',
-      'css',
-      '',
-      'rpm',
-      'deb',
-      'zip',
-      'null',
-    ]);
-  });
-
-  it('should exclude selected categories across all transpose columns of datatable rows', () => {
-    expect(getColorCategories(isTransposedDatatableRows, 'extension', true, ['', null])).toEqual([
+  it('should exclude selected categories from non-transpose datatable', () => {
+    expect(getColorCategories(basicDatatable.rows, 'extension', ['', null])).toEqual([
       'gz',
       'css',
       'rpm',

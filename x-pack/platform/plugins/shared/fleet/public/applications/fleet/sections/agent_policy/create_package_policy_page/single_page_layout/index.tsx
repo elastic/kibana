@@ -122,6 +122,14 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+  /*
+   * if there is no extension - will remain undefined
+   * if there is an extension and it is loaded - will be set to true, otherwise false
+   */
+  const [isFleetExtensionLoaded, setIsFleetExtensionLoaded] = useState<boolean | undefined>(
+    undefined
+  );
+
   const validation = agentPolicyFormValidation(newAgentPolicy, {
     allowedNamespacePrefixes: spaceSettings.allowedNamespacePrefixes,
   });
@@ -178,6 +186,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasAgentPolicyError,
     isInitialized,
     handleSetupTechnologyChange,
+    allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
@@ -265,8 +274,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
-    ({ isValid, updatedPolicy }) => {
+    ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
+      setIsFleetExtensionLoaded(isExtensionLoaded);
       setFormState((prevState) => {
         if (prevState === 'VALID' && !isValid) {
           return 'INVALID';
@@ -404,6 +414,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {!extensionView && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               disabled={false}
+              allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
               onSetupTechnologyChange={(value) => {
                 handleSetupTechnologyChange(value);
@@ -456,6 +467,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isAgentlessSelected,
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
+      allowedSetupTechnologies,
     ]
   );
 
@@ -649,7 +661,10 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                         onClick={() => onSubmit()}
                         isLoading={formState === 'LOADING'}
                         disabled={
-                          formState !== 'VALID' || hasAgentPolicyError || !validationResults
+                          formState !== 'VALID' ||
+                          hasAgentPolicyError ||
+                          !validationResults ||
+                          isFleetExtensionLoaded === false
                         }
                         iconType="save"
                         color="primary"

@@ -26,7 +26,6 @@ interface ImportRuleOptions {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   importRulePayload: ImportRuleArgs;
   mlAuthz: MlAuthz;
-  isRuleCustomizationEnabled: boolean;
 }
 
 export const importRule = async ({
@@ -35,7 +34,6 @@ export const importRule = async ({
   importRulePayload,
   prebuiltRuleAssetClient,
   mlAuthz,
-  isRuleCustomizationEnabled,
 }: ImportRuleOptions): Promise<RuleResponse> => {
   const { ruleToImport, overwriteRules, overrideFields, allowMissingConnectorSecrets } =
     importRulePayload;
@@ -62,7 +60,6 @@ export const importRule = async ({
       prebuiltRuleAssetClient,
       existingRule,
       ruleUpdate: rule,
-      isRuleCustomizationEnabled,
     });
     // applyRuleUpdate prefers the existing rule's values for `rule_source` and `immutable`, but we want to use the importing rule's calculated values
     ruleWithUpdates = { ...ruleWithUpdates, ...overrideFields };

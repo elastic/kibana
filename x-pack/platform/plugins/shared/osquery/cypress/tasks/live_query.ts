@@ -162,7 +162,7 @@ export const checkActionItemsInResults = ({
   cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
   cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
   cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
-  cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
+  cy.contains('Add to Timeline investigation').should(timeline ? 'exist' : 'not.exist');
 };
 
 export const takeOsqueryActionWithParams = () => {

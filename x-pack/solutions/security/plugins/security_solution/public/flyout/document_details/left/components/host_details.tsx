@@ -8,30 +8,37 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { v4 as uuid } from 'uuid';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
-  EuiTitle,
-  EuiSpacer,
-  EuiInMemoryTable,
-  EuiText,
+  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
-  EuiIcon,
-  EuiPanel,
   EuiHorizontalRule,
-  EuiFlexGrid,
+  EuiIcon,
+  EuiInMemoryTable,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
-import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import {
+  MISCONFIGURATION_INSIGHT_HOST_DETAILS,
+  VULNERABILITIES_INSIGHT_HOST_DETAILS,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
+import { useNonClosedAlerts } from '../../../../cloud_security_posture/hooks/use_non_closed_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import type { RelatedUser } from '../../../../../common/search_strategy/security_solution/related_entities/related_users';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
-import { EntityType } from '../../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/default_renderer';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -47,17 +54,17 @@ import { useHostRelatedUsers } from '../../../../common/containers/related_entit
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import {
-  HOST_DETAILS_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
-  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
   HOST_DETAILS_ALERT_COUNT_TEST_ID,
   HOST_DETAILS_MISCONFIGURATIONS_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_IP_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_LINK_TEST_ID,
+  HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID,
+  HOST_DETAILS_TEST_ID,
   HOST_DETAILS_VULNERABILITIES_TEST_ID,
 } from './test_ids';
 import {
-  USER_NAME_FIELD_NAME,
   HOST_IP_FIELD_NAME,
+  USER_NAME_FIELD_NAME,
 } from '../../../../timelines/components/timeline/body/renderers/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
@@ -70,9 +77,13 @@ import { MisconfigurationsInsight } from '../../shared/components/misconfigurati
 import { VulnerabilitiesInsight } from '../../shared/components/vulnerabilities_insight';
 import { AlertCountInsight } from '../../shared/components/alert_count_insight';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useNavigateToHostDetails } from '../../../entity_details/host_right/hooks/use_navigate_to_host_details';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
+import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
+const HOST_DETAILS_INSIGHTS_ID = 'host-details-insights';
 
 const HostOverviewManage = manageQuery(HostOverview);
 const RelatedUsersManage = manageQuery(InspectButtonContainer);
@@ -108,6 +119,14 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
   const isEntityAnalyticsAuthorized = isPlatinumOrTrialLicense && hasEntityAnalyticsCapability;
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const timerange = useMemo(
+    () => ({
+      from,
+      to,
+    }),
+    [from, to]
+  );
 
   const narrowDateRange = useCallback<NarrowDateRange>(
     (score, interval) => {
@@ -145,6 +164,40 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
     hostName,
     indexNames: selectedPatterns,
     skip: selectedPatterns.length === 0,
+  });
+
+  const filterQuery = useMemo(
+    () => (hostName ? buildHostNamesFilter([hostName]) : undefined),
+    [hostName]
+  );
+  const { data: hostRisk } = useRiskScore({
+    filterQuery,
+    riskEntity: EntityType.host,
+    skip: hostName == null,
+    timerange,
+  });
+  const hostRiskData = hostRisk && hostRisk.length > 0 ? hostRisk[0] : undefined;
+  const isRiskScoreExist = !!hostRiskData?.host.risk;
+
+  const { hasNonClosedAlerts } = useNonClosedAlerts({
+    field: EntityIdentifierFields.hostName,
+    value: hostName,
+    to,
+    from,
+    queryId: 'HostEntityOverview',
+  });
+  const { hasMisconfigurationFindings } = useHasMisconfigurations('host.name', hostName);
+  const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
+
+  const { openDetailsPanel } = useNavigateToHostDetails({
+    hostName,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings,
+    hasNonClosedAlerts,
+    isPreviewMode: true, // setting to true to always open a new host flyout
+    contextID: HOST_DETAILS_INSIGHTS_ID,
   });
 
   const {
@@ -197,7 +250,6 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
               rowItems={ips}
               attrName={HOST_IP_FIELD_NAME}
               idPrefix={''}
-              isDraggable={false}
               render={(ip) =>
                 ip == null ? (
                   getEmptyTagValue()
@@ -339,20 +391,23 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
             fieldName={'host.name'}
             name={hostName}
             direction="column"
+            openDetailsPanel={openDetailsPanel}
             data-test-subj={HOST_DETAILS_ALERT_COUNT_TEST_ID}
           />
           <MisconfigurationsInsight
             fieldName={'host.name'}
             name={hostName}
             direction="column"
+            openDetailsPanel={openDetailsPanel}
             data-test-subj={HOST_DETAILS_MISCONFIGURATIONS_TEST_ID}
-            telemetrySuffix={'host-details'}
+            telemetryKey={MISCONFIGURATION_INSIGHT_HOST_DETAILS}
           />
           <VulnerabilitiesInsight
             hostName={hostName}
             direction="column"
+            openDetailsPanel={openDetailsPanel}
             data-test-subj={HOST_DETAILS_VULNERABILITIES_TEST_ID}
-            telemetrySuffix={'host-details'}
+            telemetryKey={VULNERABILITIES_INSIGHT_HOST_DETAILS}
           />
         </EuiFlexGrid>
         <EuiSpacer size="l" />

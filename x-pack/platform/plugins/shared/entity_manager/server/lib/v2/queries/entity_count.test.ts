@@ -26,7 +26,9 @@ describe('getEntityCountQuery', () => {
       end: '2024-11-20T20:00:00.000Z',
     });
 
-    expect(query).toEqual('FROM logs-* | STATS BY service.name::keyword | STATS count = COUNT()');
+    expect(query).toEqual(
+      'FROM logs-* | STATS BY service.name::keyword | STATS count = COUNT() | LIMIT 1000'
+    );
 
     expect(filter).toEqual({
       bool: {
@@ -147,7 +149,8 @@ describe('getEntityCountQuery', () => {
         'EVAL entity.id = CASE(is_source_0, service_name::keyword, is_source_1, service.name::keyword) | ' +
         'WHERE entity.id IS NOT NULL | ' +
         'STATS BY entity.id | ' +
-        'STATS count = COUNT()'
+        'STATS count = COUNT() | ' +
+        'LIMIT 1000'
     );
 
     expect(filter).toEqual({

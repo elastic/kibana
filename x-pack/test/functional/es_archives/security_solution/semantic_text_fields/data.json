@@ -5,77 +5,7 @@
     "index": "semantic_text_fields",
     "source": {
       "@timestamp": "2024-11-01T15:52:16.648Z",
-      "content": {
-        "text": "my favorite color is green",
-        "inference": {
-          "inference_id": ".elser-2-elasticsearch",
-          "model_settings": {
-            "task_type": "sparse_embedding"
-          },
-          "chunks": [
-            {
-              "text": "my favorite color is green",
-              "embeddings": {
-                "green": 2.8714406,
-                "favorite": 2.5192127,
-                "color": 2.499853,
-                "favourite": 1.7829537,
-                "colors": 1.2280636,
-                "my": 1.1292906,
-                "friend": 0.87358737,
-                "rainbow": 0.8518238,
-                "love": 0.8146304,
-                "choice": 0.7517174,
-                "nature": 0.62242556,
-                "beautiful": 0.6110072,
-                "personality": 0.5559894,
-                "dr": 0.5296162,
-                "your": 0.51745296,
-                "art": 0.45324937,
-                "colour": 0.44607934,
-                "theme": 0.4360909,
-                "mood": 0.43253413,
-                "personal": 0.4201024,
-                "style": 0.39435387,
-                "blue": 0.38090202,
-                "nickname": 0.37952134,
-                "design": 0.37043664,
-                "dream": 0.3620103,
-                "desire": 0.35553402,
-                "best": 0.32577398,
-                "favorites": 0.30795538,
-                "humor": 0.30244058,
-                "popular": 0.2957705,
-                "brand": 0.28912684,
-                "neutral": 0.28545624,
-                "passion": 0.28457505,
-                "i": 0.27936152,
-                "preference": 0.24133624,
-                "inspiration": 0.24008423,
-                "purple": 0.23559056,
-                "culture": 0.23260204,
-                "flower": 0.21190192,
-                "bright": 0.20443156,
-                "beauty": 0.20076275,
-                "aura": 0.19355631,
-                "palette": 0.17414959,
-                "wonder": 0.16287619,
-                "photo": 0.16179858,
-                "orange": 0.14167522,
-                "dress": 0.12800644,
-                "camouflage": 0.061010167,
-                "grass": 0.05907971,
-                "tone": 0.028165601,
-                "painting": 0.026917756,
-                "cartoon": 0.019969255,
-                "always": 0.013872984,
-                "yellow": 0.0113299545,
-                "colorful": 0.0036836881
-              }
-            }
-          ]
-        }
-      },
+      "content": "my favorite color is green",
       "text": "my favorite color is green"
     }
   }

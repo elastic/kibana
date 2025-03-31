@@ -16,6 +16,7 @@ import {
   DATASET_QUALITY_TEST_PASSWORD,
   DatasetQualityUsername,
 } from '@kbn/dataset-quality-plugin/server/test_helpers/create_dataset_quality_users/authentication';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import {
   fleetPackageRegistryDockerImage,
   FtrConfigProviderContext,
@@ -117,6 +118,7 @@ export function createTestConfig(
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve('../tests')],
       servers,
       dockerServers: defineDockerServersConfig({

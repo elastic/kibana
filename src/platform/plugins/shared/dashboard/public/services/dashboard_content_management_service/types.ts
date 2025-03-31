@@ -9,10 +9,8 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
-import { DashboardContainerInput } from '../../../common';
 import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
 import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
@@ -41,20 +39,6 @@ export interface LoadDashboardFromSavedObjectProps {
 
 type DashboardResolveMeta = DashboardGetOut['meta'];
 
-export type SavedDashboardInput = DashboardContainerInput & {
-  /**
-   * Serialized control group state.
-   * Contains state loaded from dashboard saved object
-   */
-  controlGroupInput?: DashboardAttributes['controlGroupInput'] | undefined;
-  /**
-   * Runtime control group state.
-   * Contains state passed from dashboard locator
-   * Use runtime state when building input for portable dashboards
-   */
-  controlGroupState?: Partial<ControlGroupRuntimeState>;
-};
-
 export type DashboardSearchSource = Omit<SerializedSearchSourceFields, 'query'> & {
   query?: Query;
 };
@@ -65,7 +49,7 @@ export interface LoadDashboardReturn {
   dashboardId?: string;
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
-  dashboardInput: SavedDashboardInput;
+  dashboardInput: DashboardState;
 
   /**
    * Raw references returned directly from the Dashboard saved object. These

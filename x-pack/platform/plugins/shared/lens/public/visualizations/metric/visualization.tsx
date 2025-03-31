@@ -13,7 +13,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
+import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
@@ -33,6 +33,7 @@ import { toExpression } from './to_expression';
 import { nonNullable } from '../../utils';
 import { METRIC_NUMERIC_MAX } from '../../user_messages_ids';
 import { MetricVisualizationState } from './types';
+import { getAccessorType } from '../../shared_components';
 
 export const DEFAULT_MAX_COLUMNS = 3;
 
@@ -657,9 +658,9 @@ export const getMetricVisualization = ({
     const hasStaticColoring = !!state.color;
     const hasDynamicColoring = !!state.palette;
 
-    const currentData = frame?.activeData?.[state.layerId];
-    const isMetricNumeric = Boolean(
-      state.metricAccessor && isNumericFieldForDatatable(currentData, state.metricAccessor)
+    const { isNumeric: isMetricNumeric } = getAccessorType(
+      frame?.datasourceLayers[state.layerId],
+      state.metricAccessor
     );
 
     return {

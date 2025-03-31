@@ -42,6 +42,18 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+  [ProductFeatureSecurityKey.alertsSummary]: {
+    privileges: {
+      all: {
+        ui: ['alerts_summary'],
+        api: [`${APP_ID}-alert-summary`],
+      },
+      read: {
+        ui: ['alerts_summary_read'],
+        api: [`${APP_ID}-alert-summary`],
+      },
+    },
+  },
   [ProductFeatureSecurityKey.investigationGuideInteractions]: {
     privileges: {
       all: {
@@ -83,6 +95,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
+      SecuritySubFeatureId.globalArtifactManagement,
     ],
   },
 
@@ -135,4 +148,5 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   // Security PLIs
   [ProductFeatureSecurityKey.automaticImport]: {},
+  [ProductFeatureSecurityKey.prebuiltRuleCustomization]: {},
 };

@@ -17,23 +17,35 @@ const paramsSchema = schema.object({
 
 export const registerGetRoutes = ({ router, lib: { handleEsError } }: RouteDependencies): void => {
   // Get all pipelines
-  router.get({ path: API_BASE_PATH, validate: false }, async (ctx, req, res) => {
-    const { client: clusterClient } = (await ctx.core).elasticsearch;
+  router.get(
+    {
+      path: API_BASE_PATH,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
+    async (ctx, req, res) => {
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
-    try {
-      const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline();
+      try {
+        const pipelines = await clusterClient.asCurrentUser.ingest.getPipeline();
 
-      return res.ok({ body: deserializePipelines(pipelines) });
-    } catch (error) {
-      const esErrorResponse = handleEsError({ error, response: res });
-      if (esErrorResponse.status === 404) {
-        // ES returns 404 when there are no pipelines
-        // Instead, we return an empty array and 200 status back to the client
-        return res.ok({ body: [] });
+        return res.ok({ body: deserializePipelines(pipelines) });
+      } catch (error) {
+        const esErrorResponse = handleEsError({ error, response: res });
+        if (esErrorResponse.status === 404) {
+          // ES returns 404 when there are no pipelines
+          // Instead, we return an empty array and 200 status back to the client
+          return res.ok({ body: [] });
+        }
+        return esErrorResponse;
       }
-      return esErrorResponse;
     }
-  });
+  );
 
   // Get single pipeline
   router.get(

@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Alert } from '../alert';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
-import { DefaultActionGroupId } from '../types';
+import type { DefaultActionGroupId } from '../types';
 import { logAlerts } from './log_alerts';
 
 const logger: ReturnType<typeof loggingSystemMock.createLogger> = loggingSystemMock.createLogger();

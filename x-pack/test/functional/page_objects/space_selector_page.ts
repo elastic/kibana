@@ -208,6 +208,10 @@ export class SpaceSelectorPageObject extends FtrService {
     await this.testSubjects.click(`featureCategoryCheckbox_${categoryName}`);
   }
 
+  async getFeatureCheckboxState(featureId: string) {
+    return await this.testSubjects.isChecked(`featureCheckbox_${featureId}`);
+  }
+
   async clickOnDescriptionOfSpace() {
     await this.testSubjects.click('descriptionSpaceText');
   }

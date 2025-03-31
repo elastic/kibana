@@ -7,24 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLCommand } from '@kbn/esql-ast';
+import { CommandSuggestParams } from '../../../definitions/types';
 import {
   findPreviousWord,
   getLastNonWhitespaceChar,
   isColumnItem,
   noCaseCompare,
 } from '../../../shared/helpers';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import type { SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { handleFragment } from '../../helper';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 
-export async function suggest(
-  innerText: string,
-  command: ESQLCommand<'drop'>,
-  getColumnsByType: GetColumnsByTypeFn,
-  columnExists: (column: string) => boolean
-): Promise<SuggestionRawDefinition[]> {
+export async function suggest({
+  innerText,
+  getColumnsByType,
+  command,
+  columnExists,
+}: CommandSuggestParams<'drop'>): Promise<SuggestionRawDefinition[]> {
   if (
     /\s/.test(innerText[innerText.length - 1]) &&
     getLastNonWhitespaceChar(innerText) !== ',' &&

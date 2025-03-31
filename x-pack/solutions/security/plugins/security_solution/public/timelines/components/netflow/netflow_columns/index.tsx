@@ -32,6 +32,7 @@ EuiFlexItemMarginRight.displayName = 'EuiFlexItemMarginRight';
 export const NetflowColumns = React.memo<NetflowColumnsProps>(
   ({
     contextId,
+    scopeId,
     destinationBytes,
     destinationGeoContinentName,
     destinationGeoCountryName,
@@ -45,7 +46,6 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     eventId,
     eventEnd,
     eventStart,
-    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -72,9 +72,9 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
     >
       <EuiFlexItemMarginRight grow={false}>
         <UserProcess
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
-          isDraggable={isDraggable}
           processName={processName}
           userName={userName}
         />
@@ -82,17 +82,18 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
 
       <EuiFlexItemMarginRight grow={false}>
         <DurationEventStartEnd
+          scopeId={scopeId}
           contextId={contextId}
           eventDuration={eventDuration}
           eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
-          isDraggable={isDraggable}
         />
       </EuiFlexItemMarginRight>
 
       <EuiFlexItem grow={false}>
         <SourceDestination
+          scopeId={scopeId}
           contextId={contextId}
           destinationBytes={destinationBytes}
           destinationGeoContinentName={destinationGeoContinentName}
@@ -104,7 +105,6 @@ export const NetflowColumns = React.memo<NetflowColumnsProps>(
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
-          isDraggable={isDraggable}
           networkBytes={networkBytes}
           networkCommunityId={networkCommunityId}
           networkDirection={networkDirection}

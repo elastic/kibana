@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {
@@ -31,7 +31,7 @@ import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups, type Group } from '@kbn/alerting-rule-utils';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
@@ -748,7 +748,7 @@ export const getGroupedESQuery = (
       },
     };
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       query: {
         bool: {
           filter: [rangeFilter, ...mustFilters],
@@ -764,7 +764,7 @@ export const getGroupedESQuery = (
       index,
       allow_no_indices: true,
       ignore_unavailable: true,
-      body,
+      ...body,
     };
   } else {
     const aggregations = {
@@ -794,7 +794,7 @@ export const getGroupedESQuery = (
       },
     };
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       query: {
         bool: {
           filter: [groupedRangeFilter],
@@ -809,7 +809,7 @@ export const getGroupedESQuery = (
       index,
       allow_no_indices: true,
       ignore_unavailable: true,
-      body,
+      ...body,
     };
   }
 };
@@ -827,7 +827,7 @@ export const getUngroupedESQuery = (
     executionTimeRange
   );
 
-  const body: estypes.SearchRequest['body'] = {
+  const body: estypes.SearchRequest = {
     // Ensure we accurately track the hit count for the ungrouped case, otherwise we can only ensure accuracy up to 10,000.
     track_total_hits: true,
     query: {
@@ -861,7 +861,7 @@ const getGroupedResults = async (query: object, esClient: ElasticsearchClient) =
 
   while (true) {
     const queryWithAfterKey: any = { ...query };
-    queryWithAfterKey.body.aggregations.groups.composite.after = lastAfterKey;
+    queryWithAfterKey.aggregations.groups.composite.after = lastAfterKey;
     const groupResponse: GroupedSearchQueryResponse = decodeOrThrow(GroupedSearchQueryResponseRT)(
       await esClient.search(queryWithAfterKey)
     );
@@ -920,6 +920,7 @@ const processRecoveredAlerts = ({
       groupByKeys: groupByKeysObjectForRecovered[recoveredAlertId],
       timestamp: startedAt.toISOString(),
       viewInAppUrl,
+      reason: alertHits?.[ALERT_REASON],
       ...additionalContext,
     };
 

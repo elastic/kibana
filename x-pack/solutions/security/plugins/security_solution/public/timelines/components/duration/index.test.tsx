@@ -19,15 +19,7 @@ describe('Duration', () => {
   test('it renders the expected formatted duration', () => {
     render(
       <TestProviders>
-        <Duration
-          contextId="test"
-          eventId="abc"
-          fieldName="event.duration"
-          isDraggable={true}
-          isAggregatable={true}
-          fieldType={'keyword'}
-          value={`${ONE_MILLISECOND_AS_NANOSECONDS}`}
-        />
+        <Duration fieldName="event.duration" value={`${ONE_MILLISECOND_AS_NANOSECONDS}`} />
       </TestProviders>
     );
     expect(screen.getByText('1ms')).toBeInTheDocument();

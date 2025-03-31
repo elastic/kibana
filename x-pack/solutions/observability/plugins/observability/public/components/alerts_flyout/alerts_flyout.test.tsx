@@ -5,20 +5,47 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import React from 'react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { AlertsFlyout } from './alerts_flyout';
-import type { TopAlert } from '../../typings/alerts';
-
-const rawAlert = {} as ComponentProps<typeof AlertsFlyout>['rawAlert'];
+import {
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_INSTANCE_ID,
+  ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_URL,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  EVENT_ACTION,
+  EVENT_KIND,
+  SPACE_IDS,
+  TIMESTAMP,
+  VERSION,
+} from '@kbn/rule-data-utils';
+import { Alert } from '@kbn/alerting-types';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
+}));
+
+jest.mock('react-router-dom', () => ({
+  useRouteMatch: jest.fn().mockReturnValue({}),
 }));
 
 describe('AlertsFlyout', () => {
@@ -31,7 +58,6 @@ describe('AlertsFlyout', () => {
     const flyout = render(
       <AlertsFlyout
         alert={activeAlert}
-        rawAlert={rawAlert}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
         onClose={jest.fn()}
       />
@@ -44,7 +70,6 @@ describe('AlertsFlyout', () => {
     const flyout = render(
       <AlertsFlyout
         alert={recoveredAlert}
-        rawAlert={rawAlert}
         observabilityRuleTypeRegistry={observabilityRuleTypeRegistryMock}
         onClose={jest.fn()}
       />
@@ -54,102 +79,51 @@ describe('AlertsFlyout', () => {
   });
 });
 
-const activeAlert: TopAlert = {
-  link: '/app/logs/link-to/default/logs?time=1630587249674',
-  reason: '1957 log entries (more than 100.25) match the conditions.',
-  fields: {
-    'kibana.alert.status': 'active',
-    '@timestamp': '2021-09-02T13:08:51.750Z',
-    'kibana.alert.duration.us': 882076000,
-    'kibana.alert.reason': '1957 log entries (more than 100.25) match the conditions.',
-    'kibana.alert.workflow_status': 'open',
-    'kibana.alert.rule.uuid': 'db2ab7c0-0bec-11ec-9ae2-5b10ca924404',
-    'kibana.alert.rule.producer': 'logs',
-    'kibana.alert.rule.consumer': 'logs',
-    'kibana.alert.rule.category': 'Log threshold',
-    'kibana.alert.rule.revision': 0,
-    'kibana.alert.start': '2021-09-02T12:54:09.674Z',
-    'kibana.alert.rule.rule_type_id': 'logs.alert.document.count',
-    'event.action': 'active',
-    'kibana.alert.evaluation.value': 1957,
-    'kibana.alert.instance.id': '*',
-    'kibana.alert.rule.name': 'Log threshold (from logs)',
-    'kibana.alert.uuid': '756240e5-92fb-452f-b08e-cd3e0dc51738',
-    'kibana.space_ids': ['default'],
-    'kibana.version': '8.0.0',
-    'event.kind': 'signal',
-    'kibana.alert.rule.parameters': {
-      timeSize: 5,
-      timeUnit: 'm',
-      logView: {
-        type: 'log-view-reference',
-        logViewId: 'default',
-      },
-      count: {
-        value: 100.25,
-        comparator: 'more than',
-      },
-      criteria: [
-        {
-          field: 'host.name',
-          comparator: 'does not equal',
-          value: 'test',
-        },
-      ],
-      groupBy: ['host.name'],
-    },
-    'kibana.alert.evaluation.threshold': 100.25,
-  },
-  active: true,
-  start: 1630587249674,
-  lastUpdated: 1630588131750,
-};
+const activeAlert = {
+  [ALERT_STATUS]: ['active'],
+  [TIMESTAMP]: ['2021-09-02T13:08:51.750Z'],
+  [ALERT_DURATION]: ['882076000'],
+  [ALERT_REASON]: ['1957 log entries (more than 100.25) match the conditions.'],
+  [ALERT_WORKFLOW_STATUS]: ['open'],
+  [ALERT_RULE_UUID]: ['db2ab7c0-0bec-11ec-9ae2-5b10ca924404'],
+  [ALERT_RULE_PRODUCER]: ['logs'],
+  [ALERT_RULE_CONSUMER]: ['logs'],
+  [ALERT_RULE_CATEGORY]: ['Log threshold'],
+  [ALERT_RULE_REVISION]: ['0'],
+  [ALERT_START]: ['2021-09-02T12:54:09.674Z'],
+  [ALERT_RULE_TYPE_ID]: ['logs.alert.document.count'],
+  [EVENT_ACTION]: ['active'],
+  [ALERT_EVALUATION_VALUE]: ['1957'],
+  [ALERT_INSTANCE_ID]: ['*'],
+  [ALERT_RULE_NAME]: ['Log threshold (from logs)'],
+  [ALERT_UUID]: ['756240e5-92fb-452f-b08e-cd3e0dc51738'],
+  [SPACE_IDS]: ['default'],
+  [VERSION]: ['8.0.0'],
+  [EVENT_KIND]: ['signal'],
+  [ALERT_EVALUATION_THRESHOLD]: ['100.25'],
+  [ALERT_URL]: ['/app/logs/link-to/default/logs?time=1630587249674'],
+} as unknown as Alert;
 
-const recoveredAlert: TopAlert = {
-  link: '/app/metrics/inventory',
-  reason: 'CPU usage is greater than a threshold of 38 (current value is 38%)',
-  fields: {
-    'kibana.alert.status': 'recovered',
-    '@timestamp': '2021-09-02T13:08:45.729Z',
-    'kibana.alert.duration.us': 189030000,
-    'kibana.alert.reason': 'CPU usage is greater than a threshold of 38 (current value is 38%)',
-    'kibana.alert.workflow_status': 'open',
-    'kibana.alert.rule.uuid': '92f112f0-0bed-11ec-9ae2-5b10ca924404',
-    'kibana.alert.rule.producer': 'infrastructure',
-    'kibana.alert.rule.consumer': 'infrastructure',
-    'kibana.alert.rule.category': 'Inventory',
-    'kibana.alert.rule.revision': 0,
-    'kibana.alert.start': '2021-09-02T13:05:36.699Z',
-    'kibana.alert.rule.rule_type_id': 'metrics.alert.inventory.threshold',
-    'event.action': 'close',
-    'kibana.alert.instance.id': 'gke-edge-oblt-gcp-edge-oblt-gcp-pool-b6b9e929-vde2',
-    'kibana.alert.rule.name': 'Metrics inventory (from Metrics)',
-    'kibana.alert.uuid': '4f3a9ee4-aa45-47fd-a39a-a78758782425',
-    'kibana.space_ids': ['default'],
-    'kibana.version': '8.0.0',
-    'event.kind': 'signal',
-    'kibana.alert.end': '2021-09-02T13:08:45.729Z',
-    'kibana.alert.rule.parameters': {
-      nodeType: 'host',
-      criteria: [
-        {
-          metric: 'cpu',
-          comparator: '>',
-          threshold: [1],
-          timeSize: 1,
-          timeUnit: 'm',
-          customMetric: {
-            type: 'custom',
-            id: 'alert-custom-metric',
-            field: '',
-            aggregation: 'avg',
-          },
-        },
-      ],
-      sourceId: 'default',
-    },
-  },
-  active: false,
-  start: 1630587936699,
-  lastUpdated: 1630588125729,
-};
+const recoveredAlert = {
+  [ALERT_URL]: ['/app/metrics/inventory'],
+  [ALERT_REASON]: ['CPU usage is greater than a threshold of 38 (current value is 38%)'],
+  [ALERT_STATUS]: ['recovered'],
+  [TIMESTAMP]: ['2021-09-02T13:08:45.729Z'],
+  [ALERT_DURATION]: ['189030000'],
+  [ALERT_WORKFLOW_STATUS]: ['open'],
+  [ALERT_RULE_UUID]: ['92f112f0-0bed-11ec-9ae2-5b10ca924404'],
+  [ALERT_RULE_PRODUCER]: ['infrastructure'],
+  [ALERT_RULE_CONSUMER]: ['infrastructure'],
+  [ALERT_RULE_CATEGORY]: ['Inventory'],
+  [ALERT_RULE_REVISION]: ['0'],
+  [ALERT_START]: ['2021-09-02T13:05:36.699Z'],
+  [ALERT_RULE_TYPE_ID]: ['metrics.alert.inventory.threshold'],
+  [EVENT_ACTION]: ['close'],
+  [ALERT_INSTANCE_ID]: ['gke-edge-oblt-gcp-edge-oblt-gcp-pool-b6b9e929-vde2'],
+  [ALERT_RULE_NAME]: ['Metrics inventory (from Metrics)'],
+  [ALERT_UUID]: ['4f3a9ee4-aa45-47fd-a39a-a78758782425'],
+  [SPACE_IDS]: ['default'],
+  [VERSION]: ['8.0.0'],
+  [EVENT_KIND]: ['signal'],
+  [ALERT_END]: ['2021-09-02T13:08:45.729Z'],
+} as unknown as Alert;

@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/observability-alerting-rule-utils",
-  "owner": "@elastic/obs-ux-management-team",
-  // TODO refactor and transfer owner / contents to response-ops / alerting
-  "group": "platform",
-  "visibility": "shared"
-}

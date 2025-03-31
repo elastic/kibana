@@ -20,7 +20,7 @@ import type {
   Message,
   ObservabilityAIAssistantScreenContext,
   PendingMessage,
-  AdHocInstruction,
+  Instruction,
 } from '../common/types';
 import type { TelemetryEventTypeWithPayload } from './analytics';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -49,6 +49,7 @@ export interface ObservabilityAIAssistantChatService {
   chat: (
     name: string,
     options: {
+      systemMessage: string;
       messages: Message[];
       connectorId: string;
       functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
@@ -61,6 +62,7 @@ export interface ObservabilityAIAssistantChatService {
     getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
+    systemMessage?: string;
     messages: Message[];
     persist: boolean;
     disableFunctions:
@@ -69,7 +71,7 @@ export interface ObservabilityAIAssistantChatService {
           except: string[];
         };
     signal: AbortSignal;
-    instructions?: AdHocInstruction[];
+    instructions?: Array<string | Instruction>;
     scopes: AssistantScope[];
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getFunctions: (options?: {
@@ -79,7 +81,7 @@ export interface ObservabilityAIAssistantChatService {
   }) => FunctionDefinition[];
   functions$: BehaviorSubject<FunctionDefinition[]>;
   hasFunction: (name: string) => boolean;
-  getSystemMessage: () => Message;
+  getSystemMessage: () => string;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
     name: string,

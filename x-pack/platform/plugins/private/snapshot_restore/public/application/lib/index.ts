@@ -11,5 +11,6 @@ export type { SortField, SortDirection, SnapshotListParams } from './snapshot_li
 export {
   getListParams,
   getQueryFromListParams,
+  escapeString,
   DEFAULT_SNAPSHOT_LIST_PARAMS,
 } from './snapshot_list_params';

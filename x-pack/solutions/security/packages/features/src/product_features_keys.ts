@@ -8,6 +8,8 @@
 export enum ProductFeatureSecurityKey {
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
+  /** Enables Alerts Summary page for AI SOC */
+  alertsSummary = 'alerts_summary',
   /**
    * Enables Investigation guide in Timeline
    */
@@ -91,6 +93,11 @@ export enum ProductFeatureSecurityKey {
 
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables customization of prebuilt Elastic rules
+   */
+  prebuiltRuleCustomization = 'prebuilt_rule_customization',
 }
 
 export enum ProductFeatureCasesKey {
@@ -127,6 +134,12 @@ export enum ProductFeatureNotesFeatureKey {
    */
   notes = 'notes',
 }
+export enum ProductFeatureSiemMigrationsKey {
+  /**
+   * Enables the SIEM Migrations main feature
+   */
+  siemMigrations = 'siem_migrations',
+}
 
 // Merges the two enums.
 export const ProductFeatureKey = {
@@ -134,6 +147,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
+  ...ProductFeatureSiemMigrationsKey,
   ...ProductFeatureTimelineFeatureKey,
   ...ProductFeatureNotesFeatureKey,
 };
@@ -143,6 +157,7 @@ export type ProductFeatureKeyType =
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
   | ProductFeatureAttackDiscoveryKey
+  | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineFeatureKey
   | ProductFeatureNotesFeatureKey;
 
@@ -156,6 +171,7 @@ export enum SecuritySubFeatureId {
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
+  globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',
@@ -172,6 +188,7 @@ export enum CasesSubFeatureId {
   casesSettings = 'casesSettingsSubFeature',
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
+  assignUsers = 'assignUsersSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

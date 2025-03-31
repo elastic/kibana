@@ -15,7 +15,7 @@ import { MetricCustomTransformGenerator } from './metric_custom';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
 const SPACE_ID = 'custom-space';
-const generator = new MetricCustomTransformGenerator(SPACE_ID, dataViewsService);
+const generator = new MetricCustomTransformGenerator(SPACE_ID, dataViewsService, false);
 
 describe('Metric Custom Transform Generator', () => {
   describe('validation', () => {

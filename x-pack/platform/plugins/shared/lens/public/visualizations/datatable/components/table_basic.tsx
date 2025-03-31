@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './table_basic.scss';
 import { ColorMappingInputData, PaletteOutput, getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
@@ -32,14 +31,14 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { CoreTheme } from '@kbn/core/public';
 import { getKbnPalettes } from '@kbn/palettes';
+import { css } from '@emotion/react';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import type { FormatFactory } from '../../../../common/types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
-import { VisualizationContainer } from '../../../visualization_container';
 import { findMinMaxByColumnId, shouldColorByTerms } from '../../../shared_components';
 import type {
   DataContextType,
@@ -59,12 +58,12 @@ import {
   createGridSortingConfig,
   createTransposeColumnFilterHandler,
 } from './table_actions';
-import { getFinalSummaryConfiguration } from '../../../../common/expressions/datatable/summary';
+import { getFinalSummaryConfiguration } from '../../../../common/expressions/impl/datatable/summary';
 import { DEFAULT_HEADER_ROW_HEIGHT, DEFAULT_HEADER_ROW_HEIGHT_LINES } from './constants';
 import {
   getFieldMetaFromDatatable,
   isNumericField,
-} from '../../../../common/expressions/datatable/utils';
+} from '../../../../common/expressions/impl/datatable/utils';
 import { CellColorFn, getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 
@@ -405,16 +404,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const dataType = getFieldMetaFromDatatable(firstLocalTable, originalId)?.type;
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(dataType, isBucketed);
-
+      const categoryRows = (untransposedDataRef.current ?? firstLocalTable)?.rows;
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: getColorCategories(
-              firstLocalTable.rows,
-              originalId,
-              isTransposeId(columnId),
-              [null]
-            ),
+            // Must use non-transposed data here to correctly collate categories across transposed columns
+            categories: getColorCategories(categoryRows, originalId, [null]),
           }
         : {
             type: 'ranges',
@@ -511,9 +506,13 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   if (isEmpty) {
     return (
-      <VisualizationContainer className="lnsDataTableContainer">
+      <div
+        css={datatableContainerStyles}
+        className="eui-scrollBar"
+        data-test-subj="lnsVisualizationContainer"
+      >
         <EmptyPlaceholder icon={IconChartDatatable} />
-      </VisualizationContainer>
+      </div>
     );
   }
 
@@ -524,7 +523,11 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
     });
 
   return (
-    <VisualizationContainer className="lnsDataTableContainer">
+    <div
+      css={datatableContainerStyles}
+      className="eui-scrollBar"
+      data-test-subj="lnsVisualizationContainer"
+    >
       <DataContext.Provider
         value={{
           table: firstLocalTable,
@@ -569,6 +572,28 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
           ref={dataGridRef}
         />
       </DataContext.Provider>
-    </VisualizationContainer>
+    </div>
   );
 };
+
+const datatableContainerStyles = css`
+  height: 100%;
+  overflow: auto hidden;
+  user-select: text;
+
+  .lnsTableCell--multiline {
+    white-space: pre-wrap;
+  }
+
+  .lnsTableCell--left {
+    text-align: left;
+  }
+
+  .lnsTableCell--right {
+    text-align: right;
+  }
+
+  .lnsTableCell--center {
+    text-align: center;
+  }
+`;

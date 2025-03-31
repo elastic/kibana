@@ -21,6 +21,7 @@ import { registerSiemRuleMigrationsInstallRoute } from './install';
 import { registerSiemRuleMigrationsResourceGetMissingRoute } from './resources/missing';
 import { registerSiemRuleMigrationsPrebuiltRulesRoute } from './get_prebuilt_rules';
 import { registerSiemRuleMigrationsIntegrationsRoute } from './get_integrations';
+import { registerSiemRuleMigrationsGetMissingPrivilegesRoute } from './privileges/get_missing_privileges';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -41,4 +42,6 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsResourceUpsertRoute(router, logger);
   registerSiemRuleMigrationsResourceGetRoute(router, logger);
   registerSiemRuleMigrationsResourceGetMissingRoute(router, logger);
+
+  registerSiemRuleMigrationsGetMissingPrivilegesRoute(router, logger);
 };

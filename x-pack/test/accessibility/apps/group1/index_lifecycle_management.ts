@@ -67,28 +67,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await esClient.snapshot.createRepository({
         name: REPO_NAME,
-        body: {
+        repository: {
           type: 'fs',
           settings: {
-            // use one of the values defined in path.repo in test/functional/config.base.js
+            // use one of the values defined in path.repo in src/platform/test/functional/config.base.js
             location: '/tmp/',
           },
         },
         verify: false,
       });
-      await esClient.ilm.putLifecycle({ name: POLICY_NAME, body: POLICY_ALL_PHASES });
+      await esClient.ilm.putLifecycle({ name: POLICY_NAME, ...POLICY_ALL_PHASES });
       await esClient.indices.putIndexTemplate({
         name: indexTemplateName,
-        body: {
-          template: {
-            settings: {
-              lifecycle: {
-                name: POLICY_NAME,
-              },
+        template: {
+          settings: {
+            lifecycle: {
+              name: POLICY_NAME,
             },
           },
-          index_patterns: ['test*'],
         },
+        index_patterns: ['test*'],
       });
     });
 

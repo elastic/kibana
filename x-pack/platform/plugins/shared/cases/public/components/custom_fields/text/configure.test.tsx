@@ -12,6 +12,7 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Configure } from './configure';
 
+// Failing: See https://github.com/elastic/kibana/issues/205987
 describe('Configure ', () => {
   const onSubmit = jest.fn();
 
@@ -44,8 +45,7 @@ describe('Configure ', () => {
     });
   });
 
-  // Flaky: https://github.com/elastic/kibana/issues/178001
-  it.skip('updates field options with default value correctly when not required', async () => {
+  it('updates field options with default value correctly when not required', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Configure />

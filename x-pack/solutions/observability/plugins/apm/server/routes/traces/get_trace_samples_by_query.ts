@@ -50,25 +50,23 @@ export async function getTraceSamplesByQuery({
           apm: {
             events: [ProcessorEvent.transaction, ProcessorEvent.span, ProcessorEvent.error],
           },
-          body: {
-            track_total_hits: false,
-            size: 0,
-            query: {
-              bool: {
-                filter: [
-                  ...rangeQuery(start, end),
-                  ...environmentQuery(environment),
-                  ...kqlQuery(query),
-                ],
-              },
+          track_total_hits: false,
+          size: 0,
+          query: {
+            bool: {
+              filter: [
+                ...rangeQuery(start, end),
+                ...environmentQuery(environment),
+                ...kqlQuery(query),
+              ],
             },
-            aggs: {
-              traceId: {
-                terms: {
-                  field: TRACE_ID,
-                  execution_hint: 'map',
-                  size,
-                },
+          },
+          aggs: {
+            traceId: {
+              terms: {
+                field: TRACE_ID,
+                execution_hint: 'map',
+                size,
               },
             },
           },
@@ -104,37 +102,35 @@ export async function getTraceSamplesByQuery({
     apm: {
       events: [ProcessorEvent.transaction],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                [TRANSACTION_SAMPLED]: true,
-              },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              [TRANSACTION_SAMPLED]: true,
             },
-            ...termsQuery(TRACE_ID, ...traceIds),
-            ...rangeQuery(start, end),
-          ],
-          must_not: [{ exists: { field: PARENT_ID } }],
-        },
-      },
-      aggs: {
-        transactionId: {
-          terms: {
-            field: TRANSACTION_ID,
-            size,
           },
-          aggs: {
-            latest: {
-              top_metrics: {
-                metrics: asMutableArray([{ field: TRACE_ID }] as const),
-                size: 1,
-                sort: {
-                  '@timestamp': 'desc' as const,
-                },
+          ...termsQuery(TRACE_ID, ...traceIds),
+          ...rangeQuery(start, end),
+        ],
+        must_not: [{ exists: { field: PARENT_ID } }],
+      },
+    },
+    aggs: {
+      transactionId: {
+        terms: {
+          field: TRANSACTION_ID,
+          size,
+        },
+        aggs: {
+          latest: {
+            top_metrics: {
+              metrics: asMutableArray([{ field: TRACE_ID }] as const),
+              size: 1,
+              sort: {
+                '@timestamp': 'desc' as const,
               },
             },
           },

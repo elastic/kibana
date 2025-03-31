@@ -56,12 +56,10 @@ export async function getPipelineStateDocument({
     index: indexPatterns,
     size: 1,
     ignore_unavailable: true,
-    body: {
-      _source: { excludes: 'logstash_state.pipeline.representation.plugins' },
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query,
-      terminate_after: 1, // Safe to do because all these documents are functionally identical
-    },
+    _source: { excludes: 'logstash_state.pipeline.representation.plugins' },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query,
+    terminate_after: 1, // Safe to do because all these documents are functionally identical
   };
 
   const resp = (await callWithRequest(req, 'search', params)) as ElasticsearchResponse;

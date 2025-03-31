@@ -153,11 +153,9 @@ export default function (providerContext: FtrProviderContext) {
       await es.update({
         index: INGEST_SAVED_OBJECT_INDEX,
         id: `${PACKAGES_SAVED_OBJECT_TYPE}:${nginxPkgName}`,
-        body: {
-          doc: {
-            [PACKAGES_SAVED_OBJECT_TYPE]: {
-              install_format_schema_version: '99.99.99',
-            },
+        doc: {
+          [PACKAGES_SAVED_OBJECT_TYPE]: {
+            install_format_schema_version: '99.99.99',
           },
         },
       });

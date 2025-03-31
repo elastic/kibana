@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { ApiOperation } from '@kbn/security-plugin-types-common';
+
 export interface ApiActions {
   get(operation: ApiOperation, subject: string): string;
 
@@ -13,12 +15,4 @@ export interface ApiActions {
    */
   get(subject: string): string;
   actionFromRouteTag(routeTag: string): string;
-}
-
-export enum ApiOperation {
-  Read = 'read',
-  Create = 'create',
-  Update = 'update',
-  Delete = 'delete',
-  Manage = 'manage',
 }

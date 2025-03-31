@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { from, identity, switchMap, throwError } from 'rxjs';
-import { isReadable, Readable } from 'stream';
-import { createInferenceInternalError } from '@kbn/inference-common';
+import { defer, identity } from 'rxjs';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
-import { isNativeFunctionCallingSupported } from '../../utils';
+import { isNativeFunctionCallingSupported, handleConnectorResponse } from '../../utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import { parseInlineFunctionCalls } from '../../simulated_function_calling';
 import { processOpenAIStream, emitTokenCountEstimateIfMissing } from '../openai';
@@ -27,6 +25,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     modelName,
     logger,
     abortSignal,
+    metadata,
   }) => {
     const useSimulatedFunctionCalling =
       functionCalling === 'auto'
@@ -44,30 +43,19 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       modelName,
     });
 
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'unified_completion_stream',
         subActionParams: {
           body: request,
           signal: abortSignal,
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
-      })
-    ).pipe(
-      switchMap((response) => {
-        if (response.status === 'error') {
-          return throwError(() =>
-            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
-              rootError: response.serviceMessage,
-            })
-          );
-        }
-        if (isReadable(response.data as any)) {
-          return eventSourceStreamIntoObservable(response.data as Readable);
-        }
-        return throwError(() =>
-          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
-        );
-      }),
+      });
+    }).pipe(
+      handleConnectorResponse({ processStream: eventSourceStreamIntoObservable }),
       processOpenAIStream(),
       emitTokenCountEstimateIfMissing({ request }),
       useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity

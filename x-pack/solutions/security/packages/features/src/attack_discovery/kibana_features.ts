@@ -20,7 +20,7 @@ export const getAttackDiscoveryBaseKibanaFeature = (): BaseKibanaFeatureConfig =
       defaultMessage: 'Attack discovery',
     }
   ),
-  order: 1100,
+  order: 1400,
   category: DEFAULT_APP_CATEGORIES.security,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [ATTACK_DISCOVERY_FEATURE_ID, 'kibana'],

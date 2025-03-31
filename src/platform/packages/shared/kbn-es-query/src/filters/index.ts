@@ -31,6 +31,7 @@ export {
   extractTimeFilter,
   extractTimeRange,
   convertRangeFilterToTimeRange,
+  updateFilterReferences,
 } from './helpers';
 
 export {

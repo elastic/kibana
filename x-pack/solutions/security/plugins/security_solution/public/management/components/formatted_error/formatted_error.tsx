@@ -18,7 +18,7 @@ export const ObjectContent = memo<ObjectContentProps>(({ data }) => {
     <EuiText size="s">
       {Object.entries(data).map(([key, value]) => {
         return (
-          <div key={key} className="eui-textBreakAll">
+          <div key={key} className="eui-textBreakWord">
             <strong>{key}</strong>
             {': '}
             {value}

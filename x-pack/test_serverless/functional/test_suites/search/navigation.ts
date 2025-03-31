@@ -19,8 +19,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const header = getPageObject('header');
 
   describe('navigation', function () {
-    // see details: https://github.com/elastic/kibana/issues/196823
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
       await svlSearchNavigation.navigateToLandingPage();
@@ -36,7 +34,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check side nav links
       await solutionNavigation.sidenav.expectSectionExists('search_project_nav');
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
@@ -47,10 +45,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       // check Data
       // > Index Management
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Data' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
@@ -164,21 +162,15 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         deepLinkId: 'ml:modelManagement',
       });
       // > Management
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Management' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'management',
-      });
+      await solutionNavigation.sidenav.clickLink({ navId: 'management' });
+      await solutionNavigation.sidenav.expectLinkActive({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
       // navigate back to serverless search overview
       await svlCommonNavigation.clickLogo();
       await svlCommonNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: `Indices` });
       await testSubjects.existOrFail(`elasticsearchStartPage`);
@@ -196,7 +188,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     });
 
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
+      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'elasticsearchIndexManagement' });
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
         'Data',
         'Index Management',
@@ -206,9 +198,12 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigate management', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management']);
-      await testSubjects.click('app-card-dataViews');
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
+
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:dataViews');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Data views']);
     });
 
@@ -247,6 +242,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Relevance' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Synonyms' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Analyze' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Discover' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Dashboards' });
@@ -263,12 +259,13 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.expectOnlyDefinedLinks([
         'search_project_nav',
         'data',
-        'management:index_management',
+        'elasticsearchIndexManagement',
         'serverlessConnectors',
         'serverlessWebCrawlers',
         'build',
         'dev_tools',
         'searchPlayground',
+        'searchSynonyms',
         'relevance',
         'searchInferenceEndpoints',
         'analyze',

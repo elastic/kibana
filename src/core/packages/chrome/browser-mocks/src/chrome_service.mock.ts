@@ -59,7 +59,7 @@ const createStartContractMock = () => {
       getIsFeedbackBtnVisible$: jest.fn(),
       setIsFeedbackBtnVisible: jest.fn(),
     },
-    getBreadcrumbsAppendExtension$: jest.fn(),
+    getBreadcrumbsAppendExtensions$: jest.fn(),
     setBreadcrumbsAppendExtension: jest.fn(),
     getGlobalHelpExtensionMenuLinks$: jest.fn(),
     registerGlobalHelpExtensionMenuLink: jest.fn(),
@@ -95,7 +95,7 @@ const createStartContractMock = () => {
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
   startContract.getBadge$.mockReturnValue(new BehaviorSubject({} as ChromeBadge));
   startContract.getBreadcrumbs$.mockReturnValue(new BehaviorSubject([{} as ChromeBreadcrumb]));
-  startContract.getBreadcrumbsAppendExtension$.mockReturnValue(new BehaviorSubject(undefined));
+  startContract.getBreadcrumbsAppendExtensions$.mockReturnValue(new BehaviorSubject([]));
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getGlobalHelpExtensionMenuLinks$.mockReturnValue(new BehaviorSubject([]));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));

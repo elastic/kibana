@@ -11,9 +11,9 @@ import { OpenAiProviderType } from '../adapters/openai/types';
 export const isNativeFunctionCallingSupported = (connector: InferenceConnector): boolean => {
   switch (connector.type) {
     case InferenceConnectorType.OpenAI:
-      const apiProvider =
-        (connector.config.apiProvider as OpenAiProviderType) ?? OpenAiProviderType.Other;
-      return apiProvider !== OpenAiProviderType.Other;
+      const apiProvider = (connector.config.apiProvider as OpenAiProviderType) ?? undefined;
+      // defaulting to `true` when the config is not accessible
+      return apiProvider ? apiProvider !== OpenAiProviderType.Other : true;
     case InferenceConnectorType.Inference:
       // note: later we might need to check the provider type, for now let's assume support
       //       will be handled by ES and that all providers will support native FC.

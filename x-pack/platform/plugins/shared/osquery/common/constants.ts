@@ -32,5 +32,5 @@ export const API_VERSIONS = {
 
 export enum QUERY_TIMEOUT {
   DEFAULT = 60, // 60 seconds
-  MAX = 60 * 15,
+  MAX = 60 * 60 * 24, // 24 hours
 }

@@ -39,5 +39,6 @@ export {
   type SearchEmbeddableApi,
   type NonPersistedDisplayOptions,
 } from './embeddable';
-export { loadSharingDataHelpers } from './utils';
 export type { DiscoverServices } from './build_services';
+
+export const loadSharingDataHelpers = () => import('./utils/get_sharing_data');

@@ -380,6 +380,7 @@ class AgentPolicyService {
       user?: AuthenticatedUser;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipDeploy?: boolean;
+      hasFleetServer?: boolean;
     } = {}
   ): Promise<AgentPolicy> {
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -412,12 +413,17 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
     });
+    const policyForOutputValidation = {
+      ...agentPolicy,
+      has_fleet_server: options?.hasFleetServer,
+    };
     await validateOutputForPolicy(
       soClient,
-      agentPolicy,
+      policyForOutputValidation,
       {},
-      getAllowedOutputTypesForAgentPolicy(agentPolicy)
+      getAllowedOutputTypesForAgentPolicy(policyForOutputValidation)
     );
+
     validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
@@ -701,6 +707,7 @@ class AgentPolicyService {
       spaceId?: string;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipValidation?: boolean;
+      bumpRevision?: boolean;
     }
   ): Promise<AgentPolicy> {
     const logger = appContextService.getLogger();
@@ -772,7 +779,7 @@ class AgentPolicyService {
     }
 
     return this._update(soClient, esClient, id, agentPolicy, options?.user, {
-      bumpRevision: true,
+      bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
     }).then((updatedAgentPolicy) => {
@@ -906,13 +913,18 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { user?: AuthenticatedUser; removeProtection?: boolean; asyncDeploy?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      removeProtection?: boolean;
+      asyncDeploy?: boolean;
+      skipValidation?: boolean;
+    }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
-        skipValidation: false,
+        skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
       });
@@ -1483,15 +1495,13 @@ class AgentPolicyService {
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
       rest_total_hits_as_int: true,
-      body: {
-        query: {
-          term: {
-            policy_id: agentPolicyId,
-          },
+      query: {
+        term: {
+          policy_id: agentPolicyId,
         },
-        size: 1,
-        sort: [{ revision_idx: { order: 'desc' } }],
       },
+      size: 1,
+      sort: [{ revision_idx: { order: 'desc' } }],
     });
 
     if ((res.hits.total as number) === 0) {
@@ -1809,6 +1819,7 @@ class AgentPolicyService {
       sortOrder = 'asc',
       sortField = 'created_at',
       fields = [],
+      spaceId = undefined,
     }: FetchAllAgentPoliciesOptions = {}
   ): Promise<AsyncIterable<AgentPolicy[]>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -1821,6 +1832,7 @@ class AgentPolicyService {
         perPage,
         fields,
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        namespaces: spaceId ? [spaceId] : undefined,
       },
       resultsMapper(data) {
         return data.saved_objects.map((agentPolicySO) => {

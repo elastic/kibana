@@ -34,12 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Guided onboarding', () => {
-      it('The button "Setup guides" is loaded', async () => {
-        expect(await find.byCssSelector('[data-test-subj="guideButtonRedirect"]')).to.not.be(null);
-        const cloudLink = await find.byLinkText('Setup guides');
-        expect(cloudLink).to.not.be(null);
-      });
-
       it('The help link "Setup guides" is added', async () => {
         await PageObjects.common.clickAndValidate(
           'helpMenuButton',

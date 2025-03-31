@@ -115,11 +115,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       groupBy: ruleParams.groupBy ?? DEFAULT_VALUES.GROUP_BY,
       termSize: ruleParams.termSize ?? DEFAULT_VALUES.TERM_SIZE,
       termField: ruleParams.termField,
-      size: ruleParams.size
-        ? ruleParams.size
-        : isServerless
-        ? SERVERLESS_DEFAULT_VALUES.SIZE
-        : DEFAULT_VALUES.SIZE,
+      size:
+        ruleParams.size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
       sourceFields: ruleParams.sourceFields,
@@ -350,7 +347,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
             onClearSavedQuery={onClearSavedQuery}
             onSavedQueryUpdated={onSavedQuery}
             onSaved={onSavedQuery}
-            saveQueryMenuVisibility="allowed_by_app_privilege"
+            allowSavingQueries
             showQueryInput
             showFilterBar
             showDatePicker={false}

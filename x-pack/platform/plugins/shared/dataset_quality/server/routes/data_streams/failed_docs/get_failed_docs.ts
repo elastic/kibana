@@ -7,82 +7,9 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamDocsStat } from '../../../../common/api_types';
-import { FAILURE_STORE_SELECTOR } from '../../../../common/constants';
 import { DataStreamType } from '../../../../common/types';
-import {
-  extractIndexNameFromBackingIndex,
-  streamPartsToIndexPattern,
-} from '../../../../common/utils';
-import { createDatasetQualityESClient } from '../../../utils';
-import { DatasetQualityESClient } from '../../../utils/create_dataset_quality_es_client';
-import { rangeQuery } from '../../../utils/queries';
-
-const SIZE_LIMIT = 10000;
-
-async function getPaginatedResults(options: {
-  datasetQualityESClient: DatasetQualityESClient;
-  index: string;
-  start: number;
-  end: number;
-  after?: { dataset: string };
-  prevResults?: Record<string, number>;
-}) {
-  const { datasetQualityESClient, index, start, end, after, prevResults = {} } = options;
-
-  const bool = {
-    filter: [...rangeQuery(start, end)],
-  };
-
-  const response = await datasetQualityESClient.search({
-    index: `${index}${FAILURE_STORE_SELECTOR}`,
-    size: 0,
-    query: {
-      bool,
-    },
-    aggs: {
-      datasets: {
-        composite: {
-          ...(after ? { after } : {}),
-          size: SIZE_LIMIT,
-          sources: [{ dataset: { terms: { field: '_index' } } }],
-        },
-      },
-    },
-  });
-
-  const currResults = (response.aggregations?.datasets.buckets ?? []).reduce((acc, curr) => {
-    const datasetName = extractIndexNameFromBackingIndex(curr.key.dataset as string);
-
-    return {
-      ...acc,
-      [datasetName]: (acc[datasetName] ?? 0) + curr.doc_count,
-    };
-  }, {} as Record<string, number>);
-
-  const results = {
-    ...prevResults,
-    ...currResults,
-  };
-
-  if (
-    response.aggregations?.datasets.after_key &&
-    response.aggregations?.datasets.buckets.length === SIZE_LIMIT
-  ) {
-    return getPaginatedResults({
-      datasetQualityESClient,
-      index,
-      start,
-      end,
-      after:
-        (response.aggregations?.datasets.after_key as {
-          dataset: string;
-        }) || after,
-      prevResults: results,
-    });
-  }
-
-  return results;
-}
+import { streamPartsToIndexPattern } from '../../../../common/utils';
+import { getAggregatedDatasetPaginatedResults } from '../get_dataset_aggregated_paginated_results';
 
 export async function getFailedDocsPaginated(options: {
   esClient: ElasticsearchClient;
@@ -102,17 +29,10 @@ export async function getFailedDocsPaginated(options: {
         })
       );
 
-  const datasetQualityESClient = createDatasetQualityESClient(esClient);
-
-  const datasets = await getPaginatedResults({
-    datasetQualityESClient,
+  return await getAggregatedDatasetPaginatedResults({
+    esClient,
     index: datasetNames.join(','),
     start,
     end,
   });
-
-  return Object.entries(datasets).map(([dataset, count]) => ({
-    dataset,
-    count,
-  }));
 }

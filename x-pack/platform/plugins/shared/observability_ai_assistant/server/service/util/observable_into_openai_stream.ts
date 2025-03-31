@@ -24,11 +24,10 @@ import {
   ChatCompletionChunkEvent,
   StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
-  TokenCountEvent,
 } from '../../../common/conversation_complete';
 
 export function observableIntoOpenAIStream(
-  source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent | TokenCountEvent>,
+  source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>,
   logger: Logger
 ) {
   const stream = new PassThrough();

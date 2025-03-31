@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-export {
-  ComparatorFns,
-  getComparatorScript,
-  ComparatorFnNames,
-  getHumanReadableComparator,
-} from './comparator';
+export { getComparatorScript, getHumanReadableComparator } from './comparator';
 
 export type { EsqlTable } from './esql_query_utils';
 export { rowToDocument, transformDatatableToEsqlTable, toEsQueryHits } from './esql_query_utils';

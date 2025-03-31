@@ -29,7 +29,7 @@ export function createClient(
   options: UnboundOptions | BoundOptions
 ): BoundInferenceClient | InferenceClient {
   const { actions, request, logger } = options;
-  const client = createInferenceClient({ request, actions, logger });
+  const client = createInferenceClient({ request, actions, logger: logger.get('client') });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
   } else {

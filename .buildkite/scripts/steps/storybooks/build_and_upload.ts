@@ -39,7 +39,11 @@ const build = () => {
   console.log('--- Building Storybooks');
 
   for (const storybook of Object.keys(storybookAliases)) {
-    exec(`STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`, `yarn storybook --site ${storybook}`);
+    exec(
+      `STORYBOOK_BASE_URL=${STORYBOOK_BASE_URL}`,
+      `NODE_OPTIONS=--max-old-space-size=6144`,
+      `yarn storybook --site ${storybook}`
+    );
   }
 };
 

@@ -6,7 +6,7 @@
  */
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import {
   EuiBasicTable,
   EuiButton,
@@ -39,7 +39,7 @@ import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_lin
 
 const SpacedOrderedList = styled.ol`
   li {
-    margin-bottom: ${({ theme }) => theme.eui.euiSizeM};
+    margin-bottom: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   }
 `;
 

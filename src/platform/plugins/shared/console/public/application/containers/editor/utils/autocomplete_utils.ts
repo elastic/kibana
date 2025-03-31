@@ -305,9 +305,10 @@ const getSuggestions = (
     endLineNumber: position.lineNumber,
     endColumn: model.getLineMaxColumn(position.lineNumber),
   });
-  // if the rest of the line is empty or there is only "
+  // if the rest of the line is empty or there is only " or ends with closing parentheses
   // then template can be inserted, otherwise only name
-  context.addTemplate = isEmptyOrDoubleQuote(lineContentAfterPosition);
+  context.addTemplate =
+    isEmptyOrDoubleQuote(lineContentAfterPosition) || /^}*$/.test(lineContentAfterPosition);
 
   // if there is " after the cursor, include it in the insert range
   let endColumn = position.column;
@@ -340,7 +341,7 @@ const getSuggestions = (
       })
   );
 };
-const getInsertText = (
+export const getInsertText = (
   { name, insertValue, template, value }: ResultTerm,
   bodyContent: string,
   context: AutoCompleteContext
@@ -348,12 +349,12 @@ const getInsertText = (
   if (name === undefined) {
     return '';
   }
+
   let insertText = '';
   if (typeof name === 'string') {
     const bodyContentLines = bodyContent.split('\n');
-    const currentContentLine = bodyContentLines[bodyContentLines.length - 1];
-    const incompleteFieldRegex = /.*"[^"]*$/;
-    if (incompleteFieldRegex.test(currentContentLine)) {
+    const currentContentLine = bodyContentLines[bodyContentLines.length - 1].trim();
+    if (hasUnclosedQuote(currentContentLine)) {
       // The cursor is after an unmatched quote (e.g. '..."abc', '..."')
       insertText = '';
     } else {
@@ -374,7 +375,8 @@ const getInsertText = (
   if (conditionalTemplate) {
     template = conditionalTemplate;
   }
-  if (template !== undefined && context.addTemplate) {
+
+  if (template && context.addTemplate) {
     let templateLines;
     const { __raw, value: templateValue } = template;
     if (__raw && templateValue) {
@@ -384,10 +386,11 @@ const getInsertText = (
     }
     insertText += ': ' + templateLines.join('\n');
   } else if (value === '{') {
-    insertText += '{}';
+    insertText += ': {}';
   } else if (value === '[') {
-    insertText += '[]';
+    insertText += ': []';
   }
+
   // the string $0 is used to move the cursor between empty curly/square brackets
   if (insertText.endsWith('{}')) {
     insertText = insertText.substring(0, insertText.length - 2) + '{$0}';
@@ -448,4 +451,22 @@ export const shouldTriggerSuggestions = (lineContent: string): boolean => {
 export const isEmptyOrDoubleQuote = (lineContent: string): boolean => {
   lineContent = lineContent.trim();
   return !lineContent || lineContent === '"';
+};
+
+export const hasUnclosedQuote = (lineContent: string): boolean => {
+  let insideString = false;
+  let prevChar = '';
+  for (let i = 0; i < lineContent.length; i++) {
+    const char = lineContent[i];
+
+    if (!insideString && char === '"') {
+      insideString = true;
+    } else if (insideString && char === '"' && prevChar !== '\\') {
+      insideString = false;
+    }
+
+    prevChar = char;
+  }
+
+  return insideString;
 };

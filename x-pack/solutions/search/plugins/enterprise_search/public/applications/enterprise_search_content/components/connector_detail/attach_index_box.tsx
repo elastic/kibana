@@ -96,10 +96,10 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
     isFullMatch: boolean;
     searchValue: string;
   }>();
+  const sanitizedNameWithoutPrefix = formatApiName(connector.name);
   const [sanitizedName, setSanitizedName] = useState<string>(
-    prefixConnectorIndex(formatApiName(connector.name))
+    prefixConnectorIndex(sanitizedNameWithoutPrefix)
   );
-
   const [selectedIndex, setSelectedIndex] = useState<
     { label: string; shouldCreate?: boolean } | undefined
   >(
@@ -193,7 +193,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
 
   useEffect(() => {
     // Suggested name for managed connector should include the content- prefix
-    setSanitizedName(prefixConnectorIndex(formatApiName(connector.name)));
+    setSanitizedName(prefixConnectorIndex(sanitizedNameWithoutPrefix));
   }, [connector.name]);
 
   const { hash } = useLocation();
@@ -373,7 +373,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
                 fill
                 onClick={() => {
                   createIndex({ indexName: sanitizedName, language: null });
-                  setSelectedIndex({ label: sanitizedName });
+                  setSelectedIndex({ label: sanitizedNameWithoutPrefix });
                 }}
                 isLoading={isSaveLoading || isExistLoading}
                 disabled={indexExists[sanitizedName]}

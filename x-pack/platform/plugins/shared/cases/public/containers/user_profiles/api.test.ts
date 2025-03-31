@@ -66,6 +66,15 @@ describe('User profiles API', () => {
       expect(res).toEqual(userProfiles);
     });
 
+    it('should filter out empty user profiles', async () => {
+      const res = await bulkGetUserProfiles({
+        security,
+        uids: [...userProfilesIds, ''],
+      });
+
+      expect(res).toEqual(userProfiles);
+    });
+
     it('calls bulkGet correctly', async () => {
       await bulkGetUserProfiles({
         security,

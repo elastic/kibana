@@ -8,25 +8,21 @@
 import type { ProductDocumentationContentReference } from '@kbn/elastic-assistant-common';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import type { ContentReferenceNode } from '../content_reference_parser';
+import type { ResolvedContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 
 interface Props {
-  contentReferenceNode: ContentReferenceNode;
-  productDocumentationContentReference: ProductDocumentationContentReference;
+  contentReferenceNode: ResolvedContentReferenceNode<ProductDocumentationContentReference>;
 }
 
-export const ProductDocumentationReference: React.FC<Props> = ({
-  contentReferenceNode,
-  productDocumentationContentReference,
-}) => {
+export const ProductDocumentationReference: React.FC<Props> = ({ contentReferenceNode }) => {
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="ProductDocumentationReference"
     >
-      <EuiLink href={productDocumentationContentReference.url} target="_blank">
-        {productDocumentationContentReference.title}
+      <EuiLink href={contentReferenceNode.contentReference.url} target="_blank">
+        {contentReferenceNode.contentReference.title}
       </EuiLink>
     </PopoverReference>
   );

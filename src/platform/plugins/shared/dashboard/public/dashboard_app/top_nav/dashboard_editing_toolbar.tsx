@@ -9,28 +9,25 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback } from 'react';
+import React, { useState } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import useMountedState from 'react-use/lib/useMountedState';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { visualizationsService } from '../../services/kibana_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 import { AddPanelButton } from './add_panel_button/components/add_panel_button';
-import { addFromLibrary } from '../../dashboard_container/embeddable/api';
-import { navigateToVisEditor } from './add_panel_button/navigate_to_vis_editor';
+import { executeAddLensPanelAction } from '../../dashboard_actions/execute_add_lens_panel_action';
+import { addFromLibrary } from '../../dashboard_renderer/add_panel_from_library';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const { euiTheme } = useEuiTheme();
 
+  const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
-
-  const navigateToDefaultEditor = useCallback(() => {
-    const lensAlias = visualizationsService.getAliases().find(({ name }) => name === 'lens');
-    navigateToVisEditor(dashboardApi, lensAlias);
-  }, [dashboardApi]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const extraButtons = [
@@ -55,10 +52,17 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
           primaryButton: (
             <ToolbarButton
               type="primary"
-              isDisabled={isDisabled}
+              isDisabled={isDisabled || isLoading}
+              isLoading={isLoading}
               iconType="lensApp"
               size="s"
-              onClick={navigateToDefaultEditor}
+              onClick={async () => {
+                setIsLoading(true);
+                await executeAddLensPanelAction(dashboardApi);
+                if (isMounted()) {
+                  setIsLoading(false);
+                }
+              }}
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />

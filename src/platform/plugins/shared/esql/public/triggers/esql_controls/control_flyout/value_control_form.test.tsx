@@ -12,7 +12,7 @@ import { render, within, fireEvent } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/server/mocks';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueControlForm } from './value_control_form';
@@ -56,20 +56,23 @@ describe('ValueControlForm', () => {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    data: dataMock,
   };
 
   describe('Interval type', () => {
     it('should default correctly if no initial state is given for an interval variable type', async () => {
       const { findByTestId, findByTitle } = render(
-        <ValueControlForm
-          variableType={ESQLVariableType.TIME_LITERAL}
-          queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-          onCreateControl={jest.fn()}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <ValueControlForm
+            variableType={ESQLVariableType.TIME_LITERAL}
+            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
+            onCreateControl={jest.fn()}
+            closeFlyout={jest.fn()}
+            onEditControl={jest.fn()}
+            search={searchMock}
+            esqlVariables={[]}
+          />
+        </IntlProvider>
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
       expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
@@ -77,7 +80,7 @@ describe('ValueControlForm', () => {
       expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
 
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('interval');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('?interval');
 
       // values dropdown should be rendered
       const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
@@ -107,15 +110,17 @@ describe('ValueControlForm', () => {
     it('should call the onCreateControl callback, if no initialState is given', async () => {
       const onCreateControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
-        <ValueControlForm
-          variableType={ESQLVariableType.TIME_LITERAL}
-          queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-          onCreateControl={onCreateControlSpy}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <ValueControlForm
+            variableType={ESQLVariableType.TIME_LITERAL}
+            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
+            onCreateControl={onCreateControlSpy}
+            closeFlyout={jest.fn()}
+            onEditControl={jest.fn()}
+            search={searchMock}
+            esqlVariables={[]}
+          />
+        </IntlProvider>
       );
 
       // select the first interval
@@ -132,16 +137,18 @@ describe('ValueControlForm', () => {
     it('should call the onCancelControl callback, if Cancel button is clicked', async () => {
       const onCancelControlSpy = jest.fn();
       const { findByTestId } = render(
-        <ValueControlForm
-          variableType={ESQLVariableType.TIME_LITERAL}
-          queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-          onCreateControl={jest.fn()}
-          onCancelControl={onCancelControlSpy}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <ValueControlForm
+            variableType={ESQLVariableType.TIME_LITERAL}
+            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
+            onCreateControl={jest.fn()}
+            onCancelControl={onCancelControlSpy}
+            closeFlyout={jest.fn()}
+            onEditControl={jest.fn()}
+            search={searchMock}
+            esqlVariables={[]}
+          />
+        </IntlProvider>
       );
       // click on the cancel button
       fireEvent.click(await findByTestId('cancelEsqlControlsFlyoutButton'));
@@ -161,19 +168,21 @@ describe('ValueControlForm', () => {
         controlType: EsqlControlType.STATIC_VALUES,
       } as ESQLControlState;
       const { findByTestId } = render(
-        <ValueControlForm
-          variableType={ESQLVariableType.TIME_LITERAL}
-          queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-          onCreateControl={jest.fn()}
-          closeFlyout={jest.fn()}
-          onEditControl={jest.fn()}
-          search={searchMock}
-          initialState={initialState}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <ValueControlForm
+            variableType={ESQLVariableType.TIME_LITERAL}
+            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
+            onCreateControl={jest.fn()}
+            closeFlyout={jest.fn()}
+            onEditControl={jest.fn()}
+            search={searchMock}
+            initialState={initialState}
+            esqlVariables={[]}
+          />
+        </IntlProvider>
       );
       // variable name input should be rendered and with the default value
-      expect(await findByTestId('esqlVariableName')).toHaveValue('myInterval');
+      expect(await findByTestId('esqlVariableName')).toHaveValue('?myInterval');
 
       // values dropdown should be rendered with column2 selected
       const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
@@ -210,16 +219,18 @@ describe('ValueControlForm', () => {
       } as ESQLControlState;
       const onEditControlSpy = jest.fn();
       const { findByTestId } = render(
-        <ValueControlForm
-          variableType={ESQLVariableType.FIELDS}
-          queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
-          onCreateControl={jest.fn()}
-          closeFlyout={jest.fn()}
-          onEditControl={onEditControlSpy}
-          search={searchMock}
-          initialState={initialState}
-          esqlVariables={[]}
-        />
+        <IntlProvider locale="en">
+          <ValueControlForm
+            variableType={ESQLVariableType.FIELDS}
+            queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
+            onCreateControl={jest.fn()}
+            closeFlyout={jest.fn()}
+            onEditControl={onEditControlSpy}
+            search={searchMock}
+            initialState={initialState}
+            esqlVariables={[]}
+          />
+        </IntlProvider>
       );
       // click on the create button
       fireEvent.click(await findByTestId('saveEsqlControlsFlyoutButton'));

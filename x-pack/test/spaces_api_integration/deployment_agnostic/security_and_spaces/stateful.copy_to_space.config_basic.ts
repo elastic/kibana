@@ -9,5 +9,5 @@ import { createTestConfig } from '../../common/config';
 
 export default createTestConfig('copy_to_space - basic license', {
   license: 'basic',
-  testFiles: [require.resolve('./apis/copy_to_space')],
+  testFiles: [require.resolve('./apis/copy_to_space/index_basic')],
 });

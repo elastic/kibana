@@ -27,15 +27,18 @@ const navigateToUrl = jest.fn().mockImplementation(async (url) => {
 describe('useUnsavedChangesPrompt', () => {
   let addSpy: jest.SpiedFunction<Window['addEventListener']>;
   let removeSpy: jest.SpiedFunction<Window['removeEventListener']>;
+  let blockSpy: jest.SpiedFunction<CoreScopedHistory['block']>;
 
   beforeEach(() => {
     addSpy = jest.spyOn(window, 'addEventListener');
     removeSpy = jest.spyOn(window, 'removeEventListener');
+    blockSpy = jest.spyOn(history, 'block');
   });
 
   afterEach(() => {
     addSpy.mockRestore();
     removeSpy.mockRestore();
+    blockSpy.mockRestore();
     jest.resetAllMocks();
   });
 
@@ -96,5 +99,24 @@ describe('useUnsavedChangesPrompt', () => {
     cleanup();
     expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
     expect(removeSpy).toBeCalledWith('beforeunload', expect.anything());
+  });
+
+  it('should not block SPA navigation if blockSpaNavigation is false', async () => {
+    renderHook(() =>
+      useUnsavedChangesPrompt({
+        hasUnsavedChanges: true,
+        blockSpaNavigation: false,
+      })
+    );
+
+    expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
+
+    act(() => history.push('/test'));
+
+    expect(coreStart.overlays.openConfirm).not.toBeCalled();
+
+    expect(history.location.pathname).toBe('/test');
+
+    expect(blockSpy).not.toBeCalled();
   });
 });

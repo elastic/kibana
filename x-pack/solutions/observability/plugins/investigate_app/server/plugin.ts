@@ -32,8 +32,10 @@ export class InvestigateAppPlugin
 {
   logger: Logger;
   config: InvestigateAppConfig;
+  private isDev;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
+    this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
     this.config = context.config.get<InvestigateAppConfig>();
   }
@@ -62,6 +64,7 @@ export class InvestigateAppPlugin
         dependencies: {
           plugins: routeHandlerPlugins,
         },
+        isDev: this.isDev,
       });
     }
 

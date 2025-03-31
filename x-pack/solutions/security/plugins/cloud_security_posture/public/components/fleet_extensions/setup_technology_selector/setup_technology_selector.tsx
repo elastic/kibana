@@ -13,11 +13,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiSpacer,
   useGeneratedHtmlId,
-  EuiFlexItem,
-  EuiFlexGroup,
   EuiRadioGroup,
   EuiTitle,
   EuiRadioGroupOption,
+  EuiText,
+  EuiCallOut,
+  EuiLink,
 } from '@elastic/eui';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
@@ -25,10 +26,12 @@ export const SetupTechnologySelector = ({
   disabled,
   setupTechnology,
   onSetupTechnologyChange,
+  showLimitationsMessage = true,
 }: {
   disabled: boolean;
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
+  showLimitationsMessage?: boolean;
 }) => {
   const radioGroupItemId1 = useGeneratedHtmlId({
     prefix: 'radioGroupItem',
@@ -43,50 +46,45 @@ export const SetupTechnologySelector = ({
       id: radioGroupItemId1,
       value: SetupTechnology.AGENTLESS,
       label: (
-        <EuiFlexGroup gutterSize="xs" direction="column" aria-label={'Deployment Modes Selection'}>
-          <EuiFlexItem grow={false}>
-            <p>
-              <strong>
-                <FormattedMessage
-                  id="xpack.csp.fleetIntegration.setupTechnology.agentlessRadioLabel"
-                  defaultMessage="Agentless"
-                />
-              </strong>
-            </p>
-          </EuiFlexItem>
-          <EuiFlexItem>
+        <>
+          <strong>
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.setupTechnology.agentlessRadioLabel"
+              defaultMessage="Agentless"
+            />
+          </strong>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioDescription"
                 defaultMessage="Setup integration without an agent"
               />
             </p>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </EuiText>
+          <EuiSpacer size="xs" />
+        </>
       ),
     },
     {
       id: radioGroupItemId2,
       value: SetupTechnology.AGENT_BASED,
       label: (
-        <EuiFlexGroup gutterSize="xs" direction="column" aria-label={'Agent-based'}>
-          <EuiFlexItem grow={false}>
-            <p>
-              <strong>
-                <FormattedMessage
-                  id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioLabel"
-                  defaultMessage="Agent-based"
-                />
-              </strong>
-            </p>
-          </EuiFlexItem>
-          <EuiFlexItem>
+        <>
+          <strong>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioDescription"
-              defaultMessage="Deploy Elastic Agent into your Cloud Account"
+              id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioLabel"
+              defaultMessage="Agent-based"
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          </strong>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioDescription"
+                defaultMessage="Deploy an Elastic Agent into your cloud environment"
+              />
+            </p>
+          </EuiText>
+        </>
       ),
     },
   ];
@@ -102,6 +100,23 @@ export const SetupTechnologySelector = ({
     );
   };
 
+  const limitationsMessage = (
+    <FormattedMessage
+      id="xpack.csp.setupTechnologySelector.comingSoon"
+      defaultMessage="Agentless deployment is not supported if you are using {link}."
+      values={{
+        link: (
+          <EuiLink
+            href="https://www.elastic.co/guide/en/cloud-enterprise/current/ece-traffic-filtering-deployment-configuration.html"
+            target="_blank"
+          >
+            Traffic filtering
+          </EuiLink>
+        ),
+      }}
+    />
+  );
+
   return (
     <>
       <EuiSpacer size="l" />
@@ -109,11 +124,15 @@ export const SetupTechnologySelector = ({
         <h2>
           <FormattedMessage
             id="xpack.csp.setupTechnologySelector.deploymentOptionsTitle"
-            defaultMessage="Deployment Options"
+            defaultMessage="Deployment options"
           />
         </h2>
       </EuiTitle>
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
+      {showLimitationsMessage && (
+        <EuiCallOut title={limitationsMessage} color="warning" iconType="alert" size="m" />
+      )}
+      <EuiSpacer size="m" />
       <EuiRadioGroup
         disabled={disabled}
         data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}

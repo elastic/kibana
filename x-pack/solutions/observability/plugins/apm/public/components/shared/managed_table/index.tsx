@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { isEmpty, merge, orderBy } from 'lodash';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -36,6 +36,7 @@ export interface ITableColumn<T extends object> {
   width?: string;
   sortable?: boolean;
   truncateText?: boolean;
+  nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
 }
 
@@ -262,41 +263,44 @@ function UnoptimizedManagedTable<T extends object>(props: {
   );
 
   return (
-    <>
+    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
       {tableSearchBar.isEnabled ? (
-        <TableSearchBar
-          placeholder={tableSearchBar.placeholder}
-          searchQuery={searchQuery}
-          onChangeSearchQuery={onChangeSearchQuery}
-          techPreview={tableSearchBar.techPreview}
-        />
+        <EuiFlexItem>
+          <TableSearchBar
+            placeholder={tableSearchBar.placeholder}
+            searchQuery={searchQuery}
+            onChangeSearchQuery={onChangeSearchQuery}
+            techPreview={tableSearchBar.techPreview}
+          />
+        </EuiFlexItem>
       ) : null}
-
-      <EuiBasicTable<T>
-        loading={isLoading}
-        tableLayout={tableLayout}
-        error={
-          error
-            ? i18n.translate('xpack.apm.managedTable.errorMessage', {
-                defaultMessage: 'Failed to fetch',
-              })
-            : ''
-        }
-        noItemsMessage={
-          isLoading
-            ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
-                defaultMessage: 'Loading…',
-              })
-            : noItemsMessage
-        }
-        items={renderedItems}
-        columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
-        rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
-        sorting={sorting}
-        onChange={onTableChange}
-        {...(paginationProps ? { pagination: paginationProps } : {})}
-      />
-    </>
+      <EuiFlexItem>
+        <EuiBasicTable<T>
+          loading={isLoading}
+          tableLayout={tableLayout}
+          error={
+            error
+              ? i18n.translate('xpack.apm.managedTable.errorMessage', {
+                  defaultMessage: 'Failed to fetch',
+                })
+              : ''
+          }
+          noItemsMessage={
+            isLoading
+              ? i18n.translate('xpack.apm.managedTable.loadingDescription', {
+                  defaultMessage: 'Loading…',
+                })
+              : noItemsMessage
+          }
+          items={renderedItems}
+          columns={columns as unknown as Array<EuiBasicTableColumn<T>>} // EuiBasicTableColumn is stricter than ITableColumn
+          rowHeader={rowHeader === false ? undefined : rowHeader ?? columns[0]?.field}
+          sorting={sorting}
+          onChange={onTableChange}
+          {...(paginationProps ? { pagination: paginationProps } : {})}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiInMemoryTable,
@@ -18,8 +19,7 @@ import {
   useEuiFontSize,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { memo, useMemo } from 'react';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
 export const search = {

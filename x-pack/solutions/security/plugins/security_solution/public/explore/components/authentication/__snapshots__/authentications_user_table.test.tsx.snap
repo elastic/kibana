@@ -1,53 +1,36 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Authentication User Table Component rendering it renders the user authentication table 1`] = `
-.c2 .siemSubtitle__item {
+.c1 .siemSubtitle__item {
   color: #7a7f89;
   font-size: 12px;
   line-height: 1.5;
-}
-
-.c1 {
-  margin-bottom: 0;
-  -webkit-user-select: text;
-  -moz-user-select: text;
-  -ms-user-select: text;
-  user-select: text;
-}
-
-.c1.toggle-expand {
-  margin-bottom: 24px;
-}
-
-.c1 .no-margin {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
 }
 
 .c0 {
   position: relative;
 }
 
-.c3 tbody th,
-.c3 tbody td {
+.c2 tbody th,
+.c2 tbody td {
   vertical-align: top;
 }
 
-.c3 tbody .euiTableCellContent {
+.c2 tbody .euiTableCellContent {
   display: block;
 }
 
-.c4 {
+.c3 {
   margin-top: 4px;
 }
 
 @media only screen and (min-width:575px) {
-  .c2 .siemSubtitle__item {
+  .c1 .siemSubtitle__item {
     display: inline-block;
     margin-right: 16px;
   }
 
-  .c2 .siemSubtitle__item:last-child {
+  .c1 .siemSubtitle__item:last-child {
     margin-right: 0;
   }
 }
@@ -57,7 +40,8 @@ exports[`Authentication User Table Component rendering it renders the user authe
   data-test-subj="table-users-authentications-loading-false"
 >
   <header
-    class="c1 toggle-expand siemHeaderSection"
+    class="toggle-expand siemHeaderSection"
+    css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
     data-test-subj="header-section"
   >
     <div
@@ -144,7 +128,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         class="euiFlexItem emotion-euiFlexItem-grow-1"
       >
         <div
-          class="c2 siemSubtitle"
+          class="c1 siemSubtitle"
         >
           <p
             class="siemSubtitle__item siemSubtitle__item--text"
@@ -157,7 +141,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
     </div>
   </header>
   <div
-    class="euiBasicTable c3"
+    class="euiBasicTable c2"
     data-test-subj="paginated-basic-table"
   >
     <table
@@ -352,7 +336,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
     </table>
   </div>
   <div
-    class="euiFlexGroup c4 emotion-euiFlexGroup-l-spaceBetween-center-row"
+    class="euiFlexGroup c3 emotion-euiFlexGroup-l-spaceBetween-center-row"
   >
     <div
       class="euiFlexItem emotion-euiFlexItem-growZero"

@@ -6,7 +6,6 @@
  */
 
 import { deleteSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import {
   DefaultSummaryTransformManager,
   DefaultTransformManager,
@@ -72,7 +71,7 @@ export const deleteSLORoute = createSloServerRoute({
       rulesClient
     );
 
-    await executeWithErrorHandler(() => deleteSLO.execute(params.path.id));
+    await deleteSLO.execute(params.path.id);
     return response.noContent();
   },
 });

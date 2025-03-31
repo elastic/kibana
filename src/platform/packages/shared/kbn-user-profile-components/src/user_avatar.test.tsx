@@ -74,7 +74,7 @@ describe('UserAvatar', () => {
     );
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiAvatar
-        color="#AA6556"
+        color="#EAAE01"
         initials="DN"
         initialsLength={2}
         name="Delighted Nightingale (delighted_nightingale@elastic.co)"
@@ -86,7 +86,7 @@ describe('UserAvatar', () => {
     const wrapper = shallow(<UserAvatar />);
     expect(wrapper).toMatchInlineSnapshot(`
       <EuiAvatar
-        color="#F1F4FA"
+        color="#ECF1F9"
         initials="?"
         name=""
       />

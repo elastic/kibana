@@ -15,7 +15,7 @@ import { HistogramTransformGenerator } from './histogram';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
 
 const SPACE_ID = 'custom-space';
-const generator = new HistogramTransformGenerator(SPACE_ID, dataViewsService);
+const generator = new HistogramTransformGenerator(SPACE_ID, dataViewsService, false);
 
 describe('Histogram Transform Generator', () => {
   describe('validation', () => {

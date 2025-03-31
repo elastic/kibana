@@ -12,6 +12,7 @@ import type { FieldHook } from '../../../../shared_imports';
 import { Field } from '../../../../shared_imports';
 import { THRESHOLD_FIELD_PLACEHOLDER } from './translations';
 import * as styles from './styles';
+import { FieldSectionGroup } from './styles';
 
 export interface FieldValueThreshold {
   field: string[];
@@ -66,7 +67,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
 
   return (
     <EuiFlexGroup direction="column" className={styles.mainContainer}>
-      <EuiFlexGroup className={styles.fieldSection}>
+      <FieldSectionGroup>
         <EuiFlexItem className={styles.dropdownContainer}>
           <Field
             field={thresholdField}
@@ -87,8 +88,8 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdValue.type}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiFlexGroup className={styles.fieldSection}>
+      </FieldSectionGroup>
+      <FieldSectionGroup>
         <EuiFlexItem className={styles.dropdownContainer}>
           <Field
             field={thresholdCardinalityField}
@@ -109,7 +110,7 @@ const ThresholdInputComponent: React.FC<ThresholdInputProps> = ({
             type={thresholdCardinalityValue.type}
           />
         </EuiFlexItem>
-      </EuiFlexGroup>
+      </FieldSectionGroup>
     </EuiFlexGroup>
   );
 };

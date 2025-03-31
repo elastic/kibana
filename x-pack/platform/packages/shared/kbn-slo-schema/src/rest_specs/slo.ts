@@ -17,9 +17,8 @@ import {
 
 const sloWithDataResponseSchema = t.intersection([
   sloDefinitionSchema,
-  t.type({ summary: summarySchema, groupings: groupingsSchema }),
+  t.type({ summary: summarySchema, groupings: groupingsSchema, instanceId: allOrAnyString }),
   t.partial({
-    instanceId: allOrAnyString,
     meta: metaSchema,
     remote: remoteSchema,
   }),

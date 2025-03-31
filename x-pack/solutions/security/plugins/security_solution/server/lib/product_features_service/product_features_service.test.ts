@@ -10,11 +10,11 @@ import { ProductFeatures } from './product_features';
 import type {
   ProductFeaturesConfig,
   BaseKibanaFeatureConfig,
+  ProductFeaturesConfigurator,
 } from '@kbn/security-solution-features';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ExperimentalFeatures } from '../../../common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import type { ProductFeaturesConfigurator } from './types';
 import type {
   AssistantSubFeatureId,
   CasesSubFeatureId,
@@ -41,14 +41,16 @@ const productFeature = {
 };
 const mockGetFeature = jest.fn().mockReturnValue(productFeature);
 jest.mock('@kbn/security-solution-features/product_features', () => ({
-  getAttackDiscoveryFeature: () => mockGetFeature(),
-  getAssistantFeature: () => mockGetFeature(),
-  getCasesFeature: () => mockGetFeature(),
-  getCasesV2Feature: () => mockGetFeature(),
   getSecurityFeature: () => mockGetFeature(),
   getSecurityV2Feature: () => mockGetFeature(),
+  getCasesFeature: () => mockGetFeature(),
+  getCasesV2Feature: () => mockGetFeature(),
+  getCasesV3Feature: () => mockGetFeature(),
+  getAttackDiscoveryFeature: () => mockGetFeature(),
+  getAssistantFeature: () => mockGetFeature(),
   getTimelineFeature: () => mockGetFeature(),
   getNotesFeature: () => mockGetFeature(),
+  getSiemMigrationsFeature: () => mockGetFeature(),
 }));
 
 describe('ProductFeaturesService', () => {
@@ -60,8 +62,8 @@ describe('ProductFeaturesService', () => {
     const experimentalFeatures = {} as ExperimentalFeatures;
     new ProductFeaturesService(loggerMock.create(), experimentalFeatures);
 
-    expect(mockGetFeature).toHaveBeenCalledTimes(8);
-    expect(MockedProductFeatures).toHaveBeenCalledTimes(8);
+    expect(mockGetFeature).toHaveBeenCalledTimes(10);
+    expect(MockedProductFeatures).toHaveBeenCalledTimes(10);
   });
 
   it('should init all ProductFeatures when initialized', () => {
@@ -93,14 +95,16 @@ describe('ProductFeaturesService', () => {
     const mockCasesConfig = new Map() as ProductFeaturesConfig<CasesSubFeatureId>;
     const mockAssistantConfig = new Map() as ProductFeaturesConfig<AssistantSubFeatureId>;
     const mockAttackDiscoveryConfig = new Map() as ProductFeaturesConfig;
+    const mockSiemMigrationsConfig = new Map() as ProductFeaturesConfig;
     const mockTimelineConfig = new Map() as ProductFeaturesConfig;
     const mockNotesConfig = new Map() as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
-      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
+      siemMigrations: jest.fn(() => mockSiemMigrationsConfig),
       timeline: jest.fn(() => mockTimelineConfig),
       notes: jest.fn(() => mockNotesConfig),
     };
@@ -110,6 +114,7 @@ describe('ProductFeaturesService', () => {
     expect(configurator.cases).toHaveBeenCalled();
     expect(configurator.securityAssistant).toHaveBeenCalled();
     expect(configurator.attackDiscovery).toHaveBeenCalled();
+    expect(configurator.siemMigrations).toHaveBeenCalled();
 
     expect(MockedProductFeatures.mock.instances[0].setConfig).toHaveBeenCalledWith(
       mockSecurityConfig
@@ -120,6 +125,9 @@ describe('ProductFeaturesService', () => {
     );
     expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
       mockAttackDiscoveryConfig
+    );
+    expect(MockedProductFeatures.mock.instances[3].setConfig).toHaveBeenCalledWith(
+      mockSiemMigrationsConfig
     );
   });
 
@@ -146,14 +154,18 @@ describe('ProductFeaturesService', () => {
     const mockAttackDiscoveryConfig = new Map([
       [ProductFeatureKey.attackDiscovery, {}],
     ]) as ProductFeaturesConfig;
+    const mockSiemMigrationsConfig = new Map([
+      [ProductFeatureKey.siemMigrations, {}],
+    ]) as ProductFeaturesConfig;
     const mockTimelineConfig = new Map([[ProductFeatureKey.timeline, {}]]) as ProductFeaturesConfig;
     const mockNotesConfig = new Map([[ProductFeatureKey.notes, {}]]) as ProductFeaturesConfig;
 
     const configurator: ProductFeaturesConfigurator = {
-      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
       security: jest.fn(() => mockSecurityConfig),
       cases: jest.fn(() => mockCasesConfig),
       securityAssistant: jest.fn(() => mockAssistantConfig),
+      attackDiscovery: jest.fn(() => mockAttackDiscoveryConfig),
+      siemMigrations: jest.fn(() => mockSiemMigrationsConfig),
       timeline: jest.fn(() => mockTimelineConfig),
       notes: jest.fn(() => mockNotesConfig),
     };
@@ -164,6 +176,7 @@ describe('ProductFeaturesService', () => {
     expect(productFeaturesService.isEnabled(ProductFeatureKey.casesConnectors)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.assistant)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.attackDiscovery)).toEqual(true);
+    expect(productFeaturesService.isEnabled(ProductFeatureKey.siemMigrations)).toEqual(true);
     expect(productFeaturesService.isEnabled(ProductFeatureKey.externalRuleActions)).toEqual(false);
   });
 

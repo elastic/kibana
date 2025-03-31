@@ -6,16 +6,13 @@
  */
 
 import moment from 'moment/moment';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { getMonitorFilters, OverviewStatusQuery } from '../common';
-import {
-  getAllMonitors,
-  processMonitors,
-} from '../../saved_objects/synthetics_monitor/get_all_monitors';
+import { processMonitors } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { ConfigKey } from '../../../common/constants/monitor_management';
 import { RouteContext } from '../types';
 import {
@@ -39,7 +36,7 @@ export const SUMMARIES_PAGE_SIZE = 5000;
 
 export class OverviewStatusService {
   filterData: {
-    locationFilter?: string[] | string;
+    locationIds?: string[] | string;
     filtersStr?: string;
   } = {};
   constructor(
@@ -47,13 +44,7 @@ export class OverviewStatusService {
   ) {}
 
   async getOverviewStatus() {
-    const { request } = this.routeContext;
-    const queryParams = request.query as OverviewStatusQuery;
-
-    this.filterData = await getMonitorFilters({
-      ...queryParams,
-      context: this.routeContext,
-    });
+    this.filterData = await getMonitorFilters(this.routeContext);
 
     const [allConfigs, statusResult] = await Promise.all([
       this.getMonitorConfigs(),
@@ -70,7 +61,7 @@ export class OverviewStatusService {
       disabledCount,
       disabledMonitorsCount,
       projectMonitorsCount,
-    } = processMonitors(allConfigs, this.filterData?.locationFilter);
+    } = processMonitors(allConfigs, this.filterData?.locationIds);
 
     return {
       allIds,
@@ -100,7 +91,7 @@ export class OverviewStatusService {
       projects,
       showFromAllSpaces,
     } = params;
-    const { locationFilter } = this.filterData;
+    const { locationIds } = this.filterData;
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -129,10 +120,10 @@ export class OverviewStatusService {
       ...getTermFilter('monitor.project.id', projects),
     ];
 
-    if (scopeStatusByLocation && !isEmpty(locationFilter) && locationFilter) {
+    if (scopeStatusByLocation && !isEmpty(locationIds) && locationIds) {
       filters.push({
         terms: {
-          'observer.name': locationFilter,
+          'observer.name': locationIds,
         },
       });
     }
@@ -155,49 +146,47 @@ export class OverviewStatusService {
       do {
         const result = await this.routeContext.syntheticsEsClient.search(
           {
-            body: {
-              size: 0,
-              query: {
-                bool: {
-                  filter: [
-                    FINAL_SUMMARY_FILTER,
-                    getRangeFilter({ from: range.from, to: range.to }),
-                    getTimespanFilter({ from: 'now-15m', to: 'now' }),
-                    ...this.getEsDataFilters(),
-                  ] as QueryDslQueryContainer[],
-                },
+            size: 0,
+            query: {
+              bool: {
+                filter: [
+                  FINAL_SUMMARY_FILTER,
+                  getRangeFilter({ from: range.from, to: range.to }),
+                  getTimespanFilter({ from: 'now-15m', to: 'now' }),
+                  ...this.getEsDataFilters(),
+                ] as QueryDslQueryContainer[],
               },
-              aggs: {
-                monitors: {
-                  composite: {
-                    size: SUMMARIES_PAGE_SIZE,
-                    sources: asMutableArray([
-                      {
-                        monitorId: {
-                          terms: {
-                            field: 'monitor.id',
-                          },
+            },
+            aggs: {
+              monitors: {
+                composite: {
+                  size: SUMMARIES_PAGE_SIZE,
+                  sources: asMutableArray([
+                    {
+                      monitorId: {
+                        terms: {
+                          field: 'monitor.id',
                         },
                       },
-                      {
-                        locationId: {
-                          terms: {
-                            field: 'observer.name',
-                          },
+                    },
+                    {
+                      locationId: {
+                        terms: {
+                          field: 'observer.name',
                         },
                       },
-                    ] as const),
-                    after: afterKey,
-                  },
-                  aggs: {
-                    status: {
-                      top_metrics: {
-                        metrics: {
-                          field: 'monitor.status',
-                        },
-                        sort: {
-                          '@timestamp': 'desc',
-                        },
+                    },
+                  ] as const),
+                  after: afterKey,
+                },
+                aggs: {
+                  status: {
+                    top_metrics: {
+                      metrics: {
+                        field: 'monitor.status',
+                      },
+                      sort: {
+                        '@timestamp': 'desc',
                       },
                     },
                   },
@@ -242,7 +231,7 @@ export class OverviewStatusService {
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
     const disabledMonitors = monitors.filter((monitor) => !monitor.attributes[ConfigKey.ENABLED]);
 
-    const queryLocIds = this.filterData?.locationFilter;
+    const queryLocIds = this.filterData?.locationIds;
 
     disabledMonitors.forEach((monitor) => {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];
@@ -314,7 +303,7 @@ export class OverviewStatusService {
   }
 
   async getMonitorConfigs() {
-    const { savedObjectsClient, request } = this.routeContext;
+    const { request } = this.routeContext;
     const { query, showFromAllSpaces } = request.query || {};
     /**
      * Walk through all monitor saved objects, bucket IDs by disabled/enabled status.
@@ -325,8 +314,7 @@ export class OverviewStatusService {
 
     const { filtersStr } = this.filterData;
 
-    return await getAllMonitors({
-      soClient: savedObjectsClient,
+    return await this.routeContext.monitorConfigRepository.getAll({
       showFromAllSpaces,
       search: query ? `${query}*` : '',
       filter: filtersStr,

@@ -125,7 +125,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as \`@timestamp every 30 minute\``,
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -163,7 +163,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as \`@timestamp every 30 minute\``,
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -248,7 +248,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`var0\` | sort \`var0\` asc | rename timestamp as \`@timestamp every 30 minute\``,
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`var0\` | sort \`var0\` asc`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -329,7 +329,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`coordinates\` | rename timestamp as \`@timestamp every 30 minute\``,
+| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`coordinates\``,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);

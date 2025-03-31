@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import axios, { AxiosError, AxiosInstance } from 'axios';
+import type { AxiosInstance } from 'axios';
+import axios, { AxiosError } from 'axios';
 import { Agent as HttpsAgent } from 'https';
 import HttpProxyAgent from 'http-proxy-agent';
 import { HttpsProxyAgent } from 'https-proxy-agent';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import {
   addTimeZoneToDate,
   request,
@@ -404,6 +405,7 @@ describe('request', () => {
           defaults: {
             ...axios.defaults,
             baseURL: 'https://here-we-go.com',
+            allowAbsoluteUrls: false,
           },
         } as unknown as AxiosInstance,
         url: '/test',

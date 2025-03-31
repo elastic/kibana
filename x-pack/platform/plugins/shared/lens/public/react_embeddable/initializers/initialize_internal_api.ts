@@ -7,7 +7,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
-import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
+import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {

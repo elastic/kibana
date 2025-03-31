@@ -32,7 +32,7 @@ describe('Policy Response Services', () => {
     it('queries for the correct host', async () => {
       const agentId = 'f757d3c0-e874-11ea-9ad9-015510b487f4';
       const query = getESQueryPolicyResponseByAgentID(agentId, 'anyindex');
-      expect(query.body?.query?.bool?.filter).toEqual({ term: { 'agent.id': agentId } });
+      expect(query.query?.bool?.filter).toEqual({ term: { 'agent.id': agentId } });
     });
 
     it('filters out initial policy by ID', async () => {
@@ -40,7 +40,7 @@ describe('Policy Response Services', () => {
         'f757d3c0-e874-11ea-9ad9-015510b487f4',
         'anyindex'
       );
-      expect(query.body?.query?.bool?.must_not).toEqual({
+      expect(query.query?.bool?.must_not).toEqual({
         term: {
           'Endpoint.policy.applied.id': '00000000-0000-0000-0000-000000000000',
         },
@@ -72,13 +72,11 @@ describe('Policy Response Services', () => {
 
       expect(esClientMock.search).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.objectContaining({
-                  term: expect.objectContaining({
-                    'agent.id': '1-2-3',
-                  }),
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.objectContaining({
+                term: expect.objectContaining({
+                  'agent.id': '1-2-3',
                 }),
               }),
             }),

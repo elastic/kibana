@@ -11,6 +11,7 @@ import {
   defineDockerServersConfig,
 } from '@kbn/test';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
 import { DeploymentAgnosticCommonServices, services } from '../services';
@@ -85,6 +86,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         // services can be customized, but must extend DeploymentAgnosticCommonServices
         ...(options.services || services),

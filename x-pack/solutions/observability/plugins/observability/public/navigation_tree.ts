@@ -153,7 +153,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure inventory',
+                      defaultMessage: 'Infrastructure Inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
@@ -439,7 +439,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-            link: 'management',
             title: i18n.translate('xpack.observability.obltNav.stackManagement', {
               defaultMessage: 'Stack Management',
             }),
@@ -509,6 +508,10 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 ],
               },
             ],
+          },
+          {
+            id: 'monitoring',
+            link: 'monitoring',
           },
           {
             link: 'integrations',

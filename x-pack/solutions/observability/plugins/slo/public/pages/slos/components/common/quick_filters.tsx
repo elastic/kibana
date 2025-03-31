@@ -59,6 +59,9 @@ export function QuickFilters({
           align-items: flex-start;
           min-height: initial;
         }
+        .controlPanel {
+          height: initial;
+        }
         .controlGroup {
           min-height: initial;
         }

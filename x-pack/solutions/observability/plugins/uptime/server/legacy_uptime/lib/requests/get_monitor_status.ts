@@ -6,7 +6,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PromiseType } from 'utility-types';
 import { formatDurationFromTimeUnitChar, TimeUnitChar } from '@kbn/observability-plugin/common';
 import {
@@ -91,81 +91,79 @@ const executeQueryParams = async ({
   locations: string[];
 }) => {
   const queryParams = createEsQuery({
-    body: {
-      query: {
-        bool: {
-          filter: [
-            SUMMARY_FILTER,
-            EXCLUDE_RUN_ONCE_FILTER,
-            {
-              range: {
-                'summary.down': {
-                  gt: '0',
-                },
+    query: {
+      bool: {
+        filter: [
+          SUMMARY_FILTER,
+          EXCLUDE_RUN_ONCE_FILTER,
+          {
+            range: {
+              'summary.down': {
+                gt: '0',
               },
             },
-            {
-              range: {
-                '@timestamp': {
-                  gte: timestampRange.from,
-                  lte: timestampRange.to,
-                },
-              },
-            },
-            {
-              range: {
-                'monitor.timespan': {
-                  gte: timespanRange.from,
-                  lte: timespanRange.to,
-                },
-              },
-            },
-            // append user filters, if defined
-            ...(filters?.bool ? [filters] : []),
-          ] as QueryDslQueryContainer[],
-        },
-      },
-      size: 0,
-      aggs: {
-        monitors: {
-          composite: {
-            size: 2000,
-            /**
-             * We "paginate" results by utilizing the `afterKey` field
-             * to tell Elasticsearch where it should start on subsequent queries.
-             */
-            ...(afterKey ? { after: afterKey } : {}),
-            sources: asMutableArray([
-              {
-                monitorId: {
-                  terms: {
-                    field: 'monitor.id',
-                  },
-                },
-              },
-              {
-                status: {
-                  terms: {
-                    field: 'monitor.status',
-                  },
-                },
-              },
-              {
-                location: {
-                  terms: {
-                    field: 'observer.geo.name',
-                    missing_bucket: true,
-                  },
-                },
-              },
-            ] as const),
           },
-          aggs: {
-            fields: {
-              top_hits: {
-                size: 1,
-                sort: [{ '@timestamp': 'desc' }],
+          {
+            range: {
+              '@timestamp': {
+                gte: timestampRange.from,
+                lte: timestampRange.to,
               },
+            },
+          },
+          {
+            range: {
+              'monitor.timespan': {
+                gte: timespanRange.from,
+                lte: timespanRange.to,
+              },
+            },
+          },
+          // append user filters, if defined
+          ...(filters?.bool ? [filters] : []),
+        ] as QueryDslQueryContainer[],
+      },
+    },
+    size: 0,
+    aggs: {
+      monitors: {
+        composite: {
+          size: 2000,
+          /**
+           * We "paginate" results by utilizing the `afterKey` field
+           * to tell Elasticsearch where it should start on subsequent queries.
+           */
+          ...(afterKey ? { after: afterKey } : {}),
+          sources: asMutableArray([
+            {
+              monitorId: {
+                terms: {
+                  field: 'monitor.id',
+                },
+              },
+            },
+            {
+              status: {
+                terms: {
+                  field: 'monitor.status',
+                },
+              },
+            },
+            {
+              location: {
+                terms: {
+                  field: 'observer.geo.name',
+                  missing_bucket: true,
+                },
+              },
+            },
+          ] as const),
+        },
+        aggs: {
+          fields: {
+            top_hits: {
+              size: 1,
+              sort: [{ '@timestamp': 'desc' }],
             },
           },
         },
@@ -177,7 +175,7 @@ const executeQueryParams = async ({
    * Perform a logical `and` against the selected location filters.
    */
   if (locations.length) {
-    queryParams.body.query.bool.filter.push(getLocationClause(locations));
+    queryParams.query.bool.filter.push(getLocationClause(locations));
   }
 
   const { body: result } = await uptimeEsClient.search<Ping, typeof queryParams>(queryParams);

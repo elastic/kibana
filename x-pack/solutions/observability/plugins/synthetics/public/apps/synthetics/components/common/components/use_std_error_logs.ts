@@ -13,27 +13,25 @@ export const useStdErrorLogs = ({ checkGroup }: { checkGroup?: string }) => {
   const { data, loading } = useEsSearch(
     createEsParams({
       index: !checkGroup ? '' : SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 1000,
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'synthetics.type': ['stderr', 'stdout'],
-                },
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'synthetics.type': ['stderr', 'stdout'],
               },
-              ...(checkGroup
-                ? [
-                    {
-                      term: {
-                        'monitor.check_group': checkGroup,
-                      },
+            },
+            ...(checkGroup
+              ? [
+                  {
+                    term: {
+                      'monitor.check_group': checkGroup,
                     },
-                  ]
-                : []),
-            ],
-          },
+                  },
+                ]
+              : []),
+          ],
         },
       },
     }),

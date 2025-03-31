@@ -74,10 +74,6 @@ export interface FlyoutPanelProps {
    * Tracks the path for what to show in a panel, such as activated tab and subtab
    */
   path?: PanelPath;
-  /**
-   * Tracks visual state such as whether the panel is collapsed
-   */
-  state?: Record<string, unknown>;
 }
 
 export interface Panel {
@@ -89,4 +85,15 @@ export interface Panel {
    * Component to be rendered
    */
   component: (props: FlyoutPanelProps) => React.ReactElement;
+}
+
+export interface FlyoutPanelHistory {
+  /**
+   * Time at which the flyout was last opened
+   */
+  lastOpen: number;
+  /**
+   * Panel that was opened
+   */
+  panel: FlyoutPanelProps;
 }

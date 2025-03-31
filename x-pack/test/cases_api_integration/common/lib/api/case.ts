@@ -6,15 +6,15 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { Case, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import {
+import type { Case, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type {
   CasePostRequest,
   CasesFindResponse,
-  CasePatchRequest,
+  CasesPatchRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
-import { ToolingLog } from '@kbn/tooling-log';
-import { User } from '../authentication/types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -106,21 +106,60 @@ export const updateCaseStatus = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  version?: string;
+  version: string;
   status?: CaseStatuses;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }) => {
-  const updateRequest: CasePatchRequest = {
-    status,
-    version,
-    id: caseId,
+  const updateRequest: CasesPatchRequest = {
+    cases: [
+      {
+        status,
+        version,
+        id: caseId,
+      },
+    ],
   };
 
   const { body: updatedCase } = await supertest
-    .patch(`/api/cases/${caseId}`)
+    .patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'xxx')
-    .send(updateRequest);
+    .send(updateRequest)
+    .expect(expectedHttpCode);
+  return updatedCase;
+};
+
+export const updateCaseAssignee = async ({
+  supertest,
+  caseId,
+  version = '2',
+  assigneeId,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  version?: string;
+  assigneeId: string;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}) => {
+  const updateRequest: CasesPatchRequest = {
+    cases: [
+      {
+        version,
+        assignees: [{ uid: assigneeId }],
+        id: caseId,
+      },
+    ],
+  };
+
+  const { body: updatedCase } = await supertest
+    .patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'xxx')
+    .send(updateRequest)
+    .expect(expectedHttpCode);
   return updatedCase;
 };

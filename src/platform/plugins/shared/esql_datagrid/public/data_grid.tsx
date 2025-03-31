@@ -155,6 +155,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           hasRoomForGridControls: true,
         },
         gridProps: {
+          inTableSearchControl: customToolbarProps.gridProps.inTableSearchControl,
           additionalControls: (
             <EuiLink
               href={discoverLink}
@@ -204,6 +205,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       rows={rows}
       columnsMeta={columnsMeta}
       services={services}
+      enableInTableSearch
       isPlainRecord
       isSortEnabled={false}
       loadingState={DataLoadingState.loaded}

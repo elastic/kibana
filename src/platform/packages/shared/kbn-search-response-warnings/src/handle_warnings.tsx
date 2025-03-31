@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiButtonEmpty, EuiText } from '@elastic/eui';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   AnalyticsServiceStart,
   NotificationsStart,

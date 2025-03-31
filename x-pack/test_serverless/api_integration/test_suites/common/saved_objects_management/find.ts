@@ -27,12 +27,12 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
       it('should return 200 with individual responses', async () => {
@@ -101,18 +101,18 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
         );
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
@@ -207,12 +207,12 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
         );
         await kibanaServer.savedObjects.cleanStandardList();
       });
@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
           hiddenType: false,
           inAppUrl: {
             path: '/app/discover#/view/960372e0-3224-11e8-a572-ffca06da1357',
-            uiCapabilitiesPath: 'discover.show',
+            uiCapabilitiesPath: 'discover_v2.show',
           },
           namespaceType: 'multiple-isolated',
         });
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
           hiddenType: false,
           inAppUrl: {
             path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
-            uiCapabilitiesPath: 'dashboard.show',
+            uiCapabilitiesPath: 'dashboard_v2.show',
           },
           namespaceType: 'multiple-isolated',
         });

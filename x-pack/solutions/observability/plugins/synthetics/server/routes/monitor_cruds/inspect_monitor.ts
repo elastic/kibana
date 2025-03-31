@@ -63,7 +63,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       ) ?? false;
 
     try {
-      const newMonitorId = id ?? uuidV4();
+      const newMonitorId = id || normalizedMonitor.config_id || uuidV4();
 
       const addMonitorAPI = new AddEditMonitorAPI(routeContext);
 

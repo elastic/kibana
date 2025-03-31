@@ -33,10 +33,8 @@ export async function findExactConfiguration({
 
   const params = {
     index: APM_AGENT_CONFIGURATION_INDEX,
-    body: {
-      query: {
-        bool: { filter: [serviceNameFilter, environmentFilter] },
-      },
+    query: {
+      bool: { filter: [serviceNameFilter, environmentFilter] },
     },
   };
 

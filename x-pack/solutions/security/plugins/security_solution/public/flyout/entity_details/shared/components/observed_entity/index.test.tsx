@@ -16,7 +16,6 @@ describe('ObservedHost', () => {
     observedData: mockObservedHostData,
     contextID: '',
     scopeId: '',
-    isDraggable: false,
     queryId: 'TEST_QUERY_ID',
     observedFields: [],
   };

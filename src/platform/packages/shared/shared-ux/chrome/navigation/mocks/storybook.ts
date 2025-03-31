@@ -21,7 +21,7 @@ export class StorybookMock extends AbstractStorybookMock<{}, NavigationServices>
 
   serviceArguments = {
     isSideNavCollapsed: {
-      control: 'boolean',
+      control: { control: 'boolean' },
       defaultValue: false,
     },
   };

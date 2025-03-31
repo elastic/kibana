@@ -6,7 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
@@ -163,7 +163,6 @@ export const useTimelineEventsHandler = ({
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loaded);
@@ -215,34 +214,32 @@ export const useTimelineEventsHandler = ({
     };
   }, []);
 
-  const refetchGrid = useCallback(() => {
-    if (refetch.current != null) {
-      refetch.current();
-    }
-    loadBatchHandler(0);
-  }, [loadBatchHandler]);
-
   useEffect(() => {
     // when batch size changes, refetch DataGrid
     setActiveBatch(0);
   }, [limit]);
 
-  const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
-    id,
-    inspect: {
-      dsl: [],
-      response: [],
-    },
-    refetch: refetchGrid,
-    totalCount: -1,
-    pageInfo: {
-      activePage: 0,
-      querySize: 0,
-    },
-    events: [],
-    loadNextBatch,
-    refreshedAt: 0,
-  });
+  const defaultTimelineResponse = useMemo(
+    () => ({
+      id,
+      inspect: {
+        dsl: [],
+        response: [],
+      },
+      refetch: () => {},
+      totalCount: -1,
+      pageInfo: {
+        activePage: 0,
+        querySize: 0,
+      },
+      events: [],
+      loadNextBatch,
+      refreshedAt: 0,
+    }),
+    [id, loadNextBatch]
+  );
+
+  const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>(defaultTimelineResponse);
 
   const timelineSearch = useCallback(
     async (
@@ -353,100 +350,132 @@ export const useTimelineEventsHandler = ({
     [pageName, skip, id, activeBatch, startTracking, data.search, dataViewId]
   );
 
+  const refetchPagination = useMemo(() => {
+    return {
+      activePage: 0,
+      querySize: limit,
+    };
+  }, [limit]);
+
+  const refetchGrid = useCallback(() => {
+    /*
+     *
+     * Trigger search with a new request object to fetch the latest data.
+     *
+     */
+    const newTimelineRequest: typeof timelineRequest = {
+      ...timelineRequest,
+      factoryQueryType: TimelineEventsQueries.all,
+      language,
+      sort,
+      fieldRequested: timelineRequest?.fieldRequested ?? fields,
+      fields: timelineRequest?.fieldRequested ?? fields,
+      pagination: refetchPagination,
+    };
+
+    setTimelineRequest(newTimelineRequest);
+
+    timelineSearch(newTimelineRequest);
+    setActiveBatch(0);
+  }, [timelineRequest, timelineSearch, refetchPagination, language, sort, fields]);
+
   useEffect(() => {
     if (indexNames.length === 0) {
       return;
     }
 
-    setTimelineRequest((prevRequest) => {
-      const prevEqlRequest = prevRequest as TimelineEqlRequestOptionsInput;
-      const prevSearchParameters = {
-        defaultIndex: prevRequest?.defaultIndex ?? [],
-        filterQuery: prevRequest?.filterQuery ?? '',
-        sort: prevRequest?.sort ?? initSortDefault,
-        timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
-        ...deStructureEqlOptions(prevEqlRequest),
-      };
-
-      const timerange =
-        startDate && endDate
-          ? { timerange: { interval: '12h', from: startDate, to: endDate } }
-          : {};
-      const currentSearchParameters = {
-        defaultIndex: indexNames,
-        filterQuery: createFilter(filterQuery),
-        sort,
-        runtimeMappings: runtimeMappings ?? {},
-        ...timerange,
-        ...deStructureEqlOptions(eqlOptions),
-      };
-
-      const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
-
-      const newActiveBatch = !areSearchParamsSame ? 0 : activeBatch;
-
-      /*
-       * optimization to avoid unnecessary network request when a field
-       * has already been fetched
-       *
-       */
-
-      let finalFieldRequest = fields;
-
-      const newFieldsRequested = fields.filter(
-        (field) => !prevRequest?.fieldRequested?.includes(field)
-      );
-      if (newFieldsRequested.length > 0) {
-        finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
-      } else {
-        finalFieldRequest = prevRequest?.fieldRequested ?? [];
-      }
-
-      let newPagination = {
-        /*
-         *
-         * fetches data cumulatively for the batches upto the activeBatch
-         * This is needed because, we want to get incremental data as well for the old batches
-         * For example, newly requested fields
-         *
-         * */
-        activePage: activeBatch,
-        querySize: limit,
-      };
-
-      if (newFieldsRequested.length > 0) {
-        newPagination = {
-          activePage: 0,
-          querySize: (newActiveBatch + 1) * limit,
+    // Only set timeline request when an actual query exists
+    if (filterQuery || eqlOptions?.query) {
+      setTimelineRequest((prevRequest) => {
+        const prevEqlRequest = prevRequest as TimelineEqlRequestOptionsInput;
+        const prevSearchParameters = {
+          defaultIndex: prevRequest?.defaultIndex ?? [],
+          filterQuery: prevRequest?.filterQuery ?? '',
+          sort: prevRequest?.sort ?? initSortDefault,
+          timerange: prevRequest?.timerange ?? {},
+          runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
+          ...deStructureEqlOptions(prevEqlRequest),
         };
-      }
 
-      const currentRequest = {
-        defaultIndex: indexNames,
-        factoryQueryType: TimelineEventsQueries.all,
-        fieldRequested: finalFieldRequest,
-        fields: finalFieldRequest,
-        filterQuery: createFilter(filterQuery),
-        pagination: newPagination,
-        language,
-        runtimeMappings,
-        sort,
-        ...timerange,
-        ...(eqlOptions ? eqlOptions : {}),
-      } as const;
+        const timerange =
+          startDate && endDate
+            ? { timerange: { interval: '12h', from: startDate, to: endDate } }
+            : {};
+        const currentSearchParameters = {
+          defaultIndex: indexNames,
+          filterQuery: createFilter(filterQuery),
+          sort,
+          runtimeMappings: runtimeMappings ?? {},
+          ...timerange,
+          ...deStructureEqlOptions(eqlOptions),
+        };
 
-      if (activeBatch !== newActiveBatch) {
-        setActiveBatch(newActiveBatch);
-        if (id === TimelineId.active) {
-          activeTimeline.setActivePage(newActiveBatch);
+        const areSearchParamsSame = deepEqual(prevSearchParameters, currentSearchParameters);
+
+        const newActiveBatch = !areSearchParamsSame ? 0 : activeBatch;
+
+        /*
+         * optimization to avoid unnecessary network request when a field
+         * has already been fetched
+         *
+         */
+
+        let finalFieldRequest = fields;
+
+        const newFieldsRequested = fields.filter(
+          (field) => !prevRequest?.fieldRequested?.includes(field)
+        );
+        if (newFieldsRequested.length > 0) {
+          finalFieldRequest = [...(prevRequest?.fieldRequested ?? []), ...newFieldsRequested];
+        } else {
+          finalFieldRequest = prevRequest?.fieldRequested ?? [];
         }
-      }
-      if (!deepEqual(prevRequest, currentRequest)) {
-        return currentRequest;
-      }
-      return prevRequest;
-    });
+
+        let newPagination = {
+          /*
+           *
+           * fetches data cumulatively for the batches upto the activeBatch
+           * This is needed because, we want to get incremental data as well for the old batches
+           * For example, newly requested fields
+           *
+           * */
+          activePage: newActiveBatch,
+          querySize: limit,
+        };
+
+        if (newFieldsRequested.length > 0) {
+          newPagination = {
+            activePage: 0,
+            querySize: (newActiveBatch + 1) * limit,
+          };
+        }
+
+        const currentRequest = {
+          defaultIndex: indexNames,
+          factoryQueryType: TimelineEventsQueries.all,
+          fieldRequested: finalFieldRequest,
+          fields: finalFieldRequest,
+          filterQuery: createFilter(filterQuery),
+          pagination: newPagination,
+          language,
+          runtimeMappings,
+          sort,
+          ...timerange,
+          ...(eqlOptions ? eqlOptions : {}),
+        } as const;
+
+        if (activeBatch !== newActiveBatch) {
+          setActiveBatch(newActiveBatch);
+          if (id === TimelineId.active) {
+            activeTimeline.setActivePage(newActiveBatch);
+          }
+        }
+        if (!deepEqual(prevRequest, currentRequest)) {
+          return currentRequest;
+        }
+        return prevRequest;
+      });
+    }
   }, [
     dispatch,
     indexNames,
@@ -469,24 +498,9 @@ export const useTimelineEventsHandler = ({
   */
   useEffect(() => {
     if (isEmpty(filterQuery)) {
-      setTimelineResponse({
-        id,
-        inspect: {
-          dsl: [],
-          response: [],
-        },
-        refetch: refetchGrid,
-        totalCount: -1,
-        pageInfo: {
-          activePage: 0,
-          querySize: 0,
-        },
-        events: [],
-        loadNextBatch,
-        refreshedAt: 0,
-      });
+      setTimelineResponse(defaultTimelineResponse);
     }
-  }, [filterQuery, id, refetchGrid, loadNextBatch]);
+  }, [defaultTimelineResponse, filterQuery]);
 
   const timelineSearchHandler = useCallback(
     async (onNextHandler?: OnNextResponseHandler) => {
@@ -512,6 +526,8 @@ export const useTimelineEventsHandler = ({
   return [loading, finalTimelineLineResponse, timelineSearchHandler];
 };
 
+const defaultEvents: TimelineItem[][] = [];
+
 export const useTimelineEvents = ({
   dataViewId,
   endDate,
@@ -528,7 +544,7 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
-  const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>([[]]);
+  const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>(defaultEvents);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
     endDate,
@@ -559,9 +575,15 @@ export const useTimelineEvents = ({
     const { activePage, querySize } = timelineResponse.pageInfo;
 
     setEventsPerPage((prev) => {
-      let result = [...prev];
-      if (querySize === limit) {
+      let result = structuredClone(prev);
+      const newEventsLength = timelineResponse.events.length;
+      const oldEventsLength = result.length;
+
+      if (querySize === limit && activePage > 0) {
         result[activePage] = timelineResponse.events;
+      } else if (oldEventsLength === 0 && newEventsLength === 0) {
+        // don't change array reference if no actual changes take place
+        result = prev;
       } else {
         result = [timelineResponse.events];
       }

@@ -843,6 +843,10 @@
               "path": "x-pack/platform/plugins/private/watcher/public/plugin.ts"
             },
             {
+              "plugin": "securitySolution",
+              "path": "x-pack/solutions/security/plugins/security_solution/public/plugin.tsx"
+            },
+            {
               "plugin": "searchprofiler",
               "path": "x-pack/platform/plugins/shared/searchprofiler/public/plugin.ts"
             },
@@ -2207,6 +2211,10 @@
             {
               "plugin": "upgradeAssistant",
               "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/reindexing/reindex_service.ts"
+            },
+            {
+              "plugin": "upgradeAssistant",
+              "path": "x-pack/platform/plugins/private/upgrade_assistant/server/lib/data_streams/data_stream_migration_service.ts"
             },
             {
               "plugin": "aiops",

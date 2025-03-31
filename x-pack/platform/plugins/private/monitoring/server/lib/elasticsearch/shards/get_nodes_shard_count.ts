@@ -43,22 +43,20 @@ async function getShardCountPerNode(req: LegacyRequest, cluster: ElasticsearchMo
     index: indexPattern,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query: createQuery({
-        type,
-        dsDataset: getElasticsearchDataset(dataset),
-        metricset: dataset,
-        clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
-        metric,
-        filters,
-      }),
-      aggs: {
-        nodes: {
-          terms: {
-            field: 'shard.node',
-            size: maxBucketSize,
-          },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query: createQuery({
+      type,
+      dsDataset: getElasticsearchDataset(dataset),
+      metricset: dataset,
+      clusterUuid: cluster.cluster_uuid ?? cluster.elasticsearch?.cluster?.id,
+      metric,
+      filters,
+    }),
+    aggs: {
+      nodes: {
+        terms: {
+          field: 'shard.node',
+          size: maxBucketSize,
         },
       },
     },

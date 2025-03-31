@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { Document } from '@langchain/core/documents';
 import {
   ChatPromptTemplate,
@@ -20,7 +20,7 @@ import type { DataStreamString } from '@ai-sdk/ui-utils';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
-import { ChatMessage } from '../types';
+import { ChatMessage, ElasticsearchRetrieverContentField } from '../types';
 import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { renderTemplate } from '../utils/render_template';
 
@@ -34,7 +34,7 @@ interface RAGOptions {
   retriever: (question: string) => object;
   doc_context?: string;
   hit_doc_mapper?: (hit: SearchHit) => Document;
-  content_field: string | Record<string, string>;
+  content_field: ElasticsearchRetrieverContentField;
   size?: number;
   inputTokensLimit?: number;
 }

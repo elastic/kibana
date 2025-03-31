@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/public';
 import { ServerlessPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ServerlessPlugin(initializerContext);
+export function plugin() {
+  return new ServerlessPlugin();
 }
 
 export type { ServerlessPluginSetup, ServerlessPluginStart } from './types';

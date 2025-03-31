@@ -34,6 +34,7 @@ interface MarkdownEditorProps {
   autoFocusDisabled?: boolean;
   setIsMarkdownInvalid: (value: boolean) => void;
   includePlugins?: boolean;
+  placeholder?: string;
 }
 
 type EuiMarkdownEditorRef = ElementRef<typeof EuiMarkdownEditor>;
@@ -56,6 +57,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
       autoFocusDisabled,
       setIsMarkdownInvalid,
       includePlugins = true,
+      placeholder,
     },
     ref
   ) => {
@@ -118,6 +120,7 @@ const MarkdownEditorComponent = forwardRef<MarkdownEditorRef, MarkdownEditorProp
         errors={markdownErrorMessages}
         data-test-subj={dataTestSubj}
         height={height}
+        placeholder={placeholder}
       />
     );
   }

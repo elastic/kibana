@@ -66,7 +66,7 @@ async function mountComponent({
   const services = {
     ...unifiedHistogramServicesMock,
     capabilities: {
-      dashboard: {
+      dashboard_v2: {
         showWriteControls: hasDashboardPermissions ?? true,
       },
     } as unknown as Capabilities,

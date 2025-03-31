@@ -49,29 +49,14 @@ Object {
           "filter": Array [
             Object {
               "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
-                  Object {
-                    "match_phrase": Object {
-                      "my.field": "value",
-                    },
-                  },
-                ],
-              },
-            },
-            Object {
-              "bool": Object {
-                "minimum_should_match": 1,
-                "should": Array [
+                "filter": Array [
                   Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
-                          "range": Object {
-                            "foo": Object {
-                              "gte": "12",
-                            },
+                          "match_phrase": Object {
+                            "my.field": "value",
                           },
                         },
                       ],
@@ -82,10 +67,31 @@ Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
-                          "range": Object {
-                            "bar": Object {
-                              "lte": "100",
-                            },
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "range": Object {
+                                  "foo": Object {
+                                    "gte": "12",
+                                  },
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        Object {
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "range": Object {
+                                  "bar": Object {
+                                    "lte": "100",
+                                  },
+                                },
+                              },
+                            ],
                           },
                         },
                       ],
@@ -95,6 +101,9 @@ Object {
               },
             },
           ],
+          "must": Array [],
+          "must_not": Array [],
+          "should": Array [],
         },
       },
     ],

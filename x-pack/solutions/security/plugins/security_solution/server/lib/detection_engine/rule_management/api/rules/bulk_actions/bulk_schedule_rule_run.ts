@@ -8,7 +8,6 @@
 import type { BulkOperationError, RulesClient } from '@kbn/alerting-plugin/server';
 import type { ScheduleBackfillParams } from '@kbn/alerting-plugin/server/application/backfill/methods/schedule/types';
 import type { BulkManualRuleRun } from '../../../../../../../common/api/detection_engine';
-import type { ExperimentalFeatures } from '../../../../../../../common';
 import type { PromisePoolError } from '../../../../../../utils/promise_pool';
 import type { MlAuthz } from '../../../../../machine_learning/authz';
 import type { RuleAlertType } from '../../../../rule_schema';
@@ -20,7 +19,6 @@ interface BulkScheduleBackfillArgs {
   rulesClient: RulesClient;
   mlAuthz: MlAuthz;
   runPayload: BulkManualRuleRun['run'];
-  experimentalFeatures: ExperimentalFeatures;
 }
 
 interface BulkScheduleBackfillOutcome {
@@ -34,7 +32,6 @@ export const bulkScheduleBackfill = async ({
   rulesClient,
   mlAuthz,
   runPayload,
-  experimentalFeatures,
 }: BulkScheduleBackfillArgs): Promise<BulkScheduleBackfillOutcome> => {
   const errors: Array<PromisePoolError<RuleAlertType, Error> | BulkOperationError> = [];
 
@@ -46,7 +43,6 @@ export const bulkScheduleBackfill = async ({
         await validateBulkScheduleBackfill({
           mlAuthz,
           rule,
-          experimentalFeatures,
         });
         validatedRules.push(rule);
       } catch (error) {

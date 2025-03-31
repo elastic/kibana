@@ -7,28 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VisGroups } from '@kbn/visualizations-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import {
-  ADD_PANEL_ANNOTATION_GROUP,
-  ADD_PANEL_LEGACY_GROUP,
-  ADD_PANEL_OTHER_GROUP,
-  ADD_PANEL_VISUALIZATION_GROUP,
-} from '@kbn/embeddable-plugin/public';
+import { ADD_PANEL_OTHER_GROUP } from '@kbn/embeddable-plugin/public';
 import type { TracksOverlays } from '@kbn/presentation-containers';
 import { PresentableGroup } from '@kbn/ui-actions-browser/src/types';
 import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 import type { HasAppContext } from '@kbn/presentation-publishing';
-import { uiActionsService, visualizationsService } from '../../../services/kibana_services';
-import { navigateToVisEditor } from './navigate_to_vis_editor';
+import { uiActionsService } from '../../../services/kibana_services';
 import type { MenuItem, MenuItemGroup } from './types';
-
-const VIS_GROUP_TO_ADD_PANEL_GROUP: Record<VisGroups, undefined | PresentableGroup> = {
-  [VisGroups.AGGBASED]: undefined,
-  [VisGroups.PROMOTED]: ADD_PANEL_VISUALIZATION_GROUP,
-  [VisGroups.TOOLS]: ADD_PANEL_ANNOTATION_GROUP,
-  [VisGroups.LEGACY]: ADD_PANEL_LEGACY_GROUP,
-};
 
 export async function getMenuItemGroups(
   api: HasAppContext & TracksOverlays
@@ -51,45 +37,6 @@ export async function getMenuItemGroups(
     groups[group.id].items.push(item);
   }
 
-  // add menu items from vis types
-  visualizationsService.all().forEach((visType) => {
-    if (visType.disableCreate) return;
-
-    const group = VIS_GROUP_TO_ADD_PANEL_GROUP[visType.group];
-    if (!group) return;
-    pushItem(group, {
-      id: visType.name,
-      name: visType.titleInWizard || visType.title,
-      isDeprecated: visType.isDeprecated,
-      icon: visType.icon ?? 'empty',
-      onClick: () => {
-        api.clearOverlays();
-        navigateToVisEditor(api, visType);
-      },
-      'data-test-subj': `visType-${visType.name}`,
-      description: visType.description,
-      order: visType.order,
-    });
-  });
-
-  // add menu items from vis alias
-  visualizationsService.getAliases().forEach((visTypeAlias) => {
-    if (visTypeAlias.disableCreate) return;
-    pushItem(ADD_PANEL_VISUALIZATION_GROUP, {
-      id: visTypeAlias.name,
-      name: visTypeAlias.title,
-      icon: visTypeAlias.icon ?? 'empty',
-      onClick: () => {
-        api.clearOverlays();
-        navigateToVisEditor(api, visTypeAlias);
-      },
-      'data-test-subj': `visType-${visTypeAlias.name}`,
-      description: visTypeAlias.description,
-      order: visTypeAlias.order ?? 0,
-    });
-  });
-
-  // add menu items from "add panel" actions
   (
     await uiActionsService.getTriggerCompatibleActions(ADD_PANEL_TRIGGER, { embeddable: api })
   ).forEach((action) => {

@@ -39,9 +39,7 @@ export const listModules = async (listFlag: string, log: ToolingLog) => {
         ? module.directory
         : join(BASE_FOLDER, module.directory);
 
-      if (module.isDevOnly()) {
-        devOnly.push(module);
-      } else if (
+      if (
         directory.includes(`/${KIBANA_FOLDER}/test/`) ||
         directory.includes(`/${KIBANA_FOLDER}/x-pack/test/`)
       ) {

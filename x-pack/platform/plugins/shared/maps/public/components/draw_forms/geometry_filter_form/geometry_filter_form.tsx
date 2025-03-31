@@ -6,7 +6,7 @@
  */
 
 import React, { ChangeEvent, Component } from 'react';
-import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { GeoShapeRelation } from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiForm,
   EuiFormRow,

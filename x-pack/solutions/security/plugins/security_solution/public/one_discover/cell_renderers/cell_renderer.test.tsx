@@ -69,7 +69,6 @@ describe('getCellRendererForGivenRecord', () => {
     expect(getByTestId('mocked-default-cell-render')).toBeVisible();
     expect(mockDefaultCellRenderer).toHaveBeenCalledWith(
       {
-        isDraggable: false,
         isTimeline: false,
         isDetails: false,
         data: [

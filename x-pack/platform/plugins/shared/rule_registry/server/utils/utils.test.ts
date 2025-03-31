@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { errorAggregator } from './utils';
-import { BulkResponseErrorAggregation } from './utils';
+import type { BulkResponseErrorAggregation } from './utils';
 
 const sampleBulkErrorItem = (
   {

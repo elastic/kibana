@@ -5,54 +5,52 @@
  * 2.0.
  */
 
+import { ServerSentEventError } from '@kbn/sse-utils';
 import { InferenceTaskEventBase, InferenceTaskEventType } from './inference_task';
 
 /**
  * Enum for generic inference error codes.
  */
 export enum InferenceTaskErrorCode {
+  providerError = 'providerError',
   internalError = 'internalError',
   requestError = 'requestError',
   abortedError = 'requestAborted',
 }
 
-/**
- * Base class for all inference API errors.
- */
-export class InferenceTaskError<
+const InferenceTaskError = ServerSentEventError;
+type InferenceTaskError<
   TCode extends string,
   TMeta extends Record<string, any> | undefined
-> extends Error {
-  constructor(public code: TCode, message: string, public meta: TMeta) {
-    super(message);
-  }
+> = ServerSentEventError<TCode, TMeta>;
 
-  toJSON(): InferenceTaskErrorEvent {
-    return {
-      type: InferenceTaskEventType.error,
-      error: {
-        code: this.code,
-        message: this.message,
-        meta: this.meta,
-      },
+export type InferenceTaskErrorEvent = InferenceTaskEventBase<
+  InferenceTaskEventType.error,
+  {
+    error: {
+      code: string;
+      message: string;
+      meta?: Record<string, any>;
     };
   }
-}
-
-export type InferenceTaskErrorEvent = InferenceTaskEventBase<InferenceTaskEventType.error> & {
-  error: {
-    code: string;
-    message: string;
-    meta?: Record<string, any>;
-  };
-};
-
+>;
 /**
  * Inference error thrown when an unexpected internal error occurs while handling the request.
  */
 export type InferenceTaskInternalError = InferenceTaskError<
   InferenceTaskErrorCode.internalError,
   Record<string, any>
+>;
+
+/**
+ * Inference error thrown when calling the provider through its connector returned an error.
+ *
+ * It includes error responses returned from the provider,
+ * and any potential errors related to connectivity issue.
+ */
+export type InferenceTaskProviderError = InferenceTaskError<
+  InferenceTaskErrorCode.providerError,
+  { status?: number }
 >;
 
 /**
@@ -83,6 +81,13 @@ export function createInferenceInternalError(
   meta?: Record<string, any>
 ): InferenceTaskInternalError {
   return new InferenceTaskError(InferenceTaskErrorCode.internalError, message, meta ?? {});
+}
+
+export function createInferenceProviderError(
+  message = 'An internal error occurred',
+  meta?: { status?: number }
+): InferenceTaskProviderError {
+  return new InferenceTaskError(InferenceTaskErrorCode.providerError, message, meta ?? {});
 }
 
 export function createInferenceRequestError(
@@ -129,3 +134,12 @@ export function isInferenceRequestError(error: unknown): error is InferenceTaskR
 export function isInferenceRequestAbortedError(error: unknown): error is InferenceTaskAbortedError {
   return isInferenceError(error) && error.code === InferenceTaskErrorCode.abortedError;
 }
+
+/**
+ * Check if the given error is an {@link InferenceTaskProviderError}
+ */
+export function isInferenceProviderError(error: unknown): error is InferenceTaskProviderError {
+  return isInferenceError(error) && error.code === InferenceTaskErrorCode.providerError;
+}
+
+export { InferenceTaskError };

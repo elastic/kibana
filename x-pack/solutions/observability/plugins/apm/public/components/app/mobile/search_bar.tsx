@@ -18,6 +18,7 @@ interface Props {
   showUnifiedSearchBar?: boolean;
   showTimeComparison?: boolean;
   showTransactionTypeSelector?: boolean;
+  showQueryInput?: boolean;
   showMobileFilters?: boolean;
   searchBarPlaceholder?: string;
 }
@@ -27,6 +28,7 @@ export function MobileSearchBar({
   showUnifiedSearchBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  showQueryInput = true,
   showMobileFilters = false,
   searchBarPlaceholder,
 }: Props) {
@@ -49,7 +51,10 @@ export function MobileSearchBar({
         >
           {showUnifiedSearchBar && (
             <EuiFlexItem>
-              <UnifiedSearchBar placeholder={searchBarPlaceholder} />
+              <UnifiedSearchBar
+                placeholder={searchBarPlaceholder}
+                showQueryInput={showQueryInput}
+              />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

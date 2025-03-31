@@ -31,7 +31,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
   const OBSERVABILITY_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/`;
-  const APM_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/apm/`;
   const SECURITY_SOLUTION_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/`;
   const ENTERPRISE_SEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/enterprise-search/${DOC_LINK_VERSION}/`;
   const ESRE_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/esre/${DOC_LINK_VERSION}/`;
@@ -59,22 +58,22 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       customLinks: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-create-custom-links.html`
         : `${KIBANA_DOCS}custom-links.html`,
-      droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
-      upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
-      metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
-      overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
+      droppedTransactionSpans: `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-data-model-dropped-spans`,
+      upgrading: `${OBSERVABILITY_DOCS}apm-upgrade.html`,
+      metaData: `${OBSERVABILITY_DOCS}apm-data-model-metadata.html`,
+      overview: `${OBSERVABILITY_DOCS}apm.html`,
       tailSamplingPolicies: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
         : `${OBSERVABILITY_DOCS}configure-tail-based-sampling.html`,
-      elasticAgent: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade-to-apm-integration.html`,
+      elasticAgent: `${OBSERVABILITY_DOCS}/apm-upgrade-to-apm-integration.html`,
       storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
       spanCompression: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-compress-spans.html`
-        : `${OBSERVABILITY_DOCS}span-compression.html`,
+        : `${OBSERVABILITY_DOCS}apm-data-model-spans.html#apm-spans-span-compression`,
       transactionSampling: isServerless
         ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
         : `${OBSERVABILITY_DOCS}sampling.html`,
-      indexLifecycleManagement: `${APM_DOCS}guide/${DOC_LINK_VERSION}/ilm-how-to.html`,
+      indexLifecycleManagement: `${OBSERVABILITY_DOCS}apm-ilm-how-to.html`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,
@@ -84,7 +83,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexManagement: `${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-configure-index-management.html`,
     },
     console: {
-      guide: `${KIBANA_DOCS}console-kibana.html`,
+      guide: isServerless
+        ? `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`
+        : `${KIBANA_DOCS}console-kibana.html`,
       serverlessGuide: `${SERVERLESS_DOCS}devtools-run-api-requests-in-the-console.html`,
     },
     dashboard: {
@@ -108,6 +109,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
       elasticsearchModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-elasticsearch.html`,
       elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
+      kafkaOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/kafka-output.html`,
       startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
       exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
       suricataModule: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-module-suricata.html`,
@@ -171,6 +173,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
       indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
       inferenceApiCreate: `${ELASTICSEARCH_DOCS}put-inference-api.html`,
+      inferenceApisConfigureChunking: `${ELASTICSEARCH_DOCS}inference-apis.html#infer-chunking-config`,
       ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
       knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
@@ -197,6 +200,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
+      upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
     metricbeat: {
@@ -263,7 +267,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mapping: `${ELASTICSEARCH_DOCS}runtime-mapping-fields.html`,
     },
     scriptedFields: {
-      scriptFields: `${ELASTICSEARCH_DOCS}search-request-script-fields.html`,
+      scriptFields: `${ELASTICSEARCH_DOCS}search-fields.html#script-fields`,
       scriptAggs: `${ELASTICSEARCH_DOCS}search-aggregations.html`,
       painless: `${ELASTICSEARCH_DOCS}modules-scripting-painless.html`,
       painlessApi: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/painless/${DOC_LINK_VERSION}/painless-api-reference.html`,
@@ -298,7 +302,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+      indexBlocks: `${ELASTICSEARCH_DOCS}index-modules-blocks.html#index-block-settings`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+      unfreezeApi: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
@@ -414,6 +420,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     server: {
       protocol: `${KIBANA_DOCS}settings.html#server-protocol`,
     },
+    logging: {
+      enableDeprecationHttpDebugLogs: `${KIBANA_DOCS}logging-settings.html#enable-http-debug-logs`,
+    },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
       avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-security-av-comparatives-business-test`,
@@ -440,6 +449,12 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html`,
+      updatePrebuiltDetectionRules: isServerless
+        ? `${SERVERLESS_DOCS}security-prebuilt-rules-management.html#update-prebuilt-rules`
+        : `${SECURITY_SOLUTION_DOCS}prebuilt-rules-management.html#update-prebuilt-rules`,
+      prebuiltRuleCustomizationPromoBlog: isServerless
+        ? '' // URL for Serverless to be added later, once the blog post is published. Issue: https://github.com/elastic/kibana/issues/209000
+        : `${ELASTIC_WEBSITE_URL}blog/security-prebuilt-rules-editing`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -451,7 +466,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
-      legacyBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      siemMigrations: `${SECURITY_SOLUTION_DOCS}siem-migration.html`,
+      llmPerformanceMatrix: `${SECURITY_SOLUTION_DOCS}llm-performance-matrix.html`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -529,6 +546,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}transforms.html`
         : `${ELASTICSEARCH_DOCS}transforms.html`,
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
+      overview: `${ELASTICSEARCH_DOCS}transform-overview.html`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
@@ -673,6 +691,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
       deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
+      enableElasticSearchSecurityFeatures: `${ELASTICSEARCH_DOCS}security-minimal-setup.html#_enable_elasticsearch_security_features`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
@@ -836,7 +855,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
       elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
       policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
-      remoteESOoutput: `${FLEET_DOCS}monitor-elastic-agent.html#external-elasticsearch-monitoring`,
+      remoteESOoutput: `${FLEET_DOCS}remote-elasticsearch-output.html`,
       performancePresets: `${FLEET_DOCS}es-output-settings.html#es-output-settings-performance-tuning-settings`,
       scalingKubernetesResourcesAndLimits: `${FLEET_DOCS}scaling-on-kubernetes.html#_specifying_resources_and_limits_in_agent_manifests`,
       roleAndPrivileges: `${FLEET_DOCS}fleet-roles-and-privileges.html`,

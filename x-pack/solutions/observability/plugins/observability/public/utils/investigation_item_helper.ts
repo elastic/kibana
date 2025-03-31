@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Group } from '@kbn/observability-alerting-rule-utils';
+import { Group } from '@kbn/alerting-rule-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import {
   CustomThresholdExpressionMetric,

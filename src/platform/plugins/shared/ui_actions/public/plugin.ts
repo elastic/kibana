@@ -21,9 +21,11 @@ import { setAnalytics, setI18n, setNotifications, setTheme, setUserProfile } fro
 export type UiActionsPublicSetup = Pick<
   UiActionsService,
   | 'addTriggerAction'
+  | 'addTriggerActionAsync'
   | 'attachAction'
   | 'detachAction'
   | 'registerAction'
+  | 'registerActionAsync'
   | 'registerTrigger'
   | 'unregisterAction'
 >;

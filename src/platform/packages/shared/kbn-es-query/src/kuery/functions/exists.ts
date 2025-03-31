@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewFieldBase, DataViewBase, KueryQueryOptions } from '../../..';
 import type { KqlFunctionNode, KqlLiteralNode } from '../node_types';
 import type { KqlContext } from '../types';

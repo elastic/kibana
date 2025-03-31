@@ -8,6 +8,7 @@
 import { sha256 } from 'js-sha256';
 import type { AuthenticatedUser, IScopedClusterClient, Logger } from '@kbn/core/server';
 import { retryTransientEsErrors } from '@kbn/index-adapter';
+import { LOOKUPS_INDEX_PREFIX } from '../../../../../common/siem_migrations/constants';
 
 export type LookupData = object[];
 
@@ -15,11 +16,12 @@ export class RuleMigrationsDataLookupsClient {
   constructor(
     protected currentUser: AuthenticatedUser,
     protected esScopedClient: IScopedClusterClient,
-    protected logger: Logger
+    protected logger: Logger,
+    protected spaceId: string
   ) {}
 
   async create(lookupName: string, data: LookupData): Promise<string> {
-    const indexName = `lookup_${lookupName}`;
+    const indexName = `${LOOKUPS_INDEX_PREFIX}${this.spaceId}_${lookupName}`;
     try {
       await this.executeEs(() =>
         this.esScopedClient.asCurrentUser.indices.create({

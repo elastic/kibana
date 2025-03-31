@@ -33,6 +33,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // API Keys is enabled at the top level
         'xpack.security.enabled=true',
         'http.host=0.0.0.0',
+        'xpack.ml.enabled=false',
       ],
     },
 

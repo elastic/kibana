@@ -12,6 +12,7 @@ import * as i18n from './translations';
 export const UnknownMigration: React.FC = React.memo(() => {
   return (
     <EuiFlexGroup
+      data-test-subj="siemMigrationsUnknown"
       alignItems="center"
       gutterSize="s"
       responsive={false}

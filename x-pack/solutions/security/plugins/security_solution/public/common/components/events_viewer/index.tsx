@@ -12,6 +12,7 @@ import {
   DataTableComponent,
   defaultHeaders,
   getEventIdToDataMapping,
+  getTableByIdSelector,
 } from '@kbn/securitysolution-data-table';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
@@ -43,7 +44,6 @@ import type { RowRenderer, SortColumnTimeline as Sort } from '../../../../common
 import { InputsModelId } from '../../store/inputs/constants';
 import type { State } from '../../store';
 import { inputsActions } from '../../store/actions';
-import { eventsViewerSelector } from './selectors';
 import type { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
@@ -65,6 +65,7 @@ import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
 import { StatefulEventContext } from './stateful_event_context';
 import { defaultUnit } from '../toolbar/unit';
+import { globalFiltersQuerySelector, globalQuerySelector } from '../../store/inputs/selectors';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
 
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
@@ -114,35 +115,32 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   const dispatch = useDispatch();
   const theme: EuiTheme = useContext(ThemeContext);
   const tableContext = useMemo(() => ({ tableId }), [tableId]);
-
+  const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
+  const selectGlobalQuerySelector = useMemo(() => globalQuerySelector(), []);
+  const filters = useSelector(selectGlobalFiltersQuerySelector);
+  const query = useSelector(selectGlobalQuerySelector);
+  const selectTableById = useMemo(() => getTableByIdSelector(), []);
   const {
-    filters,
-    query,
-    dataTable: {
-      columns,
-      defaultColumns,
-      deletedEventIds,
-      graphEventId, // If truthy, the graph viewer (Resolver) is showing
-      itemsPerPage,
-      itemsPerPageOptions,
-      sessionViewConfig,
-      showCheckboxes,
-      sort,
-      queryFields,
-      selectAll,
-      selectedEventIds,
-      isSelectAllChecked,
-      loadingEventIds,
-      title,
-    } = defaultModel,
-  } = useSelector((state: State) => eventsViewerSelector(state, tableId));
+    columns,
+    defaultColumns,
+    deletedEventIds,
+    graphEventId, // If truthy, the graph viewer (Resolver) is showing
+    itemsPerPage,
+    itemsPerPageOptions,
+    sessionViewConfig,
+    showCheckboxes,
+    sort,
+    queryFields,
+    selectAll,
+    selectedEventIds,
+    isSelectAllChecked,
+    loadingEventIds,
+    title,
+  } = useSelector((state: State) => selectTableById(state, tableId) ?? defaultModel);
+
   const inspectModalTitle = useMemo(() => <span data-test-subj="title">{title}</span>, [title]);
 
-  const {
-    uiSettings,
-    data,
-    triggersActionsUi: { getFieldBrowser },
-  } = useKibana().services;
+  const { uiSettings, data } = useKibana().services;
 
   const {
     browserFields,
@@ -555,7 +553,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     unitCountText={unitCountText}
                     pagination={pagination}
                     totalItems={totalCountMinusDeleted}
-                    getFieldBrowser={getFieldBrowser}
                     getFieldSpec={getFieldSpec}
                     cellActionsTriggerId={cellActionsTriggerId}
                   />

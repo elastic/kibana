@@ -8,14 +8,16 @@
  */
 
 import { Builder } from '../../../builder';
-import { ESQLAstQueryExpression, ESQLSource } from '../../../types';
+import { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
 import { Visitor } from '../../../visitor';
 import * as generic from '../../generic';
 import * as util from '../../util';
 import type { Predicate } from '../../types';
 
-export const list = (ast: ESQLAstQueryExpression): IterableIterator<ESQLSource> => {
-  return new Visitor()
+export const list = (
+  ast: ESQLAstQueryExpression | ESQLCommand<'from'>
+): IterableIterator<ESQLSource> => {
+  const visitor = new Visitor()
     .on('visitFromCommand', function* (ctx): IterableIterator<ESQLSource> {
       for (const argument of ctx.arguments()) {
         if (argument.type === 'source') {
@@ -28,8 +30,13 @@ export const list = (ast: ESQLAstQueryExpression): IterableIterator<ESQLSource> 
       for (const command of ctx.visitCommands()) {
         yield* command;
       }
-    })
-    .visitQuery(ast);
+    });
+
+  if (ast.type === 'command') {
+    return visitor.visitCommand(ast);
+  } else {
+    return visitor.visitQuery(ast);
+  }
 };
 
 export const findByPredicate = (

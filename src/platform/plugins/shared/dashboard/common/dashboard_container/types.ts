@@ -7,26 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  PanelState,
-  EmbeddableInput,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/common';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { Reference } from '@kbn/content-management-utils';
-import { RefreshInterval } from '@kbn/data-plugin/common';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import type { ViewMode } from '@kbn/presentation-publishing';
 
-import type { DashboardOptions, GridData } from '../../server/content_management';
+import type { GridData } from '../../server/content_management';
 
 export interface DashboardPanelMap {
   [key: string]: DashboardPanelState;
 }
 
-export interface DashboardPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
-> extends PanelState<TEmbeddableInput> {
+export interface DashboardPanelState<PanelState = object> {
+  type: string;
+  explicitInput: PanelState;
   readonly gridData: GridData;
   panelRefName?: string;
 
@@ -40,33 +31,4 @@ export interface DashboardPanelState<
    * React embeddables are serialized and may pass references that are later used in factory's deserialize method.
    */
   references?: Reference[];
-}
-
-export type DashboardContainerByReferenceInput = SavedObjectEmbeddableInput;
-
-export interface DashboardContainerInput extends Omit<EmbeddableInput, 'viewMode'> {
-  // filter context to be passed to children
-  query: Query;
-  filters: Filter[];
-  timeRestore: boolean;
-  timeRange?: TimeRange;
-  timeslice?: [number, number];
-  refreshInterval?: RefreshInterval;
-
-  // dashboard meta info
-  title: string;
-  tags: string[];
-  viewMode: ViewMode;
-  description?: string;
-  executionContext: KibanaExecutionContext;
-
-  // dashboard options: TODO, build a new system to avoid all shared state appearing here. See https://github.com/elastic/kibana/issues/144532 for more information.
-  hidePanelTitles: DashboardOptions['hidePanelTitles'];
-  syncTooltips: DashboardOptions['syncTooltips'];
-  useMargins: DashboardOptions['useMargins'];
-  syncColors: DashboardOptions['syncColors'];
-  syncCursor: DashboardOptions['syncCursor'];
-
-  // dashboard contents
-  panels: DashboardPanelMap;
 }

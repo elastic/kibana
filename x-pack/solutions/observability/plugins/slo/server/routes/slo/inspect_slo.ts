@@ -6,7 +6,7 @@
  */
 
 import { createSLOParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
+import { SavedObjectsClient } from '@kbn/core/server';
 import {
   CreateSLO,
   DefaultSummaryTransformManager,
@@ -40,6 +40,10 @@ export const inspectSLORoute = createSloServerRoute({
     const esClient = core.elasticsearch.client.asCurrentUser;
     const username = core.security.authc.getCurrentUser()?.username!;
     const soClient = core.savedObjects.client;
+    const [coreStart] = await corePlugins.getStartServices();
+    const internalSoClient = new SavedObjectsClient(
+      coreStart.savedObjects.createInternalRepository()
+    );
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const dataViewsService = await dataViews.dataViewsServiceFactory(soClient, esClient);
 
@@ -63,6 +67,7 @@ export const inspectSLORoute = createSloServerRoute({
       esClient,
       scopedClusterClient,
       repository,
+      internalSoClient,
       transformManager,
       summaryTransformManager,
       logger,
@@ -71,6 +76,6 @@ export const inspectSLORoute = createSloServerRoute({
       username
     );
 
-    return await executeWithErrorHandler(() => createSLO.inspect(params.body));
+    return await createSLO.inspect(params.body);
   },
 });

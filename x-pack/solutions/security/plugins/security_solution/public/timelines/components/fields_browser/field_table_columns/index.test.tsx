@@ -12,7 +12,7 @@ import { useFieldTableColumns } from '.';
 
 import { TestProviders } from '../../../../common/mock';
 import { EuiInMemoryTable } from '@elastic/eui';
-import type { BrowserFieldItem } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { BrowserFieldItem } from '@kbn/response-ops-alerts-fields-browser/types';
 
 const mockOnHide = jest.fn();
 const mockOpenFieldEditor = jest.fn();

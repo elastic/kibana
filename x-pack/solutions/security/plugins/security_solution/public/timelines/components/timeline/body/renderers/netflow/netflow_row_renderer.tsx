@@ -89,10 +89,11 @@ export const netflowRowRenderer: RowRenderer = {
   isInstance: (ecs) =>
     eventCategoryMatches(get(EVENT_CATEGORY_FIELD, ecs)) ||
     eventActionMatches(get(EVENT_ACTION_FIELD, ecs)),
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
       <Details>
         <Netflow
+          scopeId={scopeId}
           contextId={`netflow-row-renderer-render-row-${scopeId}-${data._id}`}
           destinationBytes={asArrayIfExists(get(DESTINATION_BYTES_FIELD_NAME, data))}
           destinationGeoContinentName={asArrayIfExists(
@@ -115,7 +116,6 @@ export const netflowRowRenderer: RowRenderer = {
           eventId={get(ID_FIELD_NAME, data)}
           eventEnd={asArrayIfExists(get(EVENT_END_FIELD_NAME, data))}
           eventStart={asArrayIfExists(get(EVENT_START_FIELD_NAME, data))}
-          isDraggable={isDraggable}
           networkBytes={asArrayIfExists(get(NETWORK_BYTES_FIELD_NAME, data))}
           networkCommunityId={asArrayIfExists(get(NETWORK_COMMUNITY_ID_FIELD_NAME, data))}
           networkDirection={asArrayIfExists(get(NETWORK_DIRECTION_FIELD_NAME, data))}

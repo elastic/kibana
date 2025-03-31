@@ -15,5 +15,5 @@ import { createTestConfig } from '../../common/config';
 
 export default createTestConfig('security_and_spaces - basic license', {
   license: 'basic',
-  testFiles: [require.resolve('./apis')],
+  testFiles: [require.resolve('./apis/index_basic')],
 });

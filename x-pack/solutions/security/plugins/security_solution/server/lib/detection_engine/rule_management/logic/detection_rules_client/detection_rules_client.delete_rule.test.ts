@@ -12,6 +12,8 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 
@@ -30,7 +32,8 @@ describe('DetectionRulesClient.deleteRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
-      isRuleCustomizationEnabled: true,
+      license: licenseMock.createLicenseMock(),
+      productFeaturesService: createProductFeaturesServiceMock(),
     });
   });
 

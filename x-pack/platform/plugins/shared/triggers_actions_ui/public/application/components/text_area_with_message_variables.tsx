@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { AddMessageVariables } from '@kbn/alerts-ui-shared';
+import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
 import { templateActionVariable } from '../lib';
@@ -23,6 +23,7 @@ interface Props {
   label: string;
   helpText?: string;
   errors?: string[];
+  isOptionalField?: boolean;
 }
 
 const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
@@ -35,6 +36,7 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
   label,
   errors,
   helpText,
+  isOptionalField = false,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
@@ -61,7 +63,8 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
-        <AddMessageVariables
+        <AddMessageVariablesOptional
+          isOptionalField={isOptionalField}
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}

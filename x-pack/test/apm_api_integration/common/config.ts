@@ -16,6 +16,7 @@ import {
   LogLevel,
 } from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
@@ -116,6 +117,7 @@ export function createTestConfig(
     const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve('../tests')],
       servers,
       servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],

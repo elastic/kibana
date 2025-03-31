@@ -8,14 +8,14 @@
 import Boom from '@hapi/boom';
 
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
-import { RulesClientContext } from '../../../../rules_client';
+import type { RulesClientContext } from '../../../../rules_client';
 
 import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
-import { FillGapByIdParams } from './types';
+import type { FillGapByIdParams } from './types';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRule } from '../get/get_rule';
-import { SanitizedRuleWithLegacyId } from '../../../../types';
+import type { SanitizedRuleWithLegacyId } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 export async function fillGapById(context: RulesClientContext, params: FillGapByIdParams) {
@@ -81,7 +81,11 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
       })
     );
 
-    return scheduleBackfill(context, allGapsToSchedule);
+    const scheduleBackfillResponse = await scheduleBackfill(context, allGapsToSchedule);
+
+    await eventLogClient.refreshIndex();
+
+    return scheduleBackfillResponse;
   } catch (err) {
     const errorMessage = `Failed to find gap and schedule manual rule run for ruleId ${params.ruleId}`;
     context.logger.error(`${errorMessage} - ${err}`);

@@ -35,7 +35,7 @@ For an override related error the `expect(...)` will usually fail with typical e
 See the image below for an example of a test failure due to the license type being overridden:
 ![image][./fips_test_failure_license_override_example.png]
 
-The FIPS overrides can be found in the [fips_overrides.ts](https://github.com/elastic/kibana/blob/542a56b4829643d05c47bcc47485dd9baaacea32/packages/kbn-test/src/functional_tests/lib/fips_overrides.ts) file.
+The FIPS overrides can be found in the [fips_overrides.ts](https://github.com/elastic/kibana/blob/542a56b4829643d05c47bcc47485dd9baaacea32/src/platform/packages/shared/kbn-test/src/functional_tests/lib/fips_overrides.ts) file.
 
 For a FIPS/OpenSSL error, the error will be more cryptic/the test will fail to run, usually something like "digital envelope routines::unsupported". Generally these are related to Node.js's crypto module.
 

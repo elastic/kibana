@@ -17,6 +17,7 @@ import {
 } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { OperationDefinition } from '.';
 import {
   getFormatFromPreviousColumn,
@@ -195,6 +196,10 @@ export const percentileOperation: OperationDefinition<
       ),
       sourceField: field.name,
     };
+  },
+  toESQL: (column, columnId) => {
+    if (column.timeShift) return;
+    return `PERCENTILE(${sanitazeESQLInput(column.sourceField)}, ${column.params.percentile})`;
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
     return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentile']>(

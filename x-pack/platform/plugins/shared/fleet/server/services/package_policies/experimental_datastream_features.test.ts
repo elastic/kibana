@@ -271,7 +271,11 @@ describe('experimental_datastream_features', () => {
         expect.objectContaining({
           body: expect.objectContaining({
             template: expect.objectContaining({
-              mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
+              settings: expect.objectContaining({
+                index: expect.objectContaining({
+                  mapping: expect.objectContaining({ source: { mode: 'synthetic' } }),
+                }),
+              }),
             }),
           }),
           _meta: { has_experimental_data_stream_indexing_features: true },
@@ -483,7 +487,11 @@ describe('experimental_datastream_features', () => {
           expect.objectContaining({
             body: expect.objectContaining({
               template: expect.objectContaining({
-                mappings: expect.objectContaining({ _source: { mode: 'synthetic' } }),
+                settings: expect.objectContaining({
+                  index: expect.objectContaining({
+                    mapping: expect.objectContaining({ source: { mode: 'synthetic' } }),
+                  }),
+                }),
               }),
             }),
             _meta: { has_experimental_data_stream_indexing_features: true },

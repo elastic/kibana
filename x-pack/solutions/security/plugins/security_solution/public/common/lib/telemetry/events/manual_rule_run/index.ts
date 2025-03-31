@@ -78,8 +78,64 @@ export const manualRuleRunCancelJobEvent: ManualRuleRunTelemetryEvent = {
   },
 };
 
+export const fillGapEvent: ManualRuleRunTelemetryEvent = {
+  eventType: ManualRuleRunEventTypes.FillGap,
+  schema: {
+    rangeInMs: {
+      type: 'integer',
+      _meta: {
+        description: 'The time range (expressed in milliseconds) of the gap',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const fillRemainingGapEvent: ManualRuleRunTelemetryEvent = {
+  eventType: ManualRuleRunEventTypes.FillRemainingGap,
+  schema: {
+    rangeInMs: {
+      type: 'integer',
+      _meta: {
+        description: 'The time range (expressed in milliseconds) of the gap',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const filterGapsEvent: ManualRuleRunTelemetryEvent = {
+  eventType: ManualRuleRunEventTypes.FilterGaps,
+  schema: {
+    status: {
+      type: 'keyword',
+      _meta: {
+        description: 'The statuses of the gaps for filtering, separated by commas',
+        optional: false,
+      },
+    },
+  },
+};
+
+export const showOnlyRulesWithGapsEvent: ManualRuleRunTelemetryEvent = {
+  eventType: ManualRuleRunEventTypes.ShowOnlyRulesWithGaps,
+  schema: {
+    dateRange: {
+      type: 'keyword',
+      _meta: {
+        description: 'The date range of the gaps to show all rules with gaps',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const manualRuleRunTelemetryEvents = [
   manualRuleRunCancelJobEvent,
   manualRuleRunExecuteEvent,
   manualRuleRunOpenModalEvent,
+  fillGapEvent,
+  fillRemainingGapEvent,
+  filterGapsEvent,
+  showOnlyRulesWithGapsEvent,
 ];

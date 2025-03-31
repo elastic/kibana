@@ -8,14 +8,15 @@
 import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 import { omit, padStart } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
-import { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { estypes } from '@elastic/elasticsearch';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { nanosToMillis } from '@kbn/event-log-plugin/server';
+import type { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios, Superuser, SuperuserAtSpace1 } from '../../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,
   getTestRuleData,
@@ -537,34 +538,32 @@ instanceStateValue: true
                   TaskRunning<TaskRunningStage.RAN, ConcreteTaskInstance>
                 >({
                   index: '.kibana_task_manager',
-                  body: {
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              'task.status': 'idle',
+                  query: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            'task.status': 'idle',
+                          },
+                        },
+                        {
+                          term: {
+                            'task.attempts': 1,
+                          },
+                        },
+                        {
+                          term: {
+                            'task.taskType': 'actions:test.rate-limit',
+                          },
+                        },
+                        {
+                          range: {
+                            'task.scheduledAt': {
+                              gte: testStart,
                             },
                           },
-                          {
-                            term: {
-                              'task.attempts': 1,
-                            },
-                          },
-                          {
-                            term: {
-                              'task.taskType': 'actions:test.rate-limit',
-                            },
-                          },
-                          {
-                            range: {
-                              'task.scheduledAt': {
-                                gte: testStart,
-                              },
-                            },
-                          },
-                        ],
-                      },
+                        },
+                      ],
                     },
                   },
                 });
@@ -1500,6 +1499,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             severity_improving: false,
                             rule: {
                               parameters: {
@@ -1544,6 +1544,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             severity_improving: false,
                             rule: {
                               parameters: {
@@ -1604,6 +1605,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             previous_action_group: 'default',
                             rule: {
                               parameters: {
@@ -1648,6 +1650,7 @@ instanceStateValue: true
                             action_group: 'default',
                             flapping_history: expectExpect.any(Array),
                             maintenance_window_ids: [],
+                            pending_recovered_count: 0,
                             previous_action_group: 'default',
                             rule: {
                               parameters: {
@@ -1756,6 +1759,7 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      pending_recovered_count: 0,
                       severity_improving: false,
                       rule: {
                         parameters: {
@@ -1800,6 +1804,7 @@ instanceStateValue: true
                       action_group: 'default',
                       flapping_history: expectExpect.any(Array),
                       maintenance_window_ids: [],
+                      pending_recovered_count: 0,
                       severity_improving: false,
                       rule: {
                         parameters: {

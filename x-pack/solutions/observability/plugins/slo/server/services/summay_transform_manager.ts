@@ -32,7 +32,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         }
       );
     } catch (err) {
-      this.logger.error(`Cannot create summary transform for SLO [${slo.id}]. ${err}`);
+      this.logger.debug(`Cannot create summary transform for SLO [${slo.id}]. ${err}`);
       if (err.meta?.body?.error?.type === 'security_exception') {
         throw new SecurityException(err.meta.body.error.reason);
       }
@@ -57,7 +57,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot preview SLO summary transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot preview SLO summary transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -75,7 +75,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         }
       );
     } catch (err) {
-      this.logger.error(`Cannot start SLO summary transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot start SLO summary transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -91,7 +91,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot stop SLO summary transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot stop SLO summary transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -107,7 +107,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(`Cannot delete SLO summary transform [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot delete SLO summary transform [${transformId}]. ${err}`);
       throw err;
     }
   }
@@ -124,7 +124,7 @@ export class DefaultSummaryTransformManager implements TransformManager {
       );
       return response?.transforms[0]?._meta?.version;
     } catch (err) {
-      this.logger.error(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
+      this.logger.debug(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
       throw err;
     }
   }

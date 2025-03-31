@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OnlySearchSourceRuleParams } from '../types';
+import type { OnlySearchSourceRuleParams } from '../types';
 import {
   createSearchSourceMock,
   searchSourceInstanceMock,
@@ -15,7 +15,6 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   updateSearchSource,
   generateLink,
-  updateFilterReferences,
   getSmallerDataViewSpec,
   fetchSearchSourceQuery,
 } from './fetch_search_source_query';
@@ -23,18 +22,20 @@ import {
   createStubDataView,
   stubbedSavedObjectIndexPattern,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { Comparator } from '../../../../common/comparator_types';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { publicRuleResultServiceMock } from '@kbn/alerting-plugin/server/monitoring/rule_result_service.mock';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import {
   getErrorSource,
   TaskErrorSource,
 } from '@kbn/task-manager-plugin/server/task_running/errors';
+import { updateFilterReferences } from '@kbn/es-query';
 
 const createDataView = () => {
   const id = 'test-id';

@@ -287,42 +287,40 @@ describe('fetchNodesFromClusterStats', () => {
       index:
         '*:.monitoring-es-*,.monitoring-es-*,*:metrics-elasticsearch.stack_monitoring.cluster_stats-*,metrics-elasticsearch.stack_monitoring.cluster_stats-*',
       filter_path: ['aggregations.clusters.buckets'],
-      body: {
-        size: 0,
-        sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'cluster_stats' } },
-                    { term: { 'metricset.name': 'cluster_stats' } },
-                    {
-                      term: {
-                        'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
-                      },
+      size: 0,
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  { term: { type: 'cluster_stats' } },
+                  { term: { 'metricset.name': 'cluster_stats' } },
+                  {
+                    term: {
+                      'data_stream.dataset': 'elasticsearch.stack_monitoring.cluster_stats',
                     },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              { range: { timestamp: { gte: 'now-2m' } } },
-            ],
-          },
-        },
-        aggs: {
-          clusters: {
-            terms: { include: ['NG2d5jHiSBGPE6HLlUN2Bg'], field: 'cluster_uuid' },
-            aggs: {
-              top: {
-                top_hits: {
-                  sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                  _source: {
-                    includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.state.nodes'],
                   },
-                  size: 2,
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            { range: { timestamp: { gte: 'now-2m' } } },
+          ],
+        },
+      },
+      aggs: {
+        clusters: {
+          terms: { include: ['NG2d5jHiSBGPE6HLlUN2Bg'], field: 'cluster_uuid' },
+          aggs: {
+            top: {
+              top_hits: {
+                sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
+                _source: {
+                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.state.nodes'],
                 },
+                size: 2,
               },
             },
           },

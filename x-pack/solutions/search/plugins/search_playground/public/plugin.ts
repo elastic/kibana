@@ -49,7 +49,7 @@ export class SearchPlaygroundPlugin
       id: PLUGIN_ID,
       appRoute: PLUGIN_PATH,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: 'logoEnterpriseSearch',
+      euiIconType: 'logoElasticsearch',
       status: AppStatus.inaccessible,
       title: PLUGIN_NAME,
       updater$: this.appUpdater$,

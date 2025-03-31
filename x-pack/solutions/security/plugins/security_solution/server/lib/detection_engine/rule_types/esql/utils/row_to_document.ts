@@ -16,11 +16,12 @@ import type { EsqlResultRow, EsqlResultColumn } from '../esql_request';
 export const rowToDocument = (
   columns: EsqlResultColumn[],
   row: EsqlResultRow
-): Record<string, string | null> => {
-  return columns.reduce<Record<string, string | null>>((acc, column, i) => {
+): Record<string, string> => {
+  return columns.reduce<Record<string, string>>((acc, column, i) => {
+    const cell = row[i];
     // skips nulls, as ES|QL return null for each existing mapping field
-    if (row[i] !== null) {
-      acc[column.name] = row[i];
+    if (cell !== null) {
+      acc[column.name] = cell;
     }
     return acc;
   }, {});

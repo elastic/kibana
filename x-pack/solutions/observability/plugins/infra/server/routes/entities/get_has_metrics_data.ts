@@ -20,12 +20,10 @@ export async function getHasMetricsData({
   const results = await infraMetricsClient.search({
     allow_no_indices: true,
     ignore_unavailable: true,
-    body: {
-      track_total_hits: true,
-      terminate_after: 1,
-      size: 0,
-      query: { bool: { filter: termQuery(field, entityId) } },
-    },
+    track_total_hits: true,
+    terminate_after: 1,
+    size: 0,
+    query: { bool: { filter: termQuery(field, entityId) } },
   });
   return results.hits.total.value !== 0;
 }

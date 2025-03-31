@@ -1,0 +1,380 @@
+{
+  "id": "@kbn/data-grid-in-table-search",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.useDataGridInTableSearch",
+        "type": "Function",
+        "tags": [],
+        "label": "useDataGridInTableSearch",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/data-grid-in-table-search",
+            "scope": "public",
+            "docId": "kibKbnDataGridInTableSearchPluginApi",
+            "section": "def-public.UseDataGridInTableSearchProps",
+            "text": "UseDataGridInTableSearchProps"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/data-grid-in-table-search",
+            "scope": "public",
+            "docId": "kibKbnDataGridInTableSearchPluginApi",
+            "section": "def-public.UseDataGridInTableSearchReturn",
+            "text": "UseDataGridInTableSearchReturn"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.useDataGridInTableSearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/data-grid-in-table-search",
+                "scope": "public",
+                "docId": "kibKbnDataGridInTableSearchPluginApi",
+                "section": "def-public.UseDataGridInTableSearchProps",
+                "text": "UseDataGridInTableSearchProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.UseDataGridInTableSearchProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseDataGridInTableSearchProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/data-grid-in-table-search",
+            "scope": "public",
+            "docId": "kibKbnDataGridInTableSearchPluginApi",
+            "section": "def-public.UseDataGridInTableSearchProps",
+            "text": "UseDataGridInTableSearchProps"
+          },
+          " extends Pick<",
+          "InTableSearchControlProps",
+          ", \"rows\" | \"visibleColumns\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.enableInTableSearch",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableInTableSearch",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.dataGridWrapper",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dataGridWrapper",
+            "description": [],
+            "signature": [
+              "HTMLElement | null"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.dataGridRef",
+            "type": "Object",
+            "tags": [],
+            "label": "dataGridRef",
+            "description": [],
+            "signature": [
+              "React.RefObject<",
+              "EuiDataGridRefProps",
+              " | null>"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.cellContext",
+            "type": "Object",
+            "tags": [],
+            "label": "cellContext",
+            "description": [],
+            "signature": [
+              "CellContext | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              "EuiDataGridPaginationProps",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchProps.renderCellValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "renderCellValue",
+            "description": [],
+            "signature": [
+              "((props: CellPropsWithContext) => React.ReactNode) | React.ComponentClass<CellPropsWithContext, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.UseDataGridInTableSearchReturn",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseDataGridInTableSearchReturn",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchReturn.inTableSearchTermCss",
+            "type": "Object",
+            "tags": [],
+            "label": "inTableSearchTermCss",
+            "description": [],
+            "signature": [
+              "SerializedStyles",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchReturn.inTableSearchControl",
+            "type": "Object",
+            "tags": [],
+            "label": "inTableSearchControl",
+            "description": [],
+            "signature": [
+              "React.JSX.Element | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchReturn.cellContextWithInTableSearchSupport",
+            "type": "Object",
+            "tags": [],
+            "label": "cellContextWithInTableSearchSupport",
+            "description": [],
+            "signature": [
+              "CellContext | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/data-grid-in-table-search",
+            "id": "def-public.UseDataGridInTableSearchReturn.renderCellValueWithInTableSearchSupport",
+            "type": "Function",
+            "tags": [],
+            "label": "renderCellValueWithInTableSearchSupport",
+            "description": [],
+            "signature": [
+              "(props: ",
+              "RenderCellValuePropsWithInTableSearch",
+              ") => React.ReactNode"
+            ],
+            "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/use_data_grid_in_table_search.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-grid-in-table-search",
+                "id": "def-public.UseDataGridInTableSearchReturn.renderCellValueWithInTableSearchSupport.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "EuiDataGridCellValueElementProps",
+                  " & Pick<",
+                  "InTableSearchHighlightsWrapperProps",
+                  ", \"inTableSearchTerm\" | \"onHighlightsCountFound\">"
+                ],
+                "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.BUTTON_NEXT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "BUTTON_NEXT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"inTableSearchButtonNext\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.BUTTON_PREV_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "BUTTON_PREV_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"inTableSearchButtonPrev\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.BUTTON_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "BUTTON_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"startInTableSearchButton\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.COUNTER_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "COUNTER_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"inTableSearchMatchesCounter\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.HIGHLIGHT_CLASS_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "HIGHLIGHT_CLASS_NAME",
+        "description": [],
+        "signature": [
+          "\"dataGridInTableSearch__match\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-grid-in-table-search",
+        "id": "def-public.INPUT_TEST_SUBJ",
+        "type": "string",
+        "tags": [],
+        "label": "INPUT_TEST_SUBJ",
+        "description": [],
+        "signature": [
+          "\"inTableSearchInput\""
+        ],
+        "path": "src/platform/packages/shared/kbn-data-grid-in-table-search/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

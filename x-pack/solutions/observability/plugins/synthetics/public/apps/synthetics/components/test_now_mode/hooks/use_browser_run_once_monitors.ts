@@ -32,28 +32,26 @@ export const useBrowserEsResults = ({
   return useEsSearch(
     createEsParams({
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        sort: [
-          {
-            '@timestamp': 'desc',
-          },
-        ],
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  'synthetics.type': ['heartbeat/summary', 'journey/start'],
-                },
+      sort: [
+        {
+          '@timestamp': 'desc',
+        },
+      ],
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                'synthetics.type': ['heartbeat/summary', 'journey/start'],
               },
+            },
 
-              {
-                term: {
-                  test_run_id: testRunId,
-                },
+            {
+              term: {
+                test_run_id: testRunId,
               },
-            ],
-          },
+            },
+          ],
         },
       },
       size: 1000,

@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
 import dateMath from '@kbn/datemath';
 import { isCCSRemoteIndexName } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TransportResult } from '@elastic/elasticsearch';
+import type { estypes, TransportResult } from '@elastic/elasticsearch';
 import {
   ALERT_UUID,
   ALERT_RULE_UUID,
@@ -30,40 +31,28 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type {
-  ElasticsearchClient,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertingServerSetup,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
-  BulkResponseErrorAggregation,
-  SignalHit,
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
-  Signal,
   WrappedSignalHit,
   RuleRangeTuple,
   BaseSignalHit,
   SignalSourceHit,
   SimpleHit,
   WrappedEventHit,
+  SecuritySharedParams,
 } from '../types';
 import type { ShardError } from '../../../types';
 import type {
-  CompleteRule,
   EqlRuleParams,
   EsqlRuleParams,
   MachineLearningRuleParams,
@@ -84,7 +73,6 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import { ENABLE_CCS_READ_WARNING_SETTING } from '../../../../../common/constants';
 import type { GenericBulkCreateResponse } from '../factories';
-import type { ConfigType } from '../../../../config';
 import type {
   ExtraFieldsForShellAlert,
   WrappedEqlShellOptionalSubAlertsType,
@@ -92,6 +80,11 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
+import {
+  SECURITY_NUM_EXCEPTION_ITEMS,
+  SECURITY_NUM_INDICES_MATCHING_PATTERN,
+  SECURITY_QUERY_SPAN_S,
+} from './apm_field_names';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -146,6 +139,10 @@ export const hasTimestampFields = async (args: {
   const { timestampField, timestampFieldCapsResponse, inputIndices, ruleExecutionLogger } = args;
   const { ruleName } = ruleExecutionLogger.context;
 
+  agent.setCustomContext({
+    [SECURITY_NUM_INDICES_MATCHING_PATTERN]: timestampFieldCapsResponse.body.indices?.length,
+  });
+
   if (isEmpty(timestampFieldCapsResponse.body.indices)) {
     const errorString = `This rule is attempting to query data from Elasticsearch indices listed in the "Index patterns" section of the rule definition, however no index matching: ${JSON.stringify(
       inputIndices
@@ -193,12 +190,6 @@ export const hasTimestampFields = async (args: {
   return { foundNoIndices: false, warningMessage: undefined };
 };
 
-export const checkPrivileges = async (
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>,
-  indices: string[]
-): Promise<Privilege> =>
-  checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
-
 export const checkPrivilegesFromEsClient = async (
   esClient: ElasticsearchClient,
   indices: string[]
@@ -238,39 +229,6 @@ export const getNumCatchupIntervals = ({
   return ratio < MAX_RULE_GAP_RATIO ? ratio : MAX_RULE_GAP_RATIO;
 };
 
-export const getListsClient = ({
-  lists,
-  spaceId,
-  updatedByUser,
-  services,
-  savedObjectClient,
-}: {
-  lists: ListPluginSetup | undefined;
-  spaceId: string;
-  updatedByUser: string | null;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  savedObjectClient: SavedObjectsClientContract;
-}): {
-  listClient: ListClient;
-  exceptionsClient: ExceptionListClient;
-} => {
-  if (lists == null) {
-    throw new Error('lists plugin unavailable during rule execution');
-  }
-
-  const listClient = lists.getListClient(
-    services.scopedClusterClient.asCurrentUser,
-    spaceId,
-    updatedByUser ?? 'elastic'
-  );
-  const exceptionsClient = lists.getExceptionListClient(
-    savedObjectClient,
-    updatedByUser ?? 'elastic'
-  );
-
-  return { listClient, exceptionsClient };
-};
-
 export const getExceptions = async ({
   client,
   lists,
@@ -278,36 +236,39 @@ export const getExceptions = async ({
   client: ExceptionListClient;
   lists: ListArray;
 }): Promise<ExceptionListItemSchema[]> => {
-  if (lists.length > 0) {
-    try {
-      const listIds = lists.map(({ list_id: listId }) => listId);
-      const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
+  return withSecuritySpan('getExceptions', async () => {
+    if (lists.length > 0) {
+      try {
+        const listIds = lists.map(({ list_id: listId }) => listId);
+        const namespaceTypes = lists.map(({ namespace_type: namespaceType }) => namespaceType);
 
-      // Stream the results from the Point In Time (PIT) finder into this array
-      let items: ExceptionListItemSchema[] = [];
-      const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
-        items = [...items, ...response.data];
-      };
+        // Stream the results from the Point In Time (PIT) finder into this array
+        let items: ExceptionListItemSchema[] = [];
+        const executeFunctionOnStream = (response: FoundExceptionListItemSchema): void => {
+          items = [...items, ...response.data];
+        };
 
-      await client.findExceptionListsItemPointInTimeFinder({
-        executeFunctionOnStream,
-        listId: listIds,
-        namespaceType: namespaceTypes,
-        perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
-        filter: [],
-        maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
-        sortOrder: undefined,
-        sortField: undefined,
-      });
-      return items;
-    } catch (e) {
-      throw new Error(
-        `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
-      );
+        await client.findExceptionListsItemPointInTimeFinder({
+          executeFunctionOnStream,
+          listId: listIds,
+          namespaceType: namespaceTypes,
+          perPage: 1_000, // See https://github.com/elastic/kibana/issues/93770 for choice of 1k
+          filter: [],
+          maxSize: undefined, // NOTE: This is unbounded when it is "undefined"
+          sortOrder: undefined,
+          sortField: undefined,
+        });
+        agent.setCustomContext({ [SECURITY_NUM_EXCEPTION_ITEMS]: items.length });
+        return items;
+      } catch (e) {
+        throw new Error(
+          `unable to fetch exception list items, message: "${e.message}" full error: "${e}"`
+        );
+      }
+    } else {
+      return [];
     }
-  } else {
-    return [];
-  }
+  });
 };
 
 export const generateId = (
@@ -316,53 +277,6 @@ export const generateId = (
   version: string,
   ruleId: string
 ): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
-
-// TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
-export const generateSignalId = (signal: Signal) =>
-  createHash('sha256')
-    .update(
-      signal.parents
-        .reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
-        .concat(signal.rule.id)
-    )
-    .digest('hex');
-
-/**
- * Generates unique doc ids for each building block signal within a sequence. The id of each building block
- * depends on the parents of every building block, so that a signal which appears in multiple different sequences
- * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
- * @param buildingBlocks The full list of building blocks in the sequence.
- */
-export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] => {
-  const baseHashString = buildingBlocks.reduce(
-    (baseString, block) =>
-      baseString
-        .concat(
-          block.signal.parents.reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
-        )
-        .concat(block.signal.rule.id),
-    ''
-  );
-  return buildingBlocks.map((block, idx) =>
-    createHash('sha256').update(baseHashString).update(String(idx)).digest('hex')
-  );
-};
-
-export const wrapBuildingBlocks = (
-  buildingBlocks: SignalHit[],
-  index: string
-): WrappedSignalHit[] => {
-  const blockIds = generateBuildingBlockIds(buildingBlocks);
-  return buildingBlocks.map((block, idx) => {
-    return {
-      _id: blockIds[idx],
-      _index: index,
-      _source: {
-        ...block,
-      },
-    };
-  });
-};
 
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {
@@ -387,54 +301,12 @@ export const getGapBetweenRuns = ({
     return moment.duration(0);
   }
   const driftTolerance = moment.duration(originalTo.diff(originalFrom));
+  agent.addLabels({ [SECURITY_QUERY_SPAN_S]: driftTolerance.asSeconds() }, false);
   const currentDuration = moment.duration(moment(startedAt).diff(previousStartedAt));
   return currentDuration.subtract(driftTolerance);
 };
 
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
-
-/**
- * Given a BulkResponse this will return an aggregation based on the errors if any exist
- * from the BulkResponse. Errors are aggregated on the reason as the unique key.
- *
- * Example would be:
- * {
- *   'Parse Error': {
- *      count: 100,
- *      statusCode: 400,
- *   },
- *   'Internal server error': {
- *       count: 3,
- *       statusCode: 500,
- *   }
- * }
- * If this does not return any errors then you will get an empty object like so: {}
- * @param response The bulk response to aggregate based on the error message
- * @param ignoreStatusCodes Optional array of status codes to ignore when creating aggregate error messages
- * @returns The aggregated example as shown above.
- */
-export const errorAggregator = (
-  response: estypes.BulkResponse,
-  ignoreStatusCodes: number[]
-): BulkResponseErrorAggregation => {
-  return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
-    if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
-      const reason = item.create.error.reason ?? 'unknown';
-      if (accum[reason] == null) {
-        accum[reason] = {
-          count: 1,
-          statusCode: item.create.status,
-        };
-      } else {
-        accum[reason] = {
-          count: accum[reason].count + 1,
-          statusCode: item.create.status,
-        };
-      }
-    }
-    return accum;
-  }, Object.create(null));
-};
 
 export const getRuleRangeTuples = async ({
   startedAt,
@@ -714,13 +586,6 @@ export const createSearchAfterReturnTypeFromResponse = <
   });
 };
 
-export interface PreviewReturnType {
-  totalCount: number;
-  matrixHistogramData: unknown[];
-  errors?: string[] | undefined;
-  warningMessages?: string[] | undefined;
-}
-
 export const createSearchAfterReturnType = ({
   success,
   warning,
@@ -954,19 +819,6 @@ export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
   });
 };
 
-export const buildChunkedOrFilter = (field: string, values: string[], chunkSize: number = 1024) => {
-  if (values.length === 0) {
-    return undefined;
-  }
-  const chunkedValues = chunk(values, chunkSize);
-  return chunkedValues
-    .map((subArray) => {
-      const joinedValues = subArray.map((value) => `"${value}"`).join(' OR ');
-      return `${field}: (${joinedValues})`;
-    })
-    .join(' OR ');
-};
-
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {
   return !isWrappedSignalHit(event) && !isWrappedDetectionAlert(event);
 };
@@ -1075,33 +927,15 @@ export const getDisabledActionsWarningText = ({
   }
 };
 
-export interface SharedParams {
-  spaceId: string;
-  completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  mergeStrategy: ConfigType['alertMergeStrategy'];
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  ruleExecutionLogger: IRuleExecutionLogForExecutors;
-  publicBaseUrl: string | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
-  intendedTimestamp: Date | undefined;
-}
-
 export type RuleWithInMemorySuppression =
   | ThreatRuleParams
   | EqlRuleParams
   | MachineLearningRuleParams;
 
 export interface SequenceSuppressionTermsAndFieldsParams {
+  sharedParams: SecuritySharedParams<EqlRuleParams>;
   shellAlert: WrappedFieldsLatest<EqlShellFieldsLatest>;
   buildingBlockAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
-  spaceId: string;
-  completeRule: CompleteRule<RuleWithInMemorySuppression>;
-  indicesToQuery: string[];
-  alertTimestampOverride: Date | undefined;
-  primaryTimestamp: string;
-  secondaryTimestamp?: string;
 }
 
 export type SequenceSuppressionTermsAndFieldsFactory = (
@@ -1127,18 +961,16 @@ export const stringifyAfterKey = (afterKey: Record<string, string | number | nul
 };
 
 export const buildShellAlertSuppressionTermsAndFields = ({
+  sharedParams,
   shellAlert,
   buildingBlockAlerts,
-  spaceId,
-  completeRule,
-  alertTimestampOverride,
-  primaryTimestamp,
-  secondaryTimestamp,
 }: SequenceSuppressionTermsAndFieldsParams): WrappedFieldsLatest<
   EqlShellFieldsLatest & SuppressionFieldsLatest
 > & {
   subAlerts: Array<WrappedFieldsLatest<EqlBuildingBlockFieldsLatest>>;
 } => {
+  const { alertTimestampOverride, primaryTimestamp, secondaryTimestamp, completeRule, spaceId } =
+    sharedParams;
   const suppressionTerms = getSuppressionTerms({
     alertSuppression: completeRule?.ruleParams?.alertSuppression,
     input: shellAlert._source,

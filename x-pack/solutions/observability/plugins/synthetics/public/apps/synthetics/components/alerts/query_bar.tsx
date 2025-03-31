@@ -9,16 +9,18 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Filter } from '@kbn/es-query';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiFormRow, EuiSkeletonText } from '@elastic/eui';
 import { useSyntheticsDataView } from '../../contexts/synthetics_data_view_context';
 import { ClientPluginsStart } from '../../../../plugin';
 
 export function AlertSearchBar({
   kqlQuery,
   onChange,
+  filtersForSuggestions,
 }: {
   kqlQuery: string;
   onChange: (val: { kqlQuery?: string; filters?: Filter[] }) => void;
+  filtersForSuggestions?: Filter[];
 }) {
   const {
     data: { query },
@@ -40,6 +42,10 @@ export function AlertSearchBar({
     return () => sub.unsubscribe();
   }, [onChange, query]);
 
+  if (!dataView) {
+    return <EuiSkeletonText lines={1} />;
+  }
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.synthetics.list.search.title', {
@@ -51,7 +57,7 @@ export function AlertSearchBar({
         appName="synthetics"
         iconType="search"
         placeholder={PLACEHOLDER}
-        indexPatterns={dataView ? [dataView] : []}
+        indexPatterns={[dataView]}
         onChange={(queryN) => {
           onChange({
             kqlQuery: String(queryN.query),
@@ -67,6 +73,7 @@ export function AlertSearchBar({
         query={{ query: String(kqlQuery), language: 'kuery' }}
         autoSubmit={true}
         disableLanguageSwitcher={true}
+        filtersForSuggestions={filtersForSuggestions}
       />
     </EuiFormRow>
   );

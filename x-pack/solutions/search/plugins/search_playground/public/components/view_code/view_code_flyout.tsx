@@ -25,7 +25,7 @@ import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, PlaygroundPageMode } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../common/routes';
-import { LANGCHAIN_PYTHON } from './examples/py_langchain_python';
+import { LangchainPythonExmaple } from './examples/py_langchain_python';
 import { PY_LANG_CLIENT } from './examples/py_lang_client';
 import { DevToolsCode } from './examples/dev_tools';
 
@@ -60,7 +60,7 @@ export const ViewCodeFlyout: React.FC<ViewCodeFlyoutProps> = ({ onClose, selecte
   const CLIENT_STEP = ES_CLIENT_DETAILS(elasticsearchUrl);
 
   const steps: Record<string, React.ReactElement> = {
-    'lc-py': LANGCHAIN_PYTHON(formValues, CLIENT_STEP),
+    'lc-py': <LangchainPythonExmaple formValues={formValues} clientDetails={CLIENT_STEP} />,
     'py-es-client': PY_LANG_CLIENT(formValues, CLIENT_STEP),
   };
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

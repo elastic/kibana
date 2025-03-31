@@ -102,6 +102,23 @@ router.get({
 }, handler);
 ```
 
+### Naming conventions for privileges
+1. **Privilege should start with a valid `ApiOperation`**:
+   - **Valid operations**: `manage`, `read`, `update`, `delete`, `create`.
+   - Use the corresponding methods from the `ApiPrivileges` utility class: `ApiPrivileges.manage`, `ApiPrivileges.read`, etc.
+2. **Use `_` as the separator** between the operation and the subject.
+
+**Examples**:
+Incorrect privilege names ❌
+- `read-entity-a`: Uses `-` instead of `_`.
+- `delete_entity-a`: Mixes `_` and `-`.
+- `entity_manage`: Places the subject name before the operation.
+
+Correct privilege names ✅
+- `read_entity_a`
+- `delete_entity_a`
+- `manage_entity`
+
 ### Configuring operator and superuser privileges
 We have two special predefined privilege sets that can be used in security configuration:
 1. Operator

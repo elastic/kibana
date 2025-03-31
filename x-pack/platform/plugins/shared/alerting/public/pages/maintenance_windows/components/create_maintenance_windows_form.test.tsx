@@ -6,16 +6,20 @@
  */
 
 import React from 'react';
-import { within, fireEvent, waitFor } from '@testing-library/react';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
-import {
-  CreateMaintenanceWindowFormProps,
-  CreateMaintenanceWindowForm,
-} from './create_maintenance_windows_form';
+import { within, waitFor, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { AppMockRenderer } from '../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../lib/test_utils';
+import type { CreateMaintenanceWindowFormProps } from './create_maintenance_windows_form';
+import { CreateMaintenanceWindowForm } from './create_maintenance_windows_form';
 
 jest.mock('../../../utils/kibana_react');
 jest.mock('../../../services/rule_api', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('@kbn/alerts-ui-shared', () => ({
+  ...jest.requireActual('@kbn/alerts-ui-shared'),
+  AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
 }));
 
 const { loadRuleTypes } = jest.requireMock('../../../services/rule_api');
@@ -24,6 +28,24 @@ const { useKibana, useUiSetting } = jest.requireMock('../../../utils/kibana_reac
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: jest.fn(),
   onSuccess: jest.fn(),
+};
+
+const formPropsForEditMode: CreateMaintenanceWindowFormProps = {
+  onCancel: jest.fn(),
+  onSuccess: jest.fn(),
+  initialValue: {
+    title: 'test',
+    startDate: '2023-03-24',
+    endDate: '2023-03-26',
+    recurring: false,
+    solutionId: 'observability',
+    scopedQuery: {
+      kql: 'kibana.alert.job_errors_results.job_id : * ',
+      filters: [],
+      dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+    },
+  },
+  maintenanceWindowId: 'fake_mw_id',
 };
 
 describe('CreateMaintenanceWindowForm', () => {
@@ -50,6 +72,13 @@ describe('CreateMaintenanceWindowForm', () => {
             SearchBar: <div />,
           },
         },
+        data: {
+          dataViews: {
+            get: jest.fn(),
+            getIdsWithTitle: jest.fn().mockResolvedValue([]),
+            getDefaultDataView: jest.fn(),
+          },
+        },
       },
     });
 
@@ -69,7 +98,6 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
     expect(result.queryByTestId('timezone-field')).not.toBeInTheDocument();
   });
@@ -88,7 +116,6 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(result.getByTestId('title-field')).toBeInTheDocument();
     expect(result.getByTestId('date-field')).toBeInTheDocument();
     expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.getByTestId('maintenanceWindowCategorySelection')).toBeInTheDocument();
     expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
     expect(result.getByTestId('timezone-field')).toBeInTheDocument();
   });
@@ -115,6 +142,11 @@ describe('CreateMaintenanceWindowForm', () => {
   });
 
   it('should prefill the form when provided with initialValue', async () => {
+    useUiSetting.mockImplementation((key: string) => {
+      if (key === 'dateFormat') return 'YYYY.MM.DD, h:mm:ss';
+      return 'America/Los_Angeles';
+    });
+
     const result = appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
@@ -124,7 +156,7 @@ describe('CreateMaintenanceWindowForm', () => {
           endDate: '2023-03-26',
           timezone: ['America/Los_Angeles'],
           recurring: true,
-          categoryIds: [],
+          solutionId: undefined,
         }}
       />
     );
@@ -143,34 +175,15 @@ describe('CreateMaintenanceWindowForm', () => {
       'comboBoxSearchInput'
     );
 
-    await waitFor(() => {
-      expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
-    });
-
-    const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-observability');
-    const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-securitySolution');
-    const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-management');
-
-    expect(observabilityInput).toBeChecked();
-    expect(securityInput).toBeChecked();
-    expect(managementInput).toBeChecked();
     expect(titleInput).toHaveValue('test');
-    expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
-    expect(dateInputs[1]).toHaveValue('03/25/2023 09:00 PM');
+    expect(dateInputs[0]).toHaveValue('2023.03.23, 9:00:00');
+    expect(dateInputs[1]).toHaveValue('2023.03.25, 9:00:00');
     expect(recurringInput).toBeChecked();
     expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
-  it('should initialize MWs without category ids properly', async () => {
-    const result = appMockRenderer.render(
+  it('should initialize MW with selected solution id properly', async () => {
+    appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
         initialValue={{
@@ -179,102 +192,98 @@ describe('CreateMaintenanceWindowForm', () => {
           endDate: '2023-03-26',
           timezone: ['America/Los_Angeles'],
           recurring: true,
+          solutionId: 'observability',
+          scopedQuery: {
+            filters: [],
+            kql: 'kibana.alert.job_errors_results.job_id : * ',
+            dsl: '{"bool":{"must":[],"filter":[{"bool":{"should":[{"exists":{"field":"kibana.alert.job_errors_results.job_id"}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}',
+          },
         }}
       />
     );
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowSolutionSelectionLoading')
       ).not.toBeInTheDocument();
     });
-
-    const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-observability');
-    const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-securitySolution');
-    const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-management');
-
-    expect(observabilityInput).toBeChecked();
-    expect(securityInput).toBeChecked();
-    expect(managementInput).toBeChecked();
-  });
-
-  it('should initialize MWs with selected category ids properly', async () => {
-    const result = appMockRenderer.render(
-      <CreateMaintenanceWindowForm
-        {...formProps}
-        initialValue={{
-          title: 'test',
-          startDate: '2023-03-24',
-          endDate: '2023-03-26',
-          timezone: ['America/Los_Angeles'],
-          recurring: true,
-          categoryIds: ['observability', 'management'],
-        }}
-        maintenanceWindowId="test"
-      />
-    );
 
     await waitFor(() => {
-      expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
-      ).not.toBeInTheDocument();
+      expect(screen.getByTestId('maintenanceWindowSolutionSelection')).toBeInTheDocument();
     });
 
-    const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-observability');
-    const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-securitySolution');
-    const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-management');
+    const observabilityInput = screen.getByLabelText('Observability rules');
+    const securityInput = screen.getByLabelText('Security rules');
+    const managementInput = screen.getByLabelText('Stack rules');
 
     expect(observabilityInput).toBeChecked();
-    expect(managementInput).toBeChecked();
+    expect(managementInput).not.toBeChecked();
     expect(securityInput).not.toBeChecked();
   });
 
-  it('can select category IDs', async () => {
+  it('can select one in the time solution id', async () => {
+    const user = userEvent.setup();
     const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
       ).not.toBeInTheDocument();
     });
 
-    const observabilityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-observability');
-    const securityInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-securitySolution');
-    const managementInput = within(
-      result.getByTestId('maintenanceWindowCategorySelection')
-    ).getByTestId('option-management');
+    await waitFor(() => {
+      expect(screen.queryByTestId('maintenanceWindowSolutionSelection')).not.toBeInTheDocument();
+    });
 
-    expect(observabilityInput).toBeChecked();
-    expect(securityInput).toBeChecked();
-    expect(managementInput).toBeChecked();
+    const switchContainer = screen.getByTestId('maintenanceWindowScopedQuerySwitch');
+    const scopedQueryToggle = within(switchContainer).getByRole('switch');
 
-    fireEvent.click(observabilityInput);
+    expect(scopedQueryToggle).not.toBeChecked();
+    await user.click(scopedQueryToggle);
+    expect(scopedQueryToggle).toBeChecked();
+
+    const observabilityInput = screen.getByLabelText('Observability rules');
+    const securityInput = screen.getByLabelText('Security rules');
+    const managementInput = screen.getByLabelText('Stack rules');
+
+    await user.click(securityInput);
 
     expect(observabilityInput).not.toBeChecked();
+    expect(managementInput).not.toBeChecked();
     expect(securityInput).toBeChecked();
-    expect(managementInput).toBeChecked();
 
-    fireEvent.click(securityInput);
-    fireEvent.click(observabilityInput);
+    await user.click(observabilityInput);
 
     expect(observabilityInput).toBeChecked();
+    expect(managementInput).not.toBeChecked();
     expect(securityInput).not.toBeChecked();
-    expect(managementInput).toBeChecked();
+  });
+
+  it('should hide "Filter alerts" toggle when do not have access to any solutions', async () => {
+    loadRuleTypes.mockResolvedValue([]);
+    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
+    expect(screen.queryByTestId('maintenanceWindowScopedQuerySwitch')).not.toBeInTheDocument();
+  });
+
+  it('should show warning when edit if "Filter alerts" toggle on when do not have access to chosen solution', async () => {
+    loadRuleTypes.mockResolvedValue([]);
+    const result = appMockRenderer.render(
+      <CreateMaintenanceWindowForm {...formPropsForEditMode} />
+    );
+
+    await waitFor(() => {
+      expect(
+        result.queryByTestId('maintenanceWindowSolutionSelectionLoading')
+      ).not.toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId('maintenanceWindowNoAvailableSolutionsWarning')).toBeInTheDocument();
   });
 });

@@ -11,6 +11,7 @@ import React from 'react';
 import { TestProviders } from '../../../../../common/mock';
 import { UserHostWorkingDir } from './user_host_working_dir';
 import { useMountAppended } from '../../../../../common/utils/use_mount_appended';
+import { CellActionsWrapper } from '../../../../../common/components/drag_and_drop/cell_actions_wrapper';
 
 jest.mock('../../../../../common/lib/kibana');
 
@@ -22,13 +23,27 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+jest.mock('../../../../../common/components/drag_and_drop/cell_actions_wrapper', () => {
+  return {
+    CellActionsWrapper: jest.fn(),
+  };
+});
+
+const MockedCellActionsWrapper = jest.fn(({ children }) => {
+  return <div data-test-subj="mock-cell-action-wrapper">{children}</div>;
+});
+
 describe('UserHostWorkingDir', () => {
+  beforeEach(() => {
+    (CellActionsWrapper as unknown as jest.Mock).mockImplementation(MockedCellActionsWrapper);
+  });
   const mount = useMountAppended();
 
   describe('rendering', () => {
     test('it renders against shallow snapshot', () => {
       const wrapper = shallow(
         <UserHostWorkingDir
+          scopeId="some_scope"
           contextId="context-123"
           eventId="event-123"
           userDomain="[userDomain-123]"
@@ -43,6 +58,7 @@ describe('UserHostWorkingDir', () => {
     test('it returns null if userDomain, userName, hostName, and workingDirectory are all null', () => {
       const wrapper = shallow(
         <UserHostWorkingDir
+          scopeId="some_scope"
           contextId="context-123"
           eventId="event-123"
           userDomain={null}
@@ -57,6 +73,7 @@ describe('UserHostWorkingDir', () => {
     test('it returns null if userDomain, userName, hostName, and workingDirectory are all undefined', () => {
       const wrapper = shallow(
         <UserHostWorkingDir
+          scopeId="some_scope"
           contextId="context-123"
           eventId="event-123"
           userDomain={undefined}
@@ -73,6 +90,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain="[user-domain-123]"
@@ -91,6 +109,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain={undefined}
@@ -109,6 +128,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain={undefined}
@@ -127,6 +147,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain={null}
@@ -145,6 +166,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain={null}
@@ -163,6 +185,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain={null}
@@ -181,6 +204,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain="[user-domain-123]"
@@ -199,6 +223,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               userDomain={null}
@@ -218,6 +243,7 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
               hostNameSeparator="custom separator"
@@ -238,9 +264,9 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain="[user-domain-123]"
               userName={undefined}
               hostName={undefined}
@@ -258,9 +284,9 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain="[user-domain-123]"
               userDomainField="overridden.field.name"
               userName={undefined}
@@ -281,9 +307,9 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain={undefined}
               userName="[user-name-123]"
               hostName={undefined}
@@ -301,9 +327,9 @@ describe('UserHostWorkingDir', () => {
         <TestProviders>
           <div>
             <UserHostWorkingDir
+              scopeId="some_scope"
               contextId="context-123"
               eventId="event-123"
-              isDraggable={false}
               userDomain={undefined}
               userName="[user-name-123]"
               userNameField="overridden.field.name"
@@ -316,6 +342,32 @@ describe('UserHostWorkingDir', () => {
 
       expect(wrapper.find('[data-test-subj="render-content-overridden.field.name"]').exists()).toBe(
         true
+      );
+    });
+
+    test('should passing correct scopeId to cell actions', () => {
+      mount(
+        <TestProviders>
+          <div>
+            <UserHostWorkingDir
+              scopeId="some_scope"
+              contextId="context-123"
+              eventId="event-123"
+              userDomain={undefined}
+              userName="[user-name-123]"
+              userNameField="overridden.field.name"
+              hostName={undefined}
+              workingDirectory={undefined}
+            />
+          </div>
+        </TestProviders>
+      );
+
+      expect(MockedCellActionsWrapper).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'some_scope',
+        }),
+        {}
       );
     });
   });

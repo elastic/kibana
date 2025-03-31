@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
     });
 

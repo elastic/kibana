@@ -18,7 +18,9 @@ import {
   EuiButtonEmpty,
   EuiBadge,
   EuiTextColor,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { useFieldPreviewContext } from '../field_preview_context';
 import { IsUpdatingIndicator } from '../is_updating_indicator';
@@ -43,6 +45,7 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
   hasScriptError,
   isFromScript = false,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { controller } = useFieldPreviewContext();
   const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
 
@@ -143,7 +146,20 @@ export const PreviewListItem: React.FC<PreviewListItemProps> = ({
 
   return (
     <>
-      <EuiFlexGroup className={classes} gutterSize="none" data-test-subj="listItem">
+      <EuiFlexGroup
+        className={classes}
+        // highlights the field using token, TODO: migrate whole SCSS file to emotions
+        css={
+          isFromScript
+            ? css`
+                background-color: ${euiTheme.colors.backgroundBasePrimary};
+                font-weight: ${euiTheme.font.weight.bold};
+              `
+            : undefined
+        }
+        gutterSize="none"
+        data-test-subj="listItem"
+      >
         <EuiFlexItem className="indexPatternFieldEditor__previewFieldList__item__key">
           <div
             className="indexPatternFieldEditor__previewFieldList__item__key__wrapper"

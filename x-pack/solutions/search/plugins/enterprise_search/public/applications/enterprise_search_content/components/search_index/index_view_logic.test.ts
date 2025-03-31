@@ -10,7 +10,7 @@ import {
   mockFlashMessageHelpers,
   mockHttpValues,
 } from '../../../__mocks__/kea_logic';
-import { apiIndex, connectorIndex, crawlerIndex } from '../../__mocks__/view_index.mock';
+import { apiIndex, connectorIndex } from '../../__mocks__/view_index.mock';
 
 import { SyncStatus, IngestionMethod, IngestionStatus } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -134,21 +134,6 @@ describe('IndexViewLogic', () => {
             isInitialLoading: false,
           })
         );
-      });
-
-      it('should call fetchCrawler if index is a crawler ', () => {
-        IndexViewLogic.actions.fetchCrawlerData = jest.fn();
-        IndexNameLogic.actions.setIndexName('crawler');
-        CachedFetchIndexApiLogic.actions.apiSuccess(crawlerIndex);
-
-        expect(IndexViewLogic.actions.fetchCrawlerData).toHaveBeenCalled();
-      });
-      it('should not call fetchCrawler if index is a crawler but indexName does not match', () => {
-        IndexViewLogic.actions.fetchCrawlerData = jest.fn();
-        IndexNameLogic.actions.setIndexName('api');
-        CachedFetchIndexApiLogic.actions.apiSuccess(crawlerIndex);
-
-        expect(IndexViewLogic.actions.fetchCrawlerData).not.toHaveBeenCalled();
       });
       it('should flash success if recheckFetchIndexLoading', () => {
         IndexViewLogic.actions.resetRecheckIndexLoading = jest.fn();

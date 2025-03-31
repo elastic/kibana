@@ -39,11 +39,6 @@ const TopTracesOverview = dynamic(() =>
 const TraceExplorer = dynamic(() =>
   import('../../app/trace_explorer').then((mod) => ({ default: mod.TraceExplorer }))
 );
-const TraceExplorerAggregatedCriticalPath = dynamic(() =>
-  import('../../app/trace_explorer/trace_explorer_aggregated_critical_path').then((mod) => ({
-    default: mod.TraceExplorerAggregatedCriticalPath,
-  }))
-);
 const TraceExplorerWaterfall = dynamic(() =>
   import('../../app/trace_explorer/trace_explorer_waterfall').then((mod) => ({
     default: mod.TraceExplorerWaterfall,
@@ -198,9 +193,6 @@ export const homeRoute = {
                     detailTab: TransactionTab.timeline,
                   },
                 },
-              },
-              '/traces/explorer/critical_path': {
-                element: <TraceExplorerAggregatedCriticalPath />,
               },
               '/traces/explorer': {
                 element: <RedirectTo pathname="/traces/explorer/waterfall" />,

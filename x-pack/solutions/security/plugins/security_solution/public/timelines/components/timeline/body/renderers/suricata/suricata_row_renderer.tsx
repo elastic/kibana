@@ -20,9 +20,9 @@ export const suricataRowRenderer: RowRenderer = {
     const module: string | null | undefined = get('event.module[0]', ecs);
     return module != null && module.toLowerCase() === 'suricata';
   },
-  renderRow: ({ data, isDraggable, scopeId }) => (
+  renderRow: ({ data, scopeId }) => (
     <RowRendererContainer>
-      <SuricataDetails data={data} isDraggable={isDraggable} timelineId={scopeId} />
+      <SuricataDetails data={data} timelineId={scopeId} />
     </RowRendererContainer>
   ),
 };

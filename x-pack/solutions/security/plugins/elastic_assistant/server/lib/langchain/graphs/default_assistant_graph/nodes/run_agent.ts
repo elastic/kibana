@@ -9,7 +9,6 @@ import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
 import { BaseMessage } from '@langchain/core/messages';
 import { removeContentReferences } from '@kbn/elastic-assistant-common';
-import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
@@ -70,9 +69,6 @@ export async function runAgent({
             ? JSON.stringify(knowledgeHistory.map((e) => e.text))
             : NO_KNOWLEDGE_HISTORY
         }`,
-        include_citations_prompt_placeholder: state.contentReferencesEnabled
-          ? INCLUDE_CITATIONS
-          : '',
         // prepend any user prompt (gemini)
         input: `${userPrompt}${state.input}`,
         chat_history: sanitizeChatHistory(state.messages), // TODO: Message de-dupe with ...state spread

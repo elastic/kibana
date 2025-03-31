@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -20,6 +21,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const idpPath = require.resolve('@kbn/security-api-integration-helpers/saml/idp_metadata.xml');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [resolve(__dirname, './tests/session_lifespan')],
     services,
     servers: xPackAPITestsConfig.get('servers'),

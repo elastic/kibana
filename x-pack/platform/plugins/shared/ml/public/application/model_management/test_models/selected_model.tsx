@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { FC } from 'react';
 import React, { useMemo, useEffect } from 'react';
 import { cloneDeep } from 'lodash';
@@ -35,6 +35,7 @@ import {
   isMlIngestInferenceProcessor,
   isMlInferencePipelineInferenceConfig,
 } from '../create_pipeline_for_model/get_inference_properties_from_pipeline_config';
+import { useMlTelemetryClient } from '../../contexts/ml/ml_telemetry_context';
 
 interface Props {
   model: estypes.MlTrainedModelConfig;
@@ -54,6 +55,7 @@ export const SelectedModel: FC<Props> = ({
   setCurrentContext,
 }) => {
   const { trainedModels } = useMlApi();
+  const { telemetryClient } = useMlTelemetryClient();
 
   const inferrer = useMemo<InferrerType | undefined>(() => {
     const taskType = Object.keys(model.inference_config ?? {})[0];
@@ -65,14 +67,21 @@ export const SelectedModel: FC<Props> = ({
     if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
       switch (taskType) {
         case SUPPORTED_PYTORCH_TASKS.NER:
-          tempInferrer = new NerInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new NerInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            telemetryClient
+          );
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION:
           tempInferrer = new TextClassificationInference(
             trainedModels,
             model,
             inputType,
-            deploymentId
+            deploymentId,
+            telemetryClient
           );
           break;
         case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
@@ -80,7 +89,8 @@ export const SelectedModel: FC<Props> = ({
             trainedModels,
             model,
             inputType,
-            deploymentId
+            deploymentId,
+            telemetryClient
           );
           if (pipelineConfigValues) {
             const { labels, multi_label: multiLabel } = pipelineConfigValues;
@@ -91,30 +101,55 @@ export const SelectedModel: FC<Props> = ({
           }
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING:
-          tempInferrer = new TextEmbeddingInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new TextEmbeddingInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            telemetryClient
+          );
           break;
         case SUPPORTED_PYTORCH_TASKS.FILL_MASK:
-          tempInferrer = new FillMaskInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new FillMaskInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            telemetryClient
+          );
           break;
         case SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING:
           tempInferrer = new QuestionAnsweringInference(
             trainedModels,
             model,
             inputType,
-            deploymentId
+            deploymentId,
+            telemetryClient
           );
           if (pipelineConfigValues?.question) {
             tempInferrer.setQuestionText(pipelineConfigValues.question);
           }
           break;
         case SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION:
-          tempInferrer = new TextExpansionInference(trainedModels, model, inputType, deploymentId);
+          tempInferrer = new TextExpansionInference(
+            trainedModels,
+            model,
+            inputType,
+            deploymentId,
+            telemetryClient
+          );
           break;
         default:
           break;
       }
     } else if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
-      tempInferrer = new LangIdentInference(trainedModels, model, inputType, deploymentId);
+      tempInferrer = new LangIdentInference(
+        trainedModels,
+        model,
+        inputType,
+        deploymentId,
+        telemetryClient
+      );
     }
     if (tempInferrer) {
       if (pipelineConfigValues) {

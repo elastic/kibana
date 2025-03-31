@@ -34,3 +34,10 @@ export const MESSAGE_REQUIRED = i18n.translate(
     defaultMessage: 'Message is required.',
   }
 );
+
+export const STATUS_REQUIRED = i18n.translate(
+  'xpack.observabilityAiAssistant.requiredStatusField',
+  {
+    defaultMessage: 'Status is required.',
+  }
+);

@@ -446,7 +446,6 @@ describe('getDefaultGcpHiddenVars', () => {
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-json', type: 'text' },
-      setup_access: { value: 'manual', type: 'text' },
     });
   });
 
@@ -456,7 +455,6 @@ describe('getDefaultGcpHiddenVars', () => {
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-none', type: 'text' },
-      setup_access: { value: 'google_cloud_shell', type: 'text' },
     });
   });
 
@@ -483,7 +481,6 @@ describe('getDefaultGcpHiddenVars', () => {
 
     expect(result).toMatchObject({
       'gcp.credentials.type': { value: 'credentials-file', type: 'text' },
-      setup_access: { value: 'manual', type: 'text' },
     });
   });
 });

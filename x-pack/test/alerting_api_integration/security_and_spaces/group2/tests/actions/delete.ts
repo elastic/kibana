@@ -11,7 +11,7 @@ import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integrati
 
 import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteConnectorTests({ getService }: FtrProviderContext) {
@@ -302,28 +302,23 @@ export default function deleteConnectorTests({ getService }: FtrProviderContext)
     }
 
     it('should delete a connector with an unsupported type', async () => {
+      const { space, user } = SuperuserAtSpace1;
       await kibanaServer.importExport.load(
-        'x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/fixtures/unsupported_connector_type.json'
+        'x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/fixtures/unsupported_connector_type.json',
+        { space: space.id }
       );
 
-      const { space, user } = SuperuserAtSpace1;
-      const { body: createdConnector } = await supertest
-        .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'My Connector',
-          connector_type_id: 'test.index-record',
-          config: {
-            unencrypted: `This value shouldn't get encrypted`,
-          },
-          secrets: {
-            encrypted: 'This value should be encrypted',
-          },
-        })
-        .expect(200);
+      const res = await supertestWithoutAuth
+        .get(`${getUrlPrefix(space.id)}/api/actions/connectors`)
+        .auth(user.username, user.password);
+
+      const invalidConnector = res.body.find(
+        (connector: { connector_type_id: string; id: string }) =>
+          connector.connector_type_id === '.invalid-type'
+      );
 
       const response = await supertestWithoutAuth
-        .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdConnector.id}`)
+        .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${invalidConnector.id}`)
         .auth(user.username, user.password)
         .set('kbn-xsrf', 'foo');
 

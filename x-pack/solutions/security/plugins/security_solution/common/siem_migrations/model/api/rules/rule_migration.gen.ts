@@ -18,9 +18,9 @@ import { z } from '@kbn/zod';
 import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import {
-  UpdateRuleMigrationData,
   RuleMigrationTaskStats,
   OriginalRule,
+  UpdateRuleMigrationData,
   RuleMigration,
   RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
@@ -113,6 +113,23 @@ export type GetRuleMigrationPrebuiltRulesResponse = z.infer<
   typeof GetRuleMigrationPrebuiltRulesResponse
 >;
 export const GetRuleMigrationPrebuiltRulesResponse = z.object({}).catchall(PrebuiltRuleVersion);
+
+/**
+ * The missing index privileges required for the migration
+ */
+export type GetRuleMigrationPrivilegesResponse = z.infer<typeof GetRuleMigrationPrivilegesResponse>;
+export const GetRuleMigrationPrivilegesResponse = z.array(
+  z.object({
+    /**
+     * The index name of the privilege missing
+     */
+    indexName: z.string(),
+    /**
+     * The index privileges level missing
+     */
+    privileges: z.array(z.string()),
+  })
+);
 export type GetRuleMigrationResourcesRequestQuery = z.infer<
   typeof GetRuleMigrationResourcesRequestQuery
 >;
@@ -249,6 +266,14 @@ export const StopRuleMigrationResponse = z.object({
    */
   stopped: z.boolean(),
 });
+
+export type UpdateRuleMigrationRequestParams = z.infer<typeof UpdateRuleMigrationRequestParams>;
+export const UpdateRuleMigrationRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpdateRuleMigrationRequestParamsInput = z.input<
+  typeof UpdateRuleMigrationRequestParams
+>;
 
 export type UpdateRuleMigrationRequestBody = z.infer<typeof UpdateRuleMigrationRequestBody>;
 export const UpdateRuleMigrationRequestBody = z.array(UpdateRuleMigrationData);

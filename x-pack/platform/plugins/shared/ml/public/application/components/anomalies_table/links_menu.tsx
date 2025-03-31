@@ -788,7 +788,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       });
     }
 
-    if (application.capabilities.discover?.show && !isCategorizationAnomalyRecord) {
+    if (application.capabilities.discover_v2?.show && !isCategorizationAnomalyRecord) {
       // Add item from the start, but disable it during the URL generation.
       const isLoading = openInDiscoverUrlError === undefined && openInDiscoverUrl === undefined;
 
@@ -837,7 +837,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         );
       }
     }
-    if (application.capabilities.maps?.show) {
+    if (application.capabilities.maps_v2?.show) {
       if (anomaly.isGeoRecord === true) {
         items.push(
           <EuiContextMenuItem
@@ -881,7 +881,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
     }
 
-    if (application.capabilities.discover?.show && isCategorizationAnomalyRecord) {
+    if (application.capabilities.discover_v2?.show && isCategorizationAnomalyRecord) {
       items.push(
         <EuiContextMenuItem
           key="view_examples"

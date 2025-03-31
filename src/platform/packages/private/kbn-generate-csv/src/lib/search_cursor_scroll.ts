@@ -38,7 +38,7 @@ export class SearchCursorScroll extends SearchCursor {
 
     const searchParamsScan = {
       params: {
-        body: searchBody,
+        ...searchBody,
         index: this.indexPatternTitle,
         scroll: scroll.duration(taskInstanceFields),
         size: scroll.size,

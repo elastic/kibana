@@ -25,28 +25,30 @@ export const NO_CHANGES = i18n.translate(
 export const UPDATE_FROM_ELASTIC_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.updateFromElasticTitle',
   {
-    defaultMessage: 'Update from Elastic',
+    defaultMessage: 'Changes from Elastic',
   }
 );
 
 export const UPDATE_FROM_ELASTIC_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.updateFromElasticExplanation',
   {
-    defaultMessage: 'view the changes in Elastic’s latest update',
+    defaultMessage:
+      "Compare the field's original value with changes from the Elastic update. Your changes aren't displayed.",
   }
 );
 
-export const MY_CHANGES_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesTitle',
+export const MY_CHANGES_AND_FINAL_UPDATES_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesAndFinalUpdatesTitle',
   {
-    defaultMessage: 'My changes',
+    defaultMessage: 'My changes and final updates',
   }
 );
 
-export const MY_CHANGES_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesExplanation',
+export const MY_CHANGES_AND_FINAL_UPDATES_EXPLANATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesAndFinalUpdatesExplanation',
   {
-    defaultMessage: `view what you have changed in your installed rule and in the {finalUpdateSectionLabel} section`,
+    defaultMessage:
+      "Compare the field's original value with your changes or changes made in the {finalUpdateSectionLabel} section.",
     values: {
       finalUpdateSectionLabel: FINAL_UPDATE,
     },
@@ -54,9 +56,9 @@ export const MY_CHANGES_EXPLANATION = i18n.translate(
 );
 
 export const MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesFinalUpdateOnlyExplanation',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesInRuleUpdateWorkflowOnlyExplanation',
   {
-    defaultMessage: `view the changes you made in the {finalUpdateSectionLabel} section`,
+    defaultMessage: 'View the changes you made in the {finalUpdateSectionLabel} section.',
     values: {
       finalUpdateSectionLabel: FINAL_UPDATE,
     },
@@ -66,30 +68,40 @@ export const MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION = i18n.translate(
 export const MERGED_CHANGES_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.mergedChangesTitle',
   {
-    defaultMessage: 'My changes merged with Elastic’s',
+    defaultMessage: "My changes merged with Elastic's",
   }
 );
 
 export const MERGED_CHANGES_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.mergedChangesExplanation',
   {
-    defaultMessage: 'view an update suggestion that combines your changes with Elastic’s',
+    defaultMessage:
+      "Compare the field's original value with a version that combines your changes with those in the Elastic update. This version is only a suggestion.",
   }
 );
 
 export const MY_ORIGINAL_CHANGES_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myOriginalChangesTitle',
   {
-    defaultMessage: 'My original changes',
+    defaultMessage: 'My changes only',
   }
 );
 
 export const MY_ORIGINAL_CHANGES_EXPLANATION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myCustomizationExplanation',
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myOriginalChangesExplanation',
   {
-    defaultMessage: `view what you have changed in your installed rule. Doesn’t include changes made in the {finalUpdateSectionLabel} section.`,
+    defaultMessage:
+      "Compare the field's original value with your changes. Modifications in the {finalUpdateSectionLabel} section aren't displayed.",
     values: {
       finalUpdateSectionLabel: FINAL_UPDATE,
     },
+  }
+);
+
+export const DIFF_FORMAT_AND_COLORS_EXPLANATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.diffFormatAndColorsExplanation',
+  {
+    defaultMessage:
+      "Differences are shown in JSON and color-coded or bolded. Lines that are highlighted in green were added. Lines that are highlighted in red were removed. Text that's bolded was changed.",
   }
 );

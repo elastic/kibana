@@ -24,6 +24,7 @@ import type { NetflowProps } from './types';
 export const Netflow = React.memo<NetflowProps>(
   ({
     contextId,
+    scopeId,
     destinationBytes,
     destinationGeoContinentName,
     destinationGeoCountryName,
@@ -37,7 +38,6 @@ export const Netflow = React.memo<NetflowProps>(
     eventId,
     eventEnd,
     eventStart,
-    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -69,6 +69,7 @@ export const Netflow = React.memo<NetflowProps>(
     >
       <EuiFlexItem grow={false}>
         <NetflowColumns
+          scopeId={scopeId}
           contextId={contextId}
           destinationBytes={destinationBytes}
           destinationGeoContinentName={destinationGeoContinentName}
@@ -83,7 +84,6 @@ export const Netflow = React.memo<NetflowProps>(
           eventId={eventId}
           eventEnd={eventEnd}
           eventStart={eventStart}
-          isDraggable={isDraggable}
           networkBytes={networkBytes}
           networkCommunityId={networkCommunityId}
           networkDirection={networkDirection}
@@ -105,9 +105,9 @@ export const Netflow = React.memo<NetflowProps>(
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Fingerprints
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
-          isDraggable={isDraggable}
           tlsClientCertificateFingerprintSha1={tlsClientCertificateFingerprintSha1}
           tlsFingerprintsJa3Hash={tlsFingerprintsJa3Hash}
           tlsServerCertificateFingerprintSha1={tlsServerCertificateFingerprintSha1}

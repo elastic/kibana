@@ -133,20 +133,50 @@ describe('single line query', () => {
         );
       });
 
-      test('supports aliases', () => {
-        const { text } = reprint(`
-          FROM employees | LEFT JOIN languages_lookup AS something ON language_code`);
-
-        expect(text).toBe(
-          'FROM employees | LEFT JOIN languages_lookup AS something ON language_code'
-        );
-      });
-
       test('supports multiple conditions', () => {
         const { text } = reprint(`
           FROM employees | LEFT JOIN a ON b, c, d.e.f`);
 
         expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
+      });
+    });
+
+    describe('CHANGE_POINT', () => {
+      test('value only', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value');
+      });
+
+      test('value and key', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+      });
+
+      test('value and target', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value AS type, pvalue`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value AS type, pvalue');
+      });
+
+      test('value, key, and target', () => {
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
+
+        expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+      });
+
+      test('example from docs', () => {
+        const { text } = reprint(`
+          FROM k8s
+            | STATS count=COUNT() BY @timestamp=BUCKET(@timestamp, 1 MINUTE)
+            | CHANGE_POINT count ON @timestamp AS type, pvalue
+            | LIMIT 123
+        `);
+
+        expect(text).toBe(
+          'FROM k8s | STATS count = COUNT() BY @timestamp = BUCKET(@timestamp, 1 MINUTE) | CHANGE_POINT count ON @timestamp AS type, pvalue | LIMIT 123'
+        );
       });
     });
   });

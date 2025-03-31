@@ -11,7 +11,7 @@ export const COPY_TO_CLIPBOARD_ICON = 'copyClipboard';
 export const COPY_TO_CLIPBOARD = i18n.translate(
   'xpack.securitySolution.actions.cellValue.copyToClipboard.displayName',
   {
-    defaultMessage: 'Copy to Clipboard',
+    defaultMessage: 'Copy to clipboard',
   }
 );
 

@@ -31,8 +31,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
-import { PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer, getAccessorType } from '../../shared_components';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
@@ -213,23 +212,21 @@ function SecondaryMetricEditor({ accessor, idPrefix, frame, layerId, setState, s
 function PrimaryMetricEditor(props: SubProps) {
   const { state, setState, frame, accessor, idPrefix, isInlineEditing } = props;
 
-  const currentData = frame.activeData?.[state.layerId];
-
-  const isMetricNumeric = isNumericFieldForDatatable(currentData, accessor);
-
   if (accessor == null) {
     return null;
   }
 
-  const hasDynamicColoring = Boolean(isMetricNumeric && state?.palette);
+  const { isNumeric: isMetricNumeric } = getAccessorType(props.datasource, accessor);
+
+  const hasDynamicColoring = Boolean(isMetricNumeric && state.palette);
 
   const supportsPercentPalette = Boolean(
     state.maxAccessor ||
       (state.breakdownByAccessor && !state.collapseFn) ||
-      state?.palette?.params?.rangeType === 'percent'
+      state.palette?.params?.rangeType === 'percent'
   );
 
-  const activePalette = state?.palette || {
+  const activePalette = state.palette || {
     type: 'palette',
     name: (supportsPercentPalette ? defaultPercentagePaletteParams : defaultNumberPaletteParams)
       .name,
@@ -314,7 +311,9 @@ function PrimaryMetricEditor(props: SubProps) {
           />
         </EuiFormRow>
       )}
-      {!hasDynamicColoring && <StaticColorControls {...props} />}
+      {!hasDynamicColoring && (
+        <StaticColorControls state={state} setState={setState} isMetricNumeric={isMetricNumeric} />
+      )}
       {hasDynamicColoring && (
         <EuiFormRow
           display="columnCompressed"
@@ -368,15 +367,11 @@ function PrimaryMetricEditor(props: SubProps) {
 function StaticColorControls({
   state,
   setState,
-  frame,
-}: Pick<Props, 'state' | 'setState' | 'frame'>) {
+  isMetricNumeric,
+}: Pick<Props, 'state' | 'setState'> & { isMetricNumeric: boolean }) {
   const colorLabel = i18n.translate('xpack.lens.metric.color', {
     defaultMessage: 'Color',
   });
-  const currentData = frame.activeData?.[state.layerId];
-  const isMetricNumeric = Boolean(
-    state.metricAccessor && isNumericFieldForDatatable(currentData, state.metricAccessor)
-  );
 
   const setColor = useCallback(
     (color: string) => {
@@ -421,8 +416,8 @@ export function DimensionEditorAdditionalSection({
 }: VisualizationDimensionEditorProps<MetricVisualizationState>) {
   const { euiTheme } = useEuiTheme();
 
-  const currentData = frame.activeData?.[state.layerId];
-  if (accessor !== state.metricAccessor || !isNumericFieldForDatatable(currentData, accessor)) {
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, accessor);
+  if (accessor !== state.metricAccessor || !isMetricNumeric) {
     return null;
   }
 

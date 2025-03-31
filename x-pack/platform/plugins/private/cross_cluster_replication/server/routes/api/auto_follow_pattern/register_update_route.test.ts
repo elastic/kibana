@@ -52,11 +52,9 @@ describe('[CCR API] Update auto-follow pattern', () => {
 
     expect(response.payload).toEqual({
       name: 'foo',
-      body: {
-        remote_cluster: 'bar1',
-        leader_index_patterns: ['bar2'],
-        follow_index_pattern: 'bar3',
-      },
+      remote_cluster: 'bar1',
+      leader_index_patterns: ['bar2'],
+      follow_index_pattern: 'bar3',
     });
   });
 });

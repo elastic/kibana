@@ -19,14 +19,14 @@ jest.mock('../../hooks/use_source_indices_field', () => ({
         elser_query_fields: [],
         dense_vector_query_fields: [],
         bm25_query_fields: ['field1', 'field2'],
-        source_fields: ['context_field1', 'context_field2'],
+        source_fields: ['title', 'description'],
         semantic_fields: [],
       },
       index2: {
         elser_query_fields: [],
         dense_vector_query_fields: [],
-        bm25_query_fields: ['field1', 'field2'],
-        source_fields: ['context_field1', 'context_field2'],
+        bm25_query_fields: ['foo', 'bar'],
+        source_fields: ['body'],
         semantic_fields: [],
       },
     },
@@ -47,8 +47,8 @@ const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
       [ChatFormFields.indices]: ['index1'],
       [ChatFormFields.docSize]: 1,
       [ChatFormFields.sourceFields]: {
-        index1: ['context_field1'],
-        index2: ['context_field2'],
+        index1: ['title'],
+        index2: ['body'],
       },
     },
   });
@@ -67,9 +67,15 @@ describe('EditContextFlyout component tests', () => {
   });
 
   it('should see the context fields', async () => {
-    expect(screen.getByTestId('contextFieldsSelectable-0')).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('contextFieldsSelectable-0'));
-    const fields = await screen.findAllByTestId('contextField');
-    expect(fields.length).toBe(2);
+    expect(screen.getByTestId('contextFieldsSelectable-index1')).toBeInTheDocument();
+    const listButton = screen
+      .getByTestId('contextFieldsSelectable-index1')
+      .querySelector('[data-test-subj="comboBoxToggleListButton"]');
+    expect(listButton).not.toBeNull();
+    fireEvent.click(listButton!);
+
+    for (const field of ['title', 'description']) {
+      expect(screen.getByTestId(`contextField-${field}`)).toBeInTheDocument();
+    }
   });
 });

@@ -33,7 +33,7 @@ describe('Color Palette', () => {
   });
   describe('colorTransformer()', () => {
     it('should just work', () => {
-      expect(colorTransformer(Color.color0)).toBe('#54B399');
+      expect(colorTransformer(Color.color0)).toBe('#16C5C0');
     });
   });
 });

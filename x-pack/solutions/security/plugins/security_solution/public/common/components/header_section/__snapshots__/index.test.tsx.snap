@@ -1,9 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`HeaderSection it renders 1`] = `
-<Header
-  $hideSubtitle={false}
-  className="toggle-expand siemHeaderSection"
+<header
+  css="unknown styles"
   data-test-subj="header-section"
 >
   <EuiFlexGroup
@@ -62,5 +61,5 @@ exports[`HeaderSection it renders 1`] = `
       />
     </EuiFlexItem>
   </EuiFlexGroup>
-</Header>
+</header>
 `;

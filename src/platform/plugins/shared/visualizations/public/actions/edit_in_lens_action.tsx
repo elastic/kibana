@@ -10,7 +10,6 @@
 import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TimefilterContract } from '@kbn/data-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAccessViewMode,
@@ -141,11 +140,11 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
 
   async isCompatible(context: EmbeddableApiContext) {
     const { embeddable } = context;
-    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== ViewMode.EDIT)
+    if (!compatibilityCheck(embeddable) || getInheritedViewMode(embeddable) !== 'edit')
       return false;
 
     const vis = embeddable.getVis();
-    const { visualize } = getCapabilities();
+    const { visualize_v2: visualize } = getCapabilities();
     if (!vis || !visualize.show) {
       return false;
     }

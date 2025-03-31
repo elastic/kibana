@@ -13,25 +13,27 @@ import { discoverServiceMock as services } from '../../../../__mocks__/services'
 
 describe('Resolve data view tests', () => {
   test('returns valid data for an existing data view', async () => {
-    const id = 'the-data-view-id';
+    const dataViewId = 'the-data-view-id';
     const result = await loadDataView({
-      id,
+      dataViewId,
       services,
-      dataViewList: [],
+      savedDataViews: [],
+      adHocDataViews: [],
     });
-    expect(result.loaded).toEqual(dataViewMock);
-    expect(result.stateVal).toEqual(id);
-    expect(result.stateValFound).toEqual(true);
+    expect(result.loadedDataView).toEqual(dataViewMock);
+    expect(result.requestedDataViewId).toEqual(dataViewId);
+    expect(result.requestedDataViewFound).toEqual(true);
   });
   test('returns fallback data for an invalid data view', async () => {
-    const id = 'invalid-id';
+    const dataViewId = 'invalid-id';
     const result = await loadDataView({
-      id,
+      dataViewId,
       services,
-      dataViewList: [],
+      savedDataViews: [],
+      adHocDataViews: [],
     });
-    expect(result.loaded).toEqual(dataViewMock);
-    expect(result.stateValFound).toBe(false);
-    expect(result.stateVal).toBe(id);
+    expect(result.loadedDataView).toEqual(dataViewMock);
+    expect(result.requestedDataViewFound).toBe(false);
+    expect(result.requestedDataViewId).toBe(dataViewId);
   });
 });

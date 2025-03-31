@@ -11,6 +11,7 @@ import {
   defaultColumnHeaderType,
   tableDefaults,
   dataTableSelectors,
+  TableId,
 } from '@kbn/securitysolution-data-table';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../../common/store';
@@ -21,7 +22,6 @@ import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../../timelines/components/timel
 import type { SecurityCellAction } from '../../types';
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../../types';
-import { getAlertConfigIdByScopeId } from '../../../../common/lib/triggers_actions_ui/alert_table_scope_config';
 
 const ICON = 'listAdd';
 const COLUMN_TOGGLE = i18n.translate('xpack.securitySolution.actions.toggleColumnToggle.label', {
@@ -68,11 +68,9 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
         return;
       }
 
-      const alertTableConfigurationId = getAlertConfigIdByScopeId(scopeId);
-      if (alertTableConfigurationId) {
-        services.triggersActionsUi.alertsTableConfigurationRegistry
-          .getActions(alertTableConfigurationId)
-          ?.toggleColumn(field.name);
+      // When the flyout was initiated from an alerts table, use its toggleColumn action
+      if (metadata.alertsTableRef?.current && scopeId === TableId.alertsOnAlertsPage) {
+        metadata.alertsTableRef.current.toggleColumn(field.name);
         return;
       }
 

@@ -10,7 +10,7 @@
 import React, { createContext, useMemo } from 'react';
 import { cloneDeep } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
-import { EuiListGroup, EuiPanel } from '@elastic/eui';
+import { EuiListGroup, EuiPanel, UseEuiTheme } from '@elastic/eui';
 
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
@@ -19,6 +19,7 @@ import {
   SerializedPanelState,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
+import { css } from '@emotion/react';
 
 import {
   CONTENT_ID,
@@ -41,7 +42,6 @@ import {
 import { DISPLAY_NAME } from '../../common';
 import { injectReferences } from '../../common/persistable_state';
 
-import '../components/links_component.scss';
 import { checkForDuplicateTitle, linksClient } from '../content_management';
 import { resolveLinks } from '../lib/resolve_links';
 import {
@@ -49,7 +49,7 @@ import {
   linksSerializeStateIsByReference,
 } from '../lib/deserialize_from_library';
 import { serializeLinksAttributes } from '../lib/serialize_attributes';
-import { isParentApiCompatible } from '../actions/compatibility_check';
+import { isParentApiCompatible } from '../actions/add_links_panel_action';
 
 export const LinksContext = createContext<LinksApi | null>(null);
 
@@ -248,9 +248,7 @@ export const getLinksEmbeddableFactory = () => {
         }, [links, layout]);
         return (
           <EuiPanel
-            className={`linksComponent ${
-              layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'
-            }`}
+            className={layout === LINKS_HORIZONTAL_LAYOUT ? 'eui-xScroll' : 'eui-yScroll'}
             paddingSize="xs"
             data-shared-item
             data-rendering-count={1}
@@ -259,6 +257,7 @@ export const getLinksEmbeddableFactory = () => {
           >
             <EuiListGroup
               maxWidth={false}
+              css={styles}
               className={`${layout ?? LINKS_VERTICAL_LAYOUT}LayoutWrapper`}
               data-test-subj="links--component--listGroup"
             >
@@ -275,3 +274,20 @@ export const getLinksEmbeddableFactory = () => {
   };
   return linksEmbeddableFactory;
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    '.linksPanelLink': {
+      maxWidth: 'fit-content', // ensures that the error tooltip shows up **right beside** the link label
+    },
+    '&.verticalLayoutWrapper': {
+      gap: euiTheme.size.xs,
+    },
+    '&.horizontalLayoutWrapper': {
+      height: '100%',
+      display: 'flex',
+      flexWrap: 'nowrap',
+      alignItems: 'center',
+      flexDirection: 'row',
+    },
+  });

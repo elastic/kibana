@@ -23,10 +23,8 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -69,11 +67,8 @@ import {
   suggestEMSTermJoinConfig,
 } from './api';
 import type { MapsXPackConfig, MapsConfigType } from '../server/config';
-import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/action';
-import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
-import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID } from '../common/constants';
-import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { mapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import {
   setIsCloudEnabled,
@@ -89,6 +84,7 @@ import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
 import { MapRendererLazy } from './react_embeddable/map_renderer/map_renderer_lazy';
+import { registerUiActions } from './trigger_actions/register_ui_actions';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -192,7 +188,7 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
+    plugins.visualizations.registerAlias(mapsVisTypeAlias);
 
     core.application.register({
       id: APP_ID,
@@ -251,13 +247,9 @@ export class MapsPlugin
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
 
-    if (core.application.capabilities.maps.show) {
-      plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
-    }
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, synchronizeMovementAction);
+    registerUiActions(core, plugins);
 
-    if (!core.application.capabilities.maps.save) {
+    if (!core.application.capabilities.maps_v2.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);
     }
 

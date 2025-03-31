@@ -38,25 +38,23 @@ export async function getMetadataForDependency({
     apm: {
       events: [ProcessorEvent.span],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName,
-              },
+    track_total_hits: false,
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName,
             },
-            ...rangeQuery(start, end),
-          ],
-        },
+          },
+          ...rangeQuery(start, end),
+        ],
       },
-      fields,
-      sort: {
-        '@timestamp': 'desc',
-      },
+    },
+    fields,
+    sort: {
+      '@timestamp': 'desc',
     },
   });
 

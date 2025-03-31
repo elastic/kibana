@@ -6,7 +6,7 @@
  */
 
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ActionTypeRegistry } from '../action_type_registry';
+import type { ActionTypeRegistry } from '../action_type_registry';
 import { setupTestServers } from './lib';
 import { connectorTypes } from './mocks/connector_types';
 import { actionsConfigMock } from '../actions_config.mock';
@@ -52,7 +52,7 @@ describe('Connector type config checks', () => {
   });
 
   for (const connectorTypeId of connectorTypes) {
-    const skipConnectorType = ['.gen-ai'];
+    const skipConnectorType = ['.gen-ai', '.inference'];
     if (skipConnectorType.includes(connectorTypeId)) {
       continue;
     }

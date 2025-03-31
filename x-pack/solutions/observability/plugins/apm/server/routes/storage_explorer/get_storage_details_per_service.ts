@@ -55,47 +55,45 @@ export async function getStorageDetailsPerProcessorEvent({
           ProcessorEvent.metric,
         ],
       },
-      body: {
-        size: 0,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...rangeQuery(start, end),
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                : []),
-            ],
-          },
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...rangeQuery(start, end),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              processor_event: {
-                terms: {
-                  field: PROCESSOR_EVENT,
-                  size: 10,
-                },
-                aggs: {
-                  number_of_metric_docs_for_processor_event: {
-                    value_count: {
-                      field: PROCESSOR_EVENT,
-                    },
+      },
+      aggs: {
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            processor_event: {
+              terms: {
+                field: PROCESSOR_EVENT,
+                size: 10,
+              },
+              aggs: {
+                number_of_metric_docs_for_processor_event: {
+                  value_count: {
+                    field: PROCESSOR_EVENT,
                   },
-                  indices: {
-                    terms: {
-                      field: INDEX,
-                      size: 500,
-                    },
-                    aggs: {
-                      number_of_metric_docs_for_index: {
-                        value_count: {
-                          field: INDEX,
-                        },
+                },
+                indices: {
+                  terms: {
+                    field: INDEX,
+                    size: 500,
+                  },
+                  aggs: {
+                    number_of_metric_docs_for_index: {
+                      value_count: {
+                        field: INDEX,
                       },
                     },
                   },
@@ -173,36 +171,34 @@ export async function getStorageDetailsPerIndex({
             ProcessorEvent.metric,
           ],
         },
-        body: {
-          size: 0,
-          track_total_hits: false,
-          query: {
-            bool: {
-              filter: [
-                ...environmentQuery(environment),
-                ...kqlQuery(kuery),
-                ...rangeQuery(start, end),
-                ...termQuery(SERVICE_NAME, serviceName),
-                ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                  ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                  : []),
-              ],
-            },
+        size: 0,
+        track_total_hits: false,
+        query: {
+          bool: {
+            filter: [
+              ...environmentQuery(environment),
+              ...kqlQuery(kuery),
+              ...rangeQuery(start, end),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+                : []),
+            ],
           },
-          aggs: {
-            sample: {
-              random_sampler: randomSampler,
-              aggs: {
-                indices: {
-                  terms: {
-                    field: INDEX,
-                    size: 500,
-                  },
-                  aggs: {
-                    number_of_metric_docs_for_index: {
-                      value_count: {
-                        field: INDEX,
-                      },
+        },
+        aggs: {
+          sample: {
+            random_sampler: randomSampler,
+            aggs: {
+              indices: {
+                terms: {
+                  field: INDEX,
+                  size: 500,
+                },
+                aggs: {
+                  number_of_metric_docs_for_index: {
+                    value_count: {
+                      field: INDEX,
                     },
                   },
                 },

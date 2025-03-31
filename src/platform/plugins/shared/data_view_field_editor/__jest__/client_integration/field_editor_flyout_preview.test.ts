@@ -754,10 +754,8 @@ describe('Field editor Preview panel', () => {
       const expectedParamsToFetchClusterData = {
         params: {
           index: indexPatternNameForTest,
-          body: {
-            fields: ['*'],
-            size: 50,
-          },
+          fields: ['*'],
+          size: 50,
         },
       };
 
@@ -782,15 +780,13 @@ describe('Field editor Preview panel', () => {
       expect(searchMeta.totalCalls).toBe(initialCount + 1);
       expect(searchMeta.lastCallParams).toEqual({
         params: {
-          body: {
-            fields: ['*'],
-            query: {
-              ids: {
-                values: [nextId],
-              },
+          fields: ['*'],
+          query: {
+            ids: {
+              values: [nextId],
             },
-            size: 1,
           },
+          size: 1,
           index: indexPatternNameForTest,
         },
       });

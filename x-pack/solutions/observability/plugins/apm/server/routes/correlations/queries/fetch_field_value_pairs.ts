@@ -42,22 +42,20 @@ export const fetchFieldValuePairs = async ({
           apm: {
             events: [eventType],
           },
-          body: {
-            track_total_hits: false,
-            size: 0,
-            query: getCommonCorrelationsQuery({
-              start,
-              end,
-              environment,
-              kuery,
-              query,
-            }),
-            aggs: {
-              attribute_terms: {
-                terms: {
-                  field: fieldName,
-                  size: TERMS_SIZE,
-                },
+          track_total_hits: false,
+          size: 0,
+          query: getCommonCorrelationsQuery({
+            start,
+            end,
+            environment,
+            kuery,
+            query,
+          }),
+          aggs: {
+            attribute_terms: {
+              terms: {
+                field: fieldName,
+                size: TERMS_SIZE,
               },
             },
           },

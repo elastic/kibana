@@ -22,7 +22,7 @@ test('should return visualize edit url', () => {
   } as unknown as VisualizationSavedObject;
   expect(getInAppUrl(obj)).toEqual({
     path: '/app/visualize#/edit/1',
-    uiCapabilitiesPath: 'visualize.show',
+    uiCapabilitiesPath: 'visualize_v2.show',
   });
 });
 

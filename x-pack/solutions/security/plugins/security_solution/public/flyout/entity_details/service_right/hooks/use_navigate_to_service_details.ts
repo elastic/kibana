@@ -19,7 +19,6 @@ interface UseNavigateToServiceDetailsParams {
   email?: string[];
   scopeId: string;
   contextID: string;
-  isDraggable?: boolean;
   isRiskScoreExist: boolean;
   isPreviewMode?: boolean;
 }
@@ -39,14 +38,13 @@ export const useNavigateToServiceDetails = ({
   serviceName,
   scopeId,
   contextID,
-  isDraggable,
   isRiskScoreExist,
   isPreviewMode,
 }: UseNavigateToServiceDetailsParams): UseNavigateToServiceDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const isLinkEnabled = !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);
@@ -75,7 +73,6 @@ export const useNavigateToServiceDetails = ({
           contextID,
           serviceName,
           scopeId,
-          isDraggable,
         },
       };
 
@@ -89,7 +86,6 @@ export const useNavigateToServiceDetails = ({
     },
     [
       contextID,
-      isDraggable,
       isNewNavigationEnabled,
       isPreviewMode,
       isRiskScoreExist,

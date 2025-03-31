@@ -11,6 +11,7 @@ import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/dat
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 
 export interface LogsContextService {
+  getAllLogsIndexPattern(): string | undefined;
   isLogsIndexPattern(indexPattern: unknown): boolean;
 }
 
@@ -32,34 +33,36 @@ export const DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP = createRegExpPatternFrom
   'data'
 );
 
-export const createLogsContextService = async ({ logsDataAccess }: LogsContextServiceDeps) => {
-  let logSources: string[] | undefined;
+export const createLogsContextService = async ({
+  logsDataAccess,
+}: LogsContextServiceDeps): Promise<LogsContextService> => {
+  let allLogsIndexPattern: string | undefined;
+  let allowedDataSources: Array<string | RegExp> = [DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP];
 
   if (logsDataAccess) {
     const logSourcesService = logsDataAccess.services.logSourcesService;
-    logSources = (await logSourcesService.getLogSources())
-      .map((logSource) => logSource.indexPattern)
-      .join(',') // TODO: Will be replaced by helper in: https://github.com/elastic/kibana/pull/192003
-      .split(',');
+    allLogsIndexPattern = await logSourcesService.getFlattenedLogSources();
+    allowedDataSources = allowedDataSources.concat(allLogsIndexPattern.split(','));
   }
 
-  const ALLOWED_LOGS_DATA_SOURCES = [
-    DEFAULT_ALLOWED_LOGS_BASE_PATTERNS_REGEXP,
-    ...(logSources ? logSources : []),
-  ];
-
-  return getLogsContextService(ALLOWED_LOGS_DATA_SOURCES);
+  return getLogsContextService({
+    allLogsIndexPattern,
+    allowedDataSources,
+  });
 };
 
-export const getLogsContextService = (allowedDataSources: Array<string | RegExp>) => {
-  const isLogsIndexPattern = (indexPattern: unknown) => {
-    return (
-      typeof indexPattern === 'string' &&
-      testPatternAgainstAllowedList(allowedDataSources)(indexPattern)
-    );
-  };
+export const getLogsContextService = ({
+  allLogsIndexPattern,
+  allowedDataSources,
+}: {
+  allLogsIndexPattern: string | undefined;
+  allowedDataSources: Array<string | RegExp>;
+}): LogsContextService => {
+  const getAllLogsIndexPattern = () => allLogsIndexPattern;
+  const isLogsIndexPattern = testPatternAgainstAllowedList(allowedDataSources);
 
   return {
+    getAllLogsIndexPattern,
     isLogsIndexPattern,
   };
 };

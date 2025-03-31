@@ -15,7 +15,7 @@ import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { updateColumnParam } from '../../layer_helpers';
-import { supportedFormats } from '../../../../../../common/expressions/format_column/supported_formats';
+import { supportedFormats } from '../../../../../../common/expressions/defs/format_column/supported_formats';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../../../types';
 import { getInvalidFieldMessage, isValidNumber } from '../helpers';
@@ -137,6 +137,9 @@ export const rangeOperation: OperationDefinition<
       label: field.name,
       sourceField: field.name,
     };
+  },
+  toESQL: (column, columnId, _indexPattern, layer, uiSettings) => {
+    return undefined;
   },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;

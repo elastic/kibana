@@ -13,15 +13,15 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
+import { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import type { Query, BoolQuery } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
+import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
-import { RULE_DETAILS_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_EXECUTION_TAB,
@@ -30,6 +30,7 @@ import {
   RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
 } from '../constants';
 import type { TabId } from '../rule_details';
+import { getColumns } from '../../../components/alerts_table/common/get_columns';
 
 interface Props {
   activeTabId: TabId;
@@ -44,7 +45,10 @@ interface Props {
   ruleType: any;
   onEsQueryChange: (query: { bool: BoolQuery }) => void;
   onSetTabId: (tabId: TabId) => void;
+  onControlApiAvailable?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 }
+
+const tableColumns = getColumns();
 
 export function RuleDetailsTabs({
   activeTabId,
@@ -55,18 +59,21 @@ export function RuleDetailsTabs({
   ruleType,
   onSetTabId,
   onEsQueryChange,
+  onControlApiAvailable,
 }: Props) {
   const {
-    triggersActionsUi: {
-      alertsTableConfigurationRegistry,
-      getAlertsStateTable: AlertsStateTable,
-      getRuleEventLogList: RuleEventLogList,
-    },
+    triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
-  const { observabilityRuleTypeRegistry } = usePluginContext();
 
-  const ruleQuery = useRef<Query[]>([
-    { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
+  const ruleFilters = useRef<Filter[]>([
+    {
+      query: {
+        match_phrase: {
+          'kibana.alert.rule.uuid': ruleId,
+        },
+      },
+      meta: {},
+    },
   ]);
 
   const tabs: EuiTabbedContentTab[] = [
@@ -84,22 +91,21 @@ export function RuleDetailsTabs({
             appName={RULE_DETAILS_ALERTS_SEARCH_BAR_ID}
             onEsQueryChange={onEsQueryChange}
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
-            defaultSearchQueries={ruleQuery.current}
+            defaultFilters={ruleFilters.current}
+            disableLocalStorageSync={true}
+            onControlApiAvailable={onControlApiAvailable}
           />
           <EuiSpacer size="s" />
 
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
               {esQuery && ruleTypeIds && (
-                <AlertsStateTable
-                  alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                  configurationId={RULE_DETAILS_ALERTS_TABLE_CONFIG_ID}
+                <ObservabilityAlertsTable
                   id={RULE_DETAILS_PAGE_ID}
                   ruleTypeIds={ruleTypeIds}
                   consumers={observabilityAlertFeatureIds}
                   query={esQuery}
-                  showAlertStatusWithFlapping
-                  cellContext={{ observabilityRuleTypeRegistry }}
+                  columns={tableColumns}
                 />
               )}
             </EuiFlexItem>

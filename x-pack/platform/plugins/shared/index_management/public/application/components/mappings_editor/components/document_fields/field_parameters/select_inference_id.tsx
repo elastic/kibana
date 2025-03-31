@@ -7,11 +7,11 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiFormRow,
   EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
@@ -19,7 +19,6 @@ import {
   EuiSelectableOption,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
@@ -160,7 +159,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         </>
       }
       isOpen={isInferencePopoverVisible}
-      panelPaddingSize="m"
+      panelPaddingSize="none"
       closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
     >
       <EuiContextMenuPanel>
@@ -204,55 +203,55 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
         )}
       </EuiContextMenuPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiPanel color="transparent" paddingSize="s">
-        <EuiTitle size="xxxs">
-          <h3>
-            {i18n.translate(
+      <EuiContextMenuPanel>
+        <EuiPanel color="transparent" paddingSize="s">
+          <EuiFormRow
+            label={i18n.translate(
               'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.Label',
               {
                 defaultMessage: 'Existing endpoints',
               }
             )}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="xs" />
-
-        <EuiSelectable
-          aria-label={i18n.translate(
-            'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
-            {
-              defaultMessage: 'Existing endpoints',
-            }
-          )}
-          data-test-subj={dataTestSubj}
-          searchable
-          isLoading={isLoading}
-          singleSelection="always"
-          defaultChecked
-          searchProps={{
-            compressed: true,
-            placeholder: i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
-              {
-                defaultMessage: 'Search',
-              }
-            ),
-          }}
-          options={options}
-          onChange={(newOptions) => {
-            setValue(newOptions.find((option) => option.checked)?.label || '');
-          }}
-        >
-          {(list, search) => (
-            <>
-              {search}
-              {list}
-            </>
-          )}
-        </EuiSelectable>
-      </EuiPanel>
+          >
+            <EuiSelectable
+              aria-label={i18n.translate(
+                'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.ariaLabel',
+                {
+                  defaultMessage: 'Existing endpoints',
+                }
+              )}
+              data-test-subj={dataTestSubj}
+              searchable
+              isLoading={isLoading}
+              singleSelection="always"
+              defaultChecked
+              searchProps={{
+                compressed: true,
+                placeholder: i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.inferenceId.popover.selectable.placeholder',
+                  {
+                    defaultMessage: 'Search',
+                  }
+                ),
+              }}
+              options={options}
+              onChange={(newOptions) => {
+                setValue(newOptions.find((option) => option.checked)?.label || '');
+              }}
+            >
+              {(list, search) => (
+                <>
+                  {search}
+                  <EuiHorizontalRule margin="xs" />
+                  {list}
+                </>
+              )}
+            </EuiSelectable>
+          </EuiFormRow>
+        </EuiPanel>
+      </EuiContextMenuPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiContextMenuItem icon={<EuiIcon type="help" color="primary" />} size="s">
+      <EuiContextMenuItem icon={<EuiIcon type="help" color="primary" />} size="m">
         <EuiLink
           href={docLinks.links.inferenceManagement.inferenceAPIDocumentation}
           target="_blank"
@@ -271,7 +270,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
   return (
     <>
       <EuiSpacer />
-      <EuiFlexGroup data-test-subj="selectInferenceId">
+      <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           {inferencePopover()}
           {isInferenceFlyoutVisible ? (
@@ -286,18 +285,20 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
             </Suspense>
           ) : null}
         </EuiFlexItem>
-        <EuiFlexItem grow={true}>
-          <EuiCallOut
-            size="s"
-            color="warning"
-            title={i18n.translate(
-              'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
-              {
-                defaultMessage:
-                  'The referenced model for this inference endpoint will be started when adding this field.',
-              }
-            )}
-          />
+        <EuiFlexItem grow={false}>
+          <EuiPanel color="transparent" paddingSize="s">
+            <EuiText color="subdued" size="s">
+              <p>
+                {i18n.translate(
+                  'xpack.idxMgmt.mappingsEditor.parameters.noReferenceModelStartWarningMessage',
+                  {
+                    defaultMessage:
+                      'The referenced model for this inference endpoint will be started when adding this field.',
+                  }
+                )}
+              </p>
+            </EuiText>
+          </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

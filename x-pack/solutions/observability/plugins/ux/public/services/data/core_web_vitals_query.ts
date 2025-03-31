@@ -78,58 +78,56 @@ export function coreWebVitalsQuery(
     end,
   });
   const params = mergeProjection(projection, {
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [...projection.body.query.bool.filter],
+    size: 0,
+    query: {
+      bool: {
+        filter: [...projection.query.bool.filter],
+      },
+    },
+    aggs: {
+      coreVitalPages: {
+        filter: {
+          exists: {
+            field: 'transaction.experience',
+          },
         },
       },
-      aggs: {
-        coreVitalPages: {
-          filter: {
-            exists: {
-              field: 'transaction.experience',
-            },
-          },
+      lcp: {
+        percentiles: {
+          field: LCP_FIELD,
+          percents: [percentile],
         },
-        lcp: {
-          percentiles: {
-            field: LCP_FIELD,
-            percents: [percentile],
-          },
+      },
+      cls: {
+        percentiles: {
+          field: CLS_FIELD,
+          percents: [percentile],
         },
-        cls: {
-          percentiles: {
-            field: CLS_FIELD,
-            percents: [percentile],
-          },
+      },
+      tbt: {
+        percentiles: {
+          field: TBT_FIELD,
+          percents: [percentile],
         },
-        tbt: {
-          percentiles: {
-            field: TBT_FIELD,
-            percents: [percentile],
-          },
+      },
+      fcp: {
+        percentiles: {
+          field: FCP_FIELD,
+          percents: [percentile],
         },
-        fcp: {
-          percentiles: {
-            field: FCP_FIELD,
-            percents: [percentile],
-          },
+      },
+      lcpRanks: {
+        percentile_ranks: {
+          field: LCP_FIELD,
+          values: [2500, 4000],
+          keyed: false,
         },
-        lcpRanks: {
-          percentile_ranks: {
-            field: LCP_FIELD,
-            values: [2500, 4000],
-            keyed: false,
-          },
-        },
-        clsRanks: {
-          percentile_ranks: {
-            field: CLS_FIELD,
-            values: [0.1, 0.25],
-            keyed: false,
-          },
+      },
+      clsRanks: {
+        percentile_ranks: {
+          field: CLS_FIELD,
+          values: [0.1, 0.25],
+          keyed: false,
         },
       },
     },

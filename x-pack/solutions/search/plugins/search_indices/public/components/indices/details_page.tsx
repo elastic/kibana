@@ -40,13 +40,14 @@ import { useUsageTracker } from '../../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { usePageChrome } from '../../hooks/use_page_chrome';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { useIndexManagementBreadcrumbs } from '../../hooks/use_index_management_breadcrumbs';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
   const {
+    cloud,
     console: consolePlugin,
     docLinks,
     application,
@@ -81,8 +82,9 @@ export const SearchIndexDetailsPage = () => {
 
   const hasDocuments = Boolean(isInitialLoading || indexDocuments?.results?.data.length);
 
+  const indexManagementBreadcrumbs = useIndexManagementBreadcrumbs();
   usePageChrome(indexName, [
-    ...IndexManagementBreadcrumbs,
+    ...indexManagementBreadcrumbs,
     {
       text: indexName,
     },
@@ -290,7 +292,12 @@ export const SearchIndexDetailsPage = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <QuickStats indexDocuments={indexDocuments} index={index} mappings={mappings} />
+                    <QuickStats
+                      isStateless={cloud?.isServerlessEnabled ?? false}
+                      indexDocuments={indexDocuments}
+                      index={index}
+                      mappings={mappings}
+                    />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

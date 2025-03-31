@@ -17,7 +17,7 @@ const configSchema = schema.object({
   // Config namespace for developer-specific settings.
   developer: schema.maybe(
     schema.object({
-      // Settings for the project switcher.
+      // Settings for the project switcher.  This is now deprecated.
       projectSwitcher: schema.maybe(
         schema.object({
           // Should the switcher be enabled?
@@ -53,6 +53,12 @@ export const config: PluginConfigDescriptor<ConfigType> = {
   exposeToBrowser: {
     developer: true,
   },
+  deprecations: ({ unused }) => [
+    unused('developer', { level: 'critical' }),
+    unused('developer.projectSwitcher', { level: 'critical' }),
+    unused('developer.projectSwitcher.enabled', { level: 'critical' }),
+    unused('developer.projectSwitcher.currentType', { level: 'critical' }),
+  ],
 };
 
 export type ServerlessConfig = TypeOf<typeof configSchema>;

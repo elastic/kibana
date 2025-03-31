@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import {
   EuiButton,
@@ -25,6 +25,8 @@ import { useRulesTableContext } from '../../../rule_management_ui/components/rul
 import * as i18n from './translations';
 import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { defaultRangeValue, GapRangeValue } from '../../constants';
+import { ManualRuleRunEventTypes } from '../../../../common/lib/telemetry/events/manual_rule_run/types';
+import { useKibana } from '../../../../common/lib/kibana';
 
 export const RulesWithGapsOverviewPanel = () => {
   const {
@@ -38,6 +40,17 @@ export const RulesWithGapsOverviewPanel = () => {
     statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
   });
   const [isPopoverOpen, setPopover] = useState(false);
+  const telemetry = useKibana().services.telemetry;
+
+  useEffect(() => {
+    return () => {
+      // reset filter options when unmounting
+      setFilterOptions({
+        gapSearchRange: defaultRangeValue,
+        showRulesWithGaps: false,
+      });
+    };
+  }, [setFilterOptions]);
 
   const rangeValueToLabel = {
     [GapRangeValue.LAST_24_H]: i18n.RULE_GAPS_OVERVIEW_PANEL_LAST_24_HOURS_LABEL,
@@ -64,9 +77,14 @@ export const RulesWithGapsOverviewPanel = () => {
     </EuiButton>
   );
 
-  const handleShowRulesWithGapsFilterButtonClick = (value: boolean) => {
+  const handleShowRulesWithGapsFilterButtonClick = () => {
+    if (!showRulesWithGaps) {
+      telemetry.reportEvent(ManualRuleRunEventTypes.ShowOnlyRulesWithGaps, {
+        dateRange: gapSearchRange ?? defaultRangeValue,
+      });
+    }
     setFilterOptions({
-      showRulesWithGaps: value,
+      showRulesWithGaps: !showRulesWithGaps,
     });
   };
 
@@ -120,15 +138,9 @@ export const RulesWithGapsOverviewPanel = () => {
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton
-              withNext
-              hasActiveFilters={!showRulesWithGaps}
-              onClick={() => handleShowRulesWithGapsFilterButtonClick(false)}
-            >
-              {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_ALL_RULES_LABEL}
-            </EuiFilterButton>
-            <EuiFilterButton
               hasActiveFilters={showRulesWithGaps}
-              onClick={() => handleShowRulesWithGapsFilterButtonClick(true)}
+              onClick={handleShowRulesWithGapsFilterButtonClick}
+              iconType={showRulesWithGaps ? `checkInCircleFilled` : undefined}
             >
               {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL}
             </EuiFilterButton>

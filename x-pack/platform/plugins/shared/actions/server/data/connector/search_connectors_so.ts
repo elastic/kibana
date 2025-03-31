@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchConnectorsSoParams } from './types';
+import type { SearchConnectorsSoParams } from './types';
 
 export const searchConnectorsSo = async ({
   esClient,
@@ -15,12 +15,10 @@ export const searchConnectorsSo = async ({
   return esClient.search({
     index: kibanaIndices,
     ignore_unavailable: true,
-    body: {
-      aggs,
-      size: 0,
-      query: {
-        match_all: {},
-      },
+    aggs,
+    size: 0,
+    query: {
+      match_all: {},
     },
   });
 };

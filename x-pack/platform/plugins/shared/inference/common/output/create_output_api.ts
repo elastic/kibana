@@ -36,6 +36,9 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
     functionCalling,
     stream,
     abortSignal,
+    maxRetries,
+    retryConfiguration,
+    metadata,
     retry,
   }: DefaultOutputOptions): OutputCompositeResponse<string, ToolSchema | undefined, boolean> {
     if (stream && retry !== undefined) {
@@ -56,6 +59,9 @@ export function createOutputApi(chatCompleteApi: ChatCompleteAPI) {
       modelName,
       functionCalling,
       abortSignal,
+      maxRetries,
+      retryConfiguration,
+      metadata,
       system,
       messages,
       ...(schema

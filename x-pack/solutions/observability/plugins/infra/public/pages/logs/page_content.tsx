@@ -16,6 +16,7 @@ import {
   type ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability';
+import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
@@ -40,6 +41,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
   const onboardingLocator = share?.url.locators.get<ObservabilityOnboardingLocatorParams>(
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
+
+  const managementLocator = share?.url.locators.get(MANAGEMENT_APP_LOCATOR);
+
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
@@ -84,7 +88,19 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={routes.logsAnomalies.path} exact />
         <RedirectWithQueryParams from={'/'} to={routes.logsAnomalies.path} exact />
+        // Legacy renders and redirects
+        <Route
+          path="/settings"
+          exact
+          render={() => {
+            managementLocator?.navigate({
+              sectionId: 'kibana',
+              appId: 'settings?query=observability%3AlogSources',
+            });
 
+            return null;
+          }}
+        />
         <Route render={() => <NotFoundPage title={pageTitle} />} />
       </Routes>
     </>

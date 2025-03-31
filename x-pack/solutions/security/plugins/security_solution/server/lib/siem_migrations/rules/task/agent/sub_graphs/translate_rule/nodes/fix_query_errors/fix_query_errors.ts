@@ -6,30 +6,26 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
+import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
 import type { GraphNode } from '../../types';
 import { RESOLVE_ESQL_ERRORS_TEMPLATE } from './prompts';
 
 interface GetFixQueryErrorsNodeParams {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  esqlKnowledgeBase: EsqlKnowledgeBase;
   logger: Logger;
 }
 
 export const getFixQueryErrorsNode = ({
-  inferenceClient,
-  connectorId,
+  esqlKnowledgeBase,
   logger,
 }: GetFixQueryErrorsNodeParams): GraphNode => {
-  const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
     const rule = state.elastic_rule;
     const prompt = await RESOLVE_ESQL_ERRORS_TEMPLATE.format({
       esql_errors: state.validation_errors.esql_errors,
       esql_query: rule.query,
     });
-    const response = await esqlKnowledgeBaseCaller(prompt);
+    const response = await esqlKnowledgeBase.translate(prompt);
 
     const esqlQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
     rule.query = esqlQuery;

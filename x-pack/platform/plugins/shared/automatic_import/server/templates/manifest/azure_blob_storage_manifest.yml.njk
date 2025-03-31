@@ -5,6 +5,28 @@
   description: |
     {{ data_stream_description }}
   vars:
+    - name: account_name
+      type: text
+      title: Account Name
+      description: |
+        This attribute is required for various internal operations with respect to authentication, creating service clients and blob clients which are used internally for various processing purposes.
+      required: true
+      show_user: true
+    - name: service_account_key
+      type: password
+      title: Service Account Key
+      description: |
+        This attribute contains the access key, found under the Access keys section on Azure Cloud, under the respective storage account. A single storage account can contain multiple containers, and they will all use this common access key.
+      required: false
+      show_user: true
+      secret: true
+    - name: service_account_uri
+      type: text
+      title: Service Account URI
+      description: |
+        This attribute contains the connection string, found under the Access keys section on Azure Cloud, under the respective storage account. A single storage account can contain multiple containers, and they will all use this common connection string.
+      required: false
+      show_user: false
     - name: storage_url
       type: text
       title: Storage URL

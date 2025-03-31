@@ -34,6 +34,9 @@ export const MigrationCleanupResult = z.object({
 
 export type AlertsMigrationCleanupRequestBody = z.infer<typeof AlertsMigrationCleanupRequestBody>;
 export const AlertsMigrationCleanupRequestBody = z.object({
+  /**
+   * Array of `migration_id`s to cleanup.
+   */
   migration_ids: z.array(z.string()).min(1),
 });
 export type AlertsMigrationCleanupRequestBodyInput = z.input<

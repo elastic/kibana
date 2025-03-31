@@ -22,7 +22,7 @@ import {
 } from '../../tasks/api_fixtures';
 import type { ServerlessRoleName } from '../../support/roles';
 
-describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
+describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   ['t1_analyst', 't2_analyst'].forEach((role: string) => {
     describe(`${role}- READ + runSavedQueries `, () => {
       let savedQueryName: string;

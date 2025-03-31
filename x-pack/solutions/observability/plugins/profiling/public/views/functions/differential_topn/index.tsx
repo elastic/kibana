@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FramesSummary } from '../../../components/frames_summary';
@@ -22,6 +23,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 
 export function DifferentialTopNFunctionsView() {
+  const { onPageReady } = usePerformanceContext();
   const { query } = useProfilingParams('/functions/differential');
   const {
     rangeFrom,
@@ -38,6 +40,7 @@ export function DifferentialTopNFunctionsView() {
     pageIndex = 0,
     comparisonSortDirection,
     comparisonSortField,
+    searchFunctionName = '',
   } = query;
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -126,10 +129,10 @@ export function DifferentialTopNFunctionsView() {
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
 
-  function handleOnFrameClick(functionName: string) {
+  function handleOnFrameClick(value: string) {
     profilingRouter.push('/flamegraphs/flamegraph', {
       path: {},
-      query: { ...query, searchText: functionName },
+      query: { ...query, searchText: value },
     });
   }
 
@@ -146,6 +149,35 @@ export function DifferentialTopNFunctionsView() {
       query: { ...query, ...sorting },
     });
   }
+
+  function handleSearchFunctionNameChange(value: string) {
+    profilingRouter.push('/functions/differential', {
+      path: {},
+      query: { ...query, searchFunctionName: value },
+    });
+  }
+
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled || comparisonState.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalCount',
+          value1: state.data?.TotalCount ?? 0,
+        },
+      });
+    }
+  }, [
+    state.status,
+    state.data?.TotalCount,
+    comparisonState.status,
+    onPageReady,
+    rangeTo,
+    rangeFrom,
+  ]);
 
   return (
     <>
@@ -209,6 +241,8 @@ export function DifferentialTopNFunctionsView() {
               sortDirection={sortDirection}
               sortField={sortField}
               totalSeconds={totalSeconds}
+              searchFunctionName={searchFunctionName}
+              onSearchFunctionNameChange={handleSearchFunctionNameChange}
             />
           </AsyncComponent>
         </EuiFlexItem>

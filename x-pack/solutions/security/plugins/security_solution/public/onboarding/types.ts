@@ -6,7 +6,7 @@
  */
 
 import type React from 'react';
-import type { IconType } from '@elastic/eui';
+import type { EuiBadgeProps, IconType } from '@elastic/eui';
 import type { LicenseType } from '@kbn/licensing-plugin/public';
 
 import type { ExperimentalFeatures } from '../../common';
@@ -47,6 +47,8 @@ export type SetExpandedCardId = (
   cardId: OnboardingCardId | null,
   options?: { scroll?: boolean }
 ) => void;
+
+export type CardBadge = 'beta' | 'tech_preview' | EuiBadgeProps;
 
 export type OnboardingCardComponent<TMetadata extends {} = {}> = React.ComponentType<{
   /**
@@ -108,6 +110,10 @@ export interface OnboardingConfigAvailabilityProps {
    * The experimental features required to enable the item.
    */
   experimentalFlagRequired?: keyof ExperimentalFeatures;
+  /**
+   * The disabled experimental features required to enable the item.
+   */
+  disabledExperimentalFlagRequired?: keyof ExperimentalFeatures;
 }
 
 export interface OnboardingCardConfig<TMetadata extends {} = {}>
@@ -126,6 +132,10 @@ export interface OnboardingCardConfig<TMetadata extends {} = {}>
    * @returns Promise for the complete status
    */
   checkComplete?: OnboardingCardCheckComplete<TMetadata>;
+  /** Optional icon for dark mode */
+  iconDark?: IconType;
+  /** Optional badge to display on the card. */
+  badge?: CardBadge;
 }
 
 export interface OnboardingGroupConfig {

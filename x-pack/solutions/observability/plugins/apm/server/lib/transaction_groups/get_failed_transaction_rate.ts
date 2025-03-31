@@ -74,22 +74,20 @@ export async function getFailedTransactionRate({
     apm: {
       sources: [{ documentType, rollupInterval }],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: { bool: { filter, must_not: mustNot } },
-      aggs: {
-        ...outcomes,
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: `${bucketSizeInSeconds}s`,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
-          },
-          aggs: {
-            ...outcomes,
-          },
+    track_total_hits: false,
+    size: 0,
+    query: { bool: { filter, must_not: mustNot } },
+    aggs: {
+      ...outcomes,
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: `${bucketSizeInSeconds}s`,
+          min_doc_count: 0,
+          extended_bounds: { min: startWithOffset, max: endWithOffset },
+        },
+        aggs: {
+          ...outcomes,
         },
       },
     },

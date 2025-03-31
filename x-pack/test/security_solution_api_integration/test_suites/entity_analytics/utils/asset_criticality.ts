@@ -199,7 +199,7 @@ export const createAssetCriticalityRecords = async (
   records: CreateAssetCriticalityRecord[],
   es: Client
 ) => {
-  const ops = records.flatMap((record) => [
+  const operations = records.flatMap((record) => [
     {
       index: {
         _index: getAssetCriticalityIndex(),
@@ -210,7 +210,7 @@ export const createAssetCriticalityRecords = async (
   ]);
 
   const res = await es.bulk({
-    body: ops,
+    operations,
     refresh: 'wait_for',
   });
 

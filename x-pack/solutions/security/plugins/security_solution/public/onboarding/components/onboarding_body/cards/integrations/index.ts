@@ -10,8 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type { OnboardingCardConfig } from '../../../../types';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import { OnboardingCardId } from '../../../../constants';
-import integrationsIcon from './images/integrations_icon.png';
 import type { IntegrationCardMetadata } from './types';
+import integrationsIcon from './images/integrations_icon.png';
+import integrationsDarkIcon from './images/integrations_icon_dark.png';
 
 export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
   id: OnboardingCardId.integrations,
@@ -19,6 +20,7 @@ export const integrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadat
     defaultMessage: 'Add data with integrations',
   }),
   icon: integrationsIcon,
+  iconDark: integrationsDarkIcon,
   Component: React.lazy(
     () =>
       import(

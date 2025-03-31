@@ -30,28 +30,23 @@ export default function ({ getService }: FtrProviderContext) {
 
       await es.security.putRole({
         name: 'hp_read_user',
-        body: {
-          cluster: [],
-          // @ts-expect-error unknown property
-          index: [],
-          applications: [
-            {
-              application,
-              privileges: ['read'],
-              resources: ['*'],
-            },
-          ],
-        },
+        cluster: [],
+        body: { index: [] },
+        applications: [
+          {
+            application,
+            privileges: ['read'],
+            resources: ['*'],
+          },
+        ],
       });
 
       await es.security.putUser({
         username: 'testuser',
-        body: {
-          password: 'testpassword',
-          roles: ['hp_read_user'],
-          full_name: 'a kibana user',
-          email: 'a_kibana_rbac_user@elastic.co',
-        },
+        password: 'testpassword',
+        roles: ['hp_read_user'],
+        full_name: 'a kibana user',
+        email: 'a_kibana_rbac_user@elastic.co',
       });
     });
 

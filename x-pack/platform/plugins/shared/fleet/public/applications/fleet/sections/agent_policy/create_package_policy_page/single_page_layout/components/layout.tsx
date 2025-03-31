@@ -178,28 +178,28 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         return (
           <FormattedMessage
             id="xpack.fleet.editPackagePolicy.pageDescription"
-            defaultMessage="Modify integration settings and deploy changes to the selected agent policy."
+            defaultMessage="Modify integration settings and deploy changes to the selected agent policies."
           />
         );
       } else if (isAdd) {
         return (
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.pageDescriptionfromPolicy"
-            defaultMessage="Configure an integration for the selected agent policy."
+            defaultMessage="Configure an integration for the selected agent policies."
           />
         );
       } else if (isUpgrade) {
         return (
           <FormattedMessage
             id="xpack.fleet.upgradePackagePolicy.pageDescriptionFromUpgrade"
-            defaultMessage="Upgrade this integration and deploy changes to the selected agent policy"
+            defaultMessage="Upgrade this integration and deploy changes to the selected agent policies."
           />
         );
       } else {
         return (
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.pageDescriptionfromPackage"
-            defaultMessage="Follow these instructions to add this integration to an agent policy."
+            defaultMessage="Follow these instructions to add this integration to agent policies."
           />
         );
       }
@@ -225,10 +225,10 @@ export const CreatePackagePolicySinglePageLayout: React.FunctionComponent<{
         </EuiFlexItem>
         <EuiFlexItem>{pageTitle}</EuiFlexItem>
         <EuiFlexItem>
-          <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {pageDescription}
           </EuiText>
+          <EuiSpacer size="s" />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

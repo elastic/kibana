@@ -40,7 +40,7 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
-import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -77,7 +77,7 @@ import {
   getMachineLearningJobId,
   getStepsData,
   redirectToDetections,
-} from '../../../../detections/pages/detection_engine/rules/helpers';
+} from '../../../common/helpers';
 import { CreatedBy, UpdatedBy } from '../../../../detections/components/rules/rule_info';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { inputsSelectors } from '../../../../common/store/inputs';
@@ -87,7 +87,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 
@@ -116,7 +116,7 @@ import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
 import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
-import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as ruleI18n from '../../../common/translations';
 
 import { RuleDetailsContextProvider } from './rule_details_context';
 // eslint-disable-next-line no-restricted-imports
@@ -132,7 +132,7 @@ import { AlertsTableFilterGroup } from '../../../../detections/components/alerts
 import { useSignalHelpers } from '../../../../sourcerer/containers/use_signal_helpers';
 import { HeaderPage } from '../../../../common/components/header_page';
 import { ExceptionsViewer } from '../../../rule_exceptions/components/all_exception_items_table';
-import { EditRuleSettingButtonLink } from '../../../../detections/pages/detection_engine/rules/details/components/edit_rule_settings_button_link';
+import { EditRuleSettingButtonLink } from './edit_rule_settings_button_link/edit_rule_settings_button_link';
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
@@ -148,6 +148,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useRuleUpdateCallout } from '../../../rule_management/hooks/use_rule_update_callout';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -254,7 +255,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<RuleResponse | null>(null);
-  const isLoading = ruleLoading && rule == null;
+  const isLoading = useMemo(() => ruleLoading && rule == null, [rule, ruleLoading]);
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
   const startMlJobsIfNeeded = useCallback(async () => {
@@ -394,6 +395,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const lastExecutionDate = lastExecution?.date ?? '';
   const lastExecutionMessage = lastExecution?.message ?? '';
 
+  const upgradeCallout = useRuleUpdateCallout({
+    rule,
+    message: ruleI18n.HAS_RULE_UPDATE_DETAILS_CALLOUT_MESSAGE,
+    onUpgrade: refreshRule,
+  });
+
   const ruleStatusInfo = useMemo(() => {
     return (
       <>
@@ -433,6 +440,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       </EuiFlexItem>
     ) : (
       <RuleStatusFailedCallOut
+        ruleNameForChat={rule?.name ?? ruleI18n.DETECTION_RULES_CONVERSATION_ID}
         ruleName={rule?.immutable ? rule?.name : undefined}
         dataSources={rule?.immutable ? ruleIndex : undefined}
         status={lastExecutionStatus}
@@ -503,10 +511,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <AlertsTableComponent
-          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
+        <DetectionEngineAlertsTable
+          tableType={TableId.alertsOnRuleDetailsPage}
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
-          tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
         />
       );
@@ -556,6 +563,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
+      {upgradeCallout}
       {isBulkDuplicateConfirmationVisible && (
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
@@ -567,7 +575,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         <EuiConfirmModal
           title={ruleI18n.SINGLE_DELETE_CONFIRMATION_TITLE}
           onCancel={handleDeletionCancel}
-          onConfirm={handleDeletionConfirm}
+          onConfirm={() => handleDeletionConfirm()}
           confirmButtonText={ruleI18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={ruleI18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"

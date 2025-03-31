@@ -42,16 +42,15 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+    const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [],
+      importedAssets,
     });
 
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
@@ -72,7 +71,7 @@ describe('tagKibanaAssets', () => {
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
-      assign: kibanaAssets.dashboard,
+      assign: importedAssets,
       unassign: [],
       refresh: false,
     });
@@ -80,22 +79,21 @@ describe('tagKibanaAssets', () => {
 
   it('should only assign Managed and System tags when tags already exist', async () => {
     savedObjectTagClient.get.mockResolvedValue({ name: '', color: '', description: '' });
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+    const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
-      assign: kibanaAssets.dashboard,
+      assign: importedAssets,
       unassign: [],
       refresh: false,
     });
@@ -103,16 +101,16 @@ describe('tagKibanaAssets', () => {
 
   it('should use destinationId instead of original SO id if imported asset has it', async () => {
     savedObjectTagClient.get.mockResolvedValue({ name: '', color: '', description: '' });
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [{ id: 'dashboard1', destinationId: 'destination1' } as any],
+      importedAssets: [
+        { id: 'dashboard1', destinationId: 'destination1', type: 'dashboard' } as any,
+      ],
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
@@ -129,33 +127,32 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [{ id: 'dashboard1', type: 'dashboard' }],
-      search: [{ id: 's1', type: 'search' }],
-      config: [{ id: 'c1', type: 'config' }],
-      visualization: [{ id: 'v1', type: 'visualization' }],
-      osquery_pack_asset: [{ id: 'osquery-pack-asset1', type: 'osquery-pack-asset' }],
-      osquery_saved_query: [{ id: 'osquery_saved_query1', type: 'osquery_saved_query' }],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 's1', type: 'search' },
+      { id: 'c1', type: 'config' },
+      { id: 'v1', type: 'visualization' },
+      { id: 'osquery-pack-asset1', type: 'osquery-pack-asset' },
+      { id: 'osquery_saved_query1', type: 'osquery-saved-query' },
+    ] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [],
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['fleet-managed-default', 'fleet-pkg-system-default'],
       assign: [
-        ...kibanaAssets.dashboard,
-        ...kibanaAssets.search,
-        ...kibanaAssets.visualization,
-        ...kibanaAssets.osquery_pack_asset,
-        ...kibanaAssets.osquery_saved_query,
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 's1', type: 'search' },
+        { id: 'v1', type: 'visualization' },
+        { id: 'osquery-pack-asset1', type: 'osquery-pack-asset' },
+        { id: 'osquery_saved_query1', type: 'osquery-saved-query' },
       ],
       unassign: [],
       refresh: false,
@@ -163,16 +160,15 @@ describe('tagKibanaAssets', () => {
   });
 
   it('should do nothing if no taggable assets', async () => {
-    const kibanaAssets = { config: [{ id: 'c1', type: 'config' }] } as any;
+    const importedAssets = [{ id: 'c1', type: 'config' }] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [],
+      importedAssets,
     });
 
     expect(savedObjectTagAssignmentService.updateTagAssignments).not.toHaveBeenCalled();
@@ -188,16 +184,15 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+    const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalledWith(
@@ -219,7 +214,7 @@ describe('tagKibanaAssets', () => {
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['managed', 'fleet-pkg-system-default'],
-      assign: kibanaAssets.dashboard,
+      assign: importedAssets,
       unassign: [],
       refresh: false,
     });
@@ -235,16 +230,15 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+    const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [],
+      importedAssets,
     });
 
     expect(savedObjectTagClient.create).toHaveBeenCalledWith(
@@ -266,7 +260,7 @@ describe('tagKibanaAssets', () => {
     );
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['fleet-managed-default', 'system'],
-      assign: kibanaAssets.dashboard,
+      assign: importedAssets,
       unassign: [],
       refresh: false,
     });
@@ -283,22 +277,21 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = { dashboard: [{ id: 'dashboard1', type: 'dashboard' }] } as any;
+    const importedAssets = [{ id: 'dashboard1', type: 'dashboard' }] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'System',
       pkgName: 'system',
       spaceId: 'default',
-      importedAssets: [],
     });
 
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
     expect(savedObjectTagAssignmentService.updateTagAssignments).toHaveBeenCalledWith({
       tags: ['managed', 'system'],
-      assign: kibanaAssets.dashboard,
+      assign: importedAssets,
       unassign: [],
       refresh: false,
     });
@@ -309,14 +302,12 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-      ],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 'dashboard2', type: 'dashboard' },
+      { id: 'search_id1', type: 'search' },
+      { id: 'search_id2', type: 'search' },
+    ] as any;
     const assetTags = [
       {
         text: 'Foo',
@@ -326,11 +317,10 @@ describe('tagKibanaAssets', () => {
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
       pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
       spaceId: 'default',
-      importedAssets: [],
+      importedAssets,
       assetTags,
     });
     expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
@@ -412,23 +402,20 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-      ],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 'dashboard2', type: 'dashboard' },
+      { id: 'search_id1', type: 'search' },
+      { id: 'search_id2', type: 'search' },
+    ] as any;
     const assetTags = [{ text: 'Bar', asset_ids: ['dashboard1', 'search_id1'] }];
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
       spaceId: 'default',
-      importedAssets: [],
       assetTags,
     });
     expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
@@ -510,13 +497,11 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-      ],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 'dashboard2', type: 'dashboard' },
+      { id: 'search_id1', type: 'search' },
+    ] as any;
     const assetTags = [
       {
         text: 'myCustomTag',
@@ -527,11 +512,10 @@ describe('tagKibanaAssets', () => {
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
       spaceId: 'default',
-      importedAssets: [],
       assetTags,
     });
     expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);
@@ -610,14 +594,12 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-      ],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 'dashboard2', type: 'dashboard' },
+      { id: 'search_id1', type: 'search' },
+      { id: 'search_id2', type: 'search' },
+    ] as any;
     const assetTags = [
       {
         text: 'Foo',
@@ -633,11 +615,10 @@ describe('tagKibanaAssets', () => {
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
       pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
       spaceId: 'default',
-      importedAssets: [],
+      importedAssets,
       assetTags,
     });
     expect(savedObjectTagClient.create).not.toHaveBeenCalled();
@@ -657,14 +638,12 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-      ],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 'dashboard2', type: 'dashboard' },
+      { id: 'search_id1', type: 'search' },
+      { id: 'search_id2', type: 'search' },
+    ] as any;
     const assetTags = [
       {
         text: 'foo',
@@ -674,11 +653,10 @@ describe('tagKibanaAssets', () => {
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
       spaceId: 'default',
-      importedAssets: [],
       assetTags,
     });
     expect(savedObjectTagClient.create).toHaveBeenCalledTimes(2);
@@ -702,14 +680,12 @@ describe('tagKibanaAssets', () => {
       savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
         Promise.resolve({ id: name.toLowerCase(), name })
       );
-      const kibanaAssets = {
-        dashboard: [
-          { id: 'dashboard1', type: 'dashboard' },
-          { id: 'dashboard2', type: 'dashboard' },
-          { id: 'search_id1', type: 'search' },
-          { id: 'search_id2', type: 'search' },
-        ],
-      } as any;
+      const importedAssets = [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ] as any;
       const assetTags = [
         {
           text: 'Security Solution',
@@ -719,11 +695,10 @@ describe('tagKibanaAssets', () => {
       await tagKibanaAssets({
         savedObjectTagAssignmentService,
         savedObjectTagClient,
-        kibanaAssets,
+        importedAssets,
         pkgTitle: 'TestPackage',
         pkgName: 'test-pkg',
         spaceId: 'default',
-        importedAssets: [],
         assetTags,
       });
       expect(savedObjectTagClient.create).toHaveBeenCalledWith(
@@ -753,14 +728,12 @@ describe('tagKibanaAssets', () => {
       savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
         Promise.resolve({ id: name.toLowerCase(), name })
       );
-      const kibanaAssets = {
-        dashboard: [
-          { id: 'dashboard1', type: 'dashboard' },
-          { id: 'dashboard2', type: 'dashboard' },
-          { id: 'search_id1', type: 'search' },
-          { id: 'search_id2', type: 'search' },
-        ],
-      } as any;
+      const importedAssets = [
+        { id: 'dashboard1', type: 'dashboard' },
+        { id: 'dashboard2', type: 'dashboard' },
+        { id: 'search_id1', type: 'search' },
+        { id: 'search_id2', type: 'search' },
+      ] as any;
       const assetTags = [
         {
           text: 'Security Solution',
@@ -770,11 +743,10 @@ describe('tagKibanaAssets', () => {
       await tagKibanaAssets({
         savedObjectTagAssignmentService,
         savedObjectTagClient,
-        kibanaAssets,
+        importedAssets,
         pkgTitle: 'TestPackage',
         pkgName: 'test-pkg',
         spaceId: 'my-secondary-space',
-        importedAssets: [],
         assetTags,
       });
       expect(savedObjectTagClient.create).toHaveBeenCalledWith(managedTagPayloadArg1, {
@@ -815,23 +787,20 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-      ],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 'dashboard2', type: 'dashboard' },
+      { id: 'search_id1', type: 'search' },
+      { id: 'search_id2', type: 'search' },
+    ] as any;
 
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
       spaceId: 'default',
-      importedAssets: [],
       assetTags: [],
     });
     expect(savedObjectTagClient.create).toHaveBeenCalledTimes(2);
@@ -843,14 +812,12 @@ describe('tagKibanaAssets', () => {
     savedObjectTagClient.create.mockImplementation(({ name }: { name: string }) =>
       Promise.resolve({ id: name.toLowerCase(), name })
     );
-    const kibanaAssets = {
-      dashboard: [
-        { id: 'dashboard1', type: 'dashboard' },
-        { id: 'dashboard2', type: 'dashboard' },
-        { id: 'search_id1', type: 'search' },
-        { id: 'search_id2', type: 'search' },
-      ],
-    } as any;
+    const importedAssets = [
+      { id: 'dashboard1', type: 'dashboard' },
+      { id: 'dashboard2', type: 'dashboard' },
+      { id: 'search_id1', type: 'search' },
+      { id: 'search_id2', type: 'search' },
+    ] as any;
     const assetTags = [
       {
         text: 'Foo',
@@ -861,11 +828,10 @@ describe('tagKibanaAssets', () => {
     await tagKibanaAssets({
       savedObjectTagAssignmentService,
       savedObjectTagClient,
-      kibanaAssets,
+      importedAssets,
       pkgTitle: 'TestPackage',
       pkgName: 'test-pkg',
       spaceId: 'default',
-      importedAssets: [],
       assetTags,
     });
     expect(savedObjectTagClient.create).toHaveBeenCalledTimes(3);

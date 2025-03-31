@@ -5300,7 +5300,7 @@
             "label": "rule",
             "description": [],
             "signature": [
-              "\"contains\" | \"<\" | \">\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
+              "\"<\" | \">\" | \"regex\" | \"contains\" | \"equals\" | \"ends_with\" | \"starts_with\""
             ],
             "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
             "deprecated": false,
@@ -6951,7 +6951,7 @@
         "label": "FilteringRuleRule",
         "description": [],
         "signature": [
-          "\"contains\" | \"<\" | \">\" | \"regex\" | \"equals\" | \"ends_with\" | \"starts_with\""
+          "\"<\" | \">\" | \"regex\" | \"contains\" | \"equals\" | \"ends_with\" | \"starts_with\""
         ],
         "path": "src/platform/packages/shared/kbn-search-connectors/types/connectors.ts",
         "deprecated": false,
@@ -49496,7 +49496,7 @@
                         "label": "depends_on",
                         "description": [],
                         "signature": [
-                          "never[]"
+                          "{ field: string; value: string; }[]"
                         ],
                         "path": "src/platform/packages/shared/kbn-search-connectors/types/native_connectors.ts",
                         "deprecated": false,

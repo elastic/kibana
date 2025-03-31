@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   IRouter,
   RequestHandlerContext,
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
 } from '@kbn/core/server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 export function createHealthRoute(
   logger: Logger,

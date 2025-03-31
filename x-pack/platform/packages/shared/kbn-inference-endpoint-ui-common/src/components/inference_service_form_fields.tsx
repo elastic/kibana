@@ -48,12 +48,14 @@ interface InferenceServicesProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
+  isPreconfigured?: boolean;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
   isEdit,
+  isPreconfigured,
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
@@ -94,14 +96,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       setProviderPopoverOpen(true);
     }
   }, []);
-
-  const providerIcon = useMemo(
-    () =>
-      Object.keys(SERVICE_PROVIDERS).includes(config?.provider)
-        ? SERVICE_PROVIDERS[config?.provider as ServiceProviderKeys].icon
-        : undefined,
-    [config?.provider]
-  );
 
   const providerName = useMemo(
     () =>
@@ -250,7 +244,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         isDisabled={isEdit}
         isInvalid={isInvalid}
         fullWidth
-        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
+        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : undefined}
       >
         <EuiFieldText
           onClick={toggleProviderPopover}
@@ -276,7 +270,6 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       isEdit,
       onClearProvider,
       config?.provider,
-      providerIcon,
       toggleProviderPopover,
       handleProviderKeyboardOpen,
       providerName,
@@ -356,6 +349,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets, selectedTaskType]);
 
+  const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
+
   return !isLoading ? (
     <>
       <UseField
@@ -412,6 +407,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             items={requiredProviderFormFields}
             setConfigEntry={onSetProviderConfigEntry}
             isEdit={isEdit}
+            isPreconfigured={isPreconfigured}
+            isInternalProvider={isInternalProvider}
           />
           <EuiSpacer size="m" />
           <AdditionalOptionsFields

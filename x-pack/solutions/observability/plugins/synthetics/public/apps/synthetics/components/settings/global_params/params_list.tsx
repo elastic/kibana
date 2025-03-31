@@ -232,7 +232,7 @@ export const ParamsList = () => {
             learnMore: (
               <EuiLink
                 data-test-subj="syntheticsParamsListLink"
-                href="https://www.elastic.co/guide/en/observability/master/synthetics-params-secrets.html"
+                href="https://www.elastic.co/guide/en/observability/current/synthetics-params-secrets.html"
                 target="_blank"
               >
                 {LEARN_MORE}

@@ -30,6 +30,7 @@ import {
   HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_PAGE_URL,
   USER_AGENT_NAME,
+  USER_AGENT_VERSION,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -71,6 +72,7 @@ export async function getTransaction({
     HTTP_RESPONSE_STATUS_CODE,
     HTTP_REQUEST_METHOD,
     USER_AGENT_NAME,
+    USER_AGENT_VERSION,
   ] as const);
 
   const resp = await apmEventClient.search('get_transaction', {
@@ -82,22 +84,20 @@ export async function getTransaction({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: asMutableArray([
-            { term: { [TRANSACTION_ID]: transactionId } },
-            ...termQuery(TRACE_ID, traceId),
-            ...rangeQuery(start, end),
-          ]),
-        },
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: asMutableArray([
+          { term: { [TRANSACTION_ID]: transactionId } },
+          ...termQuery(TRACE_ID, traceId),
+          ...rangeQuery(start, end),
+        ]),
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
     },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
   });
 
   const hit = maybe(resp.hits.hits[0]);

@@ -6,7 +6,7 @@
  */
 
 import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import path from 'path';
 import { paths } from '../../../../common/locators/paths';
@@ -77,11 +77,7 @@ export const useSloActions = ({
     }
   };
 
-  const detailsUrl = paths.sloDetails(
-    slo.id,
-    ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined,
-    slo.remote?.remoteName
-  );
+  const detailsUrl = paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName);
 
   const remoteDeleteUrl = createRemoteSloDeleteUrl(slo, spaceId);
   const remoteResetUrl = createRemoteSloResetUrl(slo, spaceId);

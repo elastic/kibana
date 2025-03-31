@@ -9,7 +9,6 @@
 
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import { add, type Duration } from 'date-fns';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
@@ -31,6 +30,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../constants';
 import { CsvESQLGenerator, JobParamsCsvESQL } from './generate_csv_esql';
+import moment from 'moment';
 
 const createMockJob = (params: JobParamsCsvESQL): JobParamsCsvESQL => ({
   ...params,
@@ -216,9 +216,9 @@ describe('CsvESQLGenerator', () => {
   });
 
   describe('"auto" scroll duration config', () => {
-    const getTaskInstanceFields = (intervalFromNow: Duration) => {
+    const getTaskInstanceFields = (intervalFromNow: { seconds: number }) => {
       const now = new Date(Date.now());
-      return { startedAt: now, retryAt: add(now, intervalFromNow) };
+      return { startedAt: now, retryAt: moment(now).add(intervalFromNow).toDate() };
     };
 
     let mockConfigWithAutoScrollDuration: ReportingConfigType['csv'];

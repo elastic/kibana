@@ -77,8 +77,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             ],
-            routing: [],
             wired: {
+              routing: [],
               fields: {
                 '@timestamp': {
                   type: 'date',
@@ -121,6 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         inner_timestamp: '2023-01-01T00:00:10.000Z',
         message2: 'test',
         'log.level': 'error',
+        'stream.name': 'logs.nginx',
       });
     });
 
@@ -143,17 +144,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'log.logger': 'mylogger',
         message2: 'mylogger this is the message',
         message3: 'this is the message',
+        'stream.name': 'logs.nginx',
       });
     });
 
     it('Doc is searchable', async () => {
       const response = await esClient.search({
         index: 'logs.nginx',
-        body: {
-          query: {
-            match: {
-              message2: 'mylogger',
-            },
+        query: {
+          match: {
+            message2: 'mylogger',
           },
         },
       });
@@ -163,11 +163,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Non-indexed field is not searchable', async () => {
       const response = await esClient.search({
         index: 'logs.nginx',
-        body: {
-          query: {
-            match: {
-              'log.logger': 'mylogger',
-            },
+        query: {
+          match: {
+            'log.logger': 'mylogger',
           },
         },
       });

@@ -20,7 +20,7 @@ interface Props {
   fileName: string | null | undefined;
   filePath: string | null | undefined;
   fileExtOriginalPath: string | null | undefined;
-  isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const FileDraggable = React.memo<Props>(
@@ -32,7 +32,7 @@ export const FileDraggable = React.memo<Props>(
     fileExtOriginalPath,
     fileName,
     filePath,
-    isDraggable,
+    scopeId,
   }) => {
     if (
       isNillEmptyOrNotFinite(fileName) &&
@@ -51,10 +51,10 @@ export const FileDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(fileName) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="file.name"
-              isDraggable={isDraggable}
               value={fileName}
               iconType="document"
               isAggregatable={true}
@@ -64,10 +64,10 @@ export const FileDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgameFileName) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_name"
-              isDraggable={isDraggable}
               value={endgameFileName}
               iconType="document"
               isAggregatable={true}
@@ -85,10 +85,10 @@ export const FileDraggable = React.memo<Props>(
         {!isNillEmptyOrNotFinite(filePath) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="file.path"
-              isDraggable={isDraggable}
               value={filePath}
               iconType="document"
               isAggregatable={true}
@@ -98,10 +98,10 @@ export const FileDraggable = React.memo<Props>(
         ) : !isNillEmptyOrNotFinite(endgameFilePath) ? (
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="endgame.file_path"
-              isDraggable={isDraggable}
               value={endgameFilePath}
               iconType="document"
               isAggregatable={true}
@@ -117,10 +117,10 @@ export const FileDraggable = React.memo<Props>(
             </TokensFlexItem>
             <TokensFlexItem grow={false} component="span">
               <DraggableBadge
+                scopeId={scopeId}
                 contextId={contextId}
                 eventId={eventId}
                 field="file.Ext.original.path"
-                isDraggable={isDraggable}
                 value={fileExtOriginalPath}
                 iconType="document"
                 isAggregatable={true}

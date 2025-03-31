@@ -1,9 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/serverless-project-switcher",
-  "owner": [
-    "@elastic/appex-sharedux"
-  ],
-  "group": "platform",
-  "visibility": "private"
-}

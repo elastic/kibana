@@ -5,30 +5,39 @@
  * 2.0.
  */
 
-import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
 import { Logger } from '@kbn/logging';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { isEmpty } from 'lodash';
 import { SLODefinition } from '../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../domain/services/get_delay_in_seconds_from_slo';
 import { InvalidTransformError } from '../../errors';
 
 export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '', dataView?: DataView) {
   try {
-    if (kqlQuerySchema.is(kuery)) {
-      return toElasticsearchQuery(fromKueryExpression(kuery));
-    } else {
-      return buildEsQuery(
-        dataView,
-        {
-          query: kuery?.kqlQuery,
-          language: 'kuery',
-        },
-        kuery?.filters
-      );
+    if (isEmpty(kuery)) {
+      return { match_all: {} };
     }
+    const kqlQuery = kqlQuerySchema.is(kuery) ? kuery : kuery.kqlQuery;
+    const filters = kqlQuerySchema.is(kuery) ? [] : kuery.filters;
+    return buildEsQuery(
+      dataView,
+      {
+        query: kqlQuery,
+        language: 'kuery',
+      },
+      filters,
+      {
+        allowLeadingWildcards: true,
+      }
+    );
   } catch (err) {
-    throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
+    if (kqlQuerySchema.is(kuery)) {
+      throw new InvalidTransformError(`Invalid KQL: ${kuery}`);
+    } else {
+      throw new InvalidTransformError(`Invalid KQL: ${kuery.kqlQuery}`);
+    }
   }
 }
 
@@ -39,7 +48,7 @@ export function parseStringFilters(filters: string, logger: Logger) {
   try {
     return JSON.parse(filters);
   } catch (e) {
-    logger.info(`Failed to parse filters: ${e}`);
+    logger.debug(`Failed to parse filters: ${e}`);
     return {};
   }
 }
@@ -61,20 +70,32 @@ export function getTimesliceTargetComparator(timesliceTarget: number) {
  * preventInitialBackfill == true: we use the current time minus some buffer to account for the ingestion delay
  * preventInitialBackfill === false: we use the time window duration to get the data for the last N days
  */
-export function getFilterRange(slo: SLODefinition, timestampField: string) {
-  return slo.settings.preventInitialBackfill === true
-    ? {
-        range: {
-          [timestampField]: {
-            gte: `now-${getDelayInSecondsFromSLO(slo)}s/m`,
-          },
+export function getFilterRange(slo: SLODefinition, timestampField: string, isServerless: boolean) {
+  if (slo.settings.preventInitialBackfill) {
+    return {
+      range: {
+        [timestampField]: {
+          gte: `now-${getDelayInSecondsFromSLO(slo)}s/m`,
         },
-      }
-    : {
-        range: {
-          [timestampField]: {
-            gte: `now-${slo.timeWindow.duration.format()}/d`,
-          },
+      },
+    };
+  }
+
+  if (isServerless) {
+    return {
+      range: {
+        [timestampField]: {
+          gte: `now-7d`,
         },
-      };
+      },
+    };
+  }
+
+  return {
+    range: {
+      [timestampField]: {
+        gte: `now-${slo.timeWindow.duration.format()}/d`,
+      },
+    },
+  };
 }

@@ -1092,6 +1092,9 @@
       "status": {
         "type": "keyword"
       },
+      "timestampField": {
+        "type": "keyword"
+      },
       "type": {
         "type": "keyword"
       }
@@ -1682,6 +1685,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -1706,6 +1713,7 @@
     }
   },
   "fleet-fleet-server-host": {
+    "dynamic": false,
     "properties": {
       "host_urls": {
         "index": false,
@@ -1734,6 +1742,7 @@
     "properties": {}
   },
   "fleet-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
@@ -2068,6 +2077,10 @@
         "index": false,
         "type": "flattened"
       },
+      "required_versions": {
+        "index": false,
+        "type": "flattened"
+      },
       "revision": {
         "type": "integer"
       },
@@ -2092,6 +2105,7 @@
     }
   },
   "ingest-download-sources": {
+    "dynamic": false,
     "properties": {
       "host": {
         "type": "keyword"
@@ -2112,6 +2126,7 @@
     }
   },
   "ingest-outputs": {
+    "dynamic": false,
     "properties": {
       "allow_edit": {
         "enabled": false
@@ -2330,6 +2345,7 @@
     }
   },
   "ingest-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
@@ -3721,6 +3737,13 @@
       },
       "taskType": {
         "type": "keyword"
+      },
+      "userScope": {
+        "properties": {
+          "apiKeyId": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },

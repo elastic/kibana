@@ -11,16 +11,15 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiPanel,
   EuiSpacer,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
-import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
+import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
@@ -128,15 +127,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
       const defaultName = getFieldByPathName(allSemanticFields, 'semantic_text')
         ? ''
         : 'semantic_text';
-      const referenceField =
-        Object.values(allSemanticFields.byId)
-          .find((field) => field.source.type === 'text' && !field.isMultiField)
-          ?.path.join('.') || '';
       if (!form.getFormData().name) {
         form.setFieldValue('name', defaultName);
       }
       if (!form.getFormData().reference_field) {
-        form.setFieldValue('reference_field', referenceField);
+        form.setFieldValue('reference_field', '');
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -281,16 +276,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     </EuiFlexGroup>
   );
 
-  const { euiTheme } = useEuiTheme();
-
-  const paddingLeftCreateFieldWrapper = `${
-    isMultiField
-      ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
-      : paddingLeft
-  }px`;
-
   return (
     <>
+      <EuiSpacer size="s" />
       <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
         <Form
           form={form}
@@ -298,18 +286,15 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onSubmit={submitForm}
           data-test-subj="createFieldForm"
         >
-          <div
+          <EuiPanel
+            color="subdued"
+            paddingSize="m"
             className={classNames('mappingsEditor__createFieldWrapper', {
               'mappingsEditor__createFieldWrapper--toggle':
                 Boolean(maxNestedDepth) && maxNestedDepth! > 0,
               'mappingsEditor__createFieldWrapper--multiField': isMultiField,
             })}
-            css={css`
-              padding: ${euiTheme.size.l};
-              paddingleft: ${paddingLeftCreateFieldWrapper};
-              background-color: ${euiTheme.colors.backgroundBaseSubdued};
-            `}
-            ref={createFieldFormRef}
+            panelRef={createFieldFormRef}
             tabIndex={0}
           >
             <div className="mappingsEditor__createFieldContent">
@@ -320,7 +305,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               {isSemanticText && <SelectInferenceId />}
               {renderFormActions()}
             </div>
-          </div>
+          </EuiPanel>
         </Form>
       </EuiOutsideClickDetector>
     </>

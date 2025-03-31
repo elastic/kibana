@@ -10,7 +10,6 @@ import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/s
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
-import { initSavedObjects } from './saved_objects';
 import { events } from './lib/telemetry/event_based_telemetry';
 import {
   AssistantTool,
@@ -25,7 +24,7 @@ import { AIAssistantService } from './ai_assistant_service';
 import { RequestContextFactory } from './routes/request_context_factory';
 import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
-import { appContextService } from './services/app_context';
+import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
 
 export class ElasticAssistantPlugin
@@ -55,8 +54,6 @@ export class ElasticAssistantPlugin
     plugins: ElasticAssistantPluginSetupDependencies
   ) {
     this.logger.debug('elasticAssistant: Setup');
-
-    initSavedObjects(core.savedObjects);
 
     this.assistantService = new AIAssistantService({
       logger: this.logger.get('service'),
@@ -136,6 +133,9 @@ export class ElasticAssistantPlugin
       },
       registerTools: (pluginName: string, tools: AssistantTool[]) => {
         return appContextService.registerTools(pluginName, tools);
+      },
+      registerCallback: (callbackId: CallbackIds, callback: Function) => {
+        return appContextService.registerCallback(callbackId, callback);
       },
     };
   }

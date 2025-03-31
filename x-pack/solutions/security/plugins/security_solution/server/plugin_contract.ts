@@ -18,7 +18,10 @@ import type {
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server';
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FleetStartContract as FleetPluginStart } from '@kbn/fleet-plugin/server';
@@ -75,6 +78,7 @@ export interface SecuritySolutionPluginStartDependencies {
   cloud: CloudSetup;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
   elasticAssistant: ElasticAssistantPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;

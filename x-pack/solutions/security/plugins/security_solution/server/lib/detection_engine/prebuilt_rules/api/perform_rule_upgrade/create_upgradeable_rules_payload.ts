@@ -5,15 +5,17 @@
  * 2.0.
  */
 import { pickBy } from 'lodash';
+import { isRuleCustomized } from '../../../../../../common/detection_engine/rule_management/utils';
 import { withSecuritySpanSync } from '../../../../../utils/with_security_span';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
 import {
-  PickVersionValuesEnum,
   type PerformRuleUpgradeRequestBody,
   type PickVersionValues,
   type AllFieldsDiff,
   MissingVersion,
 } from '../../../../../../common/api/detection_engine';
+import type { UpgradeConflictResolution } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { convertRuleToDiffable } from '../../../../../../common/detection_engine/prebuilt_rules/diff/convert_rule_to_diffable';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 import { assertPickVersionIsTarget } from './assert_pick_version_is_target';
@@ -26,7 +28,7 @@ import { getValueForField } from './get_value_for_field';
 interface CreateModifiedPrebuiltRuleAssetsProps {
   upgradeableRules: RuleTriad[];
   requestBody: PerformRuleUpgradeRequestBody;
-  prebuiltRulesCustomizationEnabled: boolean;
+  defaultPickVersion: PickVersionValues;
 }
 
 interface ProcessedRules {
@@ -37,13 +39,14 @@ interface ProcessedRules {
 export const createModifiedPrebuiltRuleAssets = ({
   upgradeableRules,
   requestBody,
-  prebuiltRulesCustomizationEnabled,
+  defaultPickVersion,
 }: CreateModifiedPrebuiltRuleAssetsProps) => {
   return withSecuritySpanSync(createModifiedPrebuiltRuleAssets.name, () => {
-    const defaultPickVersion = prebuiltRulesCustomizationEnabled
-      ? PickVersionValuesEnum.MERGED
-      : PickVersionValuesEnum.TARGET;
-    const { pick_version: globalPickVersion = defaultPickVersion, mode } = requestBody;
+    const {
+      pick_version: globalPickVersion = defaultPickVersion,
+      mode,
+      on_conflict: onConflict,
+    } = requestBody;
 
     const { modifiedPrebuiltRuleAssets, processingErrors } =
       upgradeableRules.reduce<ProcessedRules>(
@@ -62,20 +65,27 @@ export const createModifiedPrebuiltRuleAssets = ({
               assertPickVersionIsTarget({ ruleId, requestBody });
             }
 
-            const calculatedRuleDiff = calculateRuleFieldsDiff({
-              base_version: upgradeableRule.base
-                ? convertRuleToDiffable(
-                    convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base)
-                  )
-                : MissingVersion,
-              current_version: convertRuleToDiffable(upgradeableRule.current),
-              target_version: convertRuleToDiffable(
-                convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
-              ),
-            }) as AllFieldsDiff;
+            const isCustomized = isRuleCustomized(current);
+
+            const calculatedRuleDiff = calculateRuleFieldsDiff(
+              {
+                base_version: upgradeableRule.base
+                  ? convertRuleToDiffable(
+                      convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base)
+                    )
+                  : MissingVersion,
+                current_version: convertRuleToDiffable(upgradeableRule.current),
+                target_version: convertRuleToDiffable(
+                  convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
+                ),
+              },
+              isCustomized
+            ) as AllFieldsDiff;
 
             if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
-              const fieldsWithConflicts = Object.keys(getFieldsDiffConflicts(calculatedRuleDiff));
+              const fieldsWithConflicts = Object.keys(
+                getFieldsDiffConflicts(calculatedRuleDiff, onConflict)
+              );
               if (fieldsWithConflicts.length > 0) {
                 // If the mode is ALL_RULES, no fields can be overriden to any other pick_version
                 // than "MERGED", so throw an error for the fields that have conflicts.
@@ -150,7 +160,12 @@ function createModifiedPrebuiltRuleAsset({
   return modifiedPrebuiltRuleAsset as PrebuiltRuleAsset;
 }
 
-const getFieldsDiffConflicts = (ruleFieldsDiff: Partial<AllFieldsDiff>) =>
-  pickBy(ruleFieldsDiff, (diff) => {
-    return diff.conflict !== 'NONE';
-  });
+const getFieldsDiffConflicts = (
+  ruleFieldsDiff: Partial<AllFieldsDiff>,
+  onConflict?: UpgradeConflictResolution
+) =>
+  pickBy(ruleFieldsDiff, (diff) =>
+    onConflict === UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE
+      ? diff.conflict !== 'NONE' && diff.conflict !== 'SOLVABLE'
+      : diff.conflict !== 'NONE'
+  );

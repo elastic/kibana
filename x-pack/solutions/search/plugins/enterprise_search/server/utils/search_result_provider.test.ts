@@ -67,30 +67,6 @@ const connectors = [
 ];
 
 describe('Search search provider', () => {
-  const mongoResult = {
-    icon: 'mongodb.svg',
-    id: 'mongodb',
-    score: 75,
-    title: 'MongoDB',
-    type: 'Elasticsearch',
-    url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=mongodb`,
-      prependBasePath: true,
-    },
-  };
-
-  const nativeMongoResult = {
-    icon: 'mongodb.svg',
-    id: 'mongodb',
-    score: 75,
-    title: 'MongoDB',
-    type: 'Elasticsearch',
-    url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=native&service_type=mongodb`,
-      prependBasePath: true,
-    },
-  };
-
   const customizedConnectorResult = {
     icon: 'custom.svg',
     id: '',
@@ -98,7 +74,31 @@ describe('Search search provider', () => {
     title: 'Customized connector',
     type: 'Elasticsearch',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=connector_client&service_type=`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
+      prependBasePath: true,
+    },
+  };
+
+  const mongodbConnectorResult = {
+    icon: 'mongodb.svg',
+    id: 'mongodb',
+    score: 75,
+    title: 'MongoDB',
+    type: 'Elasticsearch',
+    url: {
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
+      prependBasePath: true,
+    },
+  };
+
+  const searchAIResult = {
+    icon: 'logoElasticsearch',
+    id: 'ai_search',
+    score: 80,
+    title: 'Search AI',
+    type: 'Elasticsearch',
+    url: {
+      path: '/app/elasticsearch/ai_search',
       prependBasePath: true,
     },
   };
@@ -107,8 +107,7 @@ describe('Search search provider', () => {
     {
       hasConnectors: true,
     } as any,
-    connectors,
-    false
+    connectors
   );
 
   beforeEach(() => {});
@@ -127,7 +126,10 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([{ ...mongoResult, score: 80 }]),
+          a: expect.arrayContaining([
+            { ...customizedConnectorResult, score: 80 },
+            { ...searchAIResult, score: 80 },
+          ]),
         });
       });
     });
@@ -141,7 +143,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([{ ...mongoResult, score: 80 }]),
+          a: expect.arrayContaining([{ ...mongodbConnectorResult, score: 80 }]),
         });
       });
     });
@@ -151,8 +153,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -162,7 +163,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.not.arrayContaining([{ mongoResult, score: 80 }]),
+          a: expect.arrayContaining([{ ...searchAIResult, score: 80 }]),
         });
       });
     });
@@ -212,8 +213,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -232,8 +232,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -253,8 +252,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: true,
         } as any,
-        connectors,
-        true
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -265,8 +263,8 @@ describe('Search search provider', () => {
           )
         ).toBe('(a|)', {
           a: expect.arrayContaining([
-            { ...nativeMongoResult, score: 80 },
             { ...customizedConnectorResult, score: 80 },
+            { ...searchAIResult, score: 80 },
           ]),
         });
       });

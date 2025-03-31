@@ -65,8 +65,8 @@ describe('getConfiguration', () => {
           columnId: 'bucket-1',
         },
       ],
-      headerRowHeight: 'single',
-      rowHeight: 'single',
+      headerRowHeight: 'custom',
+      rowHeight: 'custom',
       layerId: 'test1',
       layerType: 'data',
       paging: {

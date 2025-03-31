@@ -24,6 +24,8 @@ export interface GridPanelData extends GridRect {
 }
 
 export interface GridRowData {
+  id: string;
+  order: number;
   title: string;
   isCollapsed: boolean;
   panels: {
@@ -31,7 +33,9 @@ export interface GridRowData {
   };
 }
 
-export type GridLayoutData = GridRowData[];
+export interface GridLayoutData {
+  [rowId: string]: GridRowData;
+}
 
 export interface GridSettings {
   gutterSize: number;
@@ -56,6 +60,18 @@ export interface ActivePanel {
   };
 }
 
+export interface ActiveRowEvent {
+  id: string;
+  startingPosition: {
+    top: number;
+    left: number;
+  };
+  translate: {
+    top: number;
+    left: number;
+  };
+}
+
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
@@ -65,10 +81,14 @@ export interface GridLayoutStateManager {
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
+  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
-  rowRefs: React.MutableRefObject<Array<HTMLDivElement | null>>;
-  panelRefs: React.MutableRefObject<Array<{ [id: string]: HTMLDivElement | null }>>;
+  rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  panelRefs: React.MutableRefObject<{
+    [rowId: string]: { [panelId: string]: HTMLDivElement | null };
+  }>;
 }
 
 /**
@@ -88,7 +108,7 @@ export interface PanelInteractionEvent {
   /**
    * The index of the grid row this panel interaction is targeting.
    */
-  targetRowIndex: number;
+  targetRow: string;
 
   /**
    * The pixel rect of the panel being interacted with.
@@ -107,18 +127,24 @@ export interface PanelInteractionEvent {
   };
 }
 
-// TODO: Remove from Dashboard plugin as part of https://github.com/elastic/kibana/issues/190446
-export enum PanelPlacementStrategy {
-  /** Place on the very top of the grid layout, add the height of this panel to all other panels. */
-  placeAtTop = 'placeAtTop',
-  /** Look for the smallest y and x value where the default panel will fit. */
-  findTopLeftMostOpenSpace = 'findTopLeftMostOpenSpace',
-}
+/**
+ * This type is used to conditionally change the type of `renderPanelContents` depending
+ * on the value of `useCustomDragHandle`
+ */
+export type UseCustomDragHandle =
+  | {
+      useCustomDragHandle: true;
+      renderPanelContents: (
+        panelId: string,
+        setDragHandles: (refs: Array<HTMLElement | null>) => void
+      ) => React.ReactNode;
+    }
+  | {
+      useCustomDragHandle?: false;
+      renderPanelContents: (panelId: string) => React.ReactNode;
+    };
 
-export interface PanelPlacementSettings {
-  strategy?: PanelPlacementStrategy;
-  height: number;
-  width: number;
-}
-
+/**
+ * Controls whether the resize + drag handles are visible and functioning
+ */
 export type GridAccessMode = 'VIEW' | 'EDIT';

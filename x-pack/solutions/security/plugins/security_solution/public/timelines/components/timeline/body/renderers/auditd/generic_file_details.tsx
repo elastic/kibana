@@ -15,7 +15,7 @@ import { DraggableBadge } from '../../../../../../common/components/draggables';
 
 import * as i18n from './translations';
 import { NetflowRenderer } from '../netflow';
-import { TokensFlexItem, Details } from '../helpers';
+import { Details, TokensFlexItem } from '../helpers';
 import { ProcessDraggable } from '../process_draggable';
 import { Args } from '../args';
 import { SessionUserHostWorkingDir } from './session_user_host_working_dir';
@@ -38,7 +38,7 @@ interface Props {
   workingDirectory: string | null | undefined;
   args: string[] | null | undefined;
   session: string | null | undefined;
-  isDraggable?: boolean;
+  scopeId: string;
 }
 
 export const AuditdGenericFileLine = React.memo<Props>(
@@ -60,11 +60,12 @@ export const AuditdGenericFileLine = React.memo<Props>(
     session,
     text,
     fileIcon,
-    isDraggable,
+    scopeId,
   }) => (
     <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
       <SessionUserHostWorkingDir
         eventId={id}
+        scopeId={scopeId}
         contextId={contextId}
         hostName={hostName}
         userName={userName}
@@ -72,7 +73,6 @@ export const AuditdGenericFileLine = React.memo<Props>(
         secondary={secondary}
         workingDirectory={workingDirectory}
         session={session}
-        isDraggable={isDraggable}
       />
       {(filePath != null || processExecutable != null) && (
         <TokensFlexItem grow={false} component="span">
@@ -81,10 +81,10 @@ export const AuditdGenericFileLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           field="file.path"
-          isDraggable={isDraggable}
           value={filePath}
           iconType={fileIcon}
         />
@@ -96,21 +96,21 @@ export const AuditdGenericFileLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <ProcessDraggable
+          scopeId={scopeId}
           contextId={contextId}
           endgamePid={undefined}
           endgameProcessName={undefined}
           eventId={id}
-          isDraggable={isDraggable}
           processPid={processPid}
           processName={processName}
           processExecutable={processExecutable}
         />
       </TokensFlexItem>
       <Args
+        scopeId={scopeId}
         eventId={id}
         args={args}
         contextId={contextId}
-        isDraggable={isDraggable}
         processTitle={processTitle}
       />
       {result != null && (
@@ -120,10 +120,10 @@ export const AuditdGenericFileLine = React.memo<Props>(
       )}
       <TokensFlexItem grow={false} component="span">
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={id}
           field="auditd.result"
-          isDraggable={isDraggable}
           queryValue={result}
           value={result}
         />
@@ -140,11 +140,10 @@ interface GenericDetailsProps {
   text: string;
   fileIcon: IconType;
   timelineId: string;
-  isDraggable?: boolean;
 }
 
 export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
-  ({ data, contextId, text, fileIcon = 'document', timelineId, isDraggable }) => {
+  ({ data, contextId, text, fileIcon = 'document', timelineId }) => {
     const id = data._id;
     const session: string | null | undefined = get('auditd.session[0]', data);
     const hostName: string | null | undefined = get('host.name[0]', data);
@@ -165,6 +164,7 @@ export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
         <Details>
           <AuditdGenericFileLine
             id={id}
+            scopeId={timelineId}
             contextId={contextId}
             text={text}
             hostName={hostName}
@@ -181,10 +181,9 @@ export const AuditdGenericFileDetails = React.memo<GenericDetailsProps>(
             secondary={secondary}
             fileIcon={fileIcon}
             result={result}
-            isDraggable={isDraggable}
           />
           <EuiSpacer size="s" />
-          <NetflowRenderer data={data} isDraggable={isDraggable} timelineId={timelineId} />
+          <NetflowRenderer data={data} timelineId={timelineId} />
         </Details>
       );
     } else {

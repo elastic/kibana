@@ -8,6 +8,7 @@
 import { readFileSync } from 'fs';
 
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -35,6 +36,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/relay_state')],
     servers,
     security: { disableTestUser: true },

@@ -50,7 +50,6 @@ describe('GenericRowRenderer', () => {
     test('renders correctly against snapshot', () => {
       const children = connectedToRenderer.renderRow({
         data: auditd,
-        isDraggable: true,
         scopeId: TimelineId.test,
       });
 
@@ -79,7 +78,6 @@ describe('GenericRowRenderer', () => {
     test('should render a auditd row', () => {
       const children = connectedToRenderer.renderRow({
         data: auditd,
-        isDraggable: true,
         scopeId: TimelineId.test,
       });
       const wrapper = mount(
@@ -110,7 +108,6 @@ describe('GenericRowRenderer', () => {
     test('renders correctly against snapshot', () => {
       const children = fileToRenderer.renderRow({
         data: auditdFile,
-        isDraggable: true,
         scopeId: TimelineId.test,
       });
 
@@ -139,7 +136,6 @@ describe('GenericRowRenderer', () => {
     test('should render a auditd row', () => {
       const children = fileToRenderer.renderRow({
         data: auditdFile,
-        isDraggable: true,
         scopeId: TimelineId.test,
       });
       const wrapper = mount(

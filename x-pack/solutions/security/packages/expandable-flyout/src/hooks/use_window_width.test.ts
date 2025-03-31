@@ -6,14 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import {
-  FULL_WIDTH_PADDING,
-  MAX_RESOLUTION_BREAKPOINT,
-  MIN_RESOLUTION_BREAKPOINT,
-  RIGHT_SECTION_MAX_WIDTH,
-  RIGHT_SECTION_MIN_WIDTH,
-  useWindowWidth,
-} from './use_window_width';
+import { useWindowWidth } from './use_window_width';
 import { useDispatch } from '../store/redux';
 import { setDefaultWidthsAction } from '../store/actions';
 
@@ -48,7 +41,7 @@ describe('useWindowWidth', () => {
     expect(mockUseDispatch).not.toHaveBeenCalled();
   });
 
-  it('should handle very small screens', () => {
+  it('should handle screens below 380px', () => {
     global.innerWidth = 300;
 
     const mockUseDispatch = jest.fn();
@@ -59,14 +52,17 @@ describe('useWindowWidth', () => {
     expect(hookResult.result.current).toEqual(300);
     expect(mockUseDispatch).toHaveBeenCalledWith(
       setDefaultWidthsAction({
-        left: -48,
-        right: 300,
-        preview: 300,
+        leftOverlay: -48,
+        leftPush: 380,
+        previewOverlay: 300,
+        previewPush: 300,
+        rightOverlay: 300,
+        rightPush: 300,
       })
     );
   });
 
-  it('should handle small screens', () => {
+  it('should handle screens between 380px and 992px', () => {
     global.innerWidth = 500;
 
     const mockUseDispatch = jest.fn();
@@ -77,58 +73,99 @@ describe('useWindowWidth', () => {
     expect(hookResult.result.current).toEqual(500);
     expect(mockUseDispatch).toHaveBeenCalledWith(
       setDefaultWidthsAction({
-        left: 72,
-        right: 380,
-        preview: 380,
+        leftOverlay: 72,
+        leftPush: 380,
+        previewOverlay: 380,
+        previewPush: 380,
+        rightOverlay: 380,
+        rightPush: 380,
       })
     );
   });
 
-  it('should handle medium screens', () => {
-    global.innerWidth = 1300;
+  it('should handle screens between 992px and 1600px', () => {
+    global.innerWidth = 1000;
 
     const mockUseDispatch = jest.fn();
     (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
-    const right =
-      RIGHT_SECTION_MIN_WIDTH +
-      (RIGHT_SECTION_MAX_WIDTH - RIGHT_SECTION_MIN_WIDTH) *
-        ((1300 - MIN_RESOLUTION_BREAKPOINT) /
-          (MAX_RESOLUTION_BREAKPOINT - MIN_RESOLUTION_BREAKPOINT));
-    const left = 1300 - right - FULL_WIDTH_PADDING;
-    const preview = right;
+    const rightOverlay = 380 + (750 - 380) * ((1000 - 992) / (1920 - 992));
+    const leftOverlay = 1000 - rightOverlay - 48;
+    const previewOverlay = rightOverlay;
+    const rightPush = 380 + (600 - 380) * ((1000 - 1600) / (2560 - 1600));
+    const leftPush = 380;
+    const previewPush = rightPush;
 
-    expect(hookResult.result.current).toEqual(1300);
+    expect(hookResult.result.current).toEqual(1000);
     expect(mockUseDispatch).toHaveBeenCalledWith(
       setDefaultWidthsAction({
-        left,
-        right,
-        preview,
+        rightOverlay,
+        leftOverlay,
+        previewOverlay,
+        leftPush,
+        previewPush,
+        rightPush,
       })
     );
   });
 
-  it('should handle large screens', () => {
-    global.innerWidth = 2500;
+  it('should handle screens between 1600px and 1920', () => {
+    global.innerWidth = 1800;
 
     const mockUseDispatch = jest.fn();
     (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
 
     const hookResult = renderHook(() => useWindowWidth());
 
-    expect(hookResult.result.current).toEqual(2500);
+    const rightOverlay = 380 + (750 - 380) * ((1800 - 992) / (1920 - 992));
+    const leftOverlay = ((1800 - rightOverlay) * 80) / 100;
+    const previewOverlay = rightOverlay;
+    const rightPush = 380 + (600 - 380) * ((1800 - 1600) / (2560 - 1600));
+    const leftPush = ((1800 - rightPush - 200) * 40) / 100;
+    const previewPush = rightPush;
+
+    expect(hookResult.result.current).toEqual(1800);
     expect(mockUseDispatch).toHaveBeenCalledWith(
       setDefaultWidthsAction({
-        left: 1400,
-        right: 750,
-        preview: 750,
+        rightOverlay,
+        leftOverlay,
+        previewOverlay,
+        leftPush,
+        previewPush,
+        rightPush,
       })
     );
   });
 
-  it('should handle very large screens', () => {
+  it('should handle screens between 1920px and 2560px', () => {
+    global.innerWidth = 2400;
+
+    const mockUseDispatch = jest.fn();
+    (useDispatch as jest.Mock).mockImplementation(() => mockUseDispatch);
+
+    const hookResult = renderHook(() => useWindowWidth());
+
+    const leftOverlay = ((2400 - 750) * 80) / 100;
+    const rightPush = 380 + (600 - 380) * ((2400 - 1600) / (2560 - 1600));
+    const leftPush = ((2400 - rightPush - 200) * 40) / 100;
+    const previewPush = rightPush;
+
+    expect(hookResult.result.current).toEqual(2400);
+    expect(mockUseDispatch).toHaveBeenCalledWith(
+      setDefaultWidthsAction({
+        rightOverlay: 750,
+        leftOverlay,
+        previewOverlay: 750,
+        leftPush,
+        previewPush,
+        rightPush,
+      })
+    );
+  });
+
+  it('should handle screens above 2560px', () => {
     global.innerWidth = 3800;
 
     const mockUseDispatch = jest.fn();
@@ -139,9 +176,12 @@ describe('useWindowWidth', () => {
     expect(hookResult.result.current).toEqual(3800);
     expect(mockUseDispatch).toHaveBeenCalledWith(
       setDefaultWidthsAction({
-        left: 1500,
-        right: 750,
-        preview: 750,
+        leftOverlay: 1500,
+        leftPush: 1200,
+        previewOverlay: 750,
+        previewPush: 600,
+        rightOverlay: 750,
+        rightPush: 600,
       })
     );
   });

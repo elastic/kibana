@@ -26,5 +26,6 @@
     "@kbn/licensing-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/inference-common",
+    "@kbn/security-authorization-core-common",
   ]
 }

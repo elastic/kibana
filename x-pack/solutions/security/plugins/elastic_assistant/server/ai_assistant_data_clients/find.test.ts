@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { findDocuments } from './find';
 import { EsConversationSchema } from './conversations/types';
@@ -34,7 +34,6 @@ export const getSearchConversationMock = (): estypes.SearchResponse<EsConversati
           messages: [],
           id: '1',
           namespace: 'default',
-          is_default: true,
           exclude_from_last_conversation_storage: false,
           api_config: {
             action_type_id: '.gen-ai',
@@ -114,7 +113,6 @@ describe('findDocuments', () => {
                 created_at: '2020-04-20T15:25:31.830Z',
                 exclude_from_last_conversation_storage: false,
                 id: '1',
-                is_default: true,
                 messages: [],
                 namespace: 'default',
                 replacements: undefined,

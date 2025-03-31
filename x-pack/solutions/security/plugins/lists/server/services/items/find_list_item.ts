@@ -86,12 +86,10 @@ export const findListItem = async ({
     });
 
     const respose = await esClient.search({
-      body: {
-        query,
-        runtime_mappings: runtimeMappings,
-      },
       ignore_unavailable: true,
       index: listItemIndex,
+      query,
+      runtime_mappings: runtimeMappings,
       size: 0,
       track_total_hits: true,
     });
@@ -101,15 +99,13 @@ export const findListItem = async ({
       // is because when you pass in seq_no_primary_term: true it does a "fall through" type and you have
       // to explicitly define the type <T>.
       const response = await esClient.search<SearchEsListItemSchema>({
-        body: {
-          query,
-          search_after: scroll.searchAfter,
-          sort: getSortWithTieBreaker({ sortField, sortOrder }),
-        },
         ignore_unavailable: true,
         index: listItemIndex,
+        query,
+        search_after: scroll.searchAfter,
         seq_no_primary_term: true,
         size: perPage,
+        sort: getSortWithTieBreaker({ sortField, sortOrder }),
       });
       return {
         cursor: encodeCursor({

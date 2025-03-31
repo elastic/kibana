@@ -17,9 +17,9 @@ import {
   getEventDetails,
   getHostNameSeparator,
   getHumanReadableLogonType,
+  getTargetUserAndTargetDomain,
   getUserDomainField,
   getUserNameField,
-  getTargetUserAndTargetDomain,
 } from './helpers';
 
 import * as i18n from './translations';
@@ -38,13 +38,13 @@ interface Props {
   eventOutcome: string | null | undefined;
   hostName: string | null | undefined;
   id: string;
-  isDraggable?: boolean;
   processExecutable: string | null | undefined;
   processName: string | null | undefined;
   processPid: number | null | undefined;
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   winlogEventId: string | null | undefined;
+  scopeId: string;
 }
 
 export const EndgameSecurityEventDetailsLine = React.memo<Props>(
@@ -62,13 +62,13 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
     eventOutcome,
     hostName,
     id,
-    isDraggable,
     processExecutable,
     processName,
     processPid,
     userDomain,
     userName,
     winlogEventId,
+    scopeId,
   }) => {
     const domain = getTargetUserAndTargetDomain(eventAction) ? endgameTargetDomainName : userDomain;
     const eventDetails = getEventDetails({ eventAction, eventOutcome });
@@ -93,11 +93,11 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
           )}
 
           <UserHostWorkingDir
+            scopeId={scopeId}
             contextId={contextId}
             eventId={id}
             hostName={hostName}
             hostNameSeparator={hostNameSeparator}
-            isDraggable={isDraggable}
             userDomain={domain}
             userDomainField={userDomainField}
             userName={user}
@@ -116,10 +116,10 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.logon_type"
-                  isDraggable={isDraggable}
                   queryValue={String(endgameLogonType)}
                   value={`${endgameLogonType} - ${getHumanReadableLogonType(endgameLogonType)}`}
                   isAggregatable={true}
@@ -139,10 +139,10 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.target_logon_id"
-                  isDraggable={isDraggable}
                   value={endgameTargetLogonId}
                   isAggregatable={true}
                   fieldType="keyword"
@@ -160,11 +160,11 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
 
           <TokensFlexItem component="span" grow={false}>
             <ProcessDraggableWithNonExistentProcess
+              scopeId={scopeId}
               contextId={contextId}
               endgamePid={undefined}
               endgameProcessName={undefined}
               eventId={id}
-              isDraggable={isDraggable}
               processPid={processPid}
               processName={processName}
               processExecutable={processExecutable}
@@ -183,10 +183,10 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
 
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_user_name"
-                  isDraggable={isDraggable}
                   iconType="user"
                   value={endgameSubjectUserName}
                   isAggregatable={true}
@@ -207,10 +207,10 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_domain_name"
-                  isDraggable={isDraggable}
                   value={endgameSubjectDomainName}
                   isAggregatable={true}
                   fieldType="keyword"
@@ -229,10 +229,10 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="endgame.subject_logon_id"
-                  isDraggable={isDraggable}
                   value={endgameSubjectLogonId}
                   isAggregatable={true}
                   fieldType="keyword"
@@ -249,6 +249,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               {!isNillEmptyOrNotFinite(eventCode) ? (
                 <TokensFlexItem component="span" grow={false}>
                   <DraggableBadge
+                    scopeId={scopeId}
                     contextId={contextId}
                     eventId={id}
                     field="event.code"
@@ -260,6 +261,7 @@ export const EndgameSecurityEventDetailsLine = React.memo<Props>(
               ) : (
                 <TokensFlexItem component="span" grow={false}>
                   <DraggableBadge
+                    scopeId={scopeId}
                     contextId={contextId}
                     eventId={id}
                     iconType="logoWindows"

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiBetaBadge, EuiBadge, EuiTitle } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import type { BadgeOptions, TitleProp } from './types';
 import { TruncatableText } from '../truncatable_text';

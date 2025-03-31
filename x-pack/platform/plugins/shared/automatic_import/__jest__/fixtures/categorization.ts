@@ -40,8 +40,7 @@ export const categorizationInitialPipeline: Pipeline = {
 export const categorizationExpectedResults = {
   docs: [
     {
-      key: 'value',
-      anotherKey: 'anotherValue',
+      event: { type: ['change'], category: ['database'] },
     },
   ],
   pipeline: {

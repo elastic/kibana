@@ -270,9 +270,9 @@ export class ChromeService {
     );
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
-    const breadcrumbsAppendExtension$ = new BehaviorSubject<
-      ChromeBreadcrumbsAppendExtension | undefined
-    >(undefined);
+    const breadcrumbsAppendExtensions$ = new BehaviorSubject<ChromeBreadcrumbsAppendExtension[]>(
+      []
+    );
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(docLinks.links.kibana.askElastic);
@@ -467,6 +467,9 @@ export class ChromeService {
                 globalHelpExtensionMenuLinks$={globalHelpExtensionMenuLinks$}
                 actionMenu$={application.currentActionMenu$}
                 breadcrumbs$={currentProjectBreadcrumbs$}
+                breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(
+                  takeUntil(this.stop$)
+                )}
                 customBranding$={customBranding$}
                 helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
                 helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
@@ -500,7 +503,7 @@ export class ChromeService {
             badge$={badge$.pipe(takeUntil(this.stop$))}
             basePath={http.basePath}
             breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
-            breadcrumbsAppendExtension$={breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$))}
+            breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$))}
             customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
             kibanaDocLink={docLinks.links.kibana.guide}
             docLinks={docLinks}
@@ -548,12 +551,24 @@ export class ChromeService {
 
       setBreadcrumbs: setClassicBreadcrumbs,
 
-      getBreadcrumbsAppendExtension$: () => breadcrumbsAppendExtension$.pipe(takeUntil(this.stop$)),
+      getBreadcrumbsAppendExtensions$: () =>
+        breadcrumbsAppendExtensions$.pipe(takeUntil(this.stop$)),
 
       setBreadcrumbsAppendExtension: (
-        breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
+        breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
       ) => {
-        breadcrumbsAppendExtension$.next(breadcrumbsAppendExtension);
+        breadcrumbsAppendExtensions$.next(
+          [...breadcrumbsAppendExtensions$.getValue(), breadcrumbsAppendExtension].sort(
+            ({ order: orderA = 50 }, { order: orderB = 50 }) => orderA - orderB
+          )
+        );
+        return () => {
+          breadcrumbsAppendExtensions$.next(
+            breadcrumbsAppendExtensions$
+              .getValue()
+              .filter((ext) => ext !== breadcrumbsAppendExtension)
+          );
+        };
       },
 
       getGlobalHelpExtensionMenuLinks$: () => globalHelpExtensionMenuLinks$.asObservable(),

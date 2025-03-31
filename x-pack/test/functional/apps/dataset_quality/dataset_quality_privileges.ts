@@ -170,18 +170,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           await PageObjects.datasetQuality.navigateTo();
         });
 
-        it('"View dashboards" and "See integration" are hidden for underprivileged user', async () => {
+        it('"View dashboards" is hidden for underprivileged user', async () => {
           await PageObjects.datasetQuality.navigateToDetails({
             dataStream: apacheAccessDataStreamName,
           });
           await PageObjects.datasetQuality.openIntegrationActionsMenu();
-
-          // "See Integration" is hidden
-          await testSubjects.missingOrFail(
-            PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsIntegrationAction(
-              'Overview'
-            )
-          );
 
           // "View Dashboards" is hidden
           await testSubjects.missingOrFail(
@@ -217,7 +210,7 @@ async function createDatasetQualityUserWithRole(
         feature: {
           dataQuality: [hasDataQualityPrivileges ? 'all' : 'none'],
           discover: ['all'],
-          fleet: ['none'],
+          fleet: ['read'],
         },
         spaces: ['*'],
       },

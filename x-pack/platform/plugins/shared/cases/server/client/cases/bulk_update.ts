@@ -14,13 +14,14 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
 
 import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
 import type { CasesClient, CasesClientArgs } from '..';
-import type { OwnerEntity } from '../../authorization';
+import type { OwnerEntity, OperationDetails } from '../../authorization';
 import type { PatchCasesArgs } from '../../services/cases/types';
 import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
 
@@ -60,6 +61,7 @@ import type {
 import { CasesPatchRequestRt } from '../../../common/types/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
 import { validateCustomFields } from './validators';
+import { emptyCasesAssigneesSanitizer } from './sanitizers';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -273,10 +275,12 @@ function partitionPatchRequest(
   // This will be a deduped array of case IDs with their corresponding owner
   casesToAuthorize: OwnerEntity[];
   reopenedCases: CasePatchRequest[];
+  changedAssignees: CasePatchRequest[];
 } {
   const nonExistingCases: CasePatchRequest[] = [];
   const conflictedCases: CasePatchRequest[] = [];
   const reopenedCases: CasePatchRequest[] = [];
+  const changedAssignees: CasePatchRequest[] = [];
   const casesToAuthorize: Map<string, OwnerEntity> = new Map<string, OwnerEntity>();
 
   for (const reqCase of patchReqCases) {
@@ -299,14 +303,56 @@ function partitionPatchRequest(
     } else {
       casesToAuthorize.set(foundCase.id, { id: foundCase.id, owner: foundCase.attributes.owner });
     }
+    if (reqCase.assignees) {
+      if (
+        !isEqual(
+          reqCase.assignees.map(({ uid }) => uid),
+          foundCase?.attributes.assignees.map(({ uid }) => uid)
+        ) &&
+        foundCase
+      ) {
+        changedAssignees.push(reqCase);
+      }
+    }
   }
 
   return {
     nonExistingCases,
     conflictedCases,
     reopenedCases,
+    changedAssignees,
     casesToAuthorize: Array.from(casesToAuthorize.values()),
   };
+}
+
+export function getOperationsToAuthorize({
+  reopenedCases,
+  changedAssignees,
+  allCases,
+}: {
+  reopenedCases: CasePatchRequest[];
+  changedAssignees: CasePatchRequest[];
+  allCases: CasePatchRequest[];
+}): OperationDetails[] {
+  const operations: OperationDetails[] = [];
+  const onlyAssigneeOperations =
+    reopenedCases.length === 0 && changedAssignees.length === allCases.length;
+  const onlyReopenOperations =
+    changedAssignees.length === 0 && reopenedCases.length === allCases.length;
+
+  if (reopenedCases.length > 0) {
+    operations.push(Operations.reopenCase);
+  }
+
+  if (changedAssignees.length > 0) {
+    operations.push(Operations.assignCase);
+  }
+
+  if (!onlyAssigneeOperations && !onlyReopenOperations) {
+    operations.push(Operations.updateCase);
+  }
+
+  return operations;
 }
 
 export interface UpdateRequestWithOriginalCase {
@@ -339,7 +385,8 @@ export const bulkUpdate = async (
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+    const rawQuery = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+    const query = emptyCasesAssigneesSanitizer(rawQuery);
     const caseIds = query.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
       caseIds,
@@ -355,13 +402,14 @@ export const bulkUpdate = async (
       return acc;
     }, new Map<string, CaseSavedObjectTransformed>());
 
-    const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases } =
+    const { nonExistingCases, conflictedCases, casesToAuthorize, reopenedCases, changedAssignees } =
       partitionPatchRequest(casesMap, query.cases);
 
-    const operationsToAuthorize =
-      reopenedCases.length > 0
-        ? [Operations.reopenCase, Operations.updateCase]
-        : [Operations.updateCase];
+    const operationsToAuthorize = getOperationsToAuthorize({
+      reopenedCases,
+      changedAssignees,
+      allCases: query.cases,
+    });
 
     await authorization.ensureAuthorized({
       entities: casesToAuthorize,

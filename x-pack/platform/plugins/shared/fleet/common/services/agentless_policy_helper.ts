@@ -73,7 +73,7 @@ export function validateAgentlessInputs(
   supportsAgentless?: boolean | null
 ) {
   if (Array.isArray(packagePolicyInputs)) {
-    return packagePolicyInputs.forEach((input) => {
+    packagePolicyInputs.forEach((input) => {
       throwIfInputNotAllowed(input.type, input.enabled, supportsAgentless);
     });
   } else {

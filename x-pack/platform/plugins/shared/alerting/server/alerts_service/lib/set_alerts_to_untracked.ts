@@ -6,8 +6,9 @@
  */
 
 import { isEmpty } from 'lodash';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_END,
   ALERT_RULE_CONSUMER,
@@ -18,9 +19,8 @@ import {
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
-  AlertStatus,
 } from '@kbn/rule-data-utils';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { RulesClientContext } from '../../rules_client';
 import { AlertingAuthorizationEntity } from '../../authorization/types';
 
@@ -125,14 +125,12 @@ const ensureAuthorizedToUntrack = async (params: SetAlertsToUntrackedParamsWithD
   const response = await esClient.search<never, ConsumersAndRuleTypesAggregation>({
     index: indices,
     allow_no_indices: true,
-    body: {
-      size: 0,
-      query: getUntrackQuery(params, ALERT_STATUS_ACTIVE),
-      aggs: {
-        ruleTypeIds: {
-          terms: { field: ALERT_RULE_TYPE_ID },
-          aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER } } },
-        },
+    size: 0,
+    query: getUntrackQuery(params, ALERT_STATUS_ACTIVE),
+    aggs: {
+      ruleTypeIds: {
+        terms: { field: ALERT_RULE_TYPE_ID },
+        aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER } } },
       },
     },
   });
@@ -218,14 +216,12 @@ export async function setAlertsToUntracked(
       const response = await esClient.updateByQuery({
         index: indices,
         allow_no_indices: true,
-        body: {
-          conflicts: 'proceed',
-          script: {
-            source: getUntrackUpdatePainlessScript(new Date()),
-            lang: 'painless',
-          },
-          query: getUntrackQuery(params, ALERT_STATUS_ACTIVE),
+        conflicts: 'proceed',
+        script: {
+          source: getUntrackUpdatePainlessScript(new Date()),
+          lang: 'painless',
         },
+        query: getUntrackQuery(params, ALERT_STATUS_ACTIVE),
         refresh: true,
       });
 
@@ -259,11 +255,9 @@ export async function setAlertsToUntracked(
     const searchResponse = await esClient.search({
       index: indices,
       allow_no_indices: true,
-      body: {
-        _source: [ALERT_RULE_UUID, ALERT_UUID],
-        size: total,
-        query: getUntrackQuery(params, ALERT_STATUS_UNTRACKED),
-      },
+      _source: [ALERT_RULE_UUID, ALERT_UUID],
+      size: total,
+      query: getUntrackQuery(params, ALERT_STATUS_UNTRACKED),
     });
 
     return searchResponse.hits.hits.map((hit) => hit._source) as UntrackedAlertsResult;

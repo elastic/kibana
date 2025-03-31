@@ -13,23 +13,23 @@ import { TokensFlexItem } from '../helpers';
 interface Props {
   contextId: string;
   eventId: string;
-  isDraggable?: boolean;
   packageName: string | null | undefined;
   packageSummary: string | null | undefined;
   packageVersion: string | null | undefined;
+  scopeId: string;
 }
 
 export const Package = React.memo<Props>(
-  ({ contextId, eventId, isDraggable, packageName, packageSummary, packageVersion }) => {
+  ({ contextId, eventId, packageName, packageSummary, packageVersion, scopeId }) => {
     if (packageName != null || packageSummary != null || packageVersion != null) {
       return (
         <>
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.name"
-              isDraggable={isDraggable}
               value={packageName}
               iconType="document"
               isAggregatable={true}
@@ -38,10 +38,10 @@ export const Package = React.memo<Props>(
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.version"
-              isDraggable={isDraggable}
               value={packageVersion}
               iconType="document"
               isAggregatable={true}
@@ -50,10 +50,10 @@ export const Package = React.memo<Props>(
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.summary"
-              isDraggable={isDraggable}
               value={packageSummary}
               isAggregatable={true}
               fieldType="keyword"

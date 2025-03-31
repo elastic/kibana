@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const { Client } = require('@elastic/elasticsearch');
+const { Client, HttpConnection } = require('@elastic/elasticsearch');
 const { faker } = require('@faker-js/faker');
 
 const THREAT_INDEX = 'logs-ti';
@@ -31,6 +31,8 @@ const client = new Client({
     username: 'elastic',
     password: 'changeme',
   },
+  Connection: HttpConnection,
+  requestTimeout: 30_000,
 });
 
 const main = async () => {

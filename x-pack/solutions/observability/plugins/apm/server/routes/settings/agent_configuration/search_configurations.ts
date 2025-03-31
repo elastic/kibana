@@ -46,21 +46,19 @@ export async function searchConfigurations({
 
   const params = {
     index: APM_AGENT_CONFIGURATION_INDEX,
-    body: {
-      query: {
-        bool: {
-          minimum_should_match: 2,
-          should: [
-            ...serviceNameFilter,
-            ...environmentFilter,
-            { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
-            {
-              bool: {
-                must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }],
-              },
+    query: {
+      bool: {
+        minimum_should_match: 2,
+        should: [
+          ...serviceNameFilter,
+          ...environmentFilter,
+          { bool: { must_not: [{ exists: { field: SERVICE_NAME } }] } },
+          {
+            bool: {
+              must_not: [{ exists: { field: SERVICE_ENVIRONMENT } }],
             },
-          ],
-        },
+          },
+        ],
       },
     },
   };

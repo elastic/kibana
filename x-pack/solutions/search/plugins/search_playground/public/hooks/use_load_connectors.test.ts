@@ -10,9 +10,11 @@ import { useLoadConnectors } from './use_load_connectors';
 import { useKibana } from './use_kibana';
 import { waitFor, renderHook } from '@testing-library/react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 
 const mockedLoadConnectors = loadConnectors as jest.Mock;
 const mockedUseKibana = useKibana as jest.Mock;
+const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
 
 jest.mock('@tanstack/react-query', () => ({
   useQuery: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
@@ -27,6 +29,10 @@ jest.mock('@tanstack/react-query', () => ({
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => ({
   loadAllActions: jest.fn(),
+}));
+
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  isInferenceEndpointExists: jest.fn(),
 }));
 
 jest.mock('./use_kibana', () => ({
@@ -85,6 +91,7 @@ describe('useLoadConnectors', () => {
       },
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
+    mockedIsInferenceEndpointExists.mockResolvedValue(true);
 
     const { result } = renderHook(() => useLoadConnectors());
     await waitFor(() =>

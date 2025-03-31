@@ -12,7 +12,18 @@ import type { RouteDefinitionParams } from '..';
  */
 export function defineAccountManagementRoutes({ httpResources }: RouteDefinitionParams) {
   httpResources.register(
-    { path: '/security/account', validate: false, options: { excludeFromOAS: true } },
+    {
+      path: '/security/account',
+      validate: false,
+      options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it a host for the account management view.',
+        },
+      },
+    },
     (context, req, res) => res.renderCoreApp()
   );
 }

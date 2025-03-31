@@ -9,7 +9,7 @@ import type { Readable } from 'stream';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { FileClient } from '@kbn/files-plugin/server';
 import { createEsFileClient } from '@kbn/files-plugin/server';
@@ -54,12 +54,10 @@ export class FleetFromHostFilesClient implements FleetFromHostFileClientInterfac
     try {
       const fileDocSearchResult = await this.esClient.search<HostUploadedFileMetadata>({
         index: this.fileMetaIndex,
-        body: {
-          size: 1,
-          query: {
-            term: {
-              _id: fileId,
-            },
+        size: 1,
+        query: {
+          term: {
+            _id: fileId,
           },
         },
       });
@@ -94,21 +92,19 @@ export class FleetFromHostFilesClient implements FleetFromHostFileClientInterfac
       const chunks = await this.esClient.search({
         index: this.fileDataIndex,
         size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                {
-                  term: {
-                    bid: fileId,
-                  },
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  bid: fileId,
                 },
-              ],
-            },
+              },
+            ],
           },
-          // Setting `_source` to false - we don't need the actual document to be returned
-          _source: false,
         },
+        // Setting `_source` to false - we don't need the actual document to be returned
+        _source: false,
       });
 
       return Boolean((chunks.hits?.total as estypes.SearchTotalHits)?.value);

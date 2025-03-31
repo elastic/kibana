@@ -6,28 +6,25 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
+
 import { waitFor, fireEvent, screen } from '@testing-library/react';
 
 import { SortActivity, sortOptions } from './sort_activity';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('SortActivity ', () => {
   const onSortActivityChange = jest.fn();
-  let appMockRender: AppMockRenderer;
-
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
 
   it('renders correctly', () => {
-    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
+    renderWithTestingProviders(
+      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
+    );
 
     expect(screen.getByTestId('user-actions-sort-select')).toBeInTheDocument();
   });
 
   it('renders loading state correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} isLoading />
     );
 
@@ -36,14 +33,18 @@ describe('SortActivity ', () => {
   });
 
   it('renders options when opened', async () => {
-    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
+    renderWithTestingProviders(
+      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
+    );
 
     expect(screen.getByText(`${sortOptions[0].text}`)).toBeInTheDocument();
     expect(screen.getByText(`${sortOptions[1].text}`)).toBeInTheDocument();
   });
 
   it('onChange is called with asc value', async () => {
-    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
+    renderWithTestingProviders(
+      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
+    );
 
     const sortSelect = screen.getByTestId('user-actions-sort-select');
 
@@ -53,7 +54,9 @@ describe('SortActivity ', () => {
   });
 
   it('onChange is called with desc value', async () => {
-    appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
+    renderWithTestingProviders(
+      <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />
+    );
 
     const sortSelect = screen.getByTestId('user-actions-sort-select');
 

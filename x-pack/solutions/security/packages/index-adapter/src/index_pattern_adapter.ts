@@ -40,6 +40,7 @@ export class IndexPatternAdapter extends IndexAdapter {
         esClient,
         logger,
         totalFieldsLimit: this.totalFieldsLimit,
+        writeIndexOnly: this.writeIndexOnly,
       }),
       `update specific indices`
     );

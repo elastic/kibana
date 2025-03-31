@@ -37,6 +37,7 @@ function Providers({ children }: { children: React.ReactNode }) {
 describe('getTimelineItemsFromConversation', () => {
   describe('returns an opening message only', () => {
     items = getTimelineItemsfromConversation({
+      isConversationOwnedByCurrentUser: true,
       chatService: mockChatService,
       hasConnector: true,
       messages: [],
@@ -51,6 +52,7 @@ describe('getTimelineItemsFromConversation', () => {
   describe('with a start of a conversation', () => {
     beforeEach(() => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         currentUser: {
@@ -62,13 +64,6 @@ describe('getTimelineItemsFromConversation', () => {
           {
             '@timestamp': new Date().toISOString(),
             message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
               role: MessageRole.User,
               content: 'User',
             },
@@ -77,7 +72,7 @@ describe('getTimelineItemsFromConversation', () => {
         onActionClick: jest.fn(),
       });
     });
-    it('excludes the system message', () => {
+    it('includes the opening message and the user message', () => {
       expect(items.length).toBe(2);
       expect(items[0].title).toBe('started a conversation');
     });
@@ -109,17 +104,11 @@ describe('getTimelineItemsFromConversation', () => {
     beforeEach(() => {
       mockChatService.hasRenderFunction.mockImplementation(() => false);
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -200,17 +189,11 @@ describe('getTimelineItemsFromConversation', () => {
       mockChatService.hasRenderFunction.mockImplementation(() => true);
       mockChatService.renderFunction.mockImplementation(() => 'Rendered');
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -278,17 +261,11 @@ describe('getTimelineItemsFromConversation', () => {
   describe('with a function that errors out', () => {
     beforeEach(() => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -356,6 +333,7 @@ describe('getTimelineItemsFromConversation', () => {
   describe('with an invalid JSON response', () => {
     beforeEach(() => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         currentUser: {
@@ -364,13 +342,6 @@ describe('getTimelineItemsFromConversation', () => {
         },
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -411,17 +382,11 @@ describe('getTimelineItemsFromConversation', () => {
     beforeEach(() => {
       mockChatService.hasRenderFunction.mockImplementation(() => false);
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -487,17 +452,11 @@ describe('getTimelineItemsFromConversation', () => {
   describe('while the chat is loading', () => {
     const renderWithLoading = (extraMessages: Message[]) => {
       items = getTimelineItemsfromConversation({
+        isConversationOwnedByCurrentUser: true,
         chatService: mockChatService,
         hasConnector: true,
         chatState: ChatState.Loading,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {

@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import type { ValidationIndicesFieldSpecification } from '../../../../../common/http_api';

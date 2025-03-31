@@ -15,6 +15,7 @@ import {
   ALERT_INSTANCE_ID,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_CONSECUTIVE_MATCHES,
+  ALERT_PENDING_RECOVERED_COUNT,
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
@@ -30,9 +31,9 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_SEVERITY_IMPROVING,
 } from '@kbn/rule-data-utils';
-import { DeepPartial } from '@kbn/utility-types';
-import { Alert as LegacyAlert } from '../../alert/alert';
-import { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
+import type { DeepPartial } from '@kbn/utility-types';
+import type { Alert as LegacyAlert } from '../../alert/alert';
+import type { AlertInstanceContext, AlertInstanceState, RuleAlertData } from '../../types';
 import type { AlertRule } from '../types';
 import { stripFrameworkFields } from './strip_framework_fields';
 import { nanosToMicros } from './nanos_to_micros';
@@ -93,6 +94,7 @@ export const buildNewAlert = <
         [ALERT_INSTANCE_ID]: legacyAlert.getId(),
         [ALERT_MAINTENANCE_WINDOW_IDS]: legacyAlert.getMaintenanceWindowIds(),
         [ALERT_CONSECUTIVE_MATCHES]: legacyAlert.getActiveCount(),
+        [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
         [ALERT_STATUS]: 'active',
         [ALERT_UUID]: legacyAlert.getUuid(),
         [ALERT_SEVERITY_IMPROVING]: false,

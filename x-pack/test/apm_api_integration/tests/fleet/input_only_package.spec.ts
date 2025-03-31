@@ -11,7 +11,7 @@ import expect from '@kbn/expect';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getBettertest } from '../../common/bettertest';
@@ -59,11 +59,9 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     const esClientScoped = createEsClientWithToken(token.value);
     return esClientScoped.security.createApiKey({
-      body: {
-        name: API_KEY_NAME,
-        role_descriptors: {
-          apmFleetPermissions: permissions,
-        },
+      name: API_KEY_NAME,
+      role_descriptors: {
+        apmFleetPermissions: permissions,
       },
     });
   }

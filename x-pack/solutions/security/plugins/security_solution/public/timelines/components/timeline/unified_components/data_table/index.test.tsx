@@ -10,14 +10,16 @@ import React from 'react';
 import { TimelineDataTable } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types';
 import { DataLoadingState } from '@kbn/unified-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import type { ComponentProps } from 'react';
 import { getColumnHeaders } from '../../body/column_headers/helpers';
 import { mockSourcererScope } from '../../../../../sourcerer/containers/mocks';
 import * as timelineActions from '../../../../store/actions';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 jest.mock('../../../../../sourcerer/containers');
 
@@ -54,6 +56,11 @@ type TestComponentProps = Partial<ComponentProps<typeof TimelineDataTable>> & {
 // that is why we are setting it to 10s
 const SPECIAL_TEST_TIMEOUT = 50000;
 
+const mockDataView = new DataView({
+  spec: mockSourcererScope.sourcererDataView,
+  fieldFormats: fieldFormatsMock,
+});
+
 const TestComponent = (props: TestComponentProps) => {
   const { store = createMockStore(), ...restProps } = props;
   useSourcererDataView();
@@ -62,6 +69,7 @@ const TestComponent = (props: TestComponentProps) => {
       <TimelineDataTable
         columns={initialEnrichedColumns}
         columnIds={initialEnrichedColumnsIds}
+        dataView={mockDataView}
         activeTab={TimelineTabs.query}
         timelineId={TimelineId.test}
         itemsPerPage={50}
@@ -263,12 +271,12 @@ describe('unified data table', () => {
       });
       expect(
         screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0]
-      ).toHaveValue(String(rowHeight.initial));
+      ).toHaveValue(rowHeight.initial);
 
       fireEvent.change(
         screen.getAllByTestId('unifiedDataTableRowHeightSettings_lineCountNumber')[0],
         {
-          target: { value: String(rowHeight.new) },
+          target: { value: rowHeight.new },
         }
       );
 

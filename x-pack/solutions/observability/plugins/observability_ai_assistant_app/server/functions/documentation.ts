@@ -18,13 +18,15 @@ export async function registerDocumentationFunction({
 }: FunctionRegistrationParameters) {
   const isProductDocAvailable = (await llmTasks.retrieveDocumentationAvailable()) ?? false;
 
-  functions.registerInstruction(({ availableFunctionNames }) => {
-    return availableFunctionNames.includes(RETRIEVE_DOCUMENTATION_NAME)
-      ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
+  if (isProductDocAvailable) {
+    functions.registerInstruction(({ availableFunctionNames }) => {
+      return availableFunctionNames.includes(RETRIEVE_DOCUMENTATION_NAME)
+        ? `When asked questions about the Elastic stack or products, You should use the ${RETRIEVE_DOCUMENTATION_NAME} function before answering,
       to retrieve documentation related to the question. Consider that the documentation returned by the function
       is always more up to date and accurate than any own internal knowledge you might have.`
-      : undefined;
-  });
+        : undefined;
+    });
+  }
 
   functions.registerFunction(
     {
@@ -62,14 +64,14 @@ export async function registerDocumentationFunction({
         required: ['query'],
       } as const,
     },
-    async ({ arguments: { query, product }, connectorId, useSimulatedFunctionCalling }) => {
+    async ({ arguments: { query, product }, connectorId, simulateFunctionCalling }) => {
       const response = await llmTasks!.retrieveDocumentation({
         searchTerm: query,
         products: product ? [product] : undefined,
         max: 3,
         connectorId,
         request: resources.request,
-        functionCalling: useSimulatedFunctionCalling ? 'simulated' : 'native',
+        functionCalling: simulateFunctionCalling ? 'simulated' : 'auto',
       });
 
       return {

@@ -28,9 +28,11 @@ export interface AppMockRenderer {
   AppWrapper: FC<PropsWithChildren<unknown>>;
 }
 
-export const createAppMockRenderer = (
-  queryClientContext?: QueryClientProviderProps['context']
-): AppMockRenderer => {
+export const createAppMockRenderer = (options?: {
+  queryClientContext?: QueryClientProviderProps['context'];
+  additionalServices?: any;
+}): AppMockRenderer => {
+  const { queryClientContext, additionalServices } = options ?? {};
   const services = createStartServicesMock();
   const core = coreMock.createStart();
 
@@ -54,7 +56,7 @@ export const createAppMockRenderer = (
   const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (
     <I18nProvider>
       <KibanaRenderContextProvider {...core}>
-        <KibanaContextProvider services={services}>
+        <KibanaContextProvider services={{ ...services, ...additionalServices }}>
           <QueryClientProvider client={queryClient} context={queryClientContext}>
             {children}
           </QueryClientProvider>
@@ -65,10 +67,10 @@ export const createAppMockRenderer = (
 
   AppWrapper.displayName = 'AppWrapper';
 
-  const render: UiRender = (ui, options) => {
+  const render: UiRender = (ui, _options) => {
     return reactRender(ui, {
       wrapper: AppWrapper,
-      ...options,
+      ..._options,
     });
   };
 

@@ -24,6 +24,7 @@ import type { FieldVisConfig } from '../stats_table/types';
 import type { CombinedQuery } from '../../../index_data_visualizer/types/combined_query';
 import { LoadingIndicator } from '../loading_indicator';
 import { ErrorMessageContent } from '../stats_table/components/field_data_expanded_row/error_message';
+import { NotSupportedContent } from '../not_in_docs_content/not_supported_content';
 
 export const IndexBasedDataVisualizerExpandedRow = ({
   item,
@@ -55,6 +56,10 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   const dvExpandedRow = useExpandedRowCss();
 
   function getCardContent() {
+    if (type === 'unknown' || type.includes('vector') || item.secondaryType?.includes('vector')) {
+      return <NotSupportedContent />;
+    }
+
     if (existsInDocs === false) {
       return <NotInDocsContent />;
     }

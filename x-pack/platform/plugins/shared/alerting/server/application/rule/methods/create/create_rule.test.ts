@@ -6,8 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CreateRuleParams } from './create_rule';
-import { RulesClient, ConstructorOptions } from '../../../../rules_client';
+import type { CreateRuleParams } from './create_rule';
+import type { ConstructorOptions } from '../../../../rules_client';
+import { RulesClient } from '../../../../rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -19,8 +20,8 @@ import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization, ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
@@ -29,9 +30,9 @@ import { RecoveredActionGroup } from '../../../../../common';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { getRuleExecutionStatusPending, getDefaultMonitoring } from '../../../../lib';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
-import { ConnectorAdapter } from '../../../../connector_adapters/types';
-import { RuleDomain } from '../../types';
-import { RuleSystemAction } from '../../../../types';
+import type { ConnectorAdapter } from '../../../../connector_adapters/types';
+import type { RuleDomain } from '../../types';
+import type { RuleSystemAction } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 
@@ -1619,6 +1620,7 @@ describe('create()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -1812,6 +1814,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -2658,6 +2661,7 @@ describe('create()', () => {
         return { state: {} };
       },
       producer: 'alerts',
+      solution: 'stack',
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"params invalid: [param1]: expected value of type [string] but got [undefined]"`
@@ -3132,6 +3136,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3282,6 +3287,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3322,6 +3328,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3416,6 +3423,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3467,6 +3475,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3531,6 +3540,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3613,6 +3623,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3817,6 +3828,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),
@@ -3876,6 +3888,7 @@ describe('create()', () => {
       category: 'test',
       validLegacyConsumers: [],
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: jest.fn(),

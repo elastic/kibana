@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
+import { ESQLVariableType } from '@kbn/esql-types';
 import { timeUnits } from '@kbn/esql-validation-autocomplete';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
@@ -18,7 +19,6 @@ export const updateQueryStringWithVariable = (
   variable: string,
   cursorPosition: monaco.Position
 ) => {
-  const variableName = `?${variable}`;
   const cursorColumn = cursorPosition?.column ?? 0;
   const cursorLine = cursorPosition?.lineNumber ?? 0;
   const lines = queryString.split('\n');
@@ -28,7 +28,7 @@ export const updateQueryStringWithVariable = (
     const queryPartToBeUpdated = queryArray[cursorLine - 1];
     const queryWithVariable = [
       queryPartToBeUpdated.slice(0, cursorColumn - 1),
-      variableName,
+      variable,
       queryPartToBeUpdated.slice(cursorColumn - 1),
     ].join('');
     queryArray[cursorLine - 1] = queryWithVariable;
@@ -37,7 +37,7 @@ export const updateQueryStringWithVariable = (
 
   return [
     queryString.slice(0, cursorColumn - 1),
-    variableName,
+    variable,
     queryString.slice(cursorColumn - 1),
   ].join('');
 };
@@ -65,10 +65,23 @@ export const areValuesIntervalsValid = (values: string[]) => {
   });
 };
 
-export const getRecurrentVariableName = (name: string, existingNames: string[]) => {
+export const getVariablePrefix = (variableType: ESQLVariableType) => {
+  switch (variableType) {
+    case ESQLVariableType.FIELDS:
+      return 'field';
+    case ESQLVariableType.FUNCTIONS:
+      return 'function';
+    case ESQLVariableType.TIME_LITERAL:
+      return 'interval';
+    default:
+      return 'variable';
+  }
+};
+
+export const getRecurrentVariableName = (name: string, existingNames: Set<string>) => {
   let newName = name;
   let i = 1;
-  while (existingNames.includes(newName)) {
+  while (existingNames.has(newName)) {
     newName = `${name}${i}`;
     i++;
   }
@@ -89,13 +102,48 @@ export const getFlyoutStyling = () => {
   `;
 };
 
-export const validateVariableName = (variableName: string) => {
+export const validateVariableName = (variableName: string, prefix: '??' | '?') => {
   let text = variableName
-    // variable name can only contain letters, numbers and underscores
-    .replace(/[^a-zA-Z0-9_]/g, '');
-  if (text.charAt(0) === '_') {
-    text = text.substring(1);
+    // variable name can only contain letters, numbers, underscores and questionmarks
+    .replace(/[^a-zA-Z0-9_?]/g, '');
+
+  if (!text.startsWith('?')) {
+    text = `?${text}`;
+  }
+
+  const match = text.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+
+  if (leadingQuestionMarksCount > 2) {
+    text = '??'.concat(text.substring(leadingQuestionMarksCount));
+  }
+
+  // Remove unnecessary leading underscores
+  if (text.charAt(prefix.length) === '_') {
+    text = `${prefix}${text.substring(prefix.length + 1)}`;
   }
 
   return text;
+};
+
+export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariableType) => {
+  const match = str.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+  if (
+    leadingQuestionMarksCount === 2 &&
+    variableType !== ESQLVariableType.FIELDS &&
+    variableType !== ESQLVariableType.FUNCTIONS
+  ) {
+    return ESQLVariableType.FIELDS;
+  }
+
+  if (
+    leadingQuestionMarksCount === 1 &&
+    variableType !== ESQLVariableType.TIME_LITERAL &&
+    variableType !== ESQLVariableType.VALUES
+  ) {
+    return ESQLVariableType.VALUES;
+  }
+
+  return variableType;
 };

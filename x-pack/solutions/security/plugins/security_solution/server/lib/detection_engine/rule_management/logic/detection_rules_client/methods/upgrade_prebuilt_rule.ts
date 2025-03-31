@@ -25,14 +25,12 @@ export const upgradePrebuiltRule = async ({
   ruleAsset,
   mlAuthz,
   prebuiltRuleAssetClient,
-  isRuleCustomizationEnabled,
 }: {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
   ruleAsset: PrebuiltRuleAsset;
   mlAuthz: MlAuthz;
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
-  isRuleCustomizationEnabled: boolean;
 }): Promise<RuleResponse> => {
   await validateMlAuth(mlAuthz, ruleAsset.type);
 
@@ -75,7 +73,6 @@ export const upgradePrebuiltRule = async ({
     prebuiltRuleAssetClient,
     existingRule,
     ruleUpdate: ruleAsset,
-    isRuleCustomizationEnabled,
   });
 
   const updatedInternalRule = await rulesClient.update({

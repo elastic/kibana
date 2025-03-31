@@ -38,7 +38,6 @@ export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
   scopeId: string;
   userName: string;
-  isDraggable?: boolean;
   isPreviewMode?: boolean;
 }
 
@@ -54,13 +53,7 @@ const FIRST_RECORD_PAGINATION = {
   querySize: 1,
 };
 
-export const UserPanel = ({
-  contextID,
-  scopeId,
-  userName,
-  isDraggable,
-  isPreviewMode,
-}: UserPanelProps) => {
+export const UserPanel = ({ contextID, scopeId, userName, isPreviewMode }: UserPanelProps) => {
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),
     [userName]
@@ -120,7 +113,6 @@ export const UserPanel = ({
     email,
     scopeId,
     contextID,
-    isDraggable,
     isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
@@ -186,18 +178,12 @@ export const UserPanel = ({
               onAssetCriticalityChange={calculateEntityRiskScore}
               contextID={contextID}
               scopeId={scopeId}
-              isDraggable={!!isDraggable}
               openDetailsPanel={openDetailsPanel}
               isPreviewMode={isPreviewMode}
               isLinkEnabled={isLinkEnabled}
             />
             {isPreviewMode && (
-              <UserPreviewPanelFooter
-                userName={userName}
-                contextID={contextID}
-                scopeId={scopeId}
-                isDraggable={!!isDraggable}
-              />
+              <UserPreviewPanelFooter userName={userName} contextID={contextID} scopeId={scopeId} />
             )}
           </>
         );

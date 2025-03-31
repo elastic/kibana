@@ -29,6 +29,7 @@ export const overviewLinks: LinkItem = {
     defaultMessage:
       'Summary of your security environment activity, including alerts, events, recent items, and a news feed!',
   }),
+
   path: OVERVIEW_PATH,
   capabilities: [`${SECURITY_FEATURE_ID}.show`],
   globalSearchKeywords: [

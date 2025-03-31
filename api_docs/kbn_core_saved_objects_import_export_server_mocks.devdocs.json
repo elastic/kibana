@@ -22,7 +22,7 @@
         "tags": [],
         "label": "savedObjectsExporterMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+        "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
               "ISavedObjectsExporter",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -54,7 +54,7 @@
         "tags": [],
         "label": "savedObjectsImporterMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_importer.mock.ts",
+        "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -70,7 +70,7 @@
               "ISavedObjectsImporter",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_importer.mock.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

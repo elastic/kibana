@@ -6,18 +6,18 @@
  */
 
 import { of } from 'rxjs';
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { executor, getValidTimefieldSort, tryToParseAsDate } from './executor';
-import { ExecutorOptions } from './types';
-import { Comparator } from '../../../common/comparator_types';
+import type { ExecutorOptions } from './types';
+import type { Comparator } from '../../../common/comparator_types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
-import { EsQueryRuleParams } from './rule_type_params';
-import { FetchEsQueryOpts } from './lib/fetch_es_query';
-import { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
-import { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
+import type { FetchEsQueryOpts } from './lib/fetch_es_query';
+import type { FetchSearchSourceQueryOpts } from './lib/fetch_search_source_query';
+import type { FetchEsqlQueryOpts } from './lib/fetch_esql_query';
 
 const logger = loggerMock.create();
 const scopedClusterClientMock = elasticsearchServiceMock.createScopedClusterClient();

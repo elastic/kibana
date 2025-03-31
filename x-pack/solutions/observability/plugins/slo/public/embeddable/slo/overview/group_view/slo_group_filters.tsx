@@ -18,7 +18,6 @@ import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
 import { useGetSettings } from '../../../../pages/slo_settings/hooks/use_get_settings';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { GroupBy, GroupFilters } from '../types';
-import './slo_group_filters.scss';
 
 interface Option {
   value: string;
@@ -254,7 +253,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           query={{ query: String(kqlQuery), language: 'kuery' }}
           showDatePicker={false}
           disableQueryLanguageSwitcher={true}
-          saveQueryMenuVisibility="globally_managed"
+          allowSavingQueries
           onClearSavedQuery={() => {}}
           showQueryInput={true}
           onSavedQueryUpdated={(savedQuery) => {

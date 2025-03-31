@@ -33,7 +33,6 @@ import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from './react_monaco_editor';
-import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
 import { PlaceholderWidget } from './placeholder_widget';

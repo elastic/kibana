@@ -1593,8 +1593,10 @@
               "The objects to authorize"
             ],
             "signature": [
+              "WithAuditName",
+              "<",
               "SavedObjectReferenceWithContext",
-              "[]"
+              ">[]"
             ],
             "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
             "deprecated": false,
@@ -3774,6 +3776,24 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectsSecurityExtension.includeSavedObjectNames",
+            "type": "Function",
+            "tags": [],
+            "label": "includeSavedObjectNames",
+            "description": [
+              "\nRetrieves whether we need to include save objects names in the audit out"
+            ],
+            "signature": [
+              "() => boolean"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4613,6 +4633,40 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.ISavedObjectTypeRegistry.getNameAttribute",
+            "type": "Function",
+            "tags": [],
+            "label": "getNameAttribute",
+            "description": [
+              "\nReturns the `nameAttribute` property for given type, or `unknown` if\nthe property/type is not registered."
+            ],
+            "signature": [
+              "(type: string) => string"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.ISavedObjectTypeRegistry.getNameAttribute.$1",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/type_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -4889,8 +4943,20 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "graph",
@@ -4903,18 +4969,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "osquery",
@@ -8705,6 +8759,22 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.nameAttribute",
+            "type": "string",
+            "tags": [],
+            "label": "nameAttribute",
+            "description": [
+              "\nThe attribute path to the saved object's name"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
             "id": "def-server.SavedObjectsType.hidden",
             "type": "boolean",
             "tags": [],
@@ -8943,6 +9013,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/saved_objects/index.ts"
               },
               {
+                "plugin": "apmSourcesAccess",
+                "path": "x-pack/platform/plugins/shared/apm_sources_access/server/saved_objects/apm_indices.ts"
+              },
+              {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/dashboard_saved_object/dashboard_saved_object.ts"
               },
@@ -8959,8 +9033,8 @@
                 "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/saved_objects.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-migration-server-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-migration-server-mocks/src/kibana_migrator.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/migration-server-mocks/src/kibana_migrator.mock.ts"
               },
               {
                 "plugin": "savedSearch",
@@ -8977,6 +9051,26 @@
               {
                 "plugin": "canvas",
                 "path": "x-pack/platform/plugins/private/canvas/server/saved_objects/workpad_template.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
               },
               {
                 "plugin": "graph",
@@ -9005,26 +9099,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/saved_objects/index.ts"
               },
               {
                 "plugin": "maps",
@@ -9057,10 +9131,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/lib/artifacts/saved_object_mappings.ts"
-              },
-              {
-                "plugin": "apmDataAccess",
-                "path": "x-pack/solutions/observability/plugins/apm_data_access/server/saved_objects/apm_indices.ts"
               },
               {
                 "plugin": "apm",
@@ -9786,6 +9856,10 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/saved_objects/custom_element.ts"
               },
               {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/saved_objects/graph_workspace.ts"
               },
@@ -9812,10 +9886,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/server/saved_object_types/connector_mappings.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/saved_objects/tag.ts"
               },
               {
                 "plugin": "maps",
@@ -10002,6 +10072,40 @@
             "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-server",
+            "id": "def-server.SavedObjectsType.getTitle",
+            "type": "Function",
+            "tags": [],
+            "label": "getTitle",
+            "description": [
+              "\nFunction returning the title to display in the management table.\nIf not defined, will use the object's type and id to generate a label."
+            ],
+            "signature": [
+              "((savedObject: Attributes) => string) | undefined"
+            ],
+            "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-server",
+                "id": "def-server.SavedObjectsType.getTitle.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "savedObject",
+                "description": [],
+                "signature": [
+                  "Attributes"
+                ],
+                "path": "src/core/packages/saved-objects/server/src/saved_objects_type.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11503,6 +11607,21 @@
         "label": "USAGE_COUNTERS_SAVED_OBJECT_INDEX",
         "description": [],
         "path": "src/core/packages/saved-objects/server/src/saved_objects_index_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server",
+        "id": "def-server.WithAuditName",
+        "type": "Type",
+        "tags": [],
+        "label": "WithAuditName",
+        "description": [],
+        "signature": [
+          "T & { name?: string | undefined; }"
+        ],
+        "path": "src/core/packages/saved-objects/server/src/extensions/security.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

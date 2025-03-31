@@ -6,11 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { EuiButtonColor } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
-import type { ResolverProcessType, NodeDataStatus } from '../types';
+import type { NodeDataStatus, ResolverProcessType } from '../types';
 import { useSymbolIDs } from './use_symbol_ids';
 import { useColors } from './use_colors';
 
@@ -22,6 +21,8 @@ export function useCubeAssets(
   cubeType: NodeDataStatus,
   isProcessTrigger: boolean
 ): NodeStyleConfig {
+  const { euiTheme } = useEuiTheme();
+
   const SymbolIds = useSymbolIDs({ id });
   const colorMap = useColors();
 
@@ -36,7 +37,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: true,
         labelButtonFill: 'primary',
-        strokeColor: euiThemeVars.euiColorPrimary,
+        strokeColor: euiTheme.colors.primary,
       },
       loadingCube: {
         backingFill: colorMap.processBackingFill,
@@ -47,7 +48,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: false,
         labelButtonFill: 'primary',
-        strokeColor: euiThemeVars.euiColorPrimary,
+        strokeColor: euiTheme.colors.primary,
       },
       errorCube: {
         backingFill: colorMap.processBackingFill,
@@ -58,7 +59,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: false,
         labelButtonFill: 'primary',
-        strokeColor: euiThemeVars.euiColorPrimary,
+        strokeColor: euiTheme.colors.primary,
       },
       runningTriggerCube: {
         backingFill: colorMap.triggerBackingFill,
@@ -69,7 +70,7 @@ export function useCubeAssets(
         }),
         isLabelFilled: true,
         labelButtonFill: 'danger',
-        strokeColor: euiThemeVars.euiColorDanger,
+        strokeColor: euiTheme.colors.danger,
       },
       terminatedProcessCube: {
         backingFill: colorMap.processBackingFill,
@@ -83,7 +84,7 @@ export function useCubeAssets(
         ),
         isLabelFilled: false,
         labelButtonFill: 'primary',
-        strokeColor: euiThemeVars.euiColorPrimary,
+        strokeColor: euiTheme.colors.primary,
       },
       terminatedTriggerCube: {
         backingFill: colorMap.triggerBackingFill,
@@ -97,10 +98,10 @@ export function useCubeAssets(
         ),
         isLabelFilled: false,
         labelButtonFill: 'danger',
-        strokeColor: euiThemeVars.euiColorDanger,
+        strokeColor: euiTheme.colors.danger,
       },
     }),
-    [SymbolIds, colorMap]
+    [SymbolIds, colorMap, euiTheme]
   );
 
   if (cubeType === 'terminated') {
@@ -132,6 +133,7 @@ const processTypeToCube: Record<ResolverProcessType, keyof NodeStyleMap> = {
   processError: 'errorCube',
   unknownEvent: 'runningProcessCube',
 };
+
 interface NodeStyleMap {
   runningProcessCube: NodeStyleConfig;
   runningTriggerCube: NodeStyleConfig;
@@ -140,6 +142,7 @@ interface NodeStyleMap {
   loadingCube: NodeStyleConfig;
   errorCube: NodeStyleConfig;
 }
+
 interface NodeStyleConfig {
   backingFill: string;
   cubeSymbol: string;

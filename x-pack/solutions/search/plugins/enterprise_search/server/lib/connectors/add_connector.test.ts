@@ -15,7 +15,6 @@ import {
 
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { generateApiKey } from '../indices/generate_api_key';
 import { textAnalysisSettings } from '../indices/text_analysis';
 
@@ -26,7 +25,6 @@ jest.mock('@kbn/search-connectors', () => ({
   deleteConnectorById: jest.fn(),
   fetchConnectorByIndexName: jest.fn(),
 }));
-jest.mock('../crawler/fetch_crawlers', () => ({ fetchCrawlerByIndexName: jest.fn() }));
 jest.mock('../indices/generate_api_key', () => ({ generateApiKey: jest.fn() }));
 
 describe('addConnector lib function', () => {
@@ -70,7 +68,6 @@ describe('addConnector lib function', () => {
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
     (generateApiKey as jest.Mock).mockImplementation(() => undefined);
 
@@ -112,7 +109,6 @@ describe('addConnector lib function', () => {
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
     (generateApiKey as jest.Mock).mockImplementation(() => ({
       id: 'api-key-id',
@@ -157,7 +153,6 @@ describe('addConnector lib function', () => {
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
@@ -175,7 +170,6 @@ describe('addConnector lib function', () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
@@ -189,34 +183,10 @@ describe('addConnector lib function', () => {
     expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
   });
 
-  it('should reject if crawler already exists', async () => {
-    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
-    (createConnector as jest.Mock).mockImplementation(() => ({
-      id: 'fakeId',
-      index_name: 'index_name',
-    }));
-    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
-    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => true);
-    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
-
-    await expect(
-      addConnector(mockClient as unknown as IScopedClusterClient, {
-        indexName: 'index_name',
-        isNative: false,
-        language: 'en',
-        name: '',
-      })
-    ).rejects.toEqual(new Error(ErrorCode.CRAWLER_ALREADY_EXISTS));
-    expect(mockClient.asCurrentUser.indices.create).not.toHaveBeenCalled();
-    expect(createConnector).not.toHaveBeenCalled();
-  });
-
   it('should reject with index already exists if connector and index already exist', async () => {
     mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => true);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => true);
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
 
     await expect(
@@ -239,7 +209,6 @@ describe('addConnector lib function', () => {
     }));
     mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => ({ id: 'connectorId' }));
-    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
     (generateApiKey as jest.Mock).mockImplementation(() => ({
       id: 'api-key-id',

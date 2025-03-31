@@ -6,7 +6,8 @@
  */
 
 import { ConnectorUsageCollector } from '../types';
-import { AxiosHeaders, AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import { AxiosHeaders } from 'axios';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 describe('ConnectorUsageCollector', () => {
