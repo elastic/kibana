@@ -9,7 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { type DataView } from '@kbn/data-views-plugin/public';
 
 import { DataViewManagerScopeName } from '../constants';
-import { useDataView } from './use_data_view';
+import { useDataViewSpec } from './use_data_view_spec';
 import { useFullDataView } from './use_full_data_view';
 
 jest.mock('./use_full_data_view');
@@ -27,7 +27,7 @@ describe('useDataView', () => {
   });
 
   it('should return correct dataView from the store, based on the provided scope', () => {
-    const wrapper = renderHook((scope) => useDataView(scope), {
+    const wrapper = renderHook((scope) => useDataViewSpec(scope), {
       initialProps: DataViewManagerScopeName.default,
     });
 

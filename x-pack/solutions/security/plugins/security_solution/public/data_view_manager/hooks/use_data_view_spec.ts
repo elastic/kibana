@@ -12,7 +12,7 @@ import { useFullDataView } from './use_full_data_view';
 /**
  * Returns data view selection for given scopeName
  */
-export const useDataView = (scopeName: DataViewManagerScopeName) => {
+export const useDataViewSpec = (scopeName: DataViewManagerScopeName) => {
   const { dataView, status } = useFullDataView(scopeName);
 
   return useMemo(() => {
