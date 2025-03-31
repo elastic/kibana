@@ -10,10 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { ReactNode } from 'react';
 import React, { useRef, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import type {
-  WaterfallSpan,
-  WaterfallTransaction,
-} from '../../../../../../../common/waterfall/typings';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
@@ -337,8 +333,8 @@ function RelatedErrors({
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
-  const transactionId = (item.doc as WaterfallTransaction).transaction?.id;
-  const spanId = (item.doc as WaterfallSpan).span?.id;
+  const transactionId = item.doc.transaction?.id;
+  const spanId = item.doc.span?.id;
 
   if (item.docType === 'transaction' && spanId) {
     kuery += ` and ${SPAN_ID} : "${spanId}"`;
