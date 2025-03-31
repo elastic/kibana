@@ -6,6 +6,15 @@ navigation_title: "Known issues"
 
 ## 9.0.0
 
+::::{dropdown} Issue with follower indices during upgrade
+:name: ua-follower-indices
+
+**Details**
+
+In Upgrade Assistant, follower indices may be identified to be reindexed. However, this is not a valid migration path and will result in an error. Instead, the recommendation is to mark as read-only and unfollow the leader index. Cross-cluster replication on that index will not be possible.
+
+::::
+
 ::::{dropdown} Unexpected deprecation warnings for APM indices during upgrade
 :name: known-issue-apm-upgrade-on-ech
 
