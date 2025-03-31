@@ -101,7 +101,7 @@ export const SetupTechnologySelector = ({
   const limitationsMessage = (
     <FormattedMessage
       id="xpack.csp.setupTechnologySelector.comingSoon"
-      defaultMessage="Agentless deployment does not work if you are using {link}."
+      defaultMessage="Agentless deployment is not supported if you are using {link}."
       values={{
         link: (
           <EuiLink
