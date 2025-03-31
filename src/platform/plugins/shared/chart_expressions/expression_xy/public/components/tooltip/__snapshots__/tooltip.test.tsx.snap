@@ -2,50 +2,7 @@
 
 exports[`Tooltip should render plain tooltip 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>
@@ -81,65 +38,10 @@ box-shadow:
 
 exports[`Tooltip should render tooltip with partial buckets 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "5l9hfr",
-        "next": undefined,
-        "styles": "
-            > :last-child {
-              margin-bottom: 8px;
-            }
-          ",
-        "toString": [Function],
-      }
-    }
+    css={[Function]}
   >
     <EndzoneTooltipHeader />
   </div>
@@ -177,65 +79,10 @@ box-shadow:
 
 exports[`Tooltip should render tooltip with partial buckets 2`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <div
-    css={
-      Object {
-        "map": undefined,
-        "name": "5l9hfr",
-        "next": undefined,
-        "styles": "
-            > :last-child {
-              margin-bottom: 8px;
-            }
-          ",
-        "toString": [Function],
-      }
-    }
+    css={[Function]}
   >
     <EndzoneTooltipHeader />
   </div>
@@ -273,50 +120,7 @@ box-shadow:
 
 exports[`Tooltip should render tooltip with xDomain 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>
@@ -352,50 +156,7 @@ box-shadow:
 
 exports[`Tooltip should render tooltip without split-column-values 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>
@@ -426,50 +187,7 @@ box-shadow:
 
 exports[`Tooltip should render tooltip without split-row-values 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>
@@ -500,50 +218,7 @@ box-shadow:
 
 exports[`Tooltip should render tooltip without splitAccessors-values 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>
@@ -574,50 +249,7 @@ box-shadow:
 
 exports[`Tooltip should render tooltip without x-value 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>
@@ -648,50 +280,7 @@ box-shadow:
 
 exports[`Tooltip should render tooltip without x-value 2`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>
@@ -722,50 +311,7 @@ box-shadow:
 
 exports[`Tooltip should render tooltip without y-value 1`] = `
 <div
-  css={
-    Array [
-      Object {
-        "map": undefined,
-        "name": "10r2mvf",
-        "next": undefined,
-        "styles": "
-    
-box-shadow:
-  0 1px 5px rgba(0,0,0,0.1),
-  0 3.6px 13px rgba(0,0,0,0.07),
-  0 8.4px 23px rgba(0,0,0,0.06),
-  0 23px 35px rgba(0,0,0,0.05);
-
-    font-size:1.0000rem;line-height:1.4286rem;
-    padding: 8px;
-    z-index: 9000;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    color: #1D2A3E;
-    pointer-events: none;
-
-    & {
-      max-width: calc(32px * 10);
-      overflow: hidden;
-      padding: 8px;
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: 4px;
-        overflow-wrap: break-word;
-      }
-    }
-  ",
-        "toString": [Function],
-      },
-    ]
-  }
+  css={[Function]}
 >
   <table>
     <tbody>

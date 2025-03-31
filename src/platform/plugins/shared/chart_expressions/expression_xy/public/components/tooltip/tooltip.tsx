@@ -11,7 +11,7 @@ import { TooltipInfo, XYChartSeriesIdentifier } from '@elastic/charts';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import React, { FC } from 'react';
-import { euiFontSize, euiShadow, useEuiTheme } from '@elastic/eui';
+import { euiFontSize, euiShadow, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { CommonXYDataLayerConfig } from '../../../common';
 import {
@@ -50,38 +50,6 @@ export const Tooltip: FC<Props> = ({
   layers,
 }) => {
   const pickedValue = values.find(({ isHighlighted }) => isHighlighted);
-
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
-
-  const customToolTipStyles = css`
-    ${euiShadow(euiThemeContext)}
-    ${euiFontSize(euiThemeContext, 's')}
-    padding: ${euiTheme.size.s};
-    z-index: ${euiTheme.levels.toast};
-    border-radius: ${euiTheme.border.radius.medium};
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-    color: ${euiTheme.colors.textParagraph};
-    pointer-events: none;
-
-    & {
-      max-width: calc(${euiTheme.size.xl} * 10);
-      overflow: hidden;
-      padding: ${euiTheme.size.s};
-    }
-
-    table {
-      table-layout: fixed;
-      width: 100%;
-
-      td,
-      th {
-        text-align: left;
-        padding: ${euiTheme.size.xs};
-        overflow-wrap: break-word;
-      }
-    }
-  `;
 
   if (!pickedValue) {
     return null;
@@ -158,15 +126,9 @@ export const Tooltip: FC<Props> = ({
   const renderEndzoneTooltip = header ? isEndzoneBucket(header?.value, xDomain) : false;
 
   return (
-    <div css={[customToolTipStyles]}>
+    <div css={styles.customToolTip}>
       {renderEndzoneTooltip && (
-        <div
-          css={css`
-            > :last-child {
-              margin-bottom: ${euiTheme.size.s};
-            }
-          `}
-        >
+        <div css={styles.header}>
           <EndzoneTooltipHeader />
         </div>
       )}
@@ -175,4 +137,41 @@ export const Tooltip: FC<Props> = ({
       </table>
     </div>
   );
+};
+
+const styles = {
+  header: ({ euiTheme }: UseEuiTheme) => css`
+    > :last-child {
+      margin-bottom: ${euiTheme.size.s};
+    }
+  `,
+
+  customToolTip: (euiThemeContext: UseEuiTheme) =>
+    css`
+      z-index: ${euiThemeContext.euiTheme.levels.toast};
+      pointer-events: none;
+
+      padding: ${euiThemeContext.euiTheme.size.s};
+      border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+      max-width: calc(${euiThemeContext.euiTheme.size.xl} * 10);
+      overflow: hidden;
+
+      ${euiFontSize(euiThemeContext, 's')}
+      color: ${euiThemeContext.euiTheme.colors.textParagraph};
+
+      ${euiShadow(euiThemeContext)}
+      background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+
+      table {
+        table-layout: fixed;
+        width: 100%;
+
+        td,
+        th {
+          text-align: left;
+          padding: ${euiThemeContext.euiTheme.size.xs};
+          overflow-wrap: break-word;
+        }
+      }
+    `,
 };
