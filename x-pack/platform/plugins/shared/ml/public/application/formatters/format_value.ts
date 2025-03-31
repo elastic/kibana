@@ -107,12 +107,13 @@ export function formatTimeValue(
   mlFunction: AnomalyDateFunction,
   record?: MlAnomalyRecordDoc
 ) {
+  const date =
+    record !== undefined && record.timestamp !== undefined
+      ? new Date(record.timestamp)
+      : new Date();
+
   switch (mlFunction) {
     case 'time_of_week': {
-      const date =
-        record !== undefined && record.timestamp !== undefined
-          ? new Date(record.timestamp)
-          : new Date();
       /**
        * For time_of_week we model "time in UTC" modulo "duration of week in seconds".
        * This means the numbers we output from the backend are seconds after a whole number of weeks after 1/1/1970 in UTC.
@@ -135,18 +136,13 @@ export function formatTimeValue(
        * that the anomaly occurred using record timestamp if supplied, add on the offset, and finally
        * revert to configured timezone for formatting.
        */
-      const d =
-        record !== undefined && record.timestamp !== undefined
-          ? new Date(record.timestamp)
-          : new Date();
-
-      const utcMoment = moment.utc(d).startOf('day').add(value, 's');
+      const utcMoment = moment.utc(date).startOf('day').add(value, 's');
 
       // Convert to local timezone
       const localMoment = moment(utcMoment.valueOf());
 
       // Get the reference date in local timezone
-      const referenceDate = moment(d).startOf('day');
+      const referenceDate = moment(date).startOf('day');
 
       // Get the date part of the calculated moment
       const localMomentDate = localMoment.clone().startOf('day');
