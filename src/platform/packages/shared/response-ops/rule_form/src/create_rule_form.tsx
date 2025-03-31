@@ -85,7 +85,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
       onSubmit?.(id);
     },
     onError: (error) => {
-      console.log('on the track')
       const message = parseRuleCircuitBreakerErrorMessage(
         error.body?.message || RULE_CREATE_ERROR_TEXT
       );
@@ -139,7 +138,6 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
           actions: newFormData.actions,
           alertDelay: newFormData.alertDelay,
           flapping: newFormData.flapping,
-          artifacts: newFormData.artifacts,
         },
       });
     },

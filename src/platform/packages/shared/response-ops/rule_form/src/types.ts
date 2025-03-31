@@ -52,7 +52,6 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   throttle?: Rule<Params>['throttle'];
   ruleTypeId?: Rule<Params>['ruleTypeId'];
   flapping?: Rule<Params>['flapping'];
-  artifacts?: Rule<Params>['artifacts'];
 }
 
 export interface RuleFormPlugins {
