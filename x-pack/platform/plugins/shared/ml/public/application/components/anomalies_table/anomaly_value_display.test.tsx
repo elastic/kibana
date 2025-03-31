@@ -52,8 +52,8 @@ describe('AnomalyValueDisplay', () => {
   });
 
   it('Renders regular numeric value for non-time functions', () => {
-    const { getByText } = render(<AnomalyValueDisplay {...baseProps} />);
-    expect(getByText('42.5')).toBeInTheDocument();
+    const { getByTestId } = render(<AnomalyValueDisplay {...baseProps} />);
+    expect(getByTestId('mlAnomalyValue')).toHaveTextContent('42.5');
   });
 
   it('Renders array values for non-time functions', () => {
@@ -63,32 +63,32 @@ describe('AnomalyValueDisplay', () => {
       function: 'lat_long',
     };
 
-    const { getByText } = render(<AnomalyValueDisplay {...props} />);
-    expect(getByText('1.5,2.5')).toBeInTheDocument();
+    const { getByTestId } = render(<AnomalyValueDisplay {...props} />);
+    expect(getByTestId('mlAnomalyValue')).toHaveTextContent('1.5,2.5');
   });
 
   it('Renders time value with tooltip for time_of_day function', async () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <AnomalyValueDisplay {...baseProps} value={52200} function="time_of_day" />
     );
 
-    const element = getByText('14:30');
+    const element = getByTestId('mlAnomalyTimeValue');
     expect(element).toBeInTheDocument();
 
     fireEvent.mouseOver(element);
     await waitForEuiToolTipVisible();
 
-    const tooltip = screen.getByRole('tooltip');
+    const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
   });
 
   it('Renders time value with day offset for time_of_day function', async () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <AnomalyValueDisplay {...baseProps} value={90000} function="time_of_day" />
     );
 
-    const timeText = getByText('14:30');
-    const offsetText = getByText('+1');
+    const timeText = getByTestId('mlAnomalyTimeValue');
+    const offsetText = getByTestId('mlAnomalyTimeValueOffset');
 
     expect(timeText).toBeInTheDocument();
     expect(offsetText).toBeInTheDocument();
@@ -96,40 +96,42 @@ describe('AnomalyValueDisplay', () => {
     fireEvent.mouseOver(timeText);
     await waitForEuiToolTipVisible();
 
-    const tooltip = screen.getByRole('tooltip');
+    const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
   });
 
   it('Renders time value with tooltip for time_of_week function', async () => {
-    const { getByText } = render(
+    const { getByTestId } = render(
       <AnomalyValueDisplay {...baseProps} value={126000} function="time_of_week" />
     );
 
-    const element = getByText('14:30');
+    const element = getByTestId('mlAnomalyTimeValue');
     expect(element).toBeInTheDocument();
 
     fireEvent.mouseOver(element);
     await waitForEuiToolTipVisible();
 
-    const tooltip = screen.getByRole('tooltip');
+    const tooltip = screen.getByTestId('mlAnomalyTimeValueTooltip');
     expect(tooltip).toHaveTextContent('January 1st 14:30');
   });
 
   it('Uses first value from array for time functions', () => {
-    const { getByText, queryByText } = render(
+    const { getByTestId, queryByTestId } = render(
       <AnomalyValueDisplay {...baseProps} value={[52200, 54000]} function="time_of_week" />
     );
 
-    expect(getByText('14:30')).toBeInTheDocument();
-    expect(queryByText('15:00')).not.toBeInTheDocument();
+    expect(getByTestId('mlAnomalyTimeValue')).toHaveTextContent('14:30');
+    expect(queryByTestId('mlAnomalyTimeValueOffset')).not.toBeInTheDocument();
   });
 
   it('Handles custom field format for non-time functions', () => {
     const customFormat = {
       convert: jest.fn().mockReturnValue('42.50%'),
     };
-    const { getByText } = render(<AnomalyValueDisplay {...baseProps} fieldFormat={customFormat} />);
+    const { getByTestId } = render(
+      <AnomalyValueDisplay {...baseProps} fieldFormat={customFormat} />
+    );
 
-    expect(getByText('42.50%')).toBeInTheDocument();
+    expect(getByTestId('mlAnomalyValue')).toHaveTextContent('42.50%');
   });
 });

@@ -28,7 +28,11 @@ export const AnomalyValueDisplay: FC<AnomalyDateValueProps> = ({
   // If the function is not a time function, format the value using the formatValue function
   // and return just the formatted value
   if (!isTimeFunction(functionName)) {
-    return formatValue(value, functionName, fieldFormat, record);
+    return (
+      <span data-test-subj="mlAnomalyValue">
+        {formatValue(value, functionName, fieldFormat, record)}
+      </span>
+    );
   }
 
   // If the function is a time function, format the value using the getTimeValueInfo function
@@ -41,11 +45,20 @@ export const AnomalyValueDisplay: FC<AnomalyDateValueProps> = ({
   );
 
   return (
-    <EuiToolTip content={tooltipContent} position="left">
+    <EuiToolTip
+      content={tooltipContent}
+      position="left"
+      anchorProps={{
+        'data-test-subj': 'mlAnomalyTimeValue',
+      }}
+      data-test-subj="mlAnomalyTimeValueTooltip"
+    >
       <>
         {formattedTime}
         {dayOffset !== undefined && dayOffset !== 0 && (
-          <sub>{dayOffset > 0 ? `+${dayOffset}` : dayOffset}</sub>
+          <sub data-test-subj="mlAnomalyTimeValueOffset">
+            {dayOffset > 0 ? `+${dayOffset}` : dayOffset}
+          </sub>
         )}
       </>
     </EuiToolTip>
