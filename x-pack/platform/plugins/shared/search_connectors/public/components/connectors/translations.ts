@@ -43,10 +43,9 @@ export const CANCEL_BUTTON_LABEL = i18n.translate(
   { defaultMessage: 'Cancel' }
 );
 
-export const START_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.startButtonLabel',
-  { defaultMessage: 'Start' }
-);
+export const START_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.startButtonLabel', {
+  defaultMessage: 'Start',
+});
 
 export const CONTINUE_BUTTON_LABEL = i18n.translate(
   'xpack.searchConnectorsactions.continueButtonLabel',
@@ -61,10 +60,9 @@ export const NEXT_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.n
   defaultMessage: 'Next',
 });
 
-export const CLOSE_BUTTON_LABEL = i18n.translate(
-  'xpack.searchConnectorsactions.closeButtonLabel',
-  { defaultMessage: 'Close' }
-);
+export const CLOSE_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.closeButtonLabel', {
+  defaultMessage: 'Close',
+});
 
 export const RESET_DEFAULT_BUTTON_LABEL = i18n.translate(
   'xpack.searchConnectorsactions.resetDefaultButtonLabel',
@@ -75,12 +73,9 @@ export const VIEW_BUTTON_LABEL = i18n.translate('xpack.searchConnectorsactions.v
   defaultMessage: 'View',
 });
 
-export const CONNECTOR_CLIENT_LABEL = i18n.translate(
-  'xpack.searchConnectorsconnectorClientLabel',
-  {
-    defaultMessage: 'Self-managed',
-  }
-);
+export const CONNECTOR_CLIENT_LABEL = i18n.translate('xpack.searchConnectorsconnectorClientLabel', {
+  defaultMessage: 'Self-managed',
+});
 
 export const NAME_LABEL = i18n.translate('xpack.searchConnectorsnameLabel', {
   defaultMessage: 'Name',
