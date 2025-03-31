@@ -27,10 +27,6 @@ const getOpenedTabsList = (
   tabItems: TabItem[],
   selectedTab: TabItem | null
 ): EuiSelectableOption[] => {
-  if (tabItems.length === 0) {
-    return [];
-  }
-
   return tabItems.map((tab) => ({
     label: tab.label,
     checked: selectedTab && tab.id === selectedTab.id ? 'on' : undefined,
@@ -39,10 +35,6 @@ const getOpenedTabsList = (
 };
 
 const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] => {
-  if (tabItems.length === 0) {
-    return [];
-  }
-
   return tabItems.map((tab) => ({
     label: tab.label,
     key: tab.id,
@@ -51,125 +43,122 @@ const getRecentlyClosedTabsList = (tabItems: TabItem[]): EuiSelectableOption[] =
 
 interface TabsBarMenuProps {
   onSelectOpenedTab: TabsBarProps['onSelect'];
-  selectedTab: TabsBarProps['selectedItem'];
-  openedTabs: TabsBarProps['items'];
-  recentlyClosedTabs: TabsBarProps['recentlyClosedItems'];
+  selectedItem: TabsBarProps['selectedItem'];
+  openedItems: TabsBarProps['items'];
+  recentlyClosedItems: TabsBarProps['recentlyClosedItems'];
 }
 
-export const TabsBarMenu: React.FC<TabsBarMenuProps> = ({
-  openedTabs,
-  selectedTab,
-  onSelectOpenedTab,
-  recentlyClosedTabs,
-}) => {
-  const openedTabsList = useMemo(
-    () => getOpenedTabsList(openedTabs, selectedTab),
-    [openedTabs, selectedTab]
-  );
-  const recentlyClosedTabsList = useMemo(
-    () => getRecentlyClosedTabsList(recentlyClosedTabs),
-    [recentlyClosedTabs]
-  );
+export const TabsBarMenu: React.FC<TabsBarMenuProps> = React.memo(
+  ({ openedItems, selectedItem, onSelectOpenedTab, recentlyClosedItems }) => {
+    const openedTabsList = useMemo(
+      () => getOpenedTabsList(openedItems, selectedItem),
+      [openedItems, selectedItem]
+    );
+    const recentlyClosedTabsList = useMemo(
+      () => getRecentlyClosedTabsList(recentlyClosedItems),
+      [recentlyClosedItems]
+    );
 
-  const [isPopoverOpen, setPopover] = useState(false);
-  const contextMenuPopoverId = useGeneratedHtmlId();
+    const [isPopoverOpen, setPopover] = useState(false);
+    const contextMenuPopoverId = useGeneratedHtmlId();
 
-  const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenuButton', {
-    defaultMessage: 'Tabs bar menu',
-  });
+    const menuButtonLabel = i18n.translate('unifiedTabs.tabsBarMenu.tabsBarMenuButton', {
+      defaultMessage: 'Tabs bar menu',
+    });
 
-  const closePopover = useCallback(() => {
-    setPopover(false);
-  }, [setPopover]);
+    const closePopover = useCallback(() => {
+      setPopover(false);
+    }, [setPopover]);
 
-  const selectableListProps = {
-    onFocusBadge: false,
-    truncationProps: {
-      truncation: 'middle',
-    },
-  } as Partial<EuiSelectableOptionsListProps>;
+    const selectableListProps = {
+      onFocusBadge: false,
+      truncationProps: {
+        truncation: 'middle',
+      },
+    } as Partial<EuiSelectableOptionsListProps>;
 
-  return (
-    <EuiPopover
-      data-test-subj="unifiedTabs_tabsBarMenu"
-      id={contextMenuPopoverId}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downRight"
-      hasArrow={false}
-      panelProps={{
-        css: popoverCss,
-      }}
-      button={
-        <EuiButtonIcon
-          aria-label={menuButtonLabel}
-          title={menuButtonLabel}
-          color="text"
-          data-test-subj="unifiedTabs_tabsBarMenuButton"
-          iconType="boxesVertical"
-          onClick={() => setPopover((prev) => !prev)}
-        />
-      }
-    >
-      <EuiSelectable
-        aria-label={i18n.translate('unifiedTabs.openedTabsList', {
-          defaultMessage: 'Opened tabs list',
-        })}
-        options={openedTabsList}
-        onChange={(newOptions) => {
-          const clickedTabId = newOptions.find((option) => option.checked)?.key;
-          const tabToNavigate = openedTabs.find((tab) => tab.id === clickedTabId);
-          if (tabToNavigate) {
-            onSelectOpenedTab(tabToNavigate);
-            closePopover();
-          }
+    return (
+      <EuiPopover
+        data-test-subj="unifiedTabs_tabsBarMenu"
+        id={contextMenuPopoverId}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downRight"
+        hasArrow={false}
+        panelProps={{
+          css: popoverCss,
         }}
-        singleSelection="always"
-        listProps={selectableListProps}
+        button={
+          <EuiButtonIcon
+            aria-label={menuButtonLabel}
+            title={menuButtonLabel}
+            color="text"
+            data-test-subj="unifiedTabs_tabsBarMenuButton"
+            iconType="boxesVertical"
+            onClick={() => setPopover((prev) => !prev)}
+          />
+        }
       >
-        {(tabs) => (
+        <EuiSelectable
+          aria-label={i18n.translate('unifiedTabs.tabsBarMenu.openedTabsList', {
+            defaultMessage: 'Opened tabs list',
+          })}
+          options={openedTabsList}
+          onChange={(newOptions) => {
+            const clickedTabId = newOptions.find((option) => option.checked)?.key;
+            const tabToNavigate = openedItems.find((tab) => tab.id === clickedTabId);
+            if (tabToNavigate) {
+              onSelectOpenedTab(tabToNavigate);
+              closePopover();
+            }
+          }}
+          singleSelection="always"
+          listProps={selectableListProps}
+        >
+          {(tabs) => (
+            <>
+              <EuiPopoverTitle paddingSize="s">
+                {i18n.translate('unifiedTabs.tabsBarMenu.openedItems', {
+                  defaultMessage: 'Opened tabs',
+                })}
+              </EuiPopoverTitle>
+              {tabs}
+            </>
+          )}
+        </EuiSelectable>
+        {recentlyClosedItems.length > 0 && (
           <>
-            <EuiPopoverTitle paddingSize="s">
-              {i18n.translate('unifiedTabs.openedTabs', {
-                defaultMessage: 'Opened tabs',
+            <EuiHorizontalRule margin="none" />
+            <EuiSelectable
+              aria-label={i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosedTabsList', {
+                defaultMessage: 'Recently closed tabs list',
               })}
-            </EuiPopoverTitle>
-            {tabs}
+              options={recentlyClosedTabsList}
+              onChange={() => {
+                alert('restore tab'); // TODO restore closed tab
+                closePopover();
+              }}
+              singleSelection={true}
+              listProps={selectableListProps}
+            >
+              {(tabs) => (
+                <>
+                  <EuiPopoverTitle paddingSize="s">
+                    {i18n.translate('unifiedTabs.tabsBarMenu.recentlyClosed', {
+                      defaultMessage: 'Recently closed',
+                    })}
+                  </EuiPopoverTitle>
+                  {tabs}
+                </>
+              )}
+            </EuiSelectable>
           </>
         )}
-      </EuiSelectable>
-      {recentlyClosedTabs.length > 0 && (
-        <>
-          <EuiHorizontalRule margin="none" />
-          <EuiSelectable
-            aria-label={i18n.translate('unifiedTabs.recentlyClosedTabsList', {
-              defaultMessage: 'Recently closed tabs list',
-            })}
-            options={recentlyClosedTabsList}
-            onChange={() => {
-              alert('restore tab'); // TODO restore closed tab
-              closePopover();
-            }}
-            singleSelection={true}
-            listProps={selectableListProps}
-          >
-            {(tabs) => (
-              <>
-                <EuiPopoverTitle paddingSize="s">
-                  {i18n.translate('unifiedTabs.recentlyClosed', {
-                    defaultMessage: 'Recently closed',
-                  })}
-                </EuiPopoverTitle>
-                {tabs}
-              </>
-            )}
-          </EuiSelectable>
-        </>
-      )}
-    </EuiPopover>
-  );
-};
+      </EuiPopover>
+    );
+  }
+);
 
 const popoverCss = css`
   width: 240px;

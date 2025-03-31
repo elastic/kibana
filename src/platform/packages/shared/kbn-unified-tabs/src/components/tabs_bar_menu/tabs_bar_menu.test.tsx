@@ -28,10 +28,10 @@ describe('TabsBarMenu', () => {
   const mockOnSelectOpenedTab = jest.fn();
 
   const defaultProps = {
-    openedTabs: mockTabs,
-    selectedTab: mockTabs[0],
+    openedItems: mockTabs,
+    selectedItem: mockTabs[0],
     onSelectOpenedTab: mockOnSelectOpenedTab,
-    recentlyClosedTabs: mockRecentlyClosedTabs,
+    recentlyClosedItems: mockRecentlyClosedTabs,
   };
 
   beforeEach(() => {
@@ -99,7 +99,7 @@ describe('TabsBarMenu', () => {
   it('does not show recently closed section when array is empty', () => {
     const propsWithNoClosedTabs = {
       ...defaultProps,
-      recentlyClosedTabs: [],
+      recentlyClosedItems: [],
     };
 
     render(<TabsBarMenu {...propsWithNoClosedTabs} />);

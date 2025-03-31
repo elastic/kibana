@@ -86,7 +86,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       alignItems="center"
       gutterSize="s"
       css={css`
-        padding-right: ${euiTheme.size.xs};
+        padding-right: ${euiTheme.size.base};
       `}
     >
       <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
@@ -133,17 +133,12 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           )}
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem
-        grow={false}
-        css={css`
-          margin-right: ${euiTheme.size.base};
-        `}
-      >
+      <EuiFlexItem grow={false}>
         <TabsBarMenu
-          openedTabs={items}
-          selectedTab={selectedItem}
+          openedItems={items}
+          selectedItem={selectedItem}
           onSelectOpenedTab={onSelect}
-          recentlyClosedTabs={recentlyClosedItems}
+          recentlyClosedItems={recentlyClosedItems}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
