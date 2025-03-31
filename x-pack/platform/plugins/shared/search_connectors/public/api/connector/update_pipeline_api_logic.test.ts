@@ -26,7 +26,7 @@ describe('updatePipelineApiLogic', () => {
         reduce_whitespace: false,
         run_ml_inference: true,
       };
-      const result = updatePipeline({ connectorId: 'connector_id', pipeline });
+      const result = updatePipeline({ http, connectorId: 'connector_id', pipeline });
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/connector_id/pipeline',

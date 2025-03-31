@@ -20,7 +20,7 @@ describe('FetchSyncJobs', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
-      const result = fetchSyncJobs({ connectorId: 'connectorId1' });
+      const result = fetchSyncJobs({ http, connectorId: 'connectorId1' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/connectorId1/sync_jobs',
@@ -31,7 +31,7 @@ describe('FetchSyncJobs', () => {
     it('appends query if specified', async () => {
       const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
-      const result = fetchSyncJobs({ connectorId: 'connectorId1', from: 10, size: 20 });
+      const result = fetchSyncJobs({ http, connectorId: 'connectorId1', from: 10, size: 20 });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/connectorId1/sync_jobs',

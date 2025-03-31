@@ -16,6 +16,7 @@ import {
 import { generateApiKey } from './generate_api_key';
 
 jest.mock('@kbn/search-connectors', () => ({
+  ...(jest.requireActual('@kbn/search-connectors') as object),
   CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX: '.search-acl-filter-',
   CONNECTORS_INDEX: '.elastic-connectors',
   createConnectorSecret: jest.fn(),
@@ -54,10 +55,10 @@ describe('generateApiKey lib function for connector clients', () => {
       _id: 'connectorId',
       _source: 'Document',
     }));
-    mockClient.asCurrentUser.security.createApiKey.mockImplementation(() => ({
+    mockClient.asCurrentUser.security.createApiKey.mockResolvedValue({
       encoded: 'encoded',
       id: 'apiKeyId',
-    }));
+    });
     (createConnectorSecret as jest.Mock).mockImplementation(() => undefined);
     (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
 
@@ -264,7 +265,7 @@ describe('generateApiKey lib function for native connectors', () => {
     (updateConnectorSecret as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', true, true)
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'search-test', true, false)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'search-test-connector',
@@ -317,7 +318,7 @@ describe('generateApiKey lib function for native connectors', () => {
     }));
 
     await expect(
-      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', true, true)
+      generateApiKey(mockClient as unknown as IScopedClusterClient, 'index_name', true, false)
     ).resolves.toEqual({ encoded: 'encoded', id: 'apiKeyId' });
     expect(mockClient.asCurrentUser.security.createApiKey).toHaveBeenCalledWith({
       name: 'index_name-connector',

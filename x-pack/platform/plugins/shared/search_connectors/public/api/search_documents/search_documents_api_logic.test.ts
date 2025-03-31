@@ -33,6 +33,7 @@ describe('SearchDocumentsApiLogic', () => {
       });
       http.post.mockReturnValue(promise);
       const result = searchDocuments({
+        http,
         indexName: 'indexName',
         pagination: {
           pageIndex: 0,
@@ -60,6 +61,7 @@ describe('SearchDocumentsApiLogic', () => {
       const promise = Promise.resolve({ results });
       http.post.mockReturnValue(promise);
       const result = searchDocuments({
+        http,
         indexName: 'düsseldorf',
         pagination: {
           pageIndex: 0,
@@ -90,6 +92,7 @@ describe('SearchDocumentsApiLogic', () => {
       const promise = Promise.resolve({ results });
       http.post.mockReturnValue(promise);
       const result = searchDocuments({
+        http,
         docsPerPage: 25,
         indexName: 'indexName',
         pagination: {

@@ -13,8 +13,8 @@
 
 import { omit } from 'lodash';
 
-import { InlineEditableTableLogic } from './inline_editable_table_logic';
 import { LogicMounter } from '../../../../__mocks__';
+import { InlineEditableTableLogic } from './inline_editable_table_logic';
 
 interface Foo {
   id: number;

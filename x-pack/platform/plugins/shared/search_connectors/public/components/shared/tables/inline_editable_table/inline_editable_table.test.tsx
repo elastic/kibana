@@ -9,6 +9,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 import { BindLogic } from 'kea';
+import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import { PageIntroduction } from '../../page_introduction/page_introduction';
 import { ReorderableTable } from '../reorderable_table';
@@ -20,7 +21,6 @@ import { getUpdatedColumns } from './get_updated_columns';
 
 import { InlineEditableTable, InlineEditableTableContents } from './inline_editable_table';
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
-import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 const items = [{ id: 1 }, { id: 2 }];
 const requiredParams = {

@@ -20,7 +20,7 @@ describe('CancelSyncsLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const result = cancelSyncs({ connectorId: 'connectorId1' });
+      const result = cancelSyncs({ connectorId: 'connectorId1', http });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/connectorId1/cancel_syncs'

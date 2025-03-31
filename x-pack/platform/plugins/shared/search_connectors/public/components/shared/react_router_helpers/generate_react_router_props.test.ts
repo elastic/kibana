@@ -7,16 +7,17 @@
 
 import { mockHistory } from '../../../__mocks__/react_router';
 import { generateReactRouterProps } from '.';
-import { scopedHistoryMock } from '@kbn/core/public/mocks';
+import { httpServiceMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 
 describe('generateReactRouterProps', () => {
-  const history = scopedHistoryMock.create();
+  const history = { ...scopedHistoryMock.create(), ...mockHistory };
+  const http = httpServiceMock.createSetupContract();
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('generates React-Router-friendly href and onClick props', () => {
-    expect(generateReactRouterProps({ to: '/hello/world', history })).toEqual({
+    expect(generateReactRouterProps({ http, to: '/hello/world', history })).toEqual({
       href: '/app/search_connectors/hello/world',
       onClick: expect.any(Function),
     });
@@ -25,7 +26,7 @@ describe('generateReactRouterProps', () => {
 
   it('renders with the correct non-basenamed href when shouldNotCreateHref is passed', () => {
     expect(
-      generateReactRouterProps({ to: '/hello/world', shouldNotCreateHref: true, history })
+      generateReactRouterProps({ http, to: '/hello/world', shouldNotCreateHref: true, history })
     ).toEqual({
       href: '/hello/world',
       onClick: expect.any(Function),
@@ -41,11 +42,11 @@ describe('generateReactRouterProps', () => {
         preventDefault: jest.fn(),
       } as any;
 
-      const { onClick } = generateReactRouterProps({ to: '/test', history, navigateToUrl });
+      const { onClick } = generateReactRouterProps({ http, to: '/test', history, navigateToUrl });
       onClick(mockEvent);
 
       expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(navigateToUrl).toHaveBeenCalledWith('/test', {
+      expect(navigateToUrl).toHaveBeenCalledWith('/app/search_connectors/test', {
         shouldNotCreateHref: false,
         shouldNotPrepend: false,
       });
@@ -59,9 +60,11 @@ describe('generateReactRouterProps', () => {
       } as any;
       const navigateToUrl = jest.fn();
       const { onClick } = generateReactRouterProps({
+        http,
         to: '/app/search_connectors/test',
         shouldNotCreateHref: true,
         history,
+        navigateToUrl,
       });
       onClick(mockEvent);
 
@@ -80,7 +83,7 @@ describe('generateReactRouterProps', () => {
         target: { getAttribute: () => '_blank' },
       } as any;
 
-      const { onClick } = generateReactRouterProps({ to: '/test', history });
+      const { onClick } = generateReactRouterProps({ http, to: '/test', history });
       onClick(mockEvent);
 
       expect(navigateToUrl).not.toHaveBeenCalled();
@@ -91,6 +94,7 @@ describe('generateReactRouterProps', () => {
       const customOnClick = jest.fn(); // Can be anything from telemetry to a state reset
 
       const { onClick } = generateReactRouterProps({
+        http,
         to: '/test',
         onClick: customOnClick,
         history,

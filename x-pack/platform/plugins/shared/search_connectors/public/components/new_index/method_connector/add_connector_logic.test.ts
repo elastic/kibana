@@ -7,10 +7,10 @@
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
+import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 
 import { AddConnectorLogic, AddConnectorValues } from './add_connector_logic';
-import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__';
 
 const DEFAULT_VALUES: AddConnectorValues = {
   isModalVisible: false,
@@ -52,7 +52,9 @@ describe('AddConnectorLogic', () => {
         await nextTick();
         jest.advanceTimersByTime(1001);
         await nextTick();
-        expect(navigateToUrl).toHaveBeenCalledWith('/connectors/success123/configuration');
+        expect(navigateToUrl).toHaveBeenCalledWith(
+          'app/management/data/search_connectors/connectors/success123/configuration'
+        );
       });
     });
   });

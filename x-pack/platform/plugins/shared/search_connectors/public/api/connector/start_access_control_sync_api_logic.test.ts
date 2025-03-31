@@ -23,7 +23,7 @@ describe('startAccessControlSyncApiLogic', () => {
       http.post.mockReturnValue(promise);
       const connectorId = 'test-connector-id-123';
 
-      const result = startAccessControlSync({ connectorId });
+      const result = startAccessControlSync({ connectorId, http });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         `/internal/search_connectors/connectors/${connectorId}/start_access_control_sync`

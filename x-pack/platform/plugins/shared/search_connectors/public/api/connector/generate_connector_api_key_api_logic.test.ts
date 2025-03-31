@@ -25,7 +25,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const result = generateApiKey({ indexName: 'indexName', isNative: false });
+      const result = generateApiKey({ http, indexName: 'indexName', isNative: false });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/search_connectors/indices/indexName/api_key',
@@ -41,7 +41,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const result = generateApiKey({ indexName: 'indexName', isNative: true });
+      const result = generateApiKey({ http, indexName: 'indexName', isNative: true });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/search_connectors/indices/indexName/api_key',

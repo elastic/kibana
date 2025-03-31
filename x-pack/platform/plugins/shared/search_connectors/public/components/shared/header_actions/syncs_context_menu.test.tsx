@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import '../../../__mocks__/shallow_useeffect.mock';
+import { setMockActions, setMockValues } from '../../../__mocks__';
 import React from 'react';
 
 import {
@@ -17,10 +18,18 @@ import {
 import { IngestionStatus, IngestionMethod, ConnectorStatus } from '@kbn/search-connectors';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import { SyncsContextMenu } from './syncs_context_menu';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Status } from '../../../../common/types/api';
-import { setMockActions, setMockValues } from '../../../__mocks__';
+import { SyncsContextMenu } from './syncs_context_menu';
+import { AppContextProvider } from '../../../app_context';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+const appContext = {
+  isAgentlessEnabled: true,
+};
+jest.mock('@kbn/kibana-react-plugin/public');
+const http = httpServiceMock.createSetupContract();
 
+const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 describe('SyncsContextMenu', () => {
   const startSync = jest.fn();
   const startIncrementalSync = jest.fn();
@@ -47,6 +56,11 @@ describe('SyncsContextMenu', () => {
   };
 
   beforeEach(() => {
+    useKibanaMock.mockReturnValue({
+      services: {
+        http,
+      },
+    });
     setMockValues(mockValues);
     setMockActions({
       cancelSyncs,
@@ -58,7 +72,11 @@ describe('SyncsContextMenu', () => {
 
   it('renders', () => {
     setMockValues({ ...mockValues, isWaitingForSync: true });
-    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const wrapper = mountWithIntl(
+      <AppContextProvider value={appContext}>
+        <SyncsContextMenu />
+      </AppContextProvider>
+    );
     const popover = wrapper.find(EuiPopover);
 
     expect(popover).toHaveLength(1);
@@ -67,7 +85,11 @@ describe('SyncsContextMenu', () => {
 
   it('Can cancel syncs', () => {
     setMockValues({ ...mockValues, isSyncing: true });
-    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const wrapper = mountWithIntl(
+      <AppContextProvider value={appContext}>
+        <SyncsContextMenu />
+      </AppContextProvider>
+    );
     const button = wrapper.find(
       'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
     );
@@ -90,7 +112,11 @@ describe('SyncsContextMenu', () => {
 
   it('Can start a sync', () => {
     setMockValues({ ...mockValues, ingestionStatus: IngestionStatus.ERROR });
-    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const wrapper = mountWithIntl(
+      <AppContextProvider value={appContext}>
+        <SyncsContextMenu />
+      </AppContextProvider>
+    );
     const button = wrapper.find(
       'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
     );
@@ -119,7 +145,11 @@ describe('SyncsContextMenu', () => {
       ...mockValues,
       connector: { index_name: null, status: ConnectorStatus.CONFIGURED },
     });
-    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const wrapper = mountWithIntl(
+      <AppContextProvider value={appContext}>
+        <SyncsContextMenu />
+      </AppContextProvider>
+    );
     const button = wrapper.find(
       'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
     );
@@ -143,7 +173,11 @@ describe('SyncsContextMenu', () => {
 
   it("Sync button is disabled when connector isn't configured", () => {
     setMockValues({ ...mockValues, connector: { status: null } });
-    const wrapper = mountWithIntl(<SyncsContextMenu />);
+    const wrapper = mountWithIntl(
+      <AppContextProvider value={appContext}>
+        <SyncsContextMenu />
+      </AppContextProvider>
+    );
     const button = wrapper.find(
       'button[data-telemetry-id="entSearchContent-connector-header-sync-openSyncMenu"]'
     );

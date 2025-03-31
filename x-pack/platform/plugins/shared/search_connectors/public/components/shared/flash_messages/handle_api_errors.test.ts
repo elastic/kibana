@@ -31,6 +31,7 @@ describe('flashAPIErrors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const history = scopedHistoryMock.create();
+    history.listen.mockReturnValue('hi');
     FlashMessagesLogic({ notifications: {} as unknown as NotificationsStart, history });
     FlashMessagesLogic.mount();
     jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');
@@ -39,7 +40,6 @@ describe('flashAPIErrors', () => {
 
   it('converts API errors into flash messages', () => {
     flashAPIErrors(mockHttpError);
-
     expect(FlashMessagesLogic.actions.setFlashMessages).toHaveBeenCalledWith([
       { type: 'error', message: 'Could not find X' },
       { type: 'error', message: 'Could not find Y' },

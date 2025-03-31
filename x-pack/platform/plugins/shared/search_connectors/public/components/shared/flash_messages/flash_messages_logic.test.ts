@@ -5,16 +5,15 @@
  * 2.0.
  */
 
+import { LogicMounter } from '../../../__mocks__';
+import { mockHistory } from '../../../__mocks__/react_router';
 import { resetContext } from 'kea';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-
-const history = scopedHistoryMock.create();
-
 import { FlashMessagesLogic } from './flash_messages_logic';
 import { IFlashMessage } from './types';
-import { scopedHistoryMock } from '@kbn/core/public/mocks';
-import { LogicMounter } from '../../../__mocks__';
+
+const history = mockHistory;
 
 describe('FlashMessagesLogic', () => {
   const { mount: mountFlashMessagesLogic, unmount: unmountFlashMessagesLogic } = new LogicMounter(
@@ -24,6 +23,7 @@ describe('FlashMessagesLogic', () => {
     resetContext({});
     mountFlashMessagesLogic(undefined, {
       notifications: {} as unknown as NotificationsStart,
+      history,
     });
     return unmountFlashMessagesLogic;
   };
@@ -36,6 +36,7 @@ describe('FlashMessagesLogic', () => {
     mount();
     expect(FlashMessagesLogic.values).toEqual({
       historyListener: expect.any(Function),
+      history,
       messages: [],
       notifications: {},
       queuedMessages: [],

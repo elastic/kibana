@@ -11,8 +11,8 @@ import { shallow } from 'enzyme';
 
 import { EuiCallOut } from '@elastic/eui';
 
-import { FlashMessages } from './flash_messages';
 import { setMockValues } from '../../../__mocks__';
+import { FlashMessages } from './flash_messages';
 
 describe('FlashMessages', () => {
   it('renders an array of callouts', () => {

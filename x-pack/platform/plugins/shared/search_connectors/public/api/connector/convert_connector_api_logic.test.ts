@@ -20,7 +20,7 @@ describe('ConvertConnectorApilogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.put.mockReturnValue(promise);
-      const result = convertConnector({ connectorId: 'connectorId1' });
+      const result = convertConnector({ connectorId: 'connectorId1', http });
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/connectorId1/native',

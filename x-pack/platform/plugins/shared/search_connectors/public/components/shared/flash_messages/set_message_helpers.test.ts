@@ -17,8 +17,7 @@ import {
   flashSuccessToast,
   flashErrorToast,
 } from './set_message_helpers';
-import { ScopedHistory } from '@kbn/core/public';
-import { scopedHistoryMock } from '@kbn/core/public/mocks';
+import { mockHistory } from '../../../__mocks__/react_router';
 
 describe('Flash Message Helpers', () => {
   const mockNotifications = {
@@ -26,7 +25,7 @@ describe('Flash Message Helpers', () => {
       add: jest.fn(),
     },
   };
-  const history: ScopedHistory<unknown> = scopedHistoryMock.create();
+  const history = mockHistory;
   const message = 'I am a message';
   beforeAll(() => {
     mountFlashMessagesLogic({

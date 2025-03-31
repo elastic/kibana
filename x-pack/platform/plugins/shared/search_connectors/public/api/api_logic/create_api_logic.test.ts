@@ -6,11 +6,11 @@
  */
 
 import { nextTick } from '@kbn/test-jest-helpers';
+import { LogicMounter, mockFlashMessageHelpers } from '../../__mocks__';
 
 import { HttpError, Status } from '../../../common/types/api';
 
 import { createApiLogic } from './create_api_logic';
-import { LogicMounter, mockFlashMessageHelpers } from '../../__mocks__';
 
 const DEFAULT_VALUES = {
   apiStatus: {

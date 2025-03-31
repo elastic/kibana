@@ -31,7 +31,7 @@ describe('Elasticsearch Search', () => {
     mockRouter = new MockRouter({
       context,
       method: 'post',
-      path: '/internal/enterprise_search/indices/{index_name}/search',
+      path: '/internal/search_connectors/indices/{index_name}/search',
     });
 
     registerSearchRoute({
@@ -40,7 +40,7 @@ describe('Elasticsearch Search', () => {
     });
   });
 
-  describe('POST /internal/enterprise_search/indices/{index_name}/search with query on request body', () => {
+  describe('POST /internal/search_connectors/indices/{index_name}/search with query on request body', () => {
     it('fails validation without index_name', () => {
       const request = { body: { searchQuery: '' }, params: {} };
       mockRouter.shouldThrow(request);
@@ -87,7 +87,7 @@ describe('Elasticsearch Search', () => {
     });
   });
 
-  describe('POST /internal/enterprise_search/indices/{index_name}/search', () => {
+  describe('POST /internal/search_connectors/indices/{index_name}/search', () => {
     let mockRouterNoQuery: MockRouter;
     beforeEach(() => {
       const context = {
@@ -97,7 +97,7 @@ describe('Elasticsearch Search', () => {
       mockRouterNoQuery = new MockRouter({
         context,
         method: 'post',
-        path: '/internal/enterprise_search/indices/{index_name}/search',
+        path: '/internal/search_connectors/indices/{index_name}/search',
       });
 
       registerSearchRoute({

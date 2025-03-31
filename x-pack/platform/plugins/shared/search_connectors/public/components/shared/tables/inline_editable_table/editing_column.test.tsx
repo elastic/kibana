@@ -11,8 +11,8 @@ import { shallow, ShallowWrapper } from 'enzyme';
 
 import { EuiFormRow } from '@elastic/eui';
 
-import { EditingColumn } from './editing_column';
 import { setMockActions, setMockValues } from '../../../../__mocks__';
+import { EditingColumn } from './editing_column';
 
 describe('EditingColumn', () => {
   const column = {

@@ -19,7 +19,7 @@ describe('IndexExistsApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({ exists: true });
       http.get.mockReturnValue(promise);
-      const result = fetchIndexExists({ indexName: 'indexName' });
+      const result = fetchIndexExists({ http, indexName: 'indexName' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/search_connectors/indices/indexName/exists');
       await expect(result).resolves.toEqual({ exists: true, indexName: 'indexName' });

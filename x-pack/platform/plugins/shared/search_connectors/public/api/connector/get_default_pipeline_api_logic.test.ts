@@ -20,7 +20,7 @@ describe('getDefaultPipelineApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
-      const result = getDefaultPipeline();
+      const result = getDefaultPipeline(http);
       await nextTick();
       expect(http.get).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/default_pipeline'

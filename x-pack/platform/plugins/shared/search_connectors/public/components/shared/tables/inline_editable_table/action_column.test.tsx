@@ -9,8 +9,8 @@ import React from 'react';
 
 import { shallow, ShallowWrapper } from 'enzyme';
 
-import { ActionColumn } from './action_column';
 import { setMockActions, setMockValues } from '../../../../__mocks__';
+import { ActionColumn } from './action_column';
 
 const requiredParams = {
   displayedItems: [],

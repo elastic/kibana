@@ -19,9 +19,9 @@ export const mockLocation = {
 };
 
 export const mockHistory = {
-  createHref: jest.fn(({ pathname }) => `/app/management${pathname}`),
+  createHref: jest.fn(({ pathname }) => `/app/search_connectors${pathname}`),
   push: jest.fn(),
   location: mockLocation,
   listen: jest.fn(() => jest.fn()),
-  basePath: '/app/management',
+  basePath: '/app/search_connectors',
 } as any;

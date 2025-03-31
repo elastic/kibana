@@ -19,7 +19,7 @@ describe('deleteIndexApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve();
       http.post.mockReturnValue(promise);
-      const result = deleteIndex({ indexName: 'deleteIndex' });
+      const result = deleteIndex({ indexName: 'deleteIndex', http });
       await nextTick();
       expect(http.delete).toHaveBeenCalledWith('/internal/search_connectors/indices/deleteIndex');
       await expect(result).resolves;

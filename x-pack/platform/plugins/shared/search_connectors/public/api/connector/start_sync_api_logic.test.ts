@@ -20,7 +20,7 @@ describe('startSync', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.post.mockReturnValue(promise);
-      const result = startSync({ connectorId: 'connectorId' });
+      const result = startSync({ http, connectorId: 'connectorId' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/connectorId/start_sync'

@@ -9,6 +9,7 @@ import moment from 'moment';
 
 import { ConnectorSyncJob, SyncJobType, SyncStatus, TriggerMethod } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
+import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__';
 
 import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
@@ -16,7 +17,7 @@ import { IndexViewLogic } from '../index_view_logic';
 
 import { SyncJobView, SyncJobsViewLogic } from './sync_jobs_view_logic';
 import { HttpError, Status } from '../../../../common/types/api';
-import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file
@@ -37,20 +38,22 @@ const DEFAULT_VALUES = {
   syncJobsStatus: Status.IDLE,
   syncTriggeredLocally: false,
 };
+const http = httpServiceMock.createSetupContract();
 
 describe('SyncJobsViewLogic', () => {
   const { mount: indexViewLogicMount } = new LogicMounter(IndexViewLogic);
   const { mount: fetchSyncJobsMount } = new LogicMounter(FetchSyncJobsApiLogic);
   const { mount } = new LogicMounter(SyncJobsViewLogic);
+  let resultSyncJobsViewLogic = {};
 
   beforeEach(() => {
-    indexViewLogicMount();
-    fetchSyncJobsMount();
-    mount();
+    indexViewLogicMount({}, { http });
+    fetchSyncJobsMount({}, { http });
+    resultSyncJobsViewLogic = mount({}, { http });
   });
 
   it('has expected default values', () => {
-    expect(SyncJobsViewLogic.values).toEqual(DEFAULT_VALUES);
+    expect(resultSyncJobsViewLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
@@ -102,7 +105,7 @@ describe('SyncJobsViewLogic', () => {
           data: [syncJob],
         });
         await nextTick();
-        expect(SyncJobsViewLogic.values).toEqual({
+        expect(resultSyncJobsViewLogic.values).toEqual({
           ...DEFAULT_VALUES,
           syncJobs: [syncJobView],
           syncJobsData: {
@@ -145,7 +148,7 @@ describe('SyncJobsViewLogic', () => {
           ],
         });
         await nextTick();
-        expect(SyncJobsViewLogic.values).toEqual({
+        expect(resultSyncJobsViewLogic.values).toEqual({
           ...DEFAULT_VALUES,
           syncJobs: [
             {
@@ -189,15 +192,15 @@ describe('SyncJobsViewLogic', () => {
 
   describe('listeners', () => {
     it('calls clearFlashMessages on fetchSyncJobs', async () => {
-      SyncJobsViewLogic.actions.fetchSyncJobs({ connectorId: 'connectorId' });
+      resultSyncJobsViewLogic.actions.fetchSyncJobs({ connectorId: 'connectorId' });
       await nextTick();
       expect(mockFlashMessageHelpers.clearFlashMessages).toHaveBeenCalledTimes(1);
     });
 
     it('updates state on apiError', async () => {
-      SyncJobsViewLogic.actions.fetchSyncJobsError({} as HttpError);
+      resultSyncJobsViewLogic.actions.fetchSyncJobsError({} as HttpError);
       await nextTick();
-      expect(SyncJobsViewLogic.values).toEqual({
+      expect(resultSyncJobsViewLogic.values).toEqual({
         ...DEFAULT_VALUES,
         syncJobsLoading: false,
         syncJobsStatus: Status.ERROR,

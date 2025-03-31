@@ -19,7 +19,7 @@ describe('FetchIndexApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve('result');
       http.get.mockReturnValue(promise);
-      const result = fetchIndex({ indexName: 'indexName' });
+      const result = fetchIndex({ http, indexName: 'indexName' });
       await nextTick();
       expect(http.get).toHaveBeenCalledWith('/internal/search_connectors/indices/indexName');
       await expect(result).resolves.toEqual('result');

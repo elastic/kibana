@@ -22,6 +22,7 @@ describe('updateConnectorConfigurationLogic', () => {
       http.post.mockReturnValue(promise);
       const configuration = { configurationKey: 'yeahhhh' };
       const result = postConnectorConfiguration({
+        http,
         configuration,
         connectorId: 'anIndexId',
       });

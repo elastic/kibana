@@ -19,7 +19,7 @@ describe('createApiIndexApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({ index: 'indexName' });
       http.post.mockReturnValue(promise);
-      const result = createApiIndex({ indexName: 'indexName', language: 'en' });
+      const result = createApiIndex({ http, indexName: 'indexName', language: 'en' });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/search_connectors/indices', {
         body: JSON.stringify({ index_name: 'indexName', language: 'en' }),

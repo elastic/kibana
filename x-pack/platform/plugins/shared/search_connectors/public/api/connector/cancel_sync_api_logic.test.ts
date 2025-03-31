@@ -20,7 +20,7 @@ describe('CancelSyncApiLogic', () => {
     it('calls correct api', async () => {
       const promise = Promise.resolve({ success: true });
       http.put.mockReturnValue(promise);
-      const result = cancelSync({ syncJobId: 'syncJobId1' });
+      const result = cancelSync({ syncJobId: 'syncJobId1', http });
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/syncJobId1/cancel_sync'

@@ -53,10 +53,6 @@ describe('createApiIndex lib function', () => {
       },
     ],
   };
-  const defaultSettings = {
-    auto_expand_replicas: '0-3',
-    number_of_shards: 2,
-  };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -75,7 +71,7 @@ describe('createApiIndex lib function', () => {
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
       mappings: defaultMappings,
-      settings: { ...textAnalysisSettings('en'), ...defaultSettings },
+      settings: textAnalysisSettings('en'),
     });
   });
   it('successfully creates an index with no mappings in French', async () => {
@@ -91,7 +87,7 @@ describe('createApiIndex lib function', () => {
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
       mappings: {},
-      settings: { ...textAnalysisSettings('fr'), ...defaultSettings },
+      settings: textAnalysisSettings('fr'),
     });
   });
 });

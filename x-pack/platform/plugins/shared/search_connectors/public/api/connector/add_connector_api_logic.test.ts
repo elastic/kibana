@@ -49,6 +49,7 @@ describe('addConnectorApiLogic', () => {
         isNative: false,
         language: null,
         name: 'indexName',
+        http,
       });
       await nextTick();
       expect(http.post).toHaveBeenCalledWith('/internal/search_connectors/connectors', {

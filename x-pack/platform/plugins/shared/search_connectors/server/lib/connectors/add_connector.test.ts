@@ -98,7 +98,7 @@ describe('addConnector lib function', () => {
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
       mappings: {},
-      settings: { ...textAnalysisSettings('fr'), auto_expand_replicas: '0-3', number_of_shards: 2 },
+      settings: { ...textAnalysisSettings('fr') },
     });
 
     // non-native connector should not generate API key or update secrets storage
@@ -146,11 +146,11 @@ describe('addConnector lib function', () => {
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
       mappings: {},
-      settings: { ...textAnalysisSettings('ja'), auto_expand_replicas: '0-3', number_of_shards: 2 },
+      settings: { ...textAnalysisSettings('ja') },
     });
 
     // native connector should generate API key and update secrets storage
-    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true);
+    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true, true);
   });
 
   it('should reject if index already exists', async () => {
@@ -265,11 +265,7 @@ describe('addConnector lib function', () => {
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
       index: 'index_name',
       mappings: {},
-      settings: {
-        ...textAnalysisSettings(undefined),
-        auto_expand_replicas: '0-3',
-        number_of_shards: 2,
-      },
+      settings: textAnalysisSettings(undefined),
     });
   });
 });

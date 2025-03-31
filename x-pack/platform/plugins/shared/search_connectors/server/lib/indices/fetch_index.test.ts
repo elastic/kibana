@@ -5,175 +5,93 @@
  * 2.0.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
+jest.mock('@kbn/search-connectors', () => ({
+  fetchConnectorByIndexName: jest.fn(),
+}));
 
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
 import { fetchIndex } from './fetch_index';
 
-jest.mock('@kbn/search-connectors', () => ({
-  SyncStatus: {
-    CANCELED: 'canceled',
-    CANCELING: 'canceling',
-    COMPLETED: 'completed',
-    ERROR: 'error',
-    IN_PROGRESS: 'in_progress',
-    PENDING: 'pending',
-    SUSPENDED: 'suspended',
-  },
-  fetchConnectorByIndexName: jest.fn(),
-}));
-
-describe('fetchIndex lib function', () => {
+describe('fetch index lib function', () => {
   const mockClient = {
-    asCurrentUser: {
-      count: jest.fn().mockReturnValue({ count: 100 }),
-      index: jest.fn(),
-      indices: {
-        get: jest.fn(),
-        stats: jest.fn(),
-      },
-      search: jest.fn().mockReturnValue({
-        hits: {
-          hits: [{ _source: { status: 'in_progress' } }, { _source: { status: 'pending' } }],
-        },
-      }),
+    indices: {
+      get: jest.fn(),
     },
-    asInternalUser: {},
+    count: jest.fn(),
+  };
+  const client = () => mockClient as unknown as ElasticsearchClient;
+
+  const indexName = 'search-regular-index';
+  const regularIndexResponse = {
+    'search-regular-index': {
+      aliases: {},
+    },
+  };
+
+  const indexCountResponse = {
+    count: 100,
+  };
+  const indexConnector = {
+    foo: 'foo',
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  const statsResponse = {
-    indices: {
-      index_name: {
-        health: 'green',
-        hidden: false,
-        size: new ByteSizeValue(108000).toString(),
-        status: 'open',
-        total: {
-          docs: {
-            count: 100,
-            deleted: 0,
-          },
-          store: {
-            size_in_bytes: 108000,
-          },
-        },
-        uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
-      },
-    },
-  };
+  it('should return index if all client calls succeed', async () => {
+    mockClient.indices.get.mockResolvedValue({ ...regularIndexResponse });
+    mockClient.count.mockResolvedValue(indexCountResponse);
+    (fetchConnectorByIndexName as unknown as jest.Mock).mockResolvedValue(indexConnector);
 
-  const result = {
-    aliases: [],
-    count: 100,
-    has_in_progress_syncs: false,
-    has_pending_syncs: false,
-    health: 'green',
-    hidden: false,
-    name: 'index_name',
-    status: 'open',
-    total: {
-      docs: {
+    await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+      index: {
+        aliases: {},
         count: 100,
-        deleted: 0,
-      },
-      store: {
-        size_in_bytes: '105.47kb',
-      },
-    },
-    uuid: '83a81e7e-5955-4255-b008-5d6961203f57',
-  };
-
-  it('should return data and stats for index if no connector or crawler is present', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() =>
-      Promise.resolve({
-        index_name: { aliases: [], data: 'full index' },
-      })
-    );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
-
-    await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
-    ).resolves.toEqual(result);
-  });
-
-  it('should return data and stats for index and connector if connector is present', async () => {
-    mockClient.asCurrentUser.search.mockReturnValue({
-      hits: {
-        hits: [{ _source: { status: 'canceled' } }, { _source: { status: 'pending' } }],
+        connector: indexConnector,
       },
     });
-    mockClient.asCurrentUser.indices.get.mockImplementation(() =>
-      Promise.resolve({
-        index_name: { aliases: [], data: 'full index' },
-      })
-    );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve({
-        doc: 'doc',
-        service_type: 'some-service-type',
-      })
-    );
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
+  });
+  it('should throw an error if get index rejects', async () => {
+    const expectedError = new Error('Boom!');
 
-    await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
-    ).resolves.toEqual({
-      ...result,
-      connector: { doc: 'doc', service_type: 'some-service-type' },
-      has_pending_syncs: true,
+    mockClient.indices.get.mockRejectedValue(expectedError);
+    mockClient.count.mockResolvedValue(indexCountResponse);
+    (fetchConnectorByIndexName as unknown as jest.Mock).mockResolvedValue(indexConnector);
+
+    await expect(fetchIndex(client(), indexName)).rejects.toEqual(expectedError);
+  });
+
+  it('should return partial data if index count rejects', async () => {
+    const expectedError = new Error('Boom!');
+
+    mockClient.indices.get.mockResolvedValue({ ...regularIndexResponse });
+    mockClient.count.mockRejectedValue(expectedError);
+    (fetchConnectorByIndexName as unknown as jest.Mock).mockResolvedValue(indexConnector);
+
+    await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+      index: {
+        aliases: {},
+        count: 0,
+        connector: indexConnector,
+      },
     });
   });
 
-  it('should throw a 404 error if the index cannot be fonud', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() => Promise.resolve({}));
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
+  it('should return partial data if fetch connector rejects', async () => {
+    const expectedError = new Error('Boom!');
 
-    await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
-    ).rejects.toEqual(new Error('404'));
-  });
-  it('should throw a 404 error if the indexStats cannot be fonud', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() =>
-      Promise.resolve({
-        index_name: { aliases: [] },
-      })
-    );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() =>
-      Promise.resolve({ indices: {} })
-    );
+    mockClient.indices.get.mockResolvedValue({ ...regularIndexResponse });
+    mockClient.count.mockResolvedValue(indexCountResponse);
+    (fetchConnectorByIndexName as unknown as jest.Mock).mockRejectedValue(expectedError);
 
-    await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
-    ).rejects.toEqual(new Error('404'));
-  });
-  it('should throw a 404 error if the index stats indices cannot be fonud', async () => {
-    mockClient.asCurrentUser.indices.get.mockImplementation(() =>
-      Promise.resolve({
-        index_name: { aliases: [] },
-      })
-    );
-    (fetchConnectorByIndexName as jest.Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
-    mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve({}));
-
-    await expect(
-      fetchIndex(mockClient as unknown as ElasticsearchClient, 'index_name')
-    ).rejects.toEqual(new Error('404'));
+    await expect(fetchIndex(client(), indexName)).resolves.toMatchObject({
+      index: {
+        aliases: {},
+        count: 100,
+      },
+    });
   });
 });
