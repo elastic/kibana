@@ -85,7 +85,7 @@ pageLoadAssetSize:
   infra: 184320
   ingestPipelines: 58003
   inputControlVis: 172675
-  inspector: 148711
+  inspector: 17600
   interactiveSetup: 80000
   inventory: 27430
   investigate: 17970
@@ -177,7 +177,7 @@ pageLoadAssetSize:
   uiActionsEnhanced: 38494
   unifiedDocViewer: 25099
   unifiedHistogram: 19928
-  unifiedSearch: 71059
+  unifiedSearch: 23000
   upgradeAssistant: 81241
   uptime: 60000
   urlDrilldown: 30063

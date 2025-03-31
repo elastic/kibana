@@ -6738,6 +6738,13 @@
                                 "description": "A short description.",
                                 "type": "string"
                               },
+                              "tags": {
+                                "items": {
+                                  "description": "An array of tags applied to this dashboard",
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
                               "timeRestore": {
                                 "default": false,
                                 "description": "Whether to restore time upon viewing this dashboard",
@@ -7383,6 +7390,13 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "tags": {
+                              "items": {
+                                "description": "An array of tags applied to this dashboard",
+                                "type": "string"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",
@@ -8038,6 +8052,13 @@
                         ],
                         "type": "object"
                       },
+                      "tags": {
+                        "items": {
+                          "description": "An array of tags applied to this dashboard",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "timeFrom": {
                         "description": "An ISO string indicating when to restore time from",
                         "type": "string"
@@ -8575,6 +8596,13 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "tags": {
+                              "items": {
+                                "description": "An array of tags applied to this dashboard",
+                                "type": "string"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",
@@ -9202,6 +9230,13 @@
                         ],
                         "type": "object"
                       },
+                      "tags": {
+                        "items": {
+                          "description": "An array of tags applied to this dashboard",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "timeFrom": {
                         "description": "An ISO string indicating when to restore time from",
                         "type": "string"
@@ -9733,6 +9768,13 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "tags": {
+                              "items": {
+                                "description": "An array of tags applied to this dashboard",
+                                "type": "string"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",
@@ -27360,6 +27402,14 @@
                 "properties": {
                   "force": {
                     "type": "boolean"
+                  },
+                  "space_ids": {
+                    "description": "When provided install assets in the specified spaces instead of the current space.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "minItems": 1,
+                    "type": "array"
                   }
                 },
                 "type": "object"
