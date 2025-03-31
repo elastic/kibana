@@ -11,7 +11,7 @@ import { FormProvider, LOCAL_STORAGE_KEY } from './form_provider';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { useLLMsModels } from '../hooks/use_llms_models';
 import * as ReactHookForm from 'react-hook-form';
-import { ChatFormFields } from '../types';
+import { ChatForm, ChatFormFields } from '../types';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 
 jest.mock('../hooks/use_load_fields_by_indices');
@@ -21,6 +21,9 @@ jest.mock('react-router-dom-v5-compat', () => ({
 }));
 jest.mock('../hooks/use_indices_validation', () => ({
   useIndicesValidation: jest.fn((indices) => ({ isValidated: true, validIndices: indices })),
+}));
+jest.mock('@kbn/react-hooks', () => ({
+  useDebounceFn: (fn: any) => ({ run: fn }),
 }));
 
 let formHookSpy: jest.SpyInstance;
@@ -42,6 +45,20 @@ const localStorageMock = (() => {
     },
   };
 })() as Storage;
+
+const DEFAULT_FORM_STATE: Partial<ChatForm> = {
+  doc_size: 3,
+  prompt: 'You are an assistant for question-answering tasks.',
+  source_fields: {},
+  search_query: '',
+  indices: [],
+  summarization_model: undefined,
+  user_elasticsearch_query: null,
+  user_elasticsearch_query_validations: {
+    isUserCustomized: false,
+    isValid: false,
+  },
+};
 
 describe('FormProvider', () => {
   beforeEach(() => {
@@ -65,14 +82,7 @@ describe('FormProvider', () => {
     const { getValues } = formHookSpy.mock.results[0].value;
 
     await waitFor(() => {
-      expect(getValues()).toEqual({
-        doc_size: 3,
-        indices: [],
-        prompt: 'You are an assistant for question-answering tasks.',
-        search_query: '',
-        source_fields: {},
-        summarization_model: undefined,
-      });
+      expect(getValues()).toEqual(DEFAULT_FORM_STATE);
     });
   });
 
@@ -145,6 +155,7 @@ describe('FormProvider', () => {
           source_fields: {},
           indices: [],
           summarization_model: undefined,
+          user_elasticsearch_query: null,
         })
       );
     });
@@ -172,12 +183,8 @@ describe('FormProvider', () => {
 
     await waitFor(() => {
       expect(getValues()).toEqual({
+        ...DEFAULT_FORM_STATE,
         prompt: 'Loaded prompt',
-        doc_size: 3,
-        source_fields: {},
-        search_query: '',
-        indices: [],
-        summarization_model: undefined,
       });
     });
   });
