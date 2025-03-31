@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import type { Alerts } from '../../../../common/lib/alerts';
 import {
-  Alerts,
   createCaseAttachAlertAndDeleteAlert,
   createSecuritySolutionAlerts,
   getAlertById,
@@ -18,7 +18,7 @@ import {
   deleteAllAlerts,
   deleteAllRules,
 } from '../../../../../common/utils/security_solution';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {

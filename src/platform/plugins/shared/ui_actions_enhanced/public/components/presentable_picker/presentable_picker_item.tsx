@@ -8,15 +8,14 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip, UseEuiTheme } from '@elastic/eui';
 import { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,
   txtInsufficientLicenseLevel,
 } from './i18n';
-
-import './styles.scss';
 
 export interface Item extends Presentable {
   isLicenseCompatible?: boolean;
@@ -41,7 +40,13 @@ export const PresentablePickerItem: React.FC<PresentablePickerItemProps> = ({
 
   let content = (
     <EuiKeyPadMenuItem
-      className="auaPresentablePicker__item"
+      css={({ euiTheme }: UseEuiTheme) =>
+        css({
+          '.euiKeyPadMenuItem__label': {
+            height: euiTheme.size.xl,
+          },
+        })
+      }
       label={item.getDisplayName(context)}
       data-test-subj={`${TEST_SUBJ_PRESENTABLE_ITEM}-${item.id}`}
       onClick={() => onSelect(item.id)}

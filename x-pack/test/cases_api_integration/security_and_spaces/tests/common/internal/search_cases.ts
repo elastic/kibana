@@ -10,7 +10,7 @@ import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import { CASES_INTERNAL_URL } from '@kbn/cases-plugin/common/constants';
 import { CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, findCasesResp, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   ensureSavedObjectIsAuthorized,
