@@ -38,6 +38,7 @@ import {
   getQueryForFields,
   validateVariableName,
   getVariablePrefix,
+  getVariableTypeFromQuery,
 } from './helpers';
 import { EsqlControlType } from '../types';
 
@@ -53,6 +54,8 @@ interface IdentifierControlFormProps {
   initialState?: ESQLControlState;
   onCancelControl?: () => void;
 }
+
+const IDENTIFIER_VARIABLE_PREFIX = '??';
 
 export function IdentifierControlForm({
   variableType,
@@ -75,11 +78,14 @@ export function IdentifierControlForm({
     );
 
     if (initialState) {
-      return initialState.variableName;
+      return `${IDENTIFIER_VARIABLE_PREFIX}${initialState.variableName}`;
     }
 
     const variablePrefix = getVariablePrefix(variableType);
-    return getRecurrentVariableName(variablePrefix, existingVariables);
+    return `${IDENTIFIER_VARIABLE_PREFIX}${getRecurrentVariableName(
+      variablePrefix,
+      existingVariables
+    )}`;
   }, [esqlVariables, initialState, variableType]);
 
   const [availableIdentifiersOptions, setAvailableIdentifiersOptions] = useState<
@@ -150,8 +156,9 @@ export function IdentifierControlForm({
 
   useEffect(() => {
     const variableExists =
-      esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
-      !isControlInEditMode;
+      esqlVariables.some(
+        (variable) => variable.key === variableName.replace(IDENTIFIER_VARIABLE_PREFIX, '')
+      ) && !isControlInEditMode;
 
     setFormIsInvalid(!selectedIdentifiers.length || !variableName || variableExists);
   }, [esqlVariables, isControlInEditMode, selectedIdentifiers.length, variableName]);
@@ -162,7 +169,7 @@ export function IdentifierControlForm({
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
-      const text = validateVariableName(String(e.target.value));
+      const text = validateVariableName(String(e.target.value), IDENTIFIER_VARIABLE_PREFIX);
       setVariableName(text);
     },
     []
@@ -211,13 +218,15 @@ export function IdentifierControlForm({
 
   const onCreateFieldControl = useCallback(async () => {
     const availableOptions = selectedIdentifiers.map((field) => field.label);
+    // removes the double question mark from the variable name
+    const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      title: label || variableName,
-      variableName,
-      variableType,
+      title: label || variableNameWithoutQuestionmark,
+      variableName: variableNameWithoutQuestionmark,
+      variableType: getVariableTypeFromQuery(variableName, variableType),
       controlType: EsqlControlType.STATIC_VALUES,
       esqlQuery: queryString,
       grow,
