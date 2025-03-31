@@ -249,8 +249,8 @@ export const AttackDiscoveryCreateProps = z.object({
   replacements: Replacements.optional(),
 });
 
-export type AttackDiscoverGenerationConfig = z.infer<typeof AttackDiscoverGenerationConfig>;
-export const AttackDiscoverGenerationConfig = z.object({
+export type AttackDiscoveryGenerationConfig = z.infer<typeof AttackDiscoveryGenerationConfig>;
+export const AttackDiscoveryGenerationConfig = z.object({
   alertsIndexPattern: z.string(),
   anonymizationFields: z.array(AnonymizationFieldResponse),
   /**

@@ -14,7 +14,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AttackDiscoverGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
+import { AttackDiscoveryGenerationConfig, Replacements } from '@kbn/elastic-assistant-common';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 
@@ -27,29 +27,29 @@ const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
-export interface GenerateAttackDiscoveryParams {
+export interface GenerateAttackDiscoveriesParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
-  attackDiscoveryId: string;
   authenticatedUser: AuthenticatedUser;
-  config: AttackDiscoverGenerationConfig;
+  config: AttackDiscoveryGenerationConfig;
   dataClient: AttackDiscoveryDataClient;
   esClient: ElasticsearchClient;
+  executionUuid: string;
   logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
 }
 
-export const generateAttackDiscovery = async ({
+export const generateAttackDiscoveries = async ({
   actionsClient,
-  attackDiscoveryId,
   authenticatedUser,
   config,
   dataClient,
   esClient,
+  executionUuid,
   logger,
   savedObjectsClient,
   telemetry,
-}: GenerateAttackDiscoveryParams) => {
+}: GenerateAttackDiscoveriesParams) => {
   const startTime = moment(); // start timing the generation
 
   // get parameters from the request body
@@ -96,7 +96,7 @@ export const generateAttackDiscovery = async ({
       anonymizedAlerts,
       apiConfig,
       attackDiscoveries,
-      attackDiscoveryId,
+      attackDiscoveryId: executionUuid,
       authenticatedUser,
       dataClient,
       hasFilter: !!(filter && Object.keys(filter).length),
@@ -113,7 +113,7 @@ export const generateAttackDiscovery = async ({
   } catch (err) {
     await handleGraphError({
       apiConfig,
-      attackDiscoveryId,
+      attackDiscoveryId: executionUuid,
       authenticatedUser,
       dataClient,
       err,

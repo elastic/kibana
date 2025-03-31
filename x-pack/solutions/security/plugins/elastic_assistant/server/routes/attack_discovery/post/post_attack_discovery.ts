@@ -19,7 +19,7 @@ import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { requestIsValid } from './helpers/request_is_valid';
-import { generateAttackDiscovery } from '../helpers/generate_discovery';
+import { generateAttackDiscoveries } from '../helpers/generate_discovery';
 
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 
@@ -109,9 +109,9 @@ export const postAttackDiscoveryRoute = (
           );
 
           // Don't await the results of invoking the graph; (just the metadata will be returned from the route handler):
-          generateAttackDiscovery({
+          generateAttackDiscoveries({
             actionsClient,
-            attackDiscoveryId,
+            executionUuid: attackDiscoveryId,
             authenticatedUser,
             config: request.body,
             dataClient,

@@ -16,10 +16,10 @@
 
 import { z } from '@kbn/zod';
 
-import { AttackDiscoverGenerationConfig, AttackDiscoveryResponse } from './common_attributes.gen';
+import { AttackDiscoveryGenerationConfig, AttackDiscoveryResponse } from './common_attributes.gen';
 
 export type AttackDiscoveryPostRequestBody = z.infer<typeof AttackDiscoveryPostRequestBody>;
-export const AttackDiscoveryPostRequestBody = AttackDiscoverGenerationConfig;
+export const AttackDiscoveryPostRequestBody = AttackDiscoveryGenerationConfig;
 export type AttackDiscoveryPostRequestBodyInput = z.input<typeof AttackDiscoveryPostRequestBody>;
 
 export type AttackDiscoveryPostResponse = z.infer<typeof AttackDiscoveryPostResponse>;
