@@ -23,7 +23,7 @@ import type {
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
-import { CISBenchmarkIcon } from '@kbn/cloud-security-posture';
+import { CloudProviderIcon, type CloudProvider } from '@kbn/custom-icons';
 import { ASSET_GROUPING_OPTIONS, TEST_SUBJ_GROUPING_COUNTER } from '../../../constants';
 import { firstNonNullValue } from './first_non_null_value';
 import { NullGroup } from './null_group';
@@ -41,7 +41,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
     return <LoadingGroup />;
   }
 
-  const cloudProvider = firstNonNullValue(bucket.cloudProvider?.buckets?.[0]?.key);
+  const cloudProvider = firstNonNullValue(bucket.cloudProvider?.buckets?.[0]?.key) as CloudProvider;
 
   const renderNullGroup = (title: string) => (
     <NullGroup title={title} field={selectedGroup} unit={NULL_GROUPING_UNIT} />
@@ -121,10 +121,7 @@ export const groupPanelRenderer: GroupPanelRenderer<AssetsGroupingAggregation> =
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {cloudProvider && (
             <EuiFlexItem grow={0}>
-              <CISBenchmarkIcon
-                type={`cis_${cloudProvider}`}
-                name={firstNonNullValue(bucket.accountName?.buckets?.[0]?.key)}
-              />
+              <CloudProviderIcon cloudProvider={cloudProvider} />
             </EuiFlexItem>
           )}
           <EuiFlexItem>
