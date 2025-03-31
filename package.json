@@ -282,7 +282,7 @@
     "load-json-file": "^6.2.0",
     "loader-utils": "^2.0.4",
     "lodash": "^4.17.21",
-    "lru-cache": "^4.1.5",
+    "lru-cache": "^11.1.0",
     "lz-string": "^1.4.4",
     "mapbox-gl-draw-rectangle-mode": "1.0.4",
     "maplibre-gl": "1.15.2",
