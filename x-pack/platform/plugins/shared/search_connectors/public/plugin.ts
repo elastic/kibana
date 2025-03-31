@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import { docLinks } from '@kbn/search-connectors';
+import { docLinks } from '@kbn/search-connectors/constants/doc_links';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
 import {
