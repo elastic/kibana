@@ -76,12 +76,12 @@ export function ImportContentPackFlyout({
               setFile(contentFile);
 
               contentFile.text().then((text: string) => {
-                const contentPack = JSON.parse(text);
-                const objects: ContentPackObject[] = contentPack.content
+                const parsedContentPack = JSON.parse(text);
+                const objects: ContentPackObject[] = parsedContentPack.content
                   .split('\n')
                   .map((line: string) => JSON.parse(line));
 
-                setContentPack(contentPack);
+                setContentPack(parsedContentPack);
                 setContentPackObjects(objects);
               });
             } else {
@@ -156,7 +156,7 @@ export function ImportContentPackFlyout({
                         const references = compact(
                           uniqBy(object.content.references, (ref) => ref.id).map((ref) =>
                             JSON.stringify(
-                              contentPackObjects.find((object) => object.content.id === ref.id)
+                              contentPackObjects.find(({ content: { id } }) => id === ref.id)
                             )
                           )
                         );

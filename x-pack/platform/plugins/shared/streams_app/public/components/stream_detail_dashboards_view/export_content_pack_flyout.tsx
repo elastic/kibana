@@ -111,7 +111,7 @@ export function ExportContentPackFlyout({
               <EuiCallOut>
                 <details>
                   <summary>
-                    {i18n.translate('xpack.stream.exportContentFlyout.advancedSettings', {
+                    {i18n.translate('xpack.streams.exportContentFlyout.advancedSettings', {
                       defaultMessage: 'Advanced settings',
                     })}
                   </summary>
@@ -225,7 +225,9 @@ export function ExportContentPackFlyout({
             onExport();
           }}
         >
-          {i18n.translate('', { defaultMessage: 'Export objects' })}
+          {i18n.translate('xpack.streams.exportContentPackFlyout.exportObjects', {
+            defaultMessage: 'Export objects',
+          })}
         </EuiButton>
       </EuiFlyoutFooter>
     </EuiFlyout>
