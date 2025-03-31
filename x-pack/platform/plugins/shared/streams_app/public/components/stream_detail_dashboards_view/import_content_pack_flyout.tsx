@@ -6,20 +6,24 @@
  */
 
 import React, { useState } from 'react';
-import { capitalize, compact, uniqBy } from 'lodash';
+import { capitalize, omitBy, uniq } from 'lodash';
 import {
-  ContentPack,
   ContentPackObject,
   ContentPackSavedObject,
-  INDEX_PLACEHOLDER,
   IngestStreamGetResponse,
+  findIndexPatterns,
+  isIndexPlaceholder,
   replaceIndexPatterns,
 } from '@kbn/streams-schema';
 import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiCallOut,
+  EuiFieldText,
   EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -51,10 +55,13 @@ export function ImportContentPackFlyout({
 
   const [isLoading, setIsLoading] = useState(false);
   const [file, setFile] = useState<File | null>(null);
-  const [contentPack, setContentPack] = useState<ContentPack | undefined>();
   const [contentPackObjects, setContentPackObjects] = useState<ContentPackObject[]>([]);
   const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackObject[]>(
     []
+  );
+  const [indexPatterns, setIndexPatterns] = useState<string[]>([]);
+  const [indexPatternReplacements, setIndexPatternReplacements] = useState<Record<string, string>>(
+    {}
   );
 
   return (
@@ -83,13 +90,21 @@ export function ImportContentPackFlyout({
               setFile(contentFile);
 
               contentFile.text().then((text: string) => {
-                const contentPack = JSON.parse(text);
-                const objects: ContentPackObject[] = contentPack.content
+                const { content } = JSON.parse(text);
+                const objects: ContentPackObject[] = content
                   .split('\n')
-                  .map((line: string) => JSON.parse(line));
+                  .map((line: string) => JSON.parse(line))
+                  .filter(
+                    (object: ContentPackObject) =>
+                      object.type === 'saved_object' && object.content.type === 'dashboard'
+                  );
 
-                setContentPack(contentPack);
+                const indexPatterns = uniq(
+                  objects.flatMap((object) => findIndexPatterns(object.content))
+                ).filter((index) => !isIndexPlaceholder(index));
+
                 setContentPackObjects(objects);
+                setIndexPatterns(indexPatterns);
               });
             } else {
               setFile(null);
@@ -102,8 +117,41 @@ export function ImportContentPackFlyout({
           <>
             <EuiSpacer />
 
+            {indexPatterns.length ? (
+              <EuiCallOut>
+                <details>
+                  <summary>Advanced settings</summary>
+                  <EuiSpacer />
+                  <p>
+                    We detected index patterns in the content pack. You can update them here or
+                    later in the imported objects.
+                  </p>
+                  {indexPatterns.map((index) => (
+                    <EuiFlexGroup alignItems="center">
+                      <EuiFlexItem grow={false}>{index}</EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiFieldText
+                          compressed
+                          placeholder={index}
+                          onChange={(e) => {
+                            setIndexPatternReplacements({
+                              ...indexPatternReplacements,
+                              [index]: e.target.value,
+                            });
+                          }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ))}
+                </details>
+              </EuiCallOut>
+            ) : null}
+
+            <EuiSpacer />
+
             <EuiBasicTable
-              items={contentPackObjects.filter((object) => object.content.type === 'dashboard')}
+              items={contentPackObjects}
               itemId={(record: ContentPackObject) => record.content.id}
               columns={[
                 {
@@ -137,12 +185,11 @@ export function ImportContentPackFlyout({
                           size="s"
                           onClick={() => {
                             const service = getDashboardBackupService();
-                            const updatedObject = replaceIndexPatterns(record, {
-                              [INDEX_PLACEHOLDER]: definition.stream.name,
-                            });
-                            const panels = JSON.parse(
-                              (updatedObject.content.attributes as DashboardAttributes).panelsJSON
-                            ).reduce(
+                            const updatedContent = replaceIndexPatterns(
+                              record.content,
+                              omitBy(indexPatternReplacements, (value) => !value)
+                            );
+                            const panels = JSON.parse(updatedContent.attributes.panelsJSON).reduce(
                               (
                                 acc: Record<
                                   string,
@@ -197,25 +244,29 @@ export function ImportContentPackFlyout({
 
             setIsLoading(true);
 
+            const selectedObjects: ContentPackObject[] = selectedContentPackObjects.map(
+              (object) => {
+                if (object.type !== 'saved_object' || object.content.type !== 'dashboard') {
+                  return object;
+                }
+
+                return {
+                  type: 'saved_object',
+                  content: replaceIndexPatterns(
+                    object.content,
+                    omitBy(indexPatternReplacements, (value) => !value)
+                  ),
+                };
+              }
+            );
+
             const body = new FormData();
             body.append(
               'content',
               new File(
                 [
                   JSON.stringify({
-                    ...contentPack,
-                    content: selectedContentPackObjects
-                      .flatMap((object) => {
-                        const references = compact(
-                          uniqBy(object.content.references, (ref) => ref.id).map((ref) =>
-                            JSON.stringify(
-                              contentPackObjects.find((object) => object.content.id === ref.id)
-                            )
-                          )
-                        );
-                        return [...references, JSON.stringify(object)];
-                      })
-                      .join('\n'),
+                    content: selectedObjects.map((object) => JSON.stringify(object)).join('\n'),
                   }),
                 ],
                 'content.json',

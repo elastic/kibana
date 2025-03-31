@@ -14,7 +14,6 @@ import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { ImportContentPackFlyout } from './import_content_pack_flyout';
-import { ExportContentPackFlyout } from './export_content_pack_flyout';
 
 export function StreamDetailDashboardsView({
   definition,
@@ -25,7 +24,6 @@ export function StreamDetailDashboardsView({
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
   const [isImportFlyoutOpen, setIsImportFlyoutOpen] = useState(false);
-  const [isExportFlyoutOpen, setIsExportFlyoutOpen] = useState(false);
 
   const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
   const { addDashboards, removeDashboards } = useDashboardsApi(definition?.stream.name);
@@ -71,19 +69,6 @@ export function StreamDetailDashboardsView({
               })}
             </EuiButton>
           )}
-
-          <EuiButton
-            data-test-subj="streamsAppStreamDetailExportContentPackButton"
-            iconType="trash"
-            onClick={() => {
-              setIsExportFlyoutOpen(true);
-            }}
-          >
-            {i18n.translate('xpack.streams.streamDetailDashboardView.exportContentPackButton', {
-              defaultMessage: 'Export content pack',
-            })}
-          </EuiButton>
-
           <EuiSearchBar
             query={query}
             box={{
@@ -155,18 +140,6 @@ export function StreamDetailDashboardsView({
             }}
             onClose={() => {
               setIsImportFlyoutOpen(false);
-            }}
-          />
-        ) : null}
-
-        {definition && isExportFlyoutOpen ? (
-          <ExportContentPackFlyout
-            definition={definition}
-            onExport={() => {
-              setIsExportFlyoutOpen(false);
-            }}
-            onClose={() => {
-              setIsExportFlyoutOpen(false);
             }}
           />
         ) : null}
