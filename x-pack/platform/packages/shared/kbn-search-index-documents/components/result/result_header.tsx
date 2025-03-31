@@ -55,17 +55,20 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       iconType="iInCircle"
       color="primary"
       onClick={() => setPopoverIsOpen(!popoverIsOpen)}
-      aria-label={i18n.translate('searchIndexDocuments.result.header.metadata.icon.ariaLabel', {
-        defaultMessage: 'Metadata for document: {id}',
-        values: { id },
-      })}
+      aria-label={i18n.translate(
+        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+        {
+          defaultMessage: 'Metadata for document: {id}',
+          values: { id },
+        }
+      )}
     />
   );
 
   return (
     <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
-        {i18n.translate('searchIndexDocuments.result.header.metadata.title', {
+        {i18n.translate('xpack.searchIndexDocuments.result.header.metadata.title', {
           defaultMessage: 'Document metadata',
         })}
       </EuiPopoverTitle>
@@ -80,7 +83,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       {onDocumentDelete && (
         <EuiPopoverFooter>
           <EuiButton iconType="trash" color="danger" size="s" onClick={closePopover} fullWidth>
-            {i18n.translate('searchIndexDocuments.result.header.metadata.deleteDocument', {
+            {i18n.translate('xpack.searchIndexDocuments.result.header.metadata.deleteDocument', {
               defaultMessage: 'Delete document',
             })}
           </EuiButton>

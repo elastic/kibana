@@ -42,7 +42,7 @@ export const DocumentsOverview: React.FC<DocumentsProps> = ({
               <EuiFieldSearch
                 data-telemetry-id={`${dataTelemetryIdPrefix}-documents-searchDocuments`}
                 placeholder={i18n.translate(
-                  'searchIndexDocuments.documents.searchField.placeholder',
+                  'xpack.searchIndexDocuments.documents.searchField.placeholder',
                   {
                     defaultMessage: 'Search documents in this index',
                   }

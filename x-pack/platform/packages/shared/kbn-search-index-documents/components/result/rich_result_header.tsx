@@ -76,10 +76,13 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
         e.stopPropagation();
         setPopoverIsOpen(!popoverIsOpen);
       }}
-      aria-label={i18n.translate('searchIndexDocuments.result.header.metadata.icon.ariaLabel', {
-        defaultMessage: 'Metadata for document: {id}',
-        values: { id },
-      })}
+      aria-label={i18n.translate(
+        'xpack.searchIndexDocuments.result.header.metadata.icon.ariaLabel',
+        {
+          defaultMessage: 'Metadata for document: {id}',
+          values: { id },
+        }
+      )}
     />
   );
 
@@ -87,7 +90,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
     <EuiPopover button={metaDataIcon} isOpen={popoverIsOpen} closePopover={closePopover}>
       <EuiPopoverTitle>
         <FormattedMessage
-          id="searchIndexDocuments.result.compactCard.header.metadata.title"
+          id="xpack.searchIndexDocuments.result.compactCard.header.metadata.title"
           defaultMessage="Document metadata"
         />
       </EuiPopoverTitle>
@@ -110,7 +113,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
             <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
               <Term
                 label={i18n.translate(
-                  'searchIndexDocuments.result.header.compactCard.metadata.score',
+                  'xpack.searchIndexDocuments.result.header.compactCard.metadata.score',
                   {
                     defaultMessage: 'Score',
                   }
@@ -128,7 +131,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
               /* for serverless search users hasDeleteDocumentsPrivilege flag indicates if user has privilege to delete documents, for stack hasDeleteDocumentsPrivilege would be undefined */
               hasDeleteDocumentsPrivilege === false
                 ? i18n.translate(
-                    'searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
+                    'xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocumentToolTip',
                     {
                       defaultMessage: 'You do not have permision to delete documents',
                     }
@@ -152,7 +155,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({
               fullWidth
             >
               <FormattedMessage
-                id="searchIndexDocuments.result.header.compactCard.metadata.deleteDocument"
+                id="xpack.searchIndexDocuments.result.header.compactCard.metadata.deleteDocument"
                 defaultMessage="Delete document"
               />
             </EuiButton>

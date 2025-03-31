@@ -7,14 +7,17 @@
 
 import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { ConnectorDefinition, ConnectorServerSideDefinition } from '@kbn/search-connectors';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { Pagination } from '@elastic/eui';
-import { IndexManagementPluginStart, IndexMappingProps } from '@kbn/index-management-shared-types';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { Pagination } from '@elastic/eui';
+import type {
+  IndexManagementPluginStart,
+  IndexMappingProps,
+} from '@kbn/index-management-shared-types';
 
 export interface SearchConnectorsPluginSetup {
   // we don't have docLinks here yet

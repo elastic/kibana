@@ -68,7 +68,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   return (
     <>
       <EuiPagination
-        aria-label={i18n.translate('searchIndexDocuments.documentList.paginationAriaLabel', {
+        aria-label={i18n.translate('xpack.searchIndexDocuments.documentList.paginationAriaLabel', {
           defaultMessage: 'Pagination for document list',
         })}
         pageCount={pageCount}
@@ -79,7 +79,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <EuiText size="xs">
         <p>
           <FormattedMessage
-            id="searchIndexDocuments.documentList.description"
+            id="xpack.searchIndexDocuments.documentList.description"
             defaultMessage="Showing {results} of {total}.
             Search results maxed at {maximum} documents."
             values={{
@@ -117,9 +117,12 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiPagination
-            aria-label={i18n.translate('searchIndexDocuments.documentList.paginationAriaLabel', {
-              defaultMessage: 'Pagination for document list',
-            })}
+            aria-label={i18n.translate(
+              'xpack.searchIndexDocuments.documentList.paginationAriaLabel',
+              {
+                defaultMessage: 'Pagination for document list',
+              }
+            )}
             pageCount={pageCount}
             activePage={meta.pageIndex}
             onPageClick={onPaginate}
@@ -128,7 +131,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         {setDocsPerPage && (
           <EuiFlexItem grow={false}>
             <EuiPopover
-              aria-label={i18n.translate('searchIndexDocuments.documentList.docsPerPage', {
+              aria-label={i18n.translate('xpack.searchIndexDocuments.documentList.docsPerPage', {
                 defaultMessage: 'Document count per page dropdown',
               })}
               button={
@@ -141,10 +144,13 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                     setIsPopoverOpen(true);
                   }}
                 >
-                  {i18n.translate('searchIndexDocuments.documentList.pagination.itemsPerPage', {
-                    defaultMessage: 'Documents per page: {docPerPage}',
-                    values: { docPerPage: docsPerPage },
-                  })}
+                  {i18n.translate(
+                    'xpack.searchIndexDocuments.documentList.pagination.itemsPerPage',
+                    {
+                      defaultMessage: 'Documents per page: {docPerPage}',
+                      values: { docPerPage: docsPerPage },
+                    }
+                  )}
                 </EuiButtonEmpty>
               }
               isOpen={isPopoverOpen}
@@ -165,10 +171,13 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                       setDocsPerPage(10);
                     }}
                   >
-                    {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
-                      defaultMessage: '{docCount} documents',
-                      values: { docCount: 10 },
-                    })}
+                    {i18n.translate(
+                      'xpack.searchIndexDocuments.documentList.paginationOptions.option',
+                      {
+                        defaultMessage: '{docCount} documents',
+                        values: { docCount: 10 },
+                      }
+                    )}
                   </EuiContextMenuItem>,
 
                   <EuiContextMenuItem
@@ -179,10 +188,13 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                       setDocsPerPage(25);
                     }}
                   >
-                    {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
-                      defaultMessage: '{docCount} documents',
-                      values: { docCount: 25 },
-                    })}
+                    {i18n.translate(
+                      'xpack.searchIndexDocuments.documentList.paginationOptions.option',
+                      {
+                        defaultMessage: '{docCount} documents',
+                        values: { docCount: 25 },
+                      }
+                    )}
                   </EuiContextMenuItem>,
                   <EuiContextMenuItem
                     key="50 rows"
@@ -192,10 +204,13 @@ export const DocumentList: React.FC<DocumentListProps> = ({
                       setDocsPerPage(50);
                     }}
                   >
-                    {i18n.translate('searchIndexDocuments.documentList.paginationOptions.option', {
-                      defaultMessage: '{docCount} documents',
-                      values: { docCount: 50 },
-                    })}
+                    {i18n.translate(
+                      'xpack.searchIndexDocuments.documentList.paginationOptions.option',
+                      {
+                        defaultMessage: '{docCount} documents',
+                        values: { docCount: 50 },
+                      }
+                    )}
                   </EuiContextMenuItem>,
                 ]}
               />
@@ -210,7 +225,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
           size="s"
           title={
             <FormattedMessage
-              id="searchIndexDocuments.documentList.resultLimitTitle"
+              id="xpack.searchIndexDocuments.documentList.resultLimitTitle"
               defaultMessage="Results are limited to {number} documents"
               values={{
                 number: <FormattedNumber value={10000} />,
@@ -221,7 +236,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         >
           <p>
             <FormattedMessage
-              id="searchIndexDocuments.documentList.resultLimit"
+              id="xpack.searchIndexDocuments.documentList.resultLimit"
               defaultMessage="Only the first {number} results are available for paging. Please use the search bar to filter down your results."
               values={{
                 number: <FormattedNumber value={10000} />,

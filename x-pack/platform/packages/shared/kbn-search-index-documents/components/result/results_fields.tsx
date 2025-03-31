@@ -22,19 +22,19 @@ interface Props {
 export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }) => {
   return (
     <EuiTable
-      aria-label={i18n.translate('searchIndexDocuments.resultFields.tableLabel', {
+      aria-label={i18n.translate('xpack.searchIndexDocuments.resultFields.tableLabel', {
         defaultMessage: 'Fields for the document with ID {documentId}',
         values: { documentId },
       })}
     >
       <EuiTableHeader>
         <EuiTableHeaderCell width="20%">
-          {i18n.translate('searchIndexDocuments.resultFields.fieldTypeHeaderLabel', {
+          {i18n.translate('xpack.searchIndexDocuments.resultFields.fieldTypeHeaderLabel', {
             defaultMessage: 'Field',
           })}
         </EuiTableHeaderCell>
         <EuiTableHeaderCell>
-          {i18n.translate('searchIndexDocuments.resultFields.contentstableHeaderLabel', {
+          {i18n.translate('xpack.searchIndexDocuments.resultFields.contentstableHeaderLabel', {
             defaultMessage: 'Contents',
           })}
         </EuiTableHeaderCell>

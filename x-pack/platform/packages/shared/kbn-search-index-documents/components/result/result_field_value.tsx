@@ -52,7 +52,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
             <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
               <EuiFlexItem>
                 <EuiBadge color="hollow">
-                  {i18n.translate('searchIndexDocuments.result.value.denseVector.dimLabel', {
+                  {i18n.translate('xpack.searchIndexDocuments.result.value.denseVector.dimLabel', {
                     defaultMessage: '{value} dims',
                     values: {
                       value: JSON.parse(fieldValue).length,
@@ -68,7 +68,7 @@ export const ResultFieldValue: React.FC<ResultFieldValueProps> = ({
                       onClick={copy}
                       data-test-subj="copyDenseVector"
                       aria-label={i18n.translate(
-                        'searchIndexDocuments.result.value.denseVector.copy',
+                        'xpack.searchIndexDocuments.result.value.denseVector.copy',
                         {
                           defaultMessage: 'Copy vector',
                         }

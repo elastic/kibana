@@ -70,7 +70,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
 }) => {
   const shouldTruncate = !isExpanded || PERMANENTLY_TRUNCATED_FIELDS.includes(fieldType);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const fieldTypeLabel = i18n.translate('searchIndexDocuments.result.fieldTypeAriaLabel', {
+  const fieldTypeLabel = i18n.translate('xpack.searchIndexDocuments.result.fieldTypeAriaLabel', {
     defaultMessage: 'This field is of the type {fieldType}',
     values: { fieldType },
   });
@@ -84,7 +84,7 @@ export const ResultField: React.FC<ResultFieldProps> = ({
               button={
                 <EuiButtonIcon
                   aria-label={i18n.translate(
-                    'searchIndexDocuments.result.fieldTypeButtonAriaLabel',
+                    'xpack.searchIndexDocuments.result.fieldTypeButtonAriaLabel',
                     {
                       defaultMessage: "Show this field's type",
                     }
