@@ -111,6 +111,7 @@ export function AlertDetails() {
   const { rule, refetch } = useFetchRule({
     ruleId,
   });
+  console.log('rule', rule);
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
   const { euiTheme } = useEuiTheme();
   const [sources, setSources] = useState<AlertDetailsSource[]>();

@@ -19,4 +19,5 @@ export const dashboardSchema = schema.arrayOf(
 
 export const artifactSchema = schema.object({
   dashboards: schema.maybe(dashboardSchema),
+  investigation_guide: schema.maybe(investigationGuideSchema),
 });

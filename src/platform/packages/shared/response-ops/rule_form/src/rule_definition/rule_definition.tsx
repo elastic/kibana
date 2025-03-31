@@ -117,6 +117,7 @@ export const RuleDefinition = () => {
   const { readFlappingSettingsUI, writeFlappingSettingsUI } = rulesSettings || {};
 
   const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
+  console.log('form data', formData);
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
@@ -216,7 +217,22 @@ export const RuleDefinition = () => {
     [dispatch]
   );
 
+  const onSetArtifacts = useCallback(
+    (value: object) => {
+      console.log('vaaaaaaalue', value);
+      dispatch({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'artifacts',
+          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
+        },
+      });
+    },
+    [dispatch, formData.artifacts]
+  );
+
   console.log('params', params);
+  console.log('value', formData.artifacts?.investigation_guide?.blob);
   return (
     <EuiSplitPanel.Outer
       hasBorder
@@ -291,8 +307,8 @@ export const RuleDefinition = () => {
               <EuiFlexItem>
                 <EuiSpacer size="l" />
                 <InvestigationManager
-                  setRuleParams={onSetRuleParams}
-                  value={params?.investigationGuide ?? ''}
+                  setRuleParams={onSetArtifacts}
+                  value={formData.artifacts?.investigation_guide?.blob ?? ''}
                 />
               </EuiFlexItem>
             </Suspense>

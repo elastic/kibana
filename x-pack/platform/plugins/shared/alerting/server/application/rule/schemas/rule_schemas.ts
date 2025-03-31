@@ -18,6 +18,7 @@ import { dateSchema } from './date_schema';
 import { notifyWhenSchema } from './notify_when_schema';
 import { actionSchema, systemActionSchema } from './action_schemas';
 import { flappingSchema } from './flapping_schema';
+import { artifactSchema } from './artifact_schema';
 
 export const mappedParamsSchema = schema.recordOf(schema.string(), schema.maybe(schema.any()));
 
@@ -147,13 +148,6 @@ export const snoozeScheduleSchema = schema.object({
 
 export const alertDelaySchema = schema.object({
   active: schema.number(),
-});
-
-export const dashboardSchema = schema.arrayOf(schema.object({ id: schema.string() }));
-
-export const artifactSchema = schema.object({
-  dashboards: schema.maybe(dashboardSchema),
-  investigation_guide: schema.maybe(schema.object({ blob: schema.string() })),
 });
 
 /**
