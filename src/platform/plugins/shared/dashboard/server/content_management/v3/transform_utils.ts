@@ -59,10 +59,10 @@ export function dashboardAttributesOut(
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
     ...(panelsJSON && { panels: transformPanelsOut(panelsJSON) }),
-    sections,
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
+    ...(sections && { sections }),
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),

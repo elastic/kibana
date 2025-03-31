@@ -83,6 +83,7 @@ describe('getSerializedState', () => {
         },
         "panels": Array [],
         "refreshInterval": undefined,
+        "sections": undefined,
         "timeFrom": undefined,
         "timeRestore": false,
         "timeTo": undefined,

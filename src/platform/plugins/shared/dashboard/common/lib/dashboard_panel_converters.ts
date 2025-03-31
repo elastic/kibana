@@ -23,10 +23,10 @@ export const convertPanelsArrayToPanelMap = (panels?: DashboardPanel[]): Dashboa
   const panelsMap: DashboardPanelMap = {};
   panels?.forEach((panel, idx) => {
     const panelIndex = panel.panelIndex ?? String(idx);
-    const { sectionId, ...gridData } = panel.gridData;
+    const gridData = panel.gridData ?? {};
     panelsMap![panel.panelIndex ?? String(idx)] = {
       type: panel.type,
-      gridData: { ...gridData, ...(sectionId !== undefined && { sectionId }) },
+      gridData: gridData.sectionId === undefined ? omit(gridData, 'sectionId') : gridData,
       panelRefName: panel.panelRefName,
       explicitInput: {
         id: panelIndex,
@@ -47,7 +47,7 @@ export const convertPanelMapToPanelsArray = (
   return Object.entries(panels).map(([panelId, panelState]) => {
     const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
     const title = (panelState.explicitInput as { title?: string }).title;
-    const { sectionId, ...gridData } = panelState.gridData;
+    const gridData = panelState.gridData ?? {};
 
     return {
       /**
@@ -58,7 +58,7 @@ export const convertPanelMapToPanelsArray = (
       ...(!removeLegacyVersion ? { version: panelState.version } : {}),
 
       type: panelState.type,
-      gridData: { ...gridData, ...(sectionId !== undefined && { sectionId }) },
+      gridData: gridData.sectionId === undefined ? omit(gridData, 'sectionId') : gridData,
       panelIndex: panelId,
       panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
       ...(title !== undefined && { title }),
