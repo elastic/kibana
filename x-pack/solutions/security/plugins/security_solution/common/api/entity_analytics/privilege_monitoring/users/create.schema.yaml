@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/monitoring/users:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: CreateUser
+      summary: Create a new monitored user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_name:
+                  type: string
+                  description: The name of the user.
+                is_monitored:
+                  type: boolean
+                  description: Whether the user is actively monitored.
+      responses:
+        "200":
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  user_name:
+                    type: string
+                  is_monitored:
+                    type: boolean

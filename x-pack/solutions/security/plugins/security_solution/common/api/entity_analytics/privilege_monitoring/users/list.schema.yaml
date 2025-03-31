@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring API
+  version: "2023-10-31"
+
+paths:
+  /api/entity_analytics/monitoring/users/list:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ListUsers
+      summary: List all monitored users
+      parameters:
+        - name: kql
+          in: query
+          required: false
+          schema:
+            type: string
+          description: KQL query to filter the list of monitored users
+      responses:
+        "200":
+          description: List of monitored users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    user_name:
+                      type: string
+                    is_monitored:
+                      type: boolean
