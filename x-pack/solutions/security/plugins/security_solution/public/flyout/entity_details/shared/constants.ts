@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 import type { UniversalEntityPanelExpandableFlyoutProps } from '../universal_right';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { HostPanelExpandableFlyoutProps } from '../host_right';
@@ -31,8 +30,6 @@ export const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
 export const ServicePanelKey: ServicePanelExpandableFlyoutProps['key'] = 'service-panel';
 export const UniversalEntityPanelKey: UniversalEntityPanelExpandableFlyoutProps['key'] =
   'universal-entity-panel';
-export const MisconfigurationFindingsPanelKey: FindingsMisconfigurationPanelExpandableFlyoutProps['key'] =
-  'findings-misconfiguration-panel';
 
 export const EntityPanelKeyByType: Record<EntityType, string | undefined> = {
   [EntityType.host]: HostPanelKey,

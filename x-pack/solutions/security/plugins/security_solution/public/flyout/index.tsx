@@ -54,13 +54,13 @@ import {
   HostPanelKey,
   ServicePanelKey,
   UniversalEntityPanelKey,
-  MisconfigurationFindingsPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/helper';
+import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
