@@ -13,8 +13,7 @@ import type {
   ExceptionListItemSchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type { OperatingSystem } from '@kbn/securitysolution-utils';
-import { EntryFieldType, hasSimpleExecutableName } from '@kbn/securitysolution-utils';
+import { EntryFieldType } from '@kbn/securitysolution-utils';
 
 import {
   ENDPOINT_ARTIFACT_LISTS,
@@ -422,29 +421,7 @@ function translateEntry(
             value: entry.value,
           };
 
-          const hasExecutableName = hasSimpleExecutableName({
-            os: os as OperatingSystem,
-            type: entry.type,
-            value: entry.value,
-          });
-
-          const existingFields = exceptionListItemEntries.map((e) => e.field);
-          const doAddPerformantEntries = !(
-            existingFields.includes('process.name') || existingFields.includes('file.name')
-          );
-
-          if (hasExecutableName && doAddPerformantEntries) {
-            // when path has a full executable name
-            // append a process.name entry based on os
-            // `exact_cased` for linux and `exact_caseless` for others
-            return appendOptimizedEntryForEndpoint({
-              entry,
-              os,
-              wildcardProcessEntry,
-            });
-          } else {
-            return wildcardProcessEntry;
-          }
+          return wildcardProcessEntry;
         }
       };
 
