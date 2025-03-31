@@ -26,7 +26,7 @@ export const useESQLVariables = ({
   closeFlyout?: () => void;
 }) => {
   const dashboardPanels = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject<{ [key: string]: unknown }>({})
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : new BehaviorSubject(undefined)
   );
   const controlGroupApi = useStateFromPublishingSubject(
     isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : new BehaviorSubject(undefined)
