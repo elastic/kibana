@@ -20,7 +20,6 @@ jest.mock('@kbn/test', () => ({
 jest.mock('../playwright/runner', () => ({
   parseTestFlags: jest.fn().mockResolvedValue({ logsDir: 'path/to/logs/directory' }),
   runTests: jest.fn().mockResolvedValue(undefined),
-  runTestsFn: jest.fn().mockResolvedValue(undefined),
 }));
 
 describe('runScoutPlaywrightConfig', () => {
