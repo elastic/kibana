@@ -23,7 +23,7 @@ const growingFlexItemCss = css`
 
 export type TabsBarProps = Pick<
   TabProps,
-  'getTabMenuItems' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
+  'getTabMenuItems' | 'getPreviewData' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
@@ -43,6 +43,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onLabelEdited,
   onSelect,
   onClose,
+  getPreviewData,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
@@ -104,6 +105,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                   tabsSizeConfig={tabsSizeConfig}
                   services={services}
                   getTabMenuItems={getTabMenuItems}
+                  getPreviewData={getPreviewData}
                   onLabelEdited={onLabelEdited}
                   onSelect={onSelect}
                   onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab

@@ -98,7 +98,3 @@ export function FilterContent({ filter, valueLabel, fieldLabel, hideAlias }: Fil
       );
   }
 }
-
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default FilterContent;

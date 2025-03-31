@@ -44,6 +44,10 @@ export function useEnableSlo() {
       onSuccess: (_data, { name }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
         queryClient.invalidateQueries({ queryKey: sloKeys.details(), exact: false });
+        queryClient.invalidateQueries({
+          queryKey: sloKeys.allDefinitions(),
+          exact: false,
+        });
 
         toasts.addSuccess(
           i18n.translate('xpack.slo.enable.successNotification', {

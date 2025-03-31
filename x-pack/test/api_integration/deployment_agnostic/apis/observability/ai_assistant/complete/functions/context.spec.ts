@@ -113,6 +113,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await clearKnowledgeBase(es);
     });
 
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
     describe('calling the context function via /chat/complete', () => {
       let firstRequestBody: ChatCompletionStreamParams;
       let secondRequestBody: ChatCompletionStreamParams;
@@ -239,7 +243,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           parsedContextResponseData.suggestions.forEach((suggestion: RecalledSuggestion) => {
             expect(suggestion).to.have.property('id');
             expect(suggestion).to.have.property('text');
-            expect(suggestion).to.have.property('score');
+            expect(suggestion).to.have.property('esScore');
           });
 
           const suggestionTexts = parsedContextResponseData.suggestions
