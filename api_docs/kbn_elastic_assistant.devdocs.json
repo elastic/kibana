@@ -166,7 +166,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, navigateToApp, nameSpace, productDocBase, spaceId, title, toasts, currentAppId, userProfileService, chrome, }: ",
+          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, navigateToApp, nameSpace, productDocBase, title, toasts, currentAppId, userProfileService, chrome, }: ",
           "AssistantProviderProps",
           ") => React.JSX.Element"
         ],
@@ -179,12 +179,45 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  spaceId,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
+            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
             "description": [],
             "signature": [
               "AssistantProviderProps"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.AssistantSpaceIdProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "AssistantSpaceIdProvider",
+        "description": [],
+        "signature": [
+          "({ children, spaceId }: SpaceIdProviderProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_space_id.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.AssistantSpaceIdProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ children, spaceId }",
+            "description": [],
+            "signature": [
+              "SpaceIdProviderProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_space_id.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -720,6 +753,68 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant",
+        "id": "def-public.useAssistantLastConversation",
+        "type": "Function",
+        "tags": [],
+        "label": "useAssistantLastConversation",
+        "description": [],
+        "signature": [
+          "({ nameSpace, spaceId, }: { nameSpace?: string | undefined; spaceId: string; }) => { getLastConversation: (selectedConversation?: ",
+          "SelectedConversation",
+          " | undefined) => ",
+          "LastConversation",
+          "; setLastConversation: (lastConversation: ",
+          "LastConversation",
+          ") => void; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant",
+            "id": "def-public.useAssistantLastConversation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  spaceId,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.useAssistantLastConversation.$1.nameSpace",
+                "type": "string",
+                "tags": [],
+                "label": "nameSpace",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/elastic-assistant",
+                "id": "def-public.useAssistantLastConversation.$1.spaceId",
+                "type": "string",
+                "tags": [],
+                "label": "spaceId",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant/use_space_aware_context/use_last_conversation.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },

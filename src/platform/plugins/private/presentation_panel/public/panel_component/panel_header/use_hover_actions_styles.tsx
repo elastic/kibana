@@ -81,6 +81,10 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         opacity: 1;
         visibility: visible;
         transition: none; // apply transition delay on hover out only
+        // when the panel is in fullscreen mode, increase the z-index of the hover actions to be above the sticky nav
+        .kbnGridPanel--expanded & {
+          z-index: ${euiTheme.levels.toast};
+        }
       }
     `;
   }, [euiTheme, showBorder, isEditMode]);
