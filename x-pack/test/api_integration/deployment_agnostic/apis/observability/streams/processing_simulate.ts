@@ -112,8 +112,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument()],
         });
 
-        expect(response.body.parsed_rate).to.be(1);
-        expect(response.body.failed_rate).to.be(0);
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, errors, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
@@ -162,8 +162,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
-        expect(response.body.parsed_rate).to.be(1);
-        expect(response.body.failed_rate).to.be(0);
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
@@ -195,8 +195,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1`)],
         });
 
-        expect(response.body.parsed_rate).to.be(0);
-        expect(response.body.failed_rate).to.be(1);
+        expect(response.body.documents_metrics.parsed_rate).to.be(0);
+        expect(response.body.documents_metrics.failed_rate).to.be(1);
 
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('partially_parsed');
@@ -272,8 +272,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ],
         });
 
-        expect(response.body.parsed_rate).to.be(0.25);
-        expect(response.body.failed_rate).to.be(0.75);
+        expect(response.body.documents_metrics.parsed_rate).to.be(0.25);
+        expect(response.body.documents_metrics.failed_rate).to.be(0.75);
         expect(response.body.documents).to.have.length(4);
         expect(response.body.documents[0].status).to.be('parsed');
         expect(response.body.documents[1].status).to.be('partially_parsed');
@@ -306,8 +306,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           documents: [createTestDocument(`${TEST_MESSAGE} 127.0.0.1 greedy data message`)],
         });
 
-        expect(response.body.parsed_rate).to.be(1);
-        expect(response.body.failed_rate).to.be(0);
+        expect(response.body.documents_metrics.parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('parsed');
