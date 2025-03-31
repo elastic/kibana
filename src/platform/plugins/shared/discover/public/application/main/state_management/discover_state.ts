@@ -44,7 +44,7 @@ import {
   isDataSourceType,
 } from '../../../../common/data_sources';
 import type { InternalStateStore, RuntimeStateManager } from './redux';
-import { internalStateActions } from './redux';
+import { internalStateActions, selectCurrentTabRuntimeState } from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
 
@@ -144,7 +144,11 @@ export interface DiscoverStateContainer {
     /**
      * Initializing state containers and start subscribing to changes triggering e.g. data fetching
      */
-    initializeAndSync: () => () => void;
+    initializeAndSync: () => void;
+    /**
+     * Stop syncing the state containers started by initializeAndSync
+     */
+    stopSyncing: () => void;
     /**
      * Create and select a temporary/adhoc data view by a given index pattern
      * Used by the Data View Picker
@@ -302,7 +306,11 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const prevDataView = runtimeStateManager.currentDataView$.getValue();
+    const { currentDataView$ } = selectCurrentTabRuntimeState(
+      internalState.getState(),
+      runtimeStateManager
+    );
+    const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
     const nextDataView = await services.dataViews.create({
@@ -408,6 +416,13 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
+  let internalStopSyncing = () => {};
+
+  const stopSyncing = () => {
+    internalStopSyncing();
+    internalStopSyncing = () => {};
+  };
+
   /**
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
@@ -442,8 +457,12 @@ export function getDiscoverStateContainer({
 
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
+      const { currentDataView$ } = selectCurrentTabRuntimeState(
+        internalState.getState(),
+        runtimeStateManager
+      );
       savedSearchContainer.update({
-        nextDataView: runtimeStateManager.currentDataView$.getValue(),
+        nextDataView: currentDataView$.getValue(),
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
       });
@@ -468,7 +487,7 @@ export function getDiscoverStateContainer({
       }
     );
 
-    return () => {
+    internalStopSyncing = () => {
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
@@ -581,6 +600,7 @@ export function getDiscoverStateContainer({
     customizationContext,
     actions: {
       initializeAndSync,
+      stopSyncing,
       fetchData,
       onChangeDataView,
       createAndAppendAdHocDataView,
