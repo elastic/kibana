@@ -10,7 +10,7 @@ import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils/types';
 import type { FC } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { getTimeValueInfo, isTimeFunction } from './anomaly_value_utils';
+import { useTimeValueInfo } from './anomaly_value_utils';
 import { formatValue } from '../../formatters/format_value';
 
 interface AnomalyDateValueProps {
@@ -26,42 +26,38 @@ export const AnomalyValueDisplay: FC<AnomalyDateValueProps> = ({
   record,
   fieldFormat,
 }) => {
-  // If the function is not a time function, format the value using the formatValue function
-  // and return just the formatted value
-  if (!isTimeFunction(functionName)) {
+  const singleValue = Array.isArray(value) ? value[0] : value;
+  const timeValueInfo = useTimeValueInfo(singleValue, functionName, record);
+
+  // If the function is a time function, return the formatted value and tooltip content
+  if (timeValueInfo !== null) {
     return (
-      <span data-test-subj="mlAnomalyValue">
-        {formatValue(value, functionName, fieldFormat, record)}
-      </span>
+      <EuiToolTip
+        content={timeValueInfo.tooltipContent}
+        position="left"
+        anchorProps={{
+          'data-test-subj': 'mlAnomalyTimeValue',
+        }}
+        data-test-subj="mlAnomalyTimeValueTooltip"
+      >
+        <>
+          {timeValueInfo.formattedTime}
+          {timeValueInfo.dayOffset !== undefined && timeValueInfo.dayOffset !== 0 && (
+            <sub data-test-subj="mlAnomalyTimeValueOffset">
+              {timeValueInfo.dayOffset > 0
+                ? `+${timeValueInfo.dayOffset}`
+                : timeValueInfo.dayOffset}
+            </sub>
+          )}
+        </>
+      </EuiToolTip>
     );
   }
 
-  // If the function is a time function, format the value using the getTimeValueInfo function
-  // and return the formatted value and tooltip content
-  const singleValue = Array.isArray(value) ? value[0] : value;
-  const { formattedTime, tooltipContent, dayOffset } = getTimeValueInfo(
-    singleValue,
-    functionName,
-    record
-  );
-
+  // If the function is not a time function, return just the formatted value
   return (
-    <EuiToolTip
-      content={tooltipContent}
-      position="left"
-      anchorProps={{
-        'data-test-subj': 'mlAnomalyTimeValue',
-      }}
-      data-test-subj="mlAnomalyTimeValueTooltip"
-    >
-      <>
-        {formattedTime}
-        {dayOffset !== undefined && dayOffset !== 0 && (
-          <sub data-test-subj="mlAnomalyTimeValueOffset">
-            {dayOffset > 0 ? `+${dayOffset}` : dayOffset}
-          </sub>
-        )}
-      </>
-    </EuiToolTip>
+    <span data-test-subj="mlAnomalyValue">
+      {formatValue(value, functionName, fieldFormat, record)}
+    </span>
   );
 };

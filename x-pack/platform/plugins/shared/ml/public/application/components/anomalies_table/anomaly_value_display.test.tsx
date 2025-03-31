@@ -11,6 +11,10 @@ import { AnomalyValueDisplay } from './anomaly_value_display';
 import { waitForEuiToolTipVisible } from '@elastic/eui/lib/test/rtl';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
+jest.mock('../../contexts/kibana', () => ({
+  useFieldFormatter: jest.fn().mockReturnValue((value: number | string) => value.toString()),
+}));
+
 jest.mock('../../formatters/format_value', () => ({
   formatValue: jest.fn((value, mlFunction, fieldFormat) => {
     if (fieldFormat && fieldFormat.convert) {
@@ -22,11 +26,18 @@ jest.mock('../../formatters/format_value', () => ({
 
 jest.mock('./anomaly_value_utils', () => ({
   isTimeFunction: (fn: string) => fn === 'time_of_day' || fn === 'time_of_week',
-  getTimeValueInfo: jest.fn((value) => ({
-    formattedTime: '14:30',
-    tooltipContent: 'January 1st 14:30',
-    dayOffset: value > 86400 ? 1 : 0,
-  })),
+  useTimeValueInfo: jest.fn((value, functionName) => {
+    // Return null for non-time functions
+    if (functionName !== 'time_of_day' && functionName !== 'time_of_week') {
+      return null;
+    }
+    // Return time info for time functions
+    return {
+      formattedTime: '14:30',
+      tooltipContent: 'January 1st 14:30',
+      dayOffset: value > 86400 ? 1 : 0,
+    };
+  }),
 }));
 
 const baseProps = {

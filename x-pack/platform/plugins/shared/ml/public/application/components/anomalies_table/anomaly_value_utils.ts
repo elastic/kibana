@@ -6,7 +6,9 @@
  */
 
 import type { AnomalyDateFunction, MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils/types';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { formatTimeValue } from '../../formatters/format_value';
+import { useFieldFormatter } from '../../contexts/kibana';
 
 interface TimeValueInfo {
   formattedTime: string;
@@ -24,15 +26,21 @@ export function isTimeFunction(functionName?: string): functionName is AnomalyDa
 /**
  * Gets formatted time information for time-based functions
  */
-export function getTimeValueInfo(
+export function useTimeValueInfo(
   value: number,
-  functionName: AnomalyDateFunction,
+  functionName: string,
   record?: MlAnomalyRecordDoc
-): TimeValueInfo {
+): TimeValueInfo | null {
+  const dateFormatter = useFieldFormatter(FIELD_FORMAT_IDS.DATE);
+
+  if (!isTimeFunction(functionName)) {
+    return null;
+  }
+
   const result = formatTimeValue(value, functionName, record);
 
   // Create a more detailed tooltip format using the moment object
-  const tooltipContent = result.moment.format('dddd, MMMM Do HH:mm');
+  const tooltipContent = dateFormatter(result.moment.valueOf());
 
   return {
     formattedTime: result.formatted,
