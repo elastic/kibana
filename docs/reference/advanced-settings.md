@@ -212,6 +212,9 @@ $$$banners-textcontent$$$`banners:textContent`
 $$$banners-textcolor$$$`banners:textColor`
 :   The color for the banner text for this space. Defaults to the value of the `xpack.banners.textColor` configuration property.
 
+$$$banners-linkcolor$$$`banners:linkColor`
+:   The color for the banner link text for this space. Defaults to the value of the `xpack.banners.linkColor` configuration property.
+
 $$$banners-backgroundcolor$$$`banners:backgroundColor`
 :   The color of the banner background for this space. Defaults to the value of the `xpack.banners.backgroundColor` configuration property.
 
@@ -499,9 +502,6 @@ $$$timelion-targetbuckets$$$`timelion:target_buckets`
 
 
 ### Visualization [kibana-visualization-settings]
-
-$$$visualization-colormapping$$$`visualization:colorMapping`
-:   [7.11.0] Maps values to specific colors in charts using the **Compatibility** palette.
 
 $$$visualization-uselegacytimeaxis$$$`visualization:useLegacyTimeAxis`
 :   [8.10.0] Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB
