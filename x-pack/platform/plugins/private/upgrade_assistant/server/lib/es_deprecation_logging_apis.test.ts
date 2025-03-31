@@ -226,7 +226,11 @@ describe('getRecentEsDeprecationLogs', () => {
     });
 
     // Verify that outsideTimeframe log is not included
-    expect(result.logs.find((log) => log['@timestamp'] === outsideTimeframe)).toBeUndefined();
+    expect(
+      result.logs.find(
+        (log) => (log as { '@timestamp': string })['@timestamp'] === outsideTimeframe
+      )
+    ).toBeUndefined();
 
     // Verify the search query uses the correct timeframe
     expect(dataClient.asCurrentUser.search).toHaveBeenCalledWith(
