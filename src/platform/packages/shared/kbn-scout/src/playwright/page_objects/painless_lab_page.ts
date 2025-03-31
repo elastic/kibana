@@ -60,7 +60,7 @@ export class PainlessLab {
 
   async getFlyoutResponseBody() {
     const flyoutResponse = this.page.testSubj.locator('painlessLabFlyoutResponse');
-    await flyoutResponse..waitFor({ state: 'visible' })
+    await flyoutResponse.waitFor({ state: 'visible' });
     return flyoutResponse.innerText();
   }
 }
