@@ -62,7 +62,7 @@ const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
-const DEFAULT_FILTERS: Filter[] = [];
+const DEFAULT_EMPTY_FILTERS: Filter[] = [];
 
 const tableColumns = getColumns({ showRuleName: true });
 
@@ -103,6 +103,15 @@ function InternalAlertsPage() {
   );
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const themeOverrides = charts.theme.useChartsBaseTheme();
+  const globalFilters = useMemo(() => {
+    return [
+      ...(alertSearchBarStateProps.filters ?? DEFAULT_EMPTY_FILTERS),
+      ...(filterControls ?? DEFAULT_EMPTY_FILTERS),
+    ];
+  }, [alertSearchBarStateProps.filters, filterControls]);
+  const globalQuery = useMemo(() => {
+    return { query: alertSearchBarStateProps.kuery, language: 'kuery' };
+  }, [alertSearchBarStateProps.kuery]);
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 
@@ -319,11 +328,8 @@ function InternalAlertsPage() {
                 consumers={observabilityAlertFeatureIds}
                 from={alertSearchBarStateProps.rangeFrom}
                 to={alertSearchBarStateProps.rangeTo}
-                globalFilters={[
-                  ...(alertSearchBarStateProps.filters ?? DEFAULT_FILTERS),
-                  ...(filterControls ?? []),
-                ]}
-                globalQuery={{ query: alertSearchBarStateProps.kuery, language: 'kuery' }}
+                globalFilters={globalFilters}
+                globalQuery={globalQuery}
                 groupingId={ALERTS_PAGE_ALERTS_TABLE_CONFIG_ID}
                 defaultGroupingOptions={DEFAULT_GROUPING_OPTIONS}
                 getAggregationsByGroupingField={getAggregationsByGroupingField}
