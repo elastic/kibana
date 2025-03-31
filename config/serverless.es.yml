@@ -60,9 +60,6 @@ xpack.features.overrides:
   observabilityAIAssistant:
     name: "AI Assistant"
     category: "enterpriseSearch"
-  ### AI Assistant enables the Inventory feature, moving to Search
-  inventory:
-    category: "enterpriseSearch"
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
