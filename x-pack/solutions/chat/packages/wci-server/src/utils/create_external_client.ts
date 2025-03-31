@@ -7,7 +7,7 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
-import type { IntegrationClient } from '../types';
+import type { IntegrationClient } from '../integration';
 
 export const getClientForExternalServer = async ({
   serverUrl,

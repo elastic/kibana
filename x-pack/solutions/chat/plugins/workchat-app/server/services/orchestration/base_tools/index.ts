@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { getClientForInternalServer } from './create_internal_client';
-export { getClientForExternalServer } from './create_external_client';
-export { createMcpServer } from './create_mcp_server';
+export { getBaseToolClient } from './base_tools_mcp';

@@ -8,7 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { IntegrationClient } from '../types';
+import type { IntegrationClient } from '../integration';
 
 /**
  * Returns a {@link IntegrationClient} that will run the provided server in memory

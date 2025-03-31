@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-export { getClientForInternalServer, getClientForExternalServer } from './src/utils';
+export { type McpTool, toolResult } from './src/mcp';
+export {
+  getClientForInternalServer,
+  getClientForExternalServer,
+  createMcpServer,
+} from './src/utils';
 export type {
   IntegrationClient,
   IntegrationContext,
   WorkChatIntegration,
   WorkchatIntegrationDefinition,
-} from './src/types';
+} from './src/integration';
