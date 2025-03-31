@@ -28,7 +28,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { MAX_FINDINGS_TO_LOAD } from '@kbn/cloud-security-posture-common';
-import type { CspFinding, RuleResponse } from '@kbn/cloud-security-posture-common';
+import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { CloudPostureDataTableResult } from '../../common/hooks/use_cloud_posture_data_table';
 import { EmptyState } from '../empty_state';
@@ -248,32 +248,11 @@ export const CloudSecurityDataTable = ({
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
 
-  const { openFlyout, closeFlyout, setFlyoutCloseCallback } = useExpandableFlyoutCsp();
+  const { onExpandDocClick } = useExpandableFlyoutCsp(setExpandedDoc);
 
-  if (!openFlyout || !closeFlyout) {
+  if (!onExpandDocClick) {
     return <></>;
   }
-
-  setFlyoutCloseCallback(setExpandedDoc);
-
-  const onExpandDocClick = (record?: DataTableRecord | undefined) => {
-    if (record) {
-      const finding = record?.raw?._source as unknown as CspFinding;
-      setExpandedDoc(record);
-      openFlyout({
-        right: {
-          id: 'findings-misconfiguration-panel',
-          params: {
-            resourceId: finding.resource.id,
-            ruleId: finding.rule.id,
-          },
-        },
-      });
-    } else {
-      closeFlyout();
-      setExpandedDoc(undefined);
-    }
-  };
 
   const services = {
     theme,

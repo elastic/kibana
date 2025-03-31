@@ -91,9 +91,7 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
 
 describe('CloudSecurityDataTable', () => {
   (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
-    openFlyout: jest.fn(),
-    closeFlyout: jest.fn(),
-    setFlyoutCloseCallback: jest.fn(),
+    onExpandDocClick: jest.fn(),
   });
   it('renders loading state', () => {
     const { getByTestId } = renderDataTable({ isLoading: true, rows: [] });

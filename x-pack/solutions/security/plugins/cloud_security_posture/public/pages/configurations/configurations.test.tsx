@@ -46,9 +46,7 @@ describe('<Findings />', () => {
   startMockServer(server);
 
   (useExpandableFlyoutCsp as jest.Mock).mockReturnValue({
-    openFlyout: jest.fn(),
-    closeFlyout: jest.fn(),
-    setFlyoutCloseCallback: jest.fn(),
+    onExpandDocClick: jest.fn(),
   });
 
   beforeEach(() => {
