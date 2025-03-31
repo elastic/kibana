@@ -16,11 +16,7 @@ import { EntryFieldType } from '@kbn/securitysolution-utils';
 
 import {
   ENDPOINT_ARTIFACT_LISTS,
-  type ENDPOINT_BLOCKLISTS_LIST_ID,
-  type ENDPOINT_EVENT_FILTERS_LIST_ID,
-  type ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID,
   type ENDPOINT_LIST_ID,
-  type ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
@@ -73,10 +69,10 @@ export async function buildArtifact(
 
 export type ArtifactListId =
   | typeof ENDPOINT_LIST_ID
-  | typeof ENDPOINT_TRUSTED_APPS_LIST_ID
-  | typeof ENDPOINT_EVENT_FILTERS_LIST_ID
-  | typeof ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID
-  | typeof ENDPOINT_BLOCKLISTS_LIST_ID;
+  | typeof ENDPOINT_ARTIFACT_LISTS.trustedApps.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.eventFilters.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id
+  | typeof ENDPOINT_ARTIFACT_LISTS.blocklists.id;
 
 export function convertExceptionsToEndpointFormat(
   exceptions: ExceptionListItemSchema[],
