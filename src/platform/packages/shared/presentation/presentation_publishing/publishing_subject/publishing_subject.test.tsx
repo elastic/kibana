@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
@@ -19,6 +19,69 @@ import {
 import { useStateFromPublishingSubject } from './publishing_subject';
 
 describe('publishing subject', () => {
+  describe('setup', () => {
+    let subject1: BehaviorSubject<number>;
+    beforeEach(() => {
+      subject1 = new BehaviorSubject<number>(0);
+    });
+
+    function emitEvent() {
+      subject1.next(subject1.getValue() + 1);
+    }
+
+    test('useStateFromPublishingSubject should synchronously subscribe to observables to avoid race conditions', async () => {
+      function Component() {
+        const value1 = useStateFromPublishingSubject(subject1);
+
+        // synchronously emit new value for observable
+        // this will cause test to fail if subscriptions are not setup synchronously
+        useMemo(() => {
+          emitEvent();
+        }, []);
+
+        return (
+          <>
+            <span>{`value1: ${value1}`}</span>
+          </>
+        );
+      }
+      render(<Component />);
+      await waitFor(() => {
+        expect(
+          // If there is a race condition, then 'value1: 0' will be rendered
+          // because value1 will have the original value '0' instead of latest value
+          screen.getByText('value1: 1')
+        ).toBeInTheDocument();
+      });
+    });
+
+    test('useBatchedPublishingSubjects should synchronously subscribe to observables to avoid race conditions', async () => {
+      function Component() {
+        const [value1] = useBatchedPublishingSubjects(subject1);
+
+        // synchronously emit new value for observable
+        // this will cause test to fail if subscriptions are not setup synchronously
+        useMemo(() => {
+          emitEvent();
+        }, []);
+
+        return (
+          <>
+            <span>{`value1: ${value1}`}</span>
+          </>
+        );
+      }
+      render(<Component />);
+      await waitFor(() => {
+        expect(
+          // If there is a race condition, then 'value1: 0' will be rendered
+          // because value1 will have the original value '0' instead of latest value
+          screen.getByText('value1: 1')
+        ).toBeInTheDocument();
+      });
+    });
+  });
+
   describe('render', () => {
     let subject1: BehaviorSubject<number>;
     let subject2: BehaviorSubject<number>;
@@ -115,30 +178,6 @@ describe('publishing subject', () => {
         ).toBeInTheDocument();
       });
       expect(renderCount).toBe(2);
-    });
-
-    test('useBatchedPublishingSubjects should synchronously subscribe to observables to avoid race conditions', async () => {
-      function Component() {
-        const [value1] = useBatchedPublishingSubjects(subject1);
-
-        // synchronously emit new values for observables
-        // this will cause test to fail if subscriptions are not setup synchronously
-        incrementAll();
-
-        return (
-          <>
-            <span>{`value1: ${value1}`}</span>
-          </>
-        );
-      }
-      render(<Component />);
-      await waitFor(() => {
-        expect(
-          // If there is a race condition, then 'value1: 0' will be rendered
-          // because value1 will have the original value '0' instead of latest value
-          screen.getByText('value1: 1')
-        ).toBeInTheDocument();
-      });
     });
 
     test('should batch state updates when using useBatchedOptionalPublishingSubjects', async () => {
