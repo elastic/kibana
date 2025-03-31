@@ -444,7 +444,7 @@
                       "items": {
                         "type": "long",
                         "_meta": {
-                          "description": "Number of rules is each space"
+                          "description": "Number of rules in each space"
                         }
                       }
                     }
