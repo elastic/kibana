@@ -83,6 +83,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const isExpanded = selectedNode?.path === path;
   const isActive = isActiveFromUrl(item.path, activeNodes) || isExpanded;
 
+  const lastOpenByHoverTS = React.useRef<number | null>(null);
+
   const itemClassNames = classNames(
     'sideNavItem',
     { 'sideNavItem--isActive': isActive },
@@ -105,7 +107,12 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const togglePanel = useCallback(
     (target: EventTarget) => {
       if (selectedNode?.id === item.id) {
-        closePanel();
+        // we want to avoid closing the panel if the user just opened it by hovering
+        const recentlyOpenedByHover =
+          lastOpenByHoverTS.current && Date.now() - lastOpenByHoverTS.current < 500;
+        if (!recentlyOpenedByHover) {
+          closePanel();
+        }
       } else {
         openPanel(item, target as Element);
       }
@@ -133,6 +140,13 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [togglePanel]
   );
 
+  const { onMouseEnter, onMouseLeave } = useHoverOpener({
+    onOpen: (e: React.MouseEvent) => {
+      lastOpenByHoverTS.current = Date.now();
+      openPanel(item, e.target as Element);
+    },
+  });
+
   if (!hasLandingPage) {
     return (
       <EuiButton
@@ -143,6 +157,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
         fullWidth
         className={buttonClassNames}
         data-test-subj={dataTestSubj}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         {title}
       </EuiButton>
@@ -185,4 +201,39 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
       )}
     </EuiFlexGroup>
   );
+};
+
+const useHoverOpener = ({ onOpen }: { onOpen: (e: React.MouseEvent) => void }) => {
+  const HOVER_OPEN_DELAY = 200;
+  const HOVER_CLOSE_DELAY = 300;
+
+  const openTimer = React.useRef<number | null>(null);
+  const closeTimer = React.useRef<number | null>(null);
+
+  const clearTimers = () => {
+    if (openTimer.current) clearTimeout(openTimer.current);
+    if (closeTimer.current) clearTimeout(closeTimer.current);
+  };
+
+  const onMouseEnter = useCallback(
+    (event: React.MouseEvent) => {
+      clearTimers();
+      openTimer.current = window.setTimeout(() => {
+        onOpen(event);
+      }, HOVER_OPEN_DELAY);
+    },
+    [onOpen]
+  );
+
+  const onMouseLeave = useCallback((event: React.MouseEvent) => {
+    clearTimers();
+    closeTimer.current = window.setTimeout(() => {
+      // TODO?
+    }, HOVER_CLOSE_DELAY);
+  }, []);
+
+  return {
+    onMouseEnter,
+    onMouseLeave,
+  };
 };
