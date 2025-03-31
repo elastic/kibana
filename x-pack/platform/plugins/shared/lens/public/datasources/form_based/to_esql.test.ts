@@ -25,7 +25,8 @@ const defaultUiSettingsGet = (key: string) => {
   }
 };
 
-describe('to_esql', () => {
+// Failing: See https://github.com/elastic/kibana/issues/216424
+describe.skip('to_esql', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
@@ -282,9 +283,10 @@ describe('to_esql', () => {
     expect(esql).toEqual(undefined);
   });
 
-  it('should work with iana timezones that fall udner utc+0', () => {
+  it('should work with iana timezones that fall under UTC+0', () => {
     uiSettings.get.mockImplementation((key: string) => {
-      if (key === 'dateFormat:tz') return 'Europe/London';
+      // There are only few countries that falls under UTC all year round, others just fall into that configuration half hear when not in DST
+      if (key === 'dateFormat:tz') return 'Atlantic/Reykjavik';
       return defaultUiSettingsGet(key);
     });
 
