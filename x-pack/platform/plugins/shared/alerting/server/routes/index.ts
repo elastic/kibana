@@ -66,6 +66,7 @@ import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_ge
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
+import { alertDeletionPreviewRoute } from './alert_deletion/apis/preview/get_alert_deletion_preview_route';
 
 // backfill API
 import { scheduleBackfillRoute } from './backfill/apis/schedule/schedule_backfill_route';
@@ -138,6 +139,7 @@ export function defineRoutes(opts: RouteOptions) {
   bulkUntrackAlertsByQueryRoute(router, licenseState);
   muteAlertRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
+  alertDeletionPreviewRoute(router, licenseState);
 
   // Maintenance Window APIs
   createMaintenanceWindowRoute(router, licenseState);
