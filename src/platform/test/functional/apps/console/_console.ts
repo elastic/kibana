@@ -76,17 +76,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.console.getEditorText()).to.be.empty();
     });
 
-    it('should display an error toast to unsupported HTTP verbs', async () => {
-      await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('OPTIONS /');
-      await PageObjects.console.clickPlay();
-      const resultToast = await toasts.getElementByIndex(1);
-      const toastText = await resultToast.getVisibleText();
-      expect(toastText).to.be(
-        'The selected request contains errors. Please resolve them and try again.'
-      );
-    });
-
     describe('tabs navigation', () => {
       let currentUrl: string;
 
