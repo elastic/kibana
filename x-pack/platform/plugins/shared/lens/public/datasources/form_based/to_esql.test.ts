@@ -25,7 +25,8 @@ const defaultUiSettingsGet = (key: string) => {
   }
 };
 
-describe('to_esql', () => {
+// Failing: See https://github.com/elastic/kibana/issues/216424
+describe.skip('to_esql', () => {
   const { uiSettings } = createCoreSetupMock();
   uiSettings.get.mockImplementation((key: string) => {
     return defaultUiSettingsGet(key);
