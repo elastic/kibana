@@ -8,6 +8,7 @@
 import { createSelector } from 'reselect';
 
 import { SampleDocument } from '@kbn/streams-schema';
+import { isPlainObject, uniq } from 'lodash';
 import { SimulationContext } from './types';
 
 /**
@@ -16,34 +17,54 @@ import { SimulationContext } from './types';
 export const selectUnsupportedDottedFields = createSelector(
   [(context: SimulationContext) => context.samples],
   (samples) => {
-    const properties = samples.flatMap(getFlattenedDottedProperties);
+    const properties = samples.flatMap(getDottedFieldPrefixes);
 
-    return new Set(properties);
+    return uniq(properties);
   }
 );
 
+const isPlainObj = isPlainObject as (value: unknown) => value is Record<string, unknown>;
+
 /**
- * Returns a list of all dotted properties in the given object.
+ * Returns a list of all dotted properties prefixes in the given object.
  */
-function getFlattenedDottedProperties(obj: SampleDocument): string[] {
+function getDottedFieldPrefixes(obj: SampleDocument): string[] {
   const result: string[] = [];
 
-  function traverse(currentObj: SampleDocument, path: string[], hasDot: boolean) {
+  function traverse(currentObj: SampleDocument, path: string[]): boolean {
+    let foundDot = false;
+
     for (const key in currentObj) {
       if (Object.hasOwn(currentObj, key)) {
-        const newPath = [...path, key];
-        const currentHasDot = hasDot || key.includes('.');
         const value = currentObj[key];
+        const newPath = [...path, key];
 
-        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          traverse(value, newPath, currentHasDot);
-        } else if (currentHasDot) {
-          result.push(newPath.join('.'));
+        // Check if current key contains a dot
+        if (key.includes('.')) {
+          const newKey = newPath.join('.');
+          // For objects with dotted keys, add trailing dot
+          if (isPlainObj(value)) {
+            result.push(newKey.concat('.'));
+          } else {
+            result.push(newKey);
+          }
+          foundDot = true;
+          continue; // Skip further traversal for this key
+        }
+
+        // If it's an object, traverse deeper
+        if (isPlainObj(value) && traverse(value, newPath)) {
+          // If traversal found a dot, don't continue with siblings
+          foundDot = true;
+          continue;
         }
       }
     }
+
+    return foundDot;
   }
 
-  traverse(obj, [], false);
+  traverse(obj, []);
+
   return result;
 }

@@ -34,7 +34,9 @@ export const ProcessorFieldSelector = () => {
   const { ref, value, ...inputProps } = field;
   const { invalid, error } = fieldState;
 
-  const isUnsupported = unsupportedFields.has(value);
+  const isUnsupported = unsupportedFields.some((unsupportedField) =>
+    value.startsWith(unsupportedField)
+  );
 
   return (
     <>
