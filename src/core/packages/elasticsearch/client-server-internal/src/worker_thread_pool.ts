@@ -7,13 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@kbn/core-elasticsearch-client-server-internal';
-/**
- * Client used to query the elasticsearch cluster.
- *
- * @public
- */
-export type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
->;
+import Piscina from 'piscina';
+import path from 'path';
+
+class ThreadPool {
+  private static instance: Piscina;
+
+  private constructor() {}
+
+  public static getInstance(): Piscina {
+    if (!ThreadPool.instance) {
+      ThreadPool.instance = new Piscina({
+        filename: path.join(__dirname, './worker.js'),
+        // TODO: control the thread pool
+      });
+    }
+    return ThreadPool.instance;
+  }
+}
+
+export const pool = ThreadPool.getInstance();
