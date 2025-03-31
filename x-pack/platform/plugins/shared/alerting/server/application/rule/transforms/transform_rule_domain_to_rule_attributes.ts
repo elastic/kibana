@@ -15,7 +15,6 @@ interface TransformRuleToEsParams {
   meta?: RawRule['meta'];
 }
 
-// TODO dashboards with refs
 export const transformRuleDomainToRuleAttributes = ({
   actionsWithRefs,
   artifactsWithRefs,

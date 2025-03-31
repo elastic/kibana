@@ -271,7 +271,6 @@ export async function createRule<Params extends RuleParams = never>(
   }
 
   // Convert domain rule to rule (Remove certain properties)
-  // As I understand I need to remove artifacts, need to confirm
   const rule = transformRuleDomainToRule<Params>(ruleDomain, { isPublic: true });
 
   // TODO (http-versioning): Remove this cast, this enables us to move forward

@@ -54,7 +54,7 @@ export const transformRuleDomainToRule = <Params extends RuleParams = never>(
     alertDelay: ruleDomain.alertDelay,
     legacyId: ruleDomain.legacyId,
     flapping: ruleDomain.flapping,
-    artifacts: ruleDomain.artifacts, // shall I return the artifacts here? When I added this here, I got artifacts in the rule creation response (in the POST response) but not in the GET rule response
+    artifacts: ruleDomain.artifacts,
   };
 
   if (isPublic) {
