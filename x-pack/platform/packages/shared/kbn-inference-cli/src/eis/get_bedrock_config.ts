@@ -45,7 +45,7 @@ async function getBedrockCreditsFromVault() {
   });
 
   const secretPath = process.env.VAULT_SECRET_PATH || 'kibana-eis-bedrock-config';
-  const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
+  const vaultAddress = process.env.VAULT_ADDR || 'https://vault-ci-dev.elastic.dev';
 
   const output = await execa
     .command(`vault kv get -format json ${secretPath}`, {
