@@ -98,16 +98,16 @@ export const conversationUpdatedEvent = ({
  * Creates a chunk event to represent partial content from an LLM response.
  */
 export const chunkEvent = ({
-  content_chunk,
-  message_id,
+  contentChunk,
+  messageId,
 }: {
-  content_chunk: string;
-  message_id: string;
+  contentChunk: string;
+  messageId: string;
 }): ChunkEvent => {
   return {
     type: 'message_chunk',
-    content_chunk,
-    message_id,
+    content_chunk: contentChunk,
+    message_id: messageId,
   };
 };
 

@@ -34,8 +34,8 @@ describe('chat_events', () => {
       expect(
         isMessageEvent(
           chunkEvent({
-            content_chunk: 'Hello',
-            message_id: 'msg-1',
+            contentChunk: 'Hello',
+            messageId: 'msg-1',
           })
         )
       ).toBe(false);
@@ -47,8 +47,8 @@ describe('chat_events', () => {
       expect(
         isChunkEvent(
           chunkEvent({
-            content_chunk: 'Hello',
-            message_id: 'msg-1',
+            contentChunk: 'Hello',
+            messageId: 'msg-1',
           })
         )
       ).toBe(true);
@@ -169,8 +169,8 @@ describe('chat_events', () => {
     it('should create a chunk event', () => {
       expect(
         chunkEvent({
-          content_chunk: 'partial response',
-          message_id: 'msg-1',
+          contentChunk: 'partial response',
+          messageId: 'msg-1',
         })
       ).toEqual({
         type: 'message_chunk',
