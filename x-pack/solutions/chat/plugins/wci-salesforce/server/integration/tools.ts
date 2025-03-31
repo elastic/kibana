@@ -13,6 +13,7 @@ interface CaseRetrievalParams {
   id?: string[];
   size?: number;
   sortField?: string;
+  sortOrder?: string;
   ownerEmail?: string[];
   priority?: string[];
   closed?: boolean;
@@ -40,16 +41,15 @@ export async function retrieveCases(
   params: CaseRetrievalParams = {}
 ): Promise<Array<{ type: 'text'; text: string }>> {
   const size = params.size || 10;
-  const sortOrder = 'asc'
-  const sort = params.sortField ? [{ [params.sortField as string]: { order: sortOrder as SortOrder } }] : [];
+  const sort = params.sortField ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }] : [];
 
   try {
     const query = buildQuery(params);
 
     const searchRequest: SearchRequest = {
       index: indexName,
-      query,
       sort,
+      query,
       size,
     };
 

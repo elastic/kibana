@@ -78,7 +78,8 @@ export async function createMcpServer({
           'Salesforce internal IDs of the support cases (use only when specifically requested)'
         ),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
-      sortField: z.string().optional().describe(`Field to sort results by. Could be any of these ${sortableFields}`),
+      sortField: z.string().optional().describe(`Field to sort results by. Can only be one of these ${sortableFields}`),
+      sortOrder: z.string().optional().describe(`Sorting order. Can only be 'desc' meaning sort in descending order or 'asc' meaning sort in ascending order`),
       ownerEmail: z
         .array(z.string())
         .optional()
@@ -125,6 +126,7 @@ export async function createMcpServer({
       id,
       size = 10,
       sortField,
+      sortOrder,
       priority,
       closed,
       caseNumber,
@@ -139,6 +141,7 @@ export async function createMcpServer({
         id,
         size,
         sortField,
+        sortOrder,
         priority,
         closed,
         caseNumber,
@@ -207,20 +210,28 @@ async function getSortableFields(
   indexName: string,
 ): Promise<Record<string, any>> {
   const sortableFieldTypes = ["keyword", "date", "boolean", "integer", "long", "double", "float"];
-  const sortableFields = {}
+  const sortableFields = []
   try {
     const response = await client.indices.getMapping({
       index: indexName
     });
 
-    // determin how to create a list of {field : type} for only sortable fields
     if (response) {
-      return response[indexName].mappings.properties as Record<string, any>
+      const properties = response[indexName].mappings.properties as Record<string, any>
+
+      for (const [fieldName, fieldConfig] of Object.entries(properties)) {
+
+        if (sortableFieldTypes.includes(fieldConfig.type)) {
+          const sortableField = {field: fieldName, type: fieldConfig.type}
+          sortableFields.push(sortableField)
+        }
+      }
+      return sortableFields
     } else {
       throw new Error('Could not find mappings in response');
     }
   } catch (error) {
-    console.error(`Error getting field mappings for index ${indexName}:`, error);
+    logger.error(`Error getting field mappings for index ${indexName}:`, error);
     throw error;
   }
 }
