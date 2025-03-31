@@ -412,7 +412,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
       compatibleWithSampling:
         getSamplingValue(state.layers[layerId]) === 1 ||
         (definition.getUnsupportedSettings?.()?.sampling ?? true),
-      documentation: definition.quickFunctionDocumentation
+      documentation: definition.quickFunctionDocumentation,
     };
   });
 
@@ -426,7 +426,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
     (selectedColumn?.operationType != null && isQuickFunction(selectedColumn?.operationType));
 
   const sideNavItems: EuiListGroupItemProps[] = operationsWithCompatibility.map(
-    ({ operationType, compatibleWithCurrentField, disabledStatus, compatibleWithSampling, documentation }) => {
+    ({
+      operationType,
+      compatibleWithCurrentField,
+      disabledStatus,
+      compatibleWithSampling,
+      documentation,
+    }) => {
       const isActive = Boolean(
         incompleteOperation === operationType ||
           (!incompleteOperation && selectedColumn && selectedColumn.operationType === operationType)
