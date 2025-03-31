@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { useHistory } from 'react-router-dom';
@@ -28,6 +28,7 @@ export function useCustomCards(
       share,
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+  const { colorMode } = useEuiTheme();
 
   const getUrlForApp = application?.getUrlForApp;
 
@@ -89,7 +90,11 @@ export function useCustomCards(
       ),
       extraLabelsBadges: [
         <ExtraLabelBadgeWrapper>
-          <LogoIcon logo="apple" size="m" />
+          {colorMode === 'DARK' ? (
+            <LogoIcon logo="apple_white" size="m" />
+          ) : (
+            <LogoIcon logo="apple_black" size="m" />
+          )}
         </ExtraLabelBadgeWrapper>,
         <ExtraLabelBadgeWrapper>
           <LogoIcon logo="linux" size="m" />
@@ -126,7 +131,11 @@ export function useCustomCards(
       ),
       extraLabelsBadges: [
         <ExtraLabelBadgeWrapper>
-          <LogoIcon logo="apple" size="m" />
+          {colorMode === 'DARK' ? (
+            <LogoIcon logo="apple_white" size="m" />
+          ) : (
+            <LogoIcon logo="apple_black" size="m" />
+          )}
         </ExtraLabelBadgeWrapper>,
         <ExtraLabelBadgeWrapper>
           <LogoIcon logo="linux" size="m" />

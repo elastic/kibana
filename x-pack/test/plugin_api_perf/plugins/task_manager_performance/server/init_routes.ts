@@ -29,6 +29,12 @@ export function initRoutes(
   router.post(
     {
       path: '/api/perf_tasks',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           tasksToSpawn: schema.number(),
