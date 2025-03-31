@@ -924,7 +924,7 @@ class AgentPolicyService {
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
-        skipValidation: options?.skipValidation ?? false,
+        skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
       });

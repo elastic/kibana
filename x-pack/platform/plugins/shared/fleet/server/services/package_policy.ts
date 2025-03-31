@@ -454,7 +454,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       for (const policyId of enrichedPackagePolicy.policy_ids) {
         await agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
-          skipValidation: true, // new package policy output already validated at this point
         });
       }
     }
@@ -1139,7 +1138,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         return agentPolicyService.bumpRevision(soClient, esClient, policyId, {
           user: options?.user,
           removeProtection,
-          skipValidation: true,
         });
       },
       { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
