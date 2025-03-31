@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { createFailError } from '@kbn/dev-cli-errors';
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 
@@ -36,9 +37,10 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const files = patterns.flatMap((pattern) => fastGlob.sync(pattern, { onlyFiles: true }));
 
   const typeMappings: Record<string, string> = {
-    'x-pack/solutions/security': 'security',
-    'x-pack/solutions/search': 'search',
-    'x-pack/solutions/observability': 'observability',
+    ...KIBANA_SOLUTIONS.reduce<Record<string, string>>((agg, solution) => {
+      agg[`x-pack/solutions/${solution}`] = solution;
+      return agg;
+    }, {}),
     'x-pack/platform/plugins': 'platform',
     'src/platform/plugins': 'platform',
   };
@@ -46,7 +48,7 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
   const matchPluginPath = (filePath: string): { pluginPath: string; pluginName: string } | null => {
     const regexes = [
       /(x-pack\/platform\/plugins\/(?:private|shared|[^\/]+)\/([^\/]+))\/ui_tests\//,
-      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//,
+      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//, // covers all Kibana solutions
       /(src\/platform\/plugins\/(?:private|shared)?\/?([^\/]+))\/ui_tests\//,
     ];
 
@@ -111,13 +113,13 @@ export const validateWithScoutCiConfig = (
   const allRegisteredPlugins = new Set([...enabledPlugins, ...disabledPlugins]);
 
   const unregisteredPlugins: string[] = [];
-  const filteredPlugins = new Map<string, PluginScoutConfig>();
+  const runnablePlugins = new Map<string, PluginScoutConfig>();
 
   for (const [pluginName, config] of pluginsWithConfigs.entries()) {
     if (!allRegisteredPlugins.has(pluginName)) {
       unregisteredPlugins.push(pluginName);
     } else if (enabledPlugins.has(pluginName)) {
-      filteredPlugins.set(pluginName, config);
+      runnablePlugins.set(pluginName, config);
     }
   }
 
@@ -143,5 +145,5 @@ export const validateWithScoutCiConfig = (
     );
   }
 
-  return filteredPlugins;
+  return runnablePlugins;
 };

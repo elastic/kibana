@@ -10,6 +10,8 @@ xpack.fleet.internal.retrySetupOnBoot: true
 xpack.fleet.internal.useMeteringApi: true
 xpack.searchSynonyms.enabled: false
 
+xpack.searchQueryRules.enabled: false
+
 ## Fine-tune the feature privileges.
 xpack.features.overrides:
   dashboard:

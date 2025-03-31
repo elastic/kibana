@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { GridLayoutStateManager } from '../../types';
 import { UserInteractionEvent } from '../types';
 import { isMouseEvent } from './mouse';
 import { isTouchEvent } from './touch';
@@ -20,3 +21,10 @@ export function getPointerPosition(e: UserInteractionEvent) {
   }
   return isTouchEvent(e) ? e.touches[0] : e;
 }
+
+export const isLayoutInteractive = (gridLayoutStateManager: GridLayoutStateManager) => {
+  return (
+    gridLayoutStateManager.expandedPanelId$.value === undefined &&
+    gridLayoutStateManager.accessMode$.getValue() === 'EDIT'
+  );
+};
