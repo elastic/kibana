@@ -46,7 +46,6 @@ import type {
   WrappedSignalHit,
   RuleRangeTuple,
   BaseSignalHit,
-  SignalSourceHit,
   SimpleHit,
   WrappedEventHit,
   SecuritySharedParams,

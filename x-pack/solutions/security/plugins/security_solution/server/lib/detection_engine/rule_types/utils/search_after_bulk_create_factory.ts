@@ -82,7 +82,7 @@ export const searchAfterAndBulkCreateFactory = async ({
     ruleExecutionLogger,
     listClient,
   } = sharedParams;
-  // eslint-disable-next-line complexity
+
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
     let searchingIteration = 0;
