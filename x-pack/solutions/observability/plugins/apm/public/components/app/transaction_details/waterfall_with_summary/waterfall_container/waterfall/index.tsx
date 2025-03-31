@@ -134,7 +134,17 @@ export function Waterfall({
             z-index: ${euiTheme.levels.content};
           `}
           aria-label={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
-            defaultMessage: `Click to ${isAccordionOpen ? 'fold' : 'unfold'} the waterfall`,
+            defaultMessage: `Click to ${
+              isAccordionOpen ? '{accordionOpen}' : '{accordionClosed}'
+            } the waterfall`,
+            values: {
+              accordionOpen: i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.fold', {
+                defaultMessage: 'fold',
+              }),
+              accordionClosed: i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel.unfold', {
+                defaultMessage: 'unfold',
+              }),
+            },
           })}
           iconType={isAccordionOpen ? 'fold' : 'unfold'}
           onClick={() => {
