@@ -196,7 +196,7 @@ export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
 
 // OpenTelemetry semconv fields for HTTP server https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-server-semantic-conventions
-export const URL_PATH = '.url.path';
+export const URL_PATH = 'url.path';
 export const URL_SCHEME = 'url.scheme';
 export const SERVER_ADDRESS = 'server.address';
 export const SERVER_PORT = 'server.port';

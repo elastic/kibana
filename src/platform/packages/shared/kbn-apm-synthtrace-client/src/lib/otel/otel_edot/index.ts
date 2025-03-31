@@ -168,7 +168,7 @@ class OtelEdot extends Serializable<OtelEdotDocument> {
         'transaction.root': false,
         'transaction.sampled': true,
         'transaction.type': 'request',
-        'url.path': '/',
+        'url.path': '/some/path',
         'url.scheme': 'https',
       },
       data_stream: {
