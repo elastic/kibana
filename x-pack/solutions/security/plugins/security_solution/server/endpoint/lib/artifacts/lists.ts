@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import path from 'path';
 import { createHash } from 'crypto';
 import type {
   Entry,
@@ -317,42 +316,6 @@ function translateItem(
     type: item.type,
     entries,
   };
-}
-
-function appendOptimizedEntryForEndpoint({
-  entry,
-  os,
-  wildcardProcessEntry,
-}: {
-  entry: {
-    field: string;
-    operator: 'excluded' | 'included';
-    type: 'wildcard';
-    value: string;
-  };
-  os: ExceptionListItemSchema['os_types'][number];
-  wildcardProcessEntry: TranslatedEntryMatchWildcard;
-}): TranslatedPerformantEntries {
-  const entries: TranslatedPerformantEntries = [
-    wildcardProcessEntry,
-    {
-      field:
-        entry.field === 'file.path.text'
-          ? normalizeFieldName('file.name')
-          : normalizeFieldName('process.name'),
-      operator: entry.operator,
-      type: (os === 'linux' ? 'exact_cased' : 'exact_caseless') as Extract<
-        TranslatedEntryMatcher,
-        'exact_caseless' | 'exact_cased'
-      >,
-      value: os === 'windows' ? path.win32.basename(entry.value) : path.posix.basename(entry.value),
-    },
-  ].reduce<TranslatedPerformantEntries>((p, c) => {
-    p.push(c);
-    return p;
-  }, []);
-
-  return entries;
 }
 
 function translateEntry(
