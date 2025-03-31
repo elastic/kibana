@@ -4609,6 +4609,21 @@
       },
       {
         "parentPluginId": "@kbn/alerting-types",
+        "id": "def-common.RuleTypeSolution",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeSolution",
+        "description": [],
+        "signature": [
+          "\"security\" | \"observability\" | \"stack\""
+        ],
+        "path": "src/platform/packages/shared/kbn-alerting-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerting-types",
         "id": "def-common.SanitizedRule",
         "type": "Type",
         "tags": [],
