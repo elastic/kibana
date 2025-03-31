@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -17,65 +16,134 @@ import {
   type ThunkAction,
   type ThunkDispatch,
 } from '@reduxjs/toolkit';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { TabItem } from '@kbn/unified-tabs';
+import type { DiscoverCustomizationContext } from '../../../../customizations';
 import type { DiscoverServices } from '../../../../build_services';
-import type { RuntimeStateManager } from './runtime_state';
-import type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+import { type RuntimeStateManager } from './runtime_state';
+import {
+  LoadingStatus,
+  type DiscoverInternalState,
+  type InternalStateDataRequestParams,
+  type TabState,
+} from './types';
+import { loadDataViewList, setTabs } from './actions';
+import { selectAllTabs, selectCurrentTab } from './selectors';
 
-const initialState: DiscoverInternalState = {
+const DEFAULT_TAB_LABEL = i18n.translate('discover.defaultTabLabel', {
+  defaultMessage: 'Untitled session',
+});
+const DEFAULT_TAB_REGEX = new RegExp(`^${DEFAULT_TAB_LABEL}( \\d+)?$`);
+
+export const defaultTabState: Omit<TabState, keyof TabItem> = {
   dataViewId: undefined,
   isDataViewLoading: false,
-  defaultProfileAdHocDataViewIds: [],
-  savedDataViews: [],
-  expandedDoc: undefined,
   dataRequestParams: {},
   overriddenVisContextAfterInvalidation: undefined,
-  isESQLToDataViewTransitionModalVisible: false,
   resetDefaultProfileState: {
     resetId: '',
     columns: false,
     rowHeight: false,
     breakdownField: false,
   },
+  documentsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: [],
+  },
+  totalHitsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: 0,
+  },
+  chartRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: {},
+  },
+};
+
+const initialState: DiscoverInternalState = {
+  initializationState: { hasESData: false, hasUserDataView: false },
+  defaultProfileAdHocDataViewIds: [],
+  savedDataViews: [],
+  expandedDoc: undefined,
+  isESQLToDataViewTransitionModalVisible: false,
+  tabs: { byId: {}, allIds: [], currentId: '' },
+};
+
+export const createTabItem = (allTabs: TabState[]): TabItem => {
+  const id = uuidv4();
+  const untitledTabCount = allTabs.filter((tab) => DEFAULT_TAB_REGEX.test(tab.label.trim())).length;
+  const label =
+    untitledTabCount > 0 ? `${DEFAULT_TAB_LABEL} ${untitledTabCount}` : DEFAULT_TAB_LABEL;
+
+  return { id, label };
+};
+
+const withCurrentTab = (state: DiscoverInternalState, fn: (tab: TabState) => void) => {
+  const currentTab = selectCurrentTab(state);
+
+  if (currentTab) {
+    fn(currentTab);
+  }
 };
 
 export const internalStateSlice = createSlice({
   name: 'internalState',
   initialState,
   reducers: {
-    setDataViewId: (state, action: PayloadAction<string | undefined>) => {
-      if (action.payload !== state.dataViewId) {
-        state.expandedDoc = undefined;
-      }
-
-      state.dataViewId = action.payload;
+    setInitializationState: (
+      state,
+      action: PayloadAction<DiscoverInternalState['initializationState']>
+    ) => {
+      state.initializationState = action.payload;
     },
 
-    setIsDataViewLoading: (state, action: PayloadAction<boolean>) => {
-      state.isDataViewLoading = action.payload;
+    setTabs: (state, action: PayloadAction<{ allTabs: TabState[]; selectedTabId: string }>) => {
+      state.tabs.byId = action.payload.allTabs.reduce<Record<string, TabState>>(
+        (acc, tab) => ({
+          ...acc,
+          [tab.id]: tab,
+        }),
+        {}
+      );
+      state.tabs.allIds = action.payload.allTabs.map((tab) => tab.id);
+      state.tabs.currentId = action.payload.selectedTabId;
     },
+
+    setDataViewId: (state, action: PayloadAction<string | undefined>) =>
+      withCurrentTab(state, (tab) => {
+        if (action.payload !== tab.dataViewId) {
+          state.expandedDoc = undefined;
+        }
+
+        tab.dataViewId = action.payload;
+      }),
+
+    setIsDataViewLoading: (state, action: PayloadAction<boolean>) =>
+      withCurrentTab(state, (tab) => {
+        tab.isDataViewLoading = action.payload;
+      }),
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {
       state.defaultProfileAdHocDataViewIds = action.payload;
-    },
-
-    setSavedDataViews: (state, action: PayloadAction<DataViewListItem[]>) => {
-      state.savedDataViews = action.payload;
     },
 
     setExpandedDoc: (state, action: PayloadAction<DataTableRecord | undefined>) => {
       state.expandedDoc = action.payload;
     },
 
-    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) => {
-      state.dataRequestParams = action.payload;
-    },
+    setDataRequestParams: (state, action: PayloadAction<InternalStateDataRequestParams>) =>
+      withCurrentTab(state, (tab) => {
+        tab.dataRequestParams = action.payload;
+      }),
 
     setOverriddenVisContextAfterInvalidation: (
       state,
-      action: PayloadAction<DiscoverInternalState['overriddenVisContextAfterInvalidation']>
-    ) => {
-      state.overriddenVisContextAfterInvalidation = action.payload;
-    },
+      action: PayloadAction<TabState['overriddenVisContextAfterInvalidation']>
+    ) =>
+      withCurrentTab(state, (tab) => {
+        tab.overriddenVisContextAfterInvalidation = action.payload;
+      }),
 
     setIsESQLToDataViewTransitionModalVisible: (state, action: PayloadAction<boolean>) => {
       state.isESQLToDataViewTransitionModalVisible = action.payload;
@@ -83,39 +151,57 @@ export const internalStateSlice = createSlice({
 
     setResetDefaultProfileState: {
       prepare: (
-        resetDefaultProfileState: Omit<DiscoverInternalState['resetDefaultProfileState'], 'resetId'>
+        resetDefaultProfileState: Omit<TabState['resetDefaultProfileState'], 'resetId'>
       ) => ({
         payload: {
           ...resetDefaultProfileState,
           resetId: uuidv4(),
         },
       }),
-      reducer: (
-        state,
-        action: PayloadAction<DiscoverInternalState['resetDefaultProfileState']>
-      ) => {
-        state.resetDefaultProfileState = action.payload;
-      },
+      reducer: (state, action: PayloadAction<TabState['resetDefaultProfileState']>) =>
+        withCurrentTab(state, (tab) => {
+          tab.resetDefaultProfileState = action.payload;
+        }),
     },
 
     resetOnSavedSearchChange: (state) => {
-      state.overriddenVisContextAfterInvalidation = undefined;
+      withCurrentTab(state, (tab) => {
+        tab.overriddenVisContextAfterInvalidation = undefined;
+      });
+
       state.expandedDoc = undefined;
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(loadDataViewList.fulfilled, (state, action) => {
+      state.savedDataViews = action.payload;
+    });
+  },
 });
 
-interface InternalStateThunkDependencies {
+export interface InternalStateThunkDependencies {
   services: DiscoverServices;
+  customizationContext: DiscoverCustomizationContext;
   runtimeStateManager: RuntimeStateManager;
+  urlStateStorage: IKbnUrlStateStorage;
 }
 
-export const createInternalStateStore = (options: InternalStateThunkDependencies) =>
-  configureStore({
+export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
+  const store = configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware({ thunk: { extraArgument: options } }),
   });
+
+  // TEMPORARY: Create initial default tab
+  const defaultTab: TabState = {
+    ...defaultTabState,
+    ...createTabItem(selectAllTabs(store.getState())),
+  };
+  store.dispatch(setTabs({ allTabs: [defaultTab], selectedTabId: defaultTab.id }));
+
+  return store;
+};
 
 export type InternalStateStore = ReturnType<typeof createInternalStateStore>;
 
