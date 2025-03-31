@@ -30,6 +30,11 @@ export {
   generateNewPanelIds,
 } from './lib/dashboard_panel_converters';
 
+export {
+  convertSectionArrayToSectionMap,
+  convertSectionMapToSectionArray,
+} from './lib/dashboard_section_converters';
+
 export const UI_SETTINGS = {
   ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
 };

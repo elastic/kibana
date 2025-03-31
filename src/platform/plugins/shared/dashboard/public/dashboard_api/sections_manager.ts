@@ -28,18 +28,19 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
     api: {
       sections$,
       addNewSection: () => {
-        const oldSections = sections$.getValue() ?? [];
-        setSections([
+        const oldSections = sections$.getValue() ?? {};
+        const newId = uuidv4();
+        setSections({
           ...oldSections,
-          {
+          [newId]: {
             id: uuidv4(),
-            order: oldSections.length + 1,
+            order: Object.keys(oldSections).length + 1,
             title: i18n.translate('dashboard.defaultSectionTitle', {
               defaultMessage: 'New collapsible section',
             }),
             collapsed: false,
           },
-        ]);
+        });
 
         // scroll to bottom after row is added
         scrollToBottom$.next();

@@ -60,9 +60,7 @@ export const DashboardGrid = ({
         panels: {},
       },
     };
-
-    (sections ?? []).forEach((section) => {
-      const sectionId = section.id ?? uuidv4();
+    Object.entries(sections ?? {}).forEach(([sectionId, section]) => {
       newLayout[sectionId] = {
         id: sectionId,
         title: section.title,
@@ -98,17 +96,17 @@ export const DashboardGrid = ({
       const currentPanels = dashboardApi.panels$.getValue();
       const currentSections = dashboardApi.sections$.getValue();
 
-      const updatedSections: DashboardSectionMap = [];
+      const updatedSections: DashboardSectionMap = {};
       const updatedPanels: { [key: string]: DashboardPanelState } = {};
       Object.values(newLayout).forEach((section) => {
         const sectionIndex = section.id;
         if (section.order !== 0) {
-          updatedSections.push({
+          updatedSections[sectionIndex] = {
             title: section.title,
             collapsed: section.isCollapsed,
             order: section.order,
             id: sectionIndex,
-          });
+          };
         }
 
         Object.values(section.panels).forEach((panelLayout) => {

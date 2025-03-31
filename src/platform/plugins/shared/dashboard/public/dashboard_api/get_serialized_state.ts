@@ -12,7 +12,12 @@ import moment, { Moment } from 'moment';
 import { RefreshInterval } from '@kbn/data-plugin/public';
 
 import type { Reference } from '@kbn/content-management-utils';
-import { convertPanelMapToPanelsArray, extractReferences, generateNewPanelIds } from '../../common';
+import {
+  convertPanelMapToPanelsArray,
+  convertSectionMapToSectionArray,
+  extractReferences,
+  generateNewPanelIds,
+} from '../../common';
 import type { DashboardAttributes } from '../../server';
 
 import { convertDashboardVersionToNumber } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
@@ -98,7 +103,7 @@ export const getSerializedState = ({
     hidePanelTitles,
   };
   const savedPanels = convertPanelMapToPanelsArray(panels, true);
-
+  const savedSections = convertSectionMapToSectionArray(sections);
   /**
    * Parse global time filter settings
    */
@@ -123,7 +128,7 @@ export const getSerializedState = ({
     timeRestore,
     options,
     panels: savedPanels,
-    sections,
+    ...(savedSections && { sections: savedSections }),
     timeFrom,
     title,
     timeTo,
