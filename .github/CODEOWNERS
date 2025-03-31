@@ -862,7 +862,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story @elastic/kib
 x-pack/platform/plugins/private/cloud_integrations/cloud_links @elastic/kibana-core
 x-pack/platform/plugins/private/cross_cluster_replication @elastic/kibana-management
 x-pack/platform/plugins/private/custom_branding @elastic/appex-sharedux
-x-pack/platform/plugins/private/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+x-pack/platform/plugins/private/data_usage @elastic/kibana-management
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
 x-pack/platform/plugins/private/discover_enhanced @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/drilldowns/url_drilldown @elastic/appex-sharedux
@@ -1290,9 +1290,9 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### Observability Plugins
 
 # Observability AI Assistant
-/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/obs-ai-assistant @elastic/security-solution
+/x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/kibana-management
+/x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/kibana-management
+/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
 /x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
