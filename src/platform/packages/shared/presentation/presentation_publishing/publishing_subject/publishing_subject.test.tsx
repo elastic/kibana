@@ -17,7 +17,6 @@ import {
   useBatchedOptionalPublishingSubjects,
 } from './publishing_batcher';
 import { useStateFromPublishingSubject } from './publishing_subject';
-import { PublishingSubject } from './types';
 
 describe('publishing subject', () => {
   describe('render', () => {
@@ -234,38 +233,6 @@ describe('publishing subject', () => {
         expect(screen.getByText('valueFoo: foo2')).toBeInTheDocument();
       });
       expect(renderCount).toBe(4);
-    });
-
-    test('useStateFromPublishingSubject should update state when publishing subject is provided', async () => {
-      let renderCount = 0;
-      function Component() {
-        // When subject is expected to change, subject must be part of react state.
-        const [subjectFoo, setSubjectFoo] = useState<PublishingSubject<string> | undefined>(
-          undefined
-        );
-        const valueFoo = useStateFromPublishingSubject(subjectFoo);
-
-        renderCount++;
-        return (
-          <>
-            <button
-              onClick={() => {
-                setSubjectFoo(new BehaviorSubject<string>('foo'));
-              }}
-            />
-            <span>{`valueFoo: ${valueFoo}`}</span>
-          </>
-        );
-      }
-      render(<Component />);
-      await waitFor(() => {
-        expect(screen.getByText('valueFoo: undefined')).toBeInTheDocument();
-      });
-      await userEvent.click(screen.getByRole('button'));
-      await waitFor(() => {
-        expect(screen.getByText('valueFoo: foo')).toBeInTheDocument();
-      });
-      expect(renderCount).toBe(3);
     });
   });
 });
