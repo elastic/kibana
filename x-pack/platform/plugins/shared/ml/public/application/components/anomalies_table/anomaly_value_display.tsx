@@ -9,6 +9,7 @@ import React from 'react';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils/types';
 import type { FC } from 'react';
 import { EuiToolTip } from '@elastic/eui';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { getTimeValueInfo, isTimeFunction } from './anomaly_value_utils';
 import { formatValue } from '../../formatters/format_value';
 
@@ -16,7 +17,7 @@ interface AnomalyDateValueProps {
   value: number | number[];
   function: string;
   record?: MlAnomalyRecordDoc;
-  fieldFormat?: any;
+  fieldFormat?: FieldFormat;
 }
 
 export const AnomalyValueDisplay: FC<AnomalyDateValueProps> = ({

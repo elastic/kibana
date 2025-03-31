@@ -15,6 +15,7 @@
 import moment from 'moment';
 import type { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import type { AnomalyDateFunction } from '@kbn/ml-anomaly-utils/types';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 
@@ -29,7 +30,7 @@ const SIGFIGS_IF_ROUNDING = 3; // Number of sigfigs to use for values < 10
 export function formatValue(
   value: number[] | number,
   mlFunction: string,
-  fieldFormat?: any,
+  fieldFormat?: FieldFormat,
   record?: MlAnomalyRecordDoc
 ) {
   // actual and typical values in anomaly record results will be arrays.
@@ -59,7 +60,7 @@ export function formatValue(
 export function formatSingleValue(
   value: number,
   mlFunction?: string,
-  fieldFormat?: any,
+  fieldFormat?: FieldFormat,
   record?: MlAnomalyRecordDoc
 ) {
   if (value === undefined || value === null) {
@@ -77,11 +78,7 @@ export function formatSingleValue(
       const absValue = Math.abs(value);
       if (absValue >= 10000 || absValue === Math.floor(absValue)) {
         // Output 0 decimal places if whole numbers or >= 10000
-        if (fieldFormat !== undefined) {
-          return fieldFormat.convert(value, 'text');
-        } else {
-          return Number(value.toFixed(0));
-        }
+        return Number(value.toFixed(0));
       } else if (absValue >= 10) {
         // Output to 1 decimal place between 10 and 10000
         return Number(value.toFixed(1));
