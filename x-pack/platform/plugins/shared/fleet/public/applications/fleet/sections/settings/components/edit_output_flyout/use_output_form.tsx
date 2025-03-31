@@ -957,12 +957,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                   }
                 : null,
               ...(!sslKeyInput.value &&
-                sslKeySecretInput.value &&
-                logstashEnableSSLInput.value && {
+                sslKeySecretInput.value && {
                   secrets: {
-                    ssl: {
-                      key: sslKeySecretInput.value,
-                    },
+                    ssl: logstashEnableSSLInput.value
+                      ? {
+                          key: sslKeySecretInput.value,
+                        }
+                      : undefined,
                   },
                 }),
               proxy_id: proxyIdValue,
