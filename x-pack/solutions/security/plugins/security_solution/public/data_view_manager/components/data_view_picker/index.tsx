@@ -28,9 +28,9 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataViewSpec: dataView, status } = useDataViewSpec(props.scope);
+  const { dataViewSpec, status } = useDataViewSpec(props.scope);
 
-  const dataViewId = dataView?.id;
+  const dataViewId = dataViewSpec?.id;
 
   const createNewDataView = useCallback(() => {
     closeDataViewEditor.current = dataViewEditor.openEditor({
@@ -91,16 +91,16 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
       return { label: 'Loading' };
     }
 
-    if (dataView.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
+    if (dataViewSpec.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
       return {
         label: 'Default Security Data View',
       };
     }
 
     return {
-      label: dataView?.name || dataView?.id || 'Data view',
+      label: dataViewSpec?.name || dataViewSpec?.id || 'Data view',
     };
-  }, [dataView.id, dataView?.name, status]);
+  }, [dataViewSpec.id, dataViewSpec?.name, status]);
 
   const { adhocDataViews: adhocDataViewSpecs, dataViews } = useSelector(sharedStateSelector);
 
