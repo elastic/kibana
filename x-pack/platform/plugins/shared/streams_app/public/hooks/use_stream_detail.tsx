@@ -12,6 +12,7 @@ import {
   isWiredStreamGetResponse,
   isUnwiredStreamGetResponse,
 } from '@kbn/streams-schema';
+import { EuiFlexGroup, EuiLoadingSpinner } from '@elastic/eui';
 import { useStreamsAppFetch } from './use_streams_app_fetch';
 
 export interface StreamDetailContextProviderProps {
@@ -63,6 +64,15 @@ export function StreamDetailContextProvider({
     () => ({ definition, loading, refresh } as StreamDetailContextValue),
     [definition, loading, refresh]
   );
+
+  // Display loading spinner for first data-fetching only to have SWR-like behaviour
+  if (!definition && loading) {
+    return (
+      <EuiFlexGroup justifyContent="center" alignItems="center">
+        <EuiLoadingSpinner size="xxl" />
+      </EuiFlexGroup>
+    );
+  }
 
   if (!definition) {
     return null;
