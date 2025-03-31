@@ -238,3 +238,6 @@ console.ui.embeddedEnabled: false
 
 # Disable role management (custom roles)
 xpack.security.roleManagementEnabled: false
+
+## Search Connectors in stack management
+xpack.searchConnectors.enabled: true
