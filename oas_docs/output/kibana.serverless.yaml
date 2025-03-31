@@ -216,6 +216,11 @@ tags:
     x-displayName: System
     description: |
       Get information about the system status, resource usage, and installed plugins.
+  - externalDocs:
+      description: Task manager
+      url: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
+    name: task manager
+    x-displayName: Task manager
 paths:
   /api/actions/connector_types:
     get:
@@ -239,7 +244,6 @@ paths:
       summary: Get connector types
       tags:
         - connectors
-      x-beta: true
   /api/actions/connector/{id}:
     delete:
       description: 'WARNING: When you delete a connector, it cannot be recovered.'
@@ -264,7 +268,6 @@ paths:
       summary: Delete a connector
       tags:
         - connectors
-      x-beta: true
     get:
       operationId: get-actions-connector-id
       parameters:
@@ -320,7 +323,6 @@ paths:
       summary: Get connector information
       tags:
         - connectors
-      x-beta: true
     post:
       operationId: post-actions-connector-id
       parameters:
@@ -467,7 +469,6 @@ paths:
       summary: Create a connector
       tags:
         - connectors
-      x-beta: true
     put:
       operationId: put-actions-connector-id
       parameters:
@@ -595,7 +596,6 @@ paths:
       summary: Update a connector
       tags:
         - connectors
-      x-beta: true
   /api/actions/connector/{id}/_execute:
     post:
       description: You can use this API to test an action that involves interaction with Kibana services or integrations with third-party systems.
@@ -713,7 +713,6 @@ paths:
       summary: Run a connector
       tags:
         - connectors
-      x-beta: true
   /api/actions/connectors:
     get:
       operationId: get-actions-connectors
@@ -729,7 +728,6 @@ paths:
       summary: Get all connectors
       tags:
         - connectors
-      x-beta: true
   /api/alerting/rule/{id}:
     delete:
       operationId: delete-alerting-rule-id
@@ -759,7 +757,6 @@ paths:
       summary: Delete a rule
       tags:
         - alerting
-      x-beta: true
     get:
       operationId: get-alerting-rule-id
       parameters:
@@ -1426,7 +1423,6 @@ paths:
       summary: Get rule details
       tags:
         - alerting
-      x-beta: true
     post:
       operationId: post-alerting-rule-id
       parameters:
@@ -2776,7 +2772,6 @@ paths:
       summary: Create a rule
       tags:
         - alerting
-      x-beta: true
     put:
       operationId: put-alerting-rule-id
       parameters:
@@ -3765,7 +3760,6 @@ paths:
       summary: Update a rule
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{id}/_disable:
     post:
       operationId: post-alerting-rule-id-disable
@@ -3807,7 +3801,6 @@ paths:
       summary: Disable a rule
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{id}/_enable:
     post:
       operationId: post-alerting-rule-id-enable
@@ -3837,7 +3830,6 @@ paths:
       summary: Enable a rule
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{id}/_mute_all:
     post:
       operationId: post-alerting-rule-id-mute-all
@@ -3867,7 +3859,6 @@ paths:
       summary: Mute all alerts
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{id}/_unmute_all:
     post:
       operationId: post-alerting-rule-id-unmute-all
@@ -3897,7 +3888,6 @@ paths:
       summary: Unmute all alerts
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{id}/_update_api_key:
     post:
       operationId: post-alerting-rule-id-update-api-key
@@ -3929,7 +3919,6 @@ paths:
       summary: Update the API key for a rule
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{id}/snooze_schedule:
     post:
       description: When you snooze a rule, the rule checks continue to run but alerts will not generate actions. You can snooze for a specified period of time and schedule single or recurring downtimes.
@@ -4100,7 +4089,6 @@ paths:
       summary: Schedule a snooze for the rule
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_mute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-mute
@@ -4136,7 +4124,6 @@ paths:
       summary: Mute an alert
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute:
     post:
       operationId: post-alerting-rule-rule-id-alert-alert-id-unmute
@@ -4172,7 +4159,6 @@ paths:
       summary: Unmute an alert
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}:
     delete:
       operationId: delete-alerting-rule-ruleid-snooze-schedule-scheduleid
@@ -4208,7 +4194,6 @@ paths:
       summary: Delete a snooze schedule for a rule
       tags:
         - alerting
-      x-beta: true
   /api/alerting/rules/_find:
     get:
       operationId: get-alerting-rules-find
@@ -5160,7 +5145,6 @@ paths:
       summary: Get information about rules
       tags:
         - alerting
-      x-beta: true
   /api/apm/agent_keys:
     post:
       description: Create a new agent key for APM.
@@ -5208,7 +5192,6 @@ paths:
       summary: Create an APM agent key
       tags:
         - APM agent keys
-      x-beta: true
   /api/apm/fleet/apm_server_schema:
     post:
       operationId: saveApmServerSchema
@@ -5263,7 +5246,6 @@ paths:
       summary: Save APM server schema
       tags:
         - APM server schema
-      x-beta: true
   /api/apm/services/{serviceName}/annotation:
     post:
       description: Create a new annotation for a specific service.
@@ -5317,7 +5299,6 @@ paths:
       summary: Create a service annotation
       tags:
         - APM annotations
-      x-beta: true
   /api/apm/services/{serviceName}/annotation/search:
     get:
       description: Search for annotations related to a specific service.
@@ -5376,7 +5357,6 @@ paths:
       summary: Search for annotations
       tags:
         - APM annotations
-      x-beta: true
   /api/apm/settings/agent-configuration:
     delete:
       operationId: deleteAgentConfiguration
@@ -5423,7 +5403,6 @@ paths:
       summary: Delete agent configuration
       tags:
         - APM agent configuration
-      x-beta: true
     get:
       operationId: getAgentConfigurations
       parameters:
@@ -5456,7 +5435,6 @@ paths:
       summary: Get a list of agent configurations
       tags:
         - APM agent configuration
-      x-beta: true
     put:
       operationId: createUpdateAgentConfiguration
       parameters:
@@ -5508,7 +5486,6 @@ paths:
       summary: Create or update agent configuration
       tags:
         - APM agent configuration
-      x-beta: true
   /api/apm/settings/agent-configuration/agent_name:
     get:
       description: Retrieve `agentName` for a service.
@@ -5550,7 +5527,6 @@ paths:
       summary: Get agent name for service
       tags:
         - APM agent configuration
-      x-beta: true
   /api/apm/settings/agent-configuration/environments:
     get:
       operationId: getEnvironmentsForService
@@ -5589,7 +5565,6 @@ paths:
       summary: Get environments for service
       tags:
         - APM agent configuration
-      x-beta: true
   /api/apm/settings/agent-configuration/search:
     post:
       description: |
@@ -5632,7 +5607,6 @@ paths:
       summary: Lookup single agent configuration
       tags:
         - APM agent configuration
-      x-beta: true
   /api/apm/settings/agent-configuration/view:
     get:
       operationId: getSingleAgentConfiguration
@@ -5678,7 +5652,6 @@ paths:
       summary: Get single agent configuration
       tags:
         - APM agent configuration
-      x-beta: true
   /api/apm/sourcemaps:
     get:
       description: |
@@ -5740,7 +5713,6 @@ paths:
             -H 'Content-Type: application/json' \
             -H 'kbn-xsrf: true' \
             -H 'Authorization: ApiKey ${YOUR_API_KEY}'
-      x-beta: true
     post:
       description: |
         Upload a source map for a specific service and version. You must have `all` Kibana privileges for the APM and User Experience feature.
@@ -5809,7 +5781,6 @@ paths:
             -F 'service_version="1.0.0"' \
             -F 'bundle_filepath="/test/e2e/general-usecase/bundle.js"' \
             -F 'sourcemap="{\"version\":3,\"file\":\"static/js/main.chunk.js\",\"sources\":[\"fleet-source-map-client/src/index.css\",\"fleet-source-map-client/src/App.js\",\"webpack:///./src/index.css?bb0a\",\"fleet-source-map-client/src/index.js\",\"fleet-source-map-client/src/reportWebVitals.js\"],\"sourcesContent\":[\"content\"],\"mappings\":\"mapping\",\"sourceRoot\":\"\"}"' 
-      x-beta: true
   /api/apm/sourcemaps/{id}:
     delete:
       description: |
@@ -5872,7 +5843,6 @@ paths:
             -H 'Content-Type: application/json' \
             -H 'kbn-xsrf: true' \
             -H 'Authorization: ApiKey ${YOUR_API_KEY}'
-      x-beta: true
   /api/asset_criticality:
     delete:
       description: Delete the asset criticality record for a specific entity.
@@ -5921,7 +5891,6 @@ paths:
       summary: Delete an asset criticality record
       tags:
         - Security Entity Analytics API
-      x-beta: true
     get:
       description: Get the asset criticality record for a specific entity.
       operationId: GetAssetCriticalityRecord
@@ -5954,7 +5923,6 @@ paths:
       summary: Get an asset criticality record
       tags:
         - Security Entity Analytics API
-      x-beta: true
     post:
       description: |
         Create or update an asset criticality record for a specific entity.
@@ -5991,7 +5959,6 @@ paths:
       summary: Upsert an asset criticality record
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/asset_criticality/bulk:
     post:
       description: |
@@ -6058,7 +6025,6 @@ paths:
       summary: Bulk upsert asset criticality records
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/asset_criticality/list:
     get:
       description: List asset criticality records, paging, sorting and filtering as needed.
@@ -6160,7 +6126,6 @@ paths:
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/dashboards/dashboard:
     get:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -6203,6 +6168,11 @@ paths:
                               default: ''
                               description: A short description.
                               type: string
+                            tags:
+                              items:
+                                description: An array of tags applied to this dashboard
+                                type: string
+                              type: array
                             timeRestore:
                               default: false
                               description: Whether to restore time upon viewing this dashboard
@@ -6283,7 +6253,6 @@ paths:
       tags:
         - Dashboards
       x-state: Technical Preview
-      x-beta: true
   /api/dashboards/dashboard/{id}:
     delete:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
@@ -6307,7 +6276,6 @@ paths:
       tags:
         - Dashboards
       x-state: Technical Preview
-      x-beta: true
     get:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: get-dashboards-dashboard-id
@@ -6665,6 +6633,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -6771,7 +6744,6 @@ paths:
       tags:
         - Dashboards
       x-state: Technical Preview
-      x-beta: true
     post:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: post-dashboards-dashboard-id
@@ -7131,6 +7103,11 @@ paths:
                       required:
                         - pause
                         - value
+                    tags:
+                      items:
+                        description: An array of tags applied to this dashboard
+                        type: string
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -7519,6 +7496,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -7605,7 +7587,6 @@ paths:
       tags:
         - Dashboards
       x-state: Technical Preview
-      x-beta: true
     put:
       description: This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
       operationId: put-dashboards-dashboard-id
@@ -7965,6 +7946,11 @@ paths:
                       required:
                         - pause
                         - value
+                    tags:
+                      items:
+                        description: An array of tags applied to this dashboard
+                        type: string
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -8349,6 +8335,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -8435,7 +8426,6 @@ paths:
       tags:
         - Dashboards
       x-state: Technical Preview
-      x-beta: true
   /api/data_views:
     get:
       operationId: getAllDataViewsDefault
@@ -8476,7 +8466,6 @@ paths:
       summary: Get all data views
       tags:
         - data views
-      x-beta: true
   /api/data_views/data_view:
     post:
       operationId: createDataViewDefaultw
@@ -8507,7 +8496,6 @@ paths:
       summary: Create a data view
       tags:
         - data views
-      x-beta: true
   /api/data_views/data_view/{viewId}:
     delete:
       description: |
@@ -8528,7 +8516,6 @@ paths:
       summary: Delete a data view
       tags:
         - data views
-      x-beta: true
     get:
       operationId: getDataViewDefault
       parameters:
@@ -8552,7 +8539,6 @@ paths:
       summary: Get a data view
       tags:
         - data views
-      x-beta: true
     post:
       operationId: updateDataViewDefault
       parameters:
@@ -8583,7 +8569,6 @@ paths:
       summary: Update a data view
       tags:
         - data views
-      x-beta: true
   /api/data_views/data_view/{viewId}/fields:
     post:
       description: |
@@ -8626,7 +8611,6 @@ paths:
       summary: Update data view fields metadata
       tags:
         - data views
-      x-beta: true
   /api/data_views/data_view/{viewId}/runtime_field:
     post:
       operationId: createRuntimeFieldDefault
@@ -8664,7 +8648,6 @@ paths:
       summary: Create a runtime field
       tags:
         - data views
-      x-beta: true
     put:
       operationId: createUpdateRuntimeFieldDefault
       parameters:
@@ -8720,7 +8703,6 @@ paths:
       summary: Create or update a runtime field
       tags:
         - data views
-      x-beta: true
   /api/data_views/data_view/{viewId}/runtime_field/{fieldName}:
     delete:
       operationId: deleteRuntimeFieldDefault
@@ -8739,7 +8721,6 @@ paths:
       summary: Delete a runtime field from a data view
       tags:
         - data views
-      x-beta: true
     get:
       operationId: getRuntimeFieldDefault
       parameters:
@@ -8771,7 +8752,6 @@ paths:
       summary: Get a runtime field
       tags:
         - data views
-      x-beta: true
     post:
       operationId: updateRuntimeFieldDefault
       parameters:
@@ -8810,7 +8790,6 @@ paths:
       summary: Update a runtime field
       tags:
         - data views
-      x-beta: true
   /api/data_views/default:
     get:
       operationId: getDefaultDataViewDefault
@@ -8836,7 +8815,6 @@ paths:
       summary: Get the default data view
       tags:
         - data views
-      x-beta: true
     post:
       operationId: setDefaultDatailViewDefault
       parameters:
@@ -8881,7 +8859,6 @@ paths:
       summary: Set the default data view
       tags:
         - data views
-      x-beta: true
   /api/data_views/swap_references:
     post:
       description: |
@@ -8927,7 +8904,6 @@ paths:
       summary: Swap saved object references
       tags:
         - data views
-      x-beta: true
   /api/data_views/swap_references/_preview:
     post:
       description: |
@@ -8966,7 +8942,6 @@ paths:
       summary: Preview a saved object reference swap
       tags:
         - data views
-      x-beta: true
   /api/detection_engine/privileges:
     get:
       description: |
@@ -9041,7 +9016,6 @@ paths:
       summary: Returns user privileges for the Kibana space
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/rules:
     delete:
       description: Delete a detection rule using the `rule_id` or `id` field.
@@ -9069,7 +9043,6 @@ paths:
       summary: Delete a detection rule
       tags:
         - Security Detections API
-      x-beta: true
     get:
       description: Retrieve a detection rule using the `rule_id` or `id` field.
       operationId: ReadRule
@@ -9096,7 +9069,6 @@ paths:
       summary: Retrieve a detection rule
       tags:
         - Security Detections API
-      x-beta: true
     patch:
       description: Update specific fields of an existing detection rule using the `rule_id` or `id` field.
       operationId: PatchRule
@@ -9116,7 +9088,6 @@ paths:
       summary: Patch a detection rule
       tags:
         - Security Detections API
-      x-beta: true
     post:
       description: Create a new detection rule.
       operationId: CreateRule
@@ -9136,7 +9107,6 @@ paths:
       summary: Create a detection rule
       tags:
         - Security Detections API
-      x-beta: true
     put:
       description: |
         Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
@@ -9159,7 +9129,6 @@ paths:
       summary: Update a detection rule
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/rules/_bulk_action:
     post:
       description: Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
@@ -9195,7 +9164,6 @@ paths:
       summary: Apply a bulk action to detection rules
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/rules/_export:
     post:
       description: |
@@ -9252,7 +9220,6 @@ paths:
       summary: Export detection rules
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/rules/_find:
     get:
       description: Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
@@ -9337,7 +9304,6 @@ paths:
       summary: List all detection rules
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/rules/_import:
     post:
       description: |
@@ -9443,7 +9409,6 @@ paths:
       summary: Import detection rules
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/rules/{id}/exceptions:
     post:
       description: Create exception items that apply to a single detection rule.
@@ -9590,7 +9555,6 @@ paths:
       summary: Create rule exception items
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/detection_engine/rules/preview:
     post:
       operationId: RulePreview
@@ -9675,7 +9639,6 @@ paths:
       summary: Preview rule alerts generated on specified time range
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/signals/assignees:
     post:
       description: |
@@ -9743,7 +9706,6 @@ paths:
       summary: Assign and unassign users from detection alerts
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/signals/search:
     post:
       description: Find and/or aggregate detection alerts that match the given query.
@@ -9870,7 +9832,6 @@ paths:
       summary: Find and/or aggregate detection alerts
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/signals/status:
     post:
       description: Set the status of one or more detection alerts.
@@ -9988,7 +9949,6 @@ paths:
       summary: Set a detection alert status
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/signals/tags:
     post:
       description: |
@@ -10078,7 +10038,6 @@ paths:
       summary: Add and remove detection alert tags
       tags:
         - Security Detections API
-      x-beta: true
   /api/detection_engine/tags:
     get:
       description: List all unique tags from all detection rules.
@@ -10093,7 +10052,6 @@ paths:
       summary: List all detection rule tags
       tags:
         - Security Detections API
-      x-beta: true
   /api/endpoint_list:
     post:
       description: Create an endpoint exception list, which groups endpoint exception list items. If an endpoint exception list already exists, an empty response is returned.
@@ -10134,7 +10092,6 @@ paths:
       summary: Create an endpoint exception list
       tags:
         - Security Endpoint Exceptions API
-      x-beta: true
   /api/endpoint_list/items:
     delete:
       description: Delete an endpoint exception list item using the `id` or `item_id` field.
@@ -10194,7 +10151,6 @@ paths:
       summary: Delete an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
-      x-beta: true
     get:
       description: Get the details of an endpoint exception list item using the `id` or `item_id` field.
       operationId: ReadEndpointListItem
@@ -10255,7 +10211,6 @@ paths:
       summary: Get an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
-      x-beta: true
     post:
       description: Create an endpoint exception list item, and associate it with the endpoint exception list.
       operationId: CreateEndpointListItem
@@ -10335,7 +10290,6 @@ paths:
       summary: Create an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
-      x-beta: true
     put:
       description: Update an endpoint exception list item using the `id` or `item_id` field.
       operationId: UpdateEndpointListItem
@@ -10420,7 +10374,6 @@ paths:
       summary: Update an endpoint exception list item
       tags:
         - Security Endpoint Exceptions API
-      x-beta: true
   /api/endpoint_list/items/_find:
     get:
       description: Get a list of all endpoint exception list items.
@@ -10526,7 +10479,6 @@ paths:
       summary: Get endpoint exception list items
       tags:
         - Security Endpoint Exceptions API
-      x-beta: true
   /api/endpoint/action:
     get:
       description: Get a list of all response actions.
@@ -10592,7 +10544,6 @@ paths:
       summary: Get response actions
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action_status:
     get:
       description: Get the status of response actions for the specified agent IDs.
@@ -10616,7 +10567,6 @@ paths:
       summary: Get response actions status
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/{action_id}:
     get:
       description: Get the details of a response action using the action ID.
@@ -10639,7 +10589,6 @@ paths:
       summary: Get action details
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
       description: Get information for the specified file using the file ID.
@@ -10665,7 +10614,6 @@ paths:
       summary: Get file information
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
       description: Download a file from an endpoint.
@@ -10691,7 +10639,6 @@ paths:
       summary: Download a file
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/execute:
     post:
       description: Run a shell command on an endpoint.
@@ -10712,7 +10659,6 @@ paths:
       summary: Run a command
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/get_file:
     post:
       description: Get a file from an endpoint.
@@ -10733,7 +10679,6 @@ paths:
       summary: Get a file
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/isolate:
     post:
       description: Isolate an endpoint from the network. The endpoint remains isolated until it's released.
@@ -10792,7 +10737,6 @@ paths:
       summary: Isolate an endpoint
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/kill_process:
     post:
       description: Terminate a running process on an endpoint.
@@ -10813,7 +10757,6 @@ paths:
       summary: Terminate a process
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/running_procs:
     post:
       description: Get a list of all processes running on an endpoint.
@@ -10834,7 +10777,6 @@ paths:
       summary: Get running processes
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/runscript:
     post:
       description: Run a shell command on an endpoint.
@@ -10855,7 +10797,6 @@ paths:
       summary: Run a script
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/scan:
     post:
       description: Scan a specific file or directory on an endpoint for malware.
@@ -10876,7 +10817,6 @@ paths:
       summary: Scan a file or directory
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/state:
     get:
       description: Get a response actions state, which reports whether encryption is enabled.
@@ -10891,7 +10831,6 @@ paths:
       summary: Get actions state
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/suspend_process:
     post:
       description: Suspend a running process on an endpoint.
@@ -10912,7 +10851,6 @@ paths:
       summary: Suspend a process
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/unisolate:
     post:
       description: Release an isolated endpoint, allowing it to rejoin a network.
@@ -10971,7 +10909,6 @@ paths:
       summary: Release an isolated endpoint
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/action/upload:
     post:
       description: Upload a file to an endpoint.
@@ -10992,7 +10929,6 @@ paths:
       summary: Upload a file
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/metadata:
     get:
       operationId: GetEndpointMetadataList
@@ -11037,7 +10973,6 @@ paths:
       summary: Get a metadata list
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/metadata/{id}:
     get:
       operationId: GetEndpointMetadata
@@ -11058,7 +10993,6 @@ paths:
       summary: Get metadata
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/policy_response:
     get:
       operationId: GetPolicyResponse
@@ -11081,7 +11015,6 @@ paths:
       summary: Get a policy response
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/endpoint/protection_updates_note/{package_policy_id}:
     get:
       operationId: GetProtectionUpdatesNote
@@ -11101,7 +11034,6 @@ paths:
       summary: Get a protection updates note
       tags:
         - Security Endpoint Management API
-      x-beta: true
     post:
       operationId: CreateUpdateProtectionUpdatesNote
       parameters:
@@ -11129,7 +11061,6 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
-      x-beta: true
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -11201,7 +11132,6 @@ paths:
       summary: Initialize the Entity Store
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/engines:
     get:
       operationId: ListEntityEngines
@@ -11222,7 +11152,6 @@ paths:
       summary: List the Entity Engines
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/engines/{entityType}:
     delete:
       operationId: DeleteEntityEngine
@@ -11252,7 +11181,6 @@ paths:
       summary: Delete the Entity Engine
       tags:
         - Security Entity Analytics API
-      x-beta: true
     get:
       operationId: GetEntityEngine
       parameters:
@@ -11272,7 +11200,6 @@ paths:
       summary: Get an Entity Engine
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/engines/{entityType}/init:
     post:
       operationId: InitEntityEngine
@@ -11340,7 +11267,6 @@ paths:
       summary: Initialize an Entity Engine
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/engines/{entityType}/start:
     post:
       operationId: StartEntityEngine
@@ -11364,7 +11290,6 @@ paths:
       summary: Start an Entity Engine
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/engines/{entityType}/stop:
     post:
       operationId: StopEntityEngine
@@ -11388,7 +11313,6 @@ paths:
       summary: Stop an Entity Engine
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/engines/apply_dataview_indices:
     post:
       operationId: ApplyEntityEngineDataviewIndices
@@ -11437,7 +11361,6 @@ paths:
       summary: Apply DataView indices to all installed engines
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -11514,7 +11437,6 @@ paths:
       summary: List Entity Store Entities
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/entity_store/status:
     get:
       operationId: GetEntityStoreStatus
@@ -11551,7 +11473,6 @@ paths:
       summary: Get the status of the Entity Store
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/exception_lists:
     delete:
       description: Delete an exception list using the `id` or `list_id` field.
@@ -11676,7 +11597,6 @@ paths:
       summary: Delete an exception list
       tags:
         - Security Exceptions API
-      x-beta: true
     get:
       description: Get the details of an exception list using the `id` or `list_id` field.
       operationId: ReadExceptionList
@@ -11795,7 +11715,6 @@ paths:
       summary: Get exception list details
       tags:
         - Security Exceptions API
-      x-beta: true
     post:
       description: |
         An exception list groups exception items and can be associated with detection rules. You can assign exception lists to multiple detection rules.
@@ -11995,7 +11914,6 @@ paths:
       summary: Create an exception list
       tags:
         - Security Exceptions API
-      x-beta: true
     put:
       description: Update an exception list using the `id` or `list_id` field.
       operationId: UpdateExceptionList
@@ -12135,7 +12053,6 @@ paths:
       summary: Update an exception list
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exception_lists/_duplicate:
     post:
       description: Duplicate an existing exception list.
@@ -12263,7 +12180,6 @@ paths:
       summary: Duplicate an exception list
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exception_lists/_export:
     post:
       description: Export an exception list and its associated items to an NDJSON file.
@@ -12378,7 +12294,6 @@ paths:
       summary: Export an exception list
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exception_lists/_find:
     get:
       description: Get a list of all exception list containers.
@@ -12548,7 +12463,6 @@ paths:
       summary: Get exception lists
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exception_lists/_import:
     post:
       description: Import an exception list and its associated items from an NDJSON file.
@@ -12696,7 +12610,6 @@ paths:
       summary: Import an exception list
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exception_lists/items:
     delete:
       description: Delete an exception list item using the `id` or `item_id` field.
@@ -12824,7 +12737,6 @@ paths:
       summary: Delete an exception list item
       tags:
         - Security Exceptions API
-      x-beta: true
     get:
       description: Get the details of an exception list item using the `id` or `item_id` field.
       operationId: ReadExceptionListItem
@@ -12953,7 +12865,6 @@ paths:
       summary: Get an exception list item
       tags:
         - Security Exceptions API
-      x-beta: true
     post:
       description: |
         Create an exception item and associate it with the specified exception list.
@@ -13275,7 +13186,6 @@ paths:
       summary: Create an exception list item
       tags:
         - Security Exceptions API
-      x-beta: true
     put:
       description: Update an exception list item using the `id` or `item_id` field.
       operationId: UpdateExceptionListItem
@@ -13433,7 +13343,6 @@ paths:
       summary: Update an exception list item
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exception_lists/items/_find:
     get:
       description: Get a list of all exception list items in the specified list.
@@ -13643,7 +13552,6 @@ paths:
       summary: Get exception list items
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exception_lists/summary:
     get:
       description: Get a summary of the specified exception list.
@@ -13769,7 +13677,6 @@ paths:
       summary: Get an exception list summary
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/exceptions/shared:
     post:
       description: |
@@ -13890,7 +13797,6 @@ paths:
       summary: Create a shared exception list
       tags:
         - Security Exceptions API
-      x-beta: true
   /api/fleet/agent_download_sources:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
@@ -13992,7 +13898,6 @@ paths:
       summary: Get agent binary download sources
       tags:
         - Elastic Agent binary download sources
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-agent-download-sources
@@ -14143,7 +14048,6 @@ paths:
       summary: Create an agent binary download source
       tags:
         - Elastic Agent binary download sources
-      x-beta: true
   /api/fleet/agent_download_sources/{sourceId}:
     delete:
       description: 'Delete an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
@@ -14196,7 +14100,6 @@ paths:
       summary: Delete an agent binary download source
       tags:
         - Elastic Agent binary download sources
-      x-beta: true
     get:
       description: 'Get an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-settings-read].'
       operationId: get-fleet-agent-download-sources-sourceid
@@ -14291,7 +14194,6 @@ paths:
       summary: Get an agent binary download source
       tags:
         - Elastic Agent binary download sources
-      x-beta: true
     put:
       description: 'Update an agent binary download source by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-agent-download-sources-sourceid
@@ -14447,7 +14349,6 @@ paths:
       summary: Update an agent binary download source
       tags:
         - Elastic Agent binary download sources
-      x-beta: true
   /api/fleet/agent_policies:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
@@ -15185,7 +15086,6 @@ paths:
       summary: Get agent policies
       tags:
         - Elastic Agent policies
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: post-fleet-agent-policies
@@ -16079,7 +15979,6 @@ paths:
       summary: Create an agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/_bulk_get:
     post:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
@@ -16782,7 +16681,6 @@ paths:
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/{agentPolicyId}:
     get:
       description: 'Get an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agent-policies-read OR fleet-agents-read OR fleet-setup].'
@@ -17462,7 +17360,6 @@ paths:
       summary: Get an agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
     put:
       description: 'Update an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
       operationId: put-fleet-agent-policies-agentpolicyid
@@ -18366,7 +18263,6 @@ paths:
       summary: Update an agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/{agentPolicyId}/copy:
     post:
       description: 'Copy an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
@@ -19067,7 +18963,6 @@ paths:
       summary: Copy an agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/{agentPolicyId}/download:
     get:
       description: 'Download an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
@@ -19142,7 +19037,6 @@ paths:
       summary: Download an agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/{agentPolicyId}/full:
     get:
       description: 'Get a full agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read].'
@@ -19545,7 +19439,6 @@ paths:
       summary: Get a full agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/{agentPolicyId}/outputs:
     get:
       description: 'Get a list of outputs associated with agent policy by policy id.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].'
@@ -19646,7 +19539,6 @@ paths:
       summary: Get outputs for an agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/delete:
     post:
       description: 'Delete an agent policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all].'
@@ -19711,7 +19603,6 @@ paths:
       summary: Delete an agent policy
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_policies/outputs:
     post:
       description: 'Get a list of outputs associated with agent policies.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-settings-read].'
@@ -19830,7 +19721,6 @@ paths:
       summary: Get outputs for agent policies
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/agent_status:
     get:
       operationId: get-fleet-agent-status
@@ -19926,7 +19816,6 @@ paths:
       summary: Get an agent status summary
       tags:
         - Elastic Agent status
-      x-beta: true
   /api/fleet/agent_status/data:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -20006,7 +19895,6 @@ paths:
       summary: Get incoming agent data
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -20418,7 +20306,6 @@ paths:
       summary: Get agents
       tags:
         - Elastic Agents
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: post-fleet-agents
@@ -20480,7 +20367,6 @@ paths:
       summary: Get agents by action ids
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents/{agentId}:
     delete:
       description: 'Delete an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -20535,7 +20421,6 @@ paths:
       summary: Delete an agent
       tags:
         - Elastic Agents
-      x-beta: true
     get:
       description: 'Get an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
       operationId: get-fleet-agents-agentid
@@ -20865,7 +20750,6 @@ paths:
       summary: Get an agent
       tags:
         - Elastic Agents
-      x-beta: true
     put:
       description: 'Update an agent by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: put-fleet-agents-agentid
@@ -21210,7 +21094,6 @@ paths:
       summary: Update an agent
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents/{agentId}/actions:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -21351,7 +21234,6 @@ paths:
       summary: Create an agent action
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/{agentId}/reassign:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -21411,7 +21293,6 @@ paths:
       summary: Reassign an agent
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/{agentId}/request_diagnostics:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -21478,7 +21359,6 @@ paths:
       summary: Request agent diagnostics
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/{agentId}/unenroll:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -21512,7 +21392,6 @@ paths:
       summary: Unenroll an agent
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/{agentId}/upgrade:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -21578,7 +21457,6 @@ paths:
       summary: Upgrade an agent
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/{agentId}/uploads:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -21656,7 +21534,6 @@ paths:
       summary: Get agent uploads
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents/action_status:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -21819,7 +21696,6 @@ paths:
       summary: Get an agent action status
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/actions/{actionId}/cancel:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -21910,7 +21786,6 @@ paths:
       summary: Cancel an agent action
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/available_versions:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -21953,7 +21828,6 @@ paths:
       summary: Get available agent versions
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents/bulk_reassign:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -22024,7 +21898,6 @@ paths:
       summary: Bulk reassign agents
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/bulk_request_diagnostics:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -22095,7 +21968,6 @@ paths:
       summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/bulk_unenroll:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -22171,7 +22043,6 @@ paths:
       summary: Bulk unenroll agents
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/bulk_update_agent_tags:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -22247,7 +22118,6 @@ paths:
       summary: Bulk update agent tags
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/bulk_upgrade:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -22329,7 +22199,6 @@ paths:
       summary: Bulk upgrade agents
       tags:
         - Elastic Agent actions
-      x-beta: true
   /api/fleet/agents/files/{fileId}:
     delete:
       description: 'Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -22385,7 +22254,6 @@ paths:
       summary: Delete an uploaded file
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents/files/{fileId}/{fileName}:
     get:
       description: 'Get a file uploaded by an agent.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -22430,7 +22298,6 @@ paths:
       summary: Get an uploaded file
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents/setup:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
@@ -22496,7 +22363,6 @@ paths:
       summary: Get agent setup info
       tags:
         - Elastic Agents
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
       operationId: post-fleet-agents-setup
@@ -22558,7 +22424,6 @@ paths:
       summary: Initiate agent setup
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/agents/tags:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-read].'
@@ -22612,7 +22477,6 @@ paths:
       summary: Get agent tags
       tags:
         - Elastic Agents
-      x-beta: true
   /api/fleet/check-permissions:
     get:
       operationId: get-fleet-check-permissions
@@ -22663,7 +22527,6 @@ paths:
       summary: Check permissions
       tags:
         - Fleet internals
-      x-beta: true
   /api/fleet/data_streams:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].'
@@ -22765,7 +22628,6 @@ paths:
       summary: Get data streams
       tags:
         - Data streams
-      x-beta: true
   /api/fleet/enrollment_api_keys:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].'
@@ -22894,7 +22756,6 @@ paths:
       summary: Get enrollment API keys
       tags:
         - Fleet enrollment API keys
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
       operationId: post-fleet-enrollment-api-keys
@@ -22988,7 +22849,6 @@ paths:
       summary: Create an enrollment API key
       tags:
         - Fleet enrollment API keys
-      x-beta: true
   /api/fleet/enrollment_api_keys/{keyId}:
     delete:
       description: 'Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -23043,7 +22903,6 @@ paths:
       summary: Revoke an enrollment API key
       tags:
         - Fleet enrollment API keys
-      x-beta: true
     get:
       description: 'Get an enrollment API key by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-setup].'
       operationId: get-fleet-enrollment-api-keys-keyid
@@ -23115,7 +22974,6 @@ paths:
       summary: Get an enrollment API key
       tags:
         - Fleet enrollment API keys
-      x-beta: true
   /api/fleet/epm/bulk_assets:
     post:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -23211,7 +23069,6 @@ paths:
       summary: Bulk get assets
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/categories:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -23280,7 +23137,6 @@ paths:
       summary: Get package categories
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/custom_integrations:
     post:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
@@ -23422,7 +23278,6 @@ paths:
       summary: Create a custom integration
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/data_streams:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -23502,7 +23357,6 @@ paths:
       summary: Get data streams
       tags:
         - Data streams
-      x-beta: true
   /api/fleet/epm/packages:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -23912,7 +23766,6 @@ paths:
       summary: Get packages
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages
@@ -24038,7 +23891,6 @@ paths:
       summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/_bulk:
     post:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
@@ -24220,7 +24072,6 @@ paths:
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}:
     delete:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
@@ -24335,7 +24186,6 @@ paths:
       summary: Delete a package
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
     get:
       operationId: get-fleet-epm-packages-pkgname-pkgversion
       parameters:
@@ -24818,7 +24668,6 @@ paths:
       summary: Get a package
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages-pkgname-pkgversion
@@ -24967,7 +24816,6 @@ paths:
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
     put:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: put-fleet-epm-packages-pkgname-pkgversion
@@ -25440,7 +25288,6 @@ paths:
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -25489,7 +25336,6 @@ paths:
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets:
     delete:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
@@ -25547,7 +25393,6 @@ paths:
       summary: Delete Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [integrations-all, fleet-agent-policies-all].'
       operationId: post-fleet-epm-packages-pkgname-pkgversion-kibana-assets
@@ -25579,6 +25424,12 @@ paths:
               properties:
                 force:
                   type: boolean
+                space_ids:
+                  description: When provided install assets in the specified spaces instead of the current space.
+                  items:
+                    type: string
+                  minItems: 1
+                  type: array
       responses:
         '200':
           content:
@@ -25614,7 +25465,6 @@ paths:
       summary: Install Kibana assets for a package
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize:
     post:
       operationId: post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize
@@ -25703,7 +25553,6 @@ paths:
       summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/{pkgName}/stats:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -25755,7 +25604,6 @@ paths:
       summary: Get package stats
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/installed:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -25906,7 +25754,6 @@ paths:
       summary: Get installed packages
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/packages/limited:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -25949,7 +25796,6 @@ paths:
       summary: Get a limited package list
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -26054,7 +25900,6 @@ paths:
       summary: Get an inputs template
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/epm/verification_key_id:
     get:
       description: '[Required authorization] Route required privileges: ANY of [integrations-read OR fleet-setup OR fleet-all].'
@@ -26096,7 +25941,6 @@ paths:
       summary: Get a package signature verification key ID
       tags:
         - Elastic Package Manager (EPM)
-      x-beta: true
   /api/fleet/fleet_server_hosts:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agents-all OR fleet-settings-read].'
@@ -26229,7 +26073,6 @@ paths:
       summary: Get Fleet Server hosts
       tags:
         - Fleet Server hosts
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-fleet-server-hosts
@@ -26442,7 +26285,6 @@ paths:
       summary: Create a Fleet Server host
       tags:
         - Fleet Server hosts
-      x-beta: true
   /api/fleet/fleet_server_hosts/{itemId}:
     delete:
       description: 'Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
@@ -26495,7 +26337,6 @@ paths:
       summary: Delete a Fleet Server host
       tags:
         - Fleet Server hosts
-      x-beta: true
     get:
       description: 'Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-fleet-server-hosts-itemid
@@ -26621,7 +26462,6 @@ paths:
       summary: Get a Fleet Server host
       tags:
         - Fleet Server hosts
-      x-beta: true
     put:
       description: 'Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-fleet-server-hosts-itemid
@@ -26832,7 +26672,6 @@ paths:
       summary: Update a Fleet Server host
       tags:
         - Fleet Server hosts
-      x-beta: true
   /api/fleet/health_check:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
@@ -26915,7 +26754,6 @@ paths:
       summary: Check Fleet Server health
       tags:
         - Fleet internals
-      x-beta: true
   /api/fleet/kubernetes:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
@@ -26971,7 +26809,6 @@ paths:
       summary: Get a full K8s agent manifest
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/kubernetes/download:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, fleet-setup].'
@@ -27041,7 +26878,6 @@ paths:
       summary: Download an agent manifest
       tags:
         - Elastic Agent policies
-      x-beta: true
   /api/fleet/logstash_api_keys:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
@@ -27089,7 +26925,6 @@ paths:
       summary: Generate a Logstash API key
       tags:
         - Fleet outputs
-      x-beta: true
   /api/fleet/message_signing_service/rotate_key_pair:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all, fleet-agent-policies-all, fleet-settings-all].'
@@ -27163,7 +26998,6 @@ paths:
       summary: Rotate a Fleet message signing key pair
       tags:
         - Message Signing Service
-      x-beta: true
   /api/fleet/outputs:
     get:
       description: '[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].'
@@ -27944,7 +27778,6 @@ paths:
       summary: Get outputs
       tags:
         - Fleet outputs
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-outputs
@@ -29454,7 +29287,6 @@ paths:
       summary: Create output
       tags:
         - Fleet outputs
-      x-beta: true
   /api/fleet/outputs/{outputId}:
     delete:
       description: 'Delete output by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
@@ -29527,7 +29359,6 @@ paths:
       summary: Delete output
       tags:
         - Fleet outputs
-      x-beta: true
     get:
       description: 'Get output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-read OR fleet-agent-policies-read].'
       operationId: get-fleet-outputs-outputid
@@ -30301,7 +30132,6 @@ paths:
       summary: Get output
       tags:
         - Fleet outputs
-      x-beta: true
     put:
       description: 'Update output by ID.<br/><br/>[Required authorization] Route required privileges: ANY of [fleet-settings-all OR fleet-agent-policies-all].'
       operationId: put-fleet-outputs-outputid
@@ -31795,7 +31625,6 @@ paths:
       summary: Update output
       tags:
         - Fleet outputs
-      x-beta: true
   /api/fleet/outputs/{outputId}/health:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
@@ -31850,7 +31679,6 @@ paths:
       summary: Get the latest output health
       tags:
         - Fleet outputs
-      x-beta: true
   /api/fleet/package_policies:
     get:
       operationId: get-fleet-package-policies
@@ -32326,7 +32154,6 @@ paths:
       summary: Get package policies
       tags:
         - Fleet package policies
-      x-beta: true
     post:
       operationId: post-fleet-package-policies
       parameters:
@@ -33194,7 +33021,6 @@ paths:
       summary: Create a package policy
       tags:
         - Fleet package policies
-      x-beta: true
   /api/fleet/package_policies/_bulk_get:
     post:
       operationId: post-fleet-package-policies-bulk-get
@@ -33657,7 +33483,6 @@ paths:
       summary: Bulk get package policies
       tags:
         - Fleet package policies
-      x-beta: true
   /api/fleet/package_policies/{packagePolicyId}:
     delete:
       description: 'Delete a package policy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
@@ -33715,7 +33540,6 @@ paths:
       summary: Delete a package policy
       tags:
         - Fleet package policies
-      x-beta: true
     get:
       description: Get a package policy by ID.
       operationId: get-fleet-package-policies-packagepolicyid
@@ -34158,7 +33982,6 @@ paths:
       summary: Get a package policy
       tags:
         - Fleet package policies
-      x-beta: true
     put:
       description: Update a package policy by ID.
       operationId: put-fleet-package-policies-packagepolicyid
@@ -35025,7 +34848,6 @@ paths:
       summary: Update a package policy
       tags:
         - Fleet package policies
-      x-beta: true
   /api/fleet/package_policies/delete:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
@@ -35159,7 +34981,6 @@ paths:
       summary: Bulk delete package policies
       tags:
         - Fleet package policies
-      x-beta: true
   /api/fleet/package_policies/upgrade:
     post:
       description: 'Upgrade a package policy to a newer package version.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agent-policies-all, integrations-all].'
@@ -35237,7 +35058,6 @@ paths:
       summary: Upgrade a package policy
       tags:
         - Fleet package policies
-      x-beta: true
   /api/fleet/package_policies/upgrade/dryrun:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agent-policies-read, integrations-read].'
@@ -36046,7 +35866,6 @@ paths:
       summary: Dry run a package policy upgrade
       tags:
         - Fleet package policies
-      x-beta: true
   /api/fleet/proxies:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
@@ -36130,7 +35949,6 @@ paths:
       summary: Get proxies
       tags:
         - Fleet proxies
-      x-beta: true
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: post-fleet-proxies
@@ -36245,7 +36063,6 @@ paths:
       summary: Create a proxy
       tags:
         - Fleet proxies
-      x-beta: true
   /api/fleet/proxies/{itemId}:
     delete:
       description: 'Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
@@ -36298,7 +36115,6 @@ paths:
       summary: Delete a proxy
       tags:
         - Fleet proxies
-      x-beta: true
     get:
       description: 'Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
       operationId: get-fleet-proxies-itemid
@@ -36375,7 +36191,6 @@ paths:
       summary: Get a proxy
       tags:
         - Fleet proxies
-      x-beta: true
     put:
       description: 'Update a proxy by ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-proxies-itemid
@@ -36492,7 +36307,6 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
-      x-beta: true
   /api/fleet/service_tokens:
     post:
       description: '[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -36554,7 +36368,6 @@ paths:
       summary: Create a service token
       tags:
         - Fleet service tokens
-      x-beta: true
   /api/fleet/settings:
     get:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read].'
@@ -36648,7 +36461,6 @@ paths:
       summary: Get settings
       tags:
         - Fleet internals
-      x-beta: true
     put:
       description: '[Required authorization] Route required privileges: ALL of [fleet-settings-all].'
       operationId: put-fleet-settings
@@ -36779,7 +36591,6 @@ paths:
       summary: Update settings
       tags:
         - Fleet internals
-      x-beta: true
   /api/fleet/setup:
     post:
       description: '[Required authorization] Route required privileges: ANY of [fleet-agents-read OR fleet-agent-policies-read OR fleet-settings-read OR fleet-setup].'
@@ -36854,7 +36665,6 @@ paths:
       summary: Initiate Fleet setup
       tags:
         - Fleet internals
-      x-beta: true
   /api/fleet/uninstall_tokens:
     get:
       description: 'List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -36951,7 +36761,6 @@ paths:
       summary: Get metadata for latest uninstall tokens
       tags:
         - Fleet uninstall tokens
-      x-beta: true
   /api/fleet/uninstall_tokens/{uninstallTokenId}:
     get:
       description: 'Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] Route required privileges: ALL of [fleet-agents-all].'
@@ -37019,7 +36828,6 @@ paths:
       summary: Get a decrypted uninstall token
       tags:
         - Fleet uninstall tokens
-      x-beta: true
   /api/lists:
     delete:
       description: |
@@ -37135,7 +36943,6 @@ paths:
       summary: Delete a value list
       tags:
         - Security Lists API
-      x-beta: true
     get:
       description: Get the details of a value list using the list ID.
       operationId: ReadList
@@ -37231,7 +37038,6 @@ paths:
       summary: Get value list details
       tags:
         - Security Lists API
-      x-beta: true
     patch:
       description: Update specific fields of an existing list using the list `id`.
       operationId: PatchList
@@ -37346,7 +37152,6 @@ paths:
       summary: Patch a value list
       tags:
         - Security Lists API
-      x-beta: true
     post:
       description: Create a new value list.
       operationId: CreateList
@@ -37539,7 +37344,6 @@ paths:
       summary: Create a value list
       tags:
         - Security Lists API
-      x-beta: true
     put:
       description: |
         Update a value list using the list `id`. The original list is replaced, and all unspecified fields are deleted.
@@ -37660,7 +37464,6 @@ paths:
       summary: Update a value list
       tags:
         - Security Lists API
-      x-beta: true
   /api/lists/_find:
     get:
       description: Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
@@ -37818,7 +37621,6 @@ paths:
       summary: Get value lists
       tags:
         - Security Lists API
-      x-beta: true
   /api/lists/index:
     delete:
       description: Delete the `.lists` and `.items` data streams.
@@ -37881,7 +37683,6 @@ paths:
       summary: Delete value list data streams
       tags:
         - Security Lists API
-      x-beta: true
     get:
       description: Verify that `.lists` and `.items` data streams exist.
       operationId: ReadListIndex
@@ -37946,7 +37747,6 @@ paths:
       summary: Get status of value list data streams
       tags:
         - Security Lists API
-      x-beta: true
     post:
       description: Create `.lists` and `.items` data streams in the relevant space.
       operationId: CreateListIndex
@@ -38014,7 +37814,6 @@ paths:
       summary: Create list data streams
       tags:
         - Security Lists API
-      x-beta: true
   /api/lists/items:
     delete:
       description: Delete a value list item using its `id`, or its `list_id` and `value` fields.
@@ -38138,7 +37937,6 @@ paths:
       summary: Delete a value list item
       tags:
         - Security Lists API
-      x-beta: true
     get:
       description: Get the details of a value list item.
       operationId: ReadListItem
@@ -38249,7 +38047,6 @@ paths:
       summary: Get a value list item
       tags:
         - Security Lists API
-      x-beta: true
     patch:
       description: Update specific fields of an existing value list item using the item `id`.
       operationId: PatchListItem
@@ -38364,7 +38161,6 @@ paths:
       summary: Patch a value list item
       tags:
         - Security Lists API
-      x-beta: true
     post:
       description: |
         Create a value list item and associate it with the specified value list.
@@ -38534,7 +38330,6 @@ paths:
       summary: Create a value list item
       tags:
         - Security Lists API
-      x-beta: true
     put:
       description: |
         Update a value list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
@@ -38647,7 +38442,6 @@ paths:
       summary: Update a value list item
       tags:
         - Security Lists API
-      x-beta: true
   /api/lists/items/_export:
     post:
       description: Export list item values from the specified value list.
@@ -38735,7 +38529,6 @@ paths:
       summary: Export value list items
       tags:
         - Security Lists API
-      x-beta: true
   /api/lists/items/_find:
     get:
       description: Get all value list items in the specified list.
@@ -38892,7 +38685,6 @@ paths:
       summary: Get value list items
       tags:
         - Security Lists API
-      x-beta: true
   /api/lists/items/_import:
     post:
       description: |
@@ -39057,7 +38849,6 @@ paths:
       summary: Import value list items
       tags:
         - Security Lists API
-      x-beta: true
   /api/lists/privileges:
     get:
       operationId: ReadListPrivileges
@@ -39193,7 +38984,6 @@ paths:
       summary: Get value list privileges
       tags:
         - Security Lists API
-      x-beta: true
   /api/ml/saved_objects/sync:
     get:
       description: |
@@ -39220,7 +39010,6 @@ paths:
       summary: Sync machine learning saved objects
       tags:
         - ml
-      x-beta: true
   /api/note:
     delete:
       description: Delete a note from a Timeline using the note ID.
@@ -39255,7 +39044,6 @@ paths:
       summary: Delete a note
       tags:
         - Security Timeline API
-      x-beta: true
     get:
       description: Get all notes for a given document.
       operationId: GetNotes
@@ -39317,7 +39105,6 @@ paths:
       summary: Get notes
       tags:
         - Security Timeline API
-      x-beta: true
     patch:
       description: Add a note to a Timeline or update an existing note.
       operationId: PersistNoteRoute
@@ -39354,7 +39141,6 @@ paths:
       summary: Add or update a note
       tags:
         - Security Timeline API
-      x-beta: true
   /api/osquery/live_queries:
     get:
       description: Get a list of all live queries.
@@ -39395,7 +39181,6 @@ paths:
       summary: Get live queries
       tags:
         - Security Osquery API
-      x-beta: true
     post:
       description: Create and run a live query.
       operationId: OsqueryCreateLiveQuery
@@ -39415,7 +39200,6 @@ paths:
       summary: Create a live query
       tags:
         - Security Osquery API
-      x-beta: true
   /api/osquery/live_queries/{id}:
     get:
       description: Get the details of a live query using the query ID.
@@ -39438,7 +39222,6 @@ paths:
       summary: Get live query details
       tags:
         - Security Osquery API
-      x-beta: true
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
       description: Get the results of a live query using the query action ID.
@@ -39493,7 +39276,6 @@ paths:
       summary: Get live query results
       tags:
         - Security Osquery API
-      x-beta: true
   /api/osquery/packs:
     get:
       description: Get a list of all query packs.
@@ -39529,7 +39311,6 @@ paths:
       summary: Get packs
       tags:
         - Security Osquery API
-      x-beta: true
     post:
       description: Create a query pack.
       operationId: OsqueryCreatePacks
@@ -39549,7 +39330,6 @@ paths:
       summary: Create a pack
       tags:
         - Security Osquery API
-      x-beta: true
   /api/osquery/packs/{id}:
     delete:
       description: Delete a query pack using the pack ID.
@@ -39572,7 +39352,6 @@ paths:
       summary: Delete a pack
       tags:
         - Security Osquery API
-      x-beta: true
     get:
       description: Get the details of a query pack using the pack ID.
       operationId: OsqueryGetPacksDetails
@@ -39592,7 +39371,6 @@ paths:
       summary: Get pack details
       tags:
         - Security Osquery API
-      x-beta: true
     put:
       description: |
         Update a query pack using the pack ID.
@@ -39621,7 +39399,6 @@ paths:
       summary: Update a pack
       tags:
         - Security Osquery API
-      x-beta: true
   /api/osquery/saved_queries:
     get:
       description: Get a list of all saved queries.
@@ -39657,7 +39434,6 @@ paths:
       summary: Get saved queries
       tags:
         - Security Osquery API
-      x-beta: true
     post:
       description: Create and run a saved query.
       operationId: OsqueryCreateSavedQuery
@@ -39677,7 +39453,6 @@ paths:
       summary: Create a saved query
       tags:
         - Security Osquery API
-      x-beta: true
   /api/osquery/saved_queries/{id}:
     delete:
       description: Delete a saved query using the query ID.
@@ -39698,7 +39473,6 @@ paths:
       summary: Delete a saved query
       tags:
         - Security Osquery API
-      x-beta: true
     get:
       description: Get the details of a saved query using the query ID.
       operationId: OsqueryGetSavedQueryDetails
@@ -39718,7 +39492,6 @@ paths:
       summary: Get saved query details
       tags:
         - Security Osquery API
-      x-beta: true
     put:
       description: |
         Update a saved query using the query ID.
@@ -39747,7 +39520,6 @@ paths:
       summary: Update a saved query
       tags:
         - Security Osquery API
-      x-beta: true
   /api/pinned_event:
     patch:
       description: Pin/unpin an event to/from an existing Timeline.
@@ -39786,7 +39558,6 @@ paths:
       summary: Pin/unpin an event
       tags:
         - Security Timeline API
-      x-beta: true
   /api/risk_score/engine/dangerously_delete_data:
     delete:
       description: Cleaning up the the Risk Engine by removing the indices, mapping and transforms
@@ -39816,7 +39587,6 @@ paths:
       summary: Cleanup the Risk Engine
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/risk_score/engine/saved_object/configure:
     patch:
       description: Configuring the Risk Engine Saved Object
@@ -39868,7 +39638,6 @@ paths:
       summary: Configure the Risk Engine Saved Object
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/risk_score/engine/schedule_now:
     post:
       description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
@@ -39898,7 +39667,6 @@ paths:
       summary: Run the risk scoring engine
       tags:
         - Security Entity Analytics API
-      x-beta: true
   /api/saved_objects/_export:
     post:
       description: |
@@ -39960,7 +39728,6 @@ paths:
       summary: Export saved objects
       tags:
         - saved objects
-      x-beta: true
   /api/saved_objects/_import:
     post:
       description: |
@@ -40054,7 +39821,6 @@ paths:
               -X POST api/saved_objects/_import?createNewCopies=true
               -H "kbn-xsrf: true"
               --form file=@file.ndjson
-      x-beta: true
   /api/security_ai_assistant/anonymization_fields/_bulk_action:
     post:
       description: Apply a bulk action to multiple anonymization fields. The bulk action is applied to all anonymization fields that match the filter or to the list of anonymization fields by their IDs.
@@ -40108,7 +39874,6 @@ paths:
       summary: Apply a bulk action to anonymization fields
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/anonymization_fields/_find:
     get:
       description: Get a list of all anonymization fields.
@@ -40194,7 +39959,6 @@ paths:
       summary: Get anonymization fields
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/chat/complete:
     post:
       description: Create a model response for the given chat conversation.
@@ -40229,7 +39993,6 @@ paths:
       summary: Create a model response
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/current_user/conversations:
     post:
       description: Create a new Security AI Assistant conversation.
@@ -40263,7 +40026,6 @@ paths:
       summary: Create a conversation
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/current_user/conversations/_find:
     get:
       description: Get a list of all conversations for the current user.
@@ -40349,7 +40111,6 @@ paths:
       summary: Get conversations
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/current_user/conversations/{id}:
     delete:
       description: Delete an existing conversation using the conversation ID.
@@ -40384,7 +40145,6 @@ paths:
       summary: Delete a conversation
       tags:
         - Security AI Assistant API
-      x-beta: true
     get:
       description: Get the details of an existing conversation using the conversation ID.
       operationId: ReadConversation
@@ -40418,7 +40178,6 @@ paths:
       summary: Get a conversation
       tags:
         - Security AI Assistant API
-      x-beta: true
     put:
       description: Update an existing conversation using the conversation ID.
       operationId: UpdateConversation
@@ -40458,7 +40217,6 @@ paths:
       summary: Update a conversation
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/knowledge_base/{resource}:
     get:
       description: Read a single KB
@@ -40505,7 +40263,6 @@ paths:
       summary: Read a KnowledgeBase
       tags:
         - Security AI Assistant API
-      x-beta: true
     post:
       description: Create a KnowledgeBase
       operationId: CreateKnowledgeBase
@@ -40551,7 +40308,6 @@ paths:
       summary: Create a KnowledgeBase
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/knowledge_base/entries:
     post:
       description: Create a Knowledge Base Entry
@@ -40578,7 +40334,6 @@ paths:
       summary: Create a Knowledge Base Entry
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/knowledge_base/entries/_bulk_action:
     post:
       description: The bulk action is applied to all Knowledge Base Entries that match the filter or to the list of Knowledge Base Entries by their IDs
@@ -40625,7 +40380,6 @@ paths:
       summary: Applies a bulk action to multiple Knowledge Base Entries
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/knowledge_base/entries/_find:
     get:
       description: Finds Knowledge Base Entries that match the given query.
@@ -40711,7 +40465,6 @@ paths:
       summary: Finds Knowledge Base Entries that match the given query.
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/knowledge_base/entries/{id}:
     delete:
       description: Deletes a single Knowledge Base Entry using the `id` field
@@ -40739,7 +40492,6 @@ paths:
       summary: Deletes a single Knowledge Base Entry using the `id` field
       tags:
         - Security AI Assistant API
-      x-beta: true
     get:
       description: Read a Knowledge Base Entry
       operationId: ReadKnowledgeBaseEntry
@@ -40766,7 +40518,6 @@ paths:
       summary: Read a Knowledge Base Entry
       tags:
         - Security AI Assistant API
-      x-beta: true
     put:
       description: Update a Knowledge Base Entry
       operationId: UpdateKnowledgeBaseEntry
@@ -40799,7 +40550,6 @@ paths:
       summary: Update a Knowledge Base Entry
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/prompts/_bulk_action:
     post:
       description: Apply a bulk action to multiple prompts. The bulk action is applied to all prompts that match the filter or to the list of prompts by their IDs.
@@ -40853,7 +40603,6 @@ paths:
       summary: Apply a bulk action to prompts
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security_ai_assistant/prompts/_find:
     get:
       description: Get a list of all prompts.
@@ -40939,7 +40688,6 @@ paths:
       summary: Get prompts
       tags:
         - Security AI Assistant API
-      x-beta: true
   /api/security/role:
     get:
       operationId: get-security-role
@@ -40956,7 +40704,6 @@ paths:
       summary: Get all roles
       tags:
         - roles
-      x-beta: true
   /api/security/role/_query:
     post:
       operationId: post-security-role-query
@@ -41006,7 +40753,6 @@ paths:
           description: Indicates a successful call.
       summary: Query roles
       tags: []
-      x-beta: true
   /api/security/role/{name}:
     delete:
       operationId: delete-security-role-name
@@ -41030,7 +40776,6 @@ paths:
       summary: Delete a role
       tags:
         - roles
-      x-beta: true
     get:
       operationId: get-security-role-name
       parameters:
@@ -41053,7 +40798,6 @@ paths:
       summary: Get a role
       tags:
         - roles
-      x-beta: true
     put:
       description: Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.
       operationId: put-security-role-name
@@ -41260,7 +41004,6 @@ paths:
       summary: Create or update a role
       tags:
         - roles
-      x-beta: true
   /api/security/roles:
     post:
       operationId: post-security-roles
@@ -41460,7 +41203,6 @@ paths:
       summary: Create or update roles
       tags:
         - roles
-      x-beta: true
   /api/spaces/space:
     get:
       operationId: get-spaces-space
@@ -41508,7 +41250,6 @@ paths:
       summary: Get all spaces
       tags:
         - spaces
-      x-beta: true
     post:
       operationId: post-spaces-space
       parameters:
@@ -41566,7 +41307,6 @@ paths:
       summary: Create a space
       tags:
         - spaces
-      x-beta: true
   /api/spaces/space/{id}:
     delete:
       description: When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.
@@ -41593,7 +41333,6 @@ paths:
       summary: Delete a space
       tags:
         - spaces
-      x-beta: true
     get:
       operationId: get-spaces-space-id
       parameters:
@@ -41614,7 +41353,6 @@ paths:
       summary: Get a space
       tags:
         - spaces
-      x-beta: true
     put:
       operationId: put-spaces-space-id
       parameters:
@@ -41678,7 +41416,6 @@ paths:
       summary: Update a space
       tags:
         - spaces
-      x-beta: true
   /api/status:
     get:
       operationId: get-status
@@ -41717,7 +41454,6 @@ paths:
       summary: Get Kibana's current status
       tags:
         - system
-      x-beta: true
   /api/streams:
     get:
       description: Fetches list of all streams
@@ -41740,7 +41476,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/_disable:
     post:
       description: Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.
@@ -41770,7 +41505,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/_enable:
     post:
       description: Enables wired streams
@@ -41800,7 +41534,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/_resync:
     post:
       description: Resyncs all streams, making sure that Elasticsearch assets are up to date
@@ -41830,7 +41563,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/{name}:
     delete:
       description: Deletes a stream definition and the underlying data stream
@@ -41865,7 +41597,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
     get:
       description: Fetches a stream definition and associated dashboards
       operationId: get-streams-name
@@ -41892,7 +41623,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
     put:
       description: Creates or updates a stream definition. Classic streams can not be created through this API, only updated
       operationId: put-streams-name
@@ -42932,7 +42662,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/{name}/_fork:
     post:
       description: Forks a wired stream and creates a child stream
@@ -43051,7 +42780,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/{name}/_group:
     get:
       description: Fetches the group settings of a group stream definition
@@ -43079,7 +42807,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
     put:
       description: Upserts the group settings of a group stream definition
       operationId: put-streams-name-group
@@ -43123,7 +42850,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/{name}/_ingest:
     get:
       description: Fetches the ingest settings of an ingest stream definition
@@ -43151,7 +42877,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
     put:
       description: Upserts the ingest settings of an ingest stream definition
       operationId: put-streams-name-ingest
@@ -44127,7 +43852,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/{name}/content/export:
     post:
       description: Exports the content associated to a stream.
@@ -44161,7 +43885,6 @@ paths:
       summary: Export stream content
       tags:
         - streams
-      x-beta: true
   /api/streams/{name}/content/import:
     post:
       description: Links content objects to a stream.
@@ -44193,7 +43916,6 @@ paths:
       summary: Import content into a stream
       tags:
         - streams
-      x-beta: true
   /api/streams/{name}/dashboards:
     get:
       description: Fetches all dashboards linked to a stream that are visible to the current user in the current space.
@@ -44221,7 +43943,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/{name}/dashboards/_bulk:
     post:
       description: Bulk update dashboards linked to a stream. Can link new dashboards and delete existing ones.
@@ -44283,7 +44004,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
   /api/streams/{name}/dashboards/{dashboardId}:
     delete:
       description: Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.
@@ -44323,7 +44043,6 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
     put:
       description: Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.
       operationId: put-streams-name-dashboards-dashboardid
@@ -44362,7 +44081,24 @@ paths:
       tags:
         - streams
       x-state: Technical Preview
-      x-beta: true
+  /api/task_manager/_health:
+    get:
+      description: |
+        Get the health status of the Kibana task manager.
+      operationId: task-manager-health
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                taskManagerHealthResponse1:
+                  $ref: '#/components/examples/Task_manager_health_Serverless_APIs_health_200response_serverless'
+              schema:
+                $ref: '#/components/schemas/Task_manager_health_Serverless_APIs_health_response_serverless'
+          description: Indicates a successful call
+      summary: Get the task manager health
+      tags:
+        - task manager
   /api/timeline:
     delete:
       description: Delete one or more Timelines or Timeline templates.
@@ -44398,7 +44134,6 @@ paths:
       summary: Delete Timelines or Timeline templates
       tags:
         - Security Timeline API
-      x-beta: true
     get:
       description: Get the details of an existing saved Timeline or Timeline template.
       operationId: GetTimeline
@@ -44423,7 +44158,6 @@ paths:
       summary: Get Timeline or Timeline template details
       tags:
         - Security Timeline API
-      x-beta: true
     patch:
       description: Update an existing Timeline. You can update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing Timeline.
       operationId: PatchTimeline
@@ -44476,7 +44210,6 @@ paths:
       summary: Update a Timeline
       tags:
         - Security Timeline API
-      x-beta: true
     post:
       description: Create a new Timeline or Timeline template.
       operationId: CreateTimelines
@@ -44540,7 +44273,6 @@ paths:
       summary: Create a Timeline or Timeline template
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timeline/_copy:
     get:
       description: |
@@ -44570,7 +44302,6 @@ paths:
       summary: Copies timeline or timeline template
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timeline/_draft:
     get:
       description: Get the details of the draft Timeline  or Timeline template for the current user. If the user doesn't have a draft Timeline, an empty Timeline is returned.
@@ -44613,7 +44344,6 @@ paths:
       summary: Get draft Timeline or Timeline template details
       tags:
         - Security Timeline API
-      x-beta: true
     post:
       description: |
         Create a clean draft Timeline or Timeline template for the current user.
@@ -44664,7 +44394,6 @@ paths:
       summary: Create a clean draft Timeline or Timeline template
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timeline/_export:
     post:
       description: Export Timelines as an NDJSON file.
@@ -44711,7 +44440,6 @@ paths:
       summary: Export Timelines
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timeline/_favorite:
     patch:
       description: Favorite a Timeline or Timeline template for the current user.
@@ -44762,7 +44490,6 @@ paths:
       summary: Favorite a Timeline or Timeline template
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timeline/_import:
     post:
       description: Import Timelines.
@@ -44836,7 +44563,6 @@ paths:
       summary: Import Timelines
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timeline/_prepackaged:
     post:
       description: Install or update prepackaged Timelines.
@@ -44889,7 +44615,6 @@ paths:
       summary: Install prepackaged Timelines
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timeline/resolve:
     get:
       operationId: ResolveTimeline
@@ -44918,7 +44643,6 @@ paths:
       summary: Get an existing saved Timeline or Timeline template
       tags:
         - Security Timeline API
-      x-beta: true
   /api/timelines:
     get:
       description: Get a list of all saved Timelines or Timeline templates.
@@ -45029,7 +44753,6 @@ paths:
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
-      x-beta: true
   /s/{spaceId}/api/observability/slos:
     get:
       description: |
@@ -45134,7 +44857,6 @@ paths:
       summary: Get a paginated list of SLOs
       tags:
         - slo
-      x-beta: true
     post:
       description: |
         You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -45182,7 +44904,6 @@ paths:
       summary: Create an SLO
       tags:
         - slo
-      x-beta: true
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       description: |
@@ -45221,7 +44942,6 @@ paths:
       summary: Batch delete rollup and summary data
       tags:
         - slo
-      x-beta: true
   /s/{spaceId}/api/observability/slos/{sloId}:
     delete:
       description: |
@@ -45261,7 +44981,6 @@ paths:
       summary: Delete an SLO
       tags:
         - slo
-      x-beta: true
     get:
       description: |
         You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -45310,7 +45029,6 @@ paths:
       summary: Get an SLO
       tags:
         - slo
-      x-beta: true
     put:
       description: |
         You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
@@ -45359,7 +45077,6 @@ paths:
       summary: Update an SLO
       tags:
         - slo
-      x-beta: true
   /s/{spaceId}/api/observability/slos/{sloId}/_reset:
     post:
       description: |
@@ -45403,7 +45120,6 @@ paths:
       summary: Reset an SLO
       tags:
         - slo
-      x-beta: true
   /s/{spaceId}/api/observability/slos/{sloId}/disable:
     post:
       description: |
@@ -45443,7 +45159,6 @@ paths:
       summary: Disable an SLO
       tags:
         - slo
-      x-beta: true
   /s/{spaceId}/api/observability/slos/{sloId}/enable:
     post:
       description: |
@@ -45483,7 +45198,6 @@ paths:
       summary: Enable an SLO
       tags:
         - slo
-      x-beta: true
   /s/{spaceId}/internal/observability/slos/_definitions:
     get:
       description: |
@@ -45498,6 +45212,11 @@ paths:
           name: includeOutdatedOnly
           schema:
             type: boolean
+        - description: Specify which SLO tags to query by (comma-separated list)
+          in: query
+          name: tags
+          schema:
+            type: string
         - description: Filters the SLOs by name
           example: my service availability
           in: query
@@ -45546,7 +45265,6 @@ paths:
       summary: Get the SLO definitions
       tags:
         - slo
-      x-beta: true
 components:
   examples:
     APM_UI_source_maps_get_200_response1:
@@ -47180,6 +46898,305 @@ components:
               icon: indexPatternApp
               title: Kibana Sample Data Logs
             type: index-pattern
+    Task_manager_health_Serverless_APIs_health_200response_serverless:
+      description: A successful response from `GET api/task_manager/_health`.
+      value: |-
+        {
+          "id": "b44483e1-3ba2-4f28-93d0-1d96c69c32c1",
+          "timestamp": "2025-03-21T21:49:50.409Z",
+          "status": "OK",
+          "last_update": "2025-03-21T21:48:53.996Z",
+          "stats": {
+            "configuration": {
+              "timestamp": "2025-03-21T21:47:51.663Z",
+              "value": {
+                "request_capacity": 1000,
+                "monitored_aggregated_stats_refresh_rate": 60000,
+                "monitored_stats_running_average_window": 50,
+                "monitored_task_execution_thresholds": {
+                  "custom": {},
+                  "default": {
+                    "error_threshold": 90,
+                    "warn_threshold": 80
+                  }
+                },
+                "claim_strategy": "mget",
+                "poll_interval": 500,
+                "capacity": {
+                  "config": 10,
+                  "as_workers": 10,
+                  "as_cost": 20
+                }
+              },
+              "status": "OK"
+            },
+            "workload": {
+              "timestamp": "2025-03-21T21:48:53.996Z",
+              "value": {
+                "count": 21,
+                "cost": 42,
+                "task_types": {
+                  "Fleet-Metrics-Task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "Fleet-Usage-Logger": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "Fleet-Usage-Sender": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "ML:saved-objects-sync": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "actions:connector_usage_reporting": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "actions_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerting_health_check": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerting_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "alerts_invalidate_api_keys": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "cases-telemetry-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "dashboard_telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:automatic-agent-upgrade-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:check-deleted-files-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:delete-unenrolled-agents-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:sync-integrations-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:unenroll-inactive-agents-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "fleet:upgrade-agentless-deployments-task": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "logs-data-telemetry": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "running": 1
+                    }
+                  },
+                  "session_cleanup": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "task_manager:delete_inactive_background_task_nodes": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  },
+                  "task_manager:mark_removed_tasks_as_unrecognized": {
+                    "count": 1,
+                    "cost": 2,
+                    "status": {
+                      "idle": 1
+                    }
+                  }
+                },
+                "non_recurring": 1,
+                "non_recurring_cost": 2,
+                "schedule": [
+                  [
+                    "1m",
+                    2
+                  ],
+                  [
+                    "5m",
+                    2
+                  ],
+                  [
+                    "10m",
+                    1
+                  ],
+                  [
+                    "15m",
+                    1
+                  ],
+                  [
+                    "30m",
+                    1
+                  ],
+                  [
+                    "1h",
+                    5
+                  ],
+                  [
+                    "3600s",
+                    1
+                  ],
+                  [
+                    "60m",
+                    1
+                  ],
+                  [
+                    "720m",
+                    1
+                  ],
+                  [
+                    "1d",
+                    4
+                  ],
+                  [
+                    "1440m",
+                    1
+                  ]
+                ],
+                "overdue": 0,
+                "overdue_cost": 0,
+                "overdue_non_recurring": 0,
+                "estimated_schedule_density": [
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  1,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0,
+                  0
+                ],
+                "capacity_requirements": {
+                  "per_minute": 2,
+                  "per_hour": 43,
+                  "per_day": 7
+                }
+              },
+              "status": "OK"
+            }
+          }
+        }
     get_connector_types_generativeai_response:
       summary: A list of connector types for the `generativeAI` feature.
       value:
@@ -61357,6 +61374,33 @@ components:
         timeWindow:
           $ref: '#/components/schemas/SLOs_time_window'
       title: Update SLO request
+      type: object
+    Task_manager_health_Serverless_APIs_configuration:
+      description: |
+        This object summarizes the current configuration of Task Manager. This includes dynamic configurations that change over time, such as `poll_interval` and `max_workers`, which can adjust in reaction to changing load on the system.
+      type: object
+    Task_manager_health_Serverless_APIs_health_response_serverless:
+      title: Task health response properties
+      type: object
+      properties:
+        id:
+          type: string
+        last_update:
+          type: string
+        stats:
+          type: object
+          properties:
+            configuration:
+              $ref: '#/components/schemas/Task_manager_health_Serverless_APIs_configuration'
+            workload:
+              $ref: '#/components/schemas/Task_manager_health_Serverless_APIs_workload'
+        status:
+          type: string
+        timestamp:
+          type: string
+    Task_manager_health_Serverless_APIs_workload:
+      description: |
+        This object summarizes the work load across the cluster, including the tasks in the system, their types, and current status.
       type: object
     bedrock_config:
       title: Connector request properties for an Amazon Bedrock connector

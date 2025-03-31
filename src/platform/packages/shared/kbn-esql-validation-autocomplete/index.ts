@@ -8,12 +8,7 @@
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
-export type {
-  FunctionDefinition,
-  CommandDefinition,
-  CommandOptionsDefinition,
-  Literals,
-} from './src/definitions/types';
+export type { FunctionDefinition, CommandDefinition, Literals } from './src/definitions/types';
 export type { ESQLCallbacks } from './src/shared/types';
 
 /**
@@ -44,7 +39,6 @@ export {
   getFunctionDefinition,
   getCommandDefinition,
   getAllCommands,
-  getCommandOption,
   getColumnForASTNode as lookupColumn,
   shouldBeQuotedText,
   printFunctionSignature,

@@ -200,6 +200,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       trainedModels: `${MACHINE_LEARNING_DOCS}ml-trained-models.html`,
       textEmbedding: `${MACHINE_LEARNING_DOCS}ml-nlp-model-ref.html#ml-nlp-model-ref-text-embedding`,
       troubleshootSetup: `${ENTERPRISE_SEARCH_DOCS}troubleshoot-setup.html`,
+      upgrade9x: `${ENTERPRISE_SEARCH_DOCS}upgrading-to-9-x.html`,
       usersAccess: `${ENTERPRISE_SEARCH_DOCS}users-access.html`,
     },
     metricbeat: {
@@ -301,6 +302,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
+      indexBlocks: `${ELASTICSEARCH_DOCS}index-modules-blocks.html#index-block-settings`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
       unfreezeApi: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
@@ -544,6 +546,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}transforms.html`
         : `${ELASTICSEARCH_DOCS}transforms.html`,
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
+      overview: `${ELASTICSEARCH_DOCS}transform-overview.html`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
