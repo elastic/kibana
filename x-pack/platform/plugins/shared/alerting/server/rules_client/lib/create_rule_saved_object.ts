@@ -52,6 +52,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 ): Promise<Rule<Params> | RuleWithLegacyId<Params> | SavedObject<RawRule>> {
   const { intervalInMs, rawRule, references, ruleId, options, returnRuleAttributes } = params;
 
+  console.log('1')
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.CREATE,
@@ -60,6 +61,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     })
   );
 
+  console.log('2')
   let createdAlert: SavedObject<RawRule>;
   try {
     createdAlert = await withSpan(
@@ -75,6 +77,8 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
           },
         })
     );
+
+  console.log('3')
   } catch (e) {
     // Avoid unused API key
     await bulkMarkApiKeysForInvalidation(
@@ -85,6 +89,8 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 
     throw e;
   }
+
+  console.log('4')
   if (rawRule.enabled) {
     let scheduledTaskId: string;
     try {
@@ -96,6 +102,9 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
         throwOnConflict: true,
       });
       scheduledTaskId = scheduledTask.id;
+      
+  console.log('5')
+
     } catch (e) {
       // Cleanup data, something went wrong scheduling the task
       try {
@@ -112,6 +121,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       throw e;
     }
 
+  console.log('6')
     await withSpan({ name: 'unsecuredSavedObjectsClient.update', type: 'rules' }, () =>
       updateRuleSo({
         savedObjectsClient: context.unsecuredSavedObjectsClient,
@@ -124,6 +134,7 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     createdAlert.attributes.scheduledTaskId = scheduledTaskId;
   }
 
+  console.log('7')
   // Log warning if schedule interval is less than the minimum but we're not enforcing it
   if (
     intervalInMs < context.minimumScheduleIntervalInMs &&
@@ -136,6 +147,8 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 
   // TODO (http-versioning): Remove casts
   if (returnRuleAttributes) {
+
+  console.log('8')
     return createdAlert as SavedObject<RawRule>;
   }
 

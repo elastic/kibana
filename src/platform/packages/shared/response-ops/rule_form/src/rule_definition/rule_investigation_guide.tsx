@@ -70,9 +70,10 @@ export function InvestigationManager<T extends RuleTypeParams>({
   setRuleParams,
   value,
 }: {
-  setRuleParams: RuleTypeParamsExpressionProps<T>['setRuleParams'];
+  setRuleParams: (v: { investigation_guide: { blob: string } }) => void;
   value: string;
 }) {
+  console.log('value from guide', value);
   const [messages, setMessages] = useState<string[]>([]);
   const onParse = useCallback((error: any, { messages: msg, astVal }: any) => {
     setMessages(error ? [error] : [msg]);
@@ -103,9 +104,7 @@ export function InvestigationManager<T extends RuleTypeParams>({
           defaultMessage: 'Add guidelines for addressing alerts created by this rule',
         })}
         value={value}
-        onChange={(v) => {
-          setRuleParams('investigationGuide', v);
-        }}
+        onChange={(blob) => setRuleParams({ investigation_guide: { blob } })}
         errors={messages}
         height={400}
         onParse={onParse}

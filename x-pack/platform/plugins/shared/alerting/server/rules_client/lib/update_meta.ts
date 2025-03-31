@@ -15,6 +15,7 @@ export function updateMeta<T extends Partial<RawRule>>(
   context: RulesClientContext,
   alertAttributes: T
 ): T {
+  console.log('before meta check')
   if (Object.hasOwn(alertAttributes, 'apiKey') || Object.hasOwn(alertAttributes, 'apiKeyOwner')) {
     return {
       ...alertAttributes,
@@ -24,5 +25,6 @@ export function updateMeta<T extends Partial<RawRule>>(
       },
     };
   }
+  console.log('after update meta check', alertAttributes);
   return alertAttributes;
 }
