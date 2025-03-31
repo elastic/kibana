@@ -26,7 +26,7 @@ export const discoverPlaywrightConfigs: Command<void> = {
   Common usage:
     node scripts/scout discover-playwright-configs --searchPaths <search_paths>
     node scripts/scout discover-playwright-configs --validate // validate if all plugins are registered in the Scout CI config
-    node scripts/scout discover-playwright-configs --save // save the discovered Playwright config files to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
+    node scripts/scout discover-playwright-configs --save // validate and save enabled plugins with its config files to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
     node scripts/scout discover-playwright-configs
   `,
   flags: {
@@ -37,19 +37,23 @@ export const discoverPlaywrightConfigs: Command<void> = {
   run: ({ flagsReader, log }) => {
     const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
 
-    let pluginsMap = measurePerformance(log, 'Discovering Playwright config files', () => {
-      return getScoutPlaywrightConfigs(searchPaths, log);
-    });
+    const pluginsWithConfigs = measurePerformance(
+      log,
+      'Discovering Playwright config files',
+      () => {
+        return getScoutPlaywrightConfigs(searchPaths, log);
+      }
+    );
 
     const finalMessage =
-      pluginsMap.size === 0
+      pluginsWithConfigs.size === 0
         ? 'No Playwright config files found'
-        : `Found Playwright config files in '${pluginsMap.size}' plugins`;
+        : `Found Playwright config files in '${pluginsWithConfigs.size}' plugins`;
 
     if (!flagsReader.boolean('save')) {
       log.info(finalMessage);
 
-      pluginsMap.forEach((data, plugin) => {
+      pluginsWithConfigs.forEach((data, plugin) => {
         log.info(`${data.group} / [${plugin}] plugin:`);
         data.configs.map((file) => {
           log.info(`- ${file}`);
@@ -57,11 +61,9 @@ export const discoverPlaywrightConfigs: Command<void> = {
       });
     }
 
-    if (flagsReader.boolean('validate')) {
-      pluginsMap = validateWithScoutCiConfig(log, pluginsMap);
-    }
-
     if (flagsReader.boolean('save')) {
+      const pluginsWithRunnableConfigs = validateWithScoutCiConfig(log, pluginsWithConfigs);
+
       const dirPath = path.dirname(SCOUT_PLAYWRIGHT_CONFIGS_PATH);
 
       if (!fs.existsSync(dirPath)) {
@@ -70,12 +72,18 @@ export const discoverPlaywrightConfigs: Command<void> = {
 
       fs.writeFileSync(
         SCOUT_PLAYWRIGHT_CONFIGS_PATH,
-        JSON.stringify(Object.fromEntries(pluginsMap), null, 2)
+        JSON.stringify(Object.fromEntries(pluginsWithRunnableConfigs), null, 2)
       );
 
       log.info(
-        `${finalMessage}.\nSaved '${pluginsMap.size}' plugins to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
+        `${finalMessage}.\nSaved '${pluginsWithRunnableConfigs.size}' plugins to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
       );
+
+      return;
+    }
+
+    if (flagsReader.boolean('validate')) {
+      validateWithScoutCiConfig(log, pluginsWithConfigs);
     }
   },
 };
