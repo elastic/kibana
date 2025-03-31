@@ -73,7 +73,7 @@ describe('#withSpaceSolutionDisabledFeatures', () => {
   });
 
   describe('when the space solution is "security"', () => {
-    test('it removes the "observability" and "enterpriseSearch" features', () => {
+    test('it removes the "observability" feature', () => {
       const spaceDisabledFeatures: string[] = ['baz'];
       const spaceSolution = 'security';
 
