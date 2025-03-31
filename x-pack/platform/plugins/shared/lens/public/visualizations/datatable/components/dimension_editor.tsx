@@ -20,6 +20,7 @@ import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';
 import { KbnPalettes } from '@kbn/palettes';
+import { DatatableInspectorTables } from '../../../../common/expressions';
 import type { VisualizationDimensionEditorProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
 
@@ -32,7 +33,6 @@ import { CollapseSetting } from '../../../shared_components/collapse_setting';
 import { ColorMappingByValues } from '../../../shared_components/coloring/color_mapping_by_values';
 import { ColorMappingByTerms } from '../../../shared_components/coloring/color_mapping_by_terms';
 import { getColumnAlignment } from '../utils';
-import { DatatableInspectorTables } from '../../../../common/expressions/datatable/datatable_fn';
 
 const idPrefix = htmlIdGenerator()();
 

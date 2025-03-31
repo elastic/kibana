@@ -19,7 +19,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { INTEGRATIONS_PLUGIN_ID } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
-import { InventoryTitle } from '../inventory_title';
+import { AssetInventoryTitle } from '../asset_inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { TEST_SUBJ_ONBOARDING_INITIALIZING } from '../../constants';
 
@@ -31,7 +31,7 @@ export const Initializing = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <InventoryTitle />
+        <AssetInventoryTitle />
         <CenteredWrapper>
           <EuiEmptyPrompt
             data-test-subj={TEST_SUBJ_ONBOARDING_INITIALIZING}

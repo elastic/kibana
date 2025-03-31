@@ -17,7 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import illustration from '../../../common/images/information_light.png';
-import { InventoryTitle } from '../inventory_title';
+import { AssetInventoryTitle } from '../asset_inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { HoverForExplanationTooltip } from './hover_for_explanation_tooltip';
 import { EmptyStateIllustrationContainer } from '../empty_state_illustration_container';
@@ -31,7 +31,7 @@ export const GetStarted = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <InventoryTitle />
+        <AssetInventoryTitle />
         <CenteredWrapper>
           <EuiEmptyPrompt
             data-test-subj={TEST_SUBJ_ONBOARDING_GET_STARTED}
