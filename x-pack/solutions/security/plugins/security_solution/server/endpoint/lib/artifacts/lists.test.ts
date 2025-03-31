@@ -737,167 +737,99 @@ describe('artifacts lists', () => {
     const getOsFilter = (os: 'macos' | 'linux' | 'windows') =>
       `exception-list-agnostic.attributes.os_types:"${os} "`;
 
-    describe('linux', () => {
-      test('it should translate wildcard wildcard process.executable entry without modifications', async () => {
-        const os = 'linux';
-        const testEntries: EntriesArray = [
-          {
-            field: 'process.executable.caseless',
-            operator: 'included',
-            type: 'wildcard',
-            value: '/usr/bi*/doc.md',
-          },
-        ];
-
-        const expectedEndpointExceptions = {
-          type: 'simple',
-          entries: [
+    describe.each`
+      os           | value                    | exceptionOperatorType
+      ${'linux'}   | ${'/usr/bi*/doc.md'}     | ${'wildcard_cased'}
+      ${'macos'}   | ${'C:\\My Doc*\\doc.md'} | ${'wildcard_caseless'}
+      ${'windows'} | ${'/usr/bi*/doc.md'}     | ${'wildcard_caseless'}
+    `(
+      '$os',
+      ({
+        os,
+        value,
+        exceptionOperatorType,
+      }: {
+        os: 'linux' | 'macos' | 'windows';
+        value: string;
+        exceptionOperatorType: string;
+      }) => {
+        test('it should translate wildcard process.executable entry without modifications', async () => {
+          const testEntries: EntriesArray = [
             {
-              field: 'process.executable',
+              field: 'process.executable.caseless',
               operator: 'included',
-              type: 'wildcard_cased',
-              value: '/usr/bi*/doc.md',
-            },
-          ],
-        };
-
-        const first = getFoundExceptionListItemSchemaMock();
-        first.data[0].entries = testEntries;
-        first.data[0].os_types = [os];
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-
-        const resp = await getFilteredEndpointExceptionListRaw({
-          elClient: mockExceptionClient,
-          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
-          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-        });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
-        expect(translated).toEqual({
-          entries: [expectedEndpointExceptions],
-        });
-      });
-
-      test('it should translate wildcard file.path.text entry without modifications', async () => {
-        const os = 'linux';
-        const testEntries: EntriesArray = [
-          {
-            field: 'file.path.text',
-            operator: 'included',
-            type: 'wildcard',
-            value: '/usr/bi*/doc.md',
-          },
-        ];
-
-        const expectedEndpointExceptions = {
-          type: 'simple',
-          entries: [
-            {
-              field: 'file.path',
-              operator: 'included',
-              type: 'wildcard_cased',
-              value: '/usr/bi*/doc.md',
-            },
-          ],
-        };
-
-        const first = getFoundExceptionListItemSchemaMock();
-        first.data[0].entries = testEntries;
-        first.data[0].os_types = [os];
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
-
-        const resp = await getFilteredEndpointExceptionListRaw({
-          elClient: mockExceptionClient,
-          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
-          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
-        });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
-        expect(translated).toEqual({
-          entries: [expectedEndpointExceptions],
-        });
-      });
-    });
-
-    describe.each(['macos', 'windows'] as const)('%s', (os) => {
-      test('it should translate wildcard process.executable entry without modifications', async () => {
-        const value = os === 'windows' ? 'C:\\My Doc*\\doc.md' : '/usr/bi*/doc.md';
-
-        const testEntries: EntriesArray = [
-          {
-            field: 'process.executable.caseless',
-            operator: 'included',
-            type: 'wildcard',
-            value,
-          },
-        ];
-
-        const expectedEndpointExceptions = {
-          type: 'simple',
-          entries: [
-            {
-              field: 'process.executable',
-              operator: 'included',
-              type: 'wildcard_caseless',
+              type: 'wildcard',
               value,
             },
-          ],
-        };
+          ];
 
-        const first = getFoundExceptionListItemSchemaMock();
-        first.data[0].entries = testEntries;
-        first.data[0].os_types = [os];
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+          const expectedEndpointExceptions = {
+            type: 'simple',
+            entries: [
+              {
+                field: 'process.executable',
+                operator: 'included',
+                type: exceptionOperatorType,
+                value,
+              },
+            ],
+          };
 
-        const resp = await getFilteredEndpointExceptionListRaw({
-          elClient: mockExceptionClient,
-          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
-          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          const first = getFoundExceptionListItemSchemaMock();
+          first.data[0].entries = testEntries;
+          first.data[0].os_types = [os];
+          mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+          const resp = await getFilteredEndpointExceptionListRaw({
+            elClient: mockExceptionClient,
+            filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+            listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          });
+          const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
+          expect(translated).toEqual({
+            entries: [expectedEndpointExceptions],
+          });
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
-        expect(translated).toEqual({
-          entries: [expectedEndpointExceptions],
-        });
-      });
 
-      test('it should translate wildcard file.path.text entry without modifications', async () => {
-        const value = os === 'windows' ? 'C:\\My Doc*\\doc.md' : '/usr/bi*/doc.md';
-
-        const testEntries: EntriesArray = [
-          {
-            field: 'file.path.text',
-            operator: 'included',
-            type: 'wildcard',
-            value,
-          },
-        ];
-
-        const expectedEndpointExceptions = {
-          type: 'simple',
-          entries: [
+        test('it should translate wildcard file.path.text entry without modifications', async () => {
+          const testEntries: EntriesArray = [
             {
-              field: 'file.path',
+              field: 'file.path.text',
               operator: 'included',
-              type: 'wildcard_caseless',
+              type: 'wildcard',
               value,
             },
-          ],
-        };
+          ];
 
-        const first = getFoundExceptionListItemSchemaMock();
-        first.data[0].entries = testEntries;
-        first.data[0].os_types = [os];
-        mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+          const expectedEndpointExceptions = {
+            type: 'simple',
+            entries: [
+              {
+                field: 'file.path',
+                operator: 'included',
+                type: exceptionOperatorType,
+                value,
+              },
+            ],
+          };
 
-        const resp = await getFilteredEndpointExceptionListRaw({
-          elClient: mockExceptionClient,
-          filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
-          listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          const first = getFoundExceptionListItemSchemaMock();
+          first.data[0].entries = testEntries;
+          first.data[0].os_types = [os];
+          mockExceptionClient.findExceptionListItem = jest.fn().mockReturnValueOnce(first);
+
+          const resp = await getFilteredEndpointExceptionListRaw({
+            elClient: mockExceptionClient,
+            filter: `${getOsFilter(os)} and (exception-list-agnostic.attributes.tags:"policy:all")`,
+            listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+          });
+          const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
+          expect(translated).toEqual({
+            entries: [expectedEndpointExceptions],
+          });
         });
-        const translated = convertExceptionsToEndpointFormat(resp, 'v1', defaultFeatures);
-        expect(translated).toEqual({
-          entries: [expectedEndpointExceptions],
-        });
-      });
-    });
+      }
+    );
   });
 
   const TEST_EXCEPTION_LIST_ITEM = {
