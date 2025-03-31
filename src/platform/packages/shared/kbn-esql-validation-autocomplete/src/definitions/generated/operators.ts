@@ -387,7 +387,7 @@ const castDefinition: FunctionDefinition = {
   name: '::',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.cast', {
     defaultMessage:
-      'The `::` operator provides a convenient alternative syntax to the TO_<type> [conversion functions](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-type-conversion-functions).',
+      'The `::` operator provides a convenient alternative syntax to the TO_<type> conversion functions',
   }),
   ignoreAsSuggestion: true,
 
