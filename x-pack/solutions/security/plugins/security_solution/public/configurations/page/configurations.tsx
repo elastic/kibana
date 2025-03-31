@@ -9,16 +9,11 @@ import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConfigurationsTabs } from './configuration_tabs';
 import { ConfigurationsRouter } from './configuration_router';
-import { PAGE_CONTENT_WIDTH } from '../../onboarding/constants';
 
 export const Configurations: React.FC = () => {
   return (
-    <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
-      <KibanaPageTemplate.Section
-        grow={true}
-        restrictWidth={PAGE_CONTENT_WIDTH}
-        bottomBorder="extended"
-      >
+    <KibanaPageTemplate restrictWidth={false} contentBorder={true}>
+      <KibanaPageTemplate.Section grow={true} bottomBorder="extended">
         <ConfigurationsTabs />
         <ConfigurationsRouter />
       </KibanaPageTemplate.Section>
