@@ -36,7 +36,7 @@ import { SloResetConfirmationModal } from '../../../components/slo/reset_confirm
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
-import { SearchState, useUrlSearchState } from './hooks/use_url_search_state';
+import { useUrlSearchState } from './hooks/use_url_search_state';
 
 export function SloManagementTable() {
   const { state, onStateChange } = useUrlSearchState();
@@ -106,10 +106,6 @@ export function SloManagementTable() {
 
   const handleDisableCancel = () => {
     setSloToDisable(undefined);
-  };
-
-  const updateFilter = (newState: SearchState) => {
-    onStateChange(newState);
   };
 
   const navigateToClone = useCloneSlo();
@@ -295,7 +291,7 @@ export function SloManagementTable() {
   return (
     <>
       <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar state={state} onRefresh={refetch} updateFilter={updateFilter} />
+        <SloManagementSearchBar onRefresh={refetch} />
         <EuiSpacer size="m" />
         <EuiBasicTable<SLODefinitionResponse>
           tableCaption={TABLE_CAPTION}

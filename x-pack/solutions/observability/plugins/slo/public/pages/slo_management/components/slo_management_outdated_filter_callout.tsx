@@ -12,34 +12,35 @@ import { useUrlSearchState } from './hooks/use_url_search_state';
 export function SloOutdatedFilterCallout() {
   const { state, onStateChange } = useUrlSearchState();
 
-  if (state.includeOutdatedOnly) {
-    return (
-      <>
-        <EuiCallOut color="primary">
-          <EuiText>
-            <EuiIcon type="iInCircle" />{' '}
-            {i18n.translate('xpack.slo.outdatedSloFilterCallout.title', {
-              defaultMessage:
-                "You're currently viewing only outdated SLOs. You can reset them from the action menu to bring them up to date.",
-            })}{' '}
-            <EuiLink
-              data-test-subj="outdated-filter-help-callout"
-              onClick={() => {
-                onStateChange({
-                  ...state,
-                  includeOutdatedOnly: false,
-                });
-              }}
-            >
-              {i18n.translate('xpack.slo.outdatedSloFilterCallout.action', {
-                defaultMessage: 'Remove filter',
-              })}
-            </EuiLink>
-          </EuiText>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </>
-    );
+  if (!state.includeOutdatedOnly) {
+    return null;
   }
-  return null;
+
+  return (
+    <>
+      <EuiCallOut color="primary">
+        <EuiText>
+          <EuiIcon type="iInCircle" />{' '}
+          {i18n.translate('xpack.slo.outdatedSloFilterCallout.title', {
+            defaultMessage:
+              "You're currently viewing only outdated SLOs. You can reset them from the action menu to bring them up to date.",
+          })}{' '}
+          <EuiLink
+            data-test-subj="outdated-filter-help-callout"
+            onClick={() => {
+              onStateChange({
+                ...state,
+                includeOutdatedOnly: false,
+              });
+            }}
+          >
+            {i18n.translate('xpack.slo.outdatedSloFilterCallout.action', {
+              defaultMessage: 'Remove filter',
+            })}
+          </EuiLink>
+        </EuiText>
+      </EuiCallOut>
+      <EuiSpacer size="m" />
+    </>
+  );
 }

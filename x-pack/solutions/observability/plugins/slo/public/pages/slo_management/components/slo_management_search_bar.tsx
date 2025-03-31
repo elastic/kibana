@@ -11,15 +11,14 @@ import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { useFetchSLOSuggestions } from '../../slo_edit/hooks/use_fetch_suggestions';
 import { useKibana } from '../../../hooks/use_kibana';
-import { SearchState } from './hooks/use_url_search_state';
+import { useUrlSearchState } from './hooks/use_url_search_state';
 
 interface Props {
-  state: SearchState;
-  updateFilter: (newState: SearchState) => void;
   onRefresh: () => void;
 }
 
-export function SloManagementSearchBar({ state, onRefresh, updateFilter }: Props) {
+export function SloManagementSearchBar({ onRefresh }: Props) {
+  const { state, onStateChange } = useUrlSearchState();
   const {
     unifiedSearch: {
       ui: { SearchBar },
@@ -46,7 +45,7 @@ export function SloManagementSearchBar({ state, onRefresh, updateFilter }: Props
       showFilterBar={false}
       query={{ query: state.search, language: 'text' }}
       onQuerySubmit={({ query: value }) => {
-        updateFilter({ ...state, search: value?.query ? (value?.query as string) : '' });
+        onStateChange({ ...state, search: value?.query ? (value?.query as string) : '' });
       }}
       onRefresh={onRefresh}
       renderQueryInputAppend={() => (
@@ -59,7 +58,7 @@ export function SloManagementSearchBar({ state, onRefresh, updateFilter }: Props
             selectedOptions={selectedOptions}
             onChange={(newOptions) => {
               setSelectedOptions(newOptions);
-              updateFilter({
+              onStateChange({
                 ...state,
                 tags: newOptions.map((option) => String(option.value)),
               });

@@ -26,7 +26,7 @@ export function SloOutdatedCallout() {
     navigateToUrl(basePath.prepend(paths.slosManagement));
   };
 
-  const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: false });
+  const { isLoading, data } = useFetchSloDefinitions({ includeOutdatedOnly: true });
   if (!isLoading && data && data.total > 0) {
     return (
       <>

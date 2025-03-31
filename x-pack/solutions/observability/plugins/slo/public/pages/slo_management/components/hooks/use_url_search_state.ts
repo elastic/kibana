@@ -10,7 +10,6 @@ import {
   createSessionStorageStateStorage,
 } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
-import { pick } from 'lodash';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../../common/constants';
@@ -78,9 +77,6 @@ export function useUrlSearchState(): {
       urlStateStorage.current?.set(SLO_MANAGEMENT_SEARCH_URL_STORAGE_KEY, updatedState, {
         replace: true,
       });
-
-      // Discard search itself from session storage. Keep only view preferences
-      sessionStorage.current?.set(SLO_MANAGEMENT_SEARCH_SESSION_STORAGE_KEY, pick(updatedState));
     },
     [state]
   );
