@@ -878,9 +878,6 @@ export default ({ getService }: FtrProviderContext): void => {
           await spacesServices.create({
             id: spaceId,
             name: spaceId,
-            disabledFeatures: [],
-            color: '#AABBCC',
-            solution: 'classic',
           });
         });
         after(async () => {
