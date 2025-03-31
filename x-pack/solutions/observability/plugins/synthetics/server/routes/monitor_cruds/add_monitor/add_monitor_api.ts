@@ -9,6 +9,7 @@ import { v4 as uuidV4 } from 'uuid';
 import { SavedObject } from '@kbn/core-saved-objects-common/src/server_types';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import pRetry from 'p-retry';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 import { parseMonitorLocations } from './utils';
 import { MonitorValidationError } from '../monitor_validation';
@@ -228,8 +229,9 @@ export class AddEditMonitorAPI {
     try {
       // we do this async, so we don't block the user, error handling will be done on the UI via separate api
       const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
-      defaultAlertService
-        .setupDefaultAlerts()
+      pRetry(async () => {
+        await defaultAlertService.setupDefaultAlerts();
+      })
         .then(() => {
           server.logger.debug(`Successfully created default alert for monitor: ${name}`);
         })
