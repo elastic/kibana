@@ -62,7 +62,7 @@ export interface CloudSecurityDataTableProps {
    * This is the component that will be rendered in the flyout when a row is expanded.
    * This component will receive the row data and a function to close the flyout.
    */
-  flyoutComponent: () => JSX.Element;
+  onOpenFlyoutCallback: () => JSX.Element;
   /**
    * This is the object that contains all the data and functions from the useCloudPostureDataTable hook.
    * This is also used to manage the table state from the parent component.
@@ -108,7 +108,7 @@ export const CloudSecurityDataTable = ({
   defaultColumns,
   rows,
   total,
-  flyoutComponent,
+  onOpenFlyoutCallback,
   cloudPostureDataTable,
   loadMore,
   title,
@@ -342,7 +342,7 @@ export const CloudSecurityDataTable = ({
           rows={rows}
           sampleSizeState={MAX_FINDINGS_TO_LOAD}
           setExpandedDoc={onExpandDocClick}
-          renderDocumentView={flyoutComponent}
+          renderDocumentView={onOpenFlyoutCallback}
           sort={sort}
           rowsPerPageState={pageSize}
           totalHits={total}

@@ -188,11 +188,11 @@ export const getVulnerabilitiesQuery = ({ query, sort }: UseCspOptions, isPrevie
   size: isPreview ? 0 : 500,
   aggs: getFindingsCountAggQueryVulnerabilities(),
   ignore_unavailable: true,
-  query: buildFindingsQueryWithFilters(query),
+  query: buildVulnerabilityFindingsQueryWithFilters(query),
   sort,
 });
 
-export const buildFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+export const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
   return {
     ...query,
     bool: {
@@ -208,6 +208,16 @@ export const buildFindingsQueryWithFilters = (query: UseCspOptions['query']) => 
           },
         },
       ],
+    },
+  };
+};
+
+export const buildFindingsQueryWithFilters = (query: UseCspOptions['query']) => {
+  return {
+    ...query,
+    bool: {
+      ...query?.bool,
+      filter: [...(query?.bool?.filter ?? [])],
     },
   };
 };

@@ -50,7 +50,7 @@ const getCspFinding = (source: Record<string, any> | undefined): CspFinding | un
 /**
  * Flyout component for the latest findings table, renders empty component as now we use Use Expandable Flyout API hook to handle all the rendering
  */
-const flyoutComponent = (): JSX.Element => {
+const onOpenFlyoutCallback = (): JSX.Element => {
   uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, OPEN_FINDINGS_FLYOUT);
   return <></>;
 };
@@ -138,7 +138,7 @@ export const LatestFindingsTable = ({
             defaultColumns={defaultColumns}
             rows={rows}
             total={total}
-            flyoutComponent={flyoutComponent}
+            onOpenFlyoutCallback={onOpenFlyoutCallback}
             cloudPostureDataTable={cloudPostureDataTable}
             loadMore={fetchNextPage}
             title={title}

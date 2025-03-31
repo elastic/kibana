@@ -27,6 +27,7 @@ import {
   EuiCallOut,
   EuiLink,
   EuiPanel,
+  EuiIconProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
@@ -112,7 +113,7 @@ export const BenchmarkIcons = ({
 }: {
   benchmarkId: BenchmarkId;
   benchmarkName: BenchmarkName;
-  size?: 's' | 'm' | 'l' | 'xl' | 'original' | 'xxl' | undefined;
+  size?: EuiIconProps['size'];
 }) => (
   <EuiFlexGroup gutterSize="s" alignItems="center">
     {benchmarkId.startsWith('cis') && (

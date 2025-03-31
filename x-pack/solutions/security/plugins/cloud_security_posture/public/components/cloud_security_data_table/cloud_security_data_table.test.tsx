@@ -71,7 +71,7 @@ const renderDataTable = (props: Partial<CloudSecurityDataTableProps> = {}) => {
     defaultColumns: mockDefaultColumns,
     rows: props.rows || mockRows,
     total: 0,
-    flyoutComponent: () => <></>,
+    onOpenFlyoutCallback: () => <></>,
     cloudPostureDataTable: mockCloudPostureDataTable,
     loadMore: jest.fn(),
     createRuleFn: jest.fn(),
