@@ -8463,7 +8463,7 @@ paths:
                               required:
                                 - order
                                 - title
-                                - collapsedz
+                                - collapsed
                             type: array
                           tags:
                             items:
