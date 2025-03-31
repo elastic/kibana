@@ -31,14 +31,14 @@ const formatter = new Intl.NumberFormat('en-US', {
 
 export const ProcessorMetricBadges = ({
   detected_fields,
-  failure_rate,
+  failed_rate,
   skipped_rate,
-  success_rate,
+  parsed_rate,
 }: ProcessorMetricBadgesProps) => {
   const detectedFieldsCount = detected_fields.length;
-  const failureRate = failure_rate > 0 ? formatter.format(failure_rate) : null;
+  const failureRate = failed_rate > 0 ? formatter.format(failed_rate) : null;
   const skippedRate = skipped_rate > 0 ? formatter.format(skipped_rate) : null;
-  const successRate = success_rate > 0 ? formatter.format(success_rate) : null;
+  const successRate = parsed_rate > 0 ? formatter.format(parsed_rate) : null;
 
   return (
     <EuiBadgeGroup gutterSize="xs">
@@ -106,7 +106,7 @@ const errorTitle = i18n.translate(
 );
 
 export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
-  const { errors, success_rate } = metrics;
+  const { errors, parsed_rate } = metrics;
 
   const { euiTheme } = useEuiTheme();
   const [isErrorListExpanded, toggleErrorListExpanded] = useToggle(false);
@@ -118,7 +118,7 @@ export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
   const getCalloutProps = (type: ProcessorMetrics['errors'][number]['type']): EuiCallOutProps => {
     const isWarningError =
       type === 'non_additive_processor_failure' ||
-      (type === 'generic_processor_failure' && success_rate > 0);
+      (type === 'generic_processor_failure' && parsed_rate > 0);
 
     return {
       color: isWarningError ? 'warning' : 'danger',

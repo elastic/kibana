@@ -55,17 +55,17 @@ const OutcomeControls = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const simulationFailureRate = useSimulatorSelector(
-    (state) => state.context.simulation?.failure_rate
+  const simulationFailedRate = useSimulatorSelector(
+    (state) => state.context.simulation?.documents_metrics.failed_rate
   );
   const simulationSkippedRate = useSimulatorSelector(
-    (state) => state.context.simulation?.skipped_rate
+    (state) => state.context.simulation?.documents_metrics.skipped_rate
   );
   const simulationPartiallyParsedRate = useSimulatorSelector(
-    (state) => state.context.simulation?.partially_parsed_rate
+    (state) => state.context.simulation?.documents_metrics.partially_parsed_rate
   );
-  const simulationSuccessRate = useSimulatorSelector(
-    (state) => state.context.simulation?.success_rate
+  const simulationParsedRate = useSimulatorSelector(
+    (state) => state.context.simulation?.documents_metrics.parsed_rate
   );
 
   const dateRangeRef = useSimulatorSelector((state) => state.context.dateRangeRef);
@@ -107,7 +107,7 @@ const OutcomeControls = () => {
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
           badgeColor="success"
           numActiveFilters={
-            simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
+            simulationParsedRate ? parseFloat((simulationParsedRate * 100).toFixed(2)) : undefined
           }
         >
           {previewDocsFilterOptions.outcome_filter_parsed.label}
@@ -136,7 +136,7 @@ const OutcomeControls = () => {
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
           badgeColor="accent"
           numActiveFilters={
-            simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
+            simulationFailedRate ? parseFloat((simulationFailedRate * 100).toFixed(2)) : undefined
           }
         >
           {previewDocsFilterOptions.outcome_filter_failed.label}

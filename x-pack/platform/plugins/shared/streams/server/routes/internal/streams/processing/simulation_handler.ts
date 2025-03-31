@@ -76,9 +76,9 @@ export interface SimulationDocReport {
 export interface ProcessorMetrics {
   detected_fields: string[];
   errors: SimulationError[];
-  failure_rate: number;
+  failed_rate: number;
   skipped_rate: number;
-  success_rate: number;
+  parsed_rate: number;
 }
 
 // Narrow down the type to only successful processor results
@@ -397,7 +397,7 @@ const computePipelineSimulationResult = (
 
       processorsMap[procId].errors.push(error);
       if (error.type !== 'non_additive_processor_failure') {
-        processorsMap[procId].failure_rate++;
+        processorsMap[procId].failed_rate++;
       }
     });
 
@@ -425,9 +425,9 @@ const initProcessorMetricsMap = (
     {
       detected_fields: [],
       errors: [],
-      failure_rate: 0,
+      failed_rate: 0,
       skipped_rate: 0,
-      success_rate: 1,
+      parsed_rate: 1,
     },
   ]);
 
@@ -442,18 +442,18 @@ const extractProcessorMetrics = ({
   sampleSize: number;
 }) => {
   return mapValues(processorsMap, (metrics) => {
-    const failureRate = metrics.failure_rate / sampleSize;
+    const failureRate = metrics.failed_rate / sampleSize;
     const skippedRate = metrics.skipped_rate / sampleSize;
-    const successRate = 1 - skippedRate - failureRate;
+    const parsedRate = 1 - skippedRate - failureRate;
     const detected_fields = uniq(metrics.detected_fields);
     const errors = uniqBy(metrics.errors, (error) => error.message);
 
     return {
       detected_fields,
       errors,
-      failure_rate: parseFloat(failureRate.toFixed(2)),
+      failed_rate: parseFloat(failureRate.toFixed(2)),
       skipped_rate: parseFloat(skippedRate.toFixed(2)),
-      success_rate: parseFloat(successRate.toFixed(2)),
+      parsed_rate: parseFloat(parsedRate.toFixed(2)),
     };
   });
 };
@@ -575,10 +575,13 @@ const prepareSimulationResponse = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   detectedFields: DetectedField[]
 ) => {
-  const successRate = computeParsedRate(docReports);
-  const partiallyParsedRate = computePartiallyParsedRate(docReports);
-  const skippedRate = computeSkippedRate(docReports);
-  const failureRate = computeFailedRate(docReports);
+  const calculateRateByStatus = getRateCalculatorForDocs(docReports);
+
+  const parsedRate = calculateRateByStatus('parsed');
+  const partiallyParsedRate = calculateRateByStatus('partially_parsed');
+  const skippedRate = calculateRateByStatus('skipped');
+  const failureRate = calculateRateByStatus('failed');
+
   const isNotAdditiveSimulation = some(processorsMetrics, (metrics) =>
     metrics.errors.some(isNonAdditiveSimulationError)
   );
@@ -587,10 +590,12 @@ const prepareSimulationResponse = async (
     detected_fields: detectedFields,
     documents: docReports,
     processors_metrics: processorsMetrics,
-    failure_rate: parseFloat(failureRate.toFixed(2)),
-    partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(2)),
-    skipped_rate: parseFloat(skippedRate.toFixed(2)),
-    success_rate: parseFloat(successRate.toFixed(2)),
+    documents_metrics: {
+      failed_rate: parseFloat(failureRate.toFixed(2)),
+      partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(2)),
+      skipped_rate: parseFloat(skippedRate.toFixed(2)),
+      parsed_rate: parseFloat(parsedRate.toFixed(2)),
+    },
     is_non_additive_simulation: isNotAdditiveSimulation,
   };
 };
@@ -603,15 +608,17 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
       [error.processor_id]: {
         detected_fields: [],
         errors: [error],
-        failure_rate: 1,
+        failed_rate: 1,
         skipped_rate: 0,
-        success_rate: 0,
+        parsed_rate: 0,
       },
     },
-    failure_rate: 1,
-    partially_parsed_rate: 0,
-    skipped_rate: 0,
-    success_rate: 0,
+    documents_metrics: {
+      failed_rate: 1,
+      partially_parsed_rate: 0,
+      skipped_rate: 0,
+      parsed_rate: 0,
+    },
     is_non_additive_simulation: isNonAdditiveSimulationError(error),
   };
 };
@@ -662,31 +669,10 @@ const computeDetectedFields = async (
   });
 };
 
-const computeParsedRate = (docs: SimulationDocReport[]) => {
-  const successfulCount = docs.reduce((rate, doc) => (rate += doc.status === 'parsed' ? 1 : 0), 0);
+const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSimulationStatus) => {
+  const matchCount = docs.reduce((rate, doc) => (rate += doc.status === status ? 1 : 0), 0);
 
-  return successfulCount / docs.length;
-};
-
-const computePartiallyParsedRate = (docs: SimulationDocReport[]) => {
-  const successfulCount = docs.reduce(
-    (rate, doc) => (rate += doc.status === 'partially_parsed' ? 1 : 0),
-    0
-  );
-
-  return successfulCount / docs.length;
-};
-
-const computeSkippedRate = (docs: SimulationDocReport[]) => {
-  const skippedCount = docs.reduce((rate, doc) => (rate += doc.status === 'skipped' ? 1 : 0), 0);
-
-  return skippedCount / docs.length;
-};
-
-const computeFailedRate = (docs: SimulationDocReport[]) => {
-  const skippedCount = docs.reduce((rate, doc) => (rate += doc.status === 'failed' ? 1 : 0), 0);
-
-  return skippedCount / docs.length;
+  return matchCount / docs.length;
 };
 
 const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) => {
