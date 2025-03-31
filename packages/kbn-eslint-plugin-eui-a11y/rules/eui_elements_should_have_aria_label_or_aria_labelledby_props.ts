@@ -23,6 +23,7 @@ import {
   sanitizeEuiElementName,
   upperCaseFirstChar,
 } from '../helpers/utils';
+import { getDefaultMessageFromI18n } from '../helpers/get_default_message_from_i18n';
 
 export const EUI_ELEMENTS_TO_CHECK = [
   'EuiBetaBadge',
@@ -129,13 +130,16 @@ const checkNodeForPropNamesAndCreateReporter = ({
 
   const props = getPropValues({
     jsxOpeningElement: node,
-    propNames: ['iconType'],
+    propNames: ['iconType', 'placeholder'],
     sourceCode,
   });
 
   // The intention of the element (i.e. "Select date", "Submit", "Cancel")
   const intent =
-    name.name === 'EuiButtonIcon' && props.iconType
+    props.placeholder &&
+    props.placeholder.type === TypescriptEsTree.TSESTree.AST_NODE_TYPES.JSXExpressionContainer
+      ? getDefaultMessageFromI18n(props.placeholder)
+      : name.name === 'EuiButtonIcon' && props.iconType
       ? String(props.iconType) // For EuiButtonIcon, use the iconType as the intent (i.e. 'pen', 'trash')
       : getIntentFromNode(node);
 
@@ -152,15 +156,13 @@ const checkNodeForPropNamesAndCreateReporter = ({
     functionDeclaration as TypescriptEsTree.TSESTree.FunctionDeclaration
   );
 
-  const translation = [
+  // 'xpack.observability.overview.logs.loadMore.ariaLabel'
+  const translationId = [
     i18nAppId,
     functionName,
     `${intent}${upperCaseFirstChar(elementName)}`,
     'ariaLabel',
-  ];
-
-  // 'xpack.observability.overview.logs.loadMore.ariaLabel'
-  const translationId = translation
+  ]
     .filter(Boolean)
     .map((el) => lowerCaseFirstChar(el).replaceAll(' ', ''))
     .join('.');

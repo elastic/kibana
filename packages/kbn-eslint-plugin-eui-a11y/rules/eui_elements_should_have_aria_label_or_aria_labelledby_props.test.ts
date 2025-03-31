@@ -103,6 +103,19 @@ for (const [name, tester] of [tsTester, babelTester]) {
             output: `<EuiButtonIcon aria-label={i18n.translate('app_not_found_in_i18nrc.button.ariaLabel', { defaultMessage: '' })}  />
 import { i18n } from '@kbn/i18n';`,
           },
+          // if an element has a placeholder prop, use that for the default message of the aria-label.
+          {
+            filename: 'foo.tsx',
+            code: `<EuiComboBox placeholder={i18n.translate('app_not_found_in_i18nrc.comboBox', { defaultMessage: 'Indices and Streams' })} />`,
+            errors: [
+              {
+                line: 1,
+                message: `<EuiComboBox> should have a \`aria-label\` for a11y. Use the autofix suggestion or add your own.`,
+              },
+            ],
+            output: `<EuiComboBox aria-label={i18n.translate('app_not_found_in_i18nrc.indicesandStreamsComboBox.ariaLabel', { defaultMessage: 'Indices and Streams' })}  placeholder={i18n.translate('app_not_found_in_i18nrc.comboBox', { defaultMessage: 'Indices and Streams' })} />
+import { i18n } from '@kbn/i18n';`,
+          },
           // wrapped elements with a missing a11y prop should be reported.
           {
             filename: 'foo.tsx',
@@ -131,7 +144,7 @@ import { i18n } from '@kbn/i18n';`,
           },
         ].concat(
           EUI_ELEMENTS_TO_CHECK.flatMap((element) =>
-            [...EUI_WRAPPING_ELEMENTS].flatMap((wrapper) => ({
+            ['unwrapped', ...EUI_WRAPPING_ELEMENTS].flatMap((wrapper) => ({
               filename: 'foo.tsx',
               code:
                 wrapper === 'unwrapped'
@@ -147,7 +160,7 @@ import { i18n } from '@kbn/i18n';`,
                 wrapper === 'unwrapped'
                   ? `<${element} aria-label={i18n.translate('app_not_found_in_i18nrc.${lowerCaseFirstChar(
                       sanitizeEuiElementName(element).elementName
-                    )}.ariaLabel', { defaultMessage: '' })} />
+                    )}.ariaLabel', { defaultMessage: '' })}  />
 import { i18n } from '@kbn/i18n';`
                   : `<${wrapper} aria-label={i18n.translate('app_not_found_in_i18nrc.${lowerCaseFirstChar(
                       sanitizeEuiElementName(element).elementName
