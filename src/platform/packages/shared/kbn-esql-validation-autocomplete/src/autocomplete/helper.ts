@@ -27,6 +27,7 @@ import {
   isReturnType,
   FunctionDefinitionTypes,
   CommandSuggestParams,
+  Location,
 } from '../definitions/types';
 import {
   findFinalWord,
@@ -380,8 +381,7 @@ export function handleFragment(
  */
 export async function getFieldsOrFunctionsSuggestions(
   types: string[],
-  commandName: string,
-  optionName: string | undefined,
+  location: Location,
   getFieldsByType: GetColumnsByTypeFn,
   {
     functions,
@@ -407,8 +407,8 @@ export async function getFieldsOrFunctionsSuggestions(
   const filteredFieldsByType = pushItUpInTheList(
     (await (fields
       ? getFieldsByType(types, ignoreColumns, {
-          advanceCursor: commandName === 'sort',
-          openSuggestions: commandName === 'sort',
+          advanceCursor: location === Location.SORT,
+          openSuggestions: location === Location.SORT,
           variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
         })
       : [])) as SuggestionRawDefinition[],
@@ -444,14 +444,14 @@ export async function getFieldsOrFunctionsSuggestions(
     }
   }
   // could also be in stats (bucket) but our autocomplete is not great yet
-  const displayDateSuggestions = types.includes('date') && ['where', 'eval'].includes(commandName);
+  const displayDateSuggestions =
+    types.includes('date') && [Location.WHERE, Location.EVAL].includes(location);
 
   const suggestions = filteredFieldsByType.concat(
     displayDateSuggestions ? getDateLiterals() : [],
     functions
       ? getFunctionSuggestions({
-          command: commandName,
-          option: optionName,
+          location,
           returnTypes: types,
           ignored: ignoreFn,
         })
@@ -564,16 +564,14 @@ export function checkFunctionInvocationComplete(
  */
 export async function getSuggestionsToRightOfOperatorExpression({
   queryText,
-  commandName,
-  optionName,
+  location,
   rootOperator: operator,
   preferredExpressionType,
   getExpressionType,
   getColumnsByType,
 }: {
   queryText: string;
-  commandName: string;
-  optionName?: string;
+  location: Location;
   rootOperator: ESQLFunction;
   preferredExpressionType?: SupportedDataType;
   getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown';
@@ -587,8 +585,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
     const operatorReturnType = getExpressionType(operator);
     suggestions.push(
       ...getOperatorSuggestions({
-        command: commandName,
-        option: optionName,
+        location,
         // here we use the operator return type because we're suggesting operators that could
         // accept the result of the existing operator as a left operand
         leftParamType:
@@ -634,17 +631,11 @@ export async function getSuggestionsToRightOfOperatorExpression({
 
         // TODO replace with fields callback + function suggestions
         suggestions.push(
-          ...(await getFieldsOrFunctionsSuggestions(
-            typeToUse,
-            commandName,
-            optionName,
-            getColumnsByType,
-            {
-              functions: true,
-              fields: true,
-              values: Boolean(operator.subtype === 'binary-expression'),
-            }
-          ))
+          ...(await getFieldsOrFunctionsSuggestions(typeToUse, location, getColumnsByType, {
+            functions: true,
+            fields: true,
+            values: Boolean(operator.subtype === 'binary-expression'),
+          }))
         );
       }
     }
@@ -671,7 +662,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
         ) {
           suggestions.push(
             ...getOperatorSuggestions({
-              command: commandName,
+              location,
               leftParamType: leftArgType,
               returnTypes: [preferredExpressionType],
             })
@@ -763,10 +754,12 @@ export async function suggestForExpression({
   getExpressionType,
   getColumnsByType,
   previousCommands,
-  commandName,
+  location,
+  preferredExpressionType,
 }: {
   expressionRoot: ESQLSingleAstItem | undefined;
-  commandName: string;
+  location: Location;
+  preferredExpressionType?: SupportedDataType;
 } & Pick<
   CommandSuggestParams<string>,
   'innerText' | 'getExpressionType' | 'getColumnsByType' | 'previousCommands'
@@ -789,7 +782,7 @@ export async function suggestForExpression({
 
       suggestions.push(
         ...getOperatorSuggestions({
-          command: commandName,
+          location,
           leftParamType: expressionType,
           ignored: ['='],
         })
@@ -811,7 +804,7 @@ export async function suggestForExpression({
     case 'after_not':
       if (expressionRoot && isFunctionItem(expressionRoot) && expressionRoot.name === 'not') {
         suggestions.push(
-          ...getFunctionSuggestions({ command: commandName, returnTypes: ['boolean'] }),
+          ...getFunctionSuggestions({ location, returnTypes: ['boolean'] }),
           ...(await getColumnsByType('boolean', [], { advanceCursor: true, openSuggestions: true }))
         );
       } else {
@@ -853,9 +846,9 @@ export async function suggestForExpression({
       suggestions.push(
         ...(await getSuggestionsToRightOfOperatorExpression({
           queryText: innerText,
-          commandName,
+          location,
           rootOperator: rightmostOperator,
-          preferredExpressionType: commandName === 'where' ? 'boolean' : undefined,
+          preferredExpressionType,
           getExpressionType,
           getColumnsByType,
         }))
@@ -883,7 +876,7 @@ export async function suggestForExpression({
       }
       suggestions.push(
         ...pushItUpInTheList(columnSuggestions, true),
-        ...getFunctionSuggestions({ command: commandName, ignored })
+        ...getFunctionSuggestions({ location, ignored })
       );
 
       break;
