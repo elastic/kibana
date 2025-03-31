@@ -77,12 +77,12 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
       )}
       <EuiSpacer size="m" />
       <EuiSwitch label="Enable SSL" {...inputs.logstashEnableSSLInput.props} />
-      {inputs.logstashEnableSSLInput.value && (
+      {!inputs.logstashEnableSSLInput.value && (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut title="Proceed with caution!" color="warning" iconType="warning">
             <p>
-              Using TLS ensures that your Elastic Agents send encrypted data to trusted Logstash
+              Using SSL/TLS ensures that your Elastic Agents send encrypted data to trusted Logstash
               servers, and that your Logstash servers receive data from trusted Elastic Agent
               clients.
             </p>
