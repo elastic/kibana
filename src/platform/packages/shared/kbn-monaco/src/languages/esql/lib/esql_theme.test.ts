@@ -17,6 +17,7 @@ const mockTheme: UseEuiTheme = {
   colorMode: 'DARK',
   euiTheme: { colors: {} } as unknown as UseEuiTheme['euiTheme'],
   modifications: {},
+  highContrastMode: false,
 };
 
 describe('ESQL Theme', () => {
@@ -100,8 +101,6 @@ describe('ESQL Theme', () => {
       'show_ws',
       'setting',
       'setting_ws',
-      'metrics_ws',
-      'closing_metrics_ws',
       'join_ws',
       'change_point_ws',
       'fork_ws',
