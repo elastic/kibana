@@ -54,7 +54,6 @@ import { getAuthorizedConsumers } from '../utils';
 import { RuleAlertDelay } from './rule_alert_delay';
 import { RuleConsumerSelection } from './rule_consumer_selection';
 import { RuleSchedule } from './rule_schedule';
-import InvestigationManager from './rule_investigation_guide';
 
 export const RuleDefinition = () => {
   const {
@@ -92,7 +91,6 @@ export const RuleDefinition = () => {
   const { readFlappingSettingsUI, writeFlappingSettingsUI } = rulesSettings || {};
 
   const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
-  console.log('form data', formData);
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
@@ -192,22 +190,6 @@ export const RuleDefinition = () => {
     [dispatch]
   );
 
-  const onSetArtifacts = useCallback(
-    (value: object) => {
-      console.log('vaaaaaaalue', value);
-      dispatch({
-        type: 'setRuleProperty',
-        payload: {
-          property: 'artifacts',
-          value: formData.artifacts ? { ...formData.artifacts, ...value } : value,
-        },
-      });
-    },
-    [dispatch, formData.artifacts]
-  );
-
-  console.log('params', params);
-  console.log('value', formData.artifacts?.investigation_guide?.blob);
   return (
     <EuiSplitPanel.Outer hasBorder hasShadow={false} data-test-subj="ruleDefinition">
       <EuiSplitPanel.Inner color="subdued">
@@ -273,15 +255,6 @@ export const RuleDefinition = () => {
                 </EuiErrorBoundary>
               </EuiFlexItem>
             </EuiFlexGroup>
-            <Suspense fallback={null}>
-              <EuiFlexItem>
-                <EuiSpacer size="l" />
-                <InvestigationManager
-                  setRuleParams={onSetArtifacts}
-                  value={formData.artifacts?.investigation_guide?.blob ?? ''}
-                />
-              </EuiFlexItem>
-            </Suspense>
           </Suspense>
         )}
       </EuiSplitPanel.Inner>
