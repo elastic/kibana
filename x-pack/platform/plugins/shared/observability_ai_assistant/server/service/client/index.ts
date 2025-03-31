@@ -100,7 +100,6 @@ export class ObservabilityAIAssistantClient {
       scopes: AssistantScope[];
     }
   ) {}
-  redactedMap: Record<string, string> = {};
   async inferNER(chunks: InferenceChunk[]) {
     const promises = chunks.map(async ({ chunkText, charStartOffset }) => {
       const response = await this.dependencies.esClient.asCurrentUser.ml.inferTrainedModel({
@@ -127,13 +126,8 @@ export class ObservabilityAIAssistantClient {
   }
 
   async sanitizeMessages(messages: Message[]): Promise<{ sanitizedMessages: Message[] }> {
-    const redactedMap: Record<string, string> = {};
     for (const message of messages) {
       if (message.message.sanitized) {
-        // If the message is already sanitized, add its entities to the redactedMap
-        message.message.nerEntities?.forEach((entity) => {
-          redactedMap[entity.id] = entity.entity;
-        });
         continue;
       }
       if (message.message.role === 'user' && message.message.content) {
@@ -144,7 +138,6 @@ export class ObservabilityAIAssistantClient {
         message.message.sanitized = true;
         message.message.nerEntities = entities?.map((ent) => {
           const redactedId = uuidv4();
-          redactedMap[redactedId] = ent.entity;
           return {
             id: redactedId,
             entity: ent.entity,
@@ -156,7 +149,6 @@ export class ObservabilityAIAssistantClient {
         });
       }
     }
-    this.redactedMap = redactedMap;
     return { sanitizedMessages: messages };
   }
   private getConversationWithMetaFields = async (
@@ -545,7 +537,6 @@ export class ObservabilityAIAssistantClient {
     const options = {
       connectorId,
       system: systemMessage,
-      messages: convertMessagesForInference(messages, this.dependencies.logger),
       toolChoice,
       tools,
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
@@ -588,6 +579,7 @@ export class ObservabilityAIAssistantClient {
     } else {
       return this.dependencies.inferenceClient.chatComplete({
         ...options,
+        messages: convertMessagesForInference(messages, this.dependencies.logger),
         stream: false,
       }) as TStream extends true ? never : Promise<ChatCompleteResponse>;
     }
@@ -855,7 +847,7 @@ export class ObservabilityAIAssistantClient {
   };
 }
 
-function chunkTextByChar(text: string, maxChars = 1800): InferenceChunk[] {
+function chunkTextByChar(text: string, maxChars = 1000): InferenceChunk[] {
   const chunks = [];
   for (let i = 0; i < text.length; i += maxChars) {
     const chunk = text.slice(i, i + maxChars);

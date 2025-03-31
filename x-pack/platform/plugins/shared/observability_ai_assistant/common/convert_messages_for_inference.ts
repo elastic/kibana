@@ -40,7 +40,6 @@ function redactEntities(original: string, entities: NerEntity[]): string {
     currentIndex = ent.end_pos;
   }
   redacted += original.substring(currentIndex);
-  console.log('redacted', redacted);
   return redacted;
 }
 
@@ -48,7 +47,7 @@ export function convertMessagesForInference(
   messages: Message[],
   logger: Pick<Logger, 'error'>
 ): InferenceMessage[] {
-  const inferenceMessages: InferenceMessage[] = []; 
+  const inferenceMessages: InferenceMessage[] = [];
 
   messages.forEach((message) => {
     if (message.message.role === MessageRole.Assistant) {
@@ -85,11 +84,18 @@ export function convertMessagesForInference(
       if (!toolCallRequest) {
         throw new Error(`Could not find tool call request for ${message.message.name}`);
       }
+      let contentWithToolCallForInference = message.message.content ?? '';
+      if (message.message.nerEntities && message.message.nerEntities.length > 0) {
+        contentWithToolCallForInference = redactEntities(
+          message.message.content ?? '',
+          message.message.nerEntities
+        );
+      }
 
       inferenceMessages.push({
         name: message.message.name!,
         role: InferenceMessageRole.Tool,
-        response: JSON.parse(message.message.content ?? '{}'),
+        response: JSON.parse(contentWithToolCallForInference),
         toolCallId: toolCallRequest.toolCalls![0].toolCallId,
       });
 
