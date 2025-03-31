@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getBaseToolClient } from './base_tools_mcp';
+export { getBaseToolProvider } from './base_tools_provider';

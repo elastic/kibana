@@ -18,6 +18,7 @@ import { integrationTypeName } from '../../saved_objects/integrations';
 import { IntegrationsSessionImpl, type IntegrationsSession } from './integrations_session';
 import type { IntegrationRegistry } from './integration_registry';
 import { IntegrationClientImpl, IntegrationClient } from './integration_client';
+import { getBaseToolProvider } from '../orchestration/base_tools';
 
 interface IntegrationsServiceOptions {
   logger: Logger;
@@ -81,6 +82,10 @@ export class IntegrationsServiceImpl implements IntegrationsService {
         });
       })
     );
+
+    // the create session logic will likely move to the orchestration side
+    // very soon, but for now doing this is fine.
+    providers.push(await getBaseToolProvider());
 
     return new IntegrationsSessionImpl({ providers, logger: this.logger.get('session') });
   }
