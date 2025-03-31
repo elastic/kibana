@@ -2157,10 +2157,10 @@
     semver "^7.6.3"
     topojson-client "^3.1.0"
 
-"@elastic/eslint-plugin-eui@0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.1.0.tgz#9eb3030d4d2d8d83ffea8e7240ec32c15a984e63"
-  integrity sha512-ryCT1bfB/Ddj3FPthai7GgZLAK/rIWQlA8ac33TpUMA87zhV+xaUDW66Xg7TBlnisiDEkpMRJ4lNXeoThcxW4Q==
+"@elastic/eslint-plugin-eui@0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.1.1.tgz#2829b0f3cc750c582baa683c2f503594676ba08a"
+  integrity sha512-dCoXcCT8V1djwWrP0XSG0gXN5fYDtAw5aF88BPArVBbuCQSWPEBpR9avaWJ6uVjAsOteQ7tdwLMtzrvMKgKKIA==
 
 "@elastic/eui-theme-borealis@0.1.0":
   version "0.1.0"
