@@ -84,7 +84,18 @@ describe('runDiscoverPlaywrightConfigs', () => {
 
   it('validates configs when "validate" is true', () => {
     // force --validate
-    flagsReader.boolean.mockImplementation((flag) => (flag === 'validate' ? true : false));
+    flagsReader.boolean.mockImplementation((flag) => {
+      if (flag === 'save') {
+        return false;
+      }
+
+      // force --validate
+      if (flag === 'validate') {
+        return true;
+      }
+
+      return false;
+    });
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
@@ -99,8 +110,18 @@ describe('runDiscoverPlaywrightConfigs', () => {
   });
 
   it('logs found configs when they exist and "save" flag is false', () => {
-    // never --save
-    flagsReader.boolean.mockImplementation((flag) => (flag === 'save' ? false : false));
+    flagsReader.boolean.mockImplementation((flag) => {
+      // never --save
+      if (flag === 'save') {
+        return false;
+      }
+
+      if (flag === 'validate') {
+        return false;
+      }
+
+      return false;
+    });
 
     runDiscoverPlaywrightConfigs(flagsReader, log);
 
