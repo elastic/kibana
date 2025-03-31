@@ -171,7 +171,7 @@ export const BulkManualRuleRun = BulkActionBase.merge(
       /**
        * End date of the manual rule run
        */
-      end_date: z.string().optional(),
+      end_date: z.string(),
     }),
   })
 );
