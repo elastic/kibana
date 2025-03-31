@@ -11,24 +11,65 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { TabItem } from '@kbn/unified-tabs';
+
+export enum LoadingStatus {
+  Uninitialized = 'uninitialized',
+  Loading = 'loading',
+  LoadingMore = 'loading_more',
+  Complete = 'complete',
+  Error = 'error',
+}
+
+type RequestState<
+  TResult extends {},
+  TLoadingStatus extends LoadingStatus = Exclude<LoadingStatus, LoadingStatus.LoadingMore>
+> =
+  | {
+      loadingStatus: Exclude<TLoadingStatus, LoadingStatus.Error>;
+      result: TResult;
+    }
+  | {
+      loadingStatus: LoadingStatus.Error;
+      error: Error;
+    };
+
+export type DocumentsRequest = RequestState<DataTableRecord[], LoadingStatus>;
+export type TotalHitsRequest = RequestState<number>;
+export type ChartRequest = RequestState<{}>;
+
 export interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
   timeRangeRelative?: TimeRange;
 }
 
-export interface DiscoverInternalState {
+export interface TabState extends TabItem {
+  globalState?: Record<string, unknown>;
+  appState?: Record<string, unknown>;
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
-  savedDataViews: DataViewListItem[];
-  defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  isESQLToDataViewTransitionModalVisible: boolean;
   resetDefaultProfileState: {
     resetId: string;
     columns: boolean;
     rowHeight: boolean;
     breakdownField: boolean;
+  };
+  documentsRequest: DocumentsRequest;
+  totalHitsRequest: TotalHitsRequest;
+  chartRequest: ChartRequest;
+}
+
+export interface DiscoverInternalState {
+  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  savedDataViews: DataViewListItem[];
+  defaultProfileAdHocDataViewIds: string[];
+  expandedDoc: DataTableRecord | undefined;
+  isESQLToDataViewTransitionModalVisible: boolean;
+  tabs: {
+    byId: Record<string, TabState>;
+    allIds: string[];
+    currentId: string;
   };
 }
