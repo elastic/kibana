@@ -20,6 +20,7 @@ import {
   FunctionDefinition,
   FunctionParameterType,
   FunctionDefinitionTypes,
+  Location,
 } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
@@ -113,8 +114,7 @@ export function getOperatorSuggestion(fn: FunctionDefinition): SuggestionRawDefi
 }
 
 interface FunctionFilterPredicates {
-  command?: string;
-  option?: string | undefined;
+  location: Location;
   returnTypes?: string[];
   ignored?: string[];
 }
@@ -126,32 +126,27 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { command, option, returnTypes, ignored = [] } = predicates;
-  return functions.filter(
-    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
-      if (ignoreAsSuggestion) {
-        return false;
-      }
+  const { location, returnTypes, ignored = [] } = predicates;
 
-      if (ignored.includes(name)) {
-        return false;
-      }
-
-      if (option && !supportedOptions?.includes(option)) {
-        return false;
-      }
-
-      if (command && !supportedCommands.includes(command)) {
-        return false;
-      }
-
-      if (returnTypes && !returnTypes.includes('any')) {
-        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
-      }
-
-      return true;
+  return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
+    if (ignoreAsSuggestion) {
+      return false;
     }
-  );
+
+    if (ignored.includes(name)) {
+      return false;
+    }
+
+    if (location && !locationsAvailable.includes(location)) {
+      return false;
+    }
+
+    if (returnTypes && !returnTypes.includes('any')) {
+      return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+    }
+
+    return true;
+  });
 };
 
 /**
