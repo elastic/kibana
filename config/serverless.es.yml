@@ -3,6 +3,7 @@
 # Make sure the plugins belonging to this project type are loaded
 plugins.includedPluginGroups: ['search']
 
+xpack.search.enabled: false
 xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
