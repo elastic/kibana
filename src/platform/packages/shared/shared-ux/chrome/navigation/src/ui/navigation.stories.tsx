@@ -417,6 +417,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               title: 'Item-Beta',
               href: '/app/kibana',
               withBadge: true,
+              isElasticInternalLink: false,
             },
             {
               id: 'item-labs',
