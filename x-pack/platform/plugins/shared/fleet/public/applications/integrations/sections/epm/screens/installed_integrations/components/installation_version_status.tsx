@@ -102,6 +102,24 @@ const UpgradingVersionStatus: React.FunctionComponent<{
   );
 });
 
+const UninstallingVersionStatus: React.FunctionComponent<{
+  item: InstalledPackageUIPackageListItem;
+}> = React.memo(({ item }) => {
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiLoadingSpinner size={'m'} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FormattedMessage
+          id="xpack.fleet.epmInstalledIntegrations.uninstallingText"
+          defaultMessage="Uninstalling..."
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+});
+
 function formatAttempt(attempt: InstallFailedAttempt): React.ReactNode {
   return (
     <>
@@ -220,6 +238,8 @@ export const InstallationVersionStatus: React.FunctionComponent<{
     return <UpgradeAvailableVersionStatus item={item} />;
   } else if (status === 'upgrading') {
     return <UpgradingVersionStatus item={item} />;
+  } else if (status === 'uninstalling') {
+    return <UninstallingVersionStatus item={item} />;
   } else if (status === 'upgrade_failed') {
     return <InstallUpgradeFailedVersionStatus isUpgradeFailed={true} item={item} />;
   } else if (status === 'install_failed') {
