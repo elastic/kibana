@@ -195,7 +195,7 @@ async function processPattern(
           streamsClient,
         });
 
-        if (simulationResult.success_rate === 0) {
+        if (simulationResult.documents_metrics.parsed_rate === 0) {
           return null;
         }
 
