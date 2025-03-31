@@ -7,4 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { applyFiltersPopover } from './apply_filters_popover';
+import { RowCommandContext } from '../../antlr/esql_parser';
+import { ESQLCommand } from '../../types';
+import { createCommand } from '../factories';
+import { collectAllFields } from '../walkers';
+
+export const createRowCommand = (ctx: RowCommandContext): ESQLCommand<'row'> => {
+  const command = createCommand('row', ctx);
+  const fields = collectAllFields(ctx.fields());
+
+  command.args.push(...fields);
+
+  return command;
+};

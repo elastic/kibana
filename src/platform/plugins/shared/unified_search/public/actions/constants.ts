@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { ApplyGlobalFilterActionContext } from './apply_filter_action';
-export { ACTION_GLOBAL_APPLY_FILTER } from './apply_filter_action';
-export { UPDATE_FILTER_REFERENCES_ACTION } from './update_filter_references_action';
+export const ACTION_GLOBAL_APPLY_FILTER = 'ACTION_GLOBAL_APPLY_FILTER';
+export const UPDATE_FILTER_REFERENCES_ACTION = 'UPDATE_FILTER_REFERENCES_ACTION';
