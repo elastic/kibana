@@ -405,7 +405,7 @@ describe('autocomplete.suggest', () => {
           });
         });
 
-        test('suggests `?function` option', async () => {
+        test('suggests `??function` option', async () => {
           const { suggest } = await setup();
 
           const suggestions = await suggest('FROM a | STATS var0 = /', {
@@ -423,8 +423,8 @@ describe('autocomplete.suggest', () => {
           });
 
           expect(suggestions).toContainEqual({
-            label: '?function',
-            text: '?function',
+            label: '??function',
+            text: '??function',
             kind: 'Constant',
             detail: 'Named parameter',
             command: undefined,
@@ -453,7 +453,7 @@ describe('autocomplete.suggest', () => {
           });
         });
 
-        test('suggests `?field` option', async () => {
+        test('suggests `??field` option', async () => {
           const { suggest } = await setup();
 
           const suggestions = await suggest('FROM a | STATS BY /', {
@@ -471,8 +471,8 @@ describe('autocomplete.suggest', () => {
           });
 
           expect(suggestions).toContainEqual({
-            label: '?field',
-            text: '?field',
+            label: '??field',
+            text: '??field',
             kind: 'Constant',
             detail: 'Named parameter',
             command: undefined,

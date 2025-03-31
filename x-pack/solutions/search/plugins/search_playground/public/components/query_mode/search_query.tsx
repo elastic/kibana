@@ -12,7 +12,7 @@ import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { ChatForm, ChatFormFields } from '../../types';
 
-export const SearchQuery = () => {
+export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
   const { control } = useFormContext();
   const {
     field: { value: searchBarValue },
@@ -37,7 +37,7 @@ export const SearchQuery = () => {
             'xpack.searchPlayground.searchMode.queryView.searchBar.placeholder',
             { defaultMessage: 'Search for documents' }
           )}
-          isLoading={isSubmitting}
+          isLoading={isLoading || isSubmitting}
         />
       )}
     />
