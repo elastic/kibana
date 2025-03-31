@@ -511,7 +511,7 @@ If search latency in {{es}} is sufficiently high, such as if you are using cross
 ## Logging and audit settings [ec_logging_and_audit_settings]
 
 ::::{note}
-To change logging settings or to enable auditing you must first [enable deployment logging](docs-content://deploy-manage/monitor/stack-monitoring/elastic-cloud-stack-monitoring.md).
+To change logging settings or to enable auditing you must first [enable deployment logging](docs-content://deploy-manage/monitor/stack-monitoring/ece-ech-stack-monitoring.md).
 ::::
 
 

@@ -77,7 +77,7 @@ export const registerSyntheticsTLSCheckRule = (
         TLSAlert
       >
     ) => {
-      const { state: ruleState, params, services, spaceId, previousStartedAt } = options;
+      const { state: ruleState, params, services, spaceId, previousStartedAt, rule } = options;
       const { alertsClient, savedObjectsClient, scopedClusterClient } = services;
       if (!alertsClient) {
         throw new AlertsClientError();
@@ -90,7 +90,9 @@ export const registerSyntheticsTLSCheckRule = (
         savedObjectsClient,
         scopedClusterClient.asCurrentUser,
         server,
-        syntheticsMonitorClient
+        syntheticsMonitorClient,
+        spaceId,
+        rule.name
       );
 
       const { foundCerts, certs, absoluteExpirationThreshold, absoluteAgeThreshold, latestPings } =
