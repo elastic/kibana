@@ -12,7 +12,14 @@
   ],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/esql-ast",
+    "@kbn/esql-utils",
+    "@kbn/streams-schema",
+    "@kbn/dashboard-plugin",
+    "@kbn/lens-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/core"
   ],
   "exclude": [
     "target/**/*"
