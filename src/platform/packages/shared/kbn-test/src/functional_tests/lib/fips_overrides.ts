@@ -9,7 +9,9 @@
 
 // This will only apply overrides when running in FIPS mode
 export function applyFipsOverrides(vars: any) {
+  vars.esTestCluster = { ...(vars.esTestCluster ?? {}) };
   vars.esTestCluster.license = 'trial';
+  vars.esTestCluster.serverArgs = vars.esTestCluster.serverArgs ?? [];
 
   const skipTags = vars.suiteTags?.exclude ?? [];
   skipTags.push('skipFIPS');

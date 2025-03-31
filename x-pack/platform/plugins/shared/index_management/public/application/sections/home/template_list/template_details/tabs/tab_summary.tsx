@@ -20,7 +20,7 @@ import {
   EuiCodeBlock,
   EuiSpacer,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '../../../../../../shared_imports';
+import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { useAppContext } from '../../../../../app_context';
 import { serializeAsESLifecycle } from '../../../../../../../common/lib';
 import { getLifecycleValue } from '../../../../../lib/data_streams';
@@ -30,6 +30,7 @@ import { useIlmLocator } from '../../../../../services/use_ilm_locator';
 import { useIngestPipelinesLocator } from '../../../../../services/use_ingest_pipeline_locator';
 import { allowAutoCreateRadioIds } from '../../../../../../../common/constants';
 import { indexModeLabels } from '../../../../../lib/index_mode_labels';
+import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../../..';
 
 interface Props {
   templateDetails: TemplateDeserialized;
@@ -64,8 +65,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const { history, core } = useAppContext();
+  const { core, url } = useAppContext();
   const ilmPolicyLink = useIlmLocator(ILM_PAGES_POLICY_EDIT, ilmPolicy?.name);
+  const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
 
   // Compute the linked ingest pipeline URL
   const linkedIngestPipeline = templateDetails?.template?.settings?.index?.default_pipeline;
@@ -149,7 +151,12 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                       {composedOf.map((component) => (
                         <li key={component}>
                           <EuiLink
-                            {...reactRouterNavigate(history, `/component_templates/${component}`)}
+                            href={
+                              locator?.getRedirectUrl({
+                                page: 'component_template',
+                                componentTemplate: component,
+                              }) || ''
+                            }
                           >
                             <span>{component}</span>
                           </EuiLink>
