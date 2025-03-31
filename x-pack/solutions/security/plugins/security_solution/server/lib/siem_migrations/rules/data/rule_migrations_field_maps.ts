@@ -81,6 +81,4 @@ export const migrationsFieldMaps: FieldMap<SchemaFieldMapKeys<SiemMigration>> = 
   id: { type: 'keyword', required: true },
   created_at: { type: 'date', required: true },
   created_by: { type: 'keyword', required: true },
-  updated_at: { type: 'date', required: false },
-  updated_by: { type: 'keyword', required: false },
 };
