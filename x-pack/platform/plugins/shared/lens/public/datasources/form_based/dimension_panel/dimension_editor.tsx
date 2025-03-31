@@ -580,6 +580,10 @@ export function DimensionEditor(props: DimensionEditorProps) {
               }),
             }
           : undefined,
+        showToolTip: !disabledStatus,
+        toolTipProps: {
+          position: 'left',
+        },
         toolTipText: documentation,
         onClick() {
           if (
@@ -746,7 +750,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
             sideNavItems.length % 2 === 1 ? [...sideNavItems, { label: '\u00a0' }] : sideNavItems
           }
           maxWidth={false}
-          showToolTips
         />
       </EuiFormRow>
 
