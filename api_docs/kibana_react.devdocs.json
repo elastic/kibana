@@ -900,6 +900,14 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
             "plugin": "monitoring",
             "path": "x-pack/platform/plugins/private/monitoring/public/components/header_menu/header_menu_portal.tsx"
           },
@@ -914,14 +922,6 @@
           {
             "plugin": "observabilityShared",
             "path": "x-pack/solutions/observability/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
           }
         ],
         "children": [
