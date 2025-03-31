@@ -40,19 +40,22 @@ export function MachineLearningNavigationProvider({
       pageSubject: string,
       spaceId?: string
     ) {
-      if (spaceId) {
-        await PageObjects.common.navigateToApp('management', { basePath: `/s/${spaceId}` });
-      } else {
-        await PageObjects.common.navigateToApp('management');
-      }
+      await retry.tryForTime(30 * 1000, async () => {
+        if (spaceId) {
+          await PageObjects.common.navigateToApp('management', { basePath: `/s/${spaceId}` });
+        } else {
+          await PageObjects.common.navigateToApp('management');
+        }
 
-      const sections = await managementMenu.getSections();
-      const mlSection = sections.find((section) => section.sectionId === 'ml');
-      expect(mlSection).to.not.be(undefined);
-      expect(mlSection?.sectionLinks).to.contain(sectionId);
-      await testSubjects.click(sectionId);
-      await retry.tryForTime(60 * 1000, async () => {
-        await testSubjects.existOrFail(pageSubject);
+        const sections = await managementMenu.getSections();
+        const mlSection = sections.find((section) => section.sectionId === 'ml');
+        expect(mlSection).to.not.be(undefined, `Expected ML section to exist in Stack Management`);
+        expect(mlSection?.sectionLinks).to.contain(
+          sectionId,
+          `Expected Stack Management ML to have section ${sectionId}`
+        );
+        await testSubjects.click(sectionId);
+        await testSubjects.existOrFail(pageSubject, { timeout: 2000 });
       });
     },
 
