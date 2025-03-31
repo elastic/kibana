@@ -10,6 +10,12 @@ import os from 'os';
 import simpleGit from 'simple-git';
 import { load } from 'js-yaml';
 
+class GitCheckoutError extends Error {
+  constructor(cause: Error) {
+    super(`Failed to checkout repository. Make sure you've authenticated to Git`, { cause });
+  }
+}
+
 async function getFiles(files: string[]): Promise<string[]> {
   // Create a temporary directory
   const tmpDir = await Fs.mkdtemp(Path.join(os.tmpdir(), 'serverless-gitops-'));
@@ -17,18 +23,25 @@ async function getFiles(files: string[]): Promise<string[]> {
 
   // Initialize an empty repository and add remote
   await git.init();
-  await git.addRemote('origin', `git@github.com:elastic/serverless-gitops.git`).catch(async () => {
-    await git.addRemote('origin', `https://github.com/elastic/serverless-gitops.git`);
-  });
-
-  // Enable sparse-checkout
   await git.raw(['config', 'core.sparseCheckout', 'true']);
 
   const sparseCheckoutPath = Path.join(tmpDir, '.git', 'info', 'sparse-checkout');
   await Fs.writeFile(sparseCheckoutPath, files.join('\n'), 'utf-8');
 
-  // Pull only the specified file with a shallow clone
-  await git.pull('origin', 'main', { '--depth': '1' });
+  async function pull() {
+    return await git.pull('origin', 'main', { '--depth': '1' });
+  }
+
+  await git.addRemote('origin', `git@github.com:elastic/serverless-gitops.gitf`);
+
+  await pull()
+    .catch(async () => {
+      await git.remote(['set-url', 'origin', 'https://github.com/elastic/serverless-gitops.git']);
+      await pull();
+    })
+    .catch((error) => {
+      throw new GitCheckoutError(error);
+    });
 
   const fileContents = await Promise.all(
     files.map(async (filePath) => {
