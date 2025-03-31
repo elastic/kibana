@@ -5,42 +5,30 @@
  * 2.0.
  */
 
-import { ScoutPage, Locator } from '@kbn/scout';
+import { ScoutPage, Locator, expect } from '@kbn/scout';
 
 const PAGE_URL = 'security/alerts';
 
 export class AlertsTablePage {
-  public expandAlertBtn: Locator;
+  public alertRow: Locator;
   public alertsTable: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.expandAlertBtn = this.page.testSubj.locator('expand-event');
+    this.alertRow = this.page.locator('div.euiDataGridRow');
     this.alertsTable = this.page.testSubj.locator('alertsTable');
   }
 
   async navigate() {
-    await this.page.gotoApp(PAGE_URL);
+    return this.page.gotoApp(PAGE_URL);
   }
 
-  async expandFirstAlertDetailsFlyout() {
+  async expandAlertDetailsFlyout(ruleName: string) {
     await this.page.waitForLoadingIndicatorHidden();
     await this.alertsTable.waitFor({ state: 'visible' });
+    // Filter alert by unique rule name
+    const row = this.alertRow.filter({ hasText: ruleName });
+    await expect(row, `Alert with rule '${ruleName}' is not displayed`).toBeVisible();
 
-    const alertRows = await this.page.$$(`div.euiDataGridRow [data-test-subj='expand-event']`);
-
-    if (alertRows.length === 0) {
-      throw new Error('No alerts found in the table');
-    }
-
-    await alertRows[0].click();
-  }
-
-  async getCurrentUrl() {
-    const url = this.page.url();
-    return url;
-  }
-
-  async reload() {
-    return this.page.reload();
+    return row.locator(`[data-test-subj='expand-event']`).click();
   }
 }
