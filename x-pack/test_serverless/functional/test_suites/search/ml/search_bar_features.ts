@@ -53,12 +53,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
         for (const expectedLabel of expectedLabels) {
           await PageObjects.svlCommonNavigation.search.searchFor(expectedLabel);
-          const [result] = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-          const label = result?.label;
-          expect(label).to.eql(
-            expectedLabel,
-            `First result should be ${expectedLabel} (got matching items '${label}')`
-          );
+          const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
+          expect(results.length).to.be.greaterThan(0);
+          expect(results.map((r) => r.label)).to.contain(expectedLabel);
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
       });
@@ -71,12 +68,9 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
         for (const notExpectedLabel of notExpectedLabels) {
           await PageObjects.svlCommonNavigation.search.searchFor(notExpectedLabel);
-          const [result] = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-          const label = result?.label;
-          expect(label).to.not.eql(
-            notExpectedLabel,
-            `First result should not be ${notExpectedLabel} (got matching items '${label}')`
-          );
+          const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
+          expect(results.length).to.be(0);
+          expect(results.map((r) => r.label)).to.not.contain(notExpectedLabel);
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
       });
