@@ -49,6 +49,12 @@ export function defineRoutes(
   router.get(
     {
       path: '/api/alerts_fixture/registered_rule_types',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (
@@ -69,6 +75,12 @@ export function defineRoutes(
   router.put(
     {
       path: '/api/alerts_fixture/{id}/replace_api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -161,6 +173,12 @@ export function defineRoutes(
   router.put(
     {
       path: '/api/alerts_fixture/saved_object/{type}/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -214,6 +232,12 @@ export function defineRoutes(
   router.put(
     {
       path: '/api/alerts_fixture/{taskId}/reschedule_task',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           taskId: schema.string(),
@@ -251,6 +275,12 @@ export function defineRoutes(
   router.put(
     {
       path: '/api/alerts_fixture/{id}/reset_task_status',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -291,6 +321,12 @@ export function defineRoutes(
   router.get(
     {
       path: '/api/alerts_fixture/api_keys_pending_invalidation',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (
@@ -318,6 +354,12 @@ export function defineRoutes(
   router.post(
     {
       path: '/api/alerts_fixture/{id}/bulk_enqueue_actions',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -371,6 +413,12 @@ export function defineRoutes(
   router.post(
     {
       path: `/api/alerting_actions_telemetry/run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           taskId: schema.string({
@@ -406,6 +454,12 @@ export function defineRoutes(
   router.post(
     {
       path: `/api/alerts_fixture/api_key_invalidation/_run_soon`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async function (
@@ -426,6 +480,12 @@ export function defineRoutes(
   router.get(
     {
       path: '/api/alerts_fixture/rule/{id}/_get_api_key',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -468,6 +528,12 @@ export function defineRoutes(
   router.get(
     {
       path: '/api/alerts_fixture/registered_connector_types',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (
@@ -489,6 +555,12 @@ export function defineRoutes(
   router.get(
     {
       path: '/_test/event_log/{type}/{id}/_find',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           type: schema.string(),
@@ -522,6 +594,12 @@ export function defineRoutes(
   router.post(
     {
       path: '/_test/send_notification',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           to: schema.arrayOf(schema.string()),
@@ -555,6 +633,12 @@ export function defineRoutes(
   router.post(
     {
       path: '/api/alerts_fixture/{id}/_execute_connector',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string(),
@@ -598,6 +682,12 @@ export function defineRoutes(
   router.post(
     {
       path: '/_test/report_gap',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           ruleId: schema.string(),
@@ -706,6 +796,12 @@ export function defineRoutes(
   router.post(
     {
       path: '/_test/event_log/update_documents',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           _id: schema.string(),
@@ -740,6 +836,12 @@ export function defineRoutes(
   router.post(
     {
       path: '/_test/delete_gaps',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {},
     },
     async (

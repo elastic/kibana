@@ -7,7 +7,7 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110907
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export type { RuleRegistryPluginSetupContract, RuleRegistryPluginStartContract } from './plugin';
 export type {
