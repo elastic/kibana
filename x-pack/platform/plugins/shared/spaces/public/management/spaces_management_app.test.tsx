@@ -129,7 +129,7 @@ describe('spacesManagementApp', () => {
           class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"serverBasePath":"","history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"maxSpaces":1000,"allowSolutionVisibility":true,"isServerless":false}
+          Spaces Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{},"intercepts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"serverBasePath":"","history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"maxSpaces":1000,"allowSolutionVisibility":true,"isServerless":false}
         </div>
       </div>
     `);
@@ -156,7 +156,7 @@ describe('spacesManagementApp', () => {
           class="css-qvyf25-redirectAppLinksStyles"
           data-test-subj="kbnRedirectAppLink"
         >
-          Spaces Create Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
+          Spaces Create Page: {"capabilities":{"catalogue":{},"management":{},"navLinks":{}},"notifications":{"toasts":{},"intercepts":{}},"spacesManager":{"onActiveSpaceChange$":{}},"history":{"action":"PUSH","length":1,"location":{"pathname":"/create","search":"","hash":""}},"allowFeatureVisibility":true,"allowSolutionVisibility":true,"eventTracker":{"analytics":{}}}
         </div>
       </div>
     `);
