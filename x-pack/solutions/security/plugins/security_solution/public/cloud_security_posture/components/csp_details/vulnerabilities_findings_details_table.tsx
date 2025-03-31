@@ -183,7 +183,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
                 onClick: () => window.open(url, '_blank'),
                 iconType: 'popout',
                 ariaLabel: i18n.translate(
-                  'xpack.csp.findings.latestVulnerabilities.table.openReference',
+                  'xpack.securitySolution.vulnerabilities.findingsDetailsTable.openReferenceURL',
                   {
                     defaultMessage: 'Open reference URL',
                   }
