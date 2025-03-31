@@ -14,6 +14,9 @@ import { TableTab } from './table_tab';
 import { TestProviders } from '../../../../common/mock';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { FLYOUT_TABLE_FIELD_NAME_CELL_ICON_TEST_ID } from '../components/test_ids';
+import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
+
+jest.mock('../../shared/hooks/use_highlighted_fields');
 
 const mockDispatch = jest.fn();
 jest.mock('react-redux', () => {
@@ -26,6 +29,14 @@ jest.mock('react-redux', () => {
 });
 
 describe('<TableTab />', () => {
+  beforeEach(() => {
+    (useHighlightedFields as jest.Mock).mockReturnValue({
+      field: {
+        values: ['value'],
+      },
+    });
+  });
+
   it('should render table component', () => {
     const contextValue = {
       eventId: 'some_Id',

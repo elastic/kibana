@@ -17,6 +17,7 @@ import { useBasicDataFromDetailsData } from './hooks/use_basic_data_from_details
 import type { DocumentDetailsProps } from './types';
 import type { GetFieldsData } from './hooks/use_get_fields_data';
 import { useRuleWithFallback } from '../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 export interface DocumentDetailsContext {
   /**
@@ -51,6 +52,10 @@ export interface DocumentDetailsContext {
    * User defined fields to highlight (defined on the rule)
    */
   investigationFields: string[];
+  /**
+   * The rule
+   */
+  rule: RuleResponse | null;
   /**
    * Promise to trigger a data refresh
    */
@@ -129,6 +134,7 @@ export const DocumentDetailsProvider = memo(
               dataFormattedForFieldBrowser,
               searchHit,
               investigationFields: maybeRule?.investigation_fields?.field_names ?? [],
+              rule: maybeRule,
               refetchFlyoutData,
               getFieldsData,
               isPreview: scopeId === TableId.rulePreview,
@@ -145,7 +151,7 @@ export const DocumentDetailsProvider = memo(
         dataFormattedForFieldBrowser,
         searchHit,
         browserFields,
-        maybeRule?.investigation_fields?.field_names,
+        maybeRule,
         refetchFlyoutData,
         getFieldsData,
         isPreviewMode,

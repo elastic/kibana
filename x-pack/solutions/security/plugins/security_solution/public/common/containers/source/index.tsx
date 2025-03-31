@@ -69,7 +69,7 @@ export const getIndexFields = memoizeOne(
 
 const DEFAULT_BROWSER_FIELDS = {};
 const DEFAULT_INDEX_PATTERNS = { fields: [], title: '' };
-interface FetchIndexReturn {
+export interface FetchIndexReturn {
   /**
    * @deprecated use fields list on dataview / "indexPattern"
    * about to use browserFields? Reconsider! Maybe you can accomplish

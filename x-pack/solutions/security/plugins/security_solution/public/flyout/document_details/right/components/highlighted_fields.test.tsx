@@ -8,15 +8,27 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { DocumentDetailsContext } from '../../shared/context';
-import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
+import {
+  HIGHLIGHTED_FIELDS_DETAILS_TEST_ID,
+  HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
+  HIGHLIGHTED_FIELDS_TITLE_TEST_ID,
+} from './test_ids';
 import { HighlightedFields } from './highlighted_fields';
-import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
 import { TestProviders } from '../../../../common/mock';
-import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
+import { useFetchIndex } from '../../../../common/containers/source';
+import { mockContextValue } from '../../shared/mocks/mock_context';
 
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
+jest.mock('../../../../common/containers/source');
+
+const mockAddSuccess = jest.fn();
+jest.mock('../../../../common/hooks/use_app_toasts', () => ({
+  useAppToasts: () => ({
+    addSuccess: mockAddSuccess,
+  }),
+}));
 
 const renderHighlightedFields = (contextValue: DocumentDetailsContext) =>
   render(
@@ -31,34 +43,36 @@ const NO_DATA_MESSAGE = "There's no highlighted fields for this alert.";
 
 describe('<HighlightedFields />', () => {
   beforeEach(() => {
-    (useRuleWithFallback as jest.Mock).mockReturnValue({ investigation_fields: undefined });
+    (useFetchIndex as jest.Mock).mockReturnValue([false, { indexPatterns: { fields: ['field'] } }]);
   });
 
   it('should render the component', () => {
-    const contextValue = {
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      scopeId: 'scopeId',
-    } as unknown as DocumentDetailsContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({
       field: {
         values: ['value'],
       },
     });
 
-    const { getByTestId } = renderHighlightedFields(contextValue);
+    const { getByTestId } = renderHighlightedFields(mockContextValue);
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HIGHLIGHTED_FIELDS_DETAILS_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it(`should render no data message if there aren't any highlighted fields`, () => {
-    const contextValue = {
-      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
-      scopeId: 'scopeId',
-    } as unknown as DocumentDetailsContext;
     (useHighlightedFields as jest.Mock).mockReturnValue({});
 
-    const { getByText } = renderHighlightedFields(contextValue);
+    const { getByText, getByTestId } = renderHighlightedFields(mockContextValue);
     expect(getByText(NO_DATA_MESSAGE)).toBeInTheDocument();
+    expect(getByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('should not render edit button if rule is null', () => {
+    const { queryByTestId } = renderHighlightedFields({
+      ...mockContextValue,
+      rule: null,
+    });
+    expect(queryByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).not.toBeInTheDocument();
   });
 });

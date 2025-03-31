@@ -241,6 +241,11 @@ export const allowedExperimentalValues = Object.freeze({
   newExpandableFlyoutNavigationDisabled: false,
 
   /**
+   * Enables the ability to edit highlighted fields in the alertflyout
+   */
+  editHighlightedFieldsEnabled: true,
+
+  /**
    * Enables CrowdStrike's RunScript RTR command
    * Release: 8.18/9.0
    */

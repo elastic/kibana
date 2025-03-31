@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { mockRule } from '../../../../detection_engine/rule_management_ui/components/rules_table/__mocks__/mock';
 import { mockBrowserFields } from './mock_browser_fields';
 import { mockSearchHit } from './mock_search_hit';
 import { mockDataFormattedForFieldBrowser } from './mock_data_formatted_for_field_browser';
@@ -12,6 +13,7 @@ import { mockGetFieldsData } from './mock_get_fields_data';
 import { mockDataAsNestedObject } from './mock_data_as_nested_object';
 import type { DocumentDetailsContext } from '../context';
 
+const rule = mockRule('ruleId');
 /**
  * Mock contextValue for left panel context
  */
@@ -28,4 +30,5 @@ export const mockContextValue: DocumentDetailsContext = {
   refetchFlyoutData: jest.fn(),
   isPreview: false,
   isPreviewMode: false,
+  rule,
 };
