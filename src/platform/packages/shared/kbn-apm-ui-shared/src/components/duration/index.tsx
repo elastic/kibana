@@ -15,7 +15,7 @@ import { PercentOfParent } from './percent_of_parent';
 export interface DurationProps {
   duration: number;
   parent?: {
-    duration: number | undefined;
+    duration?: number;
     type: 'trace' | 'transaction';
     loading: boolean;
   };
