@@ -59,6 +59,12 @@ export class AnalyticsPluginAPlugin implements Plugin {
     router.get(
       {
         path: '/internal/analytics_plugin_a/stats',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             takeNumberOfCounters: schema.number({ min: 1 }),
@@ -84,6 +90,12 @@ export class AnalyticsPluginAPlugin implements Plugin {
     router.get(
       {
         path: '/internal/analytics_plugin_a/actions',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
       },
       async (context, req, res) => {

@@ -304,7 +304,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       <li>
                         <FormattedMessage
                           id="xpack.fleet.settings.remoteClusterConfiguration.replicationStep"
-                          defaultMessage="Go to {appPath} and create a follower index using the cluster from Step 1. The leader index {leaderIndex} from this cluster and should be replicated to the follower index {followerIndex} on the remote cluster."
+                          defaultMessage="Go to {appPath} and create a follower index using the cluster from Step 1. The leader index is {leaderIndex} from this cluster and should be replicated to the follower index {followerIndex} on the remote cluster."
                           values={{
                             appPath: (
                               <strong>
