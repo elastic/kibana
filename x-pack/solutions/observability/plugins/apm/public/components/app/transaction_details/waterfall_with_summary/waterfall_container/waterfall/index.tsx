@@ -133,6 +133,9 @@ export function Waterfall({
             position: absolute;
             z-index: ${euiTheme.levels.content};
           `}
+          aria-label={i18n.translate('xpack.apm.waterfall.foldButton.ariaLabel', {
+            defaultMessage: `Click to ${isAccordionOpen ? 'fold' : 'unfold'} the waterfall`,
+          })}
           iconType={isAccordionOpen ? 'fold' : 'unfold'}
           onClick={() => {
             setIsAccordionOpen((isOpen) => !isOpen);
