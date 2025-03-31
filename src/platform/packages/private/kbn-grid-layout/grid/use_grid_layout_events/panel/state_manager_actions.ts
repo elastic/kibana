@@ -27,7 +27,9 @@ export const startAction = (
   const panelRef = gridLayoutStateManager.panelRefs.current[rowId][panelId];
   if (!panelRef) return;
 
-  const { top, bottom, right, left } = panelRef.getBoundingClientRect();
+  const panelRect = panelRef.getBoundingClientRect();
+
+  gridLayoutStateManager.activePanel$.next({ id: panelId, position: panelRect });
 
   gridLayoutStateManager.interactionEvent$.next({
     type,
@@ -35,8 +37,7 @@ export const startAction = (
     panelDiv: panelRef,
     targetRow: rowId,
     sensorType: getSensorType(e),
-    sensorOffsets: getSensorOffsets(e, { top, bottom, right, left }),
-    currentPosition: { top, bottom, right, left },
+    sensorOffsets: getSensorOffsets(e, panelRect),
   });
 
   gridLayoutStateManager.proposedGridLayout$.next(gridLayoutStateManager.gridLayout$.value);
@@ -52,6 +53,7 @@ export const moveAction = (
     runtimeSettings$: { value: runtimeSettings },
     interactionEvent$,
     proposedGridLayout$,
+    activePanel$,
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
@@ -82,7 +84,7 @@ export const moveAction = (
     }
   })();
 
-  interactionEvent$.next({ ...interactionEvent, currentPosition: previewRect });
+  activePanel$.next({ id: interactionEvent.id, position: previewRect });
 
   const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
 
@@ -177,10 +179,12 @@ export const moveAction = (
 };
 
 export const commitAction = ({
+  activePanel$,
   interactionEvent$,
   gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
+  activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {
     gridLayout$.next(cloneDeep(proposedGridLayout$.value));
@@ -189,9 +193,11 @@ export const commitAction = ({
 };
 
 export const cancelAction = ({
+  activePanel$,
   interactionEvent$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
+  activePanel$.next(undefined);
   interactionEvent$.next(undefined);
   proposedGridLayout$.next(undefined);
 };

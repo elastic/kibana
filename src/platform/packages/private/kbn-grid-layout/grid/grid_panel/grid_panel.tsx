@@ -67,25 +67,27 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
     () => {
       /** Update the styles of the panel via a subscription to prevent re-renders */
       const activePanelStyleSubscription = combineLatest([
-        gridLayoutStateManager.interactionEvent$,
+        gridLayoutStateManager.activePanel$,
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
       ])
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-        .subscribe(([interactionEvent, gridLayout, proposedGridLayout]) => {
+        .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
           const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
           if (!ref || !panel) return;
 
-          if (panelId === interactionEvent?.id) {
+          const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+
+          if (panelId === activePanel?.id) {
             ref.classList.add('kbnGridPanel--active');
 
             // if the current panel is active, give it fixed positioning depending on the interaction event
-            const { currentPosition: draggingPosition, type } = interactionEvent;
+            const { position: draggingPosition } = activePanel;
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
             ref.style.zIndex = `${euiTheme.levels.modal}`;
-            if (type === 'resize') {
+            if (currentInteractionEvent?.type === 'resize') {
               // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
               ref.style.width = `${Math.max(
                 draggingPosition.right - draggingPosition.left,
