@@ -126,8 +126,6 @@ describe('messageFromLangchain', () => {
 
     const unsupportedMessage = new UnsupportedMessage();
 
-    expect(() => messageFromLangchain(unsupportedMessage)).toThrow(
-      'Unsupported message type'
-    );
+    expect(() => messageFromLangchain(unsupportedMessage)).toThrow('Unsupported message type');
   });
 });
