@@ -8,7 +8,6 @@
 import { cloneDeep, mapValues, uniq } from 'lodash';
 import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { ContentPackSavedObject } from '@kbn/streams-schema';
 import type {
   DashboardAttributes,
   SavedDashboardPanel,
@@ -16,6 +15,7 @@ import type {
 import type { LensSerializedState } from '@kbn/lens-plugin/public';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
+import type { ContentPackSavedObject } from '../../..';
 
 export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
 

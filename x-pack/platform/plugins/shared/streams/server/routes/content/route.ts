@@ -23,7 +23,6 @@ import {
   replaceIndexPatterns,
 } from '@kbn/streams-schema';
 import { SavedObject, SavedObjectsExportResultDetails } from '@kbn/core/server';
-import { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 
