@@ -25,6 +25,7 @@ export function StreamsAppPageBody({
         border-radius: 0px;
         display: flex;
         overflow-y: auto;
+        padding-top: ${theme.size.base};
         ${!background ? `background-color: transparent;` : ''}
       `}
       paddingSize="l"
