@@ -25,7 +25,8 @@ interface Props {
 export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
-  const { id, icon, deepLink, openInNewTab, isElasticInternalLink } = item;
+  const { id, icon, deepLink, openInNewTab, isElasticInternalLink, renderItem } = item;
+
   const href = deepLink?.url ?? item.href;
   const { euiTheme } = useEuiTheme();
 
@@ -40,7 +41,9 @@ export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
     [closePanel, href, navigateToUrl]
   );
 
-  return (
+  return renderItem ? (
+    renderItem()
+  ) : (
     <EuiListGroupItem
       key={id}
       label={parentIsAccordion ? <SubItemTitle item={item} /> : item.title}
