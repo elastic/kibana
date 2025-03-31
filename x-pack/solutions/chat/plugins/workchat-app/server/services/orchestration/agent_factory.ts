@@ -7,7 +7,7 @@
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { IntegrationsService } from '../integrations/integrations_service';
+import { IntegrationsServiceImpl } from '../integrations/integrations_service';
 import type { AgentService } from '../agents';
 import type { AgentRunner } from './types';
 import { createAgentRunner } from './agent_runner';
@@ -16,14 +16,14 @@ interface AgentFactoryArgs {
   logger: Logger;
   inference: InferenceServerStart;
   agentService: AgentService;
-  integrationsService: IntegrationsService;
+  integrationsService: IntegrationsServiceImpl;
 }
 
 export class AgentFactory {
   private readonly inference: InferenceServerStart;
   private readonly logger: Logger;
   private readonly agentService: AgentService;
-  private readonly integrationsService: IntegrationsService;
+  private readonly integrationsService: IntegrationsServiceImpl;
 
   constructor({ inference, logger, integrationsService, agentService }: AgentFactoryArgs) {
     this.inference = inference;

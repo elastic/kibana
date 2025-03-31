@@ -26,7 +26,12 @@ interface IntegrationsServiceOptions {
   security: SecurityServiceStart;
 }
 
-export class IntegrationsService {
+export interface IntegrationsService {
+  getScopedClient({ request }: { request: KibanaRequest }): Promise<IntegrationClient>;
+  createSession({ request }: { request: KibanaRequest }): Promise<IntegrationsSession>;
+}
+
+export class IntegrationsServiceImpl implements IntegrationsService {
   private readonly logger: Logger;
   private readonly registry: IntegrationRegistry;
   private readonly savedObjects: SavedObjectsServiceStart;
@@ -81,6 +86,3 @@ export class IntegrationsService {
     return new IntegrationsSession({ integrations, logger: this.logger.get('session') });
   }
 }
-
-// Export the interface for the client
-export type { IntegrationClient };

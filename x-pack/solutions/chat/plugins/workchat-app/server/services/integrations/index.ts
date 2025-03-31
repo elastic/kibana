@@ -6,5 +6,5 @@
  */
 
 export { IntegrationRegistry } from './integration_registry';
-export { IntegrationsService } from './integrations_service';
+export { IntegrationsServiceImpl, type IntegrationsService } from './integrations_service';
 export type { IntegrationClient } from './integration_client';

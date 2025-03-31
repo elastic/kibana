@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/server';
 import type { LoggerFactory } from '@kbn/core/server';
 import type { WorkChatAppPluginStartDependencies } from '../types';
 import type { InternalServices } from './types';
-import { IntegrationsService } from './integrations/integrations_service';
+import { IntegrationsServiceImpl } from './integrations/integrations_service';
 import { ConversationServiceImpl } from './conversations';
 import { ChatService } from './chat';
 import { AgentFactory } from './orchestration';
@@ -31,7 +31,7 @@ export function createServices({
 }: CreateServicesParams): InternalServices {
   integrationRegistry.blockRegistration();
 
-  const integrationsService = new IntegrationsService({
+  const integrationsService = new IntegrationsServiceImpl({
     logger: logger.get('services.integrations'),
     elasticsearch: core.elasticsearch,
     registry: integrationRegistry,
