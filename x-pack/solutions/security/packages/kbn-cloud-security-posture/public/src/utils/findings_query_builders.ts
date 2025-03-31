@@ -212,7 +212,7 @@ export const buildFindingsQueryWithFilters = (query: UseCspOptions['query']) => 
   };
 };
 
-export const createGetMisconfigurationFindingsQuery = (resourceId?: string, ruleId?: string) => {
+export const createMisconfigurationFindingsQuery = (resourceId?: string, ruleId?: string) => {
   return {
     bool: {
       filter: [

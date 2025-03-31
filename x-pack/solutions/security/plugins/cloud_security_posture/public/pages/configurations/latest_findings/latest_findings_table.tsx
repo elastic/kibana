@@ -48,11 +48,9 @@ const getCspFinding = (source: Record<string, any> | undefined): CspFinding | un
 };
 
 /**
- * Flyout component for the latest findings table
+ * Flyout component for the latest findings table, renders empty component as now we use Use Expandable Flyout API hook to handle all the rendering
  */
-const flyoutComponent = (row: DataTableRecord, onCloseFlyout: () => void): JSX.Element => {
-  const finding = row.raw._source;
-  if (!finding || !isCspFinding(finding)) return <></>;
+const flyoutComponent = (): JSX.Element => {
   uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, OPEN_FINDINGS_FLYOUT);
   return <></>;
 };

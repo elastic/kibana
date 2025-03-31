@@ -37,7 +37,7 @@ import { css } from '@emotion/react';
 import {
   CspEvaluationBadge,
   benchmarksNavigation,
-  createGetMisconfigurationFindingsQuery,
+  createMisconfigurationFindingsQuery,
 } from '@kbn/cloud-security-posture';
 import type { CspFinding, BenchmarkId } from '@kbn/cloud-security-posture-common';
 import { BenchmarkName, CSP_MISCONFIGURATIONS_DATASET } from '@kbn/cloud-security-posture-common';
@@ -51,7 +51,7 @@ import type {
   CspClientPluginStartDeps,
   FindingMisconfigurationFlyoutProps,
 } from '@kbn/cloud-security-posture';
-import { useGetMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_get_misconfiguration_finding';
+import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
 import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 import { TakeAction } from '../../../components/take_action';
@@ -231,8 +231,8 @@ export const MissingFieldsCallout = ({
 };
 
 export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurationFlyoutProps) => {
-  const { data } = useGetMisconfigurationFindings({
-    query: createGetMisconfigurationFindingsQuery(resourceId, ruleId),
+  const { data } = useMisconfigurationFinding({
+    query: createMisconfigurationFindingsQuery(resourceId, ruleId),
     enabled: true,
     pageSize: 1,
   });

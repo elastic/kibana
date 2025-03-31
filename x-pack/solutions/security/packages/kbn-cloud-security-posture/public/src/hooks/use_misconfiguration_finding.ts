@@ -37,7 +37,7 @@ export const buildGetMisconfigurationsFindingsQuery = ({ query }: UseCspOptions)
   };
 };
 
-export const useGetMisconfigurationFindings = (options: UseCspOptions) => {
+export const useMisconfigurationFinding = (options: UseCspOptions) => {
   const {
     data,
     notifications: { toasts },

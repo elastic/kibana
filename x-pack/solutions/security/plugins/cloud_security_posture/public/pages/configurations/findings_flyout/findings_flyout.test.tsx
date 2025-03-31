@@ -9,7 +9,7 @@ import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture
 import userEvent from '@testing-library/user-event';
 import { FindingsRuleFlyout } from './findings_flyout';
 import { render, screen } from '@testing-library/react';
-import { useGetMisconfigurationFindings } from '@kbn/cloud-security-posture/src/hooks/use_get_misconfiguration_finding';
+import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding';
 import { TestProvider } from '../../../test/test_provider';
 import { mockFindingsHit, mockWizFinding } from '../__mocks__/findings';
 
@@ -19,14 +19,14 @@ const TestComponent = () => (
   </TestProvider>
 );
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_get_misconfiguration_finding', () => ({
-  useGetMisconfigurationFindings: jest.fn(),
+jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => ({
+  useMisconfigurationFinding: jest.fn(),
 }));
 
 describe('<FindingsFlyout/>', () => {
   describe('Overview Tab', () => {
     it('should render the flyout with available data', async () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockFindingsHit }] } },
       });
 
@@ -43,7 +43,7 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('displays missing info callout when data source is not CSP', () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockWizFinding }] } },
       });
       const { getByText } = render(<TestComponent />);
@@ -51,7 +51,7 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('does not display missing info callout when data source is CSP', () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockFindingsHit }] } },
       });
       const { queryByText } = render(<TestComponent />);
@@ -74,7 +74,7 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('displays missing info callout when data source is not CSP', async () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockWizFinding }] } },
       });
       const { getByText } = render(<TestComponent />);
@@ -84,7 +84,7 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('does not display missing info callout when data source is CSP', async () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockFindingsHit }] } },
       });
       const { queryByText } = render(<TestComponent />);
@@ -97,7 +97,7 @@ describe('<FindingsFlyout/>', () => {
 
   describe('Table Tab', () => {
     it('displays resource name and id', async () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockFindingsHit }] } },
       });
       const { getAllByText } = render(<TestComponent />);
@@ -108,7 +108,7 @@ describe('<FindingsFlyout/>', () => {
     });
 
     it('does not display missing info callout for 3Ps', async () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockWizFinding }] } },
       });
       const { queryByText } = render(<TestComponent />);
@@ -121,7 +121,7 @@ describe('<FindingsFlyout/>', () => {
 
   describe('JSON Tab', () => {
     it('does not display missing info callout for 3Ps', async () => {
-      (useGetMisconfigurationFindings as jest.Mock).mockReturnValue({
+      (useMisconfigurationFinding as jest.Mock).mockReturnValue({
         data: { result: { hits: [{ _source: mockWizFinding }] } },
       });
       const { queryByText } = render(<TestComponent />);
