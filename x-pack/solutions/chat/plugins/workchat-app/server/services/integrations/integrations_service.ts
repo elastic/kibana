@@ -13,7 +13,7 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import { integrationTypeName } from '../../saved_objects/integrations';
-import { IntegrationsSession } from './integrations_session';
+import { IntegrationsSessionImpl, type IntegrationsSession } from './integrations_session';
 import type { IntegrationRegistry } from './integration_registry';
 import { IntegrationWithMeta } from './types';
 import { IntegrationClientImpl, IntegrationClient } from './integration_client';
@@ -83,6 +83,6 @@ export class IntegrationsServiceImpl implements IntegrationsService {
       })
     );
 
-    return new IntegrationsSession({ integrations, logger: this.logger.get('session') });
+    return new IntegrationsSessionImpl({ integrations, logger: this.logger.get('session') });
   }
 }
