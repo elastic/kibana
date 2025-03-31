@@ -16,7 +16,7 @@ import type {
   ESQLInlineCast,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { monaco } from '@kbn/monaco';
 
@@ -161,7 +161,7 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 export const getESQLQueryVariables = (esql: string): string[] => {
   const { root } = parse(esql);
   const usedVariablesInQuery = Walker.params(root);
-  return usedVariablesInQuery.map((v) => v.text.replace('?', ''));
+  return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
 };
 
 /**
@@ -227,4 +227,37 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   if (column) {
     return `${column.name}`;
   }
+};
+
+// this is for backward compatibility, if the query is of fields or functions type
+// and the query is not set with ?? in the query, we should set it
+// https://github.com/elastic/elasticsearch/pull/122459
+export const fixESQLQueryWithVariables = (
+  queryString: string,
+  esqlVariables?: ESQLControlVariable[]
+) => {
+  const currentVariables = getESQLQueryVariables(queryString);
+  if (!currentVariables.length) {
+    return queryString;
+  }
+
+  // filter out the variables that are not used in the query
+  // and that they are not of type FIELDS or FUNCTIONS
+  const identifierTypeVariables = esqlVariables?.filter(
+    (variable) =>
+      currentVariables.includes(variable.key) &&
+      (variable.type === ESQLVariableType.FIELDS || variable.type === ESQLVariableType.FUNCTIONS)
+  );
+
+  // check if they are set with ?? or ? in the query
+  // replace only if there is only one ? in front of the variable
+  if (identifierTypeVariables?.length) {
+    identifierTypeVariables.forEach((variable) => {
+      const regex = new RegExp(`(?<!\\?)\\?${variable.key}`);
+      queryString = queryString.replace(regex, `??${variable.key}`);
+    });
+    return queryString;
+  }
+
+  return queryString;
 };
