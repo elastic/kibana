@@ -34,9 +34,9 @@ export const EUI_ELEMENTS_TO_CHECK = [
   'EuiSuperSelect',
 ];
 
-const EUI_WRAPPING_ELEMENTS = ['EuiFormRow'];
+export const EUI_WRAPPING_ELEMENTS = ['EuiFormRow'];
 
-const A11Y_PROP_NAMES = ['aria-label', 'aria-labelledby', 'label'];
+export const A11Y_PROP_NAMES = ['aria-label', 'aria-labelledby', 'label'];
 
 export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.RuleModule = {
   meta: {
@@ -71,7 +71,6 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.Ru
           // The wrapping element already has an a11y prop set
           if (Object.keys(props).length > 0) return;
 
-          // The wrapping element does not have an a11y prop set yet
           const reporter = checkNodeForPropNamesAndCreateReporter({
             cwd,
             filename,
@@ -80,6 +79,7 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.Ru
             sourceCode,
           });
 
+          // The wrapping element does not have an a11y prop set yet, so show the reporter
           if (reporter) report(reporter);
 
           return;
@@ -95,7 +95,6 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.Ru
         // The element already has an a11y prop set
         if (Object.keys(props).length > 0) return;
 
-        // The element does not have an a11y prop set yet
         const reporter = checkNodeForPropNamesAndCreateReporter({
           cwd,
           filename,
@@ -104,6 +103,7 @@ export const EuiElementsShouldHaveAriaLabelOrAriaLabelledbyProps: EsLint.Rule.Ru
           sourceCode,
         });
 
+        // The element does not have an a11y prop set yet, so show the reporter
         if (reporter) report(reporter);
       },
     } as EsLint.Rule.RuleListener;
@@ -143,7 +143,7 @@ const checkNodeForPropNamesAndCreateReporter = ({
   const { elementName } = sanitizeEuiElementName(name.name);
 
   // 'Actions Button'
-  const defaultMessage = upperCaseFirstChar(intent).trim(); //
+  const defaultMessage = upperCaseFirstChar(intent).trim();
 
   const i18nAppId = getI18nIdentifierFromFilePath(filename, cwd);
 
