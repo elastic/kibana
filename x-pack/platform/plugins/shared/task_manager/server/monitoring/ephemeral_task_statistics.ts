@@ -6,18 +6,17 @@
  */
 
 import { map, filter, startWith, buffer, share } from 'rxjs';
-import { JsonObject } from '@kbn/utility-types';
-import { combineLatest, Observable, zip } from 'rxjs';
-import { isOk, Ok } from '../lib/result_type';
-import { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
-import { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { JsonObject } from '@kbn/utility-types';
+import type { Observable } from 'rxjs';
+import { combineLatest, zip } from 'rxjs';
+import type { Ok } from '../lib/result_type';
+import { isOk } from '../lib/result_type';
+import type { AggregatedStat, AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
+import type { EphemeralTaskLifecycle } from '../ephemeral_task_lifecycle';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { isTaskRunEvent, isTaskManagerStatEvent } from '../task_events';
-import {
-  AveragedStat,
-  calculateRunningAverage,
-  createRunningAveragedStat,
-} from './task_run_calculators';
+import type { AveragedStat } from './task_run_calculators';
+import { calculateRunningAverage, createRunningAveragedStat } from './task_run_calculators';
 import { HealthStatus } from './monitoring_stats_stream';
 
 export interface EphemeralTaskStat extends JsonObject {
