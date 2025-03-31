@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import { errors } from '@elastic/elasticsearch';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -147,9 +146,6 @@ export async function updateDataStreamsLifecycle({
       );
     }
   } catch (err: any) {
-    if (err instanceof errors.ResponseError && err.statusCode === 404) {
-      return;
-    }
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;
   }
