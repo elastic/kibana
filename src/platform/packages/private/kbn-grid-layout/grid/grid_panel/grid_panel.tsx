@@ -13,6 +13,7 @@ import { combineLatest, skip } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+import { isEqual } from 'lodash';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
@@ -74,11 +75,23 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([interactionEvent, gridLayout, proposedGridLayout]) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
-          const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
+          const draggedPanel = proposedGridLayout?.[rowId]?.panels[panelId];
+          const confirmedPanel = gridLayout[rowId]?.panels[panelId];
+          const panel = draggedPanel ?? confirmedPanel;
           if (!ref || !panel) return;
 
           if (panelId === interactionEvent?.id) {
             ref.classList.add('kbnGridPanel--active');
+
+            // The `kbnGridPanel--activeModified` class disables pointer events when a panel is already being dragged and its position changed.
+            // We can't apply this to `kbnGridPanel--active` directly, as it would block regular clicks
+            // within the panel header since dragging starts on a `mousedown` event.
+            const isPanelModified = !isEqual(draggedPanel, confirmedPanel);
+            if (isPanelModified) {
+              ref.classList.add('kbnGridPanel--activeModified');
+            } else {
+              ref.classList.remove('kbnGridPanel--activeModified');
+            }
 
             // if the current panel is active, give it fixed positioning depending on the interaction event
             const { currentPosition: draggingPosition, type } = interactionEvent;
@@ -114,7 +127,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
               ref.style.gridArea = `auto`; // shortcut to set all grid styles to `auto`
             }
           } else {
-            ref.classList.remove('kbnGridPanel--active');
+            ref.classList.remove('kbnGridPanel--active', 'kbnGridPanel--activeModified');
 
             ref.style.zIndex = `auto`;
 
