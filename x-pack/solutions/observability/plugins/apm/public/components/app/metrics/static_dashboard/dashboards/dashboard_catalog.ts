@@ -14,7 +14,7 @@ export const existingDashboardFileNames = new Set([
   'classic_apm-otel_other-dotnet',
   'classic_apm-edot-nodejs',
   'classic_apm-edot-java',
-  'otel_native-otel_other-java',
+  'otel_native-edot-java',
   'classic_apm-edot-dotnet',
   'otel_native-edot-python',
 ]);
