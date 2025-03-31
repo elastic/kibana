@@ -120,9 +120,7 @@ describe('publishing subject', () => {
 
     test('useBatchedPublishingSubjects should synchronously subscribe to observables to avoid race conditions', async () => {
       function Component() {
-        const [value1] = useBatchedPublishingSubjects(
-          subject1,
-        );
+        const [value1] = useBatchedPublishingSubjects(subject1);
 
         // synchronously emit new values for observables
         // this will cause test to fail if subscriptions are not setup synchronously
