@@ -582,7 +582,6 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
-    lastLookBackDate: lastValidDate({ searchResult, primaryTimestamp }),
   });
 };
 
@@ -592,7 +591,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
-  lastLookBackDate,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -604,7 +602,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
-  lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -617,7 +614,6 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
-    lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -680,7 +676,6 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
-      lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -694,7 +689,6 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
-      lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -708,7 +702,6 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
-      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
