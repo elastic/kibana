@@ -24,17 +24,16 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../sourcerer/containers');
 
 const defaultProps = {
-  end: undefined,
-  filters: undefined,
-  localStorageAttackDiscoveryMaxAlerts: undefined,
-  onClose: jest.fn(),
-  query: undefined,
-  setEnd: jest.fn(),
-  setFilters: jest.fn(),
-  setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
-  setQuery: jest.fn(),
-  setStart: jest.fn(),
-  start: undefined,
+  onSettingsReset: jest.fn(),
+  onSettingsSave: jest.fn(),
+  onSettingsChanged: jest.fn(),
+  settings: {
+    end: 'now',
+    filters: [],
+    query: { query: '', language: 'kuery' },
+    size: 100,
+    start: 'now-15m',
+  },
 };
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -69,7 +68,7 @@ describe('useTabsView', () => {
   });
 
   it('should return the alert selection component with `AlertSelectionQuery` when settings tab is selected', () => {
-    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useTabsView(defaultProps));
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
 
@@ -77,7 +76,7 @@ describe('useTabsView', () => {
   });
 
   it('should return the alert selection component with `AlertSelectionRange` when settings tab is selected', () => {
-    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useTabsView(defaultProps));
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
 
@@ -85,7 +84,7 @@ describe('useTabsView', () => {
   });
 
   it('should return the empty schedule component with empty schedule page when schedule tab is selected', async () => {
-    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useTabsView(defaultProps));
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
 
@@ -100,7 +99,7 @@ describe('useTabsView', () => {
   });
 
   it('should return the empty schedule component with create new schedule button when schedule tab is selected', async () => {
-    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useTabsView(defaultProps));
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
 
@@ -115,7 +114,7 @@ describe('useTabsView', () => {
   });
 
   it('should return reset action button when settings tab is selected', () => {
-    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useTabsView(defaultProps));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
@@ -123,7 +122,7 @@ describe('useTabsView', () => {
   });
 
   it('should return save action button when settings tab is selected', () => {
-    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useTabsView(defaultProps));
 
     render(<TestProviders>{result.current.actionButtons}</TestProviders>);
 
@@ -131,7 +130,7 @@ describe('useTabsView', () => {
   });
 
   it('should not return action buttons when schedule tab is selected', async () => {
-    const { result } = renderHook(() => useTabsView({ filterSettings: defaultProps }));
+    const { result } = renderHook(() => useTabsView(defaultProps));
 
     render(<TestProviders>{result.current.tabsContainer}</TestProviders>);
 

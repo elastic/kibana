@@ -30,7 +30,7 @@ import {
 import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 
 import type {
-  RuleServices,
+  SecurityRuleServices,
   SearchAfterAndBulkCreateReturnType,
   SecuritySharedParams,
 } from '../types';
@@ -53,7 +53,7 @@ interface MultiTermsCompositeArgsBase {
   params: NewTermsRuleParams;
   aggregatableTimestampField: string;
   parsedHistoryWindowSize: Moment;
-  services: RuleServices;
+  services: SecurityRuleServices;
   result: SearchAfterAndBulkCreateReturnType;
   logger: Logger;
   afterKey: Record<string, string | number | null> | undefined;
