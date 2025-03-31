@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { Connectors } from './connectors';
 import { CRAWLERS_ELASTIC_MANAGED_PATH, CRAWLERS_PATH } from '../routes';
+const Connectors = lazy(() => import('./connectors'));
 
 export const CrawlersRouter: React.FC = () => {
   return (
     <Routes>
       <Route exact path={CRAWLERS_PATH}>
-        <Connectors isCrawler isCrawlerSelfManaged />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <Connectors isCrawler isCrawlerSelfManaged />
+        </Suspense>
       </Route>
       <Route exact path={CRAWLERS_ELASTIC_MANAGED_PATH}>
-        <Connectors isCrawler isCrawlerSelfManaged={false} />
+        <Suspense fallback={<EuiLoadingSpinner />}>
+          <Connectors isCrawler isCrawlerSelfManaged={false} />
+        </Suspense>
       </Route>
     </Routes>
   );

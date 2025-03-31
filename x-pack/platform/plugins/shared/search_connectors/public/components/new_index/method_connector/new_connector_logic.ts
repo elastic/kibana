@@ -234,12 +234,14 @@ export const NewConnectorLogic = kea<
     isFormDirty: [
       false, // Initial state (form is not dirty)
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setFormDirty: (_, { isDirty }) => isDirty,
       },
     ],
     rawName: [
       '',
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setRawName: (_, { rawName }) => rawName,
       },
     ],

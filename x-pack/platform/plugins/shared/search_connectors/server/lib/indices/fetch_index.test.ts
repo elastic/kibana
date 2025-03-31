@@ -6,7 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 
@@ -46,10 +46,6 @@ describe('fetchIndex lib function', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
-  const logger = {
-    error: jest.fn(),
-  } as any as Logger;
 
   const statsResponse = {
     indices: {

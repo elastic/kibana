@@ -73,6 +73,7 @@ export const ConnectorNameAndDescriptionLogic = kea<
     connector: [
       null,
       {
+        // @ts-expect-error upgrade typescript v5.1.6
         setConnector: (_, connector) => connector,
       },
     ],
