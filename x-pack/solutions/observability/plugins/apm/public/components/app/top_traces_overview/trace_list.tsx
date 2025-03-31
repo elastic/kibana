@@ -116,7 +116,7 @@ export function getTraceListColumns({
             <span>
               {asTransactionValue(transactionsPerMinute)}{' '}
               {i18n.translate(
-                'xpack.apm.tracesTable.tracesPerMinuteColumn.screenReaderAbbrevation',
+                'xpack.apm.tracesTable.tracesPerMinuteColumn.screenReaderAbbreviation',
                 {
                   defaultMessage: 'traces per minute',
                 }
