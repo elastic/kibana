@@ -173,6 +173,7 @@ const EsQueryRuleParamsSchemaProperties = {
       }
     )
   ),
+  investigation_guide: schema.maybe(schema.string()),
 };
 
 // rule type parameters
