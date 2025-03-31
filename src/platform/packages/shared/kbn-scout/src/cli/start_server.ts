@@ -26,7 +26,7 @@ export const runStartServer = async (flagsReader: FlagsReader, log: ToolingLog) 
 /**
  * Start servers
  */
-export const startServer: Command<void> = {
+export const startServerCmd: Command<void> = {
   name: 'start-server',
   description: 'Start Elasticsearch & Kibana for testing purposes',
   flags: SERVER_FLAG_OPTIONS,

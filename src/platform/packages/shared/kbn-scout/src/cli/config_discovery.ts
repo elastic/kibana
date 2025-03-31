@@ -68,7 +68,7 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 /**
  * Discover Playwright configuration files with Scout tests
  */
-export const discoverPlaywrightConfigs: Command<void> = {
+export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
   description: `
   Discover Playwright configuration files with Scout tests.

@@ -27,7 +27,7 @@ export const runScoutPlaywrightConfig = async (flagsReader: FlagsReader, log: To
 /**
  * Start servers and run the tests
  */
-export const runTests: Command<void> = {
+export const runTestsCmd: Command<void> = {
   name: 'run-tests',
   description: `
   Run a Scout Playwright config.
