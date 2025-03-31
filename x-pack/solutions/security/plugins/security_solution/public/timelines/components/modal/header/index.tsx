@@ -81,7 +81,9 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
       SourcererScopeName.timeline
     );
 
-    const { dataView: experimentalDataView } = useDataViewSpec(DataViewManagerScopeName.timeline);
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(
+      DataViewManagerScopeName.timeline
+    );
     const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
 
     const browserFields = useMemo(() => {

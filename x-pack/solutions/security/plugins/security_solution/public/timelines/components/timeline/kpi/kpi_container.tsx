@@ -38,7 +38,7 @@ interface KpiExpandedProps {
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const { newDataViewPickerEnabled } = useEnableExperimental();
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
   let { browserFields, sourcererDataView, selectedPatterns } = useSourcererDataView(

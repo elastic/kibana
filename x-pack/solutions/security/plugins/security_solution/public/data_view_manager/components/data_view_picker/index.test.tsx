@@ -67,7 +67,7 @@ describe('DataViewPicker', () => {
 
   beforeEach(() => {
     jest.mocked(useDataViewSpec).mockReturnValue({
-      dataView: {
+      dataViewSpec: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         name: 'Default Security Data View',
       },

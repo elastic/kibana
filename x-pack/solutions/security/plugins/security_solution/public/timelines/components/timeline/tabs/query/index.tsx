@@ -91,7 +91,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataView: experimentalDataView, status: sourcererStatus } = useDataViewSpec(
+  const { dataViewSpec: experimentalDataView, status: sourcererStatus } = useDataViewSpec(
     SourcererScopeName.timeline
   );
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);

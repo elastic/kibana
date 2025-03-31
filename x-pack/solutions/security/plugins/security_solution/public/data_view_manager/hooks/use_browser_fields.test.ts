@@ -19,7 +19,7 @@ jest.mock('./use_data_view_spec', () => ({
 describe('useBrowserFields', () => {
   beforeAll(() => {
     jest.mocked(useDataViewSpec).mockReturnValue({
-      dataView: {
+      dataViewSpec: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         fields: {
           '@timestamp': {

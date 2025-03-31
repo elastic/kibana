@@ -12,7 +12,7 @@ import { useDataViewSpec } from './use_data_view_spec';
 import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 
 export const useBrowserFields = (scope: DataViewManagerScopeName): BrowserFields => {
-  const { dataView } = useDataViewSpec(scope);
+  const { dataViewSpec: dataView } = useDataViewSpec(scope);
 
   return useMemo(() => {
     if (!dataView) {

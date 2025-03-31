@@ -109,7 +109,7 @@ const StatefulTimelineComponent: React.FC<Props> = ({
   const experimentalDataView = useDataViewSpec(SourcererScopeName.timeline);
 
   const selectedDataViewId = newDataViewPickerEnabled
-    ? experimentalDataView.dataView?.id ?? ''
+    ? experimentalDataView.dataViewSpec?.id ?? ''
     : selectedDataViewIdSourcerer;
 
   const selectedPatterns = newDataViewPickerEnabled

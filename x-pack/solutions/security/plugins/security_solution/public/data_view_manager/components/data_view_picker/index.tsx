@@ -28,7 +28,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   const closeDataViewEditor = useRef<() => void | undefined>();
   const closeFieldEditor = useRef<() => void | undefined>();
 
-  const { dataView, status } = useDataViewSpec(props.scope);
+  const { dataViewSpec: dataView, status } = useDataViewSpec(props.scope);
 
   const dataViewId = dataView?.id;
 

@@ -91,7 +91,7 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   );
 
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
 
   if (newDataViewPickerEnabled) {
     selectedPatterns = experimentalSelectedPatterns;

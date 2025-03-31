@@ -20,7 +20,7 @@ export const useDataViewSpec = (scopeName: DataViewManagerScopeName) => {
     // https://github.com/elastic/security-team/issues/11959
     if (!dataView) {
       return {
-        dataView: {
+        dataViewSpec: {
           id: '',
           title: '',
         },
@@ -28,6 +28,6 @@ export const useDataViewSpec = (scopeName: DataViewManagerScopeName) => {
       };
     }
 
-    return { status, dataView: dataView?.toSpec?.() };
+    return { status, dataViewSpec: dataView?.toSpec?.() };
   }, [dataView, status]);
 };

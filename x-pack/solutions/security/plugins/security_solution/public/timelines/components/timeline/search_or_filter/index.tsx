@@ -77,7 +77,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     let { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
 
-    const { dataView: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
     if (newDataViewPickerEnabled) {

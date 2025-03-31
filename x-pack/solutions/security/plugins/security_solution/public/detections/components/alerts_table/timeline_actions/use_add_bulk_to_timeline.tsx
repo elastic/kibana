@@ -74,7 +74,7 @@ export const useAddBulkToTimelineAction = ({
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataView: experimentalDataView } = useDataViewSpec(scopeId);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(scopeId);
   const experimentalBrowserFields = useBrowserFields(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 

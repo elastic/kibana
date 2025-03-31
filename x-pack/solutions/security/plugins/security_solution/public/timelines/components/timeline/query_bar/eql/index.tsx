@@ -70,7 +70,9 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataView: experimentalDataView, status } = useDataViewSpec(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataView, status } = useDataViewSpec(
+    SourcererScopeName.timeline
+  );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
   if (newDataViewPickerEnabled) {

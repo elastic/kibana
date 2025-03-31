@@ -63,7 +63,7 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
   const dispatch = useDispatch();
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
-  const { dataView: experimentalDataView } = useDataViewSpec(SourcererScopeName.detections);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.detections);
 
   const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
 

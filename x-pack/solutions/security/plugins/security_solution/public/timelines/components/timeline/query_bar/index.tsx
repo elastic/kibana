@@ -116,7 +116,7 @@ export const QueryBarTimeline = memo<QueryBarTimelineComponentProps>(
     let { browserFields, sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
 
     const { newDataViewPickerEnabled } = useEnableExperimental();
-    const { dataView: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
 
     if (newDataViewPickerEnabled) {
