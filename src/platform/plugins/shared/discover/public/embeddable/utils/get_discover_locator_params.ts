@@ -36,17 +36,3 @@ export const getDiscoverLocatorParams = (
 
   return locatorParams;
 };
-
-export const getDiscoverLocatorParamsForEsqlCSV = (
-  api: PublishesSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>
-): DiscoverAppLocatorParams => {
-  const savedSearch = api.savedSearch$.getValue();
-
-  const savedObjectId = api.savedObjectId$?.getValue();
-
-  return {
-    ...(savedObjectId ? { savedSearchId: savedObjectId } : {}),
-    query: savedSearch?.searchSource.getField('query'),
-    columns: savedSearch?.columns,
-  };
-};

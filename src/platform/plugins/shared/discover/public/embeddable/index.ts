@@ -9,7 +9,4 @@
 
 export { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 export * from './types';
-export {
-  getDiscoverLocatorParams,
-  getDiscoverLocatorParamsForEsqlCSV,
-} from './utils/get_discover_locator_params';
+export { getDiscoverLocatorParams } from './utils/get_discover_locator_params';

@@ -16,17 +16,16 @@ import {
   I18nStart,
   NotificationsSetup,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, type SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
   apiPublishesSavedSearch,
   PublishesSavedSearch,
   HasTimeRange,
-  getDiscoverLocatorParamsForEsqlCSV,
 } from '@kbn/discover-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
+import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import {
   apiCanAccessViewMode,
   apiHasType,
@@ -36,7 +35,9 @@ import {
   EmbeddableApiContext,
   getInheritedViewMode,
   HasType,
+  type PublishesSavedObjectId,
   PublishesTitle,
+  type PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
@@ -197,6 +198,21 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
       });
   };
 
+  private getDiscoverLocatorParamsForEsqlCSV = (
+    api: PublishesSavedSearch & Partial<PublishesSavedObjectId & PublishesUnifiedSearch>,
+    searchSourceFields: SerializedSearchSourceFields,
+    columns: string[]
+  ): DiscoverAppLocatorParams => {
+    const savedObjectId = api.savedObjectId$?.getValue();
+
+    return {
+      ...(savedObjectId ? { savedSearchId: savedObjectId } : {}),
+      query: searchSourceFields.query,
+      filters: searchSourceFields.parent?.filter, // time range filter
+      columns,
+    };
+  };
+
   public execute = async (context: EmbeddableApiContext) => {
     const { embeddable } = context;
 
@@ -215,6 +231,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
     const title = embeddable.title$.getValue() ?? '';
     const executionParamsCommon = { title, i18nStart, analytics };
 
+    const { columns, getSearchSource } = await this.getSharingData(savedSearch);
+    const searchSource = getSearchSource({
+      addGlobalTimeFilter: !embeddable.hasTimeRange(),
+      absoluteTime: true,
+    });
+
     if (this.isEsqlMode(savedSearch)) {
       return this.executeGenerate({
         ...executionParamsCommon,
@@ -223,18 +245,12 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
           locatorParams: [
             {
               id: DISCOVER_APP_LOCATOR,
-              params: getDiscoverLocatorParamsForEsqlCSV(embeddable),
+              params: this.getDiscoverLocatorParamsForEsqlCSV(embeddable, searchSource, columns),
             } as LocatorParams,
           ],
         },
       });
     }
-
-    const { columns, getSearchSource } = await this.getSharingData(savedSearch);
-    const searchSource = getSearchSource({
-      addGlobalTimeFilter: !embeddable.hasTimeRange(),
-      absoluteTime: true,
-    });
 
     return this.executeGenerate({
       ...executionParamsCommon,
