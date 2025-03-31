@@ -390,7 +390,6 @@ export const getCodeSignatureValue = (
     return codeSignature.reduce((acc, signature) => {
       if (signature?.trusted === 'true' && !noDuplicates.has(signature?.subject_name)) {
         noDuplicates.add(signature.subject_name);
-        console.log(noDuplicates);
         acc.push({
           field,
           type: 'nested',
