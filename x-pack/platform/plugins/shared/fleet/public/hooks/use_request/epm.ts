@@ -31,8 +31,11 @@ import type {
   GetInputsTemplatesResponse,
 } from '../../types';
 import type {
+  BulkUpgradePackagesRequest,
+  BulkUpgradePackagesResponse,
   FleetErrorResponse,
   GetEpmDataStreamsResponse,
+  GetOneBulkUpgradePackagesResponse,
   GetStatsResponse,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
@@ -302,6 +305,23 @@ export const sendBulkInstallPackages = (
     body: {
       packages,
     },
+  });
+};
+
+export const sendBulkUpgradePackagesForRq = (params: BulkUpgradePackagesRequest) => {
+  return sendRequestForRq<BulkUpgradePackagesResponse>({
+    path: epmRouteService.getBulkUpgradePath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
+export const sendGetOneBulkUpgradePackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkUpgradePackagesResponse>({
+    path: epmRouteService.getOneBulkUpgradePath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
   });
 };
 
