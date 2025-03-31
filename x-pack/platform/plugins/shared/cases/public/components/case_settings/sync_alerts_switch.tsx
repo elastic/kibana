@@ -41,7 +41,7 @@ const SyncAlertsSwitchComponent: React.FC<Props> = ({
       onChange={onChange}
       disabled={disabled}
       data-test-subj="sync-alerts-switch"
-      aria-label="Sync alerts"
+      aria-label={i18n.SYNC_ALERTS}
     />
   );
 };
