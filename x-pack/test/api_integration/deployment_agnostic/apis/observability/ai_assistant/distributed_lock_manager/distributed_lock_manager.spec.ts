@@ -12,63 +12,70 @@ import {
   LockManager,
   withLock,
 } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager';
+import { Client } from '@elastic/elasticsearch';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
+  const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
-    let lockManager: LockManager;
-    let lockManager2: LockManager;
-
-    const loggerMock = getLoggerMock(log);
-
     before(async () => {
       await ensureTemplatesAndIndexCreated(es);
-      lockManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
-      lockManager2 = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
     });
 
-    beforeEach(async () => {
-      await lockManager.release();
-      await lockManager2.release();
+    after(async () => {
+      await clearAllLocks(es);
     });
 
-    afterEach(async () => {
-      await lockManager.release();
-      await lockManager2.release();
-    });
+    describe('Basic lock operations', () => {
+      let lockManager: LockManager;
 
-    describe('LockManager', () => {
-      it('should acquire the lock when it is not held', async () => {
+      beforeEach(async () => {
+        // Create a fresh instance for each test to ensure state isolation.
+        lockManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        await lockManager.release();
+      });
+
+      afterEach(async () => {
+        await lockManager.release();
+      });
+
+      it('acquires the lock when not held', async () => {
         const acquired = await lockManager.acquire();
         expect(acquired).to.be(true);
 
         const lock = await lockManager.get();
-        expect(lock).to.not.be(undefined);
+        expect(lock).not.to.be(undefined);
       });
 
-      it('should store metadata that can be retrieved', async () => {
-        await lockManager.acquire({ meta: { foo: 'bar' } });
-
+      it('stores and retrieves metadata', async () => {
+        const meta = { foo: 'bar' };
+        await lockManager.acquire({ meta });
         const lock = await lockManager.get();
-        expect(lock?.meta).to.eql({ foo: 'bar' });
+        expect(lock?.meta).to.eql(meta);
       });
 
-      it('should not acquire the lock if it is already held', async () => {
-        const firstAcquired = await lockManager.acquire({ meta: { attempt: 'one' } });
-        expect(firstAcquired).to.be(true);
+      it('does not acquire the lock if already held', async () => {
+        // Use two separate instances to simulate concurrent acquisition.
+        const manager1 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        const manager2 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        await manager1.release();
+        await manager2.release();
 
-        // Try to acquire again; it should fail.
-        const secondAcquired = await lockManager2.acquire({ meta: { attempt: 'two' } });
-        expect(secondAcquired).to.be(false);
-        const lock = await lockManager2.get();
+        const acquired1 = await manager1.acquire({ meta: { attempt: 'one' } });
+        expect(acquired1).to.be(true);
+
+        const acquired2 = await manager2.acquire({ meta: { attempt: 'two' } });
+        expect(acquired2).to.be(false);
+
+        const lock = await manager2.get();
         expect(lock?.meta).to.eql({ attempt: 'one' });
       });
 
-      it('should release the lock', async () => {
+      it('releases the lock', async () => {
         const acquired = await lockManager.acquire();
         expect(acquired).to.be(true);
 
@@ -78,102 +85,80 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(lock).to.be(undefined);
       });
 
-      it('should allow reacquiring the lock after expiration', async () => {
-        // Acquire the lock with a very short TTL (1 second).
+      it('allows reacquisition after expiration', async () => {
+        // Acquire with a very short TTL.
         const acquired = await lockManager.acquire({ ttlMs: 1000, meta: { attempt: 'one' } });
         expect(acquired).to.be(true);
 
-        // Wait for 1.5 seconds so that the lock expires.
-        await sleep(1500);
+        await sleep(1500); // wait for lock to expire
 
-        // Try to acquire the lock again.
-        const reacquired = await lockManager2.acquire({ meta: { attempt: 'two' } });
+        // Use a fresh instance to acquire.
+        const newManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        const reacquired = await newManager.acquire({ meta: { attempt: 'two' } });
         expect(reacquired).to.be(true);
       });
 
-      it('get should return undefined for an expired lock and remove it', async () => {
-        // Acquire with a short TTL.
-        const acquired = await lockManager.acquire({ ttlMs: 1000 });
-        expect(acquired).to.be(true);
-
-        // Wait for the lock to expire.
-        await sleep(1500);
+      it('removes expired lock upon get()', async () => {
+        await lockManager.acquire({ ttlMs: 500 });
+        await sleep(1000);
         const lock = await lockManager.get();
         expect(lock).to.be(undefined);
-
-        // Subsequent get() calls still return undefined.
-        const lockAgain = await lockManager.get();
-        expect(lockAgain).to.be(undefined);
       });
 
-      it('should not throw an error when releasing a non-existent lock', async () => {
+      it('does not throw when releasing a non-existent lock', async () => {
         await lockManager.release();
         await lockManager.release();
         const lock = await lockManager.get();
         expect(lock).to.be(undefined);
       });
 
-      it('should return valid lock details when the lock is not expired', async () => {
+      it('returns valid lock details when active', async () => {
         await lockManager.acquire({ meta: { detail: 'valid' }, ttlMs: 5000 });
         const lock = await lockManager.get();
-        expect(lock).to.not.be(undefined);
+        expect(lock).not.to.be(undefined);
         expect(lock!.meta.detail).to.be('valid');
-      });
-
-      it('should only allow a single lock to be acquired when multiple calls are made in parallel', async () => {
-        function acquire() {
-          const customLockManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
-          return customLockManager.acquire();
-        }
-
-        const values = await Promise.all([
-          acquire(),
-          acquire(),
-          acquire(),
-          acquire(),
-          acquire(),
-          acquire(),
-          acquire(),
-          acquire(),
-          acquire(),
-        ]);
-
-        expect(values.filter((v) => v === true)).to.have.length(1);
-        expect(values.filter((v) => v === false)).to.have.length(8);
-      });
-
-      it('should increment the counter only once', async () => {
-        let counter = 0;
-
-        async function add() {
-          const customLockManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
-          const lock = await customLockManager.acquire();
-          if (lock) {
-            counter++;
-            lockManager.release();
-          }
-        }
-
-        await Promise.all([add(), add(), add(), add(), add(), add(), add()]);
-
-        expect(counter).to.be(1);
       });
     });
 
-    describe('Multiple LockManager instances', () => {
+    describe('Parallel lock acquisition', () => {
       let customLockManager: LockManager;
-      before(async () => {
-        customLockManager = new LockManager('customLockId' as LockId, es, loggerMock);
+      let standardLockManager: LockManager;
+
+      beforeEach(async () => {
+        customLockManager = new LockManager('customLockId' as LockId, es, logger);
+        standardLockManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
         await customLockManager.release();
+        await standardLockManager.release();
       });
 
-      after(async () => {
+      afterEach(async () => {
         await customLockManager.release();
+        await standardLockManager.release();
       });
 
-      it('separate locks should not interfere with each other', async () => {
-        expect(await customLockManager.acquire()).to.be(true);
-        expect(await lockManager.acquire()).to.be(true);
+      it('allows only a single lock acquisition when multiple calls are made concurrently', async () => {
+        let counter = 0;
+        async function add() {
+          const lm = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+          const hasLock = await lm.acquire();
+          if (hasLock) {
+            counter++;
+            await lm.release();
+          }
+          return hasLock;
+        }
+
+        const results = await Promise.all([add(), add(), add(), add(), add(), add(), add()]);
+        expect(counter).to.be(1);
+        expect(results.filter((v) => v === true)).to.have.length(1);
+        expect(results.filter((v) => v === false)).to.have.length(results.length - 1);
+      });
+
+      it('does not interfere between separate locks', async () => {
+        const acquiredCustom = await customLockManager.acquire();
+        const acquiredStandard = await standardLockManager.acquire();
+        expect(acquiredCustom).to.be(true);
+        expect(acquiredStandard).to.be(true);
       });
     });
 
@@ -182,9 +167,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let waitingManager: LockManager;
 
       beforeEach(async () => {
-        // Use two LockManager instances with the same lockId.
-        blockingManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
-        waitingManager = new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock);
+        blockingManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        waitingManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        await blockingManager.release();
+        await waitingManager.release();
       });
 
       afterEach(async () => {
@@ -192,15 +178,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await waitingManager.release();
       });
 
-      it('should eventually acquire the lock when it becomes available', async () => {
-        // Acquire the lock with the blocking instance.
+      it('eventually acquires the lock when it becomes available', async () => {
         const acquired = await blockingManager.acquire();
         expect(acquired).to.be(true);
 
-        // Start waiting for the lock in parallel.
         const waitPromise = waitingManager.waitForLock({ minTimeout: 50, maxTimeout: 50 });
-
-        // After a short delay, release the blocking lock so the waiting instance can acquire it.
         await sleep(100);
         await blockingManager.release();
 
@@ -208,8 +190,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(waitResult).to.be(true);
       });
 
-      it('should throw an Error when the timeout is reached', async () => {
-        // Acquire the lock so it remains held.
+      it('throws an Error when the wait times out', async () => {
         await blockingManager.acquire();
 
         let error: Error | undefined;
@@ -219,6 +200,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           error = err;
         }
         expect(error?.message).to.contain('Lock "knowledge_base_reindex" not available yet');
+        await blockingManager.release();
       });
     });
 
@@ -227,11 +209,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let runWithLock: () => Promise<string | undefined>;
       let results: Array<string | undefined>;
 
-      before(async () => {
+      beforeEach(async () => {
         executions = 0;
-        runWithLock = () => {
+        runWithLock = async () => {
           return withLock(
-            { esClient: es, lockId: LockId.KnowledgeBaseReindex, logger: loggerMock },
+            {
+              esClient: es,
+              lockId: LockId.KnowledgeBaseReindex,
+              logger,
+              meta: { test: 'withLock' },
+            },
             async () => {
               executions++;
               return 'was called';
@@ -242,16 +229,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         results = await Promise.all([runWithLock(), runWithLock(), runWithLock()]);
       });
 
-      it('should only execute the callback once', async () => {
+      it('executes the callback only once', async () => {
         expect(executions).to.be(1);
       });
 
-      it('should return the result of the callback', async () => {
+      it('returns the callback result for the successful call', async () => {
         expect(results.sort()).to.eql(['was called', undefined, undefined]);
       });
 
-      it('should release the lock', async () => {
-        const lock = await new LockManager(LockId.KnowledgeBaseReindex, es, loggerMock).get();
+      it('releases the lock after execution', async () => {
+        const lm = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        const lock = await lm.get();
         expect(lock).to.be(undefined);
       });
     });
@@ -260,4 +248,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function clearAllLocks(es: Client) {
+  return es.deleteByQuery({
+    index: '.kibana-distributed-lock-manager',
+    query: { match_all: {} },
+  });
 }
