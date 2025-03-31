@@ -139,14 +139,14 @@ export const LatestVulnerabilitiesTable = ({
         {
           onClick: () => onAddFilter(field, item, '+'),
           iconType: 'plusInCircle',
-          ariaLabel: i18n.translate('xpack.csp.findings.latestVulnerabilities.table.addFilter', {
+          ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.addFilter', {
             defaultMessage: 'Add filter',
           }),
         },
         {
           onClick: () => onAddFilter(field, item, '-'),
           iconType: 'minusInCircle',
-          ariaLabel: i18n.translate('xpack.csp.findings.latestVulnerabilities.table.removeFilter', {
+          ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.removeFilter', {
             defaultMessage: 'Remove filter',
           }),
         },
@@ -156,7 +156,7 @@ export const LatestVulnerabilitiesTable = ({
                 onClick: () => window.open(findReferenceLink(references, item)!, '_blank'),
                 iconType: 'popout',
                 ariaLabel: i18n.translate(
-                  'xpack.csp.findings.latestVulnerabilities.table.openReference',
+                  'xpack.csp.latestVulnerabilities.table.openReferenceURL',
                   {
                     defaultMessage: 'Open reference URL',
                   }
