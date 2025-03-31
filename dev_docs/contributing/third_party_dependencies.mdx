@@ -67,6 +67,57 @@ on Github:
   [Permitted Open Source Licenses list](https://github.com/elastic/open-source/blob/main/elastic-product-policy.md#permitted-licenses-list).
 </DocCallOut>
 
+### Dependency evaluation
+
+1. **Snyk health check**
+    - Ensure a minimum health score is >= 80 in [Snyk Advisor](https://snyk.io/advisor).
+    - If the health score is below 80, a valid business justification must be provided.
+
+2. **Vulnerability assessment**. Check vulnerability reports from Snyk for the exact dependency version, available through [Snyk Advisor](https://snyk.io/advisor).
+    If vulnerabilities are present (production dependencies only):
+
+    - **Critical (CVSS 9.0 - 10.0)**:
+      - **False positive:** Proceed to Step 3.
+      - **Confirmed vulnerability:** Reject dependency.
+
+    - **High (CVSS 7.0 - 8.9)**:
+      - **False positive:** Proceed to Step 3.
+      - **Confirmed vulnerability:** Reject dependency.
+
+    - **Medium/Low (CVSS 0.0 - 6.9)**:
+      - **False positive:** Proceed to Step 3.
+      - **Confirmed vulnerability:** Exception can be granted if the vulnerability is confirmed to be impossible to exploit.
+      
+    **Note:** dev-only dependencies are exempt from these criteria and are acceptable without this evaluation since they cannot affect us in any meaningful way.
+
+3. **Handling false positives**. If a vulnerability is considered to be a false positive:
+    - Clearly document why the vulnerability is considered a false positive.
+    - Submit an exception request following the [Vulnerability Exception Policy and Procedures](https://docs.google.com/document/d/1T0GqyWvnTnFWG4TYTSP_Wt_lW-4HqAIlUNhl0fuaklw/edit?usp=sharing).
+    - The exception request must be created **before merging** the dependency.
+
+4. **Approval**. Document the entire assessment clearly, including:
+    - Final health score
+    - CVSS scores of identified issues if applicable
+    - Justification for any accepted false positives if applicable
+
+
+    ```
+    ## Approval Summary
+
+    | **Dependency Name**   | `<dependency-name>`            |
+    |-----------------------|--------------------------------|
+    | **Version**           | `<version>`                    |
+    | **Snyk Health Score** | `95/100`                       |
+    | **CVSS Issues**       | None / High (CVSS 7.5, CVE-XXXX-XXXX) |
+    | **False Positives**   | [Yes/No](justification below)   |
+
+    ### Justification / Notes:
+    - Brief justification or context here
+    - Submitted CVE exception(s)? [Yes/No]
+
+    Status: [approved/rejected]
+    ```
+
 ## Using existing dependencies
 
 Using an existing dependency is typically preferred over adding a new one.
