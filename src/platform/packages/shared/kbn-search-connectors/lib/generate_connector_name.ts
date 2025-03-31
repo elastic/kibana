@@ -9,7 +9,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 
-import kebabCase from 'lodash/kebabCase';
+import { kebabCase } from 'lodash';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
