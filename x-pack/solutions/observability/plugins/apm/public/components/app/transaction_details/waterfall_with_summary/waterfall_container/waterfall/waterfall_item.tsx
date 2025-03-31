@@ -340,8 +340,10 @@ function RelatedErrors({
   const transactionId = (item.doc as WaterfallTransaction).transaction?.id;
   const spanId = (item.doc as WaterfallSpan).span?.id;
 
-  if (transactionId || spanId) {
-    kuery += ` and (${TRANSACTION_ID} : "${transactionId}" OR  ${SPAN_ID}: "${spanId}")`;
+  if (item.docType === 'transaction' && spanId) {
+    kuery += ` and ${SPAN_ID} : "${spanId}"`;
+  } else if (transactionId) {
+    kuery += ` and ${TRANSACTION_ID} : "${transactionId}"`;
   }
 
   const mobileHref = apmRouter.link(`/mobile-services/{serviceName}/errors-and-crashes`, {
