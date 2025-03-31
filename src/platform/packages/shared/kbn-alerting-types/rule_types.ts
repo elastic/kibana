@@ -221,7 +221,6 @@ export interface Dashboard extends SavedObjectAttributes {
 
 export interface Artifact extends SavedObjectAttributes {
   dashboards?: Dashboard[];
-  investigation_guide?: string; // TBD if it will be an object or a string
 }
 
 export interface Rule<Params extends RuleTypeParams = never> {
