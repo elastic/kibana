@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiPanel, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiPanel, EuiHealth, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -28,7 +28,7 @@ export const ActivitySection: React.FunctionComponent<{
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             {actions.some((action) => action.status === 'IN_PROGRESS') && (
               <EuiFlexItem grow={false}>
-                <EuiIcon type="dot" color="success" />
+                <EuiHealth color="success" />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>

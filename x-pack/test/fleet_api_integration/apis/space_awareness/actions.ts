@@ -103,7 +103,6 @@ export default function (providerContext: FtrProviderContext) {
           'nbAgentsActioned',
           'nbAgentsFailed',
           'latestErrors',
-          'is_automatic',
           'policyId'
         );
         expect(actionStatusInDefaultSpace.items[0].type).to.eql('UPDATE_TAGS');

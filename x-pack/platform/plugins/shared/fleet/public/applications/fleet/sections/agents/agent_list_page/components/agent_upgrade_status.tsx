@@ -17,6 +17,7 @@ import {
   isAgentUpgradeAvailable,
 } from '../../../../../../../common/services';
 
+import { AUTO_UPGRADE_DEFAULT_RETRIES } from '../../../../../../../common/constants';
 /**
  * Returns a user-friendly string for the estimated remaining time until the upgrade is scheduled.
  */
@@ -309,8 +310,11 @@ export const AgentUpgradeStatus: React.FC<{
             content={
               <FormattedMessage
                 id="xpack.fleet.agentUpgradeStatusTooltip.retryingUpgrade"
-                defaultMessage="Retrying Upgrade ({retryCount}/7 attempts)"
-                values={{ retryCount: agent.upgrade_attempts.length }}
+                defaultMessage="Retrying Upgrade ({retryCount}/{maxRetries} attempts)"
+                values={{
+                  retryCount: agent.upgrade_attempts.length,
+                  maxRetries: AUTO_UPGRADE_DEFAULT_RETRIES,
+                }}
               />
             }
             color="subdued"

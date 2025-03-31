@@ -119,7 +119,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="flexStart">
-            <EuiFlexGroup>
+            <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
               </EuiFlexItem>
@@ -149,20 +149,12 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
 
               <EuiFlexItem>
                 <EuiButtonEmpty>
-                  <FormattedMessage
-                    id="xpack.fleet.agentActivityFlyout.learnMore"
-                    defaultMessage="{value}"
-                    values={{
-                      value: (
-                        <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
-                          <FormattedMessage
-                            id="xpack.fleet.agentActivityFlyout.guideLink"
-                            defaultMessage="Learn more"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
-                  />
+                  <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                    <FormattedMessage
+                      id="xpack.fleet.agentActivityFlyout.guideLink"
+                      defaultMessage="Learn more"
+                    />
+                  </EuiLink>
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { act, render, fireEvent } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
+
+import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
@@ -104,6 +106,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render a loader while actions are loading and then render actions', async () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -132,8 +135,8 @@ describe('AgentActivityFlyout', () => {
         isFirstLoading: false,
       });
 
-    const result = render(component());
-
+    const result = testRenderer.render(component());
+    console.log(result.debug());
     expect(result.getByText('Agent activity')).toBeInTheDocument();
     expect(result.queryByTestId('loading')).toBeInTheDocument();
     expect(result.queryByTestId('upgradeInProgressTitle')).not.toBeInTheDocument();
@@ -144,17 +147,19 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render an empty state after loading if there are no actions', () => {
+    const testRenderer = createFleetTestRendererMock();
     mockUseActionStatus.mockReturnValue({
       currentActions: [],
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.queryByText('No activity to display')).toBeInTheDocument();
   });
 
   it('should render agent activity for in progress upgrade', async () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -176,7 +181,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -198,6 +203,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should not render cancel button if the upgrade is set to happen immediately', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -219,7 +225,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -237,6 +243,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for scheduled upgrade', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -257,7 +264,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
 
@@ -278,6 +285,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for complete upgrade', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action3',
@@ -297,7 +305,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '2 agents upgraded'
@@ -310,6 +318,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for rollout passed upgrade', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action3',
@@ -328,7 +337,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
@@ -341,6 +350,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for rollout passed upgrade with failed', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action3',
@@ -359,7 +369,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '1 of 2 agents upgraded, 1 agent(s) offline during the rollout period'
@@ -377,6 +387,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for expired unenroll', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action4',
@@ -395,7 +406,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Agent unenrollment expired'
@@ -408,6 +419,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for cancelled upgrade', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action5',
@@ -428,7 +440,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Agent upgrade cancelled'
@@ -441,6 +453,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for failed reassign', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action7',
@@ -461,7 +474,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '0 of 1 agent assigned to a new policy'
@@ -479,6 +492,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for unknown action', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -498,7 +512,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '0 of 3 agents actioned'
@@ -511,6 +525,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for policy change no agents', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -532,7 +547,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       'Policy changed'
@@ -545,6 +560,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for policy change with agents', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -566,7 +582,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.container.querySelector('[data-test-subj="statusTitle"]')!.textContent).toEqual(
       '3 agents applied policy change'
@@ -579,6 +595,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for an automatic upgrade', () => {
+    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -602,7 +619,7 @@ describe('AgentActivityFlyout', () => {
       abortUpgrade: mockAbortUpgrade,
       isFirstLoading: false,
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(
       result.container.querySelector('[data-test-subj="inProgressTitle"]')!.textContent
@@ -615,6 +632,7 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should keep flyout state on new data', () => {
+    const testRenderer = createFleetTestRendererMock();
     const failedAction = {
       actionId: 'action1',
       nbAgentsActionCreated: 1,
@@ -664,7 +682,7 @@ describe('AgentActivityFlyout', () => {
         };
       }
     });
-    const result = render(component());
+    const result = testRenderer.render(component());
 
     expect(result.getByText('Agent activity')).toBeInTheDocument();
     expect(result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')).toBe(null);

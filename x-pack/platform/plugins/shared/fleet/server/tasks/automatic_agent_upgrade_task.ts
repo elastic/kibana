@@ -225,7 +225,7 @@ export class AutomaticAgentUpgradeTask {
       );
       return;
     }
-    // before processing everything, we need to get the counts for each version so we know if we should round some up or down to make sure we arent overshooting the number of agents.
+    // Before processing each required version, we need to get the count of agents for each version so we know if we should round some up or down to make sure we arent overshooting the total number of agents.
     let versionAndCounts: VersionAndCounts[] = [];
 
     for (const requiredVersion of agentPolicy.required_versions ?? []) {
@@ -233,7 +233,7 @@ export class AutomaticAgentUpgradeTask {
         (totalActiveAgents * requiredVersion.percentage) / 100
       );
 
-      // Subtract total number of agents already or on or updating to target version.
+      // Subtract the total number of agents already or on or updating to target version.
       const updatingToKuery = `(upgrade_details.target_version:${requiredVersion.version} AND NOT upgrade_details.state:UPG_FAILED)`;
       const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
         esClient,
@@ -250,7 +250,7 @@ export class AutomaticAgentUpgradeTask {
         targetPercentage: requiredVersion.percentage,
       });
     }
-    // then we need to adjust based on the total to make sure we arent over or undershooting the number of agents
+    // Then we need to make adjustments based on the total to make sure we arent over or undershooting the total number of agents
     versionAndCounts = await this.adjustAgentCounts(versionAndCounts, totalActiveAgents);
 
     for (const requiredVersion of agentPolicy.required_versions ?? []) {
@@ -272,26 +272,26 @@ export class AutomaticAgentUpgradeTask {
       0
     );
 
-    // now we have the total percentage after we add everything up, vs the total target percentage we have. Get the difference, then multiply that by the total active agents to get the delta we need to add or remove from the total count.
+    // Now we have the total percentage after we add everything up, vs the total target percentage we have. Get the difference, then multiply that by the total active agents to get the delta we need to add or remove from the total count.
     const totalDeltaPercentage = totalActualPercentage - totalNeededPercentage;
 
-    // if we are over, we need to remove some from the count, and if we are under, we need to add some to the count. If we're spot on, all good
+    // If we are over, we need to remove some from the count, and if we are under, we need to add some to the count. If we're spot on, all good.
     if (totalDeltaPercentage !== 0) {
       // get the actual count of agents we are off by using the percentage * the total active agents
       let deltaCount = Math.round((totalDeltaPercentage / 100) * totalActiveAgents);
 
-      // now we need to add or remove from the versionAndCounts array
+      // Now we need to add or remove from the versionAndCounts array
       let index = 0;
-      // so long as we have more to add or remove, do so
+      // So long as we have more to add or remove, do so
       while (deltaCount !== 0 && index < versionAndCounts.length) {
         const item = versionAndCounts[index];
         if (deltaCount > 0) {
-          // still have too many, removing one
+          // Still have too many, removing one
 
           item.count -= 1;
           deltaCount -= 1;
         } else if (deltaCount < 0) {
-          // still have too few, adding one
+          // Still have too few, adding one
 
           if (item.count > 0) {
             item.count += 1;
