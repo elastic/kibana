@@ -9,16 +9,27 @@ import React from 'react';
 
 import { EuiCodeBlock } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { ChatFormFields } from '../../../types';
+import { ChatForm, ChatFormFields } from '../../../types';
+import { elasticsearchQueryObject } from '../../../utils/user_query';
 
 export const DevToolsCode: React.FC = () => {
-  const { getValues } = useFormContext();
-  const query = getValues(ChatFormFields.elasticsearchQuery) ?? '';
-  const indices = getValues(ChatFormFields.indices) ?? [];
-  const searchQuery = getValues(ChatFormFields.searchQuery) ?? '';
-  const replacedQuery = searchQuery
-    ? JSON.stringify(query, null, 2).replace(/\"{query}\"/g, JSON.stringify(searchQuery))
-    : JSON.stringify(query, null, 2);
+  const { getValues } = useFormContext<ChatForm>();
+  const {
+    [ChatFormFields.indices]: indices,
+    [ChatFormFields.elasticsearchQuery]: esQuery,
+    [ChatFormFields.searchQuery]: searchQuery,
+    [ChatFormFields.userElasticsearchQuery]: userElasticsearchQuery,
+    [ChatFormFields.userElasticsearchQueryValidations]: userElasticsearchQueryValidations,
+  } = getValues();
+  const query = elasticsearchQueryObject(
+    esQuery,
+    userElasticsearchQuery,
+    userElasticsearchQueryValidations
+  );
+  const replacedQuery =
+    searchQuery ?? ''
+      ? JSON.stringify(query, null, 2).replace(/\"{query}\"/g, JSON.stringify(searchQuery))
+      : JSON.stringify(query, null, 2);
 
   return (
     <EuiCodeBlock isCopyable overflowHeight="100%">
