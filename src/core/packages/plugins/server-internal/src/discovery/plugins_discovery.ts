@@ -9,15 +9,15 @@
 
 import { from, merge, EMPTY } from 'rxjs';
 import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { getPluginPackagesFilter } from '@kbn/repo-packages';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { PluginWrapper } from '../plugin';
 import { pluginManifestFromPluginPackage } from './plugin_manifest_from_plugin_package';
 import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
-import { PluginsConfig } from '../plugins_config';
-import { PluginDiscoveryError } from './plugin_discovery_error';
+import type { PluginsConfig } from '../plugins_config';
+import type { PluginDiscoveryError } from './plugin_discovery_error';
 import { parseManifest } from './plugin_manifest_parser';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 
@@ -70,6 +70,14 @@ export function discover({
         paths: config.additionalPluginPaths,
         parentDirs: config.pluginSearchPaths,
       })
+    ),
+    filter(
+      // only admit those packages that ...
+      (pkg) =>
+        // ... are NOT under an excluded group
+        !config.excludedPluginGroups.includes(pkg.getGroup()) ||
+        // ... or that are under an explicitly included group
+        config.includedPluginGroups.includes(pkg.getGroup())
     ),
     map((pkg) => {
       log.debug(`Successfully discovered plugin package "${pkg.id}"`);

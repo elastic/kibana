@@ -7,12 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type Type, TypeOf } from '@kbn/config-schema';
 import { get } from 'lodash';
 import { Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
-import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from './constants';
+import { KIBANA_SOLUTIONS, type KibanaSolution } from '@kbn/projects-solutions-groups';
+import {
+  ENABLE_ALL_PLUGINS_CONFIG_PATH,
+  INCLUDED_PLUGIN_GROUPS,
+  EXCLUDED_PLUGIN_GROUPS,
+} from './constants';
 
 const configSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
@@ -21,6 +26,32 @@ const configSchema = schema.object({
    * Defines an array of directories where another plugin should be loaded from.
    */
   paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  /**
+   * Defines an array of groups to ignore when loading plugins.
+   */
+  excludedPluginGroups: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf(
+        KIBANA_SOLUTIONS.map((solutionName) => schema.literal(solutionName)) as [
+          Type<KibanaSolution> // This cast is needed because it's different to Type<T>[] :sight:
+        ]
+      ),
+      { defaultValue: [] }
+    )
+  ),
+  /**
+   * Defines an array of groups to NOT ignore when loading plugins.
+   */
+  includedPluginGroups: schema.maybe(
+    schema.arrayOf(
+      schema.oneOf(
+        KIBANA_SOLUTIONS.map((solutionName) => schema.literal(solutionName)) as [
+          Type<KibanaSolution> // This cast is needed because it's different to Type<T>[] :sight:
+        ]
+      ),
+      { defaultValue: [] }
+    )
+  ),
   /**
    * Internal config, not intended to be used by end users. Only for specific
    * internal purposes.
@@ -61,10 +92,22 @@ export class PluginsConfig {
    */
   public readonly shouldEnableAllPlugins: boolean;
 
+  /**
+   * Specify some plugin groups that should be excluded by the discovery mechanism.
+   */
+  public readonly excludedPluginGroups: readonly string[];
+
+  /**
+   * Specify some plugin groups that should NOT be excluded by the discovery mechanism.
+   */
+  public readonly includedPluginGroups: readonly string[];
+
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
+    this.excludedPluginGroups = get(rawConfig, EXCLUDED_PLUGIN_GROUPS, []);
+    this.includedPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS, []);
     this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
   }
 }
