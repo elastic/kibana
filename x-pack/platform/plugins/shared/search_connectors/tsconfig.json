@@ -43,5 +43,16 @@
     "@kbn/features-plugin",
     "@kbn/core-http-server",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/deeplinks-search",
+    "@kbn/search-api-panels",
+    "@kbn/try-in-console",
+    "@kbn/unsaved-changes-prompt",
+    "@kbn/code-editor",
+    "@kbn/console-plugin",
+    "@kbn/discover-plugin",
+    "@kbn/guided-onboarding-plugin",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/licensing-plugin",
+    "@kbn/spaces-plugin",
   ]
 }
