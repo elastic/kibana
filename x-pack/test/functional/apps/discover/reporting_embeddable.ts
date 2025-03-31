@@ -12,13 +12,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const { reporting, common, discover, timePicker, share, header, dashboard, unifiedFieldList } =
+  const { reporting, common, discover, timePicker, header, dashboard, unifiedFieldList } =
     getPageObjects([
       'reporting',
       'common',
       'discover',
       'timePicker',
-      'share',
       'header',
       'dashboard',
       'unifiedFieldList',
