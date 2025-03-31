@@ -18,8 +18,9 @@ import {
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -42,6 +43,7 @@ import { timelineDefaults } from '../../../../store/defaults';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry';
 import { isFullScreen } from '../../helpers';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
 interface NavigationProps {
   fullScreen: boolean;
@@ -279,7 +281,13 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
     [globalFullScreen, scopeId, timelineFullScreen]
   );
 
-  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+  let { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+  if (newDataViewPickerEnabled) {
+    selectedPatterns = experimentalSelectedPatterns;
+  }
   const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openFlyout } = useExpandableFlyoutApi();

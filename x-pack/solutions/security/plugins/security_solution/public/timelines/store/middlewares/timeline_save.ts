@@ -20,6 +20,8 @@ import {
   isPhrasesFilter,
 } from '@kbn/es-query';
 
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
 import { sourcererSelectors } from '../../../sourcerer/store';
 import {
   updateTimeline,
@@ -51,27 +53,68 @@ function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveT
 }
 
 export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State> =
+  // WARN: this is disabled because we need to support experimental data view picker here.
+  // once it is stable, remove the override
+  // eslint-disable-next-line complexity
   (kibana: CoreStart) => (store) => (next) => async (action: Action) => {
-    // perform the action
-    const ret = next(action);
+    if (!isSaveTimelineAction(action)) {
+      return next(action);
+    }
 
-    if (isSaveTimelineAction(action)) {
-      const { id: localTimelineId } = action.payload;
-      const storeState = store.getState();
-      const timeline = selectTimelineById(storeState, localTimelineId);
-      const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
-        extractTimelineIdsAndVersions(timeline);
-      const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
-      const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
-        storeState,
-        SourcererScopeName.timeline
-      );
-      const selectedPatterns = sourcererSelectors.sourcererScopeSelectedPatterns(
-        storeState,
-        SourcererScopeName.timeline
+    const { id: localTimelineId } = action.payload;
+    const storeState = store.getState();
+    const timeline = selectTimelineById(storeState, localTimelineId);
+    const { timelineId, timelineVersion, templateTimelineId, templateTimelineVersion } =
+      extractTimelineIdsAndVersions(timeline);
+    const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
+    const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
+      storeState,
+      SourcererScopeName.timeline
+    );
+    const selectedPatternsSourcerer = sourcererSelectors.sourcererScopeSelectedPatterns(
+      storeState,
+      SourcererScopeName.timeline
+    );
+
+    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(
+      SourcererScopeName.timeline
+    )(storeState);
+
+    const experimentalIsDataViewEnabled =
+      storeState.app.enableExperimental.newDataViewPickerEnabled;
+
+    let experimentalSelectedPatterns: string[] = [];
+
+    // NOTE: remove eslint override above after the experimental picker is stabilized
+    if (experimentalIsDataViewEnabled && experimentalDataViewId) {
+      const plugins = await kibana.plugins.onStart<{ dataViews: DataViewsPublicPluginStart }>(
+        'dataViews'
       );
 
-      store.dispatch(startTimelineSaving({ id: localTimelineId }));
+      if (plugins.dataViews.found) {
+        const experimentalDataView = await plugins.dataViews.contract.get(experimentalDataViewId);
+
+        if (!experimentalDataView.isPersisted()) {
+          return kibana.notifications.toasts.addError(
+            new Error('Persting timelines with adhoc data views is not allowed'),
+            {
+              title: 'Error persisting timeline',
+            }
+          );
+        }
+
+        experimentalSelectedPatterns = experimentalDataView.getIndexPattern().split(',');
+      }
+    }
+
+    const indexNames = experimentalIsDataViewEnabled
+      ? experimentalSelectedPatterns
+      : selectedPatternsSourcerer;
+    const dataViewId = experimentalIsDataViewEnabled
+      ? experimentalDataViewId
+      : selectedDataViewIdSourcerer;
+
+    store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
       try {
         const result = await (action.payload.saveAsNew && timeline.id
@@ -130,7 +173,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
           return;
         }
 
-        refreshTimelines(store.getState());
+      refreshTimelines(store.getState());
 
         store.dispatch(
           updateTimeline({

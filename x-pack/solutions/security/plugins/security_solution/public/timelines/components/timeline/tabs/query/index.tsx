@@ -15,6 +15,9 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
@@ -22,7 +25,10 @@ import {
 } from '../../../../../flyout/document_details/shared/constants/panel_keys';
 import { LeftPanelNotesTab } from '../../../../../flyout/document_details/left';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
+import {
+  useEnableExperimental,
+  useIsExperimentalFeatureEnabled,
+} from '../../../../../common/hooks/use_experimental_features';
 import { useTimelineDataFilters } from '../../../../containers/use_timeline_data_filters';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useInvalidFilterQuery } from '../../../../../common/hooks/use_invalid_filter_query';
@@ -83,7 +89,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
-  const {
+  const { newDataViewPickerEnabled } = useEnableExperimental();
+
+  const { dataView: experimentalDataView, status: sourcererStatus } = useDataView(
+    SourcererScopeName.timeline
+  );
+  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+
+  let {
     browserFields,
     dataViewId,
     loading: loadingSourcerer,
@@ -92,6 +106,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     selectedPatterns,
     sourcererDataView,
   } = useSourcererDataView(SourcererScopeName.timeline);
+
+  if (newDataViewPickerEnabled) {
+    loadingSourcerer = sourcererStatus !== 'ready';
+    sourcererDataView = experimentalDataView;
+    browserFields = experimentalBrowserFields;
+    selectedPatterns = experimentalSelectedPatterns;
+    dataViewId = experimentalDataView.id ?? '';
+  }
+
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently
    * and consequently it cannot be the part of common redux state
@@ -174,7 +197,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
     useTimelineEvents({
-      dataViewId,
+      dataViewId: dataViewId ?? '',
       endDate: end,
       fields: timelineQueryFieldsFromColumns,
       filterQuery: combinedQueries?.filterQuery,
