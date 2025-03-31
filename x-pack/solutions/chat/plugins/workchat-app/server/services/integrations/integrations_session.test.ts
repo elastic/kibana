@@ -11,7 +11,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { buildToolName } from '@kbn/wci-common';
 import { getClientForInternalServer } from '@kbn/wci-server';
 import { IntegrationWithMeta, IntegrationToolInputSchema } from './types';
-import { IntegrationsSession } from './integrations_session';
+import { IntegrationsSessionImpl } from './integrations_session';
 
 describe('IntegrationsGateway', () => {
   describe('MCP servers with tools', () => {
@@ -62,7 +62,7 @@ describe('IntegrationsGateway', () => {
     };
 
     it('should register multiple MCP servers with tools and call all tools', async () => {
-      const integrationSession = new IntegrationsSession({
+      const integrationSession = new IntegrationsSessionImpl({
         logger,
         integrations: await getIntegrations(),
       });
@@ -76,7 +76,7 @@ describe('IntegrationsGateway', () => {
     });
 
     it('should allow to call a tool', async () => {
-      const integrationSession = new IntegrationsSession({
+      const integrationSession = new IntegrationsSessionImpl({
         logger,
         integrations: await getIntegrations(),
       });

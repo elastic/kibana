@@ -5,20 +5,32 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { WORKCHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
-export const useBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
+interface WorkchatBreadcrumb {
+  text: string;
+  path?: string;
+}
+
+export const useBreadcrumb = (breadcrumbs: WorkchatBreadcrumb[]) => {
   const {
     services: { chrome, application },
   } = useKibana();
 
+  const getUrl = useCallback(
+    (path: string) => {
+      return application.getUrlForApp(WORKCHAT_APP_ID, { path });
+    },
+    [application]
+  );
+
   const appUrl = useMemo(() => {
-    return application.getUrlForApp(WORKCHAT_APP_ID);
-  }, [application]);
+    return getUrl('');
+  }, [getUrl]);
 
   const baseCrumbs: ChromeBreadcrumb[] = useMemo(() => {
     return [
@@ -30,11 +42,18 @@ export const useBreadcrumb = (breadcrumbs: ChromeBreadcrumb[]) => {
   }, [appUrl]);
 
   useEffect(() => {
-    chrome.setBreadcrumbs([...baseCrumbs, ...breadcrumbs], {
-      project: { value: breadcrumbs.length ? breadcrumbs : baseCrumbs, absolute: true },
+    const additionalCrumbs = breadcrumbs.map<ChromeBreadcrumb>((crumb) => {
+      return {
+        text: crumb.text,
+        href: crumb.path ? getUrl(crumb.path) : undefined,
+      };
+    });
+
+    chrome.setBreadcrumbs([...baseCrumbs, ...additionalCrumbs], {
+      project: { value: additionalCrumbs.length ? additionalCrumbs : baseCrumbs, absolute: true },
     });
     return () => {
       chrome.setBreadcrumbs([]);
     };
-  }, [chrome, baseCrumbs, breadcrumbs]);
+  }, [chrome, baseCrumbs, breadcrumbs, getUrl]);
 };

@@ -13,7 +13,7 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import { integrationTypeName } from '../../saved_objects/integrations';
-import { IntegrationsSession } from './integrations_session';
+import { IntegrationsSessionImpl, type IntegrationsSession } from './integrations_session';
 import type { IntegrationRegistry } from './integration_registry';
 import { IntegrationWithMeta } from './types';
 import { IntegrationClientImpl, IntegrationClient } from './integration_client';
@@ -26,7 +26,12 @@ interface IntegrationsServiceOptions {
   security: SecurityServiceStart;
 }
 
-export class IntegrationsService {
+export interface IntegrationsService {
+  getScopedClient({ request }: { request: KibanaRequest }): Promise<IntegrationClient>;
+  createSession({ request }: { request: KibanaRequest }): Promise<IntegrationsSession>;
+}
+
+export class IntegrationsServiceImpl implements IntegrationsService {
   private readonly logger: Logger;
   private readonly registry: IntegrationRegistry;
   private readonly savedObjects: SavedObjectsServiceStart;
@@ -78,9 +83,6 @@ export class IntegrationsService {
       })
     );
 
-    return new IntegrationsSession({ integrations, logger: this.logger.get('session') });
+    return new IntegrationsSessionImpl({ integrations, logger: this.logger.get('session') });
   }
 }
-
-// Export the interface for the client
-export type { IntegrationClient };

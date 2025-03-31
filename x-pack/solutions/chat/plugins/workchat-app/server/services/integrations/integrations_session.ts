@@ -13,34 +13,28 @@ import { IntegrationToolInputSchema, IntegrationTool } from './types';
 import type { IntegrationWithMeta } from './types';
 
 /**
- * This class is used to manage the integrations session.
+ * Interface used to manage the integrations session.
  * It is responsible for connecting to the integrations (internal & external) and executing tools.
  * It also provides a way to get all the tools from all the integrations.
- *
- * ## Internal-based Integrations:
- *
- * - **At plugin start:**
- *   - Integrations are initialized.
- *   - MCP server is not created.
- *
- * - **At Chat session start:**
- *   - MCP server is created, with internal services (actions, Elasticsearch) passed to it.
- *
- * - **At Chat session end:**
- *   - MCP server is stopped.
- *
- * ## External (SSE)-based Integrations:
- *
- * - **At plugin start:**
- *   - Integrations are initialized.
- *   - MCP isn't connected.
- *
- * - **At Chat session start:**
- *   - MCP server is connected, passing in an authentication token for the user.
- *   - MCP server manages its own internal services and API keys
- *     (e.g., API key to access Elasticsearch).
  */
-export class IntegrationsSession {
+export interface IntegrationsSession {
+  /**
+   * Get all available tools from all connected integrations
+   */
+  getAllTools(): Promise<IntegrationTool[]>;
+
+  /**
+   * Execute a tool from a specific integration
+   */
+  executeTool(serverToolName: string, params: IntegrationToolInputSchema): Promise<unknown>;
+
+  /**
+   * Disconnect from all integrations
+   */
+  disconnect(): Promise<void>;
+}
+
+export class IntegrationsSessionImpl implements IntegrationsSession {
   private readonly integrations: IntegrationWithMeta[];
   private readonly logger: Logger;
 
