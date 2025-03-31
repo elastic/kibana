@@ -48,8 +48,8 @@ export async function retrieveCases(
 
     const searchRequest: SearchRequest = {
       index: indexName,
-      sort,
       query,
+      sort,
       size,
     };
 
