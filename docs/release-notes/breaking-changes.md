@@ -252,7 +252,7 @@ Logs Explorer has been removed. Instead, you can use Discover, that was improved
 
 **Elastic Security solution**
 
-For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/release-notes.md).
+For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Data ingestion and Fleet**
 

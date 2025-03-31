@@ -43,7 +43,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Adds a link to the location badge on synthetics SLOs that sends to the Monitors page with a filter applied that matches the location of the origin SLO [#210695]({{kib-pull}}210695).
 
 **Elastic Security solution**:
-* For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/release-notes.md).
+* For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Kibana security**:
 * Updates `js-yaml` to `4.1.0` [#190678]({{kib-pull}}190678).
@@ -74,7 +74,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Fixes an error that could prevent the Observability Infrastructure Inventory view from loading after an upgrade due to missing versioning on inventory_view_saved_object [#207007]({{kib-pull}}207007).
 
 **Elastic Security solution**:
-* For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/release-notes.md).
+* For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 **Platform**:
 
