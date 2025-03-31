@@ -187,14 +187,7 @@ export const DiscoverTopNav = ({
       managedDataViews,
       onEditDataView: stateContainer.actions.onDataViewEdited,
     };
-  }, [
-    adHocDataViews,
-    addField,
-    createNewDataView,
-    dataView,
-    managedDataViews,
-    stateContainer,
-  ]);
+  }, [adHocDataViews, addField, createNewDataView, dataView, managedDataViews, stateContainer]);
 
   const onESQLDocsFlyoutVisibilityChanged = useCallback((isOpen: boolean) => {
     if (isOpen) {
