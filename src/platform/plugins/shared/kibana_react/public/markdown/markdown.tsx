@@ -12,8 +12,8 @@ import React, { useEffect } from 'react';
 import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
 import { getSecureRelForTarget } from '@elastic/eui';
+import { markdownStyles } from './markdownStyles';
 
-import './index.scss';
 /**
  * Return a memoized markdown rendering function that use the specified
  * whiteListedRules and openLinksInNewTab configurations.
@@ -95,6 +95,7 @@ export const Markdown = (props: MarkdownProps) => {
     <div
       {...rest}
       className={classes}
+      css={markdownStyles()}
       /*
        * Justification for dangerouslySetInnerHTML:
        * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.
