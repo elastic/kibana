@@ -49,7 +49,7 @@ export function MachineLearningNavigationProvider({
 
         const sections = await managementMenu.getSections();
         const mlSection = sections.find((section) => section.sectionId === 'ml');
-        expect(mlSection).to.not.be(undefined, `Expected ML section to exist in Stack Management`);
+        expect(mlSection).to.not.be(undefined);
         expect(mlSection?.sectionLinks).to.contain(
           sectionId,
           `Expected Stack Management ML to have section ${sectionId}`

@@ -34,6 +34,13 @@ const basicJobsManageParams = {
   },
 };
 
+const basicDfaJobsManageParams = {
+  page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  pageState: {
+    jobId: jobIds[1],
+  },
+};
+
 const jobsManageParamsGroupId = {
   page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
   pageState: {
@@ -46,6 +53,7 @@ const jobsManageParamsGroupId = {
 };
 
 const anomalyDetectionAppId = 'anomaly_detection';
+const dfaAppId = 'analytics';
 
 describe('ML management internal locator', () => {
   const mlManagementLocatorInternal = new MlManagementLocatorInternal(
@@ -61,11 +69,18 @@ describe('ML management internal locator', () => {
       jobsManageParamsGroupId,
       anomalyDetectionAppId
     );
+    const { url: basicDfaJobUrl } = await mlManagementLocatorInternal.getUrl(
+      basicDfaJobsManageParams,
+      dfaAppId
+    );
     expect(url).toEqual(
       "/app/management/ml/anomaly_detection?_a=('':(queryText:'id:test-job-id-0'))"
     );
     expect(paramsGroupIdUrl).toEqual(
       "/app/management/ml/anomaly_detection?_a=('':(queryText:'groups:(test-group-id-0)'))&_g=(refreshInterval:(pause:!t,value:10000),time:(from:now-1h,to:now))"
+    );
+    expect(basicDfaJobUrl).toEqual(
+      "/app/management/ml/analytics?_a=('':(queryText:'id:test-job-id-1'))"
     );
   });
 
