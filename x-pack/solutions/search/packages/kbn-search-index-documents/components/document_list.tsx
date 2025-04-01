@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiSpacer,
   Pagination,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,7 @@ import { Result } from '..';
 import { type ResultProps } from './result/result';
 
 interface DocumentListProps {
+  executionTime: number;
   dataTelemetryIdPrefix: string;
   docs: SearchHit[];
   docsPerPage: number;
@@ -47,6 +49,7 @@ interface DocumentListProps {
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
+  executionTime,
   dataTelemetryIdPrefix,
   docs,
   docsPerPage,
@@ -63,6 +66,8 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   const getIconType = (size: number) => {
     return size === docsPerPage ? 'check' : 'empty';
   };
+
+  const convertMsToSec = (ms: number) => (ms / 1000).toFixed(3);
 
   const pageCount = meta?.pageSize ? Math.ceil(meta.totalItemCount / meta?.pageSize) : 0;
   return (
@@ -98,6 +103,9 @@ export const DocumentList: React.FC<DocumentListProps> = ({
           />
         </p>
       </EuiText>
+      <EuiBadge color="hollow" style={{ float: 'right' }}>
+        {convertMsToSec(executionTime)} Sec
+      </EuiBadge>
       {isLoading && <EuiProgress size="xs" color="primary" />}
       <EuiSpacer size="m" />
       {docs.map((doc) => {
