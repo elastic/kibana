@@ -117,7 +117,7 @@ export const TimelineQueryTabEventsCountComponent: React.FC<{ timelineId: string
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      indexPattern,
+      dataViewSpec: sourcererDataView,
       browserFields,
       filters,
       kqlQuery,

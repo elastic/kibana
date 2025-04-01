@@ -126,7 +126,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      indexPattern: sourcererDataView,
+      dataViewSpec: sourcererDataView,
       browserFields,
       filters,
       kqlQuery,

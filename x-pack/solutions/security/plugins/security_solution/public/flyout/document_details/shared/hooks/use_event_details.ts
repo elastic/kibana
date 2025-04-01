@@ -8,7 +8,6 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { type DataViewSpec } from '@kbn/data-plugin/common';
 import { DEFAULT_ALERTS_INDEX, DEFAULT_PREVIEW_INDEX } from '../../../../../common/constants';
 import type { RunTimeMappings } from '../../../../../common/api/search_strategy';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
@@ -64,10 +63,6 @@ export interface UseEventDetailsResult {
    */
   getFieldsData: GetFieldsData;
   /**
-   * Index pattern for rule details
-   */
-  indexPattern?: DataViewSpec;
-  /**
    * Whether the data is loading
    */
   loading: boolean;
@@ -112,7 +107,6 @@ export const useEventDetails = ({
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
     getFieldsData,
-    indexPattern: sourcererDataView.sourcererDataView,
     loading,
     refetchFlyoutData,
     searchHit,

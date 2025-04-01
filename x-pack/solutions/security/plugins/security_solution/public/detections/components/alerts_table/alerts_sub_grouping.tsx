@@ -106,7 +106,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          indexPattern: sourcererDataView,
+          dataViewSpec: sourcererDataView,
           browserFields,
           filters: [
             ...defaultFilters,

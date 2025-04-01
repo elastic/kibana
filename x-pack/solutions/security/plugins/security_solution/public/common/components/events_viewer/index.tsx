@@ -233,7 +233,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         dataProviders: [],
         filters: globalFilters,
         from: start,
-        indexPattern: sourcererDataView,
+        dataViewSpec: sourcererDataView,
         kqlMode: 'filter',
         kqlQuery: query,
         to: end,

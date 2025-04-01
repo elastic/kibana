@@ -223,7 +223,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
       return combineQueries({
         config: getEsQueryConfig(uiSettings),
         dataProviders: [],
-        indexPattern: indexPatterns,
+        dataViewSpec: sourcererDataView,
         browserFields,
         filters: [...allFilters],
         kqlQuery: globalQuery,
