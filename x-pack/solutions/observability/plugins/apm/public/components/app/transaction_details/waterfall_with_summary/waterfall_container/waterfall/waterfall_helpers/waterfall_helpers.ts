@@ -340,7 +340,7 @@ function reparentSpans(waterfallItems: IWaterfallSpanOrTransaction[]) {
 }
 
 const getChildrenGroupedByParentId = (waterfallItems: IWaterfallSpanOrTransaction[]) =>
-  groupBy(waterfallItems, (item) => (item.parentId ? item.parentId : ROOT_ID));
+  groupBy(waterfallItems, (item) => item.parentId ?? ROOT_ID);
 
 const getEntryWaterfallTransaction = (
   entryTransactionId: string,
@@ -403,10 +403,19 @@ function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['erro
   }, {});
 }
 
-export function getOrphanItemsIds(waterfall: IWaterfallSpanOrTransaction[]) {
+export function getOrphanItemsIds(
+  waterfall: IWaterfallSpanOrTransaction[],
+  entryWaterfallTransactionId?: string
+) {
   const waterfallItemsIds = new Set(waterfall.map((item) => item.id));
   return waterfall
-    .filter((item) => item.parentId && !waterfallItemsIds.has(item.parentId))
+    .filter(
+      (item) =>
+        // the root transaction should never be orphan
+        entryWaterfallTransactionId !== item.id &&
+        item.parentId &&
+        !waterfallItemsIds.has(item.parentId)
+    )
     .map((item) => item.id);
 }
 
@@ -455,7 +464,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     waterfallItems
   );
 
-  const orphanItemsIds = getOrphanItemsIds(waterfallItems);
+  const orphanItemsIds = getOrphanItemsIds(waterfallItems, entryWaterfallTransaction?.id);
   const childrenByParentId = getChildrenGroupedByParentId(
     reparentOrphanItems(
       orphanItemsIds,
