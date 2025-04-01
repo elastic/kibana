@@ -957,8 +957,10 @@ const isNullMatcher = buildPartialMatcher('is nul');
 const isNotNullMatcher = buildPartialMatcher('is not nul');
 
 /**
- * Encapsulates handling of the "is null" and "is not null"
- * checks...
+ * Checks whether an expression is truly complete.
+ *
+ * (Encapsulates handling of the "is null" and "is not null"
+ * checks)
  *
  * @todo use the simpler "getExpressionType(root) !== 'unknown'"
  * as soon as https://github.com/elastic/kibana/issues/199401 is resolved

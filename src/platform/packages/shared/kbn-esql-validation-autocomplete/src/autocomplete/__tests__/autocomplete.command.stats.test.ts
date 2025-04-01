@@ -488,7 +488,7 @@ describe('autocomplete.suggest', () => {
           });
         });
 
-        test('suggests `?function` option', async () => {
+        test('suggests `??function` option', async () => {
           const suggestions = await suggest('FROM a | STATS var0 = /', {
             callbacks: {
               canSuggestVariables: () => true,
@@ -532,7 +532,7 @@ describe('autocomplete.suggest', () => {
           });
         });
 
-        test('suggests `?field` option', async () => {
+        test('suggests `??field` option', async () => {
           const suggestions = await suggest('FROM a | STATS BY /', {
             callbacks: {
               canSuggestVariables: () => true,

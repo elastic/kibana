@@ -183,17 +183,6 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       // command ... "<here>"
       return { type: 'value' as const, command, node, option, containingFunction };
     }
-    // /**
-    //  * At the moment... WHERE is characterized
-    //  */
-    // let inWhereFunction = false;
-    // Walker.walk(ast, {
-    //   visitFunction: (fn) => {
-    //     if (fn.name === 'where' && fn.location.min <= offset && node.location.max >= offset) {
-    //       inWhereFunction = true;
-    //     }
-    //   },
-    // });
 
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
