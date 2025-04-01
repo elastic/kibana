@@ -572,15 +572,27 @@ export class StreamsClient {
     const [streamDefinition, dataStream] = await Promise.all([
       this.getStoredStreamDefinition(name).catch((error) => {
         if (isNotFoundError(error)) {
-          return undefined;
+          return error;
         }
         throw error;
       }),
-      this.getDataStream(name),
+      this.getDataStream(name).catch((error) => {
+        if (isNotFoundError(error)) {
+          return error;
+        }
+        throw error;
+      }),
     ]);
-    if (dataStream && !streamDefinition) {
+    if (!isNotFoundError(streamDefinition)) {
+      // stream definitely exists, all good
+      return;
+    }
+    if (!isNotFoundError(dataStream) && isNotFoundError(streamDefinition)) {
+      // stream definition does not exist, but data stream does - create an empty stream definition
       await this.updateStoredStream(this.getDataStreamAsIngestStream(dataStream));
     }
+    // if both do not exist, the stream does not exist, so this should be a 404
+    throw streamDefinition;
   }
 
   /**

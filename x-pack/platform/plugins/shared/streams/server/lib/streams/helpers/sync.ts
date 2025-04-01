@@ -170,13 +170,13 @@ async function ensureStreamManagedPipelineReference(
   if (!pipelineName) {
     // no ingest pipeline, we need to update the template to call the stream managed pipeline as
     // the default pipeline
-    const indexTemplateAsset = unmanagedAssets.find((asset) => asset.type === 'index_template');
+    const indexTemplateAsset = unmanagedAssets.indexTemplate;
     if (!indexTemplateAsset) {
       throw new Error(`Could not find index template for stream ${definition.name}`);
     }
     const indexTemplate = (
       await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
-        name: indexTemplateAsset.id,
+        name: indexTemplateAsset,
       })
     ).index_templates[0].index_template;
     const updatedTemplate: IndicesIndexTemplate = {
@@ -194,7 +194,7 @@ async function ensureStreamManagedPipelineReference(
     };
     executionPlan.push({
       method: 'PUT',
-      path: `/_index_template/${indexTemplateAsset.id}`,
+      path: `/_index_template/${indexTemplateAsset}`,
       body: updatedTemplate as unknown as Record<string, unknown>,
     });
 
@@ -243,7 +243,7 @@ export async function syncUnwiredStreamDefinitionObjects({
   });
   const executionPlan: ExecutionPlanStep[] = [];
   const streamManagedPipelineName = getProcessingPipelineName(definition.name);
-  const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
+  const pipelineName = unmanagedAssets.ingestPipeline;
   await ensureStreamManagedPipelineReference(
     scopedClusterClient,
     pipelineName,
