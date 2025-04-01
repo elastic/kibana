@@ -27,7 +27,9 @@ module.exports = {
         [
           require.resolve('@emotion/babel-preset-css-prop'),
           {
-            labelFormat: '[filename]--[local]',
+            autoLabel: 'always',
+            labelFormat: '[local]',
+            sourceMap: false,
           },
         ],
       ],
