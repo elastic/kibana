@@ -1,0 +1,102 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const MODAL_TITLE = i18n.translate('responseOpsAlertDelete.modalTitle', {
+  defaultMessage: 'Clean up alerts',
+});
+
+export const MODAL_DESCRIPTION = i18n.translate('responseOpsAlertDelete.modalDescription', {
+  defaultMessage:
+    'Clean up alert history by removing old active alerts and long-inactive alerts based on customizable time thresholds',
+});
+
+export const FORM_TITLE = i18n.translate('responseOpsAlertDelete.modalFormTitle', {
+  defaultMessage: 'Select the type of alerts to include in this cleanup task',
+});
+
+export const ACTIVE_ALERTS = i18n.translate('responseOpsAlertDelete.activeAlerts', {
+  defaultMessage: 'Active Alerts',
+});
+
+export const ACTIVE_ALERTS_DESCRIPTION = i18n.translate(
+  'responseOpsAlertDelete.activeAlertsDescription',
+  {
+    defaultMessage: 'Active alert was created more than N days ago',
+  }
+);
+
+export const INACTIVE_ALERTS = i18n.translate('responseOpsAlertDelete.inactiveAlerts', {
+  defaultMessage: 'Inactive Alerts',
+});
+
+export const INACTIVE_ALERTS_DESCRIPTION = i18n.translate(
+  'responseOpsAlertDelete.inactiveAlertsDescription',
+  {
+    defaultMessage: 'Recovered, closed or untracked more than N days ago',
+  }
+);
+
+export const MODAL_SUBMIT = i18n.translate('responseOpsAlertDelete.modalSubmit', {
+  defaultMessage: 'Run clean up task',
+});
+
+export const MODAL_CANCEL = i18n.translate('responseOpsAlertDelete.modalCancel', {
+  defaultMessage: 'Cancel',
+});
+
+export const DAYS = i18n.translate('responseOpsAlertDelete.days', {
+  defaultMessage: 'days',
+});
+
+export const MONTHS = i18n.translate('responseOpsAlertDelete.months', {
+  defaultMessage: 'months',
+});
+
+export const YEARS = i18n.translate('responseOpsAlertDelete.years', {
+  defaultMessage: 'years',
+});
+
+export const PREVIEW = i18n.translate('responseOpsAlertDelete.preview', {
+  defaultMessage:
+    "This action will permanently delete a total of 4000 alerts and you won't be able to restore them.",
+});
+
+export const DELETE_PASSKEY = i18n.translate('responseOpsAlertDelete.deletePasskey', {
+  defaultMessage: 'Delete',
+});
+
+export const DELETE_CONFIRMATION = i18n.translate('responseOpsAlertDelete.deleteConfirmation', {
+  defaultMessage: `Type "${DELETE_PASSKEY}" to confirm clean up task`,
+});
+
+export const THRESHOLD_ERROR_MAX = i18n.translate('responseOpsAlertDelete.thresholdErrorMax', {
+  defaultMessage: 'Threshold limit of 1000 days',
+});
+
+export const THRESHOLD_ERROR_MIN = i18n.translate('responseOpsAlertDelete.thresholdErrorMin', {
+  defaultMessage: 'Threshold must be at least 1 day',
+});
+
+export const RULE_SETTINGS_TITLE = i18n.translate('responseOpsAlertDelete.ruleSettingsTitle', {
+  defaultMessage: 'Clean up alert history',
+});
+
+export const RULE_SETTINGS_DESCRIPTION = i18n.translate(
+  'responseOpsAlertDelete.ruleSettingsDescription',
+  {
+    defaultMessage:
+      'Clean up alert history by removing old active alerts and long-inactive alerts based on customizable time thresholds',
+  }
+);
+
+export const RUN_CLEANUP_TASK = i18n.translate('responseOpsAlertDelete.ruleSettingsCleanUp', {
+  defaultMessage: 'Clean up',
+});

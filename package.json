@@ -775,6 +775,7 @@
     "@kbn/resizable-layout-examples-plugin": "link:examples/resizable_layout_examples",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
     "@kbn/response-ops-alerts-apis": "link:src/platform/packages/shared/response-ops/alerts-apis",
+    "@kbn/response-ops-alerts-delete": "link:src/platform/packages/shared/response-ops/alerts-delete",
     "@kbn/response-ops-alerts-fields-browser": "link:src/platform/packages/shared/response-ops/alerts-fields-browser",
     "@kbn/response-ops-alerts-table": "link:src/platform/packages/shared/response-ops/alerts-table",
     "@kbn/response-ops-rule-form": "link:src/platform/packages/shared/response-ops/rule_form",

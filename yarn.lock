@@ -6726,6 +6726,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/response-ops-alerts-delete@link:src/platform/packages/shared/response-ops/alerts-delete":
+  version "0.0.0"
+  uid ""
+
 "@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
