@@ -238,18 +238,21 @@ export const RulesListTable = (props: RulesListTableProps) => {
       }
     }
   `;
+  const ruleSidebarActionCss = useMemo(
+    () =>
+      css`
+        opacity: 0; /* 1 */
 
-  const ruleSidebarActionCss = css`
-    opacity: 0; /* 1 */
+        &.ruleSidebarItem__mobile {
+          opacity: 1;
+        }
 
-    &.ruleSidebarItem__mobile {
-      opacity: 1;
-    }
-
-    &:focus {
-      opacity: 1; /* 2 */
-    }
-  `;
+        &:focus {
+          opacity: 1; /* 2 */
+        }
+      `,
+    []
+  );
 
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
