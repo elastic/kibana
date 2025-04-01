@@ -22,9 +22,9 @@ const createIntegrationClientMock = () => {
 
 const createIntegrationsSessionMock = () => {
   const mocked: jest.Mocked<IntegrationsSession> = {
-    getAllTools: jest.fn(),
+    listTools: jest.fn(),
     executeTool: jest.fn(),
-    disconnect: jest.fn(),
+    close: jest.fn(),
   };
   return mocked;
 };
