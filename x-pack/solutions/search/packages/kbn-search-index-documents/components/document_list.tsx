@@ -35,7 +35,7 @@ import { Result } from '..';
 import { type ResultProps } from './result/result';
 
 interface DocumentListProps {
-  executionTime: number;
+  executionTime?: number;
   dataTelemetryIdPrefix: string;
   docs: SearchHit[];
   docsPerPage: number;
@@ -104,9 +104,11 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             </p>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="default">{executionTime} ms</EuiBadge>
-        </EuiFlexItem>
+        {executionTime !== null && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge color="default">{executionTime} ms</EuiBadge>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       {isLoading && <EuiProgress size="xs" color="primary" />}
       <EuiSpacer size="m" />

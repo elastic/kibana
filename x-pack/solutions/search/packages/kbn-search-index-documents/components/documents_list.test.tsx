@@ -12,7 +12,6 @@ import { INDEX_DOCUMENTS_META_DEFAULT } from '../types';
 import { DocumentList } from './document_list';
 import '@testing-library/jest-dom';
 export const DEFAULT_VALUES = {
-  executionTime: 234,
   dataTelemetryIdPrefix: `entSearchContent-api`,
   docs: [],
   docsPerPage: 25,
@@ -92,6 +91,36 @@ describe('DocumentList', () => {
       </I18nProvider>
     );
     expect(screen.getByText('Results are limited to 10,000 documents')).toBeInTheDocument();
+  });
+
+  test('does not display execution time when executionTime is missing', () => {
+    const values = {
+      ...DEFAULT_VALUES,
+    };
+
+    render(
+      <I18nProvider>
+        <DocumentList {...values} />
+      </I18nProvider>
+    );
+
+    // Ensure the execution time badge is not rendered
+    expect(screen.queryByText('234 ms')).not.toBeInTheDocument();
+  });
+
+  test('displays the execution time when executionTime is not null', () => {
+    const values = {
+      ...DEFAULT_VALUES,
+      executionTime: 234, // Set executionTime to a valid value
+    };
+
+    render(
+      <I18nProvider>
+        <DocumentList {...values} />
+      </I18nProvider>
+    );
+
+    // Ensure the execution time badge is rendered
     expect(screen.getByText('234 ms')).toBeInTheDocument();
   });
 });
