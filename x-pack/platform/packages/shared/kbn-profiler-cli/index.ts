@@ -30,7 +30,7 @@ export function cli() {
 
       process.kill(pid, 'SIGUSR1');
 
-      const stop = once(await getProfiler({ log }));
+      const stop = once(await getProfiler({ log, type: flags.heap ? 'heap' : 'cpu' }));
 
       addCleanupTask(() => {
         // exit-hook, which is used by addCleanupTask,
@@ -87,6 +87,7 @@ export function cli() {
     {
       flags: {
         string: ['port', 'pid', 't', 'timeout', 'c', 'connections', 'a', 'amount'],
+        boolean: ['heap'],
         help: `
           Usage: node scripts/profiler.js <args> <command>
 
@@ -95,6 +96,7 @@ export function cli() {
           --timeout           Run commands until timeout (in milliseconds)
           --c, --connections  Number of commands that can be run in parallel.
           --a, --amount       Amount of times the command should be run
+          --heap              Collect a heap snapshot
         `,
         allowUnexpected: false,
       },
