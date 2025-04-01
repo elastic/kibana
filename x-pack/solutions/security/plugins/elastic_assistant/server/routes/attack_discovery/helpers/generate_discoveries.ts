@@ -96,7 +96,7 @@ export const generateAttackDiscoveries = async ({
       anonymizedAlerts,
       apiConfig,
       attackDiscoveries,
-      attackDiscoveryId: executionUuid,
+      executionUuid,
       authenticatedUser,
       dataClient,
       hasFilter: !!(filter && Object.keys(filter).length),
@@ -113,7 +113,7 @@ export const generateAttackDiscoveries = async ({
   } catch (err) {
     await handleGraphError({
       apiConfig,
-      attackDiscoveryId: executionUuid,
+      executionUuid,
       authenticatedUser,
       dataClient,
       err,
