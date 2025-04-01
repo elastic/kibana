@@ -10,10 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { EuiBadge, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { enforceColorContrast } from '@kbn/coloring';
 import type { DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { type FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import { type VisParams } from '@kbn/visualizations-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import React from 'react';
@@ -24,23 +22,6 @@ export interface TrendConfig {
   palette: [string, string, string];
   baselineValue: number;
   borderColor?: string;
-}
-
-export function getContrastColor(
-  color: string,
-  isDarkTheme: boolean,
-  darkTextProp: 'euiColorInk' | 'euiTextColor' = 'euiColorInk',
-  lightTextProp: 'euiColorGhost' | 'euiTextColor' = 'euiColorGhost'
-) {
-  // when in light theme both text color and colorInk are dark and the choice
-  // may depends on the specific context.
-  const darkColor = isDarkTheme ? euiDarkVars.euiColorInk : euiLightVars[darkTextProp];
-  // Same thing for light color in dark theme
-  const lightColor = isDarkTheme ? euiDarkVars[lightTextProp] : euiLightVars.euiColorGhost;
-  const backgroundColor = isDarkTheme
-    ? euiDarkVars.euiPageBackgroundColor
-    : euiLightVars.euiPageBackgroundColor;
-  return enforceColorContrast(color, backgroundColor) ? lightColor : darkColor;
 }
 
 function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
@@ -100,16 +81,32 @@ function SecondaryMetricValue({
   formattedValue,
   trendConfig,
   color,
+  fontSize,
 }: {
   rawValue?: number | string;
   formattedValue?: string;
   trendConfig?: TrendConfig;
   color?: string;
+  fontSize: number;
 }) {
   const { euiTheme } = useEuiTheme();
   if (rawValue == null) {
     return null;
   }
+
+  const badgeCss = css(`
+    font-size:  inherit;
+    line-height:  inherit;
+    ${
+      trendConfig && typeof rawValue === 'number'
+        ? `border: 1px solid ${trendConfig.borderColor};`
+        : ''
+    }
+    svg {
+        inline-size: ${fontSize}px !important;
+        block-size: ${fontSize}px !important;
+    }
+  `);
 
   if (trendConfig && typeof rawValue === 'number') {
     const deltaValue = rawValue - trendConfig.baselineValue;
@@ -133,57 +130,7 @@ function SecondaryMetricValue({
         iconSide="left"
         color={translatedColor}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
-        css={css(`
-          font-size: inherit;
-          line-height: inherit;
-          ${trendConfig.borderColor ? `border: 1px solid ${trendConfig.borderColor};` : ''}
-
-          // Follow the Elastic Charts breakpoint font size
-          // See ref: https://github.com/elastic/elastic-charts/blob/main/packages/charts/src/chart_types/metric/renderer/dom/text_measurements.tsx#L67
-        // @TODO: remove this once the Elastic charts render props for extra is in
-          @container  (min-height: 100px) {
-            svg {
-              inline-size: 16px !important;
-              block-size: 16px !important;
-            }
-          }
-
-          @container  (min-height: 200px) {
-            svg {
-              inline-size: 16px !important;
-              block-size: 16px !important;
-            }
-          }
-
-          @container  (min-height: 300px) {
-            svg {
-              inline-size: 24px !important;
-              block-size: 24px !important;
-            }
-          }
-
-           @container  (min-height: 400px) {
-            svg {
-              inline-size: 24px !important;
-              block-size: 24px !important;
-            }
-          }
-
-          @container  (min-height: 500px) {
-            svg {
-              inline-size: 32px !important;
-              block-size: 32px !important;
-            }
-          }
-
-          @container  (min-height: 600px) {
-            svg {
-              inline-size: 42px !important;
-              block-size: 42px !important;
-            }
-          }
-          
-        `)}
+        css={badgeCss}
       >
         {trendConfig.value ? formattedValue : null}
       </EuiBadge>
@@ -194,6 +141,7 @@ function SecondaryMetricValue({
       <EuiBadge
         color={color}
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
+        css={badgeCss}
       >
         {formattedValue}
       </EuiBadge>
@@ -208,6 +156,7 @@ export interface SecondaryMetricProps {
   config: Pick<VisParams, 'metric' | 'dimensions'>;
   trendConfig?: TrendConfig;
   color?: string;
+  fontSize: number;
   getMetricFormatter: (accessor: string, columns: DatatableColumn[]) => FieldFormatConvertFunction;
 }
 
@@ -218,6 +167,7 @@ export function SecondaryMetric({
   getMetricFormatter,
   trendConfig,
   color,
+  fontSize,
 }: SecondaryMetricProps) {
   let secondaryMetricColumn: DatatableColumn | undefined;
   let formatSecondaryMetric: ReturnType<typeof getMetricFormatter>;
@@ -237,6 +187,7 @@ export function SecondaryMetric({
         formattedValue={secondaryValue != null ? formatSecondaryMetric!(secondaryValue) : undefined}
         trendConfig={color ? undefined : trendConfig}
         color={color}
+        fontSize={fontSize}
       />
     </span>
   );

@@ -222,11 +222,7 @@ export async function getExpressionRendererParams(
       hasCompatibleActions: buildHasCompatibleActions(api, services),
       getCompatibleCellValueActions: buildGetCompatibleCellValueActions(api, services),
       variables: getVariables(api, state),
-      style: {
-        ...state.style,
-        // @TODO: remove this once the Elastic charts render props for extra is in
-        ...(state.attributes.visualizationType === 'lnsMetric' ? { containerType: 'size' } : {}),
-      },
+      style: state.style,
       className: state.className,
       noPadding: getDisplayOptions().noPadding,
     };

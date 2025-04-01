@@ -35,13 +35,11 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { useResizeObserver, useEuiScrollBar, EuiIcon } from '@elastic/eui';
 import { AllowedChartOverrides, AllowedSettingsOverrides } from '@kbn/charts-plugin/common';
 import { type ChartSizeEvent, getOverridesFor } from '@kbn/chart-expressions-common';
-import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import useObservable from 'react-use/lib/useObservable';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { VisParams } from '../../common';
 import { getThemeService, getFormatService } from '../services';
 import { getColor, getMetricFormatter } from './helpers';
-import { SecondaryMetric, TrendConfig, getContrastColor } from './secondary_metric';
+import { SecondaryMetric, TrendConfig } from './secondary_metric';
 
 export const defaultColor = euiThemeVars.euiColorEmptyShade;
 
@@ -74,7 +72,6 @@ export interface MetricVisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   filterable: boolean;
   overrides?: AllowedSettingsOverrides & AllowedChartOverrides;
-  theme: CoreSetup['theme'];
 }
 
 export const MetricVis = ({
@@ -84,13 +81,8 @@ export const MetricVis = ({
   fireEvent,
   filterable,
   overrides,
-  theme,
 }: MetricVisComponentProps) => {
   const grid = useRef<MetricSpec['data']>([[]]);
-  const lastTheme = useObservable<CoreTheme>(theme.theme$, {
-    darkMode: false,
-    name: 'amsterdam',
-  });
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -181,9 +173,7 @@ export const MetricVis = ({
               ? value
               : Number(config.metric.secondaryTrend.baseline),
           palette: config.metric.secondaryTrend.palette,
-          borderColor: hasDynamicColoring
-            ? getContrastColor(tileColor, lastTheme.darkMode)
-            : undefined,
+          borderColor: undefined,
         }
       : undefined;
 
@@ -192,14 +182,19 @@ export const MetricVis = ({
         title: String(title),
         subtitle,
         icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-        extra: (
+        extra: ({ fontSize, color }) => (
           <SecondaryMetric
             row={row}
             config={config}
             columns={data.columns}
             getMetricFormatter={getMetricFormatter}
             color={config.metric.secondaryColor}
-            trendConfig={trendConfig}
+            fontSize={fontSize}
+            trendConfig={
+              hasDynamicColoring && trendConfig
+                ? { ...trendConfig, borderColor: color }
+                : trendConfig
+            }
           />
         ),
         color: config.metric.color ?? defaultColor,
@@ -215,14 +210,17 @@ export const MetricVis = ({
       title: String(title),
       subtitle,
       icon: config.metric?.icon ? getIcon(config.metric?.icon) : undefined,
-      extra: (
+      extra: ({ fontSize, color }) => (
         <SecondaryMetric
           row={row}
           config={config}
           columns={data.columns}
           getMetricFormatter={getMetricFormatter}
           color={config.metric.secondaryColor}
-          trendConfig={trendConfig}
+          fontSize={fontSize}
+          trendConfig={
+            hasDynamicColoring && trendConfig ? { ...trendConfig, borderColor: color } : trendConfig
+          }
         />
       ),
       color: tileColor,
