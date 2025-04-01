@@ -13,3 +13,8 @@ export {
   parseToolName,
   type ToolNameAndIntegrationId,
 } from './src/integration_tools';
+export type {
+  IndexSourceDefinition,
+  IndexSourceFilter,
+  IndexSourceQueryFields,
+} from './src/index_source';

@@ -29,7 +29,7 @@ import {
   conversationUpdatedEvent,
   isMessageEvent,
   isToolResultEvent,
-} from '../../../common/utils/chat_events';
+} from '../../../common/chat_events';
 import { createChatError, isChatError } from '../../../common/errors';
 import {
   type ConversationEvent,

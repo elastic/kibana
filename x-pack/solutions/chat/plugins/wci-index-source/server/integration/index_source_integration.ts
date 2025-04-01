@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { IntegrationType } from '@kbn/wci-common';
 import {
-  getClientForInternalServer,
+  getConnectToInternalServer,
   type WorkchatIntegrationDefinition,
   type WorkChatIntegration,
 } from '@kbn/wci-server';
@@ -38,11 +38,9 @@ export const getIndexSourceIntegrationDefinition = ({
         elasticsearchClient,
         logger,
       });
-      const client = await getClientForInternalServer({ server: mcpServer });
 
       return {
-        type: IntegrationType.index_source,
-        client,
+        connect: getConnectToInternalServer({ server: mcpServer }),
       };
     },
   };

@@ -12,10 +12,10 @@ import type {
   SavedObjectsServiceStart,
   SecurityServiceStart,
 } from '@kbn/core/server';
+import type { McpProvider } from '@kbn/wci-server';
+import type { Integration } from '../../../common/integrations';
 import { integrationTypeName } from '../../saved_objects/integrations';
-import { IntegrationsSession } from './integrations_session';
 import type { IntegrationRegistry } from './integration_registry';
-import { IntegrationWithMeta } from './types';
 import { IntegrationClientImpl, IntegrationClient } from './integration_client';
 
 interface IntegrationsServiceOptions {
@@ -26,7 +26,25 @@ interface IntegrationsServiceOptions {
   security: SecurityServiceStart;
 }
 
-export class IntegrationsService {
+export interface IntegrationsService {
+  /**
+   * Returns an integration client scoped to the current user.
+   */
+  getScopedClient({ request }: { request: KibanaRequest }): Promise<IntegrationClient>;
+
+  /**
+   * Create integration providers for given integration ids. Use '*' to resolve all integrations
+   */
+  getIntegrationProviders({
+    integrationIds,
+    request,
+  }: {
+    integrationIds: string[] | '*';
+    request: KibanaRequest;
+  }): Promise<McpProvider[]>;
+}
+
+export class IntegrationsServiceImpl implements IntegrationsService {
   private readonly logger: Logger;
   private readonly registry: IntegrationRegistry;
   private readonly savedObjects: SavedObjectsServiceStart;
@@ -39,9 +57,6 @@ export class IntegrationsService {
     this.security = security;
   }
 
-  /**
-   * Returns an integration client scoped to the current user.
-   */
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<IntegrationClient> {
     const user = this.security.authc.getCurrentUser(request);
     if (!user) {
@@ -58,29 +73,56 @@ export class IntegrationsService {
     });
   }
 
-  async createSession({ request }: { request: KibanaRequest }): Promise<IntegrationsSession> {
-    this.logger.debug('Creating integrations session');
-
+  async getIntegrationProviders({
+    integrationIds,
+    request,
+  }: {
+    integrationIds: string[] | '*';
+    request: KibanaRequest;
+  }): Promise<McpProvider[]> {
     const client = await this.getScopedClient({ request });
 
-    // Fetch integrations from the saved objects
-    const availableIntegrations = await client.list();
+    let integrations: Integration[] = [];
+    if (typeof integrationIds === 'string') {
+      integrations = await client.list();
+    } else {
+      for (const integrationId of integrationIds) {
+        // TODO: bulk get on client
+        integrations.push(await client.get({ integrationId }));
+      }
+    }
 
-    const integrations = await Promise.all(
-      availableIntegrations.map<Promise<IntegrationWithMeta>>(async (source) => {
-        const definition = this.registry.get(source.type);
-        const integration = await definition.createIntegration({
+    return await Promise.all(
+      integrations.map<Promise<McpProvider>>(async (source) => {
+        return integrationToProvider({
+          integration: source,
           request,
-          configuration: source.configuration,
-          description: source.description,
+          registry: this.registry,
         });
-        return Object.assign(integration, { id: source.id });
       })
     );
-
-    return new IntegrationsSession({ integrations, logger: this.logger.get('session') });
   }
 }
 
-// Export the interface for the client
-export type { IntegrationClient };
+const integrationToProvider = async ({
+  integration,
+  registry,
+  request,
+}: {
+  integration: Integration;
+  registry: IntegrationRegistry;
+  request: KibanaRequest;
+}): Promise<McpProvider> => {
+  const definition = registry.get(integration.type);
+  const instance = await definition.createIntegration({
+    request,
+    integrationId: integration.id,
+    configuration: integration.configuration,
+    description: integration.description,
+  });
+  return {
+    id: integration.id,
+    connect: instance.connect,
+    meta: {},
+  };
+};

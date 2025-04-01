@@ -67,3 +67,99 @@ export type ChatEvent =
   | ConversationCreatedEvent
   | ConversationUpdatedEvent
   | ToolResultEvent;
+
+export const conversationCreatedEvent = ({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}): ConversationCreatedEvent => {
+  return {
+    type: 'conversation_created',
+    conversation: { id, title },
+  };
+};
+
+export const conversationUpdatedEvent = ({
+  id,
+  title,
+}: {
+  id: string;
+  title: string;
+}): ConversationUpdatedEvent => {
+  return {
+    type: 'conversation_updated',
+    conversation: { id, title },
+  };
+};
+
+/**
+ * Creates a chunk event to represent partial content from an LLM response.
+ */
+export const chunkEvent = ({
+  contentChunk,
+  messageId,
+}: {
+  contentChunk: string;
+  messageId: string;
+}): ChunkEvent => {
+  return {
+    type: 'message_chunk',
+    content_chunk: contentChunk,
+    message_id: messageId,
+  };
+};
+
+/**
+ * Creates a message event to represent a complete message from either a user or assistant.
+ */
+export const messageEvent = ({
+  message,
+}: {
+  message: UserMessage | AssistantMessage;
+}): MessageEvent => {
+  return {
+    type: 'message',
+    message,
+  };
+};
+
+/**
+ * Creates a tool result event to represent the result of a tool execution.
+ */
+export const toolResultEvent = ({
+  callId,
+  result,
+}: {
+  callId: string;
+  result: string;
+}): ToolResultEvent => {
+  return {
+    type: 'tool_result',
+    toolResult: {
+      callId,
+      result,
+    },
+  };
+};
+
+export const isMessageEvent = (event: ChatEvent): event is MessageEvent => {
+  return event.type === 'message';
+};
+
+export const isChunkEvent = (event: ChatEvent): event is ChunkEvent => {
+  return event.type === 'message_chunk';
+};
+
+export const isToolResultEvent = (event: ChatEvent): event is ToolResultEvent => {
+  return event.type === 'tool_result';
+};
+
+export const isConversationCreatedEvent = (event: ChatEvent): event is ConversationCreatedEvent => {
+  return event.type === 'conversation_created';
+};
+
+export const isConversationUpdatedEvent = (event: ChatEvent): event is ConversationUpdatedEvent => {
+  return event.type === 'conversation_updated';
+};

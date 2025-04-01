@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { getConnectorList } from './get_connector_list';
 export { createBuilder } from './so_filters';

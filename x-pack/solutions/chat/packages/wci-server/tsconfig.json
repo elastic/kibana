@@ -18,6 +18,7 @@
   "kbn_references": [
     "@kbn/wci-common",
     "@kbn/utility-types",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/zod"
   ]
 } 

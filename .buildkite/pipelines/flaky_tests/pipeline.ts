@@ -8,7 +8,7 @@
  */
 
 import { groups } from './groups.json';
-import { BuildkiteStep, expandAgentQueue } from '#pipeline-utils';
+import { BuildkiteStep, expandAgentQueue, collectEnvFromLabels } from '#pipeline-utils';
 
 const configJson = process.env.KIBANA_FLAKY_TEST_RUNNER_CONFIG;
 if (!configJson) {
@@ -113,9 +113,11 @@ if (totalJobs > MAX_JOBS) {
 }
 
 const steps: BuildkiteStep[] = [];
+const envFromLabels = collectEnvFromLabels(process.env.GITHUB_PR_LABELS);
 const pipeline = {
   env: {
     IGNORE_SHIP_CI_STATS_ERROR: 'true',
+    ...envFromLabels,
   },
   steps,
 };

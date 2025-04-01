@@ -10,24 +10,32 @@ import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Agent } from '../../../common/agents';
-import { IntegrationsSession } from '../integrations/integrations_session';
-import { getLCTools } from '../integrations/utils';
+import { getLCTools } from './mcp_gateway/utils';
 import { createAgentGraph } from './agent_graph';
 import { langchainToChatEvents, conversationEventsToMessages } from './utils';
 import type { AgentRunner, AgentRunResult } from './types';
+import type { McpGatewaySession } from './mcp_gateway';
 
 export const createAgentRunner = async ({
   logger,
   agent,
   chatModel,
-  integrationsSession,
+  createSession,
 }: {
   logger: Logger;
   agent: Agent;
   chatModel: InferenceChatModel;
-  integrationsSession: IntegrationsSession;
+  createSession: () => Promise<McpGatewaySession>;
 }): Promise<AgentRunner> => {
-  const integrationTools = await getLCTools(integrationsSession);
+  const session = await createSession();
+
+  const closeSession = () => {
+    session.close().catch((err) => {
+      logger.warn(`Error disconnecting integrations: ${err.message}`);
+    });
+  };
+
+  const integrationTools = await getLCTools({ session, logger });
 
   const agentGraph = await createAgentGraph({ agent, chatModel, integrationTools });
 
@@ -57,14 +65,10 @@ export const createAgentRunner = async ({
 
       events$.subscribe({
         complete: () => {
-          integrationsSession.disconnect().catch((err) => {
-            logger.warn(`Error disconnecting integrations: ${err.message}`);
-          });
+          closeSession();
         },
         error: () => {
-          integrationsSession.disconnect().catch((err) => {
-            logger.warn(`Error disconnecting integrations: ${err.message}`);
-          });
+          closeSession();
         },
       });
 

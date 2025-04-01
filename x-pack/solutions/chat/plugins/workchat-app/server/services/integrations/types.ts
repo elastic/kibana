@@ -5,22 +5,7 @@
  * 2.0.
  */
 
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
-import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
-import type { WorkChatIntegration } from '@kbn/wci-server';
-
-export type IntegrationWithMeta = WorkChatIntegration & {
-  id: string;
-};
-
-export type IntegrationToolInputSchema = Tool['inputSchema'];
-
-export interface IntegrationTool {
-  name: string;
-  description: string;
-  inputSchema: JsonSchemaObject;
-}
-
+// TODO: remove to use UserNameAndId from common instead
 export interface ClientUser {
   id: string;
   username: string;

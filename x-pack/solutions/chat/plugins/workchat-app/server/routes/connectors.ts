@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { getConnectorList } from '@kbn/wc-genai-utils';
 import type { ListConnectorsResponse } from '../../common/http_api/connectors';
 import type { RouteDependencies } from './types';
 import { apiCapabilities } from '../../common/features';
-import { getConnectorList } from '../utils';
 import { getHandlerWrapper } from './wrap_handler';
 
 export const registerConnectorRoutes = ({ logger, router, core }: RouteDependencies) => {

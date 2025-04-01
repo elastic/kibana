@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationsService } from './integrations/integrations_service';
+import type { IntegrationsService } from './integrations/integrations_service';
 import type { AgentFactory } from './orchestration';
 import type { ConversationService } from './conversations';
 import type { ChatService } from './chat';

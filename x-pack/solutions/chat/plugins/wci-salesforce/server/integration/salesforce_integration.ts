@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { IntegrationType } from '@kbn/wci-common';
 import {
-  getClientForInternalServer,
+  getConnectToInternalServer,
   type WorkchatIntegrationDefinition,
   type WorkChatIntegration,
 } from '@kbn/wci-server';
@@ -29,11 +29,9 @@ export const getSalesforceIntegrationDefinition = ({
       const elasticsearchClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
       const mcpServer = await createMcpServer({ configuration, elasticsearchClient, logger });
-      const client = await getClientForInternalServer({ server: mcpServer });
 
       return {
-        type: IntegrationType.salesforce,
-        client,
+        connect: getConnectToInternalServer({ server: mcpServer }),
       };
     },
   };

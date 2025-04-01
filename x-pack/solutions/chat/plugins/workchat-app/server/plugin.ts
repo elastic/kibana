@@ -16,14 +16,8 @@ import { registerRoutes } from './routes';
 import { registerTypes } from './saved_objects';
 import { registerFeatures } from './features';
 import type { InternalServices } from './services/types';
-import {
-  IntegrationsService,
-  ConversationServiceImpl,
-  AgentFactory,
-  ChatService,
-  AgentServiceImpl,
-} from './services';
 import { IntegrationRegistry } from './services/integrations';
+import { createServices } from './services/create_services';
 import type {
   WorkChatAppPluginSetup,
   WorkChatAppPluginStart,
@@ -82,49 +76,12 @@ export class WorkChatAppPlugin
     core: CoreStart,
     pluginsDependencies: WorkChatAppPluginStartDependencies
   ): WorkChatAppPluginStart {
-    this.integrationRegistry.blockRegistration();
-
-    const integrationsService = new IntegrationsService({
-      logger: this.logger.get('services.integrations'),
-      elasticsearch: core.elasticsearch,
-      registry: this.integrationRegistry,
-      savedObjects: core.savedObjects,
-      security: core.security,
+    this.services = createServices({
+      core,
+      logger: this.logger,
+      pluginsDependencies,
+      integrationRegistry: this.integrationRegistry,
     });
-
-    const conversationService = new ConversationServiceImpl({
-      savedObjects: core.savedObjects,
-      security: core.security,
-      logger: this.logger.get('services.conversations'),
-    });
-
-    const agentService = new AgentServiceImpl({
-      savedObjects: core.savedObjects,
-      security: core.security,
-      logger: this.logger.get('services.agent'),
-    });
-
-    const agentFactory = new AgentFactory({
-      inference: pluginsDependencies.inference,
-      logger: this.logger.get('services.agentFactory'),
-      agentService,
-      integrationsService,
-    });
-
-    const chatService = new ChatService({
-      inference: pluginsDependencies.inference,
-      logger: this.logger.get('services.chat'),
-      agentFactory,
-      conversationService,
-    });
-
-    this.services = {
-      conversationService,
-      agentService,
-      agentFactory,
-      integrationsService,
-      chatService,
-    };
 
     return {};
   }

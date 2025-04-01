@@ -27,9 +27,6 @@ export const langchainToChatEvents = ({
   return (langchain$) => {
     return langchain$.pipe(
       filterMap<LangchainStreamEvent, AgentRunEvents>((event) => {
-        // TODO: remove
-        // console.log(JSON.stringify(event, undefined, 2));
-
         // stream text chunks for the UI
         if (event.event === 'on_chat_model_stream') {
           const chunk: AIMessageChunk = event.data.chunk;
