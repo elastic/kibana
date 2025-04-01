@@ -340,7 +340,7 @@ exports[`Error TIMESTAMP_US 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
-exports[`Error TRANSACTION_AGENT_MARKS 1`] = `undefined`;
+exports[`Error TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -707,7 +707,7 @@ exports[`Span TIMESTAMP_US 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
-exports[`Span TRANSACTION_AGENT_MARKS 1`] = `undefined`;
+exports[`Span TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
@@ -1092,7 +1092,7 @@ exports[`Transaction TIMESTAMP_US 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
-exports[`Transaction TRANSACTION_AGENT_MARKS 1`] = `undefined`;
+exports[`Transaction TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
