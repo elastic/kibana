@@ -21,8 +21,8 @@ export const EngineStatus = z.enum(['installing', 'started', 'stopped', 'updatin
 export type EngineStatusEnum = typeof EngineStatus.enum;
 export const EngineStatusEnum = EngineStatus.enum;
 
-export type EngineDescriptor = z.infer<typeof EngineDescriptor>;
-export const EngineDescriptor = z.object({
+export type MonitoringEngineDescriptor = z.infer<typeof MonitoringEngineDescriptor>;
+export const MonitoringEngineDescriptor = z.object({
   status: EngineStatus,
 });
 

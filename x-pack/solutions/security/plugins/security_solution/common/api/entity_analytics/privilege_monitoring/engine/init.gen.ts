@@ -16,7 +16,7 @@
 
 import type { z } from '@kbn/zod';
 
-import { EngineDescriptor } from '../common.gen';
+import { MonitoringEngineDescriptor } from '../common.gen';
 
 export type InitMonitoringEngineResponse = z.infer<typeof InitMonitoringEngineResponse>;
-export const InitMonitoringEngineResponse = EngineDescriptor;
+export const InitMonitoringEngineResponse = MonitoringEngineDescriptor;
