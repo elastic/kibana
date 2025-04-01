@@ -14,7 +14,7 @@ Serverless-only plugin for users to view data usage. Available in all 3 solution
   - With list of data streams, date range, and metric types
   - Only two metric types right now, data ingested and data retained
   - Requests data streams in chunks of 50 from es client with the internal user
-  - Call autoops api and return time series data
+  - Call AutoOps API and return time series data
 
 # Integration with AutoOps
 
