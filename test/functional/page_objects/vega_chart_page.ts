@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import hjson from 'hjson';
 import { FtrService } from '../ftr_provider_context';
 
 const compareSpecs = (first: string, second: string) => {
@@ -74,14 +75,17 @@ export class VegaChartPageObject extends FtrService {
     });
   }
 
-  public async typeInSpec(text: string) {
-    const aceGutter = await this.getAceGutterContainer();
-
-    await aceGutter.doubleClick();
-    await this.browser.pressKeys(this.browser.keys.RIGHT);
-    await this.browser.pressKeys(this.browser.keys.LEFT);
-    await this.browser.pressKeys(this.browser.keys.LEFT);
-    await this.browser.pressKeys(text);
+  public async getSpecAsJSON() {
+    const text = await this.getSpec();
+    try {
+      const spec = hjson.parse(text, { legacyRoot: false, keepWsc: true });
+      return {
+        spec,
+        isValid: true,
+      };
+    } catch (err) {
+      return { spec: text, isValid: false };
+    }
   }
 
   public async cleanSpec() {
