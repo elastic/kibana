@@ -12,59 +12,58 @@
  */
 
 import type {
-  Token,
-  ParserRuleContext,
-  TerminalNode,
-  RecognitionException,
   ParseTree,
+  ParserRuleContext,
+  RecognitionException,
+  TerminalNode,
+  Token,
 } from 'antlr4';
 import {
+  FunctionContext,
+  IdentifierContext,
+  IdentifierOrParameterContext,
   IndexPatternContext,
+  InputDoubleParamsContext,
+  InputNamedOrPositionalDoubleParamsContext,
+  InputNamedOrPositionalParamContext,
+  InputParamContext,
   QualifiedNameContext,
+  QualifiedNamePatternContext,
+  StringContext,
   type ArithmeticUnaryContext,
   type DecimalValueContext,
   type InlineCastContext,
   type IntegerValueContext,
   type QualifiedIntegerLiteralContext,
-  QualifiedNamePatternContext,
-  FunctionContext,
-  IdentifierContext,
-  InputParamContext,
-  InputNamedOrPositionalParamContext,
-  IdentifierOrParameterContext,
-  StringContext,
-  InputNamedOrPositionalDoubleParamsContext,
-  InputDoubleParamsContext,
 } from '../antlr/esql_parser';
-import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
+import { Builder, type AstNodeParserFields } from '../builder';
 import type {
+  BinaryExpressionOperator,
   ESQLAstBaseItem,
-  ESQLLiteral,
-  ESQLList,
-  ESQLTimeInterval,
-  ESQLLocation,
-  ESQLFunction,
-  ESQLSource,
-  ESQLColumn,
-  ESQLCommandOption,
   ESQLAstItem,
+  ESQLBinaryExpression,
+  ESQLColumn,
+  ESQLCommand,
   ESQLCommandMode,
-  ESQLInlineCast,
-  ESQLUnknownItem,
-  ESQLNumericLiteralType,
-  FunctionSubtype,
-  ESQLNumericLiteral,
-  ESQLOrderExpression,
-  InlineCastingType,
+  ESQLCommandOption,
+  ESQLFunction,
   ESQLFunctionCallExpression,
   ESQLIdentifier,
-  ESQLBinaryExpression,
-  BinaryExpressionOperator,
-  ESQLCommand,
+  ESQLInlineCast,
+  ESQLList,
+  ESQLLiteral,
+  ESQLLocation,
+  ESQLNumericLiteral,
+  ESQLNumericLiteralType,
   ESQLParamKinds,
+  ESQLSource,
+  ESQLTimeInterval,
+  ESQLUnknownItem,
+  FunctionSubtype,
+  InlineCastingType,
 } from '../types';
-import { parseIdentifier, getPosition } from './helpers';
-import { Builder, type AstNodeParserFields } from '../builder';
+import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
+import { getPosition, parseIdentifier } from './helpers';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -82,7 +81,7 @@ export function createAstBaseItem<Name = string>(
   };
 }
 
-const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
+export const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
   text: ctx.getText(),
   location: getPosition(ctx.start, ctx.stop),
   incomplete: Boolean(ctx.exception),
@@ -335,21 +334,6 @@ export const createParam = (ctx: ParseTree) => {
       return Builder.param.named({ paramKind, value }, parserFields);
     }
   }
-};
-
-export const createOrderExpression = (
-  ctx: ParserRuleContext,
-  arg: ESQLColumn,
-  order: ESQLOrderExpression['order'],
-  nulls: ESQLOrderExpression['nulls']
-) => {
-  const node = Builder.expression.order(
-    arg as ESQLColumn,
-    { order, nulls },
-    createParserFields(ctx)
-  );
-
-  return node;
 };
 
 function walkFunctionStructure(
