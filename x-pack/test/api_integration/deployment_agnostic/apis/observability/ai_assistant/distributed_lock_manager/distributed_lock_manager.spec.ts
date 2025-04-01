@@ -216,39 +216,82 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('withLock', () => {
-      let executions: number;
-      let runWithLock: () => Promise<string | undefined>;
-      let results: Array<PromiseSettledResult<string | undefined>>;
-
       const LOCK_ID = 'my_lock_with_lock';
 
-      before(async () => {
-        executions = 0;
-        runWithLock = async () => {
-          return withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
-            executions++;
-            return 'was called';
-          });
-        };
+      describe('Successful execution and concurrent calls', () => {
+        let executions: number;
+        let runWithLock: () => Promise<string | undefined>;
+        let results: Array<PromiseSettledResult<string | undefined>>;
 
-        results = await Promise.allSettled([runWithLock(), runWithLock(), runWithLock()]);
+        before(async () => {
+          executions = 0;
+          runWithLock = async () => {
+            return withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
+              executions++;
+              await sleep(100);
+              return 'was called';
+            });
+          };
+          results = await Promise.allSettled([runWithLock(), runWithLock(), runWithLock()]);
+        });
+
+        it('executes the callback only once', async () => {
+          expect(executions).to.be(1);
+        });
+
+        it('returns the callback result for the successful call', async () => {
+          const fulfilled = results.filter((r) => r.status === 'fulfilled') as Array<
+            PromiseFulfilledResult<string>
+          >;
+          expect(fulfilled).to.have.length(1);
+          expect(fulfilled[0].value).to.be('was called');
+        });
+
+        it('releases the lock after execution', async () => {
+          const lock = await getLockById(es, LOCK_ID);
+          expect(lock).to.be(undefined);
+        });
       });
 
-      it('executes the callback only once', async () => {
-        expect(executions).to.be(1);
-      });
+      describe('Error handling in withLock', () => {
+        it('should release the lock even if the callback throws an error', async () => {
+          let error: Error | undefined;
+          try {
+            await withLock({ lockId: LOCK_ID, esClient: es, logger }, async () => {
+              throw new Error('Simulated callback failure');
+            });
+            throw new Error('withLock did not throw an error');
+          } catch (err) {
+            error = err;
+          }
+          expect(error?.message).to.be('Simulated callback failure');
 
-      it('returns the callback result for the successful call', async () => {
-        const successful = results.filter((r) => r.status === 'fulfilled') as Array<
-          PromiseFulfilledResult<string>
-        >;
-        expect(successful).to.have.length(1);
-        expect(successful[0].value).to.be('was called');
-      });
+          // Verify that the lock is released even after a callback error.
+          const lock = await getLockById(es, LOCK_ID);
+          expect(lock).to.be(undefined);
+        });
 
-      it('releases the lock after execution', async () => {
-        const lock = await getLockById(es, LOCK_ID);
-        expect(lock).to.be(undefined);
+        it('should throw a LockAcquisitionError if the lock cannot be acquired', async () => {
+          // Pre-acquire the lock so that withLock cannot acquire it.
+          const preAcquirer = new LockManager(LOCK_ID, es, logger);
+          const acquired = await preAcquirer.acquire();
+          expect(acquired).to.be(true);
+
+          let error: Error | undefined;
+          try {
+            await withLock(
+              { lockId: LOCK_ID, esClient: es, logger },
+              async () => 'should not execute'
+            );
+          } catch (err) {
+            error = err;
+          }
+
+          expect(error?.name).to.be('LockAcquisitionError');
+          expect(error?.message).to.contain(`Lock "${LOCK_ID}" not acquired`);
+
+          await preAcquirer.release();
+        });
       });
     });
 
@@ -319,22 +362,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // Even though the initial TTL was short, the periodic extension should have kept the lock active.
         // After the withLock call completes, the lock should be released.
         it('should release the lock after the callback', async () => {
-          const lock = await getLockById(es, LOCK_ID);
-          expect(lock).to.be(undefined);
-        });
-      });
-
-      describe('withLock - error handling', () => {
-        it('should release the lock even if the callback throws an error', async () => {
-          try {
-            await withLock({ lockId: LOCK_ID, esClient: es, logger, ttl: 300000 }, async () => {
-              throw new Error('Simulated callback failure');
-            });
-            throw new Error('withLock did not throw an error');
-          } catch (err) {
-            expect(err.message).to.be('Simulated callback failure');
-          }
-
           const lock = await getLockById(es, LOCK_ID);
           expect(lock).to.be(undefined);
         });

@@ -33,7 +33,7 @@ export interface AcquireOptions {
    */
   metadata?: Record<string, any>;
   /**
-   * Time to live (TTL) for the lock in milliseconds.
+   * Time to live (TTL) for the lock in milliseconds. Default is 5 minutes.
    * When a lock expires it can be acquired by another process
    */
   ttl?: number;
@@ -56,7 +56,7 @@ export class LockManager {
    */
   public async acquire({
     metadata = {},
-    ttl = duration(30, 'minutes').asMilliseconds(),
+    ttl = duration(5, 'minutes').asMilliseconds(),
   }: AcquireOptions = {}): Promise<boolean> {
     await createLocksWriteIndexOnce(this.esClient);
     this.token = uuid();
@@ -351,6 +351,6 @@ function isVersionConflictException(e: Error): boolean {
 export class LockAcquisitionError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = 'LockAcquisitionException';
+    this.name = 'LockAcquisitionError';
   }
 }
