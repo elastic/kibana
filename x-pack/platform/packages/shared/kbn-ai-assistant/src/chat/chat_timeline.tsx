@@ -176,7 +176,7 @@ export function ChatTimeline({
 
       let displayContent: React.ReactNode;
 
-      // build redactedEntitiesMap with user messages using NER positions.
+      // build redactedEntitiesMap with user messages using entity positions.
       if (item.message.message.role === 'user' && item.message.message.content) {
         if (
           item.message.message.sanitized &&
