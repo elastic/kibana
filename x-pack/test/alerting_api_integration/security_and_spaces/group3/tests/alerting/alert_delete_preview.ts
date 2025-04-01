@@ -29,7 +29,7 @@ export default function getAlertDeletionPreview({ getService }: FtrProviderConte
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle get alert deletion preview request appropriately', async () => {
-          const url = `/internal/alerting/rules/settings/_alert_deletion_preview?is_active_alerts_deletion_enabled=true&active_alerts_deletion_threshold=90&is_inactive_alerts_deletion_enabled=true&inactive_alerts_deletion_threshold=90`;
+          const url = `/internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&active_alert_delete_threshold=90&is_inactive_alert_delete_enabled=true&inactive_alert_deletee_threshold=90`;
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}${url}`)

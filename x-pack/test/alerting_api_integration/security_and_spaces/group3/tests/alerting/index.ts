@@ -34,7 +34,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
       loadTestFile(require.resolve('./get_query_delay_settings'));
       loadTestFile(require.resolve('./update_query_delay_settings'));
       loadTestFile(require.resolve('./resolve'));
-      loadTestFile(require.resolve('./alert_deletion_preview'));
+      loadTestFile(require.resolve('./alert_delete_preview'));
     });
   });
 }

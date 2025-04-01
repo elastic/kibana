@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { AlertDeletionPreview } from '@kbn/alerting-types';
-import type { AlertDeletionPreviewResponseV1 } from '../../../../../common/routes/rule/apis/alert_deletion';
+import type { AlertDeletePreview } from '@kbn/alerting-types';
+import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/rule/apis/alert_delete';
 
-export const transformAlertDeletionPreviewToResponse = ({
+export const transformAlertDeletePreviewToResponse = ({
   affectedAlertCount,
-}: AlertDeletionPreview): AlertDeletionPreviewResponseV1 => {
+}: AlertDeletePreview): AlertDeletePreviewResponseV1 => {
   return {
     body: {
       affected_alert_count: affectedAlertCount,

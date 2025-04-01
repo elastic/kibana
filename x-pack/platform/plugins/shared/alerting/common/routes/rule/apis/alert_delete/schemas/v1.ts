@@ -6,15 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertDeletionCategoryIdTypes } from '../../../../../constants';
+import { alertDeleteCategoryIdTypes } from '../../../../../constants';
 
-export const alertDeletionPreviewQuerySchema = schema.object({
-  is_active_alerts_deletion_enabled: schema.boolean({
+export const alertDeletePreviewQuerySchema = schema.object({
+  is_active_alert_delete_enabled: schema.boolean({
     meta: {
       description: 'Enable deletion of active alerts when set to true',
     },
   }),
-  active_alerts_deletion_threshold: schema.number({
+  active_alert_delete_threshold: schema.number({
     min: 1,
     max: 1000,
     meta: {
@@ -22,13 +22,13 @@ export const alertDeletionPreviewQuerySchema = schema.object({
         'Threshold (in days) for deleting active alerts older than this value, applies only when deletion is enabled',
     },
   }),
-  is_inactive_alerts_deletion_enabled: schema.boolean({
+  is_inactive_alert_delete_enabled: schema.boolean({
     meta: {
       description:
         'Enable deletion of inactive alerts (recovered/closed/untracked) when set to true',
     },
   }),
-  inactive_alerts_deletion_threshold: schema.number({
+  inactive_alert_delete_threshold: schema.number({
     min: 1,
     max: 1000,
     meta: {
@@ -40,16 +40,16 @@ export const alertDeletionPreviewQuerySchema = schema.object({
     schema.nullable(
       schema.arrayOf(
         schema.oneOf([
-          schema.literal(alertDeletionCategoryIdTypes.OBSERVABILITY),
-          schema.literal(alertDeletionCategoryIdTypes.SECURITY_SOLUTION),
-          schema.literal(alertDeletionCategoryIdTypes.MANAGEMENT),
+          schema.literal(alertDeleteCategoryIdTypes.SECURITY_SOLUTION),
+          schema.literal(alertDeleteCategoryIdTypes.OBSERVABILITY),
+          schema.literal(alertDeleteCategoryIdTypes.MANAGEMENT),
         ])
       )
     )
   ),
 });
 
-export const alertDeletionPreviewResponseSchema = schema.object({
+export const alertDeletePreviewResponseSchema = schema.object({
   body: schema.object({
     affected_alert_count: schema.number(),
   }),

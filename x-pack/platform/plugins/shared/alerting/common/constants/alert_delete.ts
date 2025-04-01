@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const alertDeletionCategoryIdTypes = {
+export const alertDeleteCategoryIdTypes = {
   OBSERVABILITY: 'observability',
   SECURITY_SOLUTION: 'securitySolution',
   MANAGEMENT: 'management',

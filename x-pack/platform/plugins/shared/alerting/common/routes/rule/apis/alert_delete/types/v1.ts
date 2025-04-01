@@ -6,7 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { alertDeletionPreviewQuerySchemaV1, alertDeletionPreviewResponseSchemaV1 } from '..';
+import type { alertDeletePreviewQuerySchemaV1, alertDeletePreviewResponseSchemaV1 } from '..';
 
-export type AlertDeletionPreviewQuery = TypeOf<typeof alertDeletionPreviewQuerySchemaV1>;
-export type AlertDeletionPreviewResponse = TypeOf<typeof alertDeletionPreviewResponseSchemaV1>;
+export type AlertDeletePreviewQuery = TypeOf<typeof alertDeletePreviewQuerySchemaV1>;
+export type AlertDeletePreviewResponse = TypeOf<typeof alertDeletePreviewResponseSchemaV1>;
