@@ -47,8 +47,8 @@ export const PageIntroduction: React.FC<PageIntroductionProps> = ({
               <EuiFlexItem>
                 <EuiText size="s">
                   {Array.isArray(links)
-                    ? links.map((link, index) =>
-                        React.cloneElement(link, { key: link.key || index })
+                    ? links.map((link: any, index) =>
+                        link ? React.cloneElement(link, { key: link.key || index }) : null
                       )
                     : links}
                 </EuiText>

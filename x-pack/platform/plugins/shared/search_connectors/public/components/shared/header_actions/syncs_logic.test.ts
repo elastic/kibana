@@ -155,7 +155,7 @@ describe('SyncsLogic', () => {
   const { mount } = new LogicMounter(SyncsLogic);
   const DEFAULT_VALUES = {};
 
-  let result = {};
+  let result = SyncsLogic;
 
   beforeEach(() => {
     jest.clearAllMocks();

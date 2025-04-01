@@ -75,9 +75,9 @@ describe('IndexViewLogic', () => {
   const { mount } = new LogicMounter(IndexViewLogic);
   const { flashSuccessToast } = mockFlashMessageHelpers;
   const http = httpServiceMock.createSetupContract();
-  let resultIndexViewLogic = {};
-  let resultCachedFetchIndexApiLogic = {};
-  let resultIndexNameLogic = {};
+  let resultIndexViewLogic = IndexViewLogic;
+  let resultCachedFetchIndexApiLogic = CachedFetchIndexApiLogic;
+  let resultIndexNameLogic = IndexNameLogic;
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useRealTimers();

@@ -23,8 +23,14 @@ import { Status } from '../../../../common/types/api';
 import { SyncsContextMenu } from './syncs_context_menu';
 import { AppContextProvider } from '../../../app_context';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-const appContext = {
+import { AppDependencies } from '../../../types';
+const appContext: AppDependencies = {
   isAgentlessEnabled: true,
+  connectorTypes: [],
+  kibanaVersion: '',
+  isCloud: false,
+  hasPlatinumLicense: false,
+  plugins: {},
 };
 jest.mock('@kbn/kibana-react-plugin/public');
 const http = httpServiceMock.createSetupContract();
@@ -59,6 +65,18 @@ describe('SyncsContextMenu', () => {
     useKibanaMock.mockReturnValue({
       services: {
         http,
+      },
+      overlays: {
+        openFlyout: jest.fn(),
+        openModal: jest.fn(),
+      },
+      notifications: {
+        toasts: {
+          show: jest.fn(),
+          success: jest.fn(),
+          warning: jest.fn(),
+          danger: jest.fn(),
+        },
       },
     });
     setMockValues(mockValues);

@@ -31,7 +31,7 @@ describe('flashAPIErrors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     const history = scopedHistoryMock.create();
-    history.listen.mockReturnValue('hi');
+    history.listen.mockReturnValue(jest.fn());
     FlashMessagesLogic({ notifications: {} as unknown as NotificationsStart, history });
     FlashMessagesLogic.mount();
     jest.spyOn(FlashMessagesLogic.actions, 'setFlashMessages');

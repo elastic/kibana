@@ -44,7 +44,7 @@ describe('SyncJobsViewLogic', () => {
   const { mount: indexViewLogicMount } = new LogicMounter(IndexViewLogic);
   const { mount: fetchSyncJobsMount } = new LogicMounter(FetchSyncJobsApiLogic);
   const { mount } = new LogicMounter(SyncJobsViewLogic);
-  let resultSyncJobsViewLogic = {};
+  let resultSyncJobsViewLogic = SyncJobsViewLogic;
 
   beforeEach(() => {
     indexViewLogicMount({}, { http });
