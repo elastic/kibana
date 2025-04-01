@@ -9,6 +9,7 @@ import React from 'react';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,16 +21,34 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
+
+import queryRulesImg from '../../assets/query-rules-context-alt.svg';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
 }
 export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) => {
   const { euiTheme } = useEuiTheme();
+  const gradientOverlay = css({
+    background: `linear-gradient(180deg, ${transparentize(
+      euiTheme.colors.backgroundBasePlain,
+      0
+    )}, ${transparentize(euiTheme.colors.backgroundBasePlain, 1)} 100%)`,
+    position: 'absolute',
+    bottom: 0,
+    height: '30px',
+    width: '100%',
+  });
+  const imgProps = css({
+    maxWidth: '360px',
+    height: 'auto',
+    margin: '0 auto',
+  });
   return (
     <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
       <EuiFlexItem grow={false}>
@@ -40,18 +59,17 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
         >
           <EuiSplitPanel.Outer grow={false}>
             <EuiSplitPanel.Inner paddingSize="l">
-              <EuiSpacer size="m" />
-              <EuiTitle size="l">
-                <h2>
-                  <FormattedMessage
-                    id="xpack.queryRules.emptyPrompt.title"
-                    defaultMessage="Power a customized search experience"
-                  />
-                </h2>
-              </EuiTitle>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup direction="column" gutterSize="m">
-                <EuiFlexItem grow={false}>
+              <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+                <EuiFlexItem grow>
+                  <EuiTitle size="l">
+                    <h2>
+                      <FormattedMessage
+                        id="xpack.queryRules.emptyPrompt.title"
+                        defaultMessage="Power a customized search experience"
+                      />
+                    </h2>
+                  </EuiTitle>
+                  <EuiSpacer size="m" />
                   <EuiText size="m">
                     <p>
                       <FormattedMessage
@@ -60,123 +78,144 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                       />
                     </p>
                   </EuiText>
+                  <EuiSpacer size="m" />
+                  <EuiFlexGroup direction="row" gutterSize="m">
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        data-test-subj="searchSynonymsEmptyPromptGetStartedButton"
+                        color="primary"
+                        fill
+                        onClick={getStartedAction}
+                      >
+                        <FormattedMessage
+                          id="xpack.queryRules.emptyPrompt.getStartedButton"
+                          defaultMessage="Get started"
+                        />
+                      </EuiButton>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        data-test-subj="searchSynonymsEmptyPromptImportQueryRulesButton"
+                        onClick={() => {}}
+                      >
+                        <FormattedMessage
+                          id="xpack.queryRules.emptyPrompt.importQueryRulesButton"
+                          defaultMessage="Import existing query rules"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <div>
-                    <EuiButton
-                      data-test-subj="searchSynonymsEmptyPromptGetStartedButton"
-                      color="primary"
-                      fill
-                      onClick={getStartedAction}
-                    >
-                      <FormattedMessage
-                        id="xpack.queryRules.emptyPrompt.getStartedButton"
-                        defaultMessage="Get started"
-                      />
-                    </EuiButton>
-                  </div>
-                </EuiFlexItem>
-                <EuiHorizontalRule margin="m" />
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGrid columns={3} direction="row">
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup responsive={false} gutterSize="s">
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type="check" />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiTitle size="xxs">
-                                <h5>
-                                  <FormattedMessage
-                                    id="xpack.queryRules.emptyPrompt.pinExclude.title"
-                                    defaultMessage="Pin and exclude documents"
-                                  />
-                                </h5>
-                              </EuiTitle>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s" color="subdued">
-                            <p>
-                              <FormattedMessage
-                                id="xpack.queryRules.emptyPrompt.pinExclude.description"
-                                defaultMessage="Provide customized result ranking based on business-logic rules."
-                              />
-                            </p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup responsive={false} gutterSize="s">
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type="check" />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiTitle size="xxs">
-                                <h5>
-                                  <FormattedMessage
-                                    id="xpack.queryRules.emptyPrompt.targetQueryParameters.title"
-                                    defaultMessage="Target query parameters"
-                                  />
-                                </h5>
-                              </EuiTitle>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s" color="subdued">
-                            <p>
-                              <FormattedMessage
-                                id="xpack.queryRules.emptyPrompt.targetQueryParameters.description"
-                                defaultMessage="Use metadata from your application to determine condition-based results."
-                              />
-                            </p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiFlexGroup responsive={false} gutterSize="s">
-                            <EuiFlexItem grow={false}>
-                              <EuiIcon type="check" />
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiTitle size="xxs">
-                                <h5>
-                                  <FormattedMessage
-                                    id="xpack.queryRules.emptyPrompt.collaborateMantain.title"
-                                    defaultMessage="Collaborate and maintain"
-                                  />
-                                </h5>
-                              </EuiTitle>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s" color="subdued">
-                            <p>
-                              <FormattedMessage
-                                id="xpack.queryRules.emptyPrompt.collaborateMantain.description"
-                                defaultMessage="Update your query rules and export the updates to code for easy developer collaboration."
-                              />
-                            </p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGrid>
+                <EuiFlexItem
+                  grow
+                  css={css`
+                    position: relative;
+                  `}
+                >
+                  <img src={queryRulesImg} alt="Query Rules" css={imgProps} />
+                  <div css={gradientOverlay}>&nbsp;</div>
                 </EuiFlexItem>
               </EuiFlexGroup>
+              <EuiHorizontalRule margin="m" />
+              <EuiFlexItem grow={false}>
+                <EuiFlexGrid columns={3} direction="row">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup responsive={false} gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="check" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle size="xxs">
+                              <h5>
+                                <FormattedMessage
+                                  id="xpack.queryRules.emptyPrompt.pinExclude.title"
+                                  defaultMessage="Pin and exclude documents"
+                                />
+                              </h5>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="xpack.queryRules.emptyPrompt.pinExclude.description"
+                              defaultMessage="Provide customized result ranking based on business-logic rules."
+                            />
+                          </p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup responsive={false} gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="check" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle size="xxs">
+                              <h5>
+                                <FormattedMessage
+                                  id="xpack.queryRules.emptyPrompt.targetQueryParameters.title"
+                                  defaultMessage="Target query parameters"
+                                />
+                              </h5>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="xpack.queryRules.emptyPrompt.targetQueryParameters.description"
+                              defaultMessage="Use metadata from your application to determine condition-based results."
+                            />
+                          </p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup responsive={false} gutterSize="xs" direction="column">
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup responsive={false} gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="check" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle size="xxs">
+                              <h5>
+                                <FormattedMessage
+                                  id="xpack.queryRules.emptyPrompt.collaborateMantain.title"
+                                  defaultMessage="Collaborate and maintain"
+                                />
+                              </h5>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s" color="subdued">
+                          <p>
+                            <FormattedMessage
+                              id="xpack.queryRules.emptyPrompt.collaborateMantain.description"
+                              defaultMessage="Update your query rules and export the updates to code for easy developer collaboration."
+                            />
+                          </p>
+                        </EuiText>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGrid>
+              </EuiFlexItem>
             </EuiSplitPanel.Inner>
             <EuiSplitPanel.Inner color="subdued" paddingSize="l">
               <>
