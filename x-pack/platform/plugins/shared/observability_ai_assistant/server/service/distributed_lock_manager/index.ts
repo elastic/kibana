@@ -7,9 +7,12 @@
 
 import { Client, errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
+import { v4 as uuid } from 'uuid';
 import pRetry from 'p-retry';
+import prettyMilliseconds from 'pretty-ms';
 
-const INDEX_NAME = '.kibana-distributed-lock-manager';
+export const LOCKS_INDEX_ALIAS = '.kibana_locks';
+export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
 
 export enum LockId {
   KnowledgeBaseReindex = 'knowledge_base_reindex',
@@ -18,68 +21,156 @@ export enum LockId {
 export interface LockDocument {
   createdAt: string;
   expiresAt: string;
-  meta: Record<string, any>;
+  metadata: Record<string, any>;
+  token: string;
 }
 
 interface AcquireOptions {
-  meta?: Record<string, any>;
+  metadata?: Record<string, any>;
   ttlMs?: number;
 }
 
 export class LockManager {
-  constructor(private lockId: LockId, private esClient: Client, private logger: Logger) {}
+  private token: string;
+
+  constructor(private lockId: LockId, private esClient: Client, private logger: Logger) {
+    this.token = uuid();
+    logger.debug(`LockManager initialized with lockId: ${lockId}, token: ${this.token}`);
+  }
 
   /**
    * Attempts to acquire a lock by creating a document with the given lockId.
    * If the lock exists and is expired, it will be released and acquisition retried.
    */
   public async acquire(options: AcquireOptions = {}): Promise<boolean> {
-    const ttl = options.ttlMs ?? 3600 * 1000; // Default TTL: 1 hour.
-    const now = new Date();
+    await createLocksWriteIndex(this.esClient);
+
+    const ttl = options.ttlMs ?? 6 * 5 * 1000; // Default TTL: 5 minutes
 
     try {
-      await this.esClient.index({
-        index: INDEX_NAME,
+      const response = await this.esClient.update<LockDocument>({
+        index: LOCKS_CONCRETE_INDEX_NAME,
         id: this.lockId,
-        body: {
-          createdAt: now.toISOString(),
-          expiresAt: new Date(now.getTime() + ttl).toISOString(),
-          meta: options.meta ?? {},
+        scripted_upsert: true,
+        script: {
+          lang: 'painless',
+          source: `
+              // Get the current time on the ES server.
+              long now = System.currentTimeMillis();
+              
+              // If creating the document or if the lock is expired, update it.
+              if (ctx.op == 'create' || Instant.parse(ctx._source.expiresAt).toEpochMilli() < now) {
+                ctx._source.createdAt = Instant.ofEpochMilli(now).toString();
+                ctx._source.expiresAt = Instant.ofEpochMilli(now + params.ttl).toString();
+                ctx._source.metadata = params.metadata;
+                ctx._source.token = params.token;
+              } else {
+                ctx.op = 'noop'
+              }
+            `,
+          params: {
+            token: this.token,
+            ttl,
+            metadata: options.metadata ?? {},
+          },
         },
-        op_type: 'create', // Only create if the document does not already exist.
+        // @ts-expect-error
+        upsert: {},
+        refresh: true,
       });
-      this.logger.debug(`Lock "${this.lockId}" acquired.`);
-      return true;
-    } catch (error: unknown) {
-      const isVersionConflictError =
-        error instanceof errors.ResponseError &&
-        error.body?.error?.type === 'version_conflict_engine_exception';
 
-      if (isVersionConflictError) {
-        const existingLock = await this.get();
-        if (!existingLock) {
-          // If the lock doesn't exist, it might have been purged because it expired and we will try acquiring it again.
-          return this.acquire(options);
-        }
+      if (response.result === 'created') {
+        this.logger.debug(
+          ` Lock "${this.lockId}" acquired with ttl = ${prettyMilliseconds(ttl)} and token = ${
+            this.token
+          }`
+        );
+        return true;
+      } else if (response.result === 'updated') {
+        this.logger.debug(
+          ` Lock "${this.lockId}" was expired and re-acquired with ttl = ${prettyMilliseconds(
+            ttl
+          )} and token = ${this.token}`
+        );
+        return true;
+      } else if (response.result === 'noop') {
+        this.logger.debug(
+          `Lock "${this.lockId}" could not be acquired with token ${this.token} because it is already held`
+        );
+        return false;
+      } else {
+        throw new Error(`Unexpected response: ${response.result}`);
+      }
+    } catch (e) {
+      if (
+        e instanceof errors.ResponseError &&
+        e.body?.error?.type === 'version_conflict_engine_exception'
+      ) {
+        this.logger.debug(`Lock "${this.lockId}" already held (version conflict)`);
         return false;
       }
 
-      throw error;
+      this.logger.error(`Failed to acquire lock "${this.lockId}": ${e.message}`);
+      this.logger.debug(e);
+      return false;
     }
   }
 
-  private isExpired(lock: LockDocument): boolean {
-    const { expiresAt } = lock;
-    return new Date(expiresAt) < new Date();
+  /**
+   * Releases the lock by deleting the document with the given lockId and token
+   */
+  public async release(): Promise<boolean> {
+    try {
+      const res = await pRetry(
+        () => {
+          return this.esClient.deleteByQuery({
+            index: LOCKS_CONCRETE_INDEX_NAME,
+            query: {
+              // bool: { filter: [{ term: { _id: this.lockId } }, { term: { token: this.token } }] },
+              bool: { filter: [{ term: { _id: this.lockId } }, { term: { token: this.token } }] },
+            },
+            refresh: true,
+          });
+        },
+        { retries: 2 }
+      );
+
+      if (res.deleted === 0) {
+        this.logger.debug(
+          `Lock "${this.lockId}" with token = ${this.token} could not be released. Not found or already released.`
+        );
+        return false;
+      }
+
+      this.logger.debug(`Lock "${this.lockId}" released.`);
+      return true;
+    } catch (error) {
+      this.logger.error(`Failed to release lock "${this.lockId}": ${error.message}`);
+      this.logger.debug(error);
+      return false;
+    }
   }
 
   /**
-   * Releases a lock by deleting its document.
-   * If the document is not found, the error is ignored.
+   * Releases a lock if it is expired.
    */
-  public async release(): Promise<void> {
-    await this.esClient.delete({ index: INDEX_NAME, id: this.lockId }, { ignore: [404] });
-    this.logger.debug(`Lock "${this.lockId}" released.`);
+  public async releaseIfExpired(): Promise<boolean> {
+    const res = await this.esClient.deleteByQuery({
+      index: LOCKS_CONCRETE_INDEX_NAME,
+      query: {
+        bool: {
+          filter: [{ term: { _id: this.lockId } }, { range: { expiresAt: { lte: 'now' } } }],
+        },
+      },
+      refresh: true,
+    });
+    if (res.deleted === 0) {
+      this.logger.debug(`Lock "${this.lockId}" not found`);
+      return false;
+    }
+
+    this.logger.debug(`Lock "${this.lockId}" expired and was released.`);
+    return true;
   }
 
   /**
@@ -87,35 +178,67 @@ export class LockManager {
    * If the lock is expired, it will be released.
    */
   public async get(): Promise<LockDocument | undefined> {
-    const res = await this.esClient.get<LockDocument>(
-      { index: INDEX_NAME, id: this.lockId },
-      { ignore: [404] }
-    );
+    const result = await this.esClient.search<LockDocument>({
+      index: LOCKS_CONCRETE_INDEX_NAME,
+      query: {
+        bool: {
+          filter: [{ term: { _id: this.lockId } }, { range: { expiresAt: { gt: 'now' } } }],
+        },
+      },
+    });
 
-    if (!res?._source) {
-      return;
+    const hits = result.hits.hits;
+    if (hits.length === 0) {
+      await this.releaseIfExpired();
+      return undefined;
     }
 
-    // Check if the lock is expired.
-    if (this.isExpired(res?._source)) {
-      await this.release();
-      return;
-    }
-
-    return res._source;
+    return hits[0]._source;
   }
 
   public async waitForLock(options: AcquireOptions & pRetry.Options = {}): Promise<boolean> {
-    const { meta, ttlMs, ...pRetryOptions } = options;
+    const { metadata, ttlMs, ...pRetryOptions } = options;
 
     return pRetry(async () => {
-      const acquired = await this.acquire({ meta, ttlMs });
+      const acquired = await this.acquire({ metadata, ttlMs });
       if (!acquired) {
         this.logger.debug(`Lock "${this.lockId}" not available yet.`);
         throw new Error(`Lock "${this.lockId}" not available yet`);
       }
       return acquired;
     }, pRetryOptions ?? { forever: true, maxTimeout: 10_000 });
+  }
+
+  public async extendTtl(ttl = 300000): Promise<boolean> {
+    try {
+      await this.esClient.update<LockDocument>({
+        index: LOCKS_CONCRETE_INDEX_NAME,
+        id: this.lockId,
+        script: {
+          lang: 'painless',
+          source: `
+          long now = System.currentTimeMillis();
+          ctx._source.expiresAt = Instant.ofEpochMilli(now + params.ttl).toString();`,
+          params: { ttl },
+        },
+        refresh: true,
+      });
+      this.logger.debug(`Lock "${this.lockId}" extended ttl with ${prettyMilliseconds(ttl)}.`);
+      return true;
+    } catch (error) {
+      if (
+        error instanceof errors.ResponseError &&
+        error.message.includes('version_conflict_engine_exception') &&
+        error.message.includes('but no document was found')
+      ) {
+        this.logger.debug(`Lock "${this.lockId}" was released concurrently. Not extending TTL.`);
+        return false;
+      }
+
+      this.logger.error(`Failed to extend lock "${this.lockId}": ${error.message}`);
+      this.logger.debug(error);
+      return false;
+    }
   }
 }
 
@@ -124,8 +247,8 @@ export async function withLock<T>(
     lockId,
     esClient,
     logger,
-    meta,
-    ttlMs,
+    metadata,
+    ttlMs = 60 * 5 * 1000, // Default TTL: 5 minutes
   }: {
     lockId: LockId;
     esClient: Client;
@@ -134,11 +257,23 @@ export async function withLock<T>(
   callback: () => Promise<T>
 ): Promise<T | undefined> {
   const lockManager = new LockManager(lockId, esClient, logger);
-  const acquired = await lockManager.acquire({ meta, ttlMs });
+  const acquired = await lockManager.acquire({ metadata, ttlMs });
+
+  // extend the ttl periodically
+  const extendInterval = Math.floor(ttlMs / 2);
+  const intervalId = setInterval(async () => {
+    try {
+      await lockManager.extendTtl();
+    } catch (err) {
+      logger.error(`Failed to extend lock "${lockId}":`, err);
+    }
+  }, extendInterval);
+
   if (acquired) {
     try {
       return await callback();
     } finally {
+      clearInterval(intervalId);
       await lockManager.release();
     }
   }
@@ -146,8 +281,9 @@ export async function withLock<T>(
 }
 
 export async function ensureTemplatesAndIndexCreated(esClient: Client): Promise<void> {
-  const COMPONENT_TEMPLATE_NAME = `${INDEX_NAME}-component`;
-  const INDEX_TEMPLATE_NAME = `${INDEX_NAME}-index-template`;
+  const COMPONENT_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-component`;
+  const INDEX_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-index-template`;
+  const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
 
   await esClient.cluster.putComponentTemplate({
     name: COMPONENT_TEMPLATE_NAME,
@@ -155,7 +291,8 @@ export async function ensureTemplatesAndIndexCreated(esClient: Client): Promise<
       mappings: {
         dynamic: false,
         properties: {
-          meta: { enabled: false },
+          token: { type: 'keyword' },
+          metadata: { enabled: false },
           createdAt: { type: 'date' },
           expiresAt: { type: 'date' },
         },
@@ -165,7 +302,7 @@ export async function ensureTemplatesAndIndexCreated(esClient: Client): Promise<
 
   await esClient.indices.putIndexTemplate({
     name: INDEX_TEMPLATE_NAME,
-    index_patterns: [INDEX_NAME],
+    index_patterns: [INDEX_PATTERN],
     composed_of: [COMPONENT_TEMPLATE_NAME],
     priority: 500,
     template: {
@@ -176,6 +313,8 @@ export async function ensureTemplatesAndIndexCreated(esClient: Client): Promise<
       },
     },
   });
+}
 
-  await esClient.indices.create({ index: INDEX_NAME }, { ignore: [400] });
+async function createLocksWriteIndex(esClient: Client): Promise<void> {
+  await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
 }
