@@ -18,7 +18,8 @@ import {
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { getVendorName } from '../../../common/utils/get_vendor_name';
+import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import { createDetectionRuleFromBenchmarkRule } from '@kbn/cloud-security-posture/src/utils/create_detection_rule_from_benchmark';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -27,7 +28,6 @@ import { getDefaultQuery, defaultColumns } from './constants';
 import { useLatestFindingsTable } from './use_latest_findings_table';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { createDetectionRuleFromBenchmarkRule } from '../utils/create_detection_rule_from_benchmark';
 import { findingsTableFieldLabels } from './findings_table_field_labels';
 
 interface LatestFindingsTableProps {

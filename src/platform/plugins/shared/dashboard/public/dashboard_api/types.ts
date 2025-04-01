@@ -49,10 +49,11 @@ import {
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SerializableRecord } from '@kbn/utility-types';
 import { Observable, Subject } from 'rxjs';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
-import { DashboardLocatorParams } from '../dashboard_container/types';
+import type { DashboardPanel } from '../../server/content_management';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
@@ -119,6 +120,50 @@ export interface DashboardState extends DashboardSettings {
    * Use runtime state when building input for portable dashboards
    */
   controlGroupState?: Partial<ControlGroupRuntimeState>;
+}
+
+export type DashboardLocatorParams = Partial<
+  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
+> & {
+  /**
+   * If given, the dashboard saved object with this id will be loaded. If not given,
+   * a new, unsaved dashboard will be loaded up.
+   */
+  dashboardId?: string;
+
+  /**
+   * If not given, will use the uiSettings configuration for `storeInSessionStorage`. useHash determines
+   * whether to hash the data in the url to avoid url length issues.
+   */
+  useHash?: boolean;
+
+  /**
+   * When `true` filters from saved filters from destination dashboard as merged with applied filters
+   * When `false` applied filters take precedence and override saved filters
+   *
+   * true is default
+   */
+  preserveSavedFilters?: boolean;
+
+  /**
+   * Search search session ID to restore.
+   * (Background search)
+   */
+  searchSessionId?: string;
+
+  /**
+   * List of dashboard panels
+   */
+  panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
+
+  /**
+   * Control group changes
+   */
+  controlGroupState?: Partial<ControlGroupRuntimeState> & SerializableRecord; // used SerializableRecord here to force the GridData type to be read as serializable
+};
+
+export interface UnsavedPanelState {
+  [key: string]: object | undefined;
 }
 
 export type DashboardApi = CanExpandPanels &

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  ThreeWayDiffOutcome,
+  UpgradeConflictResolutionEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
@@ -302,11 +305,22 @@ export function threatIndexField({ getService }: FtrProviderContext): void {
             ruleUpgradeAssets,
             diffableRuleFieldName: 'threat_index',
             expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            isMergableField: false,
             expectedFieldDiffValues: {
               current: ['indexD'],
               target: ['indexB', 'indexC'],
               merged: ['indexB', 'indexC'],
             },
+          },
+          getService
+        );
+
+        testFieldUpgradesToMergedValue(
+          {
+            ruleUpgradeAssets,
+            onConflict: UpgradeConflictResolutionEnum.UPGRADE_SOLVABLE,
+            diffableRuleFieldName: 'threat_index',
+            expectedFieldsAfterUpgrade: { threat_index: ['indexB', 'indexC'] },
           },
           getService
         );

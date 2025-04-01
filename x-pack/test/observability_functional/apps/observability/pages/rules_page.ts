@@ -65,7 +65,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     await testSubjects.click(`.es-query-SelectOption`);
     await retry.waitFor(
       'Create Rule form is visible',
-      async () => await testSubjects.exists('createRuleForm')
+      async () => await testSubjects.exists('ruleForm')
     );
 
     await testSubjects.setValue('ruleDetailsNameInput', ruleName);

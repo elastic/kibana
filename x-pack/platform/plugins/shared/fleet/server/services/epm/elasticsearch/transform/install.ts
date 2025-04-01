@@ -40,6 +40,7 @@ import type {
   ESAssetMetadata,
   IndexTemplate,
   RegistryElasticsearch,
+  AssetsMap,
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
@@ -93,6 +94,17 @@ const installLegacyTransformsAssets = async (
 
   let installedTransforms: EsAssetReference[] = [];
   if (transformPaths.length > 0) {
+    const transformAssetsMap: AssetsMap = new Map();
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        if (!entry.buffer) {
+          return;
+        }
+
+        transformAssetsMap.set(entry.path, entry.buffer);
+      },
+      (path) => transformPaths.includes(path)
+    );
     const transformRefs = transformPaths.reduce<EsAssetReference[]>((acc, path) => {
       acc.push({
         id: getLegacyTransformNameForInstallation(
@@ -117,9 +129,7 @@ const installLegacyTransformsAssets = async (
     );
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
-      const content = JSON.parse(
-        getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf-8')
-      );
+      const content = JSON.parse(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
       content._meta = getESAssetMetadata({ packageName: packageInstallContext.packageInfo.name });
 
       return {
@@ -153,7 +163,7 @@ const installLegacyTransformsAssets = async (
   return { installedTransforms, esReferences };
 };
 
-const processTransformAssetsPerModule = (
+const processTransformAssetsPerModule = async (
   packageInstallContext: PackageInstallContext,
   installNameSuffix: string,
   transformPaths: string[],
@@ -161,7 +171,7 @@ const processTransformAssetsPerModule = (
   force?: boolean,
   username?: string
 ) => {
-  const { assetsMap, packageInfo: installablePackage } = packageInstallContext;
+  const { packageInfo: installablePackage } = packageInstallContext;
   const transformsSpecifications = new Map();
   const destinationIndexTemplates: DestinationIndexTemplateInstallation[] = [];
   const transforms: TransformInstallation[] = [];
@@ -170,6 +180,17 @@ const processTransformAssetsPerModule = (
   const transformsToRemoveWithDestIndex: EsAssetReference[] = [];
   const indicesToAddRefs: EsAssetReference[] = [];
 
+  const transformAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (!entry.buffer) {
+        return;
+      }
+
+      transformAssetsMap.set(entry.path, entry.buffer);
+    },
+    (path) => transformPaths.includes(path)
+  );
   transformPaths.forEach((path: string) => {
     const { transformModuleId, fileName } = getTransformFolderAndFileNames(
       installablePackage,
@@ -182,7 +203,7 @@ const processTransformAssetsPerModule = (
     }
     const packageAssets = transformsSpecifications.get(transformModuleId);
 
-    const content = load(getAssetFromAssetsMap(assetsMap, path).toString('utf-8'));
+    const content = load(getAssetFromAssetsMap(transformAssetsMap, path).toString('utf-8'));
 
     // Handling fields.yml and all other files within 'fields' folder
     if (fileName === TRANSFORM_SPECS_TYPES.FIELDS || isFields(path)) {
@@ -387,6 +408,12 @@ const processTransformAssetsPerModule = (
     version: t.transformVersion,
   }));
 
+  const fieldAssetsMap: AssetsMap = new Map();
+  await packageInstallContext.archiveIterator.traverseEntries(async (entry) => {
+    if (entry.buffer) {
+      fieldAssetsMap.set(entry.path, entry.buffer);
+    }
+  }, isFields);
   // Load and generate mappings
   for (const destinationIndexTemplate of destinationIndexTemplates) {
     if (!destinationIndexTemplate.transformModuleId) {
@@ -397,7 +424,11 @@ const processTransformAssetsPerModule = (
       .get(destinationIndexTemplate.transformModuleId)
       ?.set(
         'mappings',
-        loadMappingForTransform(packageInstallContext, destinationIndexTemplate.transformModuleId)
+        loadMappingForTransform(
+          packageInstallContext,
+          fieldAssetsMap,
+          destinationIndexTemplate.transformModuleId
+        )
       );
   }
 
@@ -441,7 +472,7 @@ const installTransformsAssets = async (
       transformsSpecifications,
       transformsToRemove,
       transformsToRemoveWithDestIndex,
-    } = processTransformAssetsPerModule(
+    } = await processTransformAssetsPerModule(
       packageInstallContext,
       installNameSuffix,
       transformPaths,

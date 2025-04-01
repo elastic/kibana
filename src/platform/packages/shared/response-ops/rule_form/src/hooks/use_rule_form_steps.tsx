@@ -47,11 +47,13 @@ const getStepStatus = ({
   currentStep,
   hasErrors,
   touchedSteps,
+  isIncomplete,
 }: {
   step: RuleFormStepId;
   currentStep?: RuleFormStepId;
   hasErrors: boolean;
   touchedSteps: Record<RuleFormStepId, boolean>;
+  isIncomplete?: boolean;
 }) => {
   // Only apply the current status if currentStep is being tracked
   if (currentStep === step) return 'current';
@@ -61,6 +63,11 @@ const getStepStatus = ({
     // Otherwise just mark it as incomplete
     return touchedSteps[step] ? 'danger' : 'incomplete';
   }
+
+  if (isIncomplete) {
+    return 'incomplete';
+  }
+
   // Only mark this step complete or incomplete if the currentStep flag is being used, otherwise set no status
   if (currentStep && isStepBefore(step, currentStep)) {
     return 'complete';
@@ -83,6 +90,7 @@ const useCommonRuleFormSteps = ({
     paramsErrors = {},
     actionsErrors = {},
     actionsParamsErrors = {},
+    formData: { actions },
   } = useRuleFormState();
 
   const canReadConnectors = !!application.capabilities.actions?.show;
@@ -121,8 +129,9 @@ const useCommonRuleFormSteps = ({
         currentStep,
         hasErrors: hasActionErrors,
         touchedSteps,
+        isIncomplete: actions.length === 0,
       }),
-    [hasActionErrors, currentStep, touchedSteps]
+    [hasActionErrors, currentStep, touchedSteps, actions]
   );
 
   const ruleDetailsStatus = useMemo(
@@ -144,12 +153,14 @@ const useCommonRuleFormSteps = ({
           : RULE_FORM_PAGE_RULE_DEFINITION_TITLE,
         status: ruleDefinitionStatus,
         children: <RuleDefinition />,
+        'data-test-subj': 'ruleFormStep-definition',
       },
       [RuleFormStepId.ACTIONS]: canReadConnectors
         ? {
             title: RULE_FORM_PAGE_RULE_ACTIONS_TITLE,
             status: actionsStatus,
             children: <RuleActions />,
+            'data-test-subj': 'ruleFormStep-actions',
           }
         : null,
       [RuleFormStepId.DETAILS]: {
@@ -158,6 +169,7 @@ const useCommonRuleFormSteps = ({
           : RULE_FORM_PAGE_RULE_DETAILS_TITLE,
         status: ruleDetailsStatus,
         children: <RuleDetails />,
+        'data-test-subj': 'ruleFormStep-details',
       },
     }),
     [ruleDefinitionStatus, canReadConnectors, actionsStatus, ruleDetailsStatus, shortTitles]

@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Adapters } from '@kbn/inspector-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import {
-  BehaviorSubject,
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  firstValueFrom,
-  race,
-  switchMap,
-} from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
@@ -35,19 +28,19 @@ import {
 } from '../hooks/use_saved_search_messages';
 import { fetchDocuments } from './fetch_documents';
 import { FetchStatus } from '../../types';
-import {
+import type {
   DataMain$,
   DataMsg,
   SavedSearchData,
 } from '../state_management/discover_data_state_container';
-import { DiscoverServices } from '../../../build_services';
+import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
-import { InternalState } from '../state_management/discover_internal_state_container';
+import { type InternalStateStore, type TabState } from '../state_management/redux';
 
 export interface FetchDeps {
   abortController: AbortController;
   getAppState: () => DiscoverAppState;
-  getInternalState: () => InternalState;
+  internalState: InternalStateStore;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
@@ -66,12 +59,12 @@ export function fetchAll(
   dataSubjects: SavedSearchData,
   reset = false,
   fetchDeps: FetchDeps,
+  getCurrentTab: () => TabState,
   onFetchRecordsComplete?: () => Promise<void>
 ): Promise<void> {
   const {
     initialFetchStatus,
     getAppState,
-    getInternalState,
     services,
     inspectorAdapters,
     savedSearch,
@@ -85,6 +78,7 @@ export function fetchAll(
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
+    const currentTab = getCurrentTab();
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -96,8 +90,7 @@ export function fetchAll(
         dataView,
         services,
         sort: getAppState().sort as SortOrder[],
-        customFilters: getInternalState().customFilters,
-        inputTimeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
+        inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
       });
     }
 
@@ -118,7 +111,7 @@ export function fetchAll(
           data,
           expressions,
           profilesManager,
-          timeRange: getInternalState().dataRequestParams.timeRangeAbsolute,
+          timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';
@@ -221,7 +214,7 @@ export async function fetchMoreDocuments(
   fetchDeps: FetchDeps
 ): Promise<void> {
   try {
-    const { getAppState, getInternalState, services, savedSearch } = fetchDeps;
+    const { getAppState, services, savedSearch } = fetchDeps;
     const searchSource = savedSearch.searchSource.createChild();
     const dataView = searchSource.getField('index')!;
     const query = getAppState().query;
@@ -249,7 +242,6 @@ export async function fetchMoreDocuments(
       dataView,
       services,
       sort: getAppState().sort as SortOrder[],
-      customFilters: getInternalState().customFilters,
     });
 
     // Fetch more documents

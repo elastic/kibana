@@ -13,19 +13,22 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import { savedSearchMockWithTimeField } from '../../../../__mocks__/saved_search';
-import {
+import type {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
 } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import { FetchStatus, SidebarToggleState } from '../../../types';
+import type { SidebarToggleState } from '../../../types';
+import { FetchStatus } from '../../../types';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DiscoverHistogramLayout, DiscoverHistogramLayoutProps } from './discover_histogram_layout';
-import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { DiscoverHistogramLayoutProps } from './discover_histogram_layout';
+import { DiscoverHistogramLayout } from './discover_histogram_layout';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
@@ -34,6 +37,11 @@ import { DiscoverMainProvider } from '../../state_management/discover_state_prov
 import { act } from 'react-dom/test-utils';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import {
+  CurrentTabProvider,
+  RuntimeStateProvider,
+  internalStateActions,
+} from '../../state_management/redux';
 
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
@@ -46,17 +54,23 @@ function getStateContainer(savedSearch?: SavedSearch) {
 
   stateContainer.appState.update(appState);
 
-  stateContainer.internalState.transitions.setDataView(dataView);
-  stateContainer.internalState.transitions.setDataRequestParams({
-    timeRangeAbsolute: {
-      from: '2020-05-14T11:05:13.590',
-      to: '2020-05-14T11:20:13.590',
-    },
-    timeRangeRelative: {
-      from: '2020-05-14T11:05:13.590',
-      to: '2020-05-14T11:20:13.590',
-    },
-  });
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataView)({ dataView })
+  );
+  stateContainer.internalState.dispatch(
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+      },
+    })
+  );
 
   return stateContainer;
 }
@@ -141,9 +155,13 @@ const mountComponent = async ({
   const component = mountWithIntl(
     <KibanaRenderContextProvider {...services.core}>
       <KibanaContextProvider services={services}>
-        <DiscoverMainProvider value={stateContainer}>
-          <DiscoverHistogramLayout {...props} />
-        </DiscoverMainProvider>
+        <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+          <DiscoverMainProvider value={stateContainer}>
+            <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+              <DiscoverHistogramLayout {...props} />
+            </RuntimeStateProvider>
+          </DiscoverMainProvider>
+        </CurrentTabProvider>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );

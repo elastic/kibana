@@ -130,7 +130,6 @@ describe('Observability AI Assistant client', () => {
     getActions: jest.fn(),
     validate: jest.fn(),
     getInstructions: jest.fn(),
-    getAdhocInstructions: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
@@ -158,6 +157,12 @@ describe('Observability AI Assistant client', () => {
     functionClientMock.hasAction.mockReturnValue(false);
     functionClientMock.getActions.mockReturnValue([]);
 
+    internalUserEsClientMock.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    } as any);
+
     currentUserEsClientMock.search.mockResolvedValue({
       hits: {
         hits: [],
@@ -171,7 +176,6 @@ describe('Observability AI Assistant client', () => {
     knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
     functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
-    functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
       config: {} as ObservabilityAIAssistantConfig,
@@ -323,6 +327,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: undefined,
             tools: undefined,
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });
@@ -510,6 +519,9 @@ describe('Observability AI Assistant client', () => {
                   labels: {},
                   numeric_labels: {},
                   public: false,
+                  user: {
+                    name: 'johndoe',
+                  },
                   messages: [user('How many alerts do I have?')],
                 },
               },
@@ -840,6 +852,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });
@@ -989,6 +1006,11 @@ describe('Observability AI Assistant client', () => {
             functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
+            metadata: {
+              connectorTelemetry: {
+                pluginId: 'observability_ai_assistant',
+              },
+            },
           },
         ]);
       });

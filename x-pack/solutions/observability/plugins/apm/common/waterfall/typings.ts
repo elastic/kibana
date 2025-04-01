@@ -33,6 +33,7 @@ export interface WaterfallTransaction {
     coldstart?: boolean;
   };
   span?: {
+    id?: string;
     links?: SpanLink[];
   };
 }
@@ -62,6 +63,7 @@ export interface WaterfallSpan {
     sync?: boolean;
     duration: { us: number };
     links?: SpanLink[];
+    destination?: { service?: { resource?: string } };
   };
   transaction?: {
     id?: string;

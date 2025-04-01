@@ -5,91 +5,85 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
-import { ReactElement } from 'react';
-import { PluginInitializerContext } from '@kbn/core/public';
-import { FeaturesPluginStart } from '@kbn/features-plugin/public';
-import { KibanaFeature } from '@kbn/features-plugin/common';
-import { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import type { ReactElement } from 'react';
+import type { PluginInitializerContext } from '@kbn/core/public';
+import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
+import type { KibanaFeature } from '@kbn/features-plugin/common';
+import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
-import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
+import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { RuleAction } from '@kbn/alerting-plugin/common';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
-import { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
 import { getAddConnectorFlyoutLazy } from './common/get_add_connector_flyout';
 import { getEditConnectorFlyoutLazy } from './common/get_edit_connector_flyout';
-import { getAddRuleFlyoutLazy } from './common/get_add_rule_flyout';
-import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
+import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
-import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
-import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
-import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
+import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getActionFormLazy } from './common/get_action_form';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
-import {
-  ExperimentalFeatures,
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
+import { getRulesListNotifyBadgeLazy } from './common/get_rules_list_notify_badge';
+import type { TriggersActionsUiConfigType } from '../common/types';
+import type { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
+import type { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
+import type { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
+import type { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
+import type { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
+
+import { ALERTS_PAGE_ID, CONNECTORS_PLUGIN_ID, PLUGIN_ID } from './common/constants';
+import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
+import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
+import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
+import { getRuleDefinitionLazy } from './common/get_rule_definition';
+import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
+import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 
 import type {
   ActionTypeModel,
-  RuleAddProps,
-  RuleEditProps,
-  RuleTypeModel,
-  RuleTypeParams,
-  RuleTypeMetaData,
-  RuleStatusDropdownProps,
-  RuleTagFilterProps,
-  RuleStatusFilterProps,
-  RuleTagBadgeProps,
-  RuleTagBadgeOptions,
-  RuleEventLogListProps,
-  RuleEventLogListOptions,
-  GlobalRuleEventLogListProps,
-  RulesListProps,
-  RulesListNotifyBadgePropsWithApi,
+  ConnectorServices,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
-  ConnectorServices,
+  GlobalRuleEventLogListProps,
   RuleDefinitionProps,
+  RuleEventLogListOptions,
+  RuleEventLogListProps,
+  RuleStatusDropdownProps,
+  RuleStatusFilterProps,
+  RuleTagBadgeOptions,
+  RuleTagBadgeProps,
+  RuleTagFilterProps,
+  RuleTypeModel,
+  RulesListNotifyBadgePropsWithApi,
+  RulesListProps,
 } from './types';
-import { TriggersActionsUiConfigType } from '../common/types';
-import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PAGE_ID } from './common/constants';
-import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
-import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
-import { getRuleDefinitionLazy } from './common/get_rule_definition';
-import { RuleStatusPanelProps } from './application/sections/rule_details/components/rule_status_panel';
-import { AlertSummaryWidgetProps } from './application/sections/alert_summary_widget';
-import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
-import { RuleSnoozeModalProps } from './application/sections/rules_list/components/rule_snooze_modal';
-import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
-import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
-import { getGlobalRuleEventLogListLazy } from './common/get_global_rule_event_log_list';
-import { AlertSummaryWidgetDependencies } from './application/sections/alert_summary_widget/types';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -110,18 +104,6 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getAddRuleFlyout: <
-    Params extends RuleTypeParams = RuleTypeParams,
-    MetaData extends RuleTypeMetaData = RuleTypeMetaData
-  >(
-    props: Omit<RuleAddProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleAddProps<Params, MetaData>>;
-  getEditRuleFlyout: <
-    Params extends RuleTypeParams = RuleTypeParams,
-    MetaData extends RuleTypeMetaData = RuleTypeMetaData
-  >(
-    props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleEditProps<Params, MetaData>>;
   getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
   getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
@@ -169,6 +151,7 @@ interface PluginsStart {
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class Plugin
@@ -306,6 +289,7 @@ export class Plugin
           isServerless: !!pluginsStart.serverless,
           fieldFormats: pluginsStart.fieldFormats,
           lens: pluginsStart.lens,
+          fieldsMetadata: pluginsStart.fieldsMetadata,
         });
       },
     });
@@ -402,6 +386,7 @@ export class Plugin
             isServerless: !!pluginsStart.serverless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
           });
         },
       });
@@ -453,22 +438,6 @@ export class Plugin
         return getEditConnectorFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
-          connectorServices: this.connectorServices!,
-        });
-      },
-      getAddRuleFlyout: (props) => {
-        return getAddRuleFlyoutLazy({
-          ...props,
-          actionTypeRegistry: this.actionTypeRegistry,
-          ruleTypeRegistry: this.ruleTypeRegistry,
-          connectorServices: this.connectorServices!,
-        });
-      },
-      getEditRuleFlyout: (props) => {
-        return getEditRuleFlyoutLazy({
-          ...props,
-          actionTypeRegistry: this.actionTypeRegistry,
-          ruleTypeRegistry: this.ruleTypeRegistry,
           connectorServices: this.connectorServices!,
         });
       },

@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import { addParameters } from '@storybook/react';
-
 import { addDecorators } from './decorators';
 
 // Import Canvas CSS
 import '../public/style/index.scss';
 
-addDecorators();
-addParameters({
-  controls: { hideNoControlsWarning: true },
-});
+export const decorators = addDecorators();

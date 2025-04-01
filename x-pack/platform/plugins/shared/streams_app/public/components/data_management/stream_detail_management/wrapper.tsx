@@ -31,7 +31,7 @@ export function Wrapper({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="l"
+      gutterSize="m"
       className={css`
         max-width: 100%;
       `}
@@ -42,8 +42,8 @@ export function Wrapper({
             legend="Management tabs"
             idSelected={subtab}
             onChange={(optionId) => {
-              router.push('/{key}/management/{subtab}', {
-                path: { key: streamId, subtab: optionId },
+              router.push('/{key}/{tab}/{subtab}', {
+                path: { key: streamId, subtab: optionId, tab: 'management' },
                 query: {},
               });
             }}

@@ -17,12 +17,14 @@ import { i18n } from '@kbn/i18n';
 import { PublicAlertsClient } from '@kbn/alerting-plugin/server/alerts_client/types';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
+import { MonitorSummaryTLSRule } from './types';
 import { TLSLatestPing } from './tls_rule_executor';
 import { ALERT_DETAILS_URL } from '../action_variables';
 import { Cert } from '../../../common/runtime_types';
 import { tlsTranslations } from '../translations';
 import { MonitorStatusActionGroup } from '../../../common/constants/synthetics_alerts';
 import {
+  AGENT_NAME,
   CERT_COMMON_NAME,
   CERT_HASH_SHA256,
   CERT_ISSUER_NAME,
@@ -76,7 +78,11 @@ const getValidAfter = (notAfter?: string): TLSContent => {
 
 export type CertSummary = ReturnType<typeof getCertSummary>;
 
-export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThreshold: number) => {
+export const getCertSummary = (
+  cert: Cert,
+  expirationThreshold: number,
+  ageThreshold: number
+): MonitorSummaryTLSRule => {
   const isExpiring = new Date(cert.not_after ?? '').valueOf() < expirationThreshold;
   const isAging = new Date(cert.not_before ?? '').valueOf() < ageThreshold;
   let content: TLSContent | null = null;
@@ -103,9 +109,12 @@ export const getCertSummary = (cert: Cert, expirationThreshold: number, ageThres
     monitorUrl: cert.monitorUrl,
     configId: cert.configId,
     monitorTags: cert.tags,
-    errorMessage: cert.errorMessage,
-    errorStackTrace: cert.errorStackTrace,
+    lastErrorMessage: cert.errorMessage,
+    lastErrorStack: cert.errorStackTrace,
     labels: cert.labels,
+    reason: summary,
+    hostName: cert.hostName,
+    checkedAt: cert['@timestamp'],
   };
 };
 
@@ -124,9 +133,10 @@ export const getTLSAlertDocument = (cert: Cert, monitorSummary: CertSummary, uui
   [URL_FULL]: monitorSummary.monitorUrl,
   [OBSERVER_GEO_NAME]: monitorSummary.locationName ? [monitorSummary.locationName] : [],
   [OBSERVER_NAME]: monitorSummary.locationId ? [monitorSummary.locationId] : [],
-  [ERROR_MESSAGE]: monitorSummary.errorMessage,
+  [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
+  [AGENT_NAME]: monitorSummary.hostName,
   // done to avoid assigning null to the field
-  [ERROR_STACK_TRACE]: monitorSummary.errorStackTrace ? monitorSummary.errorStackTrace : undefined,
+  [ERROR_STACK_TRACE]: monitorSummary.lastErrorStack ? monitorSummary.lastErrorStack : undefined,
   'location.id': monitorSummary.locationId ? [monitorSummary.locationId] : [],
   'location.name': monitorSummary.locationName ? [monitorSummary.locationName] : [],
   labels: cert.labels,

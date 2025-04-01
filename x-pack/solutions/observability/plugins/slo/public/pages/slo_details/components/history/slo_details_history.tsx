@@ -20,7 +20,7 @@ import React, { useMemo, useState } from 'react';
 import { ErrorRateChart } from '../../../../components/slo/error_rate_chart';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { TimeBounds } from '../../types';
-import { EventsChartPanel } from '../events_chart_panel';
+import { EventsChartPanel } from '../events_chart_panel/events_chart_panel';
 import { HistoricalDataCharts } from '../historical_data_charts';
 import { SloTabId } from '../slo_details';
 
@@ -111,12 +111,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
         onBrushed={onBrushed}
       />
 
-      <EventsChartPanel
-        slo={slo}
-        range={range}
-        selectedTabId={selectedTabId}
-        onBrushed={onBrushed}
-      />
+      <EventsChartPanel slo={slo} range={range} hideRangeDurationLabel onBrushed={onBrushed} />
     </EuiFlexGroup>
   );
 }

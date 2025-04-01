@@ -27,13 +27,13 @@ import {
 import { UploadRulesSectionPanel } from './upload_rules_panel';
 
 const StartMigrationsBody: OnboardingCardComponent = React.memo(
-  ({ setComplete, isCardComplete, setExpandedCardId }) => {
+  ({ setComplete, isCardComplete, setExpandedCardId, checkComplete }) => {
     const styles = useStyles();
     const { data: migrationsStats, isLoading, refreshStats } = useLatestStats();
 
     useEffect(() => {
       // Set card complete if any migration is finished
-      if (!isCardComplete(OnboardingCardId.siemMigrationsStart) && migrationsStats) {
+      if (!isCardComplete(OnboardingCardId.siemMigrationsRules) && migrationsStats) {
         if (migrationsStats.some(({ status }) => status === SiemMigrationTaskStatus.FINISHED)) {
           setComplete(true);
         }
@@ -49,13 +49,14 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
       setExpandedCardId(OnboardingCardId.siemMigrationsAiConnectors);
     }, [setExpandedCardId]);
 
+    const onFlyoutClosed = useCallback(() => {
+      refreshStats();
+      checkComplete();
+    }, [refreshStats, checkComplete]);
+
     return (
-      <RuleMigrationDataInputWrapper onFlyoutClosed={refreshStats}>
-        <OnboardingCardContentPanel
-          data-test-subj="StartMigrationsCardBody"
-          paddingSize="none"
-          className={styles}
-        >
+      <RuleMigrationDataInputWrapper onFlyoutClosed={onFlyoutClosed}>
+        <OnboardingCardContentPanel data-test-subj="StartMigrationsCardBody" className={styles}>
           {isLoading ? (
             <CenteredLoadingSpinner />
           ) : (
@@ -66,7 +67,7 @@ const StartMigrationsBody: OnboardingCardComponent = React.memo(
             />
           )}
           <EuiSpacer size="m" />
-          <PanelText size="xs" subdued>
+          <PanelText size="xs" subdued cursive>
             <p>{i18n.START_MIGRATION_CARD_FOOTER_NOTE}</p>
           </PanelText>
         </OnboardingCardContentPanel>

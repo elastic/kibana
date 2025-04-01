@@ -8,7 +8,7 @@
 import {
   EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
   RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
-} from '@kbn/security-solution-plugin/public/detections/pages/detection_engine/rules/translations';
+} from '@kbn/security-solution-plugin/public/detection_engine/common/translations';
 import { EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE_NON_I18N } from '@kbn/security-solution-plugin/public/assistant/content/prompts/user/translations';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
@@ -67,7 +67,8 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
   });
-  describe('No connectors or conversations exist', () => {
+  // On serverless we provide deafult .inference `Elastic LLM` connector
+  describe('No connectors or conversations exist', { tags: ['@skipInServerless'] }, () => {
     it('Shows welcome setup when no connectors or conversations exist', () => {
       visitGetStartedPage();
       openAssistant();

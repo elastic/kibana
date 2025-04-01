@@ -8,7 +8,7 @@
 import React from 'react';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -37,6 +37,9 @@ const openAiConnector = {
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
+  },
+  __internal__: {
+    hasHeaders: false,
   },
   isDeprecated: false,
 };
@@ -84,12 +87,14 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
       openAiConnector.config.apiProvider
     );
+    expect(getAllByTestId('config.organizationId-input')[0]).toBeInTheDocument();
+    expect(getAllByTestId('config.projectId-input')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
   test('azure ai connector fields are rendered', async () => {
-    const { getAllByTestId } = render(
+    const { getAllByTestId, queryByTestId } = render(
       <ConnectorFormTestProvider connector={azureConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
@@ -102,10 +107,12 @@ describe('ConnectorFields renders', () => {
     );
     expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
   });
 
   test('other open ai connector fields are rendered', async () => {
-    const { getAllByTestId } = render(
+    const { getAllByTestId, queryByTestId } = render(
       <ConnectorFormTestProvider connector={otherOpenAiConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
@@ -120,6 +127,149 @@ describe('ConnectorFields renders', () => {
     );
     expect(getAllByTestId('other-ai-api-doc')[0]).toBeInTheDocument();
     expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
+  });
+  describe('Headers', () => {
+    it('toggles headers as expected', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: '123',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_OPENAI_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      render(
+        <ConnectorFormTestProvider connector={testFormData}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      const headersToggle = await screen.findByTestId('openAIViewHeadersSwitch');
+
+      expect(headersToggle).toBeInTheDocument();
+
+      await userEvent.click(headersToggle);
+
+      expect(await screen.findByTestId('openAIHeaderText')).toBeInTheDocument();
+      expect(await screen.findByTestId('openAIHeadersKeyInput')).toBeInTheDocument();
+      expect(await screen.findByTestId('openAIHeadersValueInput')).toBeInTheDocument();
+      expect(await screen.findByTestId('openAIAddHeaderButton')).toBeInTheDocument();
+    });
+    it('succeeds without headers', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: '123',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_OPENAI_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.gen-ai',
+            name: 'OpenAI',
+            id: '123',
+            isDeprecated: false,
+            config: {
+              apiUrl: 'https://openaiurl.com',
+              apiProvider: OpenAiProviderType.OpenAi,
+              defaultModel: DEFAULT_OPENAI_MODEL,
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+            },
+            __internal__: {
+              hasHeaders: false,
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
+    it('succeeds with headers', async () => {
+      const testFormData = {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: '123',
+        config: {
+          apiUrl: 'https://openaiurl.com',
+          apiProvider: OpenAiProviderType.OpenAi,
+          defaultModel: DEFAULT_OPENAI_MODEL,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        isDeprecated: false,
+        __internal__: {
+          hasHeaders: false,
+        },
+      };
+      const onSubmit = jest.fn();
+      render(
+        <ConnectorFormTestProvider connector={testFormData} onSubmit={onSubmit}>
+          <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+        </ConnectorFormTestProvider>
+      );
+      const headersToggle = await screen.findByTestId('openAIViewHeadersSwitch');
+      expect(headersToggle).toBeInTheDocument();
+      await userEvent.click(headersToggle);
+
+      await userEvent.type(screen.getByTestId('openAIHeadersKeyInput'), 'hello');
+      await userEvent.type(screen.getByTestId('openAIHeadersValueInput'), 'world');
+      await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+      await waitFor(() => {
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {
+            actionTypeId: '.gen-ai',
+            name: 'OpenAI',
+            id: '123',
+            isDeprecated: false,
+            config: {
+              apiUrl: 'https://openaiurl.com',
+              apiProvider: OpenAiProviderType.OpenAi,
+              defaultModel: DEFAULT_OPENAI_MODEL,
+              headers: [{ key: 'hello', value: 'world' }],
+            },
+            secrets: {
+              apiKey: 'thats-a-nice-looking-key',
+            },
+            __internal__: {
+              hasHeaders: true,
+            },
+          },
+          isValid: true,
+        });
+      });
+    });
   });
 
   describe('Dashboard link', () => {

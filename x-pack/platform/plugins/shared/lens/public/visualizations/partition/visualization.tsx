@@ -215,20 +215,21 @@ export const getPieVisualization = ({
 
     const getPrimaryGroupConfig = (): VisualizationDimensionGroupConfig => {
       const originalOrder = getSortedAccessorsForGroup(datasource, layer, 'primaryGroups');
+      const firstNonCollapsedColumnId = originalOrder.find((id) => !isCollapsed(id, layer));
       // When we add a column it could be empty, and therefore have no order
       const accessors = originalOrder.map<AccessorConfig>((accessor) => ({
         columnId: accessor,
-        triggerIconType: isCollapsed(accessor, layer) ? 'aggregate' : undefined,
+        ...(isCollapsed(accessor, layer)
+          ? {
+              triggerIconType: 'aggregate',
+            }
+          : firstNonCollapsedColumnId === accessor
+          ? {
+              triggerIconType: 'colorBy',
+              palette: colors,
+            }
+          : undefined),
       }));
-
-      const firstNonCollapsedColumnId = layer.primaryGroups.find((id) => !isCollapsed(id, layer));
-
-      accessors.forEach((accessorConfig) => {
-        if (firstNonCollapsedColumnId === accessorConfig.columnId) {
-          accessorConfig.triggerIconType = 'colorBy';
-          accessorConfig.palette = colors;
-        }
-      });
 
       const primaryGroupConfigBaseProps = {
         groupId: 'primaryGroups',

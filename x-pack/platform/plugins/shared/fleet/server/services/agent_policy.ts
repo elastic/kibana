@@ -380,6 +380,7 @@ class AgentPolicyService {
       user?: AuthenticatedUser;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipDeploy?: boolean;
+      hasFleetServer?: boolean;
     } = {}
   ): Promise<AgentPolicy> {
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -412,12 +413,17 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
     });
+    const policyForOutputValidation = {
+      ...agentPolicy,
+      has_fleet_server: options?.hasFleetServer,
+    };
     await validateOutputForPolicy(
       soClient,
-      agentPolicy,
+      policyForOutputValidation,
       {},
-      getAllowedOutputTypesForAgentPolicy(agentPolicy)
+      getAllowedOutputTypesForAgentPolicy(policyForOutputValidation)
     );
+
     validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
@@ -907,13 +913,18 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     id: string,
-    options?: { user?: AuthenticatedUser; removeProtection?: boolean; asyncDeploy?: boolean }
+    options?: {
+      user?: AuthenticatedUser;
+      removeProtection?: boolean;
+      asyncDeploy?: boolean;
+      skipValidation?: boolean;
+    }
   ): Promise<void> {
     return withSpan('bump_agent_policy_revision', async () => {
       await this._update(soClient, esClient, id, {}, options?.user, {
         bumpRevision: true,
         removeProtection: options?.removeProtection ?? false,
-        skipValidation: false,
+        skipValidation: options?.skipValidation ?? true,
         returnUpdatedPolicy: false,
         asyncDeploy: options?.asyncDeploy,
       });

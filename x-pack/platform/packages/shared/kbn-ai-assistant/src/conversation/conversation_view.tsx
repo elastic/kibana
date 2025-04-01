@@ -10,6 +10,8 @@ import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isEqual } from 'lodash';
+import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -24,7 +26,7 @@ const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 interface ConversationViewProps {
   conversationId?: string;
-  navigateToConversation?: (nextConversationId?: string) => void;
+  navigateToConversation: (nextConversationId?: string) => void;
   getConversationHref?: (conversationId: string) => string;
   newConversationHref?: string;
   scopes?: AssistantScope[];
@@ -71,20 +73,28 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
   const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
 
-  const conversationList = useConversationList();
-
-  function handleRefreshConversations() {
-    conversationList.conversations.refresh();
-  }
+  const {
+    conversations,
+    isLoadingConversationList,
+    setIsUpdatingConversationList,
+    refreshConversations,
+  } = useConversationList();
 
   const handleConversationUpdate = (conversation: { conversation: { id: string } }) => {
     if (!conversationId) {
       updateConversationIdInPlace(conversation.conversation.id);
-      if (navigateToConversation) {
-        navigateToConversation(conversation.conversation.id);
-      }
+      navigateToConversation(conversation.conversation.id);
     }
-    handleRefreshConversations();
+    refreshConversations();
+  };
+
+  const updateDisplayedConversation = (id?: string) => {
+    navigateToConversation(id || undefined);
+  };
+
+  const handleConversationDuplicate = (conversation: Conversation) => {
+    refreshConversations();
+    navigateToConversation?.(conversation.conversation.id);
   };
 
   useEffect(() => {
@@ -140,20 +150,16 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
       <EuiFlexItem grow={false} className={conversationListContainerName}>
         <ConversationList
           selectedConversationId={conversationId}
-          conversations={conversationList.conversations}
-          isLoading={conversationList.isLoading}
-          onConversationDeleteClick={(deletedConversationId) => {
-            conversationList.deleteConversation(deletedConversationId).then(() => {
-              if (deletedConversationId === conversationId && navigateToConversation) {
-                navigateToConversation(undefined);
-              }
-            });
-          }}
+          conversations={conversations}
+          isLoading={isLoadingConversationList}
           newConversationHref={newConversationHref}
+          currentUser={currentUser as AuthenticatedUser}
           onConversationSelect={navigateToConversation}
           getConversationHref={getConversationHref}
+          setIsUpdatingConversationList={setIsUpdatingConversationList}
+          refreshConversations={refreshConversations}
+          updateDisplayedConversation={updateDisplayedConversation}
         />
-        <EuiSpacer size="s" />
       </EuiFlexItem>
 
       {!chatService.value ? (
@@ -176,6 +182,10 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
             showLinkToConversationsApp={false}
             onConversationUpdate={handleConversationUpdate}
             navigateToConversation={navigateToConversation}
+            setIsUpdatingConversationList={setIsUpdatingConversationList}
+            refreshConversations={refreshConversations}
+            updateDisplayedConversation={updateDisplayedConversation}
+            onConversationDuplicate={handleConversationDuplicate}
           />
 
           <div className={sidebarContainerClass}>

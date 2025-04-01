@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RawRule } from '../../../types';
-import { RuleDomain } from '../types';
+import type { RawRule } from '../../../types';
+import type { RuleDomain } from '../types';
 import { getMappedParams } from '../../../rules_client/common';
-import { DenormalizedAction } from '../../../rules_client';
+import type { DenormalizedAction } from '../../../rules_client';
 
 interface TransformRuleToEsParams {
   legacyId: RawRule['legacyId'];

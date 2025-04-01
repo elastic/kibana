@@ -24,6 +24,8 @@ import {
   VULNERABILITY_GROUPING_OPTIONS,
   VULNERABILITY_FIELDS,
   CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
+  EVENT_ID,
+  VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
@@ -55,27 +57,41 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       critical: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.CRITICAL,
+              case_insensitive: true,
+            },
           },
         },
       },
       high: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.HIGH,
+              case_insensitive: true,
+            },
           },
         },
       },
       medium: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.MEDIUM,
+              case_insensitive: true,
+            },
           },
         },
       },
       low: {
         filter: {
-          term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.LOW,
+              case_insensitive: true,
+            },
+          },
         },
       },
     },
@@ -180,8 +196,10 @@ export const useLatestVulnerabilitiesGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
-    to: 'now',
+    timeRange: {
+      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      to: 'now',
+    },
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],
@@ -196,6 +214,8 @@ export const useLatestVulnerabilitiesGrouping = ({
         }),
       },
     ],
+    multiValueFieldsToFlatten: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
+    countByKeyForMultiValueFields: EVENT_ID,
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({

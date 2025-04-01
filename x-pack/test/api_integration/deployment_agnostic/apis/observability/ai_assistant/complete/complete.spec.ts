@@ -20,12 +20,15 @@ import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability
 import {
   createLlmProxy,
   LlmProxy,
-  ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
-import { clearConversations } from '../knowledge_base/helpers';
+import {
+  systemMessageSorted,
+  clearConversations,
+  decodeEvents,
+  getConversationCreatedEvent,
+} from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -51,14 +54,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let proxy: LlmProxy;
     let connectorId: string;
 
-    async function getEvents(
-      params: { screenContexts?: ObservabilityAIAssistantScreenContextRequest[] },
-      title: string,
-      conversationResponse: string | ToolMessage
-    ) {
-      void proxy.interceptTitle(title);
-      void proxy.interceptConversation(conversationResponse);
-
+    async function getEvents(params: {
+      screenContexts?: ObservabilityAIAssistantScreenContextRequest[];
+    }) {
       const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
         await roleScopedSupertest.getSupertestWithRoleScope('editor', {
           useCookieHeader: true,
@@ -76,14 +74,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           scopes: ['all'],
         });
 
-      await proxy.waitForAllInterceptorsSettled();
+      await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
-      return String(response.body)
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
-        .slice(2); // ignore context request/response, we're testing this elsewhere
+      return decodeEvents(response.body).slice(2); // ignore context request/response, we're testing this elsewhere
     }
 
     before(async () => {
@@ -133,7 +126,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         parsedEvents = decodeEvents(receivedChunks.join(''));
       });
@@ -243,11 +236,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             },
           },
         });
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
         const simulator = await simulatorPromise;
         const requestData = simulator.requestBody;
         expect(requestData.messages[0].role).to.eql('system');
-        expect(requestData.messages[0].content).to.eql(systemMessage);
+        expect(systemMessageSorted(requestData.messages[0].content as string)).to.eql(
+          systemMessageSorted(systemMessage)
+        );
       });
     });
 
@@ -255,12 +250,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        events = await getEvents({}, 'Title for at new conversation', 'Hello again').then(
-          (_events) => {
-            return _events.filter(
-              (event) => event.type !== StreamingChatResponseEventType.BufferFlush
-            );
-          }
+        void proxy.interceptTitle('Title for a new conversation');
+        void proxy.interceptConversation('Hello again');
+
+        const allEvents = await getEvents({});
+        events = allEvents.filter(
+          (event) => event.type !== StreamingChatResponseEventType.BufferFlush
         );
       });
 
@@ -303,7 +298,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(omit(events[4], 'conversation.id', 'conversation.last_updated')).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
-            title: 'Title for at new conversation',
+            title: 'Title for a new conversation',
           },
         });
       });
@@ -317,41 +312,32 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        events = await getEvents(
-          {
-            screenContexts: [
-              {
-                actions: [
-                  {
-                    name: 'my_action',
-                    description: 'My action',
-                    parameters: {
-                      type: 'object',
-                      properties: {
-                        foo: {
-                          type: 'string',
-                        },
+        void proxy.interceptTitle('Title for conversation with screen context action');
+        void proxy.interceptWithFunctionRequest({
+          name: 'my_action',
+          arguments: () => JSON.stringify({ foo: 'bar' }),
+        });
+
+        events = await getEvents({
+          screenContexts: [
+            {
+              actions: [
+                {
+                  name: 'my_action',
+                  description: 'My action',
+                  parameters: {
+                    type: 'object',
+                    properties: {
+                      foo: {
+                        type: 'string',
                       },
                     },
                   },
-                ],
-              },
-            ],
-          },
-          'Title for conversation with screen context action',
-          {
-            tool_calls: [
-              {
-                toolCallId: 'fake-id',
-                index: 1,
-                function: {
-                  name: 'my_action',
-                  arguments: JSON.stringify({ foo: 'bar' }),
                 },
-              },
-            ],
-          }
-        );
+              ],
+            },
+          ],
+        });
       });
 
       it('closes the stream without persisting the conversation', () => {
@@ -420,7 +406,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(createResponse.status).to.be(200);
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
 
         conversationCreatedEvent = getConversationCreatedEvent(createResponse.body);
 
@@ -463,16 +449,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(updatedResponse.status).to.be(200);
 
-        await proxy.waitForAllInterceptorsSettled();
+        await proxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       after(async () => {
         await clearConversations(es);
       });
     });
-
-    // todo
-    it.skip('executes a function', async () => {});
 
     describe('security roles and access privileges', () => {
       it('should deny access for users without the ai_assistant privilege', async () => {

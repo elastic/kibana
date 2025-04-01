@@ -175,9 +175,8 @@ console.ui.embeddedEnabled: false
 # Enable project level rentention checks in DSL form from Index Management UI
 xpack.index_management.enableProjectLevelRetentionChecks: true
 
-# Experimental Security Solution features
+# Increase task manager capacity because security projects have more resources (Memory and CPU)
+xpack.task_manager.capacity: 20
 
-# These features are disabled in Serverless until fully tested
-xpack.securitySolution.enableExperimental:
-  - entityStoreDisabled
-  - siemMigrationsDisabled
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true

@@ -79,12 +79,6 @@ const categories = [
     ],
   },
   {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
-      defaultMessage: 'Cloud Security',
-    }),
-    linkIds: [SecurityPageName.cloudDefendPolicies],
-  },
-  {
     label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
       defaultMessage: 'Investigations',
     }),
@@ -259,7 +253,6 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
-    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
   if (!canReadActionsLogManagement) {

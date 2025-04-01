@@ -6,7 +6,8 @@
  */
 
 import _ from 'lodash';
-import React, { ChangeEvent, Component } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
 import { EuiFormRow, EuiFieldText, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { validateIndexName } from '../../validate_index_name';

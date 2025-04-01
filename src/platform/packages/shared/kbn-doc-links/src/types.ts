@@ -70,6 +70,7 @@ export interface DocLinks {
     readonly configuration: string;
     readonly elasticsearchOutput: string;
     readonly elasticsearchModule: string;
+    readonly kafkaOutput: string;
     readonly startup: string;
     readonly exportedFields: string;
     readonly suricataModule: string;
@@ -168,6 +169,7 @@ export interface DocLinks {
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
+    readonly upgrade9x: string;
   };
   readonly heartbeat: {
     readonly base: string;
@@ -260,6 +262,7 @@ export interface DocLinks {
   readonly upgradeAssistant: {
     readonly overview: string;
     readonly batchReindex: string;
+    readonly indexBlocks: string;
     readonly remoteReindex: string;
     readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
@@ -312,6 +315,7 @@ export interface DocLinks {
     readonly manageDetectionRules: string;
     readonly createDetectionRules: string;
     readonly updatePrebuiltDetectionRules: string;
+    readonly prebuiltRuleCustomizationPromoBlog: string;
     readonly createEsqlRuleType: string;
     readonly ruleUiAdvancedParams: string;
     readonly entityAnalytics: {
@@ -323,6 +327,8 @@ export interface DocLinks {
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
     readonly legacyRuleManagementBulkApiDeprecations: string;
+    readonly siemMigrations: string;
+    readonly llmPerformanceMatrix: string;
   };
   readonly query: {
     readonly eql: string;

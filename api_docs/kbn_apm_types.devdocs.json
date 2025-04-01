@@ -3805,6 +3805,36 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.LINKS_SPAN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LINKS_SPAN_ID",
+        "description": [],
+        "signature": [
+          "\"links.span_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.LINKS_TRACE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "LINKS_TRACE_ID",
+        "description": [],
+        "signature": [
+          "\"links.trace_id\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.LOG_LEVEL",
         "type": "string",
         "tags": [],
@@ -5352,6 +5382,21 @@
         "description": [],
         "signature": [
           "\"user_agent.original\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.USER_AGENT_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "USER_AGENT_VERSION",
+        "description": [],
+        "signature": [
+          "\"user_agent.version\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/apm.ts",
         "deprecated": false,

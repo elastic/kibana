@@ -18,6 +18,7 @@ import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
+import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
 
 export interface UseChatSendProps {
   currentConversation?: Conversation;
@@ -55,19 +56,16 @@ export const useChatSend = ({
     assistantTelemetry,
     toasts,
     assistantAvailability: { isAssistantEnabled },
-    setLastConversation,
   } = useAssistantContext();
+  const spaceId = useAssistantSpaceId();
+  const { setLastConversation } = useAssistantLastConversation({ spaceId });
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
   const { isLoading, sendMessage, abortStream } = useSendMessage();
   const { clearConversation, createConversation, getConversation, removeLastMessage } =
     useConversation();
   const { data: kbStatus } = useKnowledgeBaseStatus({ http, enabled: isAssistantEnabled });
-  const isSetupComplete =
-    kbStatus?.elser_exists &&
-    kbStatus?.index_exists &&
-    kbStatus?.pipeline_exists &&
-    kbStatus?.security_labs_exists;
+  const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
 
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(

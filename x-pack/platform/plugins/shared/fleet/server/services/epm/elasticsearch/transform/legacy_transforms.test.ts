@@ -26,6 +26,7 @@ import { appContextService } from '../../../app_context';
 
 import { getESAssetMetadata } from '../meta';
 
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 import type { PackageInstallContext } from '../../../../../common/types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../constants';
 
@@ -167,6 +168,22 @@ describe('test transform install with legacy schema', () => {
             Buffer.from('{"content": "data"}'),
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/data_stream/policy/elasticsearch/ingest_pipeline/default.json',
+              Buffer.from('{"content": "data"}'),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata/default.json',
+              Buffer.from('{"content": "data"}'),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
+              Buffer.from('{"content": "data"}'),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -339,6 +356,14 @@ describe('test transform install with legacy schema', () => {
             Buffer.from('{"content": "data"}'),
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
+              Buffer.from('{"content": "data"}'),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -566,6 +591,14 @@ describe('test transform install with legacy schema', () => {
             Buffer.from('{"content": "data"}'),
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/default.json',
+              Buffer.from('{"content": "data"}'),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,

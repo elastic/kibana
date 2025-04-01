@@ -158,6 +158,7 @@ export function ErrorSampleDetails({
   const errorUrl = error.error.page?.url || error.url?.full;
   const method = error.http?.request?.method;
   const status = error.http?.response?.status_code;
+  const userAgent = error?.user_agent;
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
   const isUnhandled = error.error.exception?.[0]?.handled === false;
@@ -249,9 +250,7 @@ export function ErrorSampleDetails({
             errorUrl && method ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,
-            transaction && transaction.user_agent ? (
-              <UserAgentSummaryItem {...transaction.user_agent} />
-            ) : null,
+            userAgent?.name ? <UserAgentSummaryItem {...userAgent} /> : null,
             transaction && (
               <EuiToolTip
                 content={i18n.translate('xpack.apm.errorSampleDetails.relatedTransactionSample', {
