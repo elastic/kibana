@@ -8,7 +8,6 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import execa from 'execa';
 import Path from 'path';
-import { backOff } from 'exponential-backoff';
 import chalk from 'chalk';
 import { assertDockerAvailable } from './assert_docker_available';
 import { getDockerComposeYaml } from './get_docker_compose_yaml';
@@ -16,6 +15,7 @@ import { getEisGatewayConfig } from './get_eis_gateway_config';
 import { DATA_DIR, writeFile } from './file_utils';
 import { getNginxConf } from './get_nginx_conf';
 import { getBedrockConfig } from './get_bedrock_config';
+import { untilGatewayReady } from './until_gateway_ready';
 
 const DOCKER_COMPOSE_FILE_PATH = Path.join(DATA_DIR, 'docker-compose.yaml');
 const NGINX_CONF_FILE_PATH = Path.join(DATA_DIR, 'nginx.conf');
@@ -43,11 +43,9 @@ async function down(cleanup: boolean = true) {
 export async function ensureEis({ log, signal }: { log: ToolingLog; signal: AbortSignal }) {
   log.info(`Ensuring EIS is available`);
 
-  const aws = await getBedrockConfig({ log });
-
-  log.debug(`Checking for Docker to be available`);
-
   await assertDockerAvailable();
+
+  const aws = await getBedrockConfig({ log, dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH });
 
   log.debug(`Stopping existing containers`);
 
@@ -78,26 +76,7 @@ export async function ensureEis({ log, signal }: { log: ToolingLog; signal: Abor
 
   log.debug(`Wrote docker-compose file to ${DOCKER_COMPOSE_FILE_PATH}`);
 
-  async function isGatewayReady() {
-    const { stdout: gatewayProxyContainerName } = await execa.command(
-      `docker compose -f ${DOCKER_COMPOSE_FILE_PATH} ps -q gateway-proxy`
-    );
-
-    const { stdout } = await execa.command(
-      `docker inspect --format='{{.State.Health.Status}}' ${gatewayProxyContainerName}`
-    );
-
-    if (stdout !== "'healthy'") {
-      throw new Error(`gateway-proxy not healthy: ${stdout}`);
-    }
-  }
-
-  backOff(isGatewayReady, {
-    delayFirstAttempt: true,
-    startingDelay: 500,
-    jitter: 'full',
-    numOfAttempts: 20,
-  })
+  untilGatewayReady({ dockerComposeFilePath: DOCKER_COMPOSE_FILE_PATH })
     .then(() => {
       log.write('');
 

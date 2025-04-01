@@ -42,10 +42,11 @@ async function getBedrockCreditsFromVault() {
     if (error.timedOut) {
       throw new VaultTimedOutError(error);
     }
+    throw new VaultAccessError(error);
   });
 
   const secretPath = process.env.VAULT_SECRET_PATH || 'kibana-eis-bedrock-config';
-  const vaultAddress = process.env.VAULT_ADDR || 'https://vault-ci-dev.elastic.dev';
+  const vaultAddress = process.env.VAULT_ADDR || 'https://secrets.elastic.co:8200';
 
   const output = await execa
     .command(`vault kv get -format json ${secretPath}`, {
@@ -61,21 +62,15 @@ async function getBedrockCreditsFromVault() {
       throw new VaultAccessError(error);
     });
 
-  const accessKeyId = output.aws_bedrock_access_key_id;
-  const secretAccessKey = output.aws_bedrock_secret_access_key;
-  const apiEndpoint = output.aws_bedrock_api_endpoint;
-  const bedrockModelId = output.aws_bedrock_model_id;
-  const awsBedrockRegion = output.aws_bedrock_region;
-
-  const config = {
-    accessKeyId,
-    secretAccessKey,
-    apiEndpoint,
-    bedrockModelId,
-    awsBedrockRegion,
+  const next = {
+    accessKeyId: output.aws_bedrock_access_key_id,
+    secretAccessKey: output.aws_bedrock_secret_access_key,
+    apiEndpoint: output.aws_bedrock_api_endpoint,
+    modelId: output.aws_bedrock_model_id,
+    region: output.aws_bedrock_region,
   };
 
-  return pickBy(config, (val) => !!val) as typeof config;
+  return pickBy(next, (value, key) => !!value) as typeof next;
 }
 
 export interface AwsBedrockConfig {
@@ -86,21 +81,70 @@ export interface AwsBedrockConfig {
   secretAccessKey: string;
 }
 
-function getDefaults() {
-  const accessKeyId = process.env.AWS_BEDROCK_ACCESS_KEY_ID;
-  const secretAccessKey = process.env.AWS_BEDROCK_SECRET_ACCESS_KEY;
-  const region = process.env.AWS_BEDROCK_REGION ?? 'us-west-2';
-  const modelId = process.env.AWS_BEDROCK_MODEL_ID ?? 'anthropic.claude-3-5-sonnet-20241022-v2:0';
+function getDefaults(existingEnv?: Record<string, string>) {
+  const allEnv = {
+    ...existingEnv,
+    ...process.env,
+  };
+
+  const accessKeyId = allEnv.AWS_BEDROCK_ACCESS_KEY_ID;
+  const secretAccessKey = allEnv.AWS_BEDROCK_SECRET_ACCESS_KEY;
+  const region = allEnv.AWS_BEDROCK_REGION ?? 'us-west-2';
+  const modelId = allEnv.AWS_BEDROCK_MODEL_ID ?? 'anthropic.claude-3-5-sonnet-20241022-v2:0';
   const apiEndpoint =
-    (process.env.AWS_BEDROCK_API_ENDPOINT = `https://bedrock-runtime.${region}.amazonaws.com`);
+    (allEnv.AWS_BEDROCK_API_ENDPOINT = `https://bedrock-runtime.${region}.amazonaws.com`);
 
   return { accessKeyId, secretAccessKey, region, modelId, apiEndpoint };
 }
 
-export async function getBedrockConfig({ log }: { log: ToolingLog }): Promise<AwsBedrockConfig> {
+async function getEnvFromConfig(dockerComposeFilePath: string) {
+  const eisGatewayContainerName = await execa
+    .command(`docker compose -f ${dockerComposeFilePath} ps --all -q eis-gateway`)
+    .then(({ stdout }) => stdout)
+    .catch((error) => {
+      return undefined;
+    });
+
+  if (!eisGatewayContainerName) {
+    return undefined;
+  }
+
+  const config = await execa
+    .command(`docker inspect ${eisGatewayContainerName}`)
+    .then(({ stdout }) => {
+      return JSON.parse(stdout)[0] as { Config: { Env: string[] } };
+    })
+    .catch(() => {
+      return undefined;
+    });
+
+  const envVariables = config?.Config.Env.map((env) => {
+    const [key, value] = env.split('=');
+    // account for `AWS_BEDROCK_AWS_ACCESS_KEY_ID` and `AWS_BEDROCK_AWS_SECRET_ACCESS_KEY`
+    return [key.replace('_AWS', ''), value] as const;
+  });
+
+  if (envVariables?.length) {
+    return Object.fromEntries(envVariables) as Record<string, string>;
+  }
+
+  return undefined;
+}
+
+export async function getBedrockConfig({
+  log,
+  dockerComposeFilePath,
+}: {
+  log: ToolingLog;
+  dockerComposeFilePath: string;
+}): Promise<AwsBedrockConfig> {
   log.debug(`Checking for Bedrock config`);
 
-  const defaults = getDefaults();
+  const existingEnv = await getEnvFromConfig(dockerComposeFilePath);
+
+  const defaults = {
+    ...getDefaults(existingEnv),
+  };
 
   if (defaults.accessKeyId && defaults.secretAccessKey) {
     return {
