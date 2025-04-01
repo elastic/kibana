@@ -6,7 +6,7 @@ info:
 paths: {}
 components:
   schemas:
-    EngineDescriptor:
+    MonitoringEngineDescriptor:
       type: object
       required:
         - type
