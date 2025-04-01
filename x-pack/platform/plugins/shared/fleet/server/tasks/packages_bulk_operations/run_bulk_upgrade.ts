@@ -5,25 +5,18 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import type {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { HTTPAuthorizationHeader } from '../../common/http_authorization_header';
-import { installPackage } from '../services/epm/packages';
-import { appContextService, packagePolicyService } from '../services';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../constants';
+import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
+import { installPackage } from '../../services/epm/packages';
+import { appContextService, packagePolicyService } from '../../services';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import { scheduleBulkOperationTask, formatError } from './utils';
 
-const TASK_TYPE = 'fleet:packages-bulk-operations';
-const TASK_TITLE = 'Fleet packages bulk operations';
-const TASK_TIMEOUT = '10m';
-
-interface BulkUpgradeTaskParams {
+export interface BulkUpgradeTaskParams {
+  type: 'bulk_upgrade';
   packages: Array<{ name: string; version?: string }>;
   spaceId?: string;
   authorizationHeader: HTTPAuthorizationHeader | null;
@@ -43,56 +36,6 @@ interface BulkUpgradeTaskState {
     | { success: false; name: string; error: { message: string } }
   >;
   [k: string]: unknown;
-}
-
-export function registerBulkUpgradePackagesTask(taskManager: TaskManagerSetupContract) {
-  taskManager.registerTaskDefinitions({
-    [TASK_TYPE]: {
-      title: TASK_TITLE,
-      timeout: TASK_TIMEOUT,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        const abortController = new AbortController();
-
-        return {
-          run: async () => {
-            const logger = appContextService.getLogger();
-            if (taskInstance.state.isDone) {
-              return;
-            }
-
-            const taskParams = taskInstance.params as BulkUpgradeTaskParams;
-            try {
-              const results = await _runBulkUpgradeTask({ abortController, logger, taskParams });
-              const state: BulkUpgradeTaskState = {
-                isDone: true,
-                results,
-              };
-              return {
-                runAt: new Date(Date.now() + 60 * 60 * 1000),
-                state,
-              };
-            } catch (error) {
-              logger.error('Packages bulk upgrade failed', { error });
-              return {
-                runAt: new Date(Date.now() + 60 * 60 * 1000),
-                state: {
-                  isDone: true,
-                  error: formatError(error),
-                },
-              };
-            }
-          },
-          cancel: async () => {
-            abortController.abort('task timed out');
-          },
-        };
-      },
-    },
-  });
-}
-
-function formatError(err: Error) {
-  return { message: err.message };
 }
 
 export async function _runBulkUpgradeTask({
@@ -200,36 +143,7 @@ async function bulkUpgradePackagePolicies({
 
 export async function scheduleBulkUpgrade(
   taskManagerStart: TaskManagerStartContract,
-  savedObjectsClient: SavedObjectsClientContract,
-  taskParams: BulkUpgradeTaskParams
+  taskParams: Omit<BulkUpgradeTaskParams, 'type'>
 ) {
-  const id = uuidv4();
-  await taskManagerStart.ensureScheduled({
-    id: `${TASK_TYPE}:${id}`,
-    scope: ['fleet'],
-    params: taskParams,
-    taskType: TASK_TYPE,
-    runAt: new Date(Date.now() + 3 * 1000),
-    state: {},
-  });
-
-  return id;
-}
-
-export async function getBulkUpgradeTaskResults(
-  taskManagerStart: TaskManagerStartContract,
-  id: string
-) {
-  const task = await taskManagerStart.get(`${TASK_TYPE}:${id}`);
-  const state: BulkUpgradeTaskState = task.state;
-  const status = !state?.isDone
-    ? 'pending'
-    : state?.error || state?.results?.some((r) => !r.success)
-    ? 'failed'
-    : 'success';
-  return {
-    status,
-    error: state.error,
-    results: state.results,
-  };
+  return scheduleBulkOperationTask(taskManagerStart, { ...taskParams, type: 'bulk_upgrade' });
 }
