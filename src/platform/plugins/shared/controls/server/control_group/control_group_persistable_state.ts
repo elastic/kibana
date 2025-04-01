@@ -14,7 +14,7 @@ import {
 } from '@kbn/embeddable-plugin/common/types';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
-import type { ControlPanelState, ControlPanelsState, SerializedControlState } from '../../common';
+import type { ControlPanelsState, SerializedControlState } from '../../common';
 import {
   makeControlOrdersZeroBased,
   removeHideExcludeAndHideExists,
