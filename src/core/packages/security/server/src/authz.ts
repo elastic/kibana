@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AuthzDisabled } from '@kbn/core/server';
-
 export enum AuthzOptOutReason {
   DelegatesToESClient = 'Route delegates authorization to the scoped ES client',
   DelegatesToSOClient = 'Route delegates authorization to the scoped SO client',
@@ -16,22 +14,22 @@ export enum AuthzOptOutReason {
 }
 
 export class DisabledAuthz {
-  static config(reason: AuthzOptOutReason | string): AuthzDisabled {
+  static config(reason: AuthzOptOutReason | string): { enabled: false; reason: string } {
     return {
       enabled: false,
       reason,
     };
   }
 
-  public static get delegatesToESClient(): AuthzDisabled {
+  public static get delegatesToESClient() {
     return DisabledAuthz.config(AuthzOptOutReason.DelegatesToESClient);
   }
 
-  public static get delegatesToSOClient(): AuthzDisabled {
+  public static get delegatesToSOClient() {
     return DisabledAuthz.config(AuthzOptOutReason.DelegatesToSOClient);
   }
 
-  public static get servesStaticFiles(): AuthzDisabled {
+  public static get servesStaticFiles() {
     return DisabledAuthz.config(AuthzOptOutReason.ServesStaticFiles);
   }
 }
