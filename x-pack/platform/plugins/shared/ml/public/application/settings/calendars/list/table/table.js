@@ -14,10 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { GLOBAL_CALENDAR } from '../../../../../../common/constants/calendars';
-import {
-  // useCreateAndNavigateToMlLink,
-  useCreateAndNavigateToManagementMlLink,
-} from '../../../../contexts/kibana/use_create_url';
+import { useCreateAndNavigateToManagementMlLink } from '../../../../contexts/kibana/use_create_url';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { MANAGEMENT_SECTION_IDS } from '../../../../management';
 

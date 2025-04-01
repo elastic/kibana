@@ -26,7 +26,6 @@ import { SeverityControl } from '../../application/components/severity_control';
 import { ResultTypeSelector } from './result_type_selector';
 import { alertingApiProvider } from '../../application/services/ml_api_service/alerting';
 import { PreviewAlertCondition } from './preview_alert_condition';
-import { useMlManagementLocator } from '../../application/contexts/kibana';
 import type {
   MlAnomalyDetectionAlertAdvancedSettings,
   MlAnomalyDetectionAlertParams,
@@ -56,7 +55,6 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
   const {
     services: { http },
   } = useKibana();
-  const mlManagementLocator = useMlManagementLocator();
 
   const [newJobUrl, setNewJobUrl] = useState<string | undefined>(undefined);
 
@@ -65,22 +63,22 @@ const MlAnomalyAlertTrigger: FC<MlAnomalyAlertTriggerProps> = ({
 
     if (!mlCapabilities.canCreateJob) return;
 
-    if (!mlManagementLocator) return;
-    mlManagementLocator
-      .getUrl({
-        sectionId: 'ml',
-        appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB}`,
-      })
-      .then((url) => {
-        if (mounted) {
-          setNewJobUrl(url);
-        }
-      });
+    getStartServices().then((startServices) => {
+      const { managementLocator } = startServices[2];
+      if (!managementLocator) return;
+      managementLocator
+        .getUrl({ page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB }, 'anomaly_detection')
+        .then(({ url }) => {
+          if (mounted) {
+            setNewJobUrl(url);
+          }
+        });
+    });
 
     return () => {
       mounted = false;
     };
-  }, [mlManagementLocator, mlCapabilities]);
+  }, [mlCapabilities, getStartServices]);
 
   const mlHttpService = useMemo(() => new HttpService(http!), [http]);
   const adJobsApiService = useMemo(() => jobsApiProvider(mlHttpService), [mlHttpService]);

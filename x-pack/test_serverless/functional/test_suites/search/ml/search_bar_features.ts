@@ -19,10 +19,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     { label: 'Machine Learning / Data Frame Analytics', expected: false },
     { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: false },
     { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: false },
-    { label: 'Machine Learning / Model Management', expected: true },
-    { label: 'Machine Learning / Model Management / Trained Models', expected: true },
+    { label: 'Machine Learning / Trained Models', expected: true },
     { label: 'Machine Learning / Model Management / Nodes', expected: false },
-    { label: 'Machine Learning / Memory Usage', expected: true },
     { label: 'Machine Learning / Settings', expected: false },
     { label: 'Machine Learning / Settings / Calendars', expected: false },
     { label: 'Machine Learning / Settings / Filter Lists', expected: false },
@@ -30,13 +28,11 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     { label: 'Machine Learning / AIOps / Log Rate Analysis', expected: true },
     { label: 'Machine Learning / AIOps / Log Pattern Analysis', expected: true },
     { label: 'Machine Learning / AIOps / Change Point Detection', expected: true },
-    { label: 'Machine Learning / Notifications', expected: true },
     { label: 'Machine Learning / Data Visualizer', expected: true },
     { label: 'Machine Learning / File Upload', expected: true },
     { label: 'Machine Learning / Index Data Visualizer', expected: true },
     { label: 'Machine Learning / ES|QL Data Visualizer', expected: true },
     { label: 'Machine Learning / Data Drift', expected: true },
-    { label: 'Alerts and Insights / Machine Learning', expected: true },
   ];
 
   describe('Search bar features', () => {
