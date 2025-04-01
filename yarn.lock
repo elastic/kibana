@@ -2162,26 +2162,26 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.11.tgz#edad01998f2de79b5d6b401f8951fbe10353e2d6"
-  integrity sha512-M8tDj6zDkbM/K4G/MVol64CUO2e+d9wAlZWZ7odcZHBTAbxD35I3HQy0l0+z6EUzE02+2jUmPCK8IykpKLjPdg==
+"@elastic/eui-theme-borealis@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.1.0.tgz#5b7151c9dae093b945060b3f9c1ac9461092fac0"
+  integrity sha512-eoQw+IHK+R1RHjl4VEVyWY6cWovLXddGl/u7XvIyiRZk+oEiM1ksuk0ZkO9nSkTI/j+tA7Z5aRbivhLhvCGjuA==
 
-"@elastic/eui-theme-common@0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.0.11.tgz#950d06a652a25b09c46cec8f16a449223ada45a3"
-  integrity sha512-DV8qX45R/01SWdCoINWbFwJgMdWHYuq7ZmdY/J3pE1QNKIGv52SdOpiW+XwhT8S3dOv+XFidoywVT9pAjcMmyA==
+"@elastic/eui-theme-common@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-common/-/eui-theme-common-0.1.0.tgz#fa74c7f72b4ca69ff1f7a5cf45e55c979064ab73"
+  integrity sha512-2Pm9PeEr4QXjtL/YYM6faXbQ2Fm/mJXzV7QLBxUW8iHov70IHZy1e3xJOio0lI1IbO3S7t79EIS6J3/uNffJfA==
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@100.0.0":
-  version "100.0.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-100.0.0.tgz#7da6beb5c9b2592a8784835f1450388dcda5f51c"
-  integrity sha512-8A1pYmrw3N/N8ny6tDRYYSmetOBgz3j7KkARr+LWskHMLU7l+nduK+1dVn19qR15C85ufKOyZxAoZeYpxsppsQ==
+"@elastic/eui@101.0.1":
+  version "101.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-101.0.1.tgz#505360831452674ab452bf1fd6a5622c391299c0"
+  integrity sha512-W0gYh4nfDMp/VvZTF0cA0UNQzuT7x+t6nTMvcShXdJ/qEQQfnlcQx50Nd0RMid2zu7HnrKElx8TJcFeTelWs1g==
   dependencies:
-    "@elastic/eui-theme-common" "0.0.11"
+    "@elastic/eui-theme-common" "0.1.0"
     "@elastic/prismjs-esql" "^1.0.0"
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
@@ -2713,6 +2713,13 @@
   version "8.3.1"
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-8.3.1.tgz#7753df0cb88d7649becf984a96dd1bd0a26f43e3"
   integrity sha512-FdgpFxY6V6rLZE9mmIBb9hM0xpfvQOSNOLnzolzKwsE1DH+gC7lEKV1p1IbR0lAYyvYd5a4u3qWJzowUkw1bIw==
+
+"@fast-check/jest@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@fast-check/jest/-/jest-2.1.0.tgz#67585ede285267dc9efc3ac3e05c41879887980a"
+  integrity sha512-9ZVvFnngR0EpfxWoGrq/e9ERrDv3qqE4RXVnn/mGv5Rn33LoDcIfg7xjqVREsyhGcwegEKeL0KJlrWzWiOBV8A==
+  dependencies:
+    fast-check "^3.0.0 || ^4.0.0"
 
 "@fastify/busboy@^2.0.0":
   version "2.0.0"
@@ -9232,7 +9239,7 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.33.1":
+"@redocly/cli@^1.34.0":
   version "1.34.0"
   resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.34.0.tgz#dc4f88cf3047e4abc1412a233b02379cb1f599b6"
   integrity sha512-Kg/t9zMjZB5cyb0YQLa+gne5E5Rz6wZP/goug1+2qaR17UqeupidBzwqDdr3lszEK3q2A37g4+W7pvdBOkiGQA==
@@ -11065,10 +11072,10 @@
   resolved "https://registry.yarnpkg.com/@types/diff-match-patch/-/diff-match-patch-1.0.36.tgz#dcef10a69d357fe9d43ac4ff2eca6b85dbf466af"
   integrity sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==
 
-"@types/diff@^7.0.1":
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-7.0.1.tgz#acc505eb2e8337ca400503283a6ab44a59906d9f"
-  integrity sha512-R/BHQFripuhW6XPXy05hIvXJQdQ4540KnTvEFHSLjXfHYM41liOLKgIJEyYYiQe796xpaMHfe4Uj/p7Uvng2vA==
+"@types/diff@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-7.0.2.tgz#d638edebf3c97aa4962b6f1164a7921ab3de9f83"
+  integrity sha512-JSWRMozjFKsGlEjiiKajUjIJVKuKdE3oVy2DNtK+fUo8q82nhFZ2CPQwicAIkXrofahDXrWJ7mjelvZphMS98Q==
 
 "@types/doctrine@^0.0.9":
   version "0.0.9"
@@ -18171,6 +18178,13 @@ fancy-log@^1.3.3:
     parse-node-version "^1.0.0"
     time-stamp "^1.0.0"
 
+"fast-check@^3.0.0 || ^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-4.0.0.tgz#a5aff60fb20728458c91d1ff98ca1b65d991abc5"
+  integrity sha512-aXLyLemZ7qhLNn2oq+YpjT2Xed21+i29WGAYuyrGbU4r8oinB3i4XR4e62O3NY6qmm5qHEDoc/7d+gMsri3AfA==
+  dependencies:
+    pure-rand "^7.0.0"
+
 fast-content-type-parse@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/fast-content-type-parse/-/fast-content-type-parse-2.0.1.tgz#c236124534ee2cb427c8d8e5ba35a4856947847b"
@@ -22692,10 +22706,10 @@ lru-cache@^10.2.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.4.3.tgz#410fc8a17b70e598013df257c2446b7f3383f119"
   integrity sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==
 
-lru-cache@^11.0.2:
-  version "11.0.2"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.0.2.tgz#fbd8e7cf8211f5e7e5d91905c415a3f55755ca39"
-  integrity sha512-123qHRfJBmo2jXDbo/a5YOQrJoHF/GNQTLzQ5+IdK5pWpceK17yRc6ozlWd25FxvGKQbIUs91fDFkXmDHTKcyA==
+lru-cache@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.1.0.tgz#afafb060607108132dbc1cf8ae661afb69486117"
+  integrity sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==
 
 lru-cache@^4.1.5:
   version "4.1.5"
@@ -26076,6 +26090,11 @@ pure-rand@^6.0.0:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-6.0.2.tgz#a9c2ddcae9b68d736a8163036f088a2781c8b306"
   integrity sha512-6Yg0ekpKICSjPswYOuC5sku/TSWaRYlA0qsXqJgM/d/4pLPHPuTxK7Nbf7jFKzAeedUhR8C7K9Uv63FBsSo8xQ==
+
+pure-rand@^7.0.0:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-7.0.1.tgz#6f53a5a9e3e4a47445822af96821ca509ed37566"
+  integrity sha512-oTUZM/NAZS8p7ANR3SHh30kXB+zK2r2BPcEn/awJIbOvq82WoMN4p62AWWp3Hhw50G0xMsw1mhIBLqHw64EcNQ==
 
 qs@6.13.0, qs@^6.11.0, qs@^6.7.0:
   version "6.13.0"
