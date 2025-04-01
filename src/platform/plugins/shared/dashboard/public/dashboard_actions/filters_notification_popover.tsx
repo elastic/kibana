@@ -33,10 +33,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { BehaviorSubject } from 'rxjs';
 import { uiActionsService } from '../services/kibana_services';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
 import { FiltersNotificationActionApi } from './filters_notification_action';
-import { BehaviorSubject } from 'rxjs';
 
 export function FiltersNotificationPopover({ api }: { api: FiltersNotificationActionApi }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);

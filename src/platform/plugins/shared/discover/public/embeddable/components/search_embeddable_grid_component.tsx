@@ -70,7 +70,7 @@ export function SearchEmbeddableGridComponent({
     panelTitle,
     panelDescription,
     savedSearchTitle,
-    savedSearchDescription
+    savedSearchDescription,
   ] = useBatchedPublishingSubjects(
     api.dataLoading$,
     api.savedSearch$,
