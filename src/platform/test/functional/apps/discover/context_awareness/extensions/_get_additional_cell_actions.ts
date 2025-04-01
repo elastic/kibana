@@ -9,6 +9,7 @@
 
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
+import { Alert } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -25,18 +26,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   const checkAlert = async (text: string) => {
-    const alert = await browser.getAlert();
+    let alert: Alert | undefined;
     try {
+      await retry.waitFor('alert to be present', async () => {
+        alert = (await browser.getAlert()) ?? undefined;
+        return Boolean(alert);
+      });
       expect(await alert?.getText()).to.be(text);
     } finally {
-      await retry.waitFor('alert to be dismissed', async () => {
-        await alert?.dismiss();
-        return !(await browser.getAlert());
-      });
+      await alert?.dismiss();
     }
   };
 
-  describe('x', () => {
+  describe('extension getAdditionalCellActions', () => {
     describe('ES|QL mode', () => {
       it('should render additional cell actions for logs data source', async () => {
         const state = kbnRison.encode({
