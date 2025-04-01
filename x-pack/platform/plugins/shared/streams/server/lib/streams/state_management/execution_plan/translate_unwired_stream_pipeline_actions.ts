@@ -18,7 +18,7 @@ import type {
   UpsertWriteIndexOrRolloverAction,
 } from './types';
 
-const MANAGED_BY_STREAMS = 'streams';
+export const MANAGED_BY_STREAMS = 'streams';
 
 type UnwiredStreamPipelineAction =
   | AppendProcessorToIngestPipelineAction
@@ -86,8 +86,8 @@ async function createStreamsManagedPipeline({
   if (targetTemplateNames.length !== 1) {
     throw new Error('Append actions targeting the same new pipeline target different templates');
   }
-  const indexTemplate = await getIndexTemplate(targetTemplateNames[0], scopedClusterClient);
 
+  const indexTemplate = await getIndexTemplate(targetTemplateNames[0], scopedClusterClient);
   const pipelineName = `${indexTemplate.name}-pipeline`;
 
   actionsByType.upsert_ingest_pipeline.push({
@@ -253,7 +253,8 @@ async function updateExistingUserManagedPipeline({
       }
     } else {
       processors = processors.filter(
-        (processor) => processor.pipeline && processor.pipeline.name === action.referencePipeline
+        (processor) =>
+          processor.pipeline === undefined || processor.pipeline.name !== action.referencePipeline
       );
     }
   }
@@ -288,7 +289,7 @@ async function findPipelineToModify(
   }
 
   const streamProcessor = pipeline.processors?.find(
-    (processor) => processor.pipeline && referencePipelineNames.includes(processor.pipeline.name)
+    (processor) => processor.pipeline && processor.pipeline.name.includes('@stream.')
   );
 
   if (streamProcessor) {
