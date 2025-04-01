@@ -6,7 +6,8 @@
  */
 
 import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
-import type { EngineDescriptor } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+
+import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 import { privilegeMonitoringTypeName } from './privilege_monitoring_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
@@ -16,7 +17,7 @@ interface PrivilegeMonitoringEngineDescriptorDependencies {
 }
 
 interface PrivilegedMonitoringEngineDescriptor {
-  status: EngineDescriptor['status'];
+  status: MonitoringEngineDescriptor['status'];
   error?: Record<string, unknown>;
 }
 
@@ -72,7 +73,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     return attributes;
   }
 
-  async updateStatus(status: EngineDescriptor['status']) {
+  async updateStatus(status: MonitoringEngineDescriptor['status']) {
     return this.update({ status });
   }
 
