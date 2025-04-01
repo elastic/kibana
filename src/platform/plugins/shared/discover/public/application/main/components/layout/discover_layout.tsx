@@ -57,8 +57,7 @@ import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { sendErrorMsg } from '../../hooks/use_saved_search_messages';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
-import { useCurrentDataView } from '../../state_management/redux';
-import { useCurrentTabSelector } from '../../state_management/redux/hooks';
+import { useCurrentDataView, useCurrentTabSelector } from '../../state_management/redux';
 
 const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
