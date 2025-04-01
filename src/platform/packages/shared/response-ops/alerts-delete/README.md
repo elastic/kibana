@@ -24,7 +24,7 @@ function Example() {
   return (
     <div>
       <button onClick={() => setModalVisible(true)}>Delete Alerts</button>
-      <AlertsDeleteModal isVisible={isModalVisible} onCloseModal={() => setModalVisible(false)} />
+      <AlertDeleteModal isVisible={isModalVisible} onCloseModal={() => setModalVisible(false)} />
     </div>
   );
 }
