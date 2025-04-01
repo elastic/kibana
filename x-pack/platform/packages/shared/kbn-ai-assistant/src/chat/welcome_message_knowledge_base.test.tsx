@@ -93,7 +93,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     expect(screen.getByText(/Knowledge base successfully installed/i)).toBeInTheDocument();
   });
 
-  it('renders "not set up" if installError is present', () => {
+  it('renders "We are setting up your knowledge base" with the inspect button', () => {
     const kb = createMockKnowledgeBase({
       isInstalling: false,
       installError: undefined,
@@ -104,7 +104,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           endpoint: { inference_id: 'inference_id' },
           model_stats: {
             deployment_stats: {
-              reason: 'model deployment failed',
+              state: 'starting',
               deployment_id: 'deployment_id',
               model_id: 'model_id',
               nodes: [],
@@ -121,8 +121,42 @@ describe('WelcomeMessageKnowledgeBase', () => {
     renderComponent(kb);
 
     expect(screen.getByText(/We are setting up your knowledge base/i)).toBeInTheDocument();
-    // Because we have an reason error, we also see "Inspect" button
     expect(screen.getByText(/Inspect/i)).toBeInTheDocument();
+  });
+
+  it('renders "Base setup failed" with inspect issues', () => {
+    const kb = createMockKnowledgeBase({
+      isInstalling: false,
+      installError: undefined,
+      status: {
+        value: {
+          ready: false,
+          enabled: true,
+          endpoint: { inference_id: 'inference_id' },
+          model_stats: {
+            deployment_stats: {
+              reason: 'model deployment failed',
+              state: 'failed',
+              deployment_id: 'deployment_id',
+              model_id: 'model_id',
+              nodes: [],
+              peak_throughput_per_minute: 0,
+              priority: 'normal',
+              start_time: 0,
+            },
+          },
+        },
+        loading: false,
+        refresh: jest.fn(),
+      },
+    });
+    renderComponent(kb);
+
+    expect(
+      screen.getByText(/Knowledge Base setup failed. Check 'Inspect' for details./i)
+    ).toBeInTheDocument();
+    // Because we have an reason error, we also see "Inspect" button
+    expect(screen.getAllByText(/Inspect/i)).toHaveLength(2);
   });
 
   it('renders "not set up" if server returns errorMessage (no endpoint exists) but user hasnt started installing', () => {
