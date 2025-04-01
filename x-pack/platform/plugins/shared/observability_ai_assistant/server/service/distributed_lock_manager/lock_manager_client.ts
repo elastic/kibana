@@ -242,9 +242,16 @@ export class LockManager {
         script: {
           lang: 'painless',
           source: `
-          long now = System.currentTimeMillis();
-          ctx._source.expiresAt = Instant.ofEpochMilli(now + params.ttl).toString();`,
-          params: { ttl },
+          if (ctx._source.token == params.token) {
+            long now = System.currentTimeMillis();
+            ctx._source.expiresAt = Instant.ofEpochMilli(now + params.ttl).toString();
+          } else {
+            ctx.op = 'noop';
+          }`,
+          params: {
+            ttl,
+            token: this.token,
+          },
         },
         refresh: true,
       });
