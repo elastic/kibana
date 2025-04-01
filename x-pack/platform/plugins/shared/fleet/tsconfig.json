@@ -120,6 +120,5 @@
     "@kbn/core-security-server",
     "@kbn/core-http-server-utils",
     "@kbn/core-notifications-browser-mocks",
-    "@kbn/fleet-plugin",
   ]
 }
