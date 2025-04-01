@@ -22,6 +22,7 @@ import anthropicIcon from '../assets/images/anthropic.svg';
 import alibabaCloudIcon from '../assets/images/alibaba_cloud.svg';
 import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
 import jinaAIIcon from '../assets/images/jinaai.svg';
+import voyageAIIcon from '../assets/images/voyageai.svg';
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;
@@ -110,6 +111,11 @@ export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecor
   [ServiceProviderKeys.jinaai]: {
     icon: jinaAIIcon,
     name: 'Jina AI',
+    solutions: ['Search'],
+  },
+  [ServiceProviderKeys.voyageai]: {
+    icon: voyageAIIcon,
+    name: 'Voyage AI',
     solutions: ['Search'],
   },
 };
