@@ -26,7 +26,6 @@ export const StatusColumn: React.FunctionComponent<{
 }> = ({ agentPolicyId, version, percentage }) => {
   const { getHref } = useLink();
   const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicyId);
-
   const getAgentsHref = useCallback(
     (failed?: boolean): string => {
       const kuery = failed
@@ -107,7 +106,11 @@ export const StatusColumn: React.FunctionComponent<{
       statusButton = notStartedStatus;
     } else {
       const currPercentage = calcPercentage(agentVersionCounts.agents);
-      if (currPercentage >= percentage) {
+      if (
+        currPercentage >= percentage ||
+        autoUpgradeAgentsStatus?.totalAgents ===
+          autoUpgradeAgentsStatus?.currentVersions.reduce((acc, curr) => acc + curr.agents, 0) // This handles when the total agents is equal to the sum of all the agents that have upgraded. We know theyre complete
+      ) {
         statusButton = completedStatus;
       } else {
         statusButton = inProgressStatus;
@@ -120,9 +123,10 @@ export const StatusColumn: React.FunctionComponent<{
           agentVersionCounts.agents > 0 ? (
             <FormattedMessage
               id="xpack.fleet.manageAutoUpgradeAgents.currentStatusTooltip"
-              defaultMessage="{agents} agents on target version"
+              defaultMessage="{agents} {agentsText} on target version"
               values={{
                 agents: agentVersionCounts.agents,
+                agentsText: agentVersionCounts.agents === 1 ? 'agent' : 'agents',
               }}
             />
           ) : agentVersionCounts.failedUpgradeAgents > 0 ? (
@@ -139,7 +143,7 @@ export const StatusColumn: React.FunctionComponent<{
         {statusButton}
       </EuiToolTip>
     );
-  }, [agentVersionCounts, percentage, calcPercentage, getAgentsHref]);
+  }, [agentVersionCounts, percentage, calcPercentage, getAgentsHref, autoUpgradeAgentsStatus]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexStart">

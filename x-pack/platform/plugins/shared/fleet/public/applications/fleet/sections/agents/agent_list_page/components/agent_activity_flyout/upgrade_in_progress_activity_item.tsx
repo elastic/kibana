@@ -119,7 +119,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" alignItems="flexStart">
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem grow={false}>
                 <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
               </EuiFlexItem>
@@ -133,7 +133,6 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                       data-test-subj="manageAutoUpgradesButton"
                       onClick={() => onClickManageAutoUpgradeAgents(action)}
                       size="m"
-                      flush="left"
                     >
                       <FormattedMessage
                         id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
@@ -147,7 +146,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 </>
               )}
 
-              <EuiFlexItem>
+              <EuiFlexItem grow={false}>
                 <EuiButtonEmpty>
                   <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
                     <FormattedMessage

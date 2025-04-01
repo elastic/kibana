@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   useEuiTheme,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import type { ActionStatus } from '../../../../../types';
@@ -41,26 +42,43 @@ export const ActivityItem: React.FunctionComponent<{
         />
       </EuiText>
     ) : (
-      <EuiText>
-        <FormattedMessage
-          id="xpack.fleet.agentActivity.completedTitle"
-          defaultMessage="{nbAgents} {agents} {completedText}{offlineText}"
-          values={{
-            nbAgents:
-              action.nbAgentsAck === action.nbAgentsActioned
-                ? action.nbAgentsAck
-                : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
-            agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
-            completedText: getAction(action.type, action.actionId).completedText,
-            offlineText:
-              action.status === 'ROLLOUT_PASSED' && action.nbAgentsActioned - action.nbAgentsAck > 0
-                ? `, ${
-                    action.nbAgentsActioned - action.nbAgentsAck
-                  } agent(s) offline during the rollout period`
-                : '',
-          }}
-        />
-      </EuiText>
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <EuiFlexGroup gutterSize="s" alignItems="center">
+              <FormattedMessage
+                id="xpack.fleet.agentActivity.completedTitle"
+                defaultMessage="{nbAgents} {agents} {completedText}{versionText}{offlineText}{automaticIcon}"
+                values={{
+                  nbAgents:
+                    action.nbAgentsAck === action.nbAgentsActioned
+                      ? action.nbAgentsAck
+                      : action.nbAgentsAck + ' of ' + action.nbAgentsActioned,
+                  agents: action.nbAgentsActioned === 1 ? 'agent' : 'agents',
+                  completedText: getAction(action.type, action.actionId).completedText,
+                  offlineText:
+                    action.status === 'ROLLOUT_PASSED' &&
+                    action.nbAgentsActioned - action.nbAgentsAck > 0
+                      ? ` ${
+                          action.nbAgentsActioned - action.nbAgentsAck
+                        } agent(s) offline during the rollout period`
+                      : '',
+                  versionText: action.version ? ` to version ${action.version}.` : '',
+                  automaticIcon: action.is_automatic ? (
+                    <EuiIconTip
+                      anchorProps={{
+                        style: { display: 'flex', alignItems: 'center' },
+                      }}
+                      type="timeRefresh"
+                      content="Triggered by an automatic upgrade"
+                    />
+                  ) : null,
+                }}
+              />
+            </EuiFlexGroup>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
 
   // TODO: investigate whether default completion is due to a bug

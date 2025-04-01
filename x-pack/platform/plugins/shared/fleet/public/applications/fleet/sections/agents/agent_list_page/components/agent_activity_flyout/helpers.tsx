@@ -73,7 +73,7 @@ export const getAction = (type?: string, actionId?: string) => {
 };
 
 export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | undefined) => (
-  <EuiFlexGroup alignItems="center">
+  <EuiFlexGroup gutterSize="s" alignItems="center">
     <FormattedMessage
       id="xpack.fleet.agentActivity.inProgressTitle"
       defaultMessage="{inProgressText} {nbAgents} {agents}{reassignText}{upgradeText}{failuresText}{automaticIcon}"

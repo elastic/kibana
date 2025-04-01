@@ -18,6 +18,8 @@ import {
 } from '../../../../../../../common/services';
 
 import { AUTO_UPGRADE_DEFAULT_RETRIES } from '../../../../../../../common/constants';
+// TODO: need to figure out how to use appContextService here in the browser
+const retryDelays = AUTO_UPGRADE_DEFAULT_RETRIES;
 /**
  * Returns a user-friendly string for the estimated remaining time until the upgrade is scheduled.
  */
@@ -313,7 +315,7 @@ export const AgentUpgradeStatus: React.FC<{
                 defaultMessage="Retrying Upgrade ({retryCount}/{maxRetries} attempts)"
                 values={{
                   retryCount: agent.upgrade_attempts.length,
-                  maxRetries: AUTO_UPGRADE_DEFAULT_RETRIES,
+                  maxRetries: retryDelays,
                 }}
               />
             }

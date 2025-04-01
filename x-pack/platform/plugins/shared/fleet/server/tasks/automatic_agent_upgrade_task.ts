@@ -61,10 +61,11 @@ interface AutomaticAgentUpgradeTaskSetupContract {
 interface AutomaticAgentUpgradeTaskStartContract {
   taskManager: TaskManagerStartContract;
 }
-interface VersionAndCounts {
+interface UpgradeTargetForVersion {
   version: string;
   count: number;
   targetPercentage: number;
+  alreadyUpgrading: number;
 }
 
 export class AutomaticAgentUpgradeTask {
@@ -226,8 +227,30 @@ export class AutomaticAgentUpgradeTask {
       return;
     }
     // Before processing each required version, we need to get the count of agents for each version so we know if we should round some up or down to make sure we arent overshooting the total number of agents.
-    let versionAndCounts: VersionAndCounts[] = [];
+    const versionAndCounts = await this.getVersionAndCounts(
+      agentPolicy,
+      totalActiveAgents,
+      esClient,
+      soClient
+    );
 
+    for (const requiredVersion of agentPolicy.required_versions ?? []) {
+      await this.processRequiredVersion(
+        esClient,
+        soClient,
+        agentPolicy,
+        requiredVersion,
+        versionAndCounts
+      );
+    }
+  }
+  public async getVersionAndCounts(
+    agentPolicy: AgentPolicy,
+    totalActiveAgents: number,
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract
+  ) {
+    let versionAndCounts: UpgradeTargetForVersion[] = [];
     for (const requiredVersion of agentPolicy.required_versions ?? []) {
       let numberOfAgentsForUpgrade = Math.round(
         (totalActiveAgents * requiredVersion.percentage) / 100
@@ -248,25 +271,24 @@ export class AutomaticAgentUpgradeTask {
         version: requiredVersion.version,
         count: numberOfAgentsForUpgrade,
         targetPercentage: requiredVersion.percentage,
+        alreadyUpgrading: totalOnOrUpdatingToTargetVersionAgents,
       });
     }
     // Then we need to make adjustments based on the total to make sure we arent over or undershooting the total number of agents
     versionAndCounts = await this.adjustAgentCounts(versionAndCounts, totalActiveAgents);
-
-    for (const requiredVersion of agentPolicy.required_versions ?? []) {
-      await this.processRequiredVersion(
-        esClient,
-        soClient,
-        agentPolicy,
-        requiredVersion,
-        versionAndCounts
-      );
-    }
+    return versionAndCounts;
   }
-
-  public async adjustAgentCounts(versionAndCounts: VersionAndCounts[], totalActiveAgents: number) {
+  public async adjustAgentCounts(
+    versionAndCounts: UpgradeTargetForVersion[],
+    totalActiveAgents: number
+  ) {
+    //  Calculate what we actually have vs what we need to have.
+    //  First we need to get the total actual percentage if we actually added the new agents and considering the existing ones
     const totalActualPercentage =
-      (versionAndCounts.reduce((acc, item) => acc + item.count, 0) / totalActiveAgents) * 100;
+      ((versionAndCounts.reduce((acc, item) => acc + item.count, 0) +
+        versionAndCounts.reduce((acc, item) => acc + item.alreadyUpgrading, 0)) /
+        totalActiveAgents) *
+      100;
     const totalNeededPercentage = versionAndCounts.reduce(
       (acc, item) => acc + item.targetPercentage,
       0
@@ -287,12 +309,10 @@ export class AutomaticAgentUpgradeTask {
         const item = versionAndCounts[index];
         if (deltaCount > 0) {
           // Still have too many, removing one
-
           item.count -= 1;
           deltaCount -= 1;
         } else if (deltaCount < 0) {
           // Still have too few, adding one
-
           if (item.count > 0) {
             item.count += 1;
             deltaCount += 1;
@@ -323,7 +343,7 @@ export class AutomaticAgentUpgradeTask {
     soClient: SavedObjectsClientContract,
     agentPolicy: AgentPolicy,
     requiredVersion: AgentTargetVersion,
-    versionAndCounts: VersionAndCounts[]
+    versionAndCounts: UpgradeTargetForVersion[]
   ) {
     this.logger.debug(
       `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: checking candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
@@ -346,6 +366,7 @@ export class AutomaticAgentUpgradeTask {
       agentPolicy,
       requiredVersion.version
     );
+
     numberOfAgentsForUpgrade -= numberOfRetriedAgents;
     if (numberOfAgentsForUpgrade <= 0) {
       return;
