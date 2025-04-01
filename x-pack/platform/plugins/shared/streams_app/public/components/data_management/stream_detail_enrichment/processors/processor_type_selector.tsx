@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
 import { ProcessorType } from '@kbn/streams-schema';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { getDefaultFormState } from '../utils';
+import { getDefaultFormStateByType } from '../utils';
 import { ProcessorFormState } from '../types';
 
 interface TAvailableProcessor {
@@ -38,7 +38,7 @@ export const ProcessorTypeSelector = ({
   const processorType = useWatch<{ type: ProcessorType }>({ name: 'type' });
 
   const handleChange = (type: ProcessorType) => {
-    const formState = getDefaultFormState(type);
+    const formState = getDefaultFormStateByType(type);
     reset(formState);
   };
 
@@ -68,6 +68,16 @@ export const ProcessorTypeSelector = ({
 };
 
 const availableProcessors: TAvailableProcessors = {
+  date: {
+    value: 'date',
+    inputDisplay: 'Date',
+    getDocUrl: () => (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.dateHelpText"
+        defaultMessage="Converts a date to a document timestamp."
+      />
+    ),
+  },
   dissect: {
     value: 'dissect',
     inputDisplay: 'Dissect',

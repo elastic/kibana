@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ESQLVariableType } from '@kbn/esql-types';
-import { CommandSuggestParams } from '../../../definitions/types';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
@@ -25,7 +25,7 @@ export async function suggest({
   getColumnsByType,
   getSuggestedVariableName,
   getPreferences,
-  getVariablesByType,
+  getVariables,
   supportsControls,
 }: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
@@ -37,19 +37,19 @@ export async function suggest({
   const controlSuggestions = getControlSuggestionIfSupported(
     Boolean(supportsControls),
     ESQLVariableType.FUNCTIONS,
-    getVariablesByType
+    getVariables
   );
 
   switch (pos) {
     case 'expression_without_assignment':
       return [
         ...controlSuggestions,
-        ...getFunctionSuggestions({ command: 'stats' }),
+        ...getFunctionSuggestions({ location: Location.STATS }),
         getNewVariableSuggestion(getSuggestedVariableName()),
       ];
 
     case 'expression_after_assignment':
-      return [...controlSuggestions, ...getFunctionSuggestions({ command: 'stats' })];
+      return [...controlSuggestions, ...getFunctionSuggestions({ location: Location.STATS })];
 
     case 'expression_complete':
       return [
@@ -60,14 +60,14 @@ export async function suggest({
 
     case 'grouping_expression_after_assignment':
       return [
-        ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
+        ...getFunctionSuggestions({ location: Location.STATS_BY }),
         getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
         ...columnSuggestions,
       ];
 
     case 'grouping_expression_without_assignment':
       return [
-        ...getFunctionSuggestions({ command: 'stats', option: 'by' }),
+        ...getFunctionSuggestions({ location: Location.STATS_BY }),
         getDateHistogramCompletionItem((await getPreferences?.())?.histogramBarTarget),
         ...columnSuggestions,
         getNewVariableSuggestion(getSuggestedVariableName()),

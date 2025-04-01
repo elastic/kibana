@@ -18,6 +18,12 @@ export const registerDataStreamsRoute = (
     .get({
       access: 'internal',
       path: DATA_USAGE_DATA_STREAMS_API_ROUTE,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to scoped ES client',
+        },
+      },
     })
     .addVersion(
       {

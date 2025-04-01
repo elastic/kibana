@@ -165,7 +165,7 @@ const generateWorkflowInsightsDoc = ({
           list_id: 'endpoint_trusted_apps',
           name: `${antivirus}`,
           os_types: [os],
-          description: 'Suggested by Security Workflow Insights',
+          description: 'Suggested by Automatic Troubleshooting',
           tags: ['policy:all'],
         },
       ],

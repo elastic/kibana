@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { DefendInsight, DefendInsightType } from '@kbn/elastic-assistant-common';
 
-import { getSchema } from '../../generate/schema';
+import { DefendInsightsGenerationPrompts } from '../prompts/incompatible_antivirus';
+import { getDefendInsightsSchema } from '../../generate/schema';
 import { addTrailingBackticksIfNecessary } from '../add_trailing_backticks_if_necessary';
 import { extractJson } from '../extract_json';
 
@@ -19,6 +20,7 @@ export const parseCombinedOrThrow = ({
   llmType,
   logger,
   nodeName,
+  prompts,
 }: {
   /** combined responses that maybe valid JSON */
   insightType: DefendInsightType;
@@ -27,6 +29,7 @@ export const parseCombinedOrThrow = ({
   nodeName: string;
   llmType: string;
   logger?: Logger;
+  prompts: DefendInsightsGenerationPrompts;
 }): DefendInsight[] => {
   const timestamp = new Date().toISOString();
 
@@ -44,7 +47,9 @@ export const parseCombinedOrThrow = ({
       `${nodeName} node is validating combined response (${llmType}) from attempt ${generationAttempts}`
   );
 
-  const validatedResponse = getSchema({ type: insightType }).parse(unvalidatedParsed);
+  const validatedResponse = getDefendInsightsSchema({ type: insightType, prompts }).parse(
+    unvalidatedParsed
+  );
 
   logger?.debug(
     () =>

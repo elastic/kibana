@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -63,70 +63,73 @@ const stories: Meta<Args> = {
 };
 export default stories;
 
-export const Example: Story<Args> = ({ serviceName, environment, start, end }) => {
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem>
-        <EuiTitle size="l">
-          <h1 data-test-subj="apmMainTemplateHeaderServiceName">
-            <EuiFlexGroup justifyContent="spaceBetween">
-              <EuiFlexItem>
-                <EuiFlexGroup>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="l">
-                      <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <ServiceIcons
-                      serviceName={serviceName}
-                      environment={environment}
-                      start={start}
-                      end={end}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </h1>
-        </EuiTitle>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};
-Example.args = {
-  serviceName: 'opbeans-java',
-  environment: 'dev',
-  start: '2021-09-10T13:59:00.000Z',
-  end: '2021-09-10T14:14:04.789Z',
-  icons: {
-    agentName: 'java',
-    containerType: 'Kubernetes',
-    cloudProvider: 'gcp',
+export const Example: StoryObj<Args> = {
+  render: ({ serviceName, environment, start, end }) => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h1 data-test-subj="apmMainTemplateHeaderServiceName">
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="l">
+                        <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <ServiceIcons
+                        serviceName={serviceName}
+                        environment={environment}
+                        start={start}
+                        end={end}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </h1>
+          </EuiTitle>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   },
-  details: {
-    service: {
-      versions: ['2021-12-22 17:03:27'],
-      runtime: { name: 'Java', version: '11.0.11' },
-      agent: {
-        name: 'java',
-        version: '1.28.3-SNAPSHOT.UNKNOWN',
+
+  args: {
+    serviceName: 'opbeans-java',
+    environment: 'dev',
+    start: '2021-09-10T13:59:00.000Z',
+    end: '2021-09-10T14:14:04.789Z',
+    icons: {
+      agentName: 'java',
+      containerType: 'Kubernetes',
+      cloudProvider: 'gcp',
+    },
+    details: {
+      service: {
+        versions: ['2021-12-22 17:03:27'],
+        runtime: { name: 'Java', version: '11.0.11' },
+        agent: {
+          name: 'java',
+          version: '1.28.3-SNAPSHOT.UNKNOWN',
+        },
       },
-    },
-    container: {
-      totalNumberInstances: 1,
-      image: 'container image name',
-    },
-    kubernetes: {
-      deployments: ['opbeans-java', 'opbeans-go-nsn'],
-      replicasets: ['opbeans-go-6dff977956', 'opbeans-go-nsn-864bdcbc5b'],
-      namespaces: ['default'],
-    },
-    cloud: {
-      provider: 'gcp',
-      projectName: 'elastic-observability',
-      availabilityZones: ['us-central1-c'],
-      machineTypes: ['n1-standard-4'],
+      container: {
+        totalNumberInstances: 1,
+        image: 'container image name',
+      },
+      kubernetes: {
+        deployments: ['opbeans-java', 'opbeans-go-nsn'],
+        replicasets: ['opbeans-go-6dff977956', 'opbeans-go-nsn-864bdcbc5b'],
+        namespaces: ['default'],
+      },
+      cloud: {
+        provider: 'gcp',
+        projectName: 'elastic-observability',
+        availabilityZones: ['us-central1-c'],
+        machineTypes: ['n1-standard-4'],
+      },
     },
   },
 };

@@ -319,7 +319,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
-        cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
@@ -327,6 +326,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         investigations: new subPluginClasses.Investigations(),
         machineLearning: new subPluginClasses.MachineLearning(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        configurations: new subPluginClasses.Configurations(),
       };
     }
     return this._subPlugins;
@@ -344,7 +344,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       assetInventory: subPlugins.assetInventory.start(),
       attackDiscovery: subPlugins.attackDiscovery.start(),
       cases: subPlugins.cases.start(),
-      cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
@@ -364,6 +363,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
+      configurations: subPlugins.configurations.start(),
     };
   }
 
@@ -425,7 +425,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(store, history, coreSetup, services);
+      await registerActions(store, history, coreSetup, services);
       this._actionsRegistered = true;
     }
   }
@@ -438,16 +438,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { capabilities } = core.application;
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
-    // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (
-      !hasAccessToSecuritySolution(capabilities) &&
-      !capabilities.securitySolutionCasesV2?.read_cases
-    ) {
-      this.appUpdater$.next(() => ({
-        status: AppStatus.inaccessible,
-        visibleIn: [],
-      }));
-      // no need to register the links updater when the plugin is inaccessible
+    // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
+    // This is necessary to hide security solution from the selectable solutions in the spaces UI
+    if (!hasAccessToSecuritySolution(capabilities)) {
+      this.appUpdater$.next(() => ({ status: AppStatus.inaccessible, visibleIn: [] }));
+      // no need to register the links updater when the plugin is inaccessible. return early
       return;
     }
 

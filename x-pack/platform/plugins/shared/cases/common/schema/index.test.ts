@@ -270,24 +270,6 @@ describe('schema', () => {
         ]
       `);
     });
-
-    it.skip('fails when page number is negative', () => {
-      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ page: -1 })))
-        .toMatchInlineSnapshot(`
-              Array [
-                "The provided page value is too low. The minimum allowed page value is 0.",
-              ]
-          `);
-    });
-
-    it.skip('fails when perPage number is negative', () => {
-      expect(PathReporter.report(paginationSchema({ maxPerPage: 3 }).decode({ perPage: -1 })))
-        .toMatchInlineSnapshot(`
-              Array [
-                "The provided perPage value is too low. The minimum allowed perPage value is 0.",
-              ]
-          `);
-    });
   });
 
   describe('limitedNumberSchema', () => {

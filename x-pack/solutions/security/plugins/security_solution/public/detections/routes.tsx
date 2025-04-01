@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { RouteProps, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
 import { routes as alertsRoutes } from './pages/alerts';

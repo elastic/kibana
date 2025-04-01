@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { statusRule, tlsRule } from './data';
 
 // eslint-disable-next-line import/no-default-export

@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup } from '@elastic/eui';
 import type { EuiDataGridProps } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
@@ -23,8 +23,6 @@ import type {
 } from '@kbn/unified-field-list';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { withDataView } from '../../../../common/components/with_data_view';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import { useKibana } from '../../../../common/lib/kibana';
 import type {
@@ -39,7 +37,6 @@ import { getColumnHeader } from '../body/column_headers/helpers';
 import { TimelineResizableLayout } from './resizable_layout';
 import { timelineActions } from '../../../store';
 import { defaultUdtHeaders } from '../body/column_headers/default_headers';
-import { getTimelineShowStatusByIdSelector } from '../../../store/selectors';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -324,38 +321,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
     onFieldEdited();
   }, [onFieldEdited]);
 
-  // PERFORMANCE ONLY CODE BLOCK
-  /**
-   * We check for the timeline open status to request the fields for the fields browser as the fields request
-   * is often a much longer running request for customers with a significant number of indices and fields in those indices.
-   * This request should only be made after the user has decided to interact with timeline to prevent any performance impacts
-   * to the underlying security solution views, as this query will always run when the timeline exists on the page.
-   *
-   * `hasTimelineBeenOpenedOnce` - We want to keep timeline loading times as fast as possible after the user
-   * has chosen to interact with timeline at least once, so we use this flag to prevent re-requesting of this fields data
-   * every time timeline is closed and re-opened after the first interaction.
-   */
-
-  const getTimelineShowStatus = useMemo(() => getTimelineShowStatusByIdSelector(), []);
-  const { show } = useDeepEqualSelector((state) => getTimelineShowStatus(state, timelineId));
-
-  const [hasTimelineBeenOpenedOnce, setHasTimelineBeenOpenedOnce] = useState(false);
-
-  useEffect(() => {
-    if (!hasTimelineBeenOpenedOnce && show) {
-      setHasTimelineBeenOpenedOnce(true);
-    }
-  }, [hasTimelineBeenOpenedOnce, show]);
-
-  // END PERFORMANCE ONLY CODE BLOCK
-  // the onAddFilter function type error below is likely real, but was obscured.
   return (
     <TimelineBodyContainer className="timelineBodyContainer" ref={setSidebarContainer}>
       <TimelineResizableLayout
         container={sidebarContainer}
         unifiedFieldListSidebarContainerApi={unifiedFieldListContainerRef.current}
         dataView={dataView}
-        hasTimelineBeenOpenedOnce={hasTimelineBeenOpenedOnce}
         unifiedFieldListContainerRef={unifiedFieldListContainerRef}
         fieldListSidebarServices={fieldListSidebarServices}
         columnIds={columnIds}
@@ -392,6 +363,6 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 };
 
-export const UnifiedTimeline = React.memo(withDataView<Props>(UnifiedTimelineComponent));
+export const UnifiedTimeline = React.memo(UnifiedTimelineComponent);
 // eslint-disable-next-line import/no-default-export
 export { UnifiedTimeline as default };

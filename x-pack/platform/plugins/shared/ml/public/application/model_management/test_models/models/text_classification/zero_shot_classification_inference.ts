@@ -18,6 +18,7 @@ import type { TextClassificationResponse, RawTextClassificationResponse } from '
 
 import { getZeroShotClassificationInput } from './zero_shot_classification_input';
 import { getTextClassificationOutputComponent } from './text_classification_output';
+import type { ITelemetryClient } from '../../../../services/telemetry/types';
 
 export class ZeroShotClassificationInference extends InferenceBase<TextClassificationResponse> {
   protected inferenceType = SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION;
@@ -39,9 +40,10 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
     trainedModelsApi: ReturnType<typeof trainedModelsApiProvider>,
     model: estypes.MlTrainedModelConfig,
     inputType: INPUT_TYPE,
-    deploymentId: string
+    deploymentId: string,
+    telemetryClient: ITelemetryClient
   ) {
-    super(trainedModelsApi, model, inputType, deploymentId);
+    super(trainedModelsApi, model, inputType, deploymentId, telemetryClient);
 
     this.initialize(
       [this.labelsText$.pipe(map((labelsText) => labelsText !== ''))],

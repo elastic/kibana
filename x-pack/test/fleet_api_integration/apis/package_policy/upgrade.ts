@@ -1315,6 +1315,7 @@ export default function (providerContext: FtrProviderContext) {
         }
 
         expectedAssets.push({ id: 'logs@custom', type: 'component_template' });
+        expectedAssets.push({ id: 'integration_to_input@custom', type: 'component_template' });
       });
 
       afterEach(async function () {

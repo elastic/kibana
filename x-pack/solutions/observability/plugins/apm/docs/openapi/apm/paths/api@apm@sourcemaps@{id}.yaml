@@ -1,6 +1,8 @@
 delete:
   summary: Delete source map
-  description: Delete a previously uploaded source map.
+  description: > 
+    Delete a previously uploaded source map.
+    You must have `all` Kibana privileges for the APM and User Experience feature.
   operationId: deleteSourceMap
   tags:
     - APM sourcemaps
@@ -51,3 +53,5 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/501_response.yaml'
+  x-codeSamples:
+    - $ref: "../components/examples/source_maps_delete_curl_request1.yaml"

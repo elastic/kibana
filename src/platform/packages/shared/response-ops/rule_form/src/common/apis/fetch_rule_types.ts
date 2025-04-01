@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
 import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
@@ -29,6 +29,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   default_schedule_interval: defaultScheduleInterval,
   has_alerts_mappings: hasAlertsMappings,
   has_fields_for_a_a_d: hasFieldsForAAD,
+  is_exportable: isExportable,
   ...rest
 }: AsApiContract<RuleType>) => ({
   enabledInLicense,
@@ -43,6 +44,7 @@ const rewriteBodyReq: RewriteRequestCase<RuleType> = ({
   defaultScheduleInterval,
   hasAlertsMappings,
   hasFieldsForAAD,
+  isExportable,
   ...rest,
 });
 

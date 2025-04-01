@@ -61,7 +61,6 @@ export const HIDE_FOR_SIZES = ['xs', 's'];
 
 interface SideBarPanelProps {
   dataView: DataView;
-  hasTimelineBeenOpenedOnce: boolean;
   unifiedFieldListContainerRef: React.RefObject<UnifiedFieldListSidebarContainerApi>;
   fieldListSidebarServices: UnifiedFieldListSidebarContainerProps['services'];
   columnIds: string[];
@@ -74,6 +73,7 @@ interface SideBarPanelProps {
 interface MainPanelProps {
   columns: ColumnHeaderOptions[];
   currentColumnIds: string[];
+  dataView: DataView;
   rowRenderers: RowRenderer[];
   isDropAllowed: boolean;
   onDropFieldToTable: () => void;
@@ -102,7 +102,6 @@ interface MainPanelProps {
 const SideBarPanel = React.memo(
   ({
     dataView,
-    hasTimelineBeenOpenedOnce,
     unifiedFieldListContainerRef,
     fieldListSidebarServices,
     columnIds,
@@ -115,7 +114,7 @@ const SideBarPanel = React.memo(
     return (
       <SidebarPanelFlexGroup gutterSize="none">
         <EuiFlexItem className="sidebarContainer">
-          {dataView && hasTimelineBeenOpenedOnce ? (
+          {dataView ? (
             <UnifiedFieldListSidebarContainer
               ref={unifiedFieldListContainerRef}
               showFieldList
@@ -153,6 +152,7 @@ const MainPanel = React.memo(
     columns,
     currentColumnIds,
     rowRenderers,
+    dataView,
     isDropAllowed,
     onDropFieldToTable,
     onSort,
@@ -200,6 +200,7 @@ const MainPanel = React.memo(
                 <DataGridMemoized
                   columns={columns}
                   columnIds={currentColumnIds}
+                  dataView={dataView}
                   rowRenderers={rowRenderers}
                   timelineId={timelineId}
                   isSortEnabled={isSortEnabled}
@@ -240,11 +241,8 @@ export const SIDEBAR_WIDTH_KEY = 'timeline:sidebarWidth';
 
 export const TimelineResizableLayoutComponent = ({
   container,
-  // sidebarPanel,
-  // mainPanel,
   unifiedFieldListSidebarContainerApi,
   dataView,
-  hasTimelineBeenOpenedOnce,
   onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
   wrappedOnFieldEdited,
@@ -308,7 +306,6 @@ export const TimelineResizableLayoutComponent = ({
   unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
   columnIds: string[];
   dataView: DataView;
-  hasTimelineBeenOpenedOnce: boolean;
   onAddFieldToWorkspace: (field: DataViewField) => void;
   onRemoveFieldFromWorkspace: (field: DataViewField) => void;
   wrappedOnFieldEdited: () => Promise<void>;
@@ -346,7 +343,6 @@ export const TimelineResizableLayoutComponent = ({
       <InPortal node={sidebarPanelNode}>
         <SideBarPanel
           dataView={dataView}
-          hasTimelineBeenOpenedOnce={hasTimelineBeenOpenedOnce}
           unifiedFieldListContainerRef={unifiedFieldListContainerRef}
           fieldListSidebarServices={fieldListSidebarServices}
           columnIds={columnIds}
@@ -360,6 +356,7 @@ export const TimelineResizableLayoutComponent = ({
         <MainPanel
           columns={columns}
           currentColumnIds={currentColumnIds}
+          dataView={dataView}
           rowRenderers={rowRenderers}
           isDropAllowed={isDropAllowed}
           onDropFieldToTable={onDropFieldToTable}

@@ -13,7 +13,7 @@ import { ASSET_INVENTORY_PATH } from '../../common/constants';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
-import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
+import { useDataView } from './hooks/use_data_view';
 import { AssetInventoryLoading } from './components/asset_inventory_loading';
 import { ASSET_INVENTORY_INDEX_PATTERN } from './constants';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { isPlainObject } from 'lodash';
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import LRUCache from 'lru-cache';
+import { LRUCache } from 'lru-cache';
 import type { ObjectMigrationDefinition } from '@kbn/object-versioning';
 import type { ContentManagementServiceDefinitionVersioned, Version } from '@kbn/object-versioning';
 import {

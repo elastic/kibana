@@ -9,13 +9,15 @@ import React from 'react';
 
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import {
-  ALERTS_PATH,
   ALERT_DETAILS_REDIRECT_PATH,
+  ALERTS_PATH,
+  ALERT_SUMMARY_PATH,
   SecurityPageName,
 } from '../../../../common/constants';
-import { DetectionEnginePage } from '../detection_engine/detection_engine';
+import { DetectionEnginePage } from './detection_engine';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { AlertDetailsRedirect } from './alert_details_redirect';
+import { AlertSummaryContainer } from '../alert_summary';
 
 const AlertsRoute = () => (
   <TrackApplicationView viewId={SecurityPageName.alerts}>
@@ -32,5 +34,9 @@ export const routes = [
   {
     path: `${ALERT_DETAILS_REDIRECT_PATH}/:alertId`,
     component: AlertDetailsRedirect,
+  },
+  {
+    path: ALERT_SUMMARY_PATH,
+    component: AlertSummaryContainer,
   },
 ];
