@@ -9,27 +9,25 @@
 
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep, pick } from 'lodash';
-import { MutableRefObject } from 'react';
 
-import { GridLayoutStateManager } from '../types';
-import { getRowKeysInOrder } from '../utils/resolve_grid_row';
-import { getPointerPosition } from './sensors';
-import { PointerPosition, UserInteractionEvent } from './types';
+import { GridLayoutStateManager } from '../../types';
+import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
+import { getSensorType } from '../sensors';
+import { PointerPosition, UserInteractionEvent } from '../types';
 
 export const startAction = (
   e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
-  rowId: string,
-  startingPointer: MutableRefObject<PointerPosition>
+  rowId: string
 ) => {
   const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
   if (!headerRef) return;
 
   const startingPosition = pick(headerRef.getBoundingClientRect(), ['top', 'left']);
-  startingPointer.current = getPointerPosition(e);
   gridLayoutStateManager.activeRowEvent$.next({
     id: rowId,
     startingPosition,
+    sensorType: getSensorType(e),
     translate: {
       top: 0,
       left: 0,
@@ -47,6 +45,11 @@ export const commitAction = ({
   if (proposedGridLayoutValue && !deepEqual(proposedGridLayoutValue, gridLayout$.getValue())) {
     gridLayout$.next(cloneDeep(proposedGridLayoutValue));
   }
+  proposedGridLayout$.next(undefined);
+};
+
+export const cancelAction = ({ activeRowEvent$, proposedGridLayout$ }: GridLayoutStateManager) => {
+  activeRowEvent$.next(undefined);
   proposedGridLayout$.next(undefined);
 };
 
