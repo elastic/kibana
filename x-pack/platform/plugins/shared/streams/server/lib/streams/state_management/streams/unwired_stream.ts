@@ -259,10 +259,9 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       dataStream,
       scopedClusterClient: this.dependencies.scopedClusterClient,
     });
-    const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
 
     return {
-      pipeline: pipelineName ? pipelineName : `${dataStream.template}-pipeline`,
+      pipeline: unmanagedAssets.ingestPipeline ?? `${dataStream.template}-pipeline`,
       template: dataStream.template,
     };
   }
