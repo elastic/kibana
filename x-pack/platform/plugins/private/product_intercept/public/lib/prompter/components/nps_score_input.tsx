@@ -6,14 +6,12 @@
  */
 
 import React, { useState } from 'react';
-import { css } from '@emotion/react';
 import {
   EuiButtonGroup,
   EuiButtonGroupProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  useEuiTheme,
 } from '@elastic/eui';
 
 interface NPSScoreInputProps {
@@ -43,7 +41,6 @@ export function NPSScoreInput({
   });
 
   const [selectedOption, setSelectedOption] = useState('');
-  const { euiTheme } = useEuiTheme();
 
   return (
     <EuiFormRow
@@ -59,11 +56,6 @@ export function NPSScoreInput({
       }
     >
       <EuiButtonGroup
-        css={css`
-          .euiButtonGroupButton:hover {
-            background-color: ${euiTheme.components.buttons.backgroundFilledText};
-          }
-        `}
         legend="Survey about user satisfaction"
         type="single"
         options={options}

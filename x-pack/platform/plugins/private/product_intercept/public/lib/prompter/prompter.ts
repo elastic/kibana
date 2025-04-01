@@ -49,6 +49,7 @@ export class ProductInterceptPrompter {
     this.userProfileService = userProfile;
     this.staticAssetsHelper = http.staticAssets;
 
+    // it's intentional that the promise returned here is not awaited, so that this is non-blocking
     http
       .get<{
         triggerIntervalInMs: number;
@@ -75,9 +76,7 @@ export class ProductInterceptPrompter {
                 Rx.combineLatest([userProfile.getEnabled$(), userProfile.getUserProfile$()])
               ),
               Rx.take(1), // Ensure the timer emits only once
-              Rx.repeatWhen(
-                (completed) => completed.pipe(Rx.delay(response.triggerIntervalInMs)) // Requeue after the interval
-              )
+              Rx.repeat({ delay: response.triggerIntervalInMs }) // Requeue after the interval
             )
             .subscribe(([enabled, profileData]) => {
               this.userProfile = profileData;
@@ -121,6 +120,7 @@ export class ProductInterceptPrompter {
                   key: 'productInterceptPrompterGlobalStyles',
                   styles: css`
                     :root {
+                      // hooks into exposed CSS variable to set background image the intercept
                       --intercept-background: url(${this.staticAssetsHelper?.getPluginAssetHref(
                           'magnifying_glass_search.png'
                         )})
