@@ -30,10 +30,12 @@ import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { css } from '@emotion/css';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
+import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 
 const RefreshButton = ({
   generatePatterns,
@@ -355,7 +357,15 @@ function InnerGrokAiSuggestions({
   return (
     <>
       {content != null && (
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          // make sure the content is always filling the full width so the
+          // refresh button is rendered below in all cases
+          className={css`
+            width: 100%;
+          `}
+        >
           {content}
         </EuiFlexGroup>
       )}
@@ -381,7 +391,9 @@ export function GrokAiSuggestions() {
   } = useKibana();
   const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
   const { definition } = useStreamDetail();
-  const previewDocuments = useSimulatorSelector((state) => state.context.previewDocuments);
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
 
   if (!isAiEnabled && couldBeEnabled) {
     return (

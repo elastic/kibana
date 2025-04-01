@@ -17,7 +17,7 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
@@ -91,7 +91,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   const dispatch = useDispatch();
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataView: experimentalDataView, status: sourcererStatus } = useDataView(
+  const { dataViewSpec: experimentalDataView, status: sourcererStatus } = useDataViewSpec(
     SourcererScopeName.timeline
   );
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
