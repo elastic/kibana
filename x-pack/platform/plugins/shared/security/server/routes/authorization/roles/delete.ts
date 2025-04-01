@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DisabledAuthz } from '@kbn/core-security-server';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 import type { RouteDefinitionParams } from '../..';
 import { API_VERSIONS } from '../../../../common/constants';
@@ -23,7 +23,7 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: DisabledAuthz.delegateToESClient,
+        authz: AuthzDisabled.delegateToESClient,
       },
     })
     .addVersion(

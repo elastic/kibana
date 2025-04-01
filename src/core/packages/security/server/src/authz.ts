@@ -13,23 +13,19 @@ export enum AuthzOptOutReason {
   ServeStaticFiles = 'Serving static files that do not require authorization',
 }
 
-export class DisabledAuthz {
-  static config(reason: AuthzOptOutReason | string): { enabled: false; reason: string } {
+export class AuthzDisabled {
+  public static fromReason(reason: AuthzOptOutReason | string): { enabled: false; reason: string } {
     return {
       enabled: false,
       reason,
     };
   }
 
-  public static get delegateToESClient() {
-    return DisabledAuthz.config(AuthzOptOutReason.DelegateToESClient);
-  }
-
-  public static get delegateToSOClient() {
-    return DisabledAuthz.config(AuthzOptOutReason.DelegateToSOClient);
-  }
-
-  public static get serveStaticFiles() {
-    return DisabledAuthz.config(AuthzOptOutReason.ServeStaticFiles);
-  }
+  static readonly delegateToESClient = AuthzDisabled.fromReason(
+    AuthzOptOutReason.DelegateToESClient
+  );
+  static readonly delegateToSOClient = AuthzDisabled.fromReason(
+    AuthzOptOutReason.DelegateToSOClient
+  );
+  static readonly serveStaticFiles = AuthzDisabled.fromReason(AuthzOptOutReason.ServeStaticFiles);
 }

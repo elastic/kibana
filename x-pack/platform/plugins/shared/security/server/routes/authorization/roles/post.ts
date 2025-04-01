@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DisabledAuthz } from '@kbn/core-security-server';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 import { roleGrantsSubFeaturePrivileges } from './lib';
 import {
@@ -51,7 +51,7 @@ export function defineBulkCreateOrUpdateRolesRoutes({
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: DisabledAuthz.delegateToESClient,
+        authz: AuthzDisabled.delegateToESClient,
       },
     })
     .addVersion(

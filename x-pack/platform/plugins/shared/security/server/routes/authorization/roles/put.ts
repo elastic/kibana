@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { DisabledAuthz } from '@kbn/core-security-server';
+import { AuthzDisabled } from '@kbn/core-security-server';
 
 import { roleGrantsSubFeaturePrivileges } from './lib';
 import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
@@ -33,7 +33,7 @@ export function definePutRolesRoutes({
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: DisabledAuthz.delegateToESClient,
+        authz: AuthzDisabled.delegateToESClient,
       },
     })
     .addVersion(
