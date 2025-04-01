@@ -45,6 +45,7 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
   if (offline) args.push('--offline');
   if (quiet) args.push('--silent');
   await run('yarn', args, { cwd: process.cwd(), pipe: true });
+  log.success('yarn dependencies installed');
 
   await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
   log.success('Playwright browsers installed');

@@ -23,7 +23,7 @@ import { regenerateBaseTsconfig } from './regenerate_base_tsconfig.mjs';
 import { discovery } from './discovery.mjs';
 import { updatePackageJson } from './update_package_json.mjs';
 
-/** @type {import("../../lib/command").Command} */
+/** @type {import('../../lib/command').Command} */
 export const command = {
   name: 'bootstrap',
   intro: 'Bootstrap the Kibana repository, installs all dependencies and builds all packages',
@@ -88,13 +88,15 @@ export const command = {
         if (forceInstall) {
           await removeYarnIntegrityFileIfExists();
         }
+        log.info('installing dependencies with yarn');
         await yarnInstallDeps(log, { offline, quiet });
       });
     }
 
     await time('pre-build webpack bundles for packages', async () => {
+      log.info('pre-build webpack bundles for packages');
       await run('yarn', ['kbn', 'build-shared']);
-      log.success('build required webpack bundles for packages');
+      log.success('shared webpack bundles built');
     });
 
     await time('sort package json', async () => {
@@ -104,18 +106,17 @@ export const command = {
     await Promise.all([
       validate
         ? time('validate dependencies', async () => {
-            // now that deps are installed we can import `@kbn/yarn-lock-validator`
-            const { readYarnLock, validateDependencies } = External['@kbn/yarn-lock-validator']();
-            await validateDependencies(log, await readYarnLock());
-          })
+          // now that deps are installed we can import `@kbn/yarn-lock-validator`
+          const { readYarnLock, validateDependencies } = External['@kbn/yarn-lock-validator']();
+          await validateDependencies(log, await readYarnLock());
+        })
         : undefined,
       vscodeConfig
         ? time('update vscode config', async () => {
-            // Update vscode settings
-            await run('node', ['scripts/update_vscode_config']);
-
-            log.success('vscode config updated');
-          })
+          // Update vscode settings
+          await run('node', ['scripts/update_vscode_config']);
+          log.success('vscode config updated');
+        })
         : undefined,
     ]);
   },
