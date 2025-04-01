@@ -12,9 +12,16 @@ import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { AlertDeleteRuleSettingsSection } from './components/rule_settings_section';
+import { AlertDeleteModal } from './components/modal';
 
-const CallToAction = () => {
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
+const meta = {
+  title: 'alertDelete',
+};
+
+export default meta;
+
+const DefaultStory = () => {
+  const [isFlyoutVisible, setIsFlyoutVisible] = useState(true);
   const closeFlyout = () => setIsFlyoutVisible(false);
   const showFlyout = () => setIsFlyoutVisible(true);
 
@@ -29,17 +36,26 @@ const CallToAction = () => {
   );
 };
 
-const meta = {
-  title: 'alertDelete',
-  component: CallToAction,
+export const RuleSettingsFlyout: StoryObj<typeof DefaultStory> = {
+  render: DefaultStory,
 };
 
-export default meta;
+const ModalOnlyStory = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const hideModal = () => setIsModalVisible(false);
+  const showFlyout = () => setIsModalVisible(true);
 
-type Story = StoryObj<typeof CallToAction>;
+  return isModalVisible ? (
+    <AlertDeleteModal isVisible={isModalVisible} onCloseModal={hideModal} />
+  ) : (
+    <EuiButton onClick={showFlyout}>Open Modal</EuiButton>
+  );
+};
 
-export const Default: Story = {
+export const ModalOnly: StoryObj<typeof AlertDeleteModal> = {
   args: {
-    closeModal: () => {},
+    isVisible: false,
+    onCloseModal: () => {},
   },
+  render: ModalOnlyStory,
 };
