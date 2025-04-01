@@ -3,3 +3,5 @@
 ## Disable plugins
 xpack.osquery.enabled: false
 
+# Override integrations home
+xpack.fleet.redirectIntegrationsHome: '/app/security/configurations/integrations'

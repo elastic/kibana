@@ -47,6 +47,7 @@ export const config: PluginConfigDescriptor = {
       activeAgentsSoftLimit: true,
       onlyAllowAgentUpgradeToKnownVersions: true,
     },
+    redirectIntegrationsHome: true,
   },
   deprecations: ({ renameFromRoot, unused, unusedFromRoot }) => [
     // Unused settings before Fleet server exists
@@ -296,6 +297,7 @@ export const config: PluginConfigDescriptor = {
           retryDelays: schema.maybe(schema.arrayOf(schema.string())),
         })
       ),
+      redirectIntegrationsHome: schema.maybe(schema.string()),
     },
     {
       validate: (configToValidate) => {

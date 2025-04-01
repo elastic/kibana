@@ -265,6 +265,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean?)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number?)',
+        'xpack.fleet.redirectIntegrationsHome',
         'xpack.global_search.search_timeout (duration?)',
         'xpack.global_search_bar.input_max_limit (number?)',
         'xpack.graph.canEditDrillDownUrls (boolean?)',
