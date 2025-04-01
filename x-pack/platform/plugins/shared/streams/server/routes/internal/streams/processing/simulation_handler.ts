@@ -89,12 +89,14 @@ export type SuccessfulPipelineSimulateDocumentResult = WithRequired<
 
 // TODO: update type once Kibana updates to elasticsearch-js 9.0.0-alpha4
 export interface SuccessfulIngestSimulateDocumentResult {
-  _id: string;
-  _index: string;
-  _source: Record<string, any>;
-  executed_pipelines: string[];
-  ignored_fields?: Array<Record<string, string>>;
-  error?: ErrorCause;
+  doc?: {
+    _id: string;
+    _index: string;
+    _source: Record<string, any>;
+    executed_pipelines: string[];
+    ignored_fields?: Array<Record<string, string>>;
+    error?: ErrorCause;
+  };
 }
 
 export interface SuccessfulPipelineSimulateResponse {
@@ -369,16 +371,6 @@ const executeIngestSimulation = async (
       },
     };
   }
-
-  // const entryWithError = simulationResult.docs.find(isMappingFailure);
-
-  // if (entryWithError) {
-  //   throw new DetectedMappingFailureError(
-  //     `The detected field types might not be compatible with these documents. ${entryWithError.doc.error?.reason}`
-  //   );
-  // }
-
-  // return simulationResult;
 };
 
 /**
@@ -406,14 +398,18 @@ const computePipelineSimulationResult = (
     .filter(([, { type }]) => type === 'system')
     .map(([name]) => name);
 
-  const docReports = pipelineSimulationResult.docs.map((docResult, id) => {
-    const { errors, status, value } = getLastDoc(docResult, sampleDocs[id]._source);
+  const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
+    const { errors, status, value } = getLastDoc(pipelineDocResult, sampleDocs[id]._source);
 
-    const ingestSimulationDocument = ingestSimulationResult.docs[id];
+    const ingestDocResult = ingestSimulationResult.docs[id];
 
-    const diff = computeSimulationDocDiff(docResult, sampleDocs[id]._source, forbiddenFields);
+    const diff = computeSimulationDocDiff(
+      pipelineDocResult,
+      sampleDocs[id]._source,
+      forbiddenFields
+    );
 
-    docResult.processor_results.forEach((processor) => {
+    pipelineDocResult.processor_results.forEach((processor) => {
       const procId = processor.tag;
 
       if (procId && isSkippedProcessor(processor)) {
@@ -426,7 +422,7 @@ const computePipelineSimulationResult = (
     });
 
     errors.push(...diff.errors); // Add diffing errors to the document errors list, such as reserved fields or non-additive changes
-    errors.push(...diff.errors); // Add ingestion errors to the document errors list, such as ignored_fields or mapping errors
+    errors.push(...collectIngestDocumentErrors(ingestDocResult)); // Add ingestion errors to the document errors list, such as ignored_fields or mapping errors
     errors.forEach((error) => {
       const procId = error.processor_id;
 
@@ -605,6 +601,13 @@ const computeSimulationDocDiff = (
   }
 
   return diffResult;
+};
+
+const collectIngestDocumentErrors = (
+  doc: SuccessfulIngestSimulateDocumentResult
+): SimulationError[] => {
+  // const entryWithError = isMappingFailure(doc);
+  return [];
 };
 
 const prepareSimulationResponse = async (
