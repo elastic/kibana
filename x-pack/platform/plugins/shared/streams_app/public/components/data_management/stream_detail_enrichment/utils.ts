@@ -14,7 +14,7 @@ import {
   getProcessorType,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { isEmpty } from 'lodash';
+import { isEmpty, mapValues } from 'lodash';
 import {
   DissectFormState,
   ProcessorDefinitionWithUIAttributes,
@@ -26,8 +26,8 @@ import {
 import { ALWAYS_CONDITION } from '../../../util/condition';
 import { configDrivenProcessors } from './processors/config_driven';
 import {
-  ConfigDrivenProcessorFormState,
   ConfigDrivenProcessorType,
+  ConfigDrivenProcessors,
 } from './processors/config_driven/types';
 
 /**
@@ -66,12 +66,12 @@ const defaultGrokProcessorFormState: GrokFormState = {
   if: ALWAYS_CONDITION,
 };
 
-const configDrivenDefaultFormStates = Object.fromEntries(
-  Object.entries(configDrivenProcessors).map(([key, { defaultFormState }]) => [
-    key,
-    defaultFormState,
-  ])
-) as Record<ConfigDrivenProcessorType, ConfigDrivenProcessorFormState>;
+const configDrivenDefaultFormStates = mapValues(
+  configDrivenProcessors,
+  (config) => config.defaultFormState
+) as {
+  [TKey in ConfigDrivenProcessorType]: ConfigDrivenProcessors[TKey]['defaultFormState'];
+};
 
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
   date: defaultDateProcessorFormState,

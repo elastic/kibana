@@ -20,7 +20,7 @@ export const urlDecodeProcessorConfig: ConfigDrivenProcessorConfiguration<
   UrlDecodeProcessorFormState,
   UrlDecodeProcessorDefinition
 > = {
-  value: 'urldecode' as const,
+  type: 'urldecode' as const,
   inputDisplay: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeInputDisplay',
     {

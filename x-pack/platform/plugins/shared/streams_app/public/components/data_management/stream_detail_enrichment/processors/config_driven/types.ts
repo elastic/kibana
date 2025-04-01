@@ -8,28 +8,14 @@
 import { ProcessorDefinition } from '@kbn/streams-schema';
 import { configDrivenProcessors } from '.';
 import { WithUIAttributes } from '../../types';
-import type { KvProcessorFormState } from './configs/kv';
-import type { GeoIpProcessorFormState } from './configs/geoip';
-import type { RenameProcessorFormState } from './configs/rename';
-import type { SetProcessorFormState } from './configs/set';
-import type { UrlDecodeProcessorFormState } from './configs/url_decode';
-import type { UserAgentProcessorFormState } from './configs/user_agent';
-
-export type ConfigDrivenProcessorFormState =
-  | KvProcessorFormState
-  | GeoIpProcessorFormState
-  | RenameProcessorFormState
-  | SetProcessorFormState
-  | UrlDecodeProcessorFormState
-  | UserAgentProcessorFormState;
 
 export interface ConfigDrivenProcessorConfiguration<
   FormStateT,
   ProcessorDefinitionT extends ProcessorDefinition
 > {
-  value: ConfigDrivenProcessorType;
+  type: ConfigDrivenProcessorType;
   inputDisplay: string;
-  getDocUrl: (esDocUrl: string) => JSX.Element;
+  getDocUrl: (esDocUrl: string) => React.ReactNode;
   defaultFormState: FormStateT;
   convertFormStateToConfig: (formState: FormStateT) => ProcessorDefinitionT;
   convertProcessorToFormState: (processor: WithUIAttributes<ProcessorDefinitionT>) => FormStateT;
@@ -47,7 +33,10 @@ export interface FieldConfiguration {
   type: 'string' | 'array' | 'boolean';
   required: boolean;
   label: string;
-  helpText: JSX.Element;
+  helpText: React.ReactNode;
 }
 
-export type ConfigDrivenProcessorType = keyof typeof configDrivenProcessors;
+export type ConfigDrivenProcessors = typeof configDrivenProcessors;
+export type ConfigDrivenProcessorType = keyof ConfigDrivenProcessors;
+export type ConfigDrivenProcessorFormState =
+  ConfigDrivenProcessors[keyof ConfigDrivenProcessors]['defaultFormState'];

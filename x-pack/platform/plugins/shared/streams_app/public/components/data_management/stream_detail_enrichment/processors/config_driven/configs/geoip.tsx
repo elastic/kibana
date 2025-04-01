@@ -19,7 +19,7 @@ export const geoIpProcessorConfig: ConfigDrivenProcessorConfiguration<
   GeoIpProcessorFormState,
   GeoIpProcessorDefinition
 > = {
-  value: 'geoip' as const,
+  type: 'geoip' as const,
   inputDisplay: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.geoIpInputDisplay',
     {

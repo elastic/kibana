@@ -20,7 +20,7 @@ export const setProcessorConfig: ConfigDrivenProcessorConfiguration<
   SetProcessorFormState,
   SetProcessorDefinition
 > = {
-  value: 'set' as const,
+  type: 'set' as const,
   inputDisplay: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.setInputDisplay',
     {

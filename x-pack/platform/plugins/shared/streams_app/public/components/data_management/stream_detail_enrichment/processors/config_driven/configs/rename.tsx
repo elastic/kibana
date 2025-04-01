@@ -19,7 +19,7 @@ export const renameProcessorConfig: ConfigDrivenProcessorConfiguration<
   RenameProcessorFormState,
   RenameProcessorDefinition
 > = {
-  value: 'rename' as const,
+  type: 'rename' as const,
   inputDisplay: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.renameInputDisplay',
     {

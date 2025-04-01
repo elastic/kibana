@@ -21,7 +21,7 @@ export const kvProcessorConfig: ConfigDrivenProcessorConfiguration<
   KvProcessorFormState,
   KvProcessorDefinition
 > = {
-  value: 'kv' as const,
+  type: 'kv' as const,
   inputDisplay: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.kvInputDisplay',
     {

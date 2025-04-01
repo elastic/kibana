@@ -15,13 +15,13 @@ import { createIsNarrowSchema } from '../../../helpers';
  */
 export interface ProcessorBase {
   description?: string;
-  if: Condition;
+  if?: Condition;
   ignore_failure?: boolean;
 }
 
 const processorBaseSchema = z.object({
   description: z.optional(z.string()),
-  if: conditionSchema,
+  if: z.optional(conditionSchema),
   ignore_failure: z.optional(z.boolean()),
 });
 

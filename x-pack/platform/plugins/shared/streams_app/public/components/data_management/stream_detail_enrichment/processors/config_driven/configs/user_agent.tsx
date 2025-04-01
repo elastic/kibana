@@ -19,7 +19,7 @@ export const userAgentProcessorConfig: ConfigDrivenProcessorConfiguration<
   UserAgentProcessorFormState,
   UserAgentProcessorDefinition
 > = {
-  value: 'user_agent' as const,
+  type: 'user_agent' as const,
   inputDisplay: i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.processor.UserAgentInputDisplay',
     {
