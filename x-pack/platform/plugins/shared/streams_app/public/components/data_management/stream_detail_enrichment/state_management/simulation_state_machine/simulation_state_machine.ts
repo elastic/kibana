@@ -272,7 +272,7 @@ export const simulationMachine = setup({
           target: 'idle',
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
-            { type: 'deriveDetectedSchemaFields' }
+            { type: 'deriveDetectedSchemaFields' },
           ],
         },
         onError: {
