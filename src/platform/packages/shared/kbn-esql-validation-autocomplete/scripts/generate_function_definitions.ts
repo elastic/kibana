@@ -715,7 +715,7 @@ const enrichOperators = (
     const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
     const isNotOperator =
-      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isInOperator);
+      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isLikeOperator);
 
     let signatures = op.signatures.map((s) => ({
       ...s,
@@ -847,7 +847,7 @@ function printGeneratedFunctionsFile(
     name: '${functionName}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
-    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
+    )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,' : ''}
     preview: ${functionDefinition.preview || 'false'},
     alias: ${alias ? `['${alias.join("', '")}']` : 'undefined'},
     signatures: ${JSON.stringify(signatures, null, 2)},

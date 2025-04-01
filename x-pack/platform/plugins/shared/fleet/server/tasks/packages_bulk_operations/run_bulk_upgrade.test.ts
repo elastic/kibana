@@ -7,15 +7,15 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
-import { createAppContextStartContractMock } from '../mocks';
-import { appContextService } from '../services';
-import { packagePolicyService } from '../services/package_policy';
-import { installPackage } from '../services/epm/packages';
+import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../../services';
+import { packagePolicyService } from '../../services/package_policy';
+import { installPackage } from '../../services/epm/packages';
 
-import { _runBulkUpgradeTask } from './bulk_upgrade_packages_task';
+import { _runBulkUpgradeTask } from './run_bulk_upgrade';
 
-jest.mock('../services/epm/packages');
-jest.mock('../services/package_policy');
+jest.mock('../../services/epm/packages');
+jest.mock('../../services/package_policy');
 
 describe('Bulk upgrade task', () => {
   beforeEach(() => {
@@ -54,7 +54,11 @@ describe('Bulk upgrade task', () => {
       const res = await _runBulkUpgradeTask({
         abortController: new AbortController(),
         logger: loggingSystemMock.createLogger(),
-        taskParams: { packages: [{ name: 'test_valid' }], authorizationHeader: null },
+        taskParams: {
+          type: 'bulk_upgrade',
+          packages: [{ name: 'test_valid' }],
+          authorizationHeader: null,
+        },
       });
 
       expect(installPackage).toBeCalled();
@@ -67,6 +71,7 @@ describe('Bulk upgrade task', () => {
         abortController: new AbortController(),
         logger: loggingSystemMock.createLogger(),
         taskParams: {
+          type: 'bulk_upgrade',
           packages: [
             { name: 'test_valid_1' },
             { name: 'test_invalid_1' },
@@ -99,6 +104,7 @@ describe('Bulk upgrade task', () => {
         abortController: new AbortController(),
         logger: loggingSystemMock.createLogger(),
         taskParams: {
+          type: 'bulk_upgrade',
           packages: [{ name: 'test_valid' }],
           authorizationHeader: null,
           upgradePackagePolicies: true,
@@ -119,6 +125,7 @@ describe('Bulk upgrade task', () => {
           abortController,
           logger: loggingSystemMock.createLogger(),
           taskParams: {
+            type: 'bulk_upgrade',
             packages: [
               { name: 'test_valid_1' },
               { name: 'test_invalid_1' },
