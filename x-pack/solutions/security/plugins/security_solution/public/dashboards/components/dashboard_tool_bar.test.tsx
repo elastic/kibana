@@ -35,7 +35,7 @@ const mockCore = coreMock.createStart();
 const mockNavigateTo = jest.fn();
 const mockGetAppUrl = jest.fn();
 const mockDashboardContainer = {
-  viewMode$: new BehaviorSubject('view')
+  viewMode$: new BehaviorSubject('view'),
 } as unknown as DashboardApi;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
