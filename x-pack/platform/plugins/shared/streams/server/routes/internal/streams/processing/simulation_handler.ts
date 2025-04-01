@@ -54,7 +54,7 @@ export interface SimulateProcessingDeps {
 
 export interface SimulationError {
   message: string;
-  processor_id: string;
+  processor_id?: string;
   type:
     | 'field_mapping_failure'
     | 'generic_processor_failure'
@@ -330,7 +330,6 @@ const executePipelineSimulation = async (
       status: 'failure',
       error: {
         message: error.message,
-        processor_id: 'draft',
         type: 'generic_simulation_failure',
       },
     };
@@ -366,7 +365,6 @@ const executeIngestSimulation = async (
       status: 'failure',
       error: {
         message: error.message,
-        processor_id: 'draft',
         type: 'generic_simulation_failure',
       },
     };
@@ -426,7 +424,7 @@ const computePipelineSimulationResult = (
     errors.forEach((error) => {
       const procId = error.processor_id;
 
-      if (processorsMap[procId]) {
+      if (procId && processorsMap[procId]) {
         processorsMap[procId].errors.push(error);
         if (error.type !== 'non_additive_processor_failure') {
           processorsMap[procId].failure_rate++;
@@ -603,11 +601,25 @@ const computeSimulationDocDiff = (
   return diffResult;
 };
 
-const collectIngestDocumentErrors = (
-  doc: SuccessfulIngestSimulateDocumentResult
-): SimulationError[] => {
-  // const entryWithError = isMappingFailure(doc);
-  return [];
+const collectIngestDocumentErrors = (docResult: SuccessfulIngestSimulateDocumentResult) => {
+  const errors: SimulationError[] = [];
+
+  if (isMappingFailure(docResult)) {
+    errors.push({
+      type: 'field_mapping_failure',
+      message: `Some field types might not be compatible with this document: ${docResult.doc?.error?.reason}`,
+    });
+  }
+
+  if (docResult.doc?.ignored_fields) {
+    const ignoredFields = docResult.doc.ignored_fields.map((ignored) => ignored.field).join(', ');
+    errors.push({
+      type: 'field_mapping_failure',
+      message: `Some field were ignored for this document ingestion: [${ignoredFields}]`,
+    });
+  }
+
+  return errors;
 };
 
 const prepareSimulationResponse = async (
@@ -638,13 +650,15 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
     detected_fields: [],
     documents: [],
     processors_metrics: {
-      [error.processor_id]: {
-        detected_fields: [],
-        errors: [error],
-        failure_rate: 1,
-        skipped_rate: 0,
-        success_rate: 0,
-      },
+      ...(error.processor_id && {
+        [error.processor_id]: {
+          detected_fields: [],
+          errors: [error],
+          failure_rate: 1,
+          skipped_rate: 0,
+          success_rate: 0,
+        },
+      }),
     },
     failure_rate: 1,
     skipped_rate: 0,
@@ -736,7 +750,8 @@ const isSkippedProcessor = (
 ): processor is WithRequired<IngestPipelineSimulation, 'tag'> => processor.status === 'skipped';
 
 // TODO: update type once Kibana updates to elasticsearch-js 9.0.0-alpha4
-const isMappingFailure = (entry: any) => entry.doc?.error?.type === 'document_parsing_exception';
+const isMappingFailure = (entry: SuccessfulIngestSimulateDocumentResult) =>
+  entry.doc?.error?.type === 'document_parsing_exception';
 
 const isNonAdditiveSimulationError = (error: SimulationError) =>
   error.type === 'non_additive_processor_failure';
