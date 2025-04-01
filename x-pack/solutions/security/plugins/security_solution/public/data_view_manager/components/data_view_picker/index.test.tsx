@@ -19,7 +19,7 @@ import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 
 jest.mock('../../hooks/use_data_view_spec', () => ({
-  useDataView: jest.fn(),
+  useDataViewSpec: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_select_data_view', () => ({

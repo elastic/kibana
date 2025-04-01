@@ -14,7 +14,7 @@ import { useFullDataView } from './use_full_data_view';
 
 jest.mock('./use_full_data_view');
 
-describe('useDataView', () => {
+describe('useDataViewSpec', () => {
   beforeEach(() => {
     jest.mocked(useFullDataView).mockReturnValue({
       dataView: {
@@ -35,7 +35,7 @@ describe('useDataView', () => {
 
     expect(wrapper.result.current).toMatchObject({
       status: expect.any(String),
-      dataView: expect.objectContaining({ id: expect.any(String) }),
+      dataViewSpec: expect.objectContaining({ id: expect.any(String) }),
     });
 
     wrapper.rerender(DataViewManagerScopeName.timeline);
@@ -43,7 +43,7 @@ describe('useDataView', () => {
 
     expect(wrapper.result.current).toMatchObject({
       status: expect.any(String),
-      dataView: expect.objectContaining({ id: expect.any(String) }),
+      dataViewSpec: expect.objectContaining({ id: expect.any(String) }),
     });
   });
 });

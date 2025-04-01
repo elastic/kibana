@@ -13,7 +13,7 @@ import { useDataViewSpec } from './use_data_view_spec';
 import { type FieldSpec } from '@kbn/data-views-plugin/common';
 
 jest.mock('./use_data_view_spec', () => ({
-  useDataView: jest.fn(),
+  useDataViewSpec: jest.fn(),
 }));
 
 describe('useBrowserFields', () => {
