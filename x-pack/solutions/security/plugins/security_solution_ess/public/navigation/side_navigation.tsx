@@ -36,48 +36,43 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
         defaultIsCollapsed: false,
         children: [
           {
-            breadcrumbStatus: 'hidden',
+            id: 'discover:',
+            link: 'discover',
+          },
+          {
+            id: 'dashboards',
+            link: securityLink(SecurityPageName.dashboards),
+            renderAs: 'item',
             children: [
               {
-                id: 'discover:',
-                link: 'discover',
+                id: 'overview',
+                link: securityLink(SecurityPageName.overview),
+                sideNavStatus: 'hidden',
               },
               {
-                id: 'dashboards',
-                link: securityLink(SecurityPageName.dashboards),
-                renderAs: 'item',
-                children: [
-                  {
-                    id: 'overview',
-                    link: securityLink(SecurityPageName.overview),
-                    sideNavStatus: 'hidden',
-                  },
-                  {
-                    id: 'detection_response',
-                    link: securityLink(SecurityPageName.detectionAndResponse),
-                    sideNavStatus: 'hidden',
-                  },
-                  {
-                    id: 'cloud_security_posture-dashboard',
-                    link: securityLink(SecurityPageName.cloudSecurityPostureDashboard),
-                    sideNavStatus: 'hidden',
-                  },
-                  {
-                    id: 'cloud_security_posture-vulnerability_dashboard',
-                    link: securityLink(SecurityPageName.cloudSecurityPostureVulnerabilityDashboard),
-                    sideNavStatus: 'hidden',
-                  },
-                  {
-                    id: 'entity_analytics',
-                    link: securityLink(SecurityPageName.entityAnalytics),
-                    sideNavStatus: 'hidden',
-                  },
-                  {
-                    id: 'data_quality',
-                    link: securityLink(SecurityPageName.dataQuality),
-                    sideNavStatus: 'hidden',
-                  },
-                ],
+                id: 'detection_response',
+                link: securityLink(SecurityPageName.detectionAndResponse),
+                sideNavStatus: 'hidden',
+              },
+              {
+                id: 'cloud_security_posture-dashboard',
+                link: securityLink(SecurityPageName.cloudSecurityPostureDashboard),
+                sideNavStatus: 'hidden',
+              },
+              {
+                id: 'cloud_security_posture-vulnerability_dashboard',
+                link: securityLink(SecurityPageName.cloudSecurityPostureVulnerabilityDashboard),
+                sideNavStatus: 'hidden',
+              },
+              {
+                id: 'entity_analytics',
+                link: securityLink(SecurityPageName.entityAnalytics),
+                sideNavStatus: 'hidden',
+              },
+              {
+                id: 'data_quality',
+                link: securityLink(SecurityPageName.dataQuality),
+                sideNavStatus: 'hidden',
               },
             ],
           },

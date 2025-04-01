@@ -7,50 +7,45 @@ Object {
       "breadcrumbStatus": "hidden",
       "children": Array [
         Object {
-          "breadcrumbStatus": "hidden",
+          "id": "discover:",
+          "link": "discover",
+        },
+        Object {
           "children": Array [
             Object {
-              "id": "discover:",
-              "link": "discover",
+              "id": "overview",
+              "link": "securitySolutionUI:overview",
+              "sideNavStatus": "hidden",
             },
             Object {
-              "children": Array [
-                Object {
-                  "id": "overview",
-                  "link": "securitySolutionUI:overview",
-                  "sideNavStatus": "hidden",
-                },
-                Object {
-                  "id": "detection_response",
-                  "link": "securitySolutionUI:detection_response",
-                  "sideNavStatus": "hidden",
-                },
-                Object {
-                  "id": "cloud_security_posture-dashboard",
-                  "link": "securitySolutionUI:cloud_security_posture-dashboard",
-                  "sideNavStatus": "hidden",
-                },
-                Object {
-                  "id": "cloud_security_posture-vulnerability_dashboard",
-                  "link": "securitySolutionUI:cloud_security_posture-vulnerability_dashboard",
-                  "sideNavStatus": "hidden",
-                },
-                Object {
-                  "id": "entity_analytics",
-                  "link": "securitySolutionUI:entity_analytics",
-                  "sideNavStatus": "hidden",
-                },
-                Object {
-                  "id": "data_quality",
-                  "link": "securitySolutionUI:data_quality",
-                  "sideNavStatus": "hidden",
-                },
-              ],
-              "id": "dashboards",
-              "link": "securitySolutionUI:dashboards",
-              "renderAs": "item",
+              "id": "detection_response",
+              "link": "securitySolutionUI:detection_response",
+              "sideNavStatus": "hidden",
+            },
+            Object {
+              "id": "cloud_security_posture-dashboard",
+              "link": "securitySolutionUI:cloud_security_posture-dashboard",
+              "sideNavStatus": "hidden",
+            },
+            Object {
+              "id": "cloud_security_posture-vulnerability_dashboard",
+              "link": "securitySolutionUI:cloud_security_posture-vulnerability_dashboard",
+              "sideNavStatus": "hidden",
+            },
+            Object {
+              "id": "entity_analytics",
+              "link": "securitySolutionUI:entity_analytics",
+              "sideNavStatus": "hidden",
+            },
+            Object {
+              "id": "data_quality",
+              "link": "securitySolutionUI:data_quality",
+              "sideNavStatus": "hidden",
             },
           ],
+          "id": "dashboards",
+          "link": "securitySolutionUI:dashboards",
+          "renderAs": "item",
         },
         Object {
           "breadcrumbStatus": "hidden",
