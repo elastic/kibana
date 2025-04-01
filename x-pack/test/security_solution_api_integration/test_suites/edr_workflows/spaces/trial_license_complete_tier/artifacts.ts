@@ -10,6 +10,7 @@ import { ensureSpaceIdExists } from '@kbn/security-solution-plugin/scripts/endpo
 import {
   ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,
+  EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
 import expect from '@kbn/expect';
 import {
@@ -20,6 +21,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { exceptionItemToCreateExceptionItem } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type {
   ExceptionListItemSchema,
+  ExceptionListSummarySchema,
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Role } from '@kbn/security-plugin-types-common';
@@ -258,6 +260,44 @@ export default function ({ getService }: FtrProviderContext) {
           expect((response.body as ExceptionListItemSchema).item_id).to.equal(
             spaceTwoGlobalArtifact.artifact.item_id
           );
+        });
+
+        it('should return summary counts for active space only', async () => {
+          const response = await supertestArtifactManager
+            .get(addSpaceIdToPath('/', spaceOneId, `${EXCEPTION_LIST_URL}/summary`))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .query({
+              list_id: listInfo.id,
+              namespace_type: 'agnostic',
+            })
+            .send()
+            .expect(200);
+
+          const expectedSummaryResponse = [
+            spaceOneGlobalArtifact,
+            spaceOnePerPolicyArtifact,
+            spaceTwoGlobalArtifact,
+          ].reduce(
+            (acc, item) => {
+              (
+                ['windows', 'macos', 'linux'] as Array<
+                  keyof Omit<ExceptionListSummarySchema, 'total'>
+                >
+              ).forEach((osType) => {
+                if (item.artifact.os_types.includes(osType)) {
+                  acc[osType]++;
+                }
+              });
+
+              return acc;
+            },
+            { windows: 0, linux: 0, macos: 0, total: 3 } as ExceptionListSummarySchema
+          );
+
+          expect(response.body as ExceptionListSummarySchema).to.eql(expectedSummaryResponse);
         });
 
         describe('and user does NOT have global artifact management privilege', () => {
