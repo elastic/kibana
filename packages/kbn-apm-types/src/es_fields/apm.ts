@@ -191,13 +191,19 @@ export const METRIC_OTEL_JVM_SYSTEM_CPU_PERCENT = 'process.runtime.jvm.system.cp
 export const METRIC_OTEL_JVM_GC_DURATION = 'process.runtime.jvm.gc.duration';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_HEAP = 'heap';
 export const VALUE_OTEL_JVM_PROCESS_MEMORY_NON_HEAP = 'non_heap';
+
 // OpenTelemetry semconv fields for AgentName https://opentelemetry.io/docs/specs/semconv/resource/#telemetry-sdk
 export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
 
-// OpenTelemetry span links
+// OpenTelemetry semconv fields for HTTP server https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-server-semantic-conventions
+export const URL_PATH = 'url.path';
+export const URL_SCHEME = 'url.scheme';
+export const SERVER_ADDRESS = 'server.address';
+export const SERVER_PORT = 'server.port';
 
+// OpenTelemetry span links
 export const LINKS_SPAN_ID = 'links.span_id';
 export const LINKS_TRACE_ID = 'links.trace_id';
 

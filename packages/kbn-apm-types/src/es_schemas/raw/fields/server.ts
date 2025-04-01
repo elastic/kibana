@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface Url {
-  domain?: string;
-  full?: string;
-  original?: string;
-  scheme?: string;
-  path?: string;
+export interface Server {
+  address?: string;
+  port?: string;
 }

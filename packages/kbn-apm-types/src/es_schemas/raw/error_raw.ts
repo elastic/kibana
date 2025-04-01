@@ -21,6 +21,7 @@ import {
   Url,
   User,
 } from './fields';
+import { Server } from './fields/server';
 
 export interface Processor {
   name: 'error';
@@ -72,5 +73,6 @@ export interface ErrorRaw extends APMBaseDoc {
   process?: Process;
   service: Service;
   url?: Url;
+  server?: Server;
   user?: User;
 }
