@@ -36,6 +36,7 @@ function renderSecondaryMetric(props: Partial<SecondaryMetricProps> = {}) {
         metric: { secondaryPrefix: '' },
       }}
       getMetricFormatter={jest.fn(() => () => formattedValue)}
+      fontSize={16}
       {...props}
     />
   );
