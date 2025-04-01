@@ -13,7 +13,7 @@ import { getConnectToInternalServer } from './create_internal_client';
 jest.mock('@modelcontextprotocol/sdk/inMemory.js');
 jest.mock('@modelcontextprotocol/sdk/client/index.js');
 
-describe('getClientForInternalServer', () => {
+describe('getConnectToInternalServer', () => {
   const createStubServer = (): jest.Mocked<McpServer> => {
     return {
       connect: jest.fn(),
@@ -50,12 +50,12 @@ describe('getClientForInternalServer', () => {
     const server = createStubServer();
     const { clientTransport, serverTransport, mockClient } = setupMocks();
 
-    const integrationClient = await getConnectToInternalServer({
+    const connectFn = getConnectToInternalServer({
       server,
       clientName: 'test-client',
     });
 
-    await integrationClient.connect();
+    await connectFn();
 
     expect(Client).toHaveBeenCalledWith({
       name: 'test-client',
@@ -69,12 +69,12 @@ describe('getClientForInternalServer', () => {
     const server = createStubServer();
     const { mockClient } = setupMocks();
 
-    const integrationClient = await getConnectToInternalServer({
+    const connectFn = getConnectToInternalServer({
       server,
     });
 
-    await integrationClient.connect();
-    await integrationClient.disconnect();
+    const client = await connectFn();
+    await client.disconnect();
 
     expect(mockClient.close).toHaveBeenCalled();
     expect(server.close).toHaveBeenCalled();
@@ -84,20 +84,24 @@ describe('getClientForInternalServer', () => {
     const server = createStubServer();
     setupMocks();
 
-    const integrationClient = await getConnectToInternalServer({
+    const connectFn = getConnectToInternalServer({
       server,
     });
 
-    await integrationClient.connect();
-    await expect(integrationClient.connect()).rejects.toThrow('Client already connected');
+    await connectFn();
+    await expect(connectFn()).rejects.toThrow('Client already connected');
   });
 
-  it('should handle disconnection of an unconnected client gracefully', async () => {
+  it('should handle disconnection errors gracefully', async () => {
     const server = createStubServer();
-    const integrationClient = await getConnectToInternalServer({
+    const { mockClient } = setupMocks();
+    mockClient.close.mockRejectedValueOnce(new Error('Disconnect failed'));
+
+    const connectFn = getConnectToInternalServer({
       server,
     });
 
-    await expect(integrationClient.disconnect()).resolves.not.toThrow();
+    const client = await connectFn();
+    await expect(client.disconnect()).rejects.toThrow('Disconnect failed');
   });
 });
