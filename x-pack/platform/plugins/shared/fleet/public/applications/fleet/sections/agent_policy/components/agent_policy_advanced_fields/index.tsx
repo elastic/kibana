@@ -737,10 +737,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.download_source_id && validation.download_source_id)}
-          isDisabled={disabled}
+          isDisabled={disabled || isManagedorAgentlessPolicy}
         >
           <EuiSuperSelect
-            disabled={disabled || agentPolicy?.supports_agentless === true}
+            disabled={disabled || isManagedorAgentlessPolicy}
             valueOfSelected={agentPolicy.download_source_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingDownloadSources}
@@ -771,9 +771,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         }
       >
-        <EuiFormRow fullWidth isDisabled={disabled}>
+        <EuiFormRow fullWidth isDisabled={disabled || isManagedorAgentlessPolicy}>
           <EuiRadioGroup
-            disabled={disabled || agentPolicy?.supports_agentless === true}
+            disabled={disabled || isManagedorAgentlessPolicy}
             options={[
               {
                 id: 'hostname',
@@ -864,7 +864,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               : null
           }
           isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
-          isDisabled={disabled}
+          isDisabled={disabled || isManagedorAgentlessPolicy}
         >
           <EuiFieldNumber
             fullWidth
