@@ -24,25 +24,25 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.type', {
       defaultMessage: 'Type',
     }),
-    fieldName: 'entity.category',
-  },
-  {
-    title: i18n.translate('xpack.securitySolution.assetInventory.filters.criticality', {
-      defaultMessage: 'Criticality',
-    }),
-    fieldName: 'asset.criticality',
-  },
-  {
-    title: i18n.translate('xpack.securitySolution.assetInventory.filters.tags', {
-      defaultMessage: 'Tags',
-    }),
-    fieldName: 'asset.tags.name',
+    fieldName: 'entity.type',
   },
   {
     title: i18n.translate('xpack.securitySolution.assetInventory.filters.name', {
       defaultMessage: 'Name',
     }),
-    fieldName: 'asset.name',
+    fieldName: 'entity.name',
+  },
+  {
+    title: i18n.translate('xpack.securitySolution.assetInventory.filters.id', {
+      defaultMessage: 'ID',
+    }),
+    fieldName: 'entity.id',
+  },
+  {
+    title: i18n.translate('xpack.securitySolution.assetInventory.filters.source', {
+      defaultMessage: 'Source',
+    }),
+    fieldName: 'entity.source',
   },
 ];
 
