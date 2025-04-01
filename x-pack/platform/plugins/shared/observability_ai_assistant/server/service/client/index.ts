@@ -33,6 +33,7 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { ChatCompleteResponse, FunctionCallingMode, ToolChoiceType } from '@kbn/inference-common';
 
+import { getRegexEntities } from '../../../common/utils/get_regex_entities';
 import { resourceNames } from '..';
 import {
   ChatCompletionChunkEvent,
@@ -56,6 +57,7 @@ import {
   type InferenceChunk,
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
+  DetectedEntity,
 } from '../../../common/types';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
 import type { ChatFunctionClient } from '../chat_function_client';
@@ -100,7 +102,7 @@ export class ObservabilityAIAssistantClient {
       scopes: AssistantScope[];
     }
   ) {}
-  async inferNER(chunks: InferenceChunk[]) {
+  async inferNER(chunks: InferenceChunk[]): Promise<DetectedEntity[]> {
     const promises = chunks.map(async ({ chunkText, charStartOffset }) => {
       const response = await this.dependencies.esClient.asCurrentUser.ml.inferTrainedModel({
         model_id: 'elastic__distilbert-base-uncased-finetuned-conll03-english',
@@ -111,11 +113,12 @@ export class ObservabilityAIAssistantClient {
         ],
       });
       const entities = response?.inference_results?.[0]?.entities ?? [];
-
       const adjustedEntities = entities.map((entity) => ({
         ...entity,
         start_pos: entity.start_pos + charStartOffset,
         end_pos: entity.end_pos + charStartOffset,
+        hash: objectHash({ entity: entity.entity, class_name: entity.class_name }),
+        type: 'ner' as const,
       }));
 
       return adjustedEntities;
@@ -134,17 +137,29 @@ export class ObservabilityAIAssistantClient {
         // chunk before sending
         const messageContent = message.message.content;
         const chunks = chunkTextByChar(messageContent);
-        const entities = await this.inferNER(chunks);
+        const nerEntities = await this.inferNER(chunks);
+        const regexEntities = getRegexEntities(messageContent);
+        const combinedEntities = [...nerEntities, ...regexEntities];
+        const dedupedEntities = combinedEntities.filter((ent) => {
+          // Regex entities take precedence over NER entities.
+          if (ent.type === 'regex') return true;
+          // For NER entities, check if there's any regex entity that overlaps.
+          // Here, "overlap" is defined as the ranges intersecting.
+          const overlaps = regexEntities.some(
+            (regexEnt) => ent.start_pos < regexEnt.end_pos && ent.end_pos > regexEnt.start_pos
+          );
+          return !overlaps;
+        });
         message.message.sanitized = true;
-        message.message.nerEntities = entities?.map((ent) => {
-          const redactedId = objectHash({ entity: ent.entity, className: ent.class_name });
+
+        message.message.detectedEntities = dedupedEntities.map((ent) => {
           return {
-            hash: redactedId,
             entity: ent.entity,
             class_name: ent.class_name,
-            class_probability: ent.class_probability,
             start_pos: ent.start_pos,
             end_pos: ent.end_pos,
+            type: ent.type,
+            hash: ent.hash,
           };
         });
       }

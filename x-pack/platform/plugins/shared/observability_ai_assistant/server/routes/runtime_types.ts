@@ -15,13 +15,13 @@ import {
   type StarterPrompt,
 } from '../../common/types';
 
-export const entityRt = t.type({
+export const detectedEntityRt = t.type({
   entity: t.string,
   class_name: t.string,
-  class_probability: t.number,
   start_pos: t.number,
   end_pos: t.number,
   hash: t.string,
+  type: t.union([t.literal('ner'), t.literal('regex')]),
 });
 
 export const messageRt: t.Type<Message> = t.type({
@@ -55,7 +55,7 @@ export const messageRt: t.Type<Message> = t.type({
         }),
       ]),
       sanitized: t.boolean,
-      nerEntities: t.array(entityRt),
+      detectedEntities: t.array(detectedEntityRt),
     }),
   ]),
 });

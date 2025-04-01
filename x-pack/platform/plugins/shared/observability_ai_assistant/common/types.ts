@@ -29,19 +29,19 @@ export interface PendingMessage {
   aborted?: boolean;
   error?: any;
 }
-export interface NerEntity {
+export interface DetectedEntity {
   entity: string;
   class_name: string;
-  class_probability: number;
   start_pos: number;
   end_pos: number;
   hash: string;
+  type: 'ner' | 'regex';
 }
 export interface Message {
   '@timestamp': string;
   message: {
     content?: string;
-    nerEntities?: NerEntity[];
+    detectedEntities?: DetectedEntity[];
     sanitized?: boolean;
     name?: string;
     role: MessageRole;

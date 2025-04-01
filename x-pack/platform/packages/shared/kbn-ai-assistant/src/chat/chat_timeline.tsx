@@ -76,13 +76,13 @@ const highlightPIIClassName = css`
   border-radius: 3px;
 `;
 
-// helper using NER positions to transform user messages into react node to add text highlighting
+// helper using detected entity positions to transform user messages into react node to add text highlighting
 function transformUserContent(
   content: string,
-  nerEntities: Array<{ start_pos: number; end_pos: number; entity: string }>
+  detectedEntities: Array<{ start_pos: number; end_pos: number; entity: string }>
 ): React.ReactNode {
   // Sort the entities by start position
-  const sortedEntities = [...nerEntities].sort((a, b) => a.start_pos - b.start_pos);
+  const sortedEntities = [...detectedEntities].sort((a, b) => a.start_pos - b.start_pos);
   const parts: Array<string | React.ReactNode> = [];
   let lastIndex = 0;
   sortedEntities.forEach((entity, index) => {
@@ -178,14 +178,17 @@ export function ChatTimeline({
 
       // build redactedEntitiesMap with user messages using NER positions.
       if (item.message.message.role === 'user' && item.message.message.content) {
-        if (item.message.message.sanitized && Array.isArray(item.message.message.nerEntities)) {
-          item.message.message.nerEntities.forEach((entity) => {
+        if (
+          item.message.message.sanitized &&
+          Array.isArray(item.message.message.detectedEntities)
+        ) {
+          item.message.message.detectedEntities.forEach((entity) => {
             redactedEntitiesMap[entity.hash] = entity.entity;
           });
           // transform user messages to react nodes to highlight the sensitive portions in the user message.
           displayContent = transformUserContent(
             item.message.message.content,
-            item.message.message.nerEntities
+            item.message.message.detectedEntities
           );
         } else {
           displayContent = item.message.message.content;
