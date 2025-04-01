@@ -147,7 +147,7 @@ describe('generateAttackDiscoveries', () => {
           anonymizedAlerts: mockAnonymizedAlerts,
           apiConfig: mockConfig.apiConfig,
           attackDiscoveries: mockAttackDiscoveries,
-          attackDiscoveryId: executionUuid,
+          executionUuid,
           authenticatedUser: mockAuthenticatedUser,
           dataClient: mockDataClient,
           hasFilter: false,
@@ -220,7 +220,7 @@ describe('generateAttackDiscoveries', () => {
       expect(handleGraphError).toHaveBeenCalledWith(
         expect.objectContaining({
           apiConfig: mockConfig.apiConfig,
-          attackDiscoveryId: executionUuid,
+          executionUuid,
           authenticatedUser: mockAuthenticatedUser,
           dataClient: mockDataClient,
           err: testInvokeError,
@@ -327,7 +327,7 @@ describe('generateAttackDiscoveries', () => {
       expect(handleGraphError).toHaveBeenCalledWith(
         expect.objectContaining({
           apiConfig: mockConfig.apiConfig,
-          attackDiscoveryId: executionUuid,
+          executionUuid,
           authenticatedUser: mockAuthenticatedUser,
           dataClient: mockDataClient,
           err: testUpdateError,
