@@ -60,6 +60,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Should not allow processing changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
           ingest: {
             ...rootStreamDefinition.ingest,
@@ -87,6 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Should not allow fields changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
           ingest: {
             ...rootStreamDefinition.ingest,
@@ -109,6 +111,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('Should allow routing changes', async () => {
       const body: IngestStreamUpsertRequest = {
         dashboards: [],
+        queries: [],
         stream: {
           ingest: {
             ...rootStreamDefinition.ingest,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 

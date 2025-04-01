@@ -149,6 +149,8 @@ export {
   ingestStreamUpsertRequestSchema,
   ingestUpsertRequestSchema,
   ingestStreamGetResponseSchema,
+  wiredStreamUpsertRequestSchema,
+  unwiredStreamUpsertRequestSchema,
   wiredStreamGetResponseSchema,
   unwiredStreamGetResponseSchema,
   type IngestGetResponse,

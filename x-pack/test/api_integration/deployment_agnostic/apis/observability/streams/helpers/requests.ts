@@ -119,3 +119,18 @@ export async function getIlmStats(
     .expect(expectStatusCode)
     .then((response) => response.body);
 }
+
+export async function getQueries(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}/queries 2023-10-31', {
+      params: {
+        path: { name },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}

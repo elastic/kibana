@@ -63,6 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
           body: {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
@@ -98,12 +99,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const {
         dashboards,
+        queries,
         stream,
         effective_lifecycle: effectiveLifecycle,
         elasticsearch_assets: elasticsearchAssets,
       } = body;
 
       expect(dashboards).to.eql([]);
+      expect(queries).to.eql([]);
 
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
@@ -159,6 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         params: {
           path: { name: TEST_STREAM_NAME },
           body: {
+            queries: [],
             dashboards: [],
             stream: {
               ingest: {
@@ -255,6 +259,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               name: DATA_STREAM_NAME,
             },
             body: {
+              queries: [],
               dashboards: [],
               stream: {
                 ingest: {
