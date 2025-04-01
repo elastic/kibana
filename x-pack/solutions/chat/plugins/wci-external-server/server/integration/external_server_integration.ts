@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { IntegrationType } from '@kbn/wci-common';
 import {
-  getClientForExternalServer,
+  getConnectToExternalServer,
   WorkchatIntegrationDefinition,
   WorkChatIntegration,
 } from '@kbn/wci-server';
@@ -24,11 +24,10 @@ export const getExternalServerIntegrationDefinition = ({
   return {
     getType: () => IntegrationType.external_server,
     createIntegration: async ({ configuration }): Promise<WorkChatIntegration> => {
-      const client = await getClientForExternalServer({ serverUrl: configuration.url });
-
       return {
-        type: IntegrationType.external_server,
-        client,
+        connect: getConnectToExternalServer({
+          serverUrl: configuration.url,
+        }),
       };
     },
   };

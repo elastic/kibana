@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-// TODO: remove to use UserNameAndId from common instead
-export interface ClientUser {
-  id: string;
-  username: string;
-}
+export const baseToolsProviderId = 'base_tools';

@@ -2143,7 +2143,8 @@
       "groupName": "workchat gen-ai dependencies",
       "matchDepNames": [
         "@modelcontextprotocol/sdk",
-        "@n8n/json-schema-to-zod"
+        "@n8n/json-schema-to-zod",
+        "expr-eval"
       ],
       "reviewers": [
         "team:search-kibana"

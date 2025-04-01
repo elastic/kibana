@@ -7,12 +7,12 @@
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { SSEClientTransport } from '@modelcontextprotocol/sdk/client/sse.js';
-import { getClientForExternalServer } from './create_external_client';
+import { getConnectToExternalServer } from './create_external_client';
 
 jest.mock('@modelcontextprotocol/sdk/client/index.js');
 jest.mock('@modelcontextprotocol/sdk/client/sse.js');
 
-describe('getClientForExternalServer', () => {
+describe('getConnectToExternalServer', () => {
   const mockUrl = 'http://test-server.com/mcp';
 
   const setupMocks = () => {
@@ -38,12 +38,12 @@ describe('getClientForExternalServer', () => {
   it('should create a client and connect successfully', async () => {
     const { mockTransport, mockClient } = setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const connectFn = getConnectToExternalServer({
       serverUrl: mockUrl,
       clientName: 'test-client',
     });
 
-    await integrationClient.connect();
+    await connectFn();
 
     expect(SSEClientTransport).toHaveBeenCalledWith(expect.any(URL));
     expect(Client).toHaveBeenCalledWith(
@@ -65,11 +65,11 @@ describe('getClientForExternalServer', () => {
   it('should use correct URL when creating transport', async () => {
     setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const connectFn = getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 
-    await integrationClient.connect();
+    await connectFn();
 
     expect(SSEClientTransport).toHaveBeenCalledWith(new URL(mockUrl));
   });
@@ -77,12 +77,12 @@ describe('getClientForExternalServer', () => {
   it('should disconnect properly', async () => {
     const { mockClient } = setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const connectFn = getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 
-    await integrationClient.connect();
-    await integrationClient.disconnect();
+    const client = await connectFn();
+    await client.disconnect();
 
     expect(mockClient.close).toHaveBeenCalled();
   });
@@ -90,19 +90,23 @@ describe('getClientForExternalServer', () => {
   it('should throw error when connecting an already connected client', async () => {
     setupMocks();
 
-    const integrationClient = await getClientForExternalServer({
+    const connectFn = getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 
-    await integrationClient.connect();
-    await expect(integrationClient.connect()).rejects.toThrow('Client already connected');
+    await connectFn();
+    await expect(connectFn()).rejects.toThrow('Client already connected');
   });
 
-  it('should handle disconnection of an unconnected client gracefully', async () => {
-    const integrationClient = await getClientForExternalServer({
+  it('should handle disconnection errors gracefully', async () => {
+    const { mockClient } = setupMocks();
+    mockClient.close.mockRejectedValueOnce(new Error('Disconnect failed'));
+
+    const connectFn = getConnectToExternalServer({
       serverUrl: mockUrl,
     });
 
-    await expect(integrationClient.disconnect()).resolves.not.toThrow();
+    const client = await connectFn();
+    await expect(client.disconnect()).rejects.toThrow('Disconnect failed');
   });
 });
