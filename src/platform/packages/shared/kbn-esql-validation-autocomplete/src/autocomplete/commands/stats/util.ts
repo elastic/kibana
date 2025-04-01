@@ -62,22 +62,20 @@ export const getPosition = (innerText: string, command: ESQLCommand): CaretPosit
     }
   }
 
-  if (isFunctionExpression(lastCommandArg) && lastCommandArg.name === 'where') {
-    return 'after_where';
-  }
-
   if (isAssignment(lastCommandArg) && !isAssignmentComplete(lastCommandArg)) {
     return 'expression_after_assignment';
   }
 
-  if (
-    getLastNonWhitespaceChar(innerText) === ',' ||
-    noCaseCompare(findPreviousWord(innerText), 'stats')
-  ) {
+  const previousWord = findPreviousWord(innerText);
+  if (getLastNonWhitespaceChar(innerText) === ',' || noCaseCompare(previousWord, 'stats')) {
     return 'expression_without_assignment';
-  } else {
-    return 'expression_complete';
   }
+
+  if (isFunctionExpression(lastCommandArg) && lastCommandArg.name === 'where') {
+    return 'after_where';
+  }
+
+  return 'expression_complete';
 };
 
 export const byCompleteItem: SuggestionRawDefinition = {

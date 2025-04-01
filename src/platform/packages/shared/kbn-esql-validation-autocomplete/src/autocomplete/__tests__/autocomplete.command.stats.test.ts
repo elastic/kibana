@@ -62,7 +62,7 @@ describe('autocomplete.suggest', () => {
     });
 
     describe('... <aggregates> ...', () => {
-      test('lists possible aggregations on space after command', async () => {
+      test('suggestions for a fresh expression', async () => {
         const expected = [
           'var0 = ',
           ...allAggFunctions,
@@ -72,6 +72,11 @@ describe('autocomplete.suggest', () => {
 
         await assertSuggestions('from a | stats /', expected);
         await assertSuggestions('FROM a | STATS /', expected);
+        await assertSuggestions('from a | stats a=max(b), /', expected);
+        await assertSuggestions(
+          'from a | stats a=max(b) WHERE doubleField > longField, /',
+          expected
+        );
       });
 
       test('on assignment expression, shows all agg and eval functions', async () => {
@@ -84,15 +89,6 @@ describe('autocomplete.suggest', () => {
 
       test('on space after aggregate field', async () => {
         await assertSuggestions('from a | stats a=min(b) /', ['WHERE ', 'BY ', ', ', '| ']);
-      });
-
-      test('on space after aggregate field with comma', async () => {
-        await assertSuggestions('from a | stats a=max(b), /', [
-          'var0 = ',
-          ...allAggFunctions,
-          ...allGroupingFunctions,
-          ...allEvaFunctions,
-        ]);
       });
 
       test('on function left paren', async () => {
@@ -256,16 +252,40 @@ describe('autocomplete.suggest', () => {
           ]);
         });
 
-        it('suggests pipe after complete boolean expression', async () => {
-          const suggestions = await suggest(
-            'FROM a | STATS MIN(b) WHERE keywordField != keywordField /'
+        describe('completed expression suggestions', () => {
+          const completedExpressionSuggestions = ['| ', ', ', 'BY '];
+
+          test.each(completedExpressionSuggestions)(
+            'suggests "%s" after complete boolean expression',
+            async (suggestion) => {
+              const suggestions = await suggest(
+                'FROM a | STATS MIN(b) WHERE keywordField != keywordField /'
+              );
+              expect(suggestions.map(({ text }) => text)).toContain(suggestion);
+            }
           );
-          expect(suggestions.map(({ text }) => text)).toContain('| ');
+
+          test.each(completedExpressionSuggestions)(
+            'does NOT suggest "%s" after complete non-boolean',
+            async (suggestion) => {
+              const suggestions = await suggest('FROM a | STATS MIN(b) WHERE longField + 1 /');
+              expect(suggestions.map(({ text }) => text)).not.toContain(suggestion);
+            }
+          );
         });
 
-        it('does NOT suggest pipe after complete non-boolean expression', async () => {
-          const suggestions = await suggest('FROM a | STATS MIN(b) WHERE doubleField + 1 /');
-          expect(suggestions.map(({ text }) => text)).not.toContain('| ');
+        it('suggests after logical operator', async () => {
+          await assertSuggestions(
+            `FROM a | STATS AVG(doubleField) WHERE keywordField >= keywordField AND doubleField /`,
+            [
+              ...getFunctionSignaturesByReturnType(
+                Location.STATS_WHERE,
+                'boolean',
+                { operators: true },
+                ['double']
+              ),
+            ]
+          );
         });
 
         describe('Parity with WHERE command', () => {
@@ -294,7 +314,10 @@ describe('autocomplete.suggest', () => {
 
             await assertSuggestions(
               `FROM a | STATS AVG(longField) WHERE ${expression} /`,
-              suggestions.map(({ text }) => text)
+              suggestions
+                .map(({ text }) => text)
+                // A couple extra goodies in STATS ... WHERE
+                .concat([', ', 'BY '])
             );
           });
         });

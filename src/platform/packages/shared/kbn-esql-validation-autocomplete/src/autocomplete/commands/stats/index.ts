@@ -89,7 +89,7 @@ export async function suggest({
       // If so, we can call it done and suggest a pipe
       const expressionType = getExpressionType(expressionRoot);
       if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
-        suggestions.push(pipeCompleteItem);
+        suggestions.push(pipeCompleteItem, { ...commaCompleteItem, text: ', ' }, byCompleteItem);
       }
 
       return suggestions;
