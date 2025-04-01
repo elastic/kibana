@@ -196,20 +196,20 @@ exports[`discover Discover Embeddable - Generate CSV report per panel Generate E
 
 exports[`discover Discover Embeddable - Generate CSV report per panel Generate Embeddable CSV for savedDiscoverSessionWithESQL generates a report with custom time range 1`] = `
 "averageB,extension
-\\"5738.34725848564\\",css
-\\"466.22712933753945\\",gif
-\\"5536.247799152266\\",jpg
 \\"10497.149253731342\\",png
+\\"5738.34725848564\\",css
+\\"5536.247799152266\\",jpg
 \\"4868.18064516129\\",php
+\\"466.22712933753945\\",gif
 "
 `;
 
 exports[`discover Discover Embeddable - Generate CSV report per panel Generate Embeddable CSV for savedDiscoverSessionWithESQL generates a report with global time range 1`] = `
 "averageB,extension
+\\"10429.042836041359\\",png
 \\"5765.214962121212\\",css
-\\"471.8752783964365\\",gif
 \\"5563.784938941655\\",jpg
 \\"4884.612149532711\\",php
-\\"10429.042836041359\\",png
+\\"471.8752783964365\\",gif
 "
 `;

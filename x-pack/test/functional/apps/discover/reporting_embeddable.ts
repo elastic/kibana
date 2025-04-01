@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
       await monacoEditor.setCodeEditorValue(
-        'from logstash-* | sort @timestamp desc | stats averageB = avg(bytes) by extension'
+        'from logstash-* | sort @timestamp desc | stats averageB = avg(bytes) by extension | sort averageB desc'
       );
       await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
