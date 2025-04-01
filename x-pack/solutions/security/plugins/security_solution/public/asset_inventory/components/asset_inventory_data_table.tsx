@@ -19,7 +19,7 @@ import {
 } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import {
-  type RowControlColumn,
+  // type RowControlColumn,
   SHOW_MULTIFIELDS,
   SORT_DEFAULT_ORDER_SETTING,
 } from '@kbn/discover-utils';
@@ -28,7 +28,7 @@ import {
   type EuiDataGridCellValueElementProps,
   type EuiDataGridStyle,
   EuiProgress,
-  EuiButtonIcon,
+  // EuiButtonIcon,
 } from '@elastic/eui';
 import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
@@ -71,12 +71,12 @@ const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.ta
   defaultMessage: 'assets',
 });
 
-const moreActionsLabel = i18n.translate(
-  'xpack.securitySolution.assetInventory.flyout.moreActionsButton',
-  {
-    defaultMessage: 'More actions',
-  }
-);
+// const moreActionsLabel = i18n.translate(
+//   'xpack.securitySolution.assetInventory.flyout.moreActionsButton',
+//   {
+//     defaultMessage: 'More actions',
+//   }
+// );
 
 const columnHeaders: Record<string, string> = {
   'entity.name': i18n.translate('xpack.securitySolution.assetInventory.allAssets.name', {
@@ -334,21 +334,22 @@ export const AssetInventoryDataTable = ({
     />
   );
 
-  const externalControlColumns: RowControlColumn[] = [
-    {
-      id: 'more-actions',
-      headerAriaLabel: moreActionsLabel,
-      headerCellRender: () => null,
-      renderControl: () => (
-        <EuiButtonIcon
-          aria-label={moreActionsLabel}
-          iconType="boxesHorizontal"
-          color="primary"
-          isLoading={isLoadingGridData}
-        />
-      ),
-    },
-  ];
+  // TODO Decide if we need to keep, hide or remove the 3-dots button on each row
+  // const externalControlColumns: RowControlColumn[] = [
+  //   {
+  //     id: 'more-actions',
+  //     headerAriaLabel: moreActionsLabel,
+  //     headerCellRender: () => null,
+  //     renderControl: () => (
+  //       <EuiButtonIcon
+  //         aria-label={moreActionsLabel}
+  //         iconType="boxesHorizontal"
+  //         color="primary"
+  //         isLoading={isLoadingGridData}
+  //       />
+  //     ),
+  //   },
+  // ];
 
   const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
 
@@ -396,7 +397,7 @@ export const AssetInventoryDataTable = ({
             showTimeCol={false}
             settings={settings}
             onFetchMoreRecords={loadMore}
-            rowAdditionalLeadingControls={externalControlColumns}
+            // rowAdditionalLeadingControls={externalControlColumns}
             externalCustomRenderers={externalCustomRenderers}
             externalAdditionalControls={externalAdditionalControls}
             gridStyleOverride={gridStyle}
