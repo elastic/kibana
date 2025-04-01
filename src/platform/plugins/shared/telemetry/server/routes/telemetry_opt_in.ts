@@ -126,17 +126,20 @@ export function registerTelemetryOptInRoutes({
   };
 
   router.versioned
-    .post({ access: 'internal', path: OptInRoute })
+    .post({
+      access: 'internal',
+      path: OptInRoute,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+    })
     // Just because it used to be /v2/, we are creating identical v1 and v2.
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: v2Validations,
       },
       v2Handler
