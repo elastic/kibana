@@ -79,19 +79,16 @@ const moreActionsLabel = i18n.translate(
 );
 
 const columnHeaders: Record<string, string> = {
-  'asset.risk': i18n.translate('xpack.securitySolution.assetInventory.allAssets.risk', {
-    defaultMessage: 'Risk',
-  }),
-  'asset.name': i18n.translate('xpack.securitySolution.assetInventory.allAssets.name', {
+  'entity.name': i18n.translate('xpack.securitySolution.assetInventory.allAssets.name', {
     defaultMessage: 'Name',
   }),
-  'asset.criticality': i18n.translate(
-    'xpack.securitySolution.assetInventory.allAssets.criticality',
-    {
-      defaultMessage: 'Criticality',
-    }
-  ),
-  'asset.source': i18n.translate('xpack.securitySolution.assetInventory.allAssets.source', {
+  'entity.id': i18n.translate('xpack.securitySolution.assetInventory.allAssets.id', {
+    defaultMessage: 'ID',
+  }),
+  'entity.type': i18n.translate('xpack.securitySolution.assetInventory.allAssets.type', {
+    defaultMessage: 'Type',
+  }),
+  'entity.source': i18n.translate('xpack.securitySolution.assetInventory.allAssets.source', {
     defaultMessage: 'Source',
   }),
   '@timestamp': i18n.translate('xpack.securitySolution.assetInventory.allAssets.lastSeen', {
@@ -100,8 +97,8 @@ const columnHeaders: Record<string, string> = {
 } as const;
 
 const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
-  'asset.risk': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const risk = rows[rowIndex].flattened['asset.risk'] as number;
+  'entity.risk': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const risk = rows[rowIndex].flattened['entity.risk'] as number;
     return <RiskBadge risk={risk} />;
   },
   'asset.criticality': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
@@ -118,10 +115,10 @@ interface AssetInventoryDefaultColumn {
 }
 
 const defaultColumns: AssetInventoryDefaultColumn[] = [
-  { id: 'asset.risk', width: 50 },
-  { id: 'asset.name', width: 400 },
-  { id: 'asset.criticality' },
-  { id: 'asset.source' },
+  { id: 'entity.name', width: 400 },
+  { id: 'entity.id' },
+  { id: 'entity.type' },
+  { id: 'entity.source' },
   { id: '@timestamp' },
 ];
 
