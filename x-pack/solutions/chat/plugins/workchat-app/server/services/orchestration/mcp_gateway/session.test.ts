@@ -10,10 +10,11 @@ import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
 import { buildToolName } from '@kbn/wci-common';
 import { getConnectToInternalServer } from '@kbn/wci-server';
-import { IntegrationWithMeta, IntegrationToolInputSchema } from './types';
-import { IntegrationsSessionImpl } from './integrations_session';
+import { IntegrationToolInputSchema } from './types';
+import { McpGatewaySessionImpl } from './session';
+import type { McpProvider } from '@kbn/wci-server';
 
-describe('IntegrationsGateway', () => {
+describe('McpGatewaySession', () => {
   describe('MCP servers with tools', () => {
     const logger = loggerMock.create();
 
@@ -45,44 +46,50 @@ describe('IntegrationsGateway', () => {
       return server;
     };
 
-    const getIntegrations = async () => {
-      const integration1: IntegrationWithMeta = {
-        id: 'Test Server 1',
-        type: 'test1' as any,
-        client: await getConnectToInternalServer({ server: serverA() }),
+    const getProviders = async () => {
+      const provider1: McpProvider = {
+        id: 'test-client-1',
+        connect: () =>
+          getConnectToInternalServer({
+            server: serverA(),
+            clientName: 'Test Server 1',
+          })(),
       };
 
-      const integration2: IntegrationWithMeta = {
-        id: 'Test Server 2',
-        type: 'test2' as any,
-        client: await getConnectToInternalServer({ server: serverB() }),
+      const provider2: McpProvider = {
+        id: 'test-client-2',
+        connect: () =>
+          getConnectToInternalServer({
+            server: serverB(),
+            clientName: 'Test Server 2',
+          })(),
       };
 
-      return [integration1, integration2];
+      return [provider1, provider2];
     };
 
     it('should register multiple MCP servers with tools and call all tools', async () => {
-      const integrationSession = new IntegrationsSessionImpl({
+      const integrationSession = new McpGatewaySessionImpl({
         logger,
-        integrations: await getIntegrations(),
+        providers: await getProviders(),
       });
 
       const allTools = await integrationSession.listTools();
       expect(allTools.length).toBe(2);
       expect(allTools.map((tool) => tool.name)).toEqual([
-        buildToolName({ integrationId: 'Test Server 1', toolName: 'add' }),
-        buildToolName({ integrationId: 'Test Server 2', toolName: 'tool3' }),
+        buildToolName({ integrationId: 'test-client-1', toolName: 'add' }),
+        buildToolName({ integrationId: 'test-client-2', toolName: 'tool3' }),
       ]);
     });
 
     it('should allow to call a tool', async () => {
-      const integrationSession = new IntegrationsSessionImpl({
+      const integrationSession = new McpGatewaySessionImpl({
         logger,
-        integrations: await getIntegrations(),
+        providers: await getProviders(),
       });
 
       const result = await integrationSession.executeTool(
-        buildToolName({ integrationId: 'Test Server 1', toolName: 'add' }),
+        buildToolName({ integrationId: 'test-client-1', toolName: 'add' }),
         {
           a: 1,
           b: 2,

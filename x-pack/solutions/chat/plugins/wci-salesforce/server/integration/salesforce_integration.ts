@@ -24,18 +24,14 @@ export const getSalesforceIntegrationDefinition = ({
 }): WorkchatIntegrationDefinition<WCISalesforceConfiguration> => {
   return {
     getType: () => IntegrationType.salesforce,
-    createIntegration: async ({
-      request,
-      integrationId,
-      configuration,
-    }): Promise<WorkChatIntegration> => {
+    createIntegration: async ({ request, configuration }): Promise<WorkChatIntegration> => {
       const [coreStart] = await core.getStartServices();
       const elasticsearchClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
       const mcpServer = await createMcpServer({ configuration, elasticsearchClient, logger });
 
       return {
-        connect: getConnectToInternalServer({ server: mcpServer, clientId: integrationId }),
+        connect: getConnectToInternalServer({ server: mcpServer }),
       };
     },
   };

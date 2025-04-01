@@ -61,7 +61,7 @@ export class McpGatewaySessionImpl implements McpGatewaySession {
 
   async listTools(): Promise<IntegrationTool[]> {
     await this.ensureConnected();
-    return listClientsTools({ clients: Object.values(this.sessionClients), logger: this.logger });
+    return listClientsTools({ clients: this.sessionClients, logger: this.logger });
   }
 
   async executeTool(serverToolName: string, params: IntegrationToolInputSchema) {

@@ -23,11 +23,6 @@ export interface McpTool<RunInput extends ZodRawShape = ZodRawShape> {
  */
 export type McpClient = Pick<McpBaseClient, 'listTools' | 'callTool'> & {
   /**
-   * a unique ID for this client.
-   * E.g for integrations, it's the integration ID
-   */
-  id: string;
-  /**
    * Disconnect the client. Note that once disconnected, it can't
    * be connected again.
    */

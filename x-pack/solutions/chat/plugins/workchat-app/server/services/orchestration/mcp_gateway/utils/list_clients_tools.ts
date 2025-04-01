@@ -18,23 +18,23 @@ export const listClientsTools = async ({
   clients,
   logger,
 }: {
-  clients: McpClient[];
+  clients: Record<string, McpClient>;
   logger?: Logger;
 }): Promise<IntegrationTool[]> => {
   const clientsTools = await Promise.all(
-    clients.map<Promise<IntegrationTool[]>>(async (client) => {
+    Object.entries(clients).map<Promise<IntegrationTool[]>>(async ([clientId, client]) => {
       try {
         const toolsResponse = await client.listTools();
         if (toolsResponse?.tools?.length) {
           return toolsResponse.tools.map((tool) => ({
-            name: buildToolName({ integrationId: client.id, toolName: tool.name }),
+            name: buildToolName({ integrationId: clientId, toolName: tool.name }),
             description: tool.description || '',
             inputSchema: (tool.inputSchema || {}) as JsonSchemaObject,
           }));
         }
         return [];
       } catch (err) {
-        logger?.warn(`Error fetching tools for client: ${client.id}`);
+        logger?.warn(`Error fetching tools for client: ${clientId}`);
         return [];
       }
     })

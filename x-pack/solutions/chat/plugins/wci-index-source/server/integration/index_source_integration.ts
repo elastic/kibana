@@ -27,7 +27,6 @@ export const getIndexSourceIntegrationDefinition = ({
     createIntegration: async ({
       request,
       description,
-      integrationId,
       configuration,
     }): Promise<WorkChatIntegration> => {
       const [coreStart] = await core.getStartServices();
@@ -41,7 +40,7 @@ export const getIndexSourceIntegrationDefinition = ({
       });
 
       return {
-        connect: getConnectToInternalServer({ server: mcpServer, clientId: integrationId }),
+        connect: getConnectToInternalServer({ server: mcpServer }),
       };
     },
   };
