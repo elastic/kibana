@@ -128,14 +128,6 @@ async function updateWithOCC(
         updatedAt: modificationMetadata.updatedAt,
       });
 
-    if (updateMaintenanceWindowAttributes.scopedQuery) {
-      if (updateMaintenanceWindowAttributes.categoryIds?.length !== 1) {
-        throw Boom.badRequest(
-          `Error validating update maintenance window data - scoped query must be accompanied by 1 category ID`
-        );
-      }
-    }
-
     // We are deleting and then creating rather than updating because SO.update
     // performs a partial update on the rRule, we would need to null out all of the fields
     // that are removed from a new rRule if that were the case.
