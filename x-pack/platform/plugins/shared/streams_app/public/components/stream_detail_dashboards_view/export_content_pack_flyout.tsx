@@ -93,7 +93,7 @@ export function ExportContentPackFlyout({
       <EuiFlyoutHeader>
         <EuiTitle>
           <h2>
-            {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
+            {i18n.translate('xpack.streams.streamDetailDashboard.exportContent', {
               defaultMessage: 'Export content pack',
             })}
           </h2>
