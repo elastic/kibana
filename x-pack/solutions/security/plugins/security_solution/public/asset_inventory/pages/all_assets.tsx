@@ -12,7 +12,7 @@ import { EuiPageTemplate } from '@elastic/eui';
 import { AssetInventorySearchBar } from '../components/asset_inventory_search_bar';
 import { AssetInventoryFilters } from '../components/filters/asset_inventory_filters';
 import { AssetInventoryBarChart } from '../components/asset_inventory_bar_chart';
-import { AssetInventoryDataTable } from '../components/asset_inventory_data_table';
+import { AssetInventoryTableSection } from '../components/asset_inventory_table_section';
 import { AssetInventoryTitle } from '../components/asset_inventory_title';
 import { useFetchChartData } from '../hooks/use_fetch_chart_data';
 import {
@@ -59,7 +59,7 @@ export const AllAssets = () => {
           isFetching={isFetchingChartData}
           entities={!!chartData && chartData.length > 0 ? chartData : []}
         />
-        <AssetInventoryDataTable state={state} />
+        <AssetInventoryTableSection state={state} />
       </EuiPageTemplate.Section>
     </I18nProvider>
   );
