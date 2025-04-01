@@ -19,7 +19,7 @@ import type { SharedDataViewSelectionState } from '../redux/types';
  * This hook should be used whenever we need the actual DataView and not just the spec for the
  * selected data view.
  */
-export const useFullDataView = (
+export const useDataView = (
   dataViewManagerScope: DataViewManagerScopeName
 ): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
   const {

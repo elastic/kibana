@@ -10,7 +10,7 @@ import type { ComponentType } from 'react';
 import type { ReactElement } from 'react-markdown';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { DataViewManagerScopeName } from '../../../data_view_manager/constants';
-import { useFullDataView } from '../../../data_view_manager/hooks/use_full_data_view';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { DataViewErrorComponent } from './data_view_error';
 import { useEnableExperimental } from '../../hooks/use_experimental_features';
 
@@ -34,7 +34,7 @@ export const withDataView = <P extends WithDataViewArg>(
   fallback?: ReactElement
 ) => {
   const ComponentWithDataView = (props: OmitDataView<P>) => {
-    const { dataView: experimentalDataView } = useFullDataView(DataViewManagerScopeName.timeline);
+    const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.timeline);
 
     const dataView = useGetScopedSourcererDataView({
       sourcererScope: SourcererScopeName.timeline,

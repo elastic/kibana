@@ -7,13 +7,13 @@
 
 import { useMemo } from 'react';
 import type { DataViewManagerScopeName } from '../constants';
-import { useFullDataView } from './use_full_data_view';
+import { useDataView } from './use_data_view';
 
 /**
  * Returns data view selection for given scopeName
  */
 export const useDataViewSpec = (scopeName: DataViewManagerScopeName) => {
-  const { dataView, status } = useFullDataView(scopeName);
+  const { dataView, status } = useDataView(scopeName);
 
   return useMemo(() => {
     // NOTE: remove this after we are ready for undefined (lazy) data view everywhere in the app
