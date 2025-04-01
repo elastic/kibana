@@ -18,6 +18,7 @@ import { retryTransientEsErrors } from '../../services/epm/elasticsearch/retry';
 import type { CustomAssetsData, IntegrationsData, SyncIntegrationsData } from './model';
 
 const DELETED_ASSET_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
+export const CUSTOM_ASSETS_PREFIX = '*@custom';
 
 export const findIntegration = (assetName: string, integrations: IntegrationsData[]) => {
   const matches = assetName.match(/^(\w*)?(?:\-)?(\w*)(?:\-)?(?:\.)?(?:\w*)?@custom$/);
@@ -35,8 +36,8 @@ export const findIntegration = (assetName: string, integrations: IntegrationsDat
 
 export function getComponentTemplate(
   esClient: ElasticsearchClient,
-  abortController: AbortController,
-  name?: string
+  name: string,
+  abortController: AbortController
 ): Promise<ClusterGetComponentTemplateResponse> {
   return esClient.cluster.getComponentTemplate(
     {
@@ -51,8 +52,8 @@ export function getComponentTemplate(
 
 export function getPipeline(
   esClient: ElasticsearchClient,
-  abortController: AbortController,
-  name?: string
+  name: string,
+  abortController: AbortController
 ): Promise<IngestGetPipelineResponse> {
   return esClient.ingest.getPipeline(
     {
@@ -71,7 +72,11 @@ export const getCustomAssets = async (
   abortController: AbortController,
   previousSyncIntegrationsData: SyncIntegrationsData | undefined
 ): Promise<CustomAssetsData[]> => {
-  const customTemplates = await getComponentTemplate(esClient, abortController, '*@custom');
+  const customTemplates = await getComponentTemplate(
+    esClient,
+    CUSTOM_ASSETS_PREFIX,
+    abortController
+  );
 
   const customAssetsComponentTemplates = customTemplates.component_templates.reduce(
     (acc: CustomAssetsData[], template) => {
@@ -90,7 +95,7 @@ export const getCustomAssets = async (
     []
   );
 
-  const ingestPipelines = await getPipeline(esClient, abortController, '*@custom');
+  const ingestPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
 
   const customAssetsIngestPipelines = Object.keys(ingestPipelines).reduce(
     (acc: CustomAssetsData[], pipeline) => {
@@ -155,7 +160,7 @@ async function updateComponentTemplate(
   abortController: AbortController,
   logger: Logger
 ) {
-  const customTemplates = await getComponentTemplate(esClient, abortController, customAsset.name);
+  const customTemplates = await getComponentTemplate(esClient, customAsset.name, abortController);
   const existingTemplate = customTemplates.component_templates?.find(
     (template) => template.name === customAsset.name
   );
@@ -212,7 +217,7 @@ async function updateIngestPipeline(
   abortController: AbortController,
   logger: Logger
 ) {
-  const ingestPipelines = await getPipeline(esClient, abortController, customAsset.name);
+  const ingestPipelines = await getPipeline(esClient, customAsset.name, abortController);
   const existingPipeline = ingestPipelines[customAsset.name];
 
   if (customAsset.is_deleted) {

@@ -38,7 +38,12 @@ import type {
 } from '../../../common/types';
 
 import type { IntegrationsData, SyncIntegrationsData, CustomAssetsData } from './model';
-import { getPipeline, installCustomAsset, getComponentTemplate } from './custom_assets';
+import {
+  getPipeline,
+  installCustomAsset,
+  getComponentTemplate,
+  CUSTOM_ASSETS_PREFIX,
+} from './custom_assets';
 
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
@@ -315,14 +320,14 @@ const compareIntegrations = (
         return {
           ...ccrIntegration,
           sync_status: 'failed' as SyncStatus.FAILED,
-          error: `Installation not found`,
+          error: `Installation not found on remote`,
         };
       }
       if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
         return {
           ...ccrIntegration,
           sync_status: 'failed' as SyncStatus.FAILED,
-          error: `Installed version: ${localIntegrationSO?.attributes.version}`,
+          error: `Found incorrect installed version ${localIntegrationSO?.attributes.version}`,
         };
       }
       if (localIntegrationSO?.attributes.install_status !== 'installed') {
@@ -352,8 +357,12 @@ const compareCustomAssets = async (
   const abortController = new AbortController();
 
   try {
-    const installedPipelines = await getPipeline(esClient, abortController);
-    const installedComponentTemplates = await getComponentTemplate(esClient, abortController);
+    const installedPipelines = await getPipeline(esClient, CUSTOM_ASSETS_PREFIX, abortController);
+    const installedComponentTemplates = await getComponentTemplate(
+      esClient,
+      CUSTOM_ASSETS_PREFIX,
+      abortController
+    );
 
     const componentTemplatesByName = (
       installedComponentTemplates?.component_templates || []
@@ -369,7 +378,8 @@ const compareCustomAssets = async (
     Object.entries(ccrCustomAssets).forEach(([ccrCustomName, ccrCustomAsset]) => {
       if (ccrCustomAsset.type === 'ingest_pipeline') {
         const installedAsset = installedPipelines[ccrCustomAsset?.name];
-        if (isEqual(installedAsset?.processors, ccrCustomAsset?.pipeline?.processors)) {
+
+        if (isEqual(installedAsset, ccrCustomAsset?.pipeline)) {
           result[ccrCustomName] = {
             ...ccrCustomAsset,
             sync_status: 'completed' as SyncStatus.COMPLETED,
