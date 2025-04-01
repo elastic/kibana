@@ -51,6 +51,8 @@ export interface OtelEdotTransactionDocument extends OtelEdotDocument {
     'session.id'?: string;
     'thread.id'?: number;
     'thread.name'?: string;
+    'url.path'?: string;
+    'url.scheme'?: string;
   };
   status?: {
     code?: string;
