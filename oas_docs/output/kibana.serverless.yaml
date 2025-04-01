@@ -6168,6 +6168,11 @@ paths:
                               default: ''
                               description: A short description.
                               type: string
+                            tags:
+                              items:
+                                description: An array of tags applied to this dashboard
+                                type: string
+                              type: array
                             timeRestore:
                               default: false
                               description: Whether to restore time upon viewing this dashboard
@@ -6628,6 +6633,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -7093,6 +7103,11 @@ paths:
                       required:
                         - pause
                         - value
+                    tags:
+                      items:
+                        description: An array of tags applied to this dashboard
+                        type: string
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -7481,6 +7496,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -7926,6 +7946,11 @@ paths:
                       required:
                         - pause
                         - value
+                    tags:
+                      items:
+                        description: An array of tags applied to this dashboard
+                        type: string
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -8310,6 +8335,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -53168,8 +53198,7 @@ components:
         required_fields:
           $ref: '#/components/schemas/Security_Detections_API_RequiredFieldArray'
         revision:
-          minimum: 0
-          type: integer
+          $ref: '#/components/schemas/Security_Detections_API_RuleRevision'
         rule_id:
           $ref: '#/components/schemas/Security_Detections_API_RuleSignatureId'
         rule_source:
@@ -53515,6 +53544,15 @@ components:
         - $ref: '#/components/schemas/Security_Detections_API_EsqlRule'
       discriminator:
         propertyName: type
+    Security_Detections_API_RuleRevision:
+      description: |
+        The rule's revision number.
+
+        It represents the version of rule's object in Kibana. It is set to `0` when the rule is installed or created and then gets incremented on each update.
+        > info
+        > Not all updates to any rule fields will increment the revision. Only those fields that are considered static `rule parameters` can trigger revision increments. For example, an update to a rule's query or index fields will increment the rule's revision by `1`. However, changes to dynamic or technical fields like enabled or execution_summary will not cause revision increments.
+      minimum: 0
+      type: integer
     Security_Detections_API_RuleSignatureId:
       description: Could be any string, not necessarily a UUID
       type: string
@@ -53543,7 +53581,13 @@ components:
       discriminator:
         propertyName: type
     Security_Detections_API_RuleVersion:
-      description: The rule's version number.
+      description: |
+        The rule's version number.
+
+        - For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
+        - For custom rules it is set to `1` when the rule is created. 
+        > info
+        > It is not incremented on each update. Compare this to the `revision` field.
       minimum: 1
       type: integer
     Security_Detections_API_SavedObjectResolveAliasPurpose:

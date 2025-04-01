@@ -4380,6 +4380,28 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.BULK_UNINSTALL_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-public.EPM_API_ROUTES.LIST_PATTERN",
             "type": "string",
             "tags": [],
@@ -31179,6 +31201,28 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.BULK_UNINSTALL_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.LIST_PATTERN",
             "type": "string",
             "tags": [],
@@ -31672,6 +31716,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getBulkUninstallPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBulkUninstallPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.epmRouteService.getOneBulkUpgradePath",
             "type": "Function",
             "tags": [],
@@ -31687,6 +31747,38 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-common.epmRouteService.getOneBulkUpgradePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "taskId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getOneBulkUninstallPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getOneBulkUninstallPath",
+            "description": [],
+            "signature": [
+              "(taskId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getOneBulkUninstallPath.$1",
                 "type": "string",
                 "tags": [],
                 "label": "taskId",

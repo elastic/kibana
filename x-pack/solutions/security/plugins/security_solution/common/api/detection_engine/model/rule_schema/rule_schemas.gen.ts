@@ -59,6 +59,7 @@ import {
   RuleSignatureId,
   IsRuleImmutable,
   RuleSource,
+  RuleRevision,
   RequiredFieldArray,
   RuleQuery,
   IndexPatternArray,
@@ -166,7 +167,7 @@ export const ResponseFields = z.object({
   updated_by: z.string(),
   created_at: z.string().datetime(),
   created_by: z.string(),
-  revision: z.number().int().min(0),
+  revision: RuleRevision,
   required_fields: RequiredFieldArray,
   execution_summary: RuleExecutionSummary.optional(),
 });
