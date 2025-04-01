@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiScreenReaderOnly, EuiToolTip, useEuiFontSize } from '@elastic/eui';
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import type {
@@ -21,91 +21,69 @@ interface Props {
   options: InfraWaffleMapOptions;
 }
 
-export class GroupName extends React.PureComponent<Props, { a11yAnnouncement: string }> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { a11yAnnouncement: '' };
-  }
+export const GroupName: React.FC<Props> = ({ onDrilldown, group, isChild, options }) => {
+  const [a11yAnnouncement, setA11yAnnouncement] = useState('');
 
-  public render() {
-    const { group, isChild } = this.props;
-    const { a11yAnnouncement } = this.state;
-    const buttonStyle = {
-      fontSize: isChild ? '0.85em' : '1em',
-    };
-
-    return (
-      <>
-        <EuiScreenReaderOnly>
-          <div aria-live="polite" role="status">
-            {a11yAnnouncement}
-          </div>
-        </EuiScreenReaderOnly>
-
-        <GroupNameContainer>
-          <Inner isChild={isChild}>
-            <Name>
-              <EuiToolTip position="top" content={group.name}>
-                <EuiButtonEmpty
-                  aria-label={i18n.translate('xpack.infra.inventory.groupBySelectorButtonLabel', {
-                    defaultMessage: 'Group by {group}',
-                    values: { group: group.name },
-                  })}
-                  style={buttonStyle}
-                  onClick={this.handleClick}
-                  data-test-subj="groupNameButton"
-                >
-                  {group.name}
-                </EuiButtonEmpty>
-              </EuiToolTip>
-            </Name>
-            <Count>{group.count}</Count>
-          </Inner>
-        </GroupNameContainer>
-      </>
-    );
-  }
-
-  private handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-    const {
-      options: { groupBy },
-      group,
-    } = this.props;
 
-    if (groupBy.length === 0) {
-      this.setState(
-        {
-          a11yAnnouncement: i18n.translate('xpack.infra.inventory.groupBy.noChangeMessage', {
-            defaultMessage: 'No changes were made when selecting {group}.',
-            values: { group: group.name },
-          }),
-        },
-        () => {
-          // Clear the message after a short delay to ensure it gets announced
-          setTimeout(() => this.setState({ a11yAnnouncement: '' }), 2000);
-        }
+    if (options.groupBy.length === 0) {
+      setA11yAnnouncement(
+        i18n.translate('xpack.infra.inventory.groupBy.noChangeMessage', {
+          defaultMessage: 'No changes were made when selecting {group}.',
+          values: { group: group.name },
+        })
       );
       return;
     }
 
-    this.setState(
-      {
-        a11yAnnouncement: i18n.translate('xpack.infra.inventory.groupBy.grouppingByMessage', {
-          defaultMessage: 'Groupping by {group}...',
-          values: { group: group.name },
-        }),
-      },
-      () => {
-        setTimeout(() => {
-          const currentPath = this.props.isChild && groupBy.length > 1 ? groupBy[1] : groupBy[0];
-          this.props.onDrilldown(`${currentPath.field}: "${group.name}"`);
-          this.setState({ a11yAnnouncement: '' });
-        }, 500);
-      }
+    setA11yAnnouncement(
+      i18n.translate('xpack.infra.inventory.groupBy.grouppingByMessage', {
+        defaultMessage: 'Grouping by {group}...',
+        values: { group: group.name },
+      })
     );
+
+    const currentPath =
+      isChild && options.groupBy.length > 1 ? options.groupBy[1] : options.groupBy[0];
+    onDrilldown(`${currentPath.field}: "${group.name}"`);
   };
-}
+
+  const buttonStyle = {
+    fontSize: isChild ? '0.85em' : '1em',
+  };
+
+  return (
+    <>
+      <EuiScreenReaderOnly>
+        <div aria-live="polite" role="status">
+          {a11yAnnouncement}
+        </div>
+      </EuiScreenReaderOnly>
+
+      <GroupNameContainer>
+        <Inner isChild={isChild}>
+          <Name>
+            <EuiToolTip position="top" content={group.name}>
+              <EuiButtonEmpty
+                aria-label={i18n.translate('xpack.infra.inventory.groupBySelectorButtonLabel', {
+                  defaultMessage: 'Group by {group}',
+                  values: { group: group.name },
+                })}
+                style={buttonStyle}
+                onClick={handleClick}
+                data-test-subj="groupNameButton"
+              >
+                {group.name}
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          </Name>
+          <Count>{group.count}</Count>
+        </Inner>
+      </GroupNameContainer>
+    </>
+  );
+};
 
 const GroupNameContainer = styled.div`
   position: relative;
