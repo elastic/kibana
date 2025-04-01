@@ -476,14 +476,13 @@ export const alertDelaySchema = schema.object(
 );
 
 export const dashboardSchema = schema.arrayOf(schema.object({ id: schema.string() }));
+export const investigationGuideSchema = schema.object({
+  blob: schema.string(),
+});
 
 export const artifactSchema = schema.object({
   dashboards: schema.maybe(dashboardSchema),
-  investigation_guide: schema.maybe(
-    schema.object({
-      blob: schema.string(),
-    })
-  ),
+  investigation_guide: schema.maybe(investigationGuideSchema),
 });
 
 export const ruleResponseSchema = schema.object({
