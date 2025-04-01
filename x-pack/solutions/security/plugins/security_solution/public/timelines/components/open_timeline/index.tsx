@@ -58,7 +58,7 @@ import { useStartTransaction } from '../../../common/lib/apm/use_start_transacti
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -163,7 +163,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
     let { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
     if (newDataViewPickerEnabled) {
