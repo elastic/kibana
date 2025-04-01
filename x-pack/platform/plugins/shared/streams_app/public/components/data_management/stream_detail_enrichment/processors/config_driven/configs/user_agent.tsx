@@ -10,10 +10,83 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { UserAgentProcessorConfig, UserAgentProcessorDefinition } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
-import { ConfigDrivenProcessorConfiguration } from '../types';
+import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
+import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
 export type UserAgentProcessorFormState = UserAgentProcessorConfig & { type: 'user_agent' };
+
+const defaultFormState: UserAgentProcessorFormState = {
+  type: 'user_agent' as const,
+  field: '',
+  target_field: '',
+  regex_file: '',
+  properties: [],
+  ignore_missing: false,
+};
+
+const fieldOptions: FieldOptions = {
+  fieldHelpText: i18n.translate(
+    'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentFieldHelpText',
+    { defaultMessage: 'The field containing the user agent string.' }
+  ),
+  includeCondition: false,
+  includeIgnoreFailures: false,
+  includeIgnoreMissing: true,
+};
+
+const fieldConfigurations: FieldConfiguration[] = [
+  {
+    field: 'target_field',
+    type: 'string',
+    required: false,
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentTargetFieldLabel',
+      { defaultMessage: 'Target field' }
+    ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentTargetFieldHelpText"
+        defaultMessage="The field that will be filled with the user agent details. Default is {userAgentField}."
+        values={{
+          userAgentField: <EuiCode>user_agent</EuiCode>,
+        }}
+      />
+    ),
+  },
+  {
+    field: 'regex_file',
+    type: 'string',
+    required: false,
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileLabel',
+      { defaultMessage: 'Regex file' }
+    ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileHelpText"
+        defaultMessage="The name of the file in the config/ingest-user-agent directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the regexes.yaml from uap-core it ships with."
+      />
+    ),
+  },
+  {
+    field: 'properties',
+    type: 'array',
+    required: false,
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentPropertiesLabel',
+      { defaultMessage: 'Properties' }
+    ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentPropertiesHelpText"
+        defaultMessage="Controls what properties are added to {targetField}."
+        values={{
+          targetField: <EuiCode>target_field</EuiCode>,
+        }}
+      />
+    ),
+  },
+];
 
 export const userAgentProcessorConfig: ConfigDrivenProcessorConfiguration<
   UserAgentProcessorFormState,
@@ -49,95 +122,15 @@ export const userAgentProcessorConfig: ConfigDrivenProcessorConfiguration<
       />
     );
   },
-  defaultFormState: {
-    type: 'user_agent' as const,
-    field: '',
-    target_field: '',
-    regex_file: '',
-    properties: [],
-    ignore_missing: false,
-  },
-  convertFormStateToConfig: (formState) => {
-    return {
-      user_agent: {
-        field: formState.field,
-        target_field: isEmpty(formState.target_field) ? undefined : formState.target_field,
-        regex_file: isEmpty(formState.regex_file) ? undefined : formState.regex_file,
-        properties: isEmpty(formState.properties) ? undefined : formState.properties,
-        ignore_missing: formState.ignore_missing,
-      },
-    };
-  },
-  convertProcessorToFormState: (processor) => {
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { user_agent } = processor;
-
-    return structuredClone({
-      ...user_agent,
-      type: 'user_agent',
-      properties: user_agent.properties ?? [],
-    });
-  },
-  fieldConfigurations: [
-    {
-      field: 'target_field',
-      type: 'string',
-      required: false,
-      label: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentTargetFieldLabel',
-        { defaultMessage: 'Target field' }
-      ),
-      helpText: (
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentTargetFieldHelpText"
-          defaultMessage="The field that will be filled with the user agent details. Default is {userAgentField}."
-          values={{
-            userAgentField: <EuiCode>user_agent</EuiCode>,
-          }}
-        />
-      ),
-    },
-    {
-      field: 'regex_file',
-      type: 'string',
-      required: false,
-      label: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileLabel',
-        { defaultMessage: 'Regex file' }
-      ),
-      helpText: (
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentRegexFileHelpText"
-          defaultMessage="The name of the file in the config/ingest-user-agent directory containing the regular expressions for parsing the user agent string. Both the directory and the file have to be created before starting Elasticsearch. If not specified, ingest-user-agent will use the regexes.yaml from uap-core it ships with."
-        />
-      ),
-    },
-    {
-      field: 'properties',
-      type: 'array',
-      required: false,
-      label: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentPropertiesLabel',
-        { defaultMessage: 'Properties' }
-      ),
-      helpText: (
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentPropertiesHelpText"
-          defaultMessage="Controls what properties are added to {targetField}."
-          values={{
-            targetField: <EuiCode>target_field</EuiCode>,
-          }}
-        />
-      ),
-    },
-  ],
-  fieldOptions: {
-    fieldHelpText: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.userAgentFieldHelpText',
-      { defaultMessage: 'The field containing the user agent string.' }
-    ),
-    includeCondition: false,
-    includeIgnoreFailures: false,
-    includeIgnoreMissing: true,
-  },
+  defaultFormState,
+  convertFormStateToConfig: getConvertFormStateToConfig<
+    UserAgentProcessorFormState,
+    UserAgentProcessorDefinition
+  >('user_agent', fieldConfigurations, fieldOptions),
+  convertProcessorToFormState: getConvertProcessorToFormState<
+    UserAgentProcessorDefinition,
+    UserAgentProcessorFormState
+  >('user_agent', defaultFormState),
+  fieldConfigurations,
+  fieldOptions,
 };

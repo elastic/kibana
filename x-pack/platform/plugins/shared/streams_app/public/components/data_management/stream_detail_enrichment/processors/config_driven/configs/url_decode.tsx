@@ -10,11 +10,51 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiLink } from '@elastic/eui';
 import { UrlDecodeProcessorConfig, UrlDecodeProcessorDefinition } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
 import { ALWAYS_CONDITION } from '../../../../../../util/condition';
-import { ConfigDrivenProcessorConfiguration } from '../types';
+import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
+import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
 export type UrlDecodeProcessorFormState = UrlDecodeProcessorConfig & { type: 'urldecode' };
+
+const defaultFormState: UrlDecodeProcessorFormState = {
+  type: 'urldecode' as const,
+  field: '',
+  target_field: '',
+  ignore_missing: false,
+  ignore_failure: false,
+  if: ALWAYS_CONDITION,
+};
+
+const fieldOptions: FieldOptions = {
+  fieldHelpText: i18n.translate(
+    'xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeFieldHelpText',
+    { defaultMessage: 'The field to decode.' }
+  ),
+  includeCondition: true,
+  includeIgnoreFailures: true,
+  includeIgnoreMissing: true,
+};
+
+const fieldConfigurations: FieldConfiguration[] = [
+  {
+    field: 'target_field',
+    type: 'string',
+    required: false,
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeTargetFieldLabel',
+      { defaultMessage: 'Target field' }
+    ),
+    helpText: (
+      <FormattedMessage
+        id="xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeTargetFieldHelpText"
+        defaultMessage="The field to assign the converted value to, by default {field} is updated in-place."
+        values={{
+          field: <EuiCode>field</EuiCode>,
+        }}
+      />
+    ),
+  },
+];
 
 export const urlDecodeProcessorConfig: ConfigDrivenProcessorConfiguration<
   UrlDecodeProcessorFormState,
@@ -49,60 +89,15 @@ export const urlDecodeProcessorConfig: ConfigDrivenProcessorConfiguration<
       />
     );
   },
-  defaultFormState: {
-    type: 'urldecode' as const,
-    field: '',
-    target_field: '',
-    ignore_missing: false,
-    ignore_failure: false,
-    if: ALWAYS_CONDITION,
-  },
-  convertFormStateToConfig: (formState) => {
-    return {
-      urldecode: {
-        if: formState.if,
-        field: formState.field,
-        target_field: isEmpty(formState.target_field) ? undefined : formState.target_field,
-        ignore_missing: formState.ignore_missing,
-        ignore_failure: formState.ignore_failure,
-      },
-    };
-  },
-  convertProcessorToFormState: (processor) => {
-    const { urldecode } = processor;
-
-    return structuredClone({
-      ...urldecode,
-      type: 'urldecode',
-    });
-  },
-  fieldConfigurations: [
-    {
-      field: 'target_field',
-      type: 'string',
-      required: false,
-      label: i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeTargetFieldLabel',
-        { defaultMessage: 'Target field' }
-      ),
-      helpText: (
-        <FormattedMessage
-          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeTargetFieldHelpText"
-          defaultMessage="The field to assign the converted value to, by default {field} is updated in-place."
-          values={{
-            field: <EuiCode>field</EuiCode>,
-          }}
-        />
-      ),
-    },
-  ],
-  fieldOptions: {
-    fieldHelpText: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.urlDecodeFieldHelpText',
-      { defaultMessage: 'The field to decode.' }
-    ),
-    includeCondition: true,
-    includeIgnoreFailures: true,
-    includeIgnoreMissing: true,
-  },
+  defaultFormState,
+  convertFormStateToConfig: getConvertFormStateToConfig<
+    UrlDecodeProcessorFormState,
+    UrlDecodeProcessorDefinition
+  >('urldecode', fieldConfigurations, fieldOptions),
+  convertProcessorToFormState: getConvertProcessorToFormState<
+    UrlDecodeProcessorDefinition,
+    UrlDecodeProcessorFormState
+  >('urldecode', defaultFormState),
+  fieldConfigurations,
+  fieldOptions,
 };

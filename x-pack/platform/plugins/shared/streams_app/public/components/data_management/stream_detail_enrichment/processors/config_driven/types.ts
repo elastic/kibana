@@ -20,12 +20,14 @@ export interface ConfigDrivenProcessorConfiguration<
   convertFormStateToConfig: (formState: FormStateT) => ProcessorDefinitionT;
   convertProcessorToFormState: (processor: WithUIAttributes<ProcessorDefinitionT>) => FormStateT;
   fieldConfigurations: FieldConfiguration[];
-  fieldOptions: {
-    includeIgnoreFailures: boolean;
-    includeIgnoreMissing: boolean;
-    includeCondition: boolean;
-    fieldHelpText: string;
-  };
+  fieldOptions: FieldOptions;
+}
+
+export interface FieldOptions {
+  includeIgnoreFailures: boolean;
+  includeIgnoreMissing: boolean;
+  includeCondition: boolean;
+  fieldHelpText: string;
 }
 
 export interface FieldConfiguration {
