@@ -107,7 +107,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow">{convertMsToSec(executionTime)} Sec</EuiBadge>
+          <EuiBadge color="success">{convertMsToSec(executionTime)} Sec</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
       {isLoading && <EuiProgress size="xs" color="primary" />}
