@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getGridLayoutStateManagerMock } from '../test_utils/mocks';
-import { getRowKeysInOrder } from '../utils/resolve_grid_row';
-import { moveAction } from './row_state_manager_actions';
+import { getGridLayoutStateManagerMock } from '../../test_utils/mocks';
+import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
+import { moveAction } from './state_manager_actions';
 
 describe('row state manager actions', () => {
   const gridLayoutStateManager = getGridLayoutStateManagerMock();
@@ -26,6 +26,7 @@ describe('row state manager actions', () => {
           top: 0,
           left: 0,
         },
+        sensorType: 'mouse',
       });
       gridLayoutStateManager.rowRefs.current = {
         first: {} as any as HTMLDivElement,
@@ -72,6 +73,7 @@ describe('row state manager actions', () => {
           top: -140,
           left: 80,
         },
+        sensorType: 'mouse',
       });
     });
   });

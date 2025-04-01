@@ -7,5 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useGridLayoutPanelEvents } from './panel/events';
-export { useGridLayoutRowEvents } from './row/events';
+export const updateClientY = (
+  currentY: number,
+  stepY: number,
+  isCloseToEdge: boolean,
+  type = 'drag'
+) => {
+  if (isCloseToEdge) {
+    switch (type) {
+      case 'drag':
+        window.scrollTo({ top: window.scrollY + stepY, behavior: 'smooth' });
+        return currentY;
+      case 'resize':
+        setTimeout(() =>
+          document.activeElement?.scrollIntoView({ behavior: 'smooth', block: 'end' })
+        );
+    }
+  }
+  return currentY + stepY;
+};
