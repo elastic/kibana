@@ -140,24 +140,44 @@ export class LockManager {
    */
   public async release(): Promise<boolean> {
     try {
-      const res = await this.esClient.deleteByQuery({
+      const response = await this.esClient.update<LockDocument>({
         index: LOCKS_CONCRETE_INDEX_NAME,
-        query: {
-          bool: { filter: [{ term: { _id: this.lockId } }, { term: { token: this.token } }] },
+        id: this.lockId,
+        scripted_upsert: false,
+        script: {
+          lang: 'painless',
+          source: `
+            if (ctx._source.token == params.token) {
+              ctx.op = 'delete';
+            } else {
+              ctx.op = 'noop';
+            }
+          `,
+          params: { token: this.token },
         },
         refresh: true,
       });
 
-      if (res.deleted === 0) {
+      if (response.result === 'deleted') {
+        this.logger.debug(`Lock "${this.lockId}" released with token ${this.token}.`);
+        return true;
+      } else if (response.result === 'noop') {
         this.logger.debug(
-          `Lock "${this.lockId}" with token = ${this.token} could not be released. Not found or already released.`
+          `Lock "${this.lockId}" was not released. Token ${this.token} does not match.`
         );
+        return false;
+      } else {
+        throw new Error(`Unexpected response: ${response.result}`);
+      }
+    } catch (error: any) {
+      if (
+        error instanceof errors.ResponseError &&
+        error.body?.error?.type === 'document_missing_exception'
+      ) {
+        this.logger.debug(`Lock "${this.lockId}" already released.`);
         return false;
       }
 
-      this.logger.debug(`Lock "${this.lockId}" with token = ${this.token} was released.`);
-      return true;
-    } catch (error) {
       this.logger.error(`Failed to release lock "${this.lockId}": ${error.message}`);
       this.logger.debug(error);
       return false;
