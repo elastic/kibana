@@ -73,3 +73,31 @@ export const DELETE_CONFIRMATION_BODY = i18n.translate(
     defaultMessage: 'This action will delete the rule. Click "Delete" to continue.',
   }
 );
+
+export const SOURCE_ADDRESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.groups.sourceAddress',
+  {
+    defaultMessage: 'Source address',
+  }
+);
+
+export const USER_NAME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.groups.userName',
+  {
+    defaultMessage: 'User name',
+  }
+);
+
+export const HOST_NAME = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.groups.hostName',
+  {
+    defaultMessage: 'Host name',
+  }
+);
+
+export const DESTINATION_ADDRESS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.groups.destinationAddress',
+  {
+    defaultMessage: 'Destination address',
+  }
+);

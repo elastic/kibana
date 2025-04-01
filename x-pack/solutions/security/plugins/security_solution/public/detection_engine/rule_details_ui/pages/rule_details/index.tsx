@@ -40,7 +40,6 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
-  defaultGroupingOptions,
   defaultGroupPanelRenderers,
   defaultGroupStats,
 } from '../../../../detections/components/alerts_table/grouping_settings';
@@ -183,6 +182,25 @@ const StyledMinHeightTabContainer = styled.div`
 const RuleFieldsSectionWrapper = styled.div`
   overflow-wrap: anywhere;
 `;
+
+const defaultGroupingOptions = [
+  {
+    label: i18n.SOURCE_ADDRESS,
+    key: 'source.address',
+  },
+  {
+    label: i18n.USER_NAME,
+    key: 'user.name',
+  },
+  {
+    label: i18n.HOST_NAME,
+    key: 'host.name',
+  },
+  {
+    label: i18n.DESTINATION_ADDRESS,
+    key: 'destination.address,',
+  },
+];
 
 type DetectionEngineComponentProps = PropsFromRedux;
 
