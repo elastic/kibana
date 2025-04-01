@@ -80,8 +80,9 @@ export class LockManager {
               
               // If creating the document or if the lock is expired, update it.
               if (ctx.op == 'create' || Instant.parse(ctx._source.expiresAt).toEpochMilli() < now) {
-                ctx._source.createdAt = Instant.ofEpochMilli(now).toString();
-                ctx._source.expiresAt = Instant.ofEpochMilli(now + params.ttl).toString();
+                def instantNow = Instant.ofEpochMilli(now);
+                ctx._source.createdAt = instantNow.toString();
+                ctx._source.expiresAt = instantNow.plusMillis(params.ttl).toString();
               } else {
                 ctx.op = 'noop'
               }

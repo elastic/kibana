@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuid } from 'uuid';
+import prettyMilliseconds from 'pretty-ms';
 import {
   LockId,
   ensureTemplatesAndIndexCreated,
@@ -69,6 +70,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         const lock = await getLockById(es, BASIC_LOCK_ID);
         expect(lock).to.be(undefined);
+      });
+
+      it('it sets expiresAt according to the ttl', async () => {
+        await lockManager.acquire({ ttl: 8 * 60 * 1000 });
+        const lock = await getLockById(es, BASIC_LOCK_ID);
+        const ttl = new Date(lock!.expiresAt).getTime() - new Date(lock!.createdAt).getTime();
+        expect(prettyMilliseconds(ttl)).to.be('8m');
       });
 
       it('removes expired lock upon get()', async () => {
