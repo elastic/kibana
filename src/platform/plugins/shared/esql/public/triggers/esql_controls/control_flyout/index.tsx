@@ -108,9 +108,9 @@ export function ESQLControlsFlyout({
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
     initialState?.controlType ??
-      (variableNamePrefix === VariableNamePrefix.IDENTIFIER
-        ? EsqlControlType.STATIC_VALUES
-        : EsqlControlType.VALUES_FROM_QUERY)
+      (initialVariableType === ESQLVariableType.VALUES
+        ? EsqlControlType.VALUES_FROM_QUERY
+        : EsqlControlType.STATIC_VALUES)
   );
   const [variableName, setVariableName] = useState(suggestedVariableName);
   const [variableType, setVariableType] = useState<ESQLVariableType>(initialVariableType);
