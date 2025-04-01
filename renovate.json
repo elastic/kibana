@@ -3717,9 +3717,9 @@
       "enabled": true
     },
     {
-      "groupName": "native-hdr-histogram",
+      "groupName": "hdr-histogram-js",
       "matchDepNames": [
-        "native-hdr-histogram"
+        "hdr-histogram-js"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
