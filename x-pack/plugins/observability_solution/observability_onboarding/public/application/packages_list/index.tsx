@@ -55,6 +55,7 @@ const PackageListGridWrapper = ({
   searchQuery,
   setSearchQuery,
   customCards,
+  showCardLabels,
   flowCategory,
   flowSearch,
   joinCardLists = false,
@@ -70,7 +71,6 @@ const PackageListGridWrapper = ({
     selectedCategory,
     excludePackageIdList,
     customCards,
-    showCardLabels,
     flowCategory,
     flowSearch,
     joinCardLists
