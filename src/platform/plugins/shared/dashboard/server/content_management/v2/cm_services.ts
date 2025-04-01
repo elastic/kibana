@@ -51,18 +51,11 @@ export const serviceDefinition: ServicesDefinition = {
       ...serviceDefinitionV1.update?.in,
       data: {
         schema: dashboardAttributesSchema,
-        up: (data: DashboardCrudTypes['UpdateIn']['data']) => attributesTov3(data),
+        up: (data: DashboardCrudTypes['UpdateIn']['data']) => attributesTov3(data, [], () => []),
       },
     },
   },
   search: {
     in: serviceDefinitionV1.search?.in,
-  },
-  mSearch: {
-    out: {
-      result: {
-        schema: dashboardSavedObjectSchema,
-      },
-    },
   },
 };

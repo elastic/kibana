@@ -98,12 +98,18 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
 
       border-radius: ${euiTheme.border.radius.medium};
       border: var(--internalBorderStyle);
+      border-width: ${euiTheme.border.width
+        .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
+      box-shadow: var(
+        --hoverActionsSingleWrapperBoxShadowStyle
+      ); /* Simulates a 2px border without affecting layout by using a box-shadow */
       background-color: ${euiTheme.colors.backgroundBasePlain};
       grid-template-columns: max-content;
 
       & > * {
         // undo certain styles on all children so that parent takes precedence
         border: none !important;
+        box-shadow: none !important;
         padding: 0px !important;
         border-radius: unset !important;
         background-color: transparent !important;
@@ -131,6 +137,11 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         pointer-events: all; // re-enable pointer events for non-breakpoint children
         background-color: ${euiTheme.colors.backgroundBasePlain};
         border: var(--internalBorderStyle);
+        border-width: ${euiTheme.border.width
+          .thin}; /* Prevents the element from resizing when dragged by keeping the border width constant (overriding the default change from 1px to 2px) */
+        box-shadow: var(
+          --hoverActionsBoxShadowStyle
+        ); /* Simulates a 2px 3-side border without affecting layout by using a box-shadow */
         border-bottom: 0px;
         padding: var(--paddingAroundAction);
         padding-bottom: 0px;
