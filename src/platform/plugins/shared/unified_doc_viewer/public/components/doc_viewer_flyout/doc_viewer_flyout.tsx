@@ -27,6 +27,7 @@ import {
   useEuiTheme,
   useIsWithinMinBreakpoint,
   EuiFlyoutProps,
+  isDOMNode,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -135,11 +136,7 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
-      if (
-        ev.target instanceof Node &&
-        ev.currentTarget.contains(ev.target) &&
-        ev.key === keys.ESCAPE
-      ) {
+      if (isDOMNode(ev.target) && ev.currentTarget.contains(ev.target) && ev.key === keys.ESCAPE) {
         ev.preventDefault();
         ev.stopPropagation();
         onClose();
