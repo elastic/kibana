@@ -22,7 +22,6 @@ export const getBaseToolProvider = async (): Promise<McpProvider> => {
     id: baseToolsProviderId,
     connect: getConnectToInternalServer({
       server,
-      clientId: baseToolsProviderId,
       clientName: 'baseToolsClient',
     }),
     meta: {
