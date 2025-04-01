@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { isEqual } from 'lodash';
 import type {
   ElasticsearchClient,
   SavedObjectsClient,
@@ -15,6 +15,11 @@ import type {
 
 import semverGte from 'semver/functions/gte';
 
+import type {
+  CcrFollowInfoFollowerIndex,
+  ClusterComponentTemplateSummary,
+} from '@elastic/elasticsearch/lib/api/types';
+
 import type { PackageClient } from '../../services';
 import { outputService, appContextService } from '../../services';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
@@ -24,11 +29,16 @@ import { FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX } from '../../services/setup
 
 import type { Installation } from '../../types';
 
-import type { RemoteSyncedIntegrationsStatus, GetRemoteSyncedIntegrationsStatusResponse, SyncStatus } from '../../../common/types';
+import type {
+  RemoteSyncedIntegrationsStatus,
+  GetRemoteSyncedIntegrationsStatusResponse,
+  SyncStatus,
+  RemoteSyncedCustomAssetsStatus,
+  RemoteSyncedCustomAssetsRecord,
+} from '../../../common/types';
 
-import type { SyncIntegrationsData } from './model';
-import { installCustomAsset } from './custom_assets';
-import { CcrFollowInfoFollowerIndex } from '@elastic/elasticsearch/lib/api/types';
+import type { IntegrationsData, SyncIntegrationsData, CustomAssetsData } from './model';
+import { getPipeline, installCustomAsset, getComponentTemplate } from './custom_assets';
 
 const MAX_RETRY_ATTEMPTS = 5;
 const RETRY_BACKOFF_MINUTES = [5, 10, 20, 40, 60];
@@ -209,22 +219,22 @@ export const syncIntegrationsOnRemote = async (
 export const getFollowerIndexInfo = async (
   esClient: ElasticsearchClient,
   logger: Logger
-): Promise<{info?: CcrFollowInfoFollowerIndex, error?: string}> => {
+): Promise<{ info?: CcrFollowInfoFollowerIndex; error?: string }> => {
   try {
     const index = await getFollowerIndex(esClient, new AbortController());
     if (!index) {
-      return {error: `Follower index not found`};
+      return { error: `Follower index not found` };
     }
     const res = await esClient.ccr.followInfo({
       index,
     });
     if (!res?.follower_indices || res.follower_indices.length === 0)
-      return {error: `Follower index ${index} not available`};
+      return { error: `Follower index ${index} not available` };
 
     if (res.follower_indices[0]?.status === 'paused') {
-      return {error: `Follower index ${index} paused`};
+      return { error: `Follower index ${index} paused` };
     }
-    return {info: res.follower_indices[0]};
+    return { info: res.follower_indices[0] };
   } catch (err) {
     if (err?.body?.error?.type === 'index_not_found_exception')
       throw new IndexNotFoundError(`Index not found`);
@@ -254,20 +264,21 @@ export const fetchAndCompareSyncedIntegrations = async (
     });
     if (searchRes.hits.hits[0]?._source === undefined) {
       return {
-        items: [],
-        error: `No integrations found on ${index}`
-      }
+        integrations: [],
+        error: `No integrations found on ${index}`,
+      };
     }
-    const ccrIntegrations = searchRes.hits.hits[0]?._source?.integrations;
+    const ccrIndex = searchRes.hits.hits[0]?._source;
+    const { integrations: ccrIntegrations, custom_assets: ccrCustomAssets } = ccrIndex;
 
     // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
 
     if (!installedIntegrations && ccrIntegrations.length > 0) {
       return {
-        items: [],
-        error: `No integrations installed on remote`
-      }
+        integrations: [],
+        error: `No integrations installed on remote`,
+      };
     }
 
     const installedIntegrationsByName = (installedIntegrations?.saved_objects || []).reduce(
@@ -279,39 +290,114 @@ export const fetchAndCompareSyncedIntegrations = async (
       },
       {} as Record<string, SavedObjectsFindResult<Installation>>
     );
+    const customAssetsStatus = await compareCustomAssets(esClient, logger, ccrCustomAssets);
+    const integrationsStatus = compareIntegrations(ccrIntegrations, installedIntegrationsByName);
+    const result = {
+      ...integrationsStatus,
+      ...(customAssetsStatus && { custom_assets: customAssetsStatus }),
+    };
 
-    const integrationsStatus: RemoteSyncedIntegrationsStatus[] | undefined = ccrIntegrations?.map(
-      (ccrIntegration) => {
-        const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
-        if (!localIntegrationSO) {
-          return {
-            ...ccrIntegration,
-            sync_status: 'failed' as SyncStatus.FAILED,
-            error: `Installation not found`,
-          };
-        }
-        if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
-          return {
-            ...ccrIntegration,
-            sync_status: 'failed' as SyncStatus.FAILED,
-            error: `Installed version: ${localIntegrationSO?.attributes.version}`,
-          };
-        }
-        if (localIntegrationSO?.attributes.install_status !== 'installed') {
-          return {
-            ...ccrIntegration,
-            sync_status: 'failed' as SyncStatus.FAILED,
-            error: `Installation status: ${localIntegrationSO?.attributes.install_status}`,
-          };
-        }
+    return result;
+  } catch (err) {
+    logger.error('error', err.message);
+    throw err;
+  }
+};
+
+const compareIntegrations = (
+  ccrIntegrations: IntegrationsData[],
+  installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>
+) => {
+  const integrationsStatus: RemoteSyncedIntegrationsStatus[] | undefined = ccrIntegrations?.map(
+    (ccrIntegration) => {
+      const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
+      if (!localIntegrationSO) {
         return {
           ...ccrIntegration,
-          sync_status: 'completed' as SyncStatus.COMPLETED,
-          updated_at: localIntegrationSO?.updated_at,
+          sync_status: 'failed' as SyncStatus.FAILED,
+          error: `Installation not found`,
         };
       }
-    );
-    return {items: integrationsStatus};
+      if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
+        return {
+          ...ccrIntegration,
+          sync_status: 'failed' as SyncStatus.FAILED,
+          error: `Installed version: ${localIntegrationSO?.attributes.version}`,
+        };
+      }
+      if (localIntegrationSO?.attributes.install_status !== 'installed') {
+        return {
+          ...ccrIntegration,
+          sync_status: 'failed' as SyncStatus.FAILED,
+          error: `Installation status: ${localIntegrationSO?.attributes.install_status}`,
+        };
+      }
+      return {
+        ...ccrIntegration,
+        sync_status: 'completed' as SyncStatus.COMPLETED,
+        updated_at: localIntegrationSO?.updated_at,
+      };
+    }
+  );
+  return { integrations: integrationsStatus };
+};
+
+const compareCustomAssets = async (
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  ccrCustomAssets: { [key: string]: CustomAssetsData }
+) => {
+  if (!ccrCustomAssets) return;
+
+  const abortController = new AbortController();
+
+  try {
+    const installedPipelines = await getPipeline(esClient, abortController);
+    const installedComponentTemplates = await getComponentTemplate(esClient, abortController);
+
+    const componentTemplatesByName = (
+      installedComponentTemplates?.component_templates || []
+    ).reduce((acc, componentTemplate) => {
+      if (componentTemplate?.name) {
+        acc[componentTemplate.name] = componentTemplate.component_template?.template;
+      }
+      return acc;
+    }, {} as Record<string, ClusterComponentTemplateSummary>);
+    const result: RemoteSyncedCustomAssetsRecord = {};
+
+    // compare custom pipelines and custom component templates
+    Object.entries(ccrCustomAssets).forEach(([ccrCustomName, ccrCustomAsset]) => {
+      if (ccrCustomAsset.type === 'ingest_pipeline') {
+        const installedAsset = installedPipelines[ccrCustomAsset?.name];
+        if (isEqual(installedAsset?.processors, ccrCustomAsset?.pipeline?.processors)) {
+          result[ccrCustomName] = {
+            ...ccrCustomAsset,
+            sync_status: 'completed' as SyncStatus.COMPLETED,
+          } as RemoteSyncedCustomAssetsStatus;
+        } else {
+          result[ccrCustomName] = {
+            ...ccrCustomAsset,
+            sync_status: 'failed' as SyncStatus.FAILED,
+          } as RemoteSyncedCustomAssetsStatus;
+        }
+      }
+      if (ccrCustomAsset.type === 'component_template') {
+        const installedAsset = componentTemplatesByName[ccrCustomAsset?.name];
+
+        if (isEqual(installedAsset, ccrCustomAsset?.template)) {
+          result[ccrCustomName] = {
+            ...ccrCustomAsset,
+            sync_status: 'completed' as SyncStatus.COMPLETED,
+          } as RemoteSyncedCustomAssetsStatus;
+        } else {
+          result[ccrCustomName] = {
+            ...ccrCustomAsset,
+            sync_status: 'failed' as SyncStatus.FAILED,
+          } as RemoteSyncedCustomAssetsStatus;
+        }
+      }
+    });
+    return result;
   } catch (err) {
     logger.error('error', err.message);
     throw err;
@@ -320,21 +406,26 @@ export const fetchAndCompareSyncedIntegrations = async (
 
 export const getRemoteSyncedIntegrationsStatus = async (
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
+  soClient: SavedObjectsClientContract
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
   const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
   const logger = appContextService.getLogger();
 
   if (!enableSyncIntegrationsOnRemote) {
-    return { items: [] };
+    return { integrations: [] };
   }
 
   try {
     const followerIndexRes = await getFollowerIndexInfo(esClient, logger);
     if (followerIndexRes?.error || !followerIndexRes?.info) {
-      return { error: followerIndexRes?.error, items: [] };
+      return { error: followerIndexRes?.error, integrations: [] };
     }
-    const res = await fetchAndCompareSyncedIntegrations(esClient, soClient, followerIndexRes.info.follower_index, logger);
+    const res = await fetchAndCompareSyncedIntegrations(
+      esClient,
+      soClient,
+      followerIndexRes.info.follower_index,
+      logger
+    );
     return res;
   } catch (err) {
     throw err;

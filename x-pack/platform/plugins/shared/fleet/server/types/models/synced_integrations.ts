@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { SyncStatus } from '../../../common/types';
 
 const RemoteSyncedIntegrationsBaseSchema = schema.object({
@@ -24,7 +25,26 @@ export const RemoteSyncedIntegrationsStatusSchema = RemoteSyncedIntegrationsBase
   updated_at: schema.maybe(schema.string()),
 });
 
+export const CustomAssetsDataSchema = schema
+  .object({
+    type: schema.string(),
+    name: schema.string(),
+    package_name: schema.string(),
+    package_version: schema.string(),
+    is_deleted: schema.boolean(),
+    deleted_at: schema.maybe(schema.string()),
+    sync_status: schema.oneOf([
+      schema.literal(SyncStatus.COMPLETED),
+      schema.literal(SyncStatus.SYNCHRONIZING),
+      schema.literal(SyncStatus.FAILED),
+    ]),
+  })
+  .extendsDeep({
+    unknowns: 'allow',
+  });
+
 export const GetRemoteSyncedIntegrationsStatusResponseSchema = schema.object({
-  items: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema),
+  integrations: schema.arrayOf(RemoteSyncedIntegrationsStatusSchema),
+  custom_assets: schema.maybe(schema.recordOf(schema.string(), CustomAssetsDataSchema)),
   error: schema.maybe(schema.string()),
 });

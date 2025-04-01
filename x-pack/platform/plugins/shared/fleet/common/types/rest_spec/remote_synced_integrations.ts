@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { RemoteSyncedIntegrationsStatus } from '../models';
+import type { RemoteSyncedCustomAssetsRecord, RemoteSyncedIntegrationsStatus } from '../models';
 
 export interface GetRemoteSyncedIntegrationsStatusResponse {
-  items: RemoteSyncedIntegrationsStatus[];
+  integrations: RemoteSyncedIntegrationsStatus[];
+  custom_assets?: RemoteSyncedCustomAssetsRecord;
   error?: string;
 }

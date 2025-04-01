@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { CustomAssetsData } from '../../../server/tasks/sync_integrations/model';
+
 export enum SyncStatus {
   SYNCHRONIZING = 'synchronizing',
   COMPLETED = 'completed',
-  FAILED= 'failed'
+  FAILED = 'failed',
 }
 
 export interface RemoteSyncedIntegrationsBase {
@@ -19,4 +21,12 @@ export interface RemoteSyncedIntegrationsStatus extends RemoteSyncedIntegrations
   sync_status: SyncStatus;
   error?: string;
   updated_at?: string;
+}
+export interface RemoteSyncedCustomAssetsStatus extends CustomAssetsData {
+  sync_status: SyncStatus;
+  error?: string;
+}
+
+export interface RemoteSyncedCustomAssetsRecord {
+  [key: string]: RemoteSyncedCustomAssetsStatus;
 }

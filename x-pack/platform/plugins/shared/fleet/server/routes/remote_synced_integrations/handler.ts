@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import type { RequestHandler } from '@kbn/core/server';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
 
 import { getRemoteSyncedIntegrationsStatus } from '../../tasks/sync_integrations/sync_integrations_on_remote';
 
-export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<
-  undefined
-> = async (context, request, response) => {
+export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<undefined> = async (
+  context,
+  request,
+  response
+) => {
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
@@ -22,7 +23,7 @@ export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<
   try {
     const res: GetRemoteSyncedIntegrationsStatusResponse = await getRemoteSyncedIntegrationsStatus(
       esClient,
-      soClient,
+      soClient
     );
 
     return response.ok({ body: res });

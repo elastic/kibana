@@ -1,19 +1,29 @@
 # Test sync integrations feature
 
-## Changes to `kibana.dev.yml`
+## Run ES and Kibana
+
+### Changes to `kibana.dev.yml`
 
 - Remove `elasticsearch.hosts`
 - Enable feature flag
+
 ```
   xpack.fleet.enableExperimental: ['enableSyncIntegrationsOnRemote']
 ```
 
+This configuration allows to run two local ES clusters in parallel, each one having its own instance of Kibana.
 
-## Start Cluster 1 (remote)
+### Start Cluster 1 (remote)
 - Start ES 1
 
 ```
 yarn es snapshot -E http.port=9500 -E transport.port=9600 -E path.data=../remote --license trial -E http.host=0.0.0.0
+```
+
+Verify that node is healthy
+
+```
+  curl -k -u elastic:changeme http://localhost:9500
 ```
 
 - Start Kibana 1
@@ -23,12 +33,19 @@ yarn start --server.port=5701 --elasticsearch.hosts=http://localhost:9500 --dev.
 ```
 - Login into http://localhost/5601/<YOUR_PATH>
 
-## Start Cluster 2 (main)
+### Start Cluster 2 (main)
 
 - Start ES 2
 
 ```
 yarn es snapshot --license trial -E path.data=/tmp/es-data -E http.host=0.0.0.0
+```
+Note that `transport.port` defaults to `9300`
+
+Verify that node is healthy:
+
+```
+curl -k -u elastic:changeme http://localhost:9200
 ```
 
 - Start Kibana 2
@@ -78,38 +95,36 @@ Save the responses as they will be required in Cluster 2 (see next section).
 
 ### Set up CCR
 
-Please note that [CCR](https://www.elastic.co/guide/en/elasticsearch/reference/7.17/ccr-getting-started-tutorial.html) requires both clusters to have the same license. At the time of writing an `enterprise` license is needed.
+Please note that [CCR](https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-getting-started-tutorial.html) requires both clusters to have the same license. At the time of writing an `enterprise` license is needed.
 On cluster 1, navigate to *Stack Management > Cross-Cluster Replication* and create a follower index using the cluster from Step 1.
 
   - Leader index `fleet-synced-integrations`
   - Follower index `fleet-synced-integrations-ccr-remote1`
 
 ### Set up local ES output
-This configuration is required to kick off the integration sync. The local host needs to match the remote ES output configured on Cluster 2 (see next section)
+This configuration is required to kick off the integration sync. The local host needs to match the remote ES output configured on Cluster 2 (see next section). Note that `kibana.dev.yml` is read by both kibana instances so it's better to add it in the UI to avoid conflicts.
 
 ```
-xpack.fleet.outputs:
-  - name: 'Preconfigured ES output'
-    type: 'elasticsearch'
-    id: 'local-output'
-    hosts: ["http://<local_ip>:9500"]
+  name: 'ES output'
+  type: 'elasticsearch'
+  id: 'local-output'
+  hosts: ["http://<local_ip>:9500"]
 ```
 
 ## Setup on Cluster 2
-### Add remote ES output
-- Add remote ES output to Cluster 2. Insert `token` and `key` obtained from the previous commands. This example is adding a preconfigured output but it can also be added from the UI.
 
+### Add remote ES output
+- Add remote ES output to Cluster 2. Insert `token` and `key` obtained from the previous commands.
 ```
-xpack.fleet.outputs:
-  - name: 'Preconfigured remote output'
-    type: 'remote_elasticsearch'
-    id: 'remote-output'
-    hosts: ["http://<local_ip>:9500"]
-    sync_integrations: true
-    kibana_url: "http://localhost:5701"
-    secrets:
-      service_token: token
-      kibana_api_key: key
+  name: 'Remote output'
+  type: 'remote_elasticsearch'
+  id: 'remote-output'
+  hosts: ["http://<local_ip>:9500"]
+  sync_integrations: true
+  kibana_url: "http://localhost:5701"
+  secrets:
+    service_token: token
+    kibana_api_key: key
 ```
 
 ## Verify sync
@@ -118,12 +133,19 @@ With these configuration, the sync task should run every 5 minutes and the integ
 
 ### Check contents of sync integrations indices
 
-- In Cluster 1
+- From Cluster 1, verify that the follower index is active using the [follower info API](https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-get-follow-info.html):
+
+```
+GET fleet-synced-integrations-ccr-remote1/_ccr/info
+```
+
+Check content of ccr index:
+
 ```
 GET fleet-synced-integrations-ccr-remote1/_search
 ```
 
-- In Cluster 2
+- From Cluster 2
 ```
 GET fleet-synced-integrations/_search
 ```
@@ -132,11 +154,11 @@ GET fleet-synced-integrations/_search
 
 - Enroll Fleet Server to Cluster 2
 
-- Create Agent Policy in Cluster 2 and use remote output for integrations and monitoring
+- Create an Agent Policy in Cluster 2 and use remote output for integrations and monitoring
 
-- Enroll Agent to Cluster 2 to the Agent policy
+- Enroll an agent the above Agent policy in Cluster 2
 
-- Check data in Cluster 1 with CCS
+- Check data in Cluster 1 with [CCS](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-cross-cluster-search.html)
 
 ```
 GET remote1:metrics-*/_search

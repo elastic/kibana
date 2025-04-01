@@ -33,10 +33,10 @@ export const findIntegration = (assetName: string, integrations: IntegrationsDat
   });
 };
 
-function getComponentTemplate(
+export function getComponentTemplate(
   esClient: ElasticsearchClient,
-  name: string,
-  abortController: AbortController
+  abortController: AbortController,
+  name?: string
 ): Promise<ClusterGetComponentTemplateResponse> {
   return esClient.cluster.getComponentTemplate(
     {
@@ -49,10 +49,10 @@ function getComponentTemplate(
   );
 }
 
-function getPipeline(
+export function getPipeline(
   esClient: ElasticsearchClient,
-  name: string,
-  abortController: AbortController
+  abortController: AbortController,
+  name?: string
 ): Promise<IngestGetPipelineResponse> {
   return esClient.ingest.getPipeline(
     {
@@ -71,7 +71,7 @@ export const getCustomAssets = async (
   abortController: AbortController,
   previousSyncIntegrationsData: SyncIntegrationsData | undefined
 ): Promise<CustomAssetsData[]> => {
-  const customTemplates = await getComponentTemplate(esClient, '*@custom', abortController);
+  const customTemplates = await getComponentTemplate(esClient, abortController, '*@custom');
 
   const customAssetsComponentTemplates = customTemplates.component_templates.reduce(
     (acc: CustomAssetsData[], template) => {
@@ -90,7 +90,7 @@ export const getCustomAssets = async (
     []
   );
 
-  const ingestPipelines = await getPipeline(esClient, '*@custom', abortController);
+  const ingestPipelines = await getPipeline(esClient, abortController, '*@custom');
 
   const customAssetsIngestPipelines = Object.keys(ingestPipelines).reduce(
     (acc: CustomAssetsData[], pipeline) => {
@@ -155,7 +155,7 @@ async function updateComponentTemplate(
   abortController: AbortController,
   logger: Logger
 ) {
-  const customTemplates = await getComponentTemplate(esClient, customAsset.name, abortController);
+  const customTemplates = await getComponentTemplate(esClient, abortController, customAsset.name);
   const existingTemplate = customTemplates.component_templates?.find(
     (template) => template.name === customAsset.name
   );
@@ -212,7 +212,7 @@ async function updateIngestPipeline(
   abortController: AbortController,
   logger: Logger
 ) {
-  const ingestPipelines = await getPipeline(esClient, customAsset.name, abortController);
+  const ingestPipelines = await getPipeline(esClient, abortController, customAsset.name);
   const existingPipeline = ingestPipelines[customAsset.name];
 
   if (customAsset.is_deleted) {

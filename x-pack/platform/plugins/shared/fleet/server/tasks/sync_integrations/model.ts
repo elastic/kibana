@@ -25,7 +25,6 @@ export interface CustomAssetsError {
   timestamp: string;
   error: string;
 }
-
 export interface SyncIntegrationsData {
   remote_es_hosts: Array<{
     name: string;
