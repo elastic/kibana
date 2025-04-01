@@ -11,6 +11,9 @@ import type { GenericEntityRecord } from '../../../asset_inventory/types/generic
 import { FieldsTable } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
+import {
+  GENERIC_FLYOUT_STORAGE_KEYS
+} from "@kbn/security-solution-plugin/public/flyout/entity_details/universal_right/constants";
 
 interface UniversalEntityFlyoutContentProps {
   source: GenericEntityRecord;
@@ -27,11 +30,11 @@ export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutCo
           />
         }
         expanded
-        localStorageKey={'universal_flyout:overview:fields_section'}
+        localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION}
       >
         <FieldsTable
           document={source || {}}
-          tableStorageKey={'universal_flyout:overview:fields_table_pins'}
+          tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
         />
       </ExpandableSection>
     </FlyoutBody>
