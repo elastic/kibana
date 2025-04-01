@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
 
-import { useFullDataView } from './use_full_data_view';
+import { useDataView } from './use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSelector } from 'react-redux';
 
@@ -20,7 +20,7 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));
 
-describe('useFullDataView', () => {
+describe('useDataView', () => {
   beforeEach(() => {
     jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
     jest
@@ -30,7 +30,7 @@ describe('useFullDataView', () => {
 
   describe('when data view is available', () => {
     it('should return DataView instance', async () => {
-      const wrapper = renderHook(() => useFullDataView(DataViewManagerScopeName.default), {
+      const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
         wrapper: TestProviders,
       });
 
@@ -41,7 +41,7 @@ describe('useFullDataView', () => {
 
   describe('when data view fields are not available', () => {
     it('should return undefined', () => {
-      const wrapper = renderHook(() => useFullDataView(DataViewManagerScopeName.default), {
+      const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
         wrapper: TestProviders,
       });
 
