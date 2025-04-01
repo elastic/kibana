@@ -12,6 +12,8 @@ export enum ProductFeatureSecurityKey {
   alertsSummary = 'alerts_summary',
   /** Elastic endpoint detections, includes alerts, rules, investigations */
   detections = 'detections',
+  /** Enables Configurations page for AI SOC */
+  configurations = 'configurations',
   /**
    * Enables Investigation guide in Timeline
    */

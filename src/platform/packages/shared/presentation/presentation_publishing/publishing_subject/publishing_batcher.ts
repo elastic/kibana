@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { combineLatest, debounceTime, skip } from 'rxjs';
 import { AnyPublishingSubject, PublishingSubject, UnwrapPublishingSubjectTuple } from './types';
 
@@ -120,22 +120,37 @@ export const useBatchedPublishingSubjects = <
 
   /**
    * Subscribe to all subjects and update the latest values when any of them change.
+   *
+   * Can not set up subscription in useEffect.
+   * useEffect introduces a race condition where subscriptions may emit after values are set with useState
+   * but before subscription is setup in useEffect.
+   *
+   * Can not set up subscription in useRef.
+   * useRef executes initialization logic every render.
    */
-  useEffect(() => {
-    const subscription = combineLatest(subjects)
-      .pipe(
-        // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
-        skip(1),
-        debounceTime(0)
-      )
-      .subscribe((values) => {
-        setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
-      });
-    return () => subscription.unsubscribe();
+  const subscription = useMemo(
+    () =>
+      combineLatest(subjects)
+        .pipe(
+          // When a new observer subscribes to a BehaviorSubject, it immediately receives the current value. Skip this emit.
+          skip(1),
+          debounceTime(0)
+        )
+        .subscribe((values) => {
+          setLatestPublishedValues(values as UnwrapPublishingSubjectTuple<SubjectsType>);
+        }),
     // 'subjects' gets a new reference on each call because of spread
     // Use 'useBatchedOptionalPublishingSubjects' when 'subjects' are expected to change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    []
+  );
+
+  /**
+   * Clean up subscription on unmount.
+   */
+  useEffect(() => {
+    return () => subscription.unsubscribe();
+  }, [subscription]);
 
   return latestPublishedValues;
 };
