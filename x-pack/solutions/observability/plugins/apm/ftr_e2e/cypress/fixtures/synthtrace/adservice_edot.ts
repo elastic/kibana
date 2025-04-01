@@ -28,6 +28,13 @@ export function adserviceEdot({ from, to }: { from: number; to: number }) {
         .transaction({
           transactionName,
         })
+        .overrides({
+          'attributes.server.address': 'otel-demo-blue-adservice-edot-synth',
+          'attributes.server.port': 8080,
+          'attributes.url.path': '/some/path',
+          'attributes.url.scheme': 'https',
+          'attributes.url.full': undefined,
+        })
         .timestamp(timestamp)
         .duration(551)
         .success(),
