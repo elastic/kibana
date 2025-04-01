@@ -104,9 +104,11 @@ export const DocumentList: React.FC<DocumentListProps> = ({
             </p>
           </EuiText>
         </EuiFlexItem>
-        {executionTime !== null && (
+        {executionTime !== undefined && (
           <EuiFlexItem grow={false}>
-            <EuiBadge color="default">{executionTime} ms</EuiBadge>
+            <EuiBadge data-test-subj="executionTimeBadge" color="default">
+              {executionTime} ms
+            </EuiBadge>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

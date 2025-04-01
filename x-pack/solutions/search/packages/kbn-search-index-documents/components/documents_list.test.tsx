@@ -93,34 +93,36 @@ describe('DocumentList', () => {
     expect(screen.getByText('Results are limited to 10,000 documents')).toBeInTheDocument();
   });
 
-  test('does not display execution time when executionTime is missing', () => {
-    const values = {
-      ...DEFAULT_VALUES,
-    };
+  describe('executionTime badge', () => {
+    test('does not display the badge when executionTime is missing', () => {
+      const values = {
+        ...DEFAULT_VALUES,
+      };
 
-    render(
-      <I18nProvider>
-        <DocumentList {...values} />
-      </I18nProvider>
-    );
+      render(
+        <I18nProvider>
+          <DocumentList {...values} />
+        </I18nProvider>
+      );
 
-    // Ensure the execution time badge is not rendered
-    expect(screen.queryByText('234 ms')).not.toBeInTheDocument();
-  });
+      expect(screen.queryByTestId('executionTimeBadge')).not.toBeInTheDocument();
+    });
 
-  test('displays the execution time when executionTime is not null', () => {
-    const values = {
-      ...DEFAULT_VALUES,
-      executionTime: 234, // Set executionTime to a valid value
-    };
+    test('displays the badge when executionTime is present', () => {
+      const values = {
+        ...DEFAULT_VALUES,
+        executionTime: 234, // Set executionTime to a valid value
+      };
 
-    render(
-      <I18nProvider>
-        <DocumentList {...values} />
-      </I18nProvider>
-    );
+      render(
+        <I18nProvider>
+          <DocumentList {...values} />
+        </I18nProvider>
+      );
 
-    // Ensure the execution time badge is rendered
-    expect(screen.getByText('234 ms')).toBeInTheDocument();
+      const badge = screen.getByTestId('executionTimeBadge');
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveTextContent('234 ms');
+    });
   });
 });
