@@ -82,7 +82,7 @@ ${inputsYaml}
             q: `agent.name:${agent.name}`,
             ignore_unavailable: true,
           });
-  
+
           // @ts-expect-error TotalHit
           if (searchRes.hits.total.value > 0) {
             foundMetrics = true;
@@ -90,7 +90,7 @@ ${inputsYaml}
           }
         } catch (err) {
           log.error(err);
-        }  
+        }
         // await agent.log(); uncomment if you need to debug agent logs
         await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
       }
