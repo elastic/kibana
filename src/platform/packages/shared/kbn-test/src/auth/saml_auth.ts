@@ -16,7 +16,7 @@ import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { randomInt } from 'crypto';
-import { isValidHostname, isValidUrl } from './helper';
+import { isValidUrl } from './helper';
 import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
@@ -72,15 +72,6 @@ const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: str
   }
 
   return cookie;
-};
-
-const getCloudHostName = () => {
-  const hostname = process.env.TEST_CLOUD_HOST_NAME;
-  if (!hostname || !isValidHostname(hostname)) {
-    throw new Error('SAML Authentication requires TEST_CLOUD_HOST_NAME env variable to be set');
-  }
-
-  return hostname;
 };
 
 const getCloudUrl = (hostname: string, pathname: string) => {
@@ -351,8 +342,7 @@ export const getSecurityProfile = async ({
 };
 
 export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => {
-  const { email, password, kbnHost, kbnVersion, log } = params;
-  const hostname = getCloudHostName();
+  const { hostname, email, password, kbnHost, kbnVersion, log } = params;
   const ecSession = await createCloudSession({ hostname, email, password, log });
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
   const samlResponse = await createSAMLResponse({ location, ecSession, email, kbnHost, log });

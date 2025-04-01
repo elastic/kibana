@@ -128,8 +128,16 @@ describe('parseTestFlags', () => {
       esFrom: 'snapshot',
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
-    await expect(parseTestFlags(flags)).rejects.toThrow(
-      'Running tests against Cloud / MKI is not supported yet'
-    );
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'stateful',
+      configPath: '/path/to/config',
+      testTarget: 'cloud',
+      headed: true,
+      esFrom: 'snapshot',
+      installDir: undefined,
+      logsDir: undefined,
+    });
   });
 });
