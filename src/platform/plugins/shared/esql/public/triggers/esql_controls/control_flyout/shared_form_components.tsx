@@ -176,9 +176,6 @@ export function VariableName({
     defaultMessage: 'You can’t edit a control name after it’s been created.',
   });
   const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
-  // const variableExists =
-  //   esqlVariables.some((variable) => variable.key === variableNameWithoutQuestionmark) &&
-  //   !isControlInEditMode;
   const variableExists =
     checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
   const errorMessage = !variableNameWithoutQuestionmark
