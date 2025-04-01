@@ -41,6 +41,7 @@
     "@kbn/es-query",
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/utils",
-    "@kbn/core-analytics-server"
+    "@kbn/core-analytics-server",
+    "@kbn/content-packs-schema"
   ]
 }
