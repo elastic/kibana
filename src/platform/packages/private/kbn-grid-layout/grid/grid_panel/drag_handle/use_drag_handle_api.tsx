@@ -9,9 +9,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 
-import { useGridLayoutEvents } from '../../use_grid_layout_events';
-import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 import { useGridLayoutContext } from '../../use_grid_layout_context';
+import { useGridLayoutPanelEvents } from '../../use_grid_layout_events';
+import { UserInteractionEvent } from '../../use_grid_layout_events/types';
 
 export interface DragHandleApi {
   startDrag: (e: UserInteractionEvent) => void;
@@ -20,17 +20,17 @@ export interface DragHandleApi {
 
 export const useDragHandleApi = ({
   panelId,
-  rowIndex,
+  rowId,
 }: {
   panelId: string;
-  rowIndex: number;
+  rowId: string;
 }): DragHandleApi => {
   const { useCustomDragHandle } = useGridLayoutContext();
 
-  const startInteraction = useGridLayoutEvents({
+  const { startDrag } = useGridLayoutPanelEvents({
     interactionType: 'drag',
     panelId,
-    rowIndex,
+    rowId,
   });
 
   const removeEventListenersRef = useRef<(() => void) | null>(null);
@@ -39,19 +39,21 @@ export const useDragHandleApi = ({
     (dragHandles: Array<HTMLElement | null>) => {
       for (const handle of dragHandles) {
         if (handle === null) return;
-        handle.addEventListener('mousedown', startInteraction, { passive: true });
-        handle.addEventListener('touchstart', startInteraction, { passive: true });
-        handle.style.touchAction = 'none';
+        handle.addEventListener('mousedown', startDrag, { passive: true });
+        handle.addEventListener('touchstart', startDrag, { passive: true });
+        handle.addEventListener('keydown', startDrag);
+        handle.classList.add('kbnGridPanel--dragHandle');
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.removeEventListener('mousedown', startInteraction);
-          handle.removeEventListener('touchstart', startInteraction);
+          handle.removeEventListener('mousedown', startDrag);
+          handle.removeEventListener('touchstart', startDrag);
+          handle.removeEventListener('keydown', startDrag);
         }
       };
     },
-    [startInteraction]
+    [startDrag]
   );
 
   useEffect(
@@ -63,7 +65,7 @@ export const useDragHandleApi = ({
   );
 
   return {
-    startDrag: startInteraction,
+    startDrag,
     setDragHandles: useCustomDragHandle ? setDragHandles : undefined,
   };
 };

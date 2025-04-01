@@ -130,7 +130,7 @@ export const LEARN_MORE = i18n.translate(
 export const RE_ENTER_SECRETS = (label: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
     defaultMessage:
-      'You will need to reenter your ${label} each time you edit the inference endpoint',
+      'You will need to re-enter your {label} each time you edit the inference endpoint',
     values: { label },
   });
 };

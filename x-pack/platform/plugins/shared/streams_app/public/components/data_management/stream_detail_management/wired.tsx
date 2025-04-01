@@ -24,15 +24,13 @@ function isValidManagementSubTab(value: string): value is ManagementSubTabs {
 export function WiredStreamDetailManagement({
   definition,
   refreshDefinition,
-  isLoadingDefinition,
 }: {
-  definition?: WiredStreamGetResponse;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
-  isLoadingDefinition: boolean;
 }) {
   const {
     path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+  } = useStreamsAppParams('/{key}/{tab}/{subtab}');
 
   const tabs = {
     route: {
@@ -53,11 +51,7 @@ export function WiredStreamDetailManagement({
     },
     schemaEditor: {
       content: (
-        <StreamDetailSchemaEditor
-          definition={definition}
-          refreshDefinition={refreshDefinition}
-          isLoadingDefinition={isLoadingDefinition}
-        />
+        <StreamDetailSchemaEditor definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
@@ -75,7 +69,10 @@ export function WiredStreamDetailManagement({
 
   if (!isValidManagementSubTab(subtab)) {
     return (
-      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'route' } }} />
+      <RedirectTo
+        path="/{key}/{tab}/{subtab}"
+        params={{ path: { key, tab: 'management', subtab: 'route' } }}
+      />
     );
   }
 

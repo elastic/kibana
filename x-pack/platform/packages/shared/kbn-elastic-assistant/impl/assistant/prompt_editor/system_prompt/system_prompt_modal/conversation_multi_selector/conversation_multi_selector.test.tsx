@@ -15,6 +15,7 @@ const testProps = {
   conversations: [alertConvo, welcomeConvo, customConvo],
   onConversationSelectionChange,
   selectedConversations: [welcomeConvo],
+  setPaginationObserver: jest.fn(),
 };
 
 describe('ConversationMultiSelector', () => {

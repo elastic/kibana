@@ -487,7 +487,7 @@ export const getEcommerceSavedObjects = () => {
         }),
         description: '',
         mapStateJSON:
-          '{"zoom":2.11,"center":{"lon":-15.07605,"lat":45.88578},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"}}',
+          '{"zoom":2.11,"center":{"lon":-15.07605,"lat":45.88578},"timeFilters":{"from":"now-7d","to":"now"},"refreshConfig":{"isPaused":true,"interval":0},"query":{"query":"","language":"kuery"},"settings":{"projection":"globeInterpolate"}}',
         layerListJSON: JSON.stringify(layerList),
         uiStateJSON: '{"isDarkMode":false}',
         bounds: {

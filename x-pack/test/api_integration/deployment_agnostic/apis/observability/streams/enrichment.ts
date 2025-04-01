@@ -77,8 +77,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 },
               },
             ],
-            routing: [],
             wired: {
+              routing: [],
               fields: {
                 '@timestamp': {
                   type: 'date',

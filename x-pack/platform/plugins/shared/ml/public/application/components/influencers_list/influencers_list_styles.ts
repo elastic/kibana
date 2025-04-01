@@ -14,7 +14,7 @@ import { ML_SEVERITY_COLORS } from '@kbn/ml-anomaly-utils';
 export const useInfluencersListStyles = () => {
   const { euiTheme } = useEuiTheme();
   const euiFontSizeXS = useEuiFontSize('xs').fontSize;
-  const euiFontSizeS = useEuiFontSize('s').fontSize;
+  const euiFontSizeM = useEuiFontSize('m').fontSize;
 
   return {
     influencersList: css({
@@ -23,7 +23,7 @@ export const useInfluencersListStyles = () => {
     fieldLabel: css({
       fontSize: euiFontSizeXS,
       textAlign: 'left',
-      maxHeight: euiFontSizeS,
+      maxHeight: euiFontSizeM,
       maxWidth: 'calc(100% - 102px)',
     }),
     progress: css({

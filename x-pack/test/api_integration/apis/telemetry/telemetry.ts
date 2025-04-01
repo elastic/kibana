@@ -18,9 +18,11 @@ import ossPlatformTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_platfor
 import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import xpackPlatformTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_platform.json';
+// BOOKMARK - List of Kibana Solutions
 import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_observability.json';
 import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
 import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
+import xpackChatTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_chat.json';
 import type { UnencryptedTelemetryPayload } from '@kbn/telemetry-plugin/common/types';
 import type {
   UsageStatsPayload,
@@ -177,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           xpackObservabilityTelemetrySchema,
           xpackSearchTelemetrySchema,
           xpackSecurityTelemetrySchema,
+          xpackChatTelemetrySchema,
         ] as TelemetrySchemaObject[];
         const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 

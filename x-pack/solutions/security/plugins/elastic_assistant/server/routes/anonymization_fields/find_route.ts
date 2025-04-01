@@ -18,6 +18,7 @@ import {
   FindAnonymizationFieldsResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import _ from 'lodash';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
@@ -76,7 +77,7 @@ export const findAnonymizationFieldsRoute = (
             sortField: query.sort_field,
             sortOrder: query.sort_order,
             filter: query.filter,
-            fields: query.fields,
+            fields: query.fields?.map((f) => _.snakeCase(f)),
           });
 
           if (result) {

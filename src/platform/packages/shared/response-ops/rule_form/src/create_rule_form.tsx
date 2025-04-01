@@ -11,11 +11,12 @@ import React, { useCallback } from 'react';
 import { EuiLoadingElastic } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type { RuleFormData, RuleFormPlugins } from './types';
+import type { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 import { RuleFormStateProvider } from './rule_form_state';
 import { useCreateRule } from './common/hooks';
 import { RulePage } from './rule_page';
+import { RuleFlyout } from './rule_flyout';
 import {
   RuleFormCircuitBreakerError,
   RuleFormErrorPromptWrapper,
@@ -44,9 +45,13 @@ export interface CreateRuleFormProps {
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
+  isFlyout?: boolean;
   isServerless?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
+  onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
+  initialValues?: Partial<RuleFormData>;
+  initialMetadata?: RuleTypeMetaData;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -61,12 +66,16 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     shouldUseRuleProducer = false,
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
+    isFlyout,
     isServerless = false,
     onCancel,
     onSubmit,
+    onChangeMetaData,
+    initialMetadata,
+    initialValues = {},
   } = props;
 
-  const { http, docLinks, notifications, ruleTypeRegistry, ...deps } = plugins;
+  const { http, docLinks, notifications, ruleTypeRegistry, fieldsMetadata, ...deps } = plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useCreateRule({
@@ -112,6 +121,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     validConsumers,
     filteredRuleTypes,
     connectorFeatureId,
+    fieldsMetadata,
   });
 
   const onSave = useCallback(
@@ -158,11 +168,13 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     );
   }
 
+  const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
+
   return (
-    <div data-test-subj="createRuleForm">
-      <RuleFormStateProvider
-        initialRuleFormState={{
-          formData: getDefaultFormData({
+    <RuleFormStateProvider
+      initialRuleFormState={{
+        formData: {
+          ...getDefaultFormData({
             ruleTypeId,
             name: `${ruleType.name} rule`,
             consumer: getInitialConsumer({
@@ -176,33 +188,41 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
             }),
             actions: [],
           }),
-          plugins,
-          connectors,
-          connectorTypes,
-          aadTemplateFields,
-          minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
-          selectedRuleTypeModel: ruleTypeModel,
-          selectedRuleType: ruleType,
-          availableRuleTypes: getAvailableRuleTypes({
-            consumer,
-            ruleTypes,
-            ruleTypeRegistry,
-          }).map(({ ruleType: rt }) => rt),
+          ...initialValues,
+        },
+        metadata: initialMetadata,
+        plugins,
+        connectors,
+        connectorTypes,
+        aadTemplateFields,
+        minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+        selectedRuleTypeModel: ruleTypeModel,
+        selectedRuleType: ruleType,
+        availableRuleTypes: getAvailableRuleTypes({
+          consumer,
+          ruleTypes,
+          ruleTypeRegistry,
+        }).map(({ ruleType: rt }) => rt),
+        validConsumers,
+        flappingSettings,
+        canShowConsumerSelection,
+        showMustacheAutocompleteSwitch,
+        multiConsumerSelection: getInitialMultiConsumer({
+          multiConsumerSelection,
           validConsumers,
-          flappingSettings,
-          canShowConsumerSelection,
-          showMustacheAutocompleteSwitch,
-          multiConsumerSelection: getInitialMultiConsumer({
-            multiConsumerSelection,
-            validConsumers,
-            ruleType,
-            ruleTypes,
-            isServerless,
-          }),
-        }}
-      >
-        <RulePage isEdit={false} isSaving={isSaving} onCancel={onCancel} onSave={onSave} />
-      </RuleFormStateProvider>
-    </div>
+          ruleType,
+          ruleTypes,
+          isServerless,
+        }),
+      }}
+    >
+      <RuleFormUIComponent
+        isEdit={false}
+        isSaving={isSaving}
+        onCancel={onCancel}
+        onSave={onSave}
+        onChangeMetaData={onChangeMetaData}
+      />
+    </RuleFormStateProvider>
   );
 };

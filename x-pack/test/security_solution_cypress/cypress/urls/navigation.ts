@@ -15,7 +15,6 @@ export const DASHBOARDS_URL = '/app/security/dashboards';
 
 export const ASSETS_URL = '/app/security/assets';
 export const ENDPOINTS_URL = '/app/security/administration/endpoints';
-export const CLOUD_DEFEND_URL = '/app/security/cloud_defend';
 export const POLICIES_URL = '/app/security/administration/policy';
 export const TRUSTED_APPS_URL = '/app/security/administration/trusted_apps';
 export const EVENT_FILTERS_URL = '/app/security/administration/event_filters';

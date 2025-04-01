@@ -13,7 +13,6 @@ import { catchError, tap } from 'rxjs';
 import { firstValueFrom, from } from 'rxjs';
 import type { ISearchOptions, IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
-import { omit } from 'lodash';
 import { IAsyncSearchRequestParams } from '../..';
 import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy, SearchStrategyDependencies } from '../../types';
@@ -171,7 +170,7 @@ export const enhancedEsSearchStrategyProvider = (
       const esResponse = await client.rollup.rollupSearch(
         {
           ...querystring,
-          ...omit(request.params, ['indexType']),
+          ...request.params,
           index: request.params.index,
         },
         {

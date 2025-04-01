@@ -56,7 +56,7 @@ export class ResetSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLIPipelineTemplate(slo)
+            getSLIPipelineTemplate(slo, this.spaceId)
           ),
         { logger: this.logger }
       );
@@ -86,7 +86,7 @@ export class ResetSLO {
         { logger: this.logger }
       );
     } catch (err) {
-      this.logger.error(
+      this.logger.debug(
         `Cannot reset the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 

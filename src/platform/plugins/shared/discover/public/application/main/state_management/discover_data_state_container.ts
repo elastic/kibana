@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, filter, map, mergeMap, ReplaySubject, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
@@ -28,8 +29,9 @@ import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
-import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -64,14 +66,6 @@ export interface DataDocumentsMsg extends DataMsg {
 
 export interface DataTotalHitsMsg extends DataMsg {
   result?: number;
-}
-
-export interface DataChartsMessage extends DataMsg {
-  response?: SearchResponse;
-}
-
-export interface DataAvailableFieldsMsg extends DataMsg {
-  fields?: string[];
 }
 
 export interface DiscoverDataStateContainer {
@@ -138,21 +132,27 @@ export function getDataStateContainer({
   services,
   searchSessionManager,
   appStateContainer,
-  internalStateContainer,
+  internalState,
+  runtimeStateManager,
   getSavedSearch,
   setDataView,
+  injectCurrentTab,
+  getCurrentTab,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   appStateContainer: DiscoverAppStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
+  runtimeStateManager: RuntimeStateManager;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
-  const fetchChart$ = new Subject<void>();
+  const fetchChart$ = new ReplaySubject<void>(1);
   const disableNextFetchOnStateChange$ = new BehaviorSubject(false);
 
   /**
@@ -229,7 +229,7 @@ export function getDataStateContainer({
             searchSessionId,
             services,
             getAppState: appStateContainer.getState,
-            getInternalState: internalStateContainer.getState,
+            internalState,
             savedSearch: getSavedSearch(),
           };
 
@@ -254,10 +254,14 @@ export function getDataStateContainer({
             return;
           }
 
-          internalStateContainer.transitions.setDataRequestParams({
-            timeRangeAbsolute: timefilter.getAbsoluteTime(),
-            timeRangeRelative: timefilter.getTime(),
-          });
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.setDataRequestParams)({
+              dataRequestParams: {
+                timeRangeAbsolute: timefilter.getAbsoluteTime(),
+                timeRangeRelative: timefilter.getTime(),
+              },
+            })
+          );
 
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
@@ -265,7 +269,9 @@ export function getDataStateContainer({
             query: appStateContainer.getState().query,
           });
 
-          const { resetDefaultProfileState, dataView } = internalStateContainer.getState();
+          const { id: currentTabId, resetDefaultProfileState } = getCurrentTab();
+          const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
+          const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
             ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
             : undefined;
@@ -292,9 +298,9 @@ export function getDataStateContainer({
               abortController,
               ...commonFetchDeps,
             },
+            getCurrentTab,
             async () => {
-              const { resetDefaultProfileState: currentResetDefaultProfileState } =
-                internalStateContainer.getState();
+              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
                 return;
@@ -313,11 +319,15 @@ export function getDataStateContainer({
 
               // Clear the default profile state flags after the data fetching
               // is done so refetches don't reset the state again
-              internalStateContainer.transitions.setResetDefaultProfileState({
-                columns: false,
-                rowHeight: false,
-                breakdownField: false,
-              });
+              internalState.dispatch(
+                injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+                  resetDefaultProfileState: {
+                    columns: false,
+                    rowHeight: false,
+                    breakdownField: false,
+                  },
+                })
+              );
             }
           );
 

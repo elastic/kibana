@@ -16,24 +16,24 @@ import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
-import { ResizeHandle } from './resize_handle';
+import { ResizeHandle } from './grid_panel_resize_handle';
 
 export interface GridPanelProps {
   panelId: string;
-  rowIndex: number;
+  rowId: string;
 }
 
-export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
+export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
     useGridLayoutContext();
 
   const { euiTheme } = useEuiTheme();
-  const dragHandleApi = useDragHandleApi({ panelId, rowIndex });
+  const dragHandleApi = useDragHandleApi({ panelId, rowId });
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
   const initialStyles = useMemo(() => {
     const initialPanel = (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-      gridLayoutStateManager.gridLayout$.getValue())[rowIndex].panels[panelId];
+      gridLayoutStateManager.gridLayout$.getValue())[rowId].panels[panelId];
     return css`
       position: relative;
       height: calc(
@@ -47,8 +47,21 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
       grid-row-start: ${initialPanel.row + 1};
       grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+      .kbnGridPanel--dragHandle,
+      .kbnGridPanel--resizeHandle {
+        touch-action: none; // prevent scrolling on touch devices
+        scroll-margin-top: ${gridLayoutStateManager.runtimeSettings$.value.keyboardDragTopLimit}px;
+      }
     `;
-  }, [gridLayoutStateManager, rowIndex, panelId]);
+  }, [gridLayoutStateManager, rowId, panelId]);
+
+  useEffect(() => {
+    return () => {
+      // remove reference on unmount
+      delete gridLayoutStateManager.panelRefs.current[rowId][panelId];
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(
     () => {
@@ -60,8 +73,8 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
       ])
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-          const panel = (proposedGridLayout ?? gridLayout)[rowIndex].panels[panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+          const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
           if (!ref || !panel) return;
 
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
@@ -128,9 +141,9 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
        */
       const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
         (expandedPanelId) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          const panel = gridLayout[rowIndex].panels[panelId];
+          const panel = gridLayout[rowId].panels[panelId];
           if (!ref || !panel) return;
 
           if (expandedPanelId && expandedPanelId === panelId) {
@@ -160,17 +173,17 @@ export const GridPanel = React.memo(({ panelId, rowIndex }: GridPanelProps) => {
   return (
     <div
       ref={(element) => {
-        if (!gridLayoutStateManager.panelRefs.current[rowIndex]) {
-          gridLayoutStateManager.panelRefs.current[rowIndex] = {};
+        if (!gridLayoutStateManager.panelRefs.current[rowId]) {
+          gridLayoutStateManager.panelRefs.current[rowId] = {};
         }
-        gridLayoutStateManager.panelRefs.current[rowIndex][panelId] = element;
+        gridLayoutStateManager.panelRefs.current[rowId][panelId] = element;
       }}
       css={initialStyles}
       className="kbnGridPanel"
     >
       {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
       {panelContents}
-      <ResizeHandle panelId={panelId} rowIndex={rowIndex} />
+      <ResizeHandle panelId={panelId} rowId={rowId} />
     </div>
   );
 });

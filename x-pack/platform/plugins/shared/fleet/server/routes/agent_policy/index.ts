@@ -35,6 +35,7 @@ import {
   GetListAgentPolicyOutputsRequestSchema,
   GetAutoUpgradeAgentsStatusRequestSchema,
   GetAutoUpgradeAgentsStatusResponseSchema,
+  CreateAgentAndPackagePolicyRequestSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
@@ -58,6 +59,7 @@ import {
   GetAgentPolicyOutputsHandler,
   GetListAgentPolicyOutputsHandler,
   getAutoUpgradeAgentsStatusHandler,
+  createAgentAndPackagePoliciesHandler,
 } from './handlers';
 
 export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
@@ -247,6 +249,39 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         },
       },
       createAgentPolicyHandler
+    );
+
+  // Create agent + package policies in a single request
+  // Used for agentless integrations
+  router.versioned
+    .post({
+      path: AGENT_POLICY_API_ROUTES.CREATE_WITH_PACKAGE_POLICIES,
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL],
+        },
+      },
+      summary: `Create an agent policy and its package policies in one request`,
+      options: {
+        tags: ['oas-tag:Elastic Agent policies'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: CreateAgentAndPackagePolicyRequestSchema,
+          response: {
+            200: {
+              body: () => GetAgentPolicyResponseSchema,
+            },
+            400: {
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      createAgentAndPackagePoliciesHandler
     );
 
   // Update

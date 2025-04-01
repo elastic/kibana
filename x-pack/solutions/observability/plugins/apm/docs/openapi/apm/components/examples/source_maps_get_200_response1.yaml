@@ -1,0 +1,42 @@
+# summary:
+description: A successful response from `GET /api/apm/sourcemaps`.
+value: >
+  {
+    "artifacts": [
+      {
+        "type": "sourcemap",
+        "identifier": "foo-1.0.0",
+        "relative_url": "/api/fleet/artifacts/foo-1.0.0/644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+        "body": {
+          "serviceName": "foo",
+          "serviceVersion": "1.0.0",
+          "bundleFilepath": "/test/e2e/general-usecase/bundle.js",
+          "sourceMap": {
+            "version": 3,
+            "file": "static/js/main.chunk.js",
+            "sources": [
+              "fleet-source-map-client/src/index.css",
+              "fleet-source-map-client/src/App.js",
+              "webpack:///./src/index.css?bb0a",
+              "fleet-source-map-client/src/index.js",
+              "fleet-source-map-client/src/reportWebVitals.js"
+            ],
+            "sourcesContent": [
+              "content"
+            ],
+            "mappings": "mapping",
+            "sourceRoot": ""
+          }
+        },
+        "created": "2021-07-09T20:47:44.812Z",
+        "id": "apm:foo-1.0.0-644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+        "compressionAlgorithm": "zlib",
+        "decodedSha256": "644fd5a997d1ddd90ee131ba18e2b3d03931d89dd1fe4599143c0b3264b3e456",
+        "decodedSize": 441,
+        "encodedSha256": "024c72749c3e3dd411b103f7040ae62633558608f480bce4b108cf5b2275bd24",
+        "encodedSize": 237,
+        "encryptionAlgorithm": "none",
+        "packageName": "apm"
+      }
+    ]
+  }

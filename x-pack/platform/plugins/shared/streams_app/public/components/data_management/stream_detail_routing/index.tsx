@@ -27,7 +27,7 @@ export function StreamDetailRouting({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredStreamGetResponse;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const { appParams, core } = useKibana();
@@ -44,7 +44,7 @@ export function StreamDetailRouting({
 
   const streamsListFetch = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams', {
+      return streamsRepositoryClient.fetch('GET /api/streams 2023-10-31', {
         signal,
       });
     },
@@ -60,10 +60,6 @@ export function StreamDetailRouting({
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
-
-  if (!definition) {
-    return null;
-  }
 
   const closeModal = () => routingAppState.setShowDeleteModal(false);
 

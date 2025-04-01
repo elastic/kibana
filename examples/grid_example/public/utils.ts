@@ -15,10 +15,11 @@ export const gridLayoutToDashboardPanelMap = (
   layout: GridLayoutData
 ): { panels: MockedDashboardPanelMap; rows: MockedDashboardRowMap } => {
   const panels: MockedDashboardPanelMap = {};
-  const rows: MockedDashboardRowMap = [];
-  layout.forEach((row, rowIndex) => {
-    rows.push({ title: row.title, collapsed: row.isCollapsed });
-    Object.values(row.panels).forEach((panelGridData) => {
+  const rows: MockedDashboardRowMap = {};
+  Object.entries(layout).forEach(([rowId, row]) => {
+    const { panels: rowPanels, isCollapsed, ...rest } = row; // drop panels
+    rows[rowId] = { ...rest, collapsed: isCollapsed };
+    Object.values(rowPanels).forEach((panelGridData) => {
       panels[panelGridData.id] = {
         ...panelState[panelGridData.id],
         gridData: {
@@ -27,7 +28,7 @@ export const gridLayoutToDashboardPanelMap = (
           x: panelGridData.column,
           w: panelGridData.width,
           h: panelGridData.height,
-          row: rowIndex,
+          row: rowId,
         },
       };
     });
@@ -42,15 +43,19 @@ export const dashboardInputToGridLayout = ({
   panels: MockedDashboardPanelMap;
   rows: MockedDashboardRowMap;
 }): GridLayoutData => {
-  const layout: GridLayoutData = [];
-
-  rows.forEach((row) => {
-    layout.push({ title: row.title, isCollapsed: row.collapsed, panels: {} });
+  const layout: GridLayoutData = {};
+  Object.values(rows).forEach((row) => {
+    const { collapsed, ...rest } = row;
+    layout[row.id] = {
+      ...rest,
+      panels: {},
+      isCollapsed: collapsed,
+    };
   });
 
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
-    layout[gridData.row ?? 0].panels[panelId] = {
+    layout[gridData.row ?? 'first'].panels[panelId] = {
       id: panelId,
       row: gridData.y,
       column: gridData.x,

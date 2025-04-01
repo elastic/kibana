@@ -63,11 +63,12 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       kibanaVersion: '8.8.0',
       ml,
       getElserId: getElserId.mockResolvedValue('elser-id'),
+      modelIdOverride: false,
       getIsKBSetupInProgress: mockGetIsKBSetupInProgress.mockReturnValue(false),
+      getProductDocumentationStatus: jest.fn().mockResolvedValue('installed'),
       ingestPipelineResourceName: 'something',
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
-      assistantDefaultInferenceEndpoint: false,
       trainedModelsProvider: trainedModelsProviderMock,
     };
     esClientMock.search.mockReturnValue(
@@ -331,7 +332,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
           { fully_defined: false, model_id: '', tags: [], input: { field_names: ['content'] } },
         ],
       });
-      mockLoadSecurityLabs.mockRejectedValue(new Error('Installation error'));
+      (getMlNodeCount as jest.Mock).mockRejectedValue(new Error('Installation error'));
       const client = new AIAssistantKnowledgeBaseDataClient(mockOptions);
 
       await expect(client.setupKnowledgeBase({})).rejects.toThrow(

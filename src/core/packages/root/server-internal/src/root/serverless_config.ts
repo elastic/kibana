@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf, Type } from '@kbn/config-schema';
-import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { schema, TypeOf, type Type } from '@kbn/config-schema';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { KIBANA_PROJECTS, type KibanaProject } from '@kbn/projects-solutions-groups';
 
 // Config validation for how to run Kibana in Serverless mode.
 // Clients need to specify the project type to run in.
@@ -17,12 +18,11 @@ import { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 // If we even decide to extend this further, and converting it into an object,
 // BWC can be ensured by adding the object definition as another alternative to `schema.oneOf`.
 
-export const VALID_SERVERLESS_PROJECT_TYPES = ['es', 'oblt', 'security'];
-
+// BOOKMARK - List of Kibana project types
 const serverlessConfigSchema = schema.maybe(
   schema.oneOf(
-    VALID_SERVERLESS_PROJECT_TYPES.map((projectName) => schema.literal(projectName)) as [
-      Type<(typeof VALID_SERVERLESS_PROJECT_TYPES)[number]> // This cast is needed because it's different to Type<T>[] :sight:
+    KIBANA_PROJECTS.map((projectName) => schema.literal(projectName)) as [
+      Type<KibanaProject> // This cast is needed because it's different to Type<T>[] :sight:
     ]
   )
 );

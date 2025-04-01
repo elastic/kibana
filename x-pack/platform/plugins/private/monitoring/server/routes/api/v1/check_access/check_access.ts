@@ -20,6 +20,12 @@ export function checkAccessRoute(server: MonitoringCore) {
   server.route({
     method: 'get',
     path: '/api/monitoring/v1/check_access',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {},
     options: {
       access: 'internal',

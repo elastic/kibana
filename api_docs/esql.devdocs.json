@@ -151,9 +151,9 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLVariableType",
                 "text": "ESQLVariableType"
               }
@@ -591,86 +591,20 @@
           },
           {
             "parentPluginId": "esql",
-            "id": "def-public.ESQLEditorProps.supportsControls",
-            "type": "CompoundType",
+            "id": "def-public.ESQLEditorProps.controlsContext",
+            "type": "Object",
             "tags": [],
-            "label": "supportsControls",
+            "label": "controlsContext",
             "description": [
-              "The editor supports the creation of controls,\nThis flag should be set to true to display the \"Create control\" suggestion"
+              "Enables the creation of controls from the editor"
             ],
             "signature": [
-              "boolean | undefined"
+              "ControlsContext",
+              " | undefined"
             ],
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "esql",
-            "id": "def-public.ESQLEditorProps.onSaveControl",
-            "type": "Function",
-            "tags": [],
-            "label": "onSaveControl",
-            "description": [
-              "Function to be called after the control creation"
-            ],
-            "signature": [
-              "((controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>) | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "esql",
-                "id": "def-public.ESQLEditorProps.onSaveControl.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "controlState",
-                "description": [],
-                "signature": [
-                  "Record<string, unknown>"
-                ],
-                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "esql",
-                "id": "def-public.ESQLEditorProps.onSaveControl.$2",
-                "type": "string",
-                "tags": [],
-                "label": "updatedQuery",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "esql",
-            "id": "def-public.ESQLEditorProps.onCancelControl",
-            "type": "Function",
-            "tags": [],
-            "label": "onCancelControl",
-            "description": [
-              "Function to be called after cancelling the control creation"
-            ],
-            "signature": [
-              "(() => void) | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
           },
           {
             "parentPluginId": "esql",
@@ -683,9 +617,9 @@
             ],
             "signature": [
               {
-                "pluginId": "@kbn/esql-validation-autocomplete",
+                "pluginId": "@kbn/esql-types",
                 "scope": "common",
-                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "docId": "kibKbnEsqlTypesPluginApi",
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },

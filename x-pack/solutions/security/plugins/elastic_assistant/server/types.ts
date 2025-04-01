@@ -24,7 +24,7 @@ import {
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
+import { StructuredToolInterface } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import {
@@ -57,11 +57,13 @@ import {
   GetAIAssistantConversationsDataClientParams,
 } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
+import { CallbackIds } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
-import type { DefendInsightsDataClient } from './ai_assistant_data_clients/defend_insights';
+import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
+export { CallbackIds };
 
 /** The plugin setup interface */
 export interface ElasticAssistantPluginSetup {
@@ -108,6 +110,12 @@ export interface ElasticAssistantPluginStart {
    * @param pluginName Name of the plugin to get the tools for
    */
   getRegisteredTools: GetRegisteredTools;
+  /**
+   * Register a callback to be used by the elastic assistant.
+   * @param callbackId
+   * @param callback
+   */
+  registerCallback: (callbackId: CallbackIds, callback: Function) => void;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {
@@ -224,7 +232,7 @@ export interface AssistantTool {
   description: string;
   sourceRegister: string;
   isSupported: (params: AssistantToolParams) => boolean;
-  getTool: (params: AssistantToolParams) => Tool | DynamicStructuredTool | null;
+  getTool: (params: AssistantToolParams) => StructuredToolInterface | null;
 }
 
 export type AssistantToolLlm =

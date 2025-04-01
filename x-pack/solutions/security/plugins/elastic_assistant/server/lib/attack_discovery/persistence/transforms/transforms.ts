@@ -42,6 +42,7 @@ export const transformESSearchToAttackDiscovery = (
         },
         attackDiscoveries: adSchema.attack_discoveries.map((attackDiscovery) => ({
           alertIds: attackDiscovery.alert_ids,
+          id: attackDiscovery.id,
           title: attackDiscovery.title,
           detailsMarkdown: attackDiscovery.details_markdown,
           entitySummaryMarkdown: attackDiscovery.entity_summary_markdown,

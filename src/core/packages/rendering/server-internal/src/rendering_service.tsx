@@ -48,6 +48,7 @@ import {
 import { filterUiPlugins } from './filter_ui_plugins';
 import { getApmConfig } from './get_apm_config';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
+import { isThemeBundled } from './theme';
 
 type RenderOptions =
   | RenderingSetupDeps
@@ -134,7 +135,16 @@ export class RenderingService {
     featureFlags
       .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
       // Parse the input feature flag value to ensure it's of type ThemeName
-      .pipe(map((value) => parseThemeNameValue(value)))
+      // and that it's bundled with this build of Kibana
+      .pipe(
+        map((themeName) => {
+          if (isThemeBundled(themeName)) {
+            return parseThemeNameValue(themeName);
+          }
+
+          return DEFAULT_THEME_NAME;
+        })
+      )
       .subscribe(this.themeName$);
   }
 

@@ -53,7 +53,7 @@ describe('HistoricalResultsList', () => {
               total: modifiedResults.length,
             }}
           >
-            <HistoricalResultsList indexName={indexName} />
+            <HistoricalResultsList checkedAt={1706526408000} indexName={indexName} />
           </TestHistoricalResultsProvider>
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -86,7 +86,7 @@ describe('HistoricalResultsList', () => {
               total: 1,
             }}
           >
-            <HistoricalResultsList indexName={indexName} />
+            <HistoricalResultsList checkedAt={1706526408000} indexName={indexName} />
           </TestHistoricalResultsProvider>
         </TestDataQualityProviders>
       </TestExternalProviders>
@@ -116,7 +116,7 @@ describe('HistoricalResultsList', () => {
                 total: 1,
               }}
             >
-              <HistoricalResultsList indexName={indexName} />
+              <HistoricalResultsList checkedAt={1706526408000} indexName={indexName} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -154,7 +154,7 @@ describe('HistoricalResultsList', () => {
                 total: 0,
               }}
             >
-              <HistoricalResultsList indexName={indexName} />
+              <HistoricalResultsList checkedAt={1706526408000} indexName={indexName} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>
@@ -180,7 +180,7 @@ describe('HistoricalResultsList', () => {
                 total: results.length,
               }}
             >
-              <HistoricalResultsList indexName={indexName} />
+              <HistoricalResultsList checkedAt={1706526408000} indexName={indexName} />
             </TestHistoricalResultsProvider>
           </TestDataQualityProviders>
         </TestExternalProviders>

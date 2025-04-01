@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import agent from 'elastic-apm-node';
 import type { Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import type { Duration } from 'moment';
@@ -39,6 +40,7 @@ import type {
 } from './client_interface';
 import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { SECURITY_RULE_STATUS } from '../../../../rule_types/utils/apm_field_names';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
@@ -83,6 +85,8 @@ export const createRuleExecutionLogClientForExecutors = (
       await withSecuritySpan('IRuleExecutionLogForExecutors.logStatusChange', async () => {
         const correlationIds = baseCorrelationIds.withStatus(args.newStatus);
         const logMeta = correlationIds.getLogMeta();
+
+        agent.addLabels({ [SECURITY_RULE_STATUS]: args.newStatus });
 
         try {
           const normalizedArgs = normalizeStatusChangeArgs(args);

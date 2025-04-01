@@ -34,6 +34,7 @@ import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/con
 import { getAlertsGroupingQuery, useGroupTakeActionsItems } from './grouping_settings';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
+const DEFAULT_FILTERS: Filter[] = [];
 
 interface OwnProps {
   currentAlertStatusFilterValue?: Status[];
@@ -66,7 +67,7 @@ export type AlertsTableComponentProps = OwnProps;
 
 export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   currentAlertStatusFilterValue,
-  defaultFilters = [],
+  defaultFilters = DEFAULT_FILTERS,
   from,
   getGrouping,
   globalFilters,
@@ -99,7 +100,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         return combineQueries({
           config: getEsQueryConfig(uiSettings),
           dataProviders: [],
-          indexPattern: sourcererDataView,
+          dataViewSpec: sourcererDataView,
           browserFields,
           filters: [
             ...(defaultFilters ?? []),

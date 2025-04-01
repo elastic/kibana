@@ -58,8 +58,7 @@ webpack_cli(
       "NODE_ENV": "production",
     },
     "//conditions:default": {
-      "NODE_ENV": "development",
-      "REACT_18": "$(REACT_18)",
+      "NODE_ENV": "development"
     },
   }),
   visibility = ["//visibility:public"],

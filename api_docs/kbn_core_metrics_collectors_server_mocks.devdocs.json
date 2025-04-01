@@ -79,6 +79,22 @@
             "trackAdoption": false,
             "returnComment": [],
             "children": []
+          },
+          {
+            "parentPluginId": "@kbn/core-metrics-collectors-server-mocks",
+            "id": "def-server.collectorMock.createProcessMetricsCollector",
+            "type": "Function",
+            "tags": [],
+            "label": "createProcessMetricsCollector",
+            "description": [],
+            "signature": [
+              "() => { registerMetrics: jest.Mock<any, any, any>; collect: jest.MockInstance<any, [], unknown> & (() => any); reset: jest.MockInstance<void, [], unknown> & (() => void); }"
+            ],
+            "path": "src/core/packages/metrics/collectors-server-mocks/src/mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": []
           }
         ],
         "initialIsOpen": false

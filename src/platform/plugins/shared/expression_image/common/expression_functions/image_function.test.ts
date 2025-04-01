@@ -9,20 +9,12 @@
 
 import expect from '@kbn/expect';
 import { ExecutionContext } from '@kbn/expressions-plugin/common';
-import { getElasticLogo, getElasticOutline } from '@kbn/presentation-util-plugin/common';
+import { elasticLogo, elasticOutline } from '@kbn/expression-utils';
 import { functionWrapper } from '@kbn/presentation-util-plugin/test_helpers';
 import { imageFunction as image } from './image_function';
 
 describe('image', () => {
   const fn = functionWrapper(image);
-
-  let elasticLogo: string;
-  let elasticOutline: string;
-
-  beforeEach(async () => {
-    elasticLogo = (await getElasticLogo())?.elasticLogo;
-    elasticOutline = (await getElasticOutline())?.elasticOutline;
-  });
 
   it('returns an image object using a dataUrl', async () => {
     const result = await fn(

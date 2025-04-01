@@ -8069,6 +8069,18 @@
                 "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/logs.ts"
               },
@@ -8079,18 +8091,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "osquery",
@@ -11736,10 +11736,6 @@
             {
               "plugin": "stackAlerts",
               "path": "x-pack/platform/plugins/shared/stack_alerts/public/rule_types/threshold/expression.tsx"
-            },
-            {
-              "plugin": "expressionPartitionVis",
-              "path": "src/platform/plugins/shared/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
@@ -24270,6 +24266,18 @@
                 "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/logs.ts"
               },
@@ -24280,18 +24288,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "osquery",

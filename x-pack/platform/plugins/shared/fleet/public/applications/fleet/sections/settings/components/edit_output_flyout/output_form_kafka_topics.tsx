@@ -15,9 +15,12 @@ import {
   EuiTitle,
   EuiRadioGroup,
   EuiComboBox,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import { useStartServices } from '../../../../hooks';
 
 import {
   kafkaTopicsType,
@@ -30,10 +33,12 @@ import type { OutputFormInputsType } from './use_output_form';
 export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputFormInputsType }> = ({
   inputs,
 }) => {
+  const { docLinks } = useStartServices();
+
   const dynamicOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const options = KAFKA_DYNAMIC_FIELDS.map((option) => ({
       label: option,
-      value: option,
+      value: `%{[${option}]}`,
     }));
     return options;
   }, []);
@@ -73,7 +78,17 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
             label={
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.kafkaDynamicTopicLabel"
-                defaultMessage="Topic from field"
+                defaultMessage="Topic from field(s). For more info, see our {guideLink}"
+                values={{
+                  guideLink: (
+                    <EuiLink href={docLinks.links.filebeat.kafkaOutput} target="_blank" external>
+                      <FormattedMessage
+                        id="xpack.fleet.settings.kafkaGuideLink"
+                        defaultMessage="docs."
+                      />
+                    </EuiLink>
+                  ),
+                }}
               />
             }
             {...inputs.kafkaDynamicTopicInput.formRowProps}
@@ -83,7 +98,7 @@ export const OutputFormKafkaTopics: React.FunctionComponent<{ inputs: OutputForm
               fullWidth
               isClearable={true}
               options={dynamicOptions}
-              customOptionText="Use custom field (not recommended)"
+              customOptionText="Use custom field"
               singleSelection={{ asPlainText: true }}
               {...inputs.kafkaDynamicTopicInput.props}
             />

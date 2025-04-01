@@ -34,7 +34,7 @@ export interface UseChatResult {
   messages: Message[];
   setMessages: (messages: Message[]) => void;
   state: ChatState;
-  next: (messages: Message[]) => void;
+  next: (messages: Message[], onError?: (error: any) => void) => void;
   stop: () => void;
 }
 
@@ -131,7 +131,7 @@ function useChatWithoutContext({
   );
 
   const next = useCallback(
-    async (nextMessages: Message[]) => {
+    async (nextMessages: Message[], onError?: (error: any) => void) => {
       // make sure we ignore any aborts for the previous signal
       abortControllerRef.current.signal.removeEventListener('abort', handleSignalAbort);
 
@@ -239,6 +239,7 @@ function useChatWithoutContext({
         error: (error) => {
           setPendingMessages([]);
           setMessages(nextMessages.concat(getPendingMessages()));
+          onError?.(error);
           handleError(error);
         },
       });

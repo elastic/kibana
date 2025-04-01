@@ -409,12 +409,6 @@ export const waitForBulkEditActionToFinish = ({
   }
 };
 
-export const checkPrebuiltRulesCannotBeModified = (rulesCount: number) => {
-  cy.get(MODAL_CONFIRMATION_BODY).contains(
-    `${rulesCount} prebuilt Elastic rules (editing prebuilt rules is not supported)`
-  );
-};
-
 export const checkMachineLearningRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
     `${rulesCount} machine learning rule (these rules don't have index patterns)`

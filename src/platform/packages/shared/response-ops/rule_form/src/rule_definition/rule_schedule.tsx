@@ -121,7 +121,7 @@ export const RuleSchedule = () => {
       isInvalid={hasIntervalError}
       error={baseErrors?.interval}
     >
-      <EuiFlexGroup gutterSize="s">
+      <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem grow={2}>
           <EuiFieldNumber
             fullWidth

@@ -9,7 +9,8 @@
 
 import { createStubIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { DataSourceCategory, RootContext, SolutionType } from '../../../profiles';
+import type { RootContext } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
 import { createDeprecationLogsDataSourceProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';
 import { DEPRECATION_LOGS_PROFILE_ID } from './consts';

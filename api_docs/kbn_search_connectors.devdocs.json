@@ -1896,6 +1896,39 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.toValidIndexName",
+        "type": "Function",
+        "tags": [],
+        "label": "toValidIndexName",
+        "description": [],
+        "signature": [
+          "(str: string) => string"
+        ],
+        "path": "src/platform/packages/shared/kbn-search-connectors/lib/generate_connector_name.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.toValidIndexName.$1",
+            "type": "string",
+            "tags": [],
+            "label": "str",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-search-connectors/lib/generate_connector_name.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.updateConnectorApiKeyId",
         "type": "Function",
         "tags": [],
@@ -6608,7 +6641,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; index_name: string | null; configuration: ",
+          " | null | undefined; configuration: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
@@ -6616,7 +6649,7 @@
             "section": "def-common.ConnectorConfiguration",
             "text": "ConnectorConfiguration"
           },
-          "; deleted: boolean | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
+          "; index_name: string | null; deleted: boolean | null; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
