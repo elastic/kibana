@@ -82,20 +82,19 @@ export class LockManager {
               if (ctx.op == 'create' || Instant.parse(ctx._source.expiresAt).toEpochMilli() < now) {
                 ctx._source.createdAt = Instant.ofEpochMilli(now).toString();
                 ctx._source.expiresAt = Instant.ofEpochMilli(now + params.ttl).toString();
-                ctx._source.metadata = params.metadata;
-                ctx._source.token = params.token;
               } else {
                 ctx.op = 'noop'
               }
             `,
           params: {
-            token: this.token,
             ttl,
-            metadata,
           },
         },
         // @ts-expect-error
-        upsert: {},
+        upsert: {
+          metadata,
+          token: this.token,
+        },
         refresh: true,
       });
 
@@ -141,19 +140,13 @@ export class LockManager {
    */
   public async release(): Promise<boolean> {
     try {
-      const res = await pRetry(
-        () => {
-          return this.esClient.deleteByQuery({
-            index: LOCKS_CONCRETE_INDEX_NAME,
-            query: {
-              // bool: { filter: [{ term: { _id: this.lockId } }, { term: { token: this.token } }] },
-              bool: { filter: [{ term: { _id: this.lockId } }, { term: { token: this.token } }] },
-            },
-            refresh: true,
-          });
+      const res = await this.esClient.deleteByQuery({
+        index: LOCKS_CONCRETE_INDEX_NAME,
+        query: {
+          bool: { filter: [{ term: { _id: this.lockId } }, { term: { token: this.token } }] },
         },
-        { retries: 2 }
-      );
+        refresh: true,
+      });
 
       if (res.deleted === 0) {
         this.logger.debug(
