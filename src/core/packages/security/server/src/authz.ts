@@ -8,9 +8,9 @@
  */
 
 export enum AuthzOptOutReason {
-  DelegatesToESClient = 'Route delegates authorization to the scoped ES client',
-  DelegatesToSOClient = 'Route delegates authorization to the scoped SO client',
-  ServesStaticFiles = 'Serving static files that do not require authorization',
+  DelegateToESClient = 'Route delegates authorization to the scoped ES client',
+  DelegateToSOClient = 'Route delegates authorization to the scoped SO client',
+  ServeStaticFiles = 'Serving static files that do not require authorization',
 }
 
 export class DisabledAuthz {
@@ -21,15 +21,15 @@ export class DisabledAuthz {
     };
   }
 
-  public static get delegatesToESClient() {
-    return DisabledAuthz.config(AuthzOptOutReason.DelegatesToESClient);
+  public static get delegateToESClient() {
+    return DisabledAuthz.config(AuthzOptOutReason.DelegateToESClient);
   }
 
-  public static get delegatesToSOClient() {
-    return DisabledAuthz.config(AuthzOptOutReason.DelegatesToSOClient);
+  public static get delegateToSOClient() {
+    return DisabledAuthz.config(AuthzOptOutReason.DelegateToSOClient);
   }
 
-  public static get servesStaticFiles() {
-    return DisabledAuthz.config(AuthzOptOutReason.ServesStaticFiles);
+  public static get serveStaticFiles() {
+    return DisabledAuthz.config(AuthzOptOutReason.ServeStaticFiles);
   }
 }

@@ -31,7 +31,7 @@ export function defineGetAllRolesRoutes({
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: DisabledAuthz.DelegatesToESClient,
+        authz: DisabledAuthz.delegateToESClient,
       },
     })
     .addVersion(

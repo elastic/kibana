@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthzOptOutReason, disabledAuthz } from '@kbn/core-security-server';
+import { DisabledAuthz } from '@kbn/core-security-server';
 
 import { roleGrantsSubFeaturePrivileges } from './lib';
 import {
@@ -51,7 +51,7 @@ export function defineBulkCreateOrUpdateRolesRoutes({
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: disabledAuthz(AuthzOptOutReason.DelegatesToESClient),
+        authz: DisabledAuthz.delegateToESClient,
       },
     })
     .addVersion(

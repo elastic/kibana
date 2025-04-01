@@ -23,7 +23,7 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: DisabledAuthz.delegatesToESClient,
+        authz: DisabledAuthz.delegateToESClient,
       },
     })
     .addVersion(

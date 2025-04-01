@@ -33,7 +33,7 @@ export function definePutRolesRoutes({
         tags: ['oas-tag:roles'],
       },
       security: {
-        authz: DisabledAuthz.DelegatesToESClient,
+        authz: DisabledAuthz.delegateToESClient,
       },
     })
     .addVersion(

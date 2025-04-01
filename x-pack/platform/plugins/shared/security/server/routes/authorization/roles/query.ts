@@ -35,7 +35,7 @@ export function defineQueryRolesRoutes({
         tags: ['oas-tags:roles'],
       },
       security: {
-        authz: DisabledAuthz.delegatesToESClient,
+        authz: DisabledAuthz.delegateToESClient,
       },
     })
     .addVersion(
