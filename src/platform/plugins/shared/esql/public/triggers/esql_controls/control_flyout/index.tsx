@@ -117,11 +117,17 @@ export function ESQLControlsFlyout({
       const newType = getVariableTypeFromQuery(text, variableType);
       setVariableType(newType);
       setVariableNamePrefix(getVariableNamePrefix(newType));
-      setControlFlyoutType(
-        newType === ESQLVariableType.VALUES
-          ? EsqlControlType.VALUES_FROM_QUERY
-          : EsqlControlType.STATIC_VALUES
-      );
+      if (
+        controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
+        newType !== ESQLVariableType.VALUES
+      ) {
+        setControlFlyoutType(EsqlControlType.STATIC_VALUES);
+      }
+      // setControlFlyoutType(
+      //   newType === ESQLVariableType.VALUES
+      //     ? EsqlControlType.VALUES_FROM_QUERY
+      //     : EsqlControlType.STATIC_VALUES
+      // );
 
       const variableNameWithoutQuestionmark = text.replace(/^\?+/, '');
       const variableExists = checkVariableExistence(esqlVariables, text);
@@ -133,6 +139,7 @@ export function ESQLControlsFlyout({
       );
     },
     [
+      controlFlyoutType,
       areValuesValid,
       controlState?.availableOptions.length,
       esqlVariables,
