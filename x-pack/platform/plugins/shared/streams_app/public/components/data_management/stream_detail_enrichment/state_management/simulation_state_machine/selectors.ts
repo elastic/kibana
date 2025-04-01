@@ -7,7 +7,7 @@
 
 import { createSelector } from 'reselect';
 
-import { SampleDocument } from '@kbn/streams-schema';
+import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';
 import { SimulationContext } from './types';
 import { filterSimulationDocuments } from './utils';
@@ -25,9 +25,9 @@ export const selectPreviewDocuments = createSelector(
   ],
   (samples, previewDocsFilter, documents) => {
     return (
-      (previewDocsFilter && documents
+      ((previewDocsFilter && documents
         ? filterSimulationDocuments(documents, previewDocsFilter)
-        : samples) || EMPTY_ARRAY
+        : samples) as FlattenRecord[]) || EMPTY_ARRAY
     );
   }
 );
