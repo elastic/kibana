@@ -382,18 +382,20 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    output?.type === 'logstash' ? validateSSLCertificate : undefined,
+    output?.type === 'logstash' && logstashEnableSSLInput.value
+      ? validateSSLCertificate
+      : undefined,
     isSSLEditable
   );
   const sslKeyInput = useInput(
     output?.ssl?.key ?? '',
-    output?.type === 'logstash' ? validateSSLKey : undefined,
+    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKey : undefined,
     isSSLEditable
   );
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    output?.type === 'logstash' ? validateSSLKeySecret : undefined,
+    output?.type === 'logstash' && logstashEnableSSLInput.value ? validateSSLKeySecret : undefined,
     isSSLEditable
   );
 
@@ -687,7 +689,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         additionalYamlConfigValid &&
         nameInputValid &&
         sslCertificateValid &&
-        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
+        (sslKeyValid || sslKeySecretValid)
       );
     }
     if (isKafka) {
