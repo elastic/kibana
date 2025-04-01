@@ -171,6 +171,17 @@ export function convertRulesToTableItems(opts: ConvertRulesToTableItemsOpts): Ru
     };
   });
 }
+const ruleSidebarActionCss = css`
+  opacity: 0; /* 1 */
+
+  &.ruleSidebarItem__mobile {
+    opacity: 1;
+  }
+
+  &:focus {
+    opacity: 1; /* 2 */
+  }
+`;
 
 export const RulesListTable = (props: RulesListTableProps) => {
   const {
@@ -238,21 +249,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
       }
     }
   `;
-  const ruleSidebarActionCss = useMemo(
-    () =>
-      css`
-        opacity: 0; /* 1 */
-
-        &.ruleSidebarItem__mobile {
-          opacity: 1;
-        }
-
-        &:focus {
-          opacity: 1; /* 2 */
-        }
-      `,
-    []
-  );
 
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
@@ -867,7 +863,6 @@ export const RulesListTable = (props: RulesListTableProps) => {
     tagPopoverOpenIndex,
     ruleOutcomeColumnField,
     euiTheme,
-    ruleSidebarActionCss,
   ]);
 
   const allRuleColumns = useMemo(() => getRulesTableColumns(), [getRulesTableColumns]);
