@@ -61,7 +61,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
         api: [],
       },
       read: {
-        ui: ['configurations_read'],
+        ui: [],
         api: [],
       },
     },
