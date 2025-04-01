@@ -13,7 +13,7 @@ import { BasicRules } from '../tabs/basic_rules';
 import { KnowledgeSources } from '../tabs/knowledge_sources';
 import { Integrations } from '../tabs/integrations';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
-import { ConfigurationTabs } from './configuration_tabs';
+import { ConfigurationTabs } from '../constants';
 
 export const ConfigurationsRouter = React.memo(() => {
   return (

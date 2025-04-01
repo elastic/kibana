@@ -5,69 +5,49 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiTab, EuiTabs } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { useNavigation } from '../../common/lib/kibana';
-
+import { ConfigurationTabs } from '../constants';
 import * as i18n from '../translations';
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  knowledgeSources = 'knowledge_sources',
-}
 
+const CONFIGURATION_TABS = [
+  {
+    tabId: ConfigurationTabs.integrations,
+    deepLinkId: SecurityPageName.configurationsIntegrations,
+    name: i18n.INTEGRATIONS,
+  },
+  {
+    tabId: ConfigurationTabs.knowledgeSources,
+    deepLinkId: SecurityPageName.configurationsKnowledgeSources,
+    name: i18n.KNOWLEDGE_SOURCES,
+  },
+  {
+    tabId: ConfigurationTabs.basicRules,
+    deepLinkId: SecurityPageName.configurationsBasicRules,
+    name: i18n.BASIC_RULES,
+  },
+];
 export const ConfigurationsTabs = React.memo(() => {
   const { navigateTo } = useNavigation();
   const params: { tab: ConfigurationTabs } = useParams();
 
-  const tabs = useMemo(
-    () => ({
-      [ConfigurationTabs.integrations]: {
-        id: ConfigurationTabs.integrations,
-        name: i18n.INTEGRATIONS,
-        disabled: false,
-        href: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}`,
-      },
-
-      [ConfigurationTabs.knowledgeSources]: {
-        id: ConfigurationTabs.knowledgeSources,
-        name: i18n.KNOWLEDGE_SOURCES,
-        disabled: false,
-        href: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.knowledgeSources}`,
-      },
-      [ConfigurationTabs.basicRules]: {
-        id: ConfigurationTabs.basicRules,
-        name: i18n.BASIC_RULES,
-        disabled: false,
-        href: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.basicRules}`,
-      },
-    }),
-    []
-  );
-
-  const tabsArray = useMemo(() => Object.values(tabs), [tabs]);
-
   const onSelectedTabChanged = useCallback(
-    (id: ConfigurationTabs) => {
-      navigateTo({
-        deepLinkId: SecurityPageName.configurations,
-        path: id,
-      });
+    (deepLinkId: SecurityPageName) => {
+      navigateTo({ deepLinkId });
     },
     [navigateTo]
   );
 
   return (
     <EuiTabs size="m" bottomBorder>
-      {tabsArray.map((tab, i) => (
+      {CONFIGURATION_TABS.map((tab) => (
         <EuiTab
-          key={`${tab}-${i}`}
-          onClick={() => onSelectedTabChanged(tab.id)}
-          isSelected={tab.id === params.tab}
-          disabled={tab.disabled}
+          key={tab.deepLinkId}
+          onClick={() => onSelectedTabChanged(tab.deepLinkId)}
+          isSelected={tab.tabId === params.tab}
         >
           {tab.name}
         </EuiTab>

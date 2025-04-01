@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConfigurationTabs } from './page/configuration_tabs';
+import { ConfigurationTabs } from './constants';
+
 import type { LinkItem } from '..';
 import { CONFIGURATIONS_PATH, SECURITY_FEATURE_ID, SecurityPageName } from '../../common/constants';
 import { CONFIGURATIONS } from '../app/translations';
