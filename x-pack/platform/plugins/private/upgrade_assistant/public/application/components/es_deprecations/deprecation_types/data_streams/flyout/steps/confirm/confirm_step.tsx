@@ -120,7 +120,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
             values={{
               learnMoreHtml: (
                 <EuiLink
-                  href={`${links.upgradeAssistant.dataStreamReindex}data-stream-reindex-api.html#reindex-data-stream-api-settings`}
+                  href={links.upgradeAssistant.dataStreamReindex}
                   target="_blank"
                 >
                   <FormattedMessage
