@@ -106,17 +106,17 @@ export const command = {
     await Promise.all([
       validate
         ? time('validate dependencies', async () => {
-          // now that deps are installed we can import `@kbn/yarn-lock-validator`
-          const { readYarnLock, validateDependencies } = External['@kbn/yarn-lock-validator']();
-          await validateDependencies(log, await readYarnLock());
-        })
+            // now that deps are installed we can import `@kbn/yarn-lock-validator`
+            const { readYarnLock, validateDependencies } = External['@kbn/yarn-lock-validator']();
+            await validateDependencies(log, await readYarnLock());
+          })
         : undefined,
       vscodeConfig
         ? time('update vscode config', async () => {
-          // Update vscode settings
-          await run('node', ['scripts/update_vscode_config']);
-          log.success('vscode config updated');
-        })
+            // Update vscode settings
+            await run('node', ['scripts/update_vscode_config']);
+            log.success('vscode config updated');
+          })
         : undefined,
     ]);
   },
