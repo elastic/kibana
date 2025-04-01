@@ -85,7 +85,8 @@ const PackageListGridWrapper = ({
   if (isLoading) return <Loading />;
 
   const showPackageList = (showSearchBar && !!searchQuery) || showSearchBar === false;
-  const shouldShowCardLabels = showCardLabels ?? (showSearchBar && !!searchQuery);
+  const shouldShowCardLabels =
+    showCardLabels ?? (!showSearchBar || (showSearchBar && !!searchQuery));
 
   return (
     <Suspense fallback={<Loading />}>
