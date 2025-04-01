@@ -6,21 +6,21 @@
  */
 
 import { FieldDefinition, isWiredStreamGetResponse } from '@kbn/streams-schema';
-import { StreamEnrichmentContext } from './types';
+import { StreamEnrichmentContextType } from './types';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
   getUnmappedSchemaFields,
 } from '../simulation_state_machine';
 
-export function getStagedProcessors(context: StreamEnrichmentContext) {
+export function getStagedProcessors(context: StreamEnrichmentContextType) {
   return context.processorsRefs
     .map((proc) => proc.getSnapshot())
     .filter((proc) => proc.context.isNew)
     .map((proc) => proc.context.processor);
 }
 
-export function getConfiguredProcessors(context: StreamEnrichmentContext) {
+export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
   return context.processorsRefs
     .map((proc) => proc.getSnapshot())
     .filter((proc) => proc.matches('configured'))
@@ -28,7 +28,7 @@ export function getConfiguredProcessors(context: StreamEnrichmentContext) {
 }
 
 export function getUpsertWiredFields(
-  context: StreamEnrichmentContext
+  context: StreamEnrichmentContextType
 ): FieldDefinition | undefined {
   if (!isWiredStreamGetResponse(context.definition) || !context.simulatorRef) {
     return undefined;
