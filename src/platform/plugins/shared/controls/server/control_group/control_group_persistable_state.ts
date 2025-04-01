@@ -47,7 +47,15 @@ export const createControlGroupInject = (
         const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
 
         const { type, ...injectedState } = persistableStateService.inject(
-          { ...workingPanels[key].explicitInput, type: workingPanels[key].type },
+          /**
+           * Forcing the type here because `explicitInput` no longer has ID but we cannot backport
+           * https://github.com/elastic/kibana/pull/210927 to fix the type concerns because it might
+           * have larger impacts on legacy embeddables.
+           */
+          {
+            ...workingPanels[key].explicitInput,
+            type: workingPanels[key].type,
+          } as EmbeddableStateWithType,
           panelReferences
         );
         workingPanels[key].explicitInput = injectedState;
