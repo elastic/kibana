@@ -14,7 +14,7 @@ import {
   withLock,
   LockDocument,
   LOCKS_CONCRETE_INDEX_NAME,
-} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager';
+} from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -71,7 +71,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('removes expired lock upon get()', async () => {
-        await lockManager.acquire({ ttlMs: 500 });
+        await lockManager.acquire({ ttl: 500 });
         await sleep(1000);
         const lock = await lockManager.get();
         expect(lock).to.be(undefined);
@@ -85,7 +85,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns valid lock details when active', async () => {
-        await lockManager.acquire({ metadata: { detail: 'valid' }, ttlMs: 5000 });
+        await lockManager.acquire({ metadata: { detail: 'valid' }, ttl: 5000 });
         const lock = await lockManager.get();
         expect(lock).not.to.be(undefined);
         expect(lock!.metadata.detail).to.be('valid');
@@ -141,7 +141,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('allows reacquisition after expiration', async () => {
         // Acquire with a very short TTL.
-        const acquired = await manager1.acquire({ ttlMs: 1000, metadata: { attempt: 'one' } });
+        const acquired = await manager1.acquire({ ttl: 1000, metadata: { attempt: 'one' } });
         expect(acquired).to.be(true);
 
         await sleep(1500); // wait for lock to expire
@@ -151,7 +151,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('waitForLock', () => {
+    describe('acquireWithRetry', () => {
       let blockingManager: LockManager;
       let waitingManager: LockManager;
 
@@ -171,7 +171,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const acquired = await blockingManager.acquire();
         expect(acquired).to.be(true);
 
-        const waitPromise = waitingManager.waitForLock({ minTimeout: 50, maxTimeout: 50 });
+        const waitPromise = waitingManager.acquireWithRetry({ minTimeout: 50, maxTimeout: 50 });
         await sleep(100);
         await blockingManager.release();
 
@@ -184,7 +184,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         let error: Error | undefined;
         try {
-          await waitingManager.waitForLock({ minTimeout: 100, maxRetryTime: 100, retries: 2 });
+          await waitingManager.acquireWithRetry({ minTimeout: 100, maxRetryTime: 100, retries: 2 });
         } catch (err) {
           error = err;
         }
@@ -241,7 +241,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         it('should extend the TTL when `extendTtl` is called', async () => {
           // Acquire the lock with a very short TTL (e.g. 1 second).
-          const acquired = await lockManager.acquire({ ttlMs: 1000 });
+          const acquired = await lockManager.acquire({ ttl: 1000 });
           expect(acquired).to.be(true);
 
           const lockExpiryBefore = (await getLockById(es, LockId.KnowledgeBaseReindex))!.expiresAt;
@@ -268,7 +268,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           // Use a very short TTL (1 second) so that without extension the lock would expire.
           // The withLock helper extends the TTL periodically.
           result = await withLock(
-            { lockId: LockId.KnowledgeBaseReindex, esClient: es, logger, ttlMs: 100 },
+            { lockId: LockId.KnowledgeBaseReindex, esClient: es, logger, ttl: 100 },
             async () => {
               lockExpiryBefore = (await getLockById(es, LockId.KnowledgeBaseReindex))?.expiresAt;
               await sleep(500); // Simulate a long-running operation
@@ -304,7 +304,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('should release the lock even if the callback throws an error', async () => {
           try {
             await withLock(
-              { lockId: LockId.KnowledgeBaseReindex, esClient: es, logger, ttlMs: 300000 },
+              { lockId: LockId.KnowledgeBaseReindex, esClient: es, logger, ttl: 300000 },
               async () => {
                 throw new Error('Simulated callback failure');
               }
@@ -340,7 +340,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('should handle concurrent release and acquisition without race conditions', async () => {
         const initialManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
-        const acquired = await initialManager.acquire({ ttlMs: 3000 });
+        const acquired = await initialManager.acquire({ ttl: 3000 });
         expect(acquired).to.be(true);
 
         // Then launch multiple concurrent operations:
@@ -387,7 +387,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('should not release the lock if the token does not match', async () => {
-        const acquired = await manager1.acquire({ ttlMs: 5000 });
+        const acquired = await manager1.acquire({ ttl: 5000 });
         expect(acquired).to.be(true);
 
         // Simulate an interfering update that changes the token.

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { Client, errors } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 import { v4 as uuid } from 'uuid';
 import pRetry from 'p-retry';
 import prettyMilliseconds from 'pretty-ms';
 import { once } from 'lodash';
+import { duration } from 'moment';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 export const LOCKS_INDEX_ALIAS = '.kibana_locks';
 export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
@@ -26,9 +28,17 @@ export interface LockDocument {
   token: string;
 }
 
-interface AcquireOptions {
+export interface AcquireOptions {
+  /**
+   * Metadata to be stored with the lock. This can be any key-value pair.
+   * This is not mapped and therefore not searchable.
+   */
   metadata?: Record<string, any>;
-  ttlMs?: number;
+  /**
+   * Time to live (TTL) for the lock in milliseconds.
+   * When a lock expires it can be acquired by another process
+   */
+  ttl?: number;
 }
 
 const createLocksWriteIndexOnce = once(createLocksWriteIndex);
@@ -36,7 +46,11 @@ const createLocksWriteIndexOnce = once(createLocksWriteIndex);
 export class LockManager {
   private token = uuid();
 
-  constructor(private lockId: LockId, private esClient: Client, private logger: Logger) {
+  constructor(
+    private lockId: LockId,
+    private esClient: ElasticsearchClient,
+    private logger: Logger
+  ) {
     logger.debug(`LockManager initialized with lockId: ${lockId}`);
   }
 
@@ -44,12 +58,12 @@ export class LockManager {
    * Attempts to acquire a lock by creating a document with the given lockId.
    * If the lock exists and is expired, it will be released and acquisition retried.
    */
-  public async acquire(options: AcquireOptions = {}): Promise<boolean> {
+  public async acquire({
+    metadata = {},
+    ttl = duration(30, 'minutes').asMilliseconds(),
+  }: AcquireOptions = {}): Promise<boolean> {
     await createLocksWriteIndexOnce(this.esClient);
-
     this.token = uuid();
-    const ttl = options.ttlMs ?? 6 * 5 * 1000; // Default TTL: 5 minutes
-
     this.logger.debug(
       `Acquiring lock "${this.lockId}" with ttl = ${prettyMilliseconds(ttl)} and token = ${
         this.token
@@ -80,7 +94,7 @@ export class LockManager {
           params: {
             token: this.token,
             ttl,
-            metadata: options.metadata ?? {},
+            metadata,
           },
         },
         // @ts-expect-error
@@ -205,17 +219,19 @@ export class LockManager {
     return hits[0]._source;
   }
 
-  public async waitForLock(options: AcquireOptions & pRetry.Options = {}): Promise<boolean> {
-    const { metadata, ttlMs, ...pRetryOptions } = options;
-
+  public async acquireWithRetry({
+    metadata,
+    ttl,
+    ...retryOptions
+  }: AcquireOptions & pRetry.Options = {}): Promise<boolean> {
     return pRetry(async () => {
-      const acquired = await this.acquire({ metadata, ttlMs });
+      const acquired = await this.acquire({ metadata, ttl });
       if (!acquired) {
         this.logger.debug(`Lock "${this.lockId}" not available yet.`);
         throw new Error(`Lock "${this.lockId}" not available yet`);
       }
       return acquired;
-    }, pRetryOptions ?? { forever: true, maxTimeout: 10_000 });
+    }, retryOptions ?? { forever: true, maxTimeout: 10_000 });
   }
 
   public async extendTtl(ttl = 300000): Promise<boolean> {
@@ -253,29 +269,40 @@ export class LockManager {
 
 export async function withLock<T>(
   {
-    lockId,
     esClient,
     logger,
+    lockId,
     metadata,
-    ttlMs = 60 * 5 * 1000, // Default TTL: 5 minutes
+    ttl = duration(5, 'minutes').asMilliseconds(),
+    waitForLock = false,
+    retryOptions,
   }: {
-    lockId: LockId;
-    esClient: Client;
+    esClient: ElasticsearchClient;
     logger: Logger;
+    lockId: LockId;
+    waitForLock?: boolean;
+    retryOptions?: pRetry.Options;
   } & AcquireOptions,
   callback: () => Promise<T>
 ): Promise<T | undefined> {
   const lockManager = new LockManager(lockId, esClient, logger);
-  const acquired = await lockManager.acquire({ metadata, ttlMs });
+  const acquired =
+    waitForLock ?? retryOptions
+      ? await lockManager.acquireWithRetry({ metadata, ttl, ...retryOptions })
+      : await lockManager.acquire({ metadata, ttl });
 
   // extend the ttl periodically
-  const extendInterval = Math.floor(ttlMs / 2);
-  const intervalId = setInterval(async () => {
-    try {
-      await lockManager.extendTtl();
-    } catch (err) {
+  const extendInterval = Math.floor(ttl / 2);
+  logger.debug(
+    `Lock "${lockId}" acquired. Extending TTL every ${prettyMilliseconds(extendInterval)}`
+  );
+  const extendPromises: Array<Promise<boolean>> = [];
+  const intervalId = setInterval(() => {
+    const p = lockManager.extendTtl().catch((err) => {
       logger.error(`Failed to extend lock "${lockId}":`, err);
-    }
+      return false;
+    });
+    extendPromises.push(p);
   }, extendInterval);
 
   if (acquired) {
@@ -289,7 +316,7 @@ export async function withLock<T>(
   return undefined;
 }
 
-export async function ensureTemplatesAndIndexCreated(esClient: Client): Promise<void> {
+export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClient): Promise<void> {
   const COMPONENT_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-component`;
   const INDEX_TEMPLATE_NAME = `${LOCKS_INDEX_ALIAS}-index-template`;
   const INDEX_PATTERN = `${LOCKS_INDEX_ALIAS}*`;
@@ -324,6 +351,6 @@ export async function ensureTemplatesAndIndexCreated(esClient: Client): Promise<
   });
 }
 
-async function createLocksWriteIndex(esClient: Client): Promise<void> {
+async function createLocksWriteIndex(esClient: ElasticsearchClient): Promise<void> {
   await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
 }
