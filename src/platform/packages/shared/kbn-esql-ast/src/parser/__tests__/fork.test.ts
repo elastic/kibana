@@ -41,4 +41,36 @@ describe('FORK', () => {
       ]);
     });
   });
+
+  describe('when incorrectly formatted, returns errors', () => {
+    it('when no pipe', () => {
+      const text = `FROM kibana_ecommerce_data
+| FORK
+    (WHERE bytes > 1 LIMIT 1)`;
+
+      const { errors } = parse(text);
+
+      expect(errors.length > 0).toBe(true);
+    });
+
+    it('when bad parens', () => {
+      const text = `FROM kibana_ecommerce_data
+| FORK
+    WHERE bytes > 1)`;
+
+      const { errors } = parse(text);
+
+      expect(errors.length > 0).toBe(true);
+    });
+
+    it('when unsupported command', () => {
+      const text = `FROM kibana_ecommerce_data
+      | FORK
+          (EVAL bytes > 1)`;
+
+      const { errors } = parse(text);
+
+      expect(errors.length > 0).toBe(true);
+    });
+  });
 });
