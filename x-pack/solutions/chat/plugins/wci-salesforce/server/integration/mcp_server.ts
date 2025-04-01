@@ -50,7 +50,7 @@ export async function createMcpServer({
   // Extract field mappings for sorting parameters
   const sortableFields = await getSortableFields(elasticsearchClient, logger, index);
   logger.debug('Salesforce Integration Sortable Fields ' + JSON.stringify(sortableFields));
-  
+
   const enumFieldValues = await getFieldValues(elasticsearchClient, logger, index, enumFields);
   // Extract specific values for tool parameters
   const priorityValues = enumFieldValues.find((f) => f.field === 'priority')?.values || [];
