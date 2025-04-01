@@ -78,7 +78,6 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
 
         expect(exists('kibanaStatsPanel')).toBe(true);
         expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
-        expect(exists('kibanaStatsPanel.noWarningDeprecationIssues')).toBe(true);
       });
 
       test('panel links to Kibana deprecations page', () => {

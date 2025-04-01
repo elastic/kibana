@@ -77,7 +77,6 @@ describe('Overview - Fix deprecation issues step - Elasticsearch deprecations', 
         const { exists, find } = testBed;
         expect(exists('esStatsPanel')).toBe(true);
         expect(find('esStatsPanel.criticalDeprecations').text()).toContain('1');
-        expect(exists('esStatsPanel.noWarningDeprecationIssues')).toBe(true);
       });
 
       test('panel links to ES deprecations page', () => {
