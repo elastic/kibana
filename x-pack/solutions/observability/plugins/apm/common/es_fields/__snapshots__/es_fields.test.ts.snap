@@ -256,6 +256,10 @@ exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
 exports[`Error PROCESSOR_NAME 1`] = `"error"`;
 
+exports[`Error SERVER_ADDRESS 1`] = `undefined`;
+
+exports[`Error SERVER_PORT 1`] = `undefined`;
+
 exports[`Error SERVICE 1`] = `
 Object {
   "language": Object {
@@ -371,6 +375,10 @@ exports[`Error TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 exports[`Error TRANSACTION_TYPE 1`] = `"request"`;
 
 exports[`Error URL_FULL 1`] = `undefined`;
+
+exports[`Error URL_PATH 1`] = `undefined`;
+
+exports[`Error URL_SCHEME 1`] = `undefined`;
 
 exports[`Error USER_AGENT_NAME 1`] = `undefined`;
 
@@ -627,6 +635,10 @@ exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
 exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
 
+exports[`Span SERVER_ADDRESS 1`] = `undefined`;
+
+exports[`Span SERVER_PORT 1`] = `undefined`;
+
 exports[`Span SERVICE 1`] = `
 Object {
   "name": "service name",
@@ -738,6 +750,10 @@ exports[`Span TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 exports[`Span TRANSACTION_TYPE 1`] = `undefined`;
 
 exports[`Span URL_FULL 1`] = `undefined`;
+
+exports[`Span URL_PATH 1`] = `undefined`;
+
+exports[`Span URL_SCHEME 1`] = `undefined`;
 
 exports[`Span USER_AGENT_NAME 1`] = `undefined`;
 
@@ -1008,6 +1024,10 @@ exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
 exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
 
+exports[`Transaction SERVER_ADDRESS 1`] = `undefined`;
+
+exports[`Transaction SERVER_PORT 1`] = `undefined`;
+
 exports[`Transaction SERVICE 1`] = `
 Object {
   "language": Object {
@@ -1123,6 +1143,10 @@ exports[`Transaction TRANSACTION_SUCCESS_COUNT 1`] = `undefined`;
 exports[`Transaction TRANSACTION_TYPE 1`] = `"transaction type"`;
 
 exports[`Transaction URL_FULL 1`] = `"http://www.elastic.co"`;
+
+exports[`Transaction URL_PATH 1`] = `undefined`;
+
+exports[`Transaction URL_SCHEME 1`] = `undefined`;
 
 exports[`Transaction USER_AGENT_NAME 1`] = `"Other"`;
 
