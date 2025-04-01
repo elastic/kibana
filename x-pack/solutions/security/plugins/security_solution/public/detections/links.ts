@@ -16,7 +16,7 @@ import { ALERT_SUMMARY, ALERTS } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
 
 export const alertsLink: LinkItem = {
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
   globalNavPosition: 3,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alerts', {
@@ -40,5 +40,4 @@ export const alertSummaryLink: LinkItem = {
     }),
   ],
   hideTimeline: true,
-  
 };

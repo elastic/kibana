@@ -48,7 +48,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
   [ProductFeatureSecurityKey.detections]: {
     privileges: {
       all: {
-        ui: ['show', 'crud'],
+        ui: ['show', 'crud', 'detections'],
         api: [
           APP_ID,
           'lists-all',
@@ -62,7 +62,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
         ],
       },
       read: {
-        ui: ['show'],
+        ui: ['show', 'detections'],
         api: [APP_ID, 'lists-read', 'rac', 'cloud-security-posture-read', 'cloud-defend-read'],
       },
     },

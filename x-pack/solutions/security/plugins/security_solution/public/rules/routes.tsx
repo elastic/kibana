@@ -30,6 +30,7 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import { withSecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const RulesSubRoutes = [
   {
@@ -117,14 +118,24 @@ const CoverageOverviewRoutes = () => (
 export const routes: SecuritySubPluginRoutes = [
   {
     path: RULES_LANDING_PATH,
-    component: RulesLandingPage,
+    component: withSecurityRoutePageWrapper(RulesLandingPage, SecurityPageName.rulesLanding, {
+      redirectOnMissing: true,
+    }),
   },
   {
     path: RULES_PATH,
-    component: Rules,
+    component: withSecurityRoutePageWrapper(Rules, SecurityPageName.rules, {
+      redirectOnMissing: true,
+    }),
   },
   {
     path: COVERAGE_OVERVIEW_PATH,
-    component: CoverageOverviewRoutes,
+    component: withSecurityRoutePageWrapper(
+      CoverageOverviewRoutes,
+      SecurityPageName.coverageOverview,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
 ];
