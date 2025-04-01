@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../common/mock';
-import { noUpdateCasesPermissions, createAppMockRenderer } from '../../common/mock';
+
+import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 import { fireEvent, screen } from '@testing-library/react';
 import { RemovableItem } from './removable_item';
 import userEvent from '@testing-library/user-event';
@@ -17,8 +17,6 @@ const MockComponent = () => {
 };
 
 describe('UserRepresentation', () => {
-  let appMockRender: AppMockRenderer;
-
   const onRemoveItem = jest.fn();
 
   const defaultProps = {
@@ -27,12 +25,8 @@ describe('UserRepresentation', () => {
     onRemoveItem,
   };
 
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
-
   it('does not show the cross button when the user is not hovering over the row', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableItem {...defaultProps}>
         <MockComponent />
       </RemovableItem>
@@ -42,7 +36,7 @@ describe('UserRepresentation', () => {
   });
 
   it('show the cross button when the user is hovering over the row', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableItem {...defaultProps}>
         <MockComponent />
       </RemovableItem>
@@ -54,7 +48,7 @@ describe('UserRepresentation', () => {
   });
 
   it('shows and then removes the cross button when the user hovers and removes the mouse from over the row', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableItem {...defaultProps}>
         <MockComponent />
       </RemovableItem>
@@ -68,11 +62,11 @@ describe('UserRepresentation', () => {
   });
 
   it('does not show the cross button when the user is hovering over the row and does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableItem {...defaultProps}>
         <MockComponent />
-      </RemovableItem>
+      </RemovableItem>,
+      { wrapperProps: { permissions: noUpdateCasesPermissions() } }
     );
 
     fireEvent.mouseEnter(screen.getByTestId('remove-group'));
@@ -81,7 +75,7 @@ describe('UserRepresentation', () => {
   });
 
   it('call onRemoveItem correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableItem {...defaultProps}>
         <MockComponent />
       </RemovableItem>
@@ -93,7 +87,7 @@ describe('UserRepresentation', () => {
   });
 
   it('sets the dataTestSubjPrefix correctly', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableItem {...defaultProps} dataTestSubjPrefix={'my-prefix'}>
         <MockComponent />
       </RemovableItem>

@@ -26,13 +26,12 @@ import { hasUserCRUDPermission } from '../../../../../common/utils/privileges';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
 import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import { useUserData } from '../../../../../detections/components/user_info';
-import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../../common/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { getNormalizedSeverity } from '../helpers';
 import type { UpgradePrebuiltRulesTableActions } from './upgrade_prebuilt_rules_table_context';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export type TableColumn = EuiBasicTableColumn<RuleUpgradeState>;
 
@@ -110,7 +109,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
     return <IntegrationsPopover relatedIntegrations={integrations} />;
   },
-  width: '143px',
+  width: '70px',
   truncateText: true,
 };
 
@@ -241,22 +240,13 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
     actions: { upgradeRules, openRulePreview },
   } = useUpgradePrebuiltRulesTableContext();
   const isDisabled = isRefetching || isUpgradingSecurityPackages;
-
-  const { isRulesCustomizationEnabled, customizationDisabledReason } =
-    usePrebuiltRulesCustomizationStatus();
-  const shouldShowModifiedColumn =
-    isRulesCustomizationEnabled ||
-    customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License;
-
-  if (shouldShowModifiedColumn) {
-    INTEGRATIONS_COLUMN.width = '70px';
-  }
+  const { isRulesCustomizationEnabled } = usePrebuiltRulesCustomizationStatus();
 
   return useMemo(
     () => [
       RULE_NAME_COLUMN,
-      ...(shouldShowModifiedColumn ? [MODIFIED_COLUMN] : []),
-      CONFLICT_COLUMN,
+      MODIFIED_COLUMN,
+      ...(isRulesCustomizationEnabled ? [CONFLICT_COLUMN] : []),
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -293,7 +283,6 @@ export const useUpgradePrebuiltRulesTableColumns = (): TableColumn[] => {
         : []),
     ],
     [
-      shouldShowModifiedColumn,
       showRelatedIntegrations,
       hasCRUDPermissions,
       upgradeRules,

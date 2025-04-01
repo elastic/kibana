@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
-import { FilesSetup } from '@kbn/files-plugin/server';
-import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
+import type { FilesSetup } from '@kbn/files-plugin/server';
+import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';

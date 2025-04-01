@@ -92,7 +92,7 @@ import { fooResource } from '../../schemas/v1';
 // Note: this response schema is instantiated lazily to avoid creating schemas that are not needed in most cases!
 const fooResourceResponse = () => {
   return schema.object({
-    id: schema.string({ 
+    id: schema.string({
       maxLength: 20,
       meta: { description: 'Add a description.' }
     }),
@@ -129,7 +129,7 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
       version: '2023-10-31',
       validate: {
         request: {
-          body: ,
+          body: fooResource,
         },
         response: {
           200: {
@@ -154,6 +154,124 @@ function registerFooRoute(router: IRouter, docLinks: DoclinksStart) {
   );
 }
 ```
+
+##### Adding examples
+
+Beyond the schema of requests and responses, it is **very useful** to provide
+concrete requests and responses as examples. Examples go beyond defaults and
+provide a more intuitive understanding for end users in learning the behaviour
+of your API. See the [bump.sh documentation](https://docs.bump.sh/guides/openapi/specification/v3.1/data-models/examples/)
+for more information on how examples will be shown to end users.
+
+To add examples to the endpoint we created above you could do the following:
+
+```typescript
+// ...
+    .addVersion({
+      version: '2023-10-31',
+      options: {
+        // Be sure and lazily instantiate this value. It's only used at dev time!
+        oasOperationObject: () => ({
+          requestBody: {
+            content: {
+              'application/json': {
+                examples: {
+                  fooExample1: {
+                    summary: 'An example foo request',
+                    value: {
+                      name: 'Cool foo!',
+                    } as FooResource,
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            200: {
+              content: {
+                'application/json': {
+                  examples: {
+                    /* Put your 200 response examples here */
+                  },
+                },
+              },
+            },
+          },
+        }),
+      },
+      validate: {
+        request: {
+          body: fooResource,
+        },
+        response: {
+          200: {
+            body: fooResourceResponse,
+          },
+        },
+      },
+    },
+// ...
+```
+The strength of this approach is your examples are captured in code and type
+checked at dev time. So any shape errors should be caught as you author.
+
+<details>
+
+<summary>I have prexisting YAML based examples I'd like to use!</summary>
+
+If you pre-existing examples created in YAML that you would like
+to use the following approach:
+
+```typescript
+import path from 'node:path';
+
+const oasOperationObject: () => path.join(__dirname, 'foo.examples.yaml'),
+
+// ...
+    .addVersion({
+      version: '2023-10-31',
+      options: {
+        oasOperationObject,
+      },
+      validate: {
+        request: {
+          body: fooResource,
+        },
+        response: {
+          200: {
+            body: fooResourceResponse,
+          },
+        },
+      },
+    },
+// ...
+```
+
+Where the contents of `foo.examples.yaml` are:
+
+```yaml
+requestBody:
+  content:
+    application/json:
+      examples: # Make sure to use the examples array, example (singular) has been deprecated
+        fooExample:
+          summary: Foo example
+          description: >
+            An example request of creating foo.
+          value:
+            name: 'Cool foo!'
+        fooExampleRef:
+          # You can use JSONSchema $refs to organize this file further
+          $ref: "./examples/foo_example_i_factored_out_of_this_file.yaml"
+responses:
+  200:
+    content:
+      application/json:
+        examples:
+          # Apply a similar pattern to writing examples here
+```
+
+</details>
 
 #### 3. Generating OAS
 

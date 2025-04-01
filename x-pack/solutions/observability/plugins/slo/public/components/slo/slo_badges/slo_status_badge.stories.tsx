@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ComponentStory } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiFlexGroup } from '@elastic/eui';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
@@ -19,7 +19,7 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: SloStatusProps) => (
+const Template: StoryFn<typeof Component> = (props: SloStatusProps) => (
   <EuiFlexGroup>
     <Component {...props} />
   </EuiFlexGroup>
@@ -29,5 +29,7 @@ const defaultProps = {
   slo: buildSlo(),
 };
 
-export const SloStatusBadge = Template.bind({});
-SloStatusBadge.args = defaultProps;
+export const SloStatusBadge = {
+  render: Template,
+  args: defaultProps,
+};

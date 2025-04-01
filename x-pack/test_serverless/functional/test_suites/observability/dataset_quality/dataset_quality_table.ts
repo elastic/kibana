@@ -26,6 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'svlCommonNavigation',
     'svlCommonPage',
   ]);
+  const retry = getService('retry');
   const synthtrace = getService('svlLogsSynthtraceClient');
   const to = '2024-01-01T12:00:00.000Z';
   const apacheAccessDatasetName = 'apache.access';
@@ -144,9 +145,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await (await actionsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click "Open"
 
       // Confirm dataset selector text in observability logs explorer
-      const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-
-      originalExpect(datasetSelectorText).toMatch(datasetName);
+      await retry.try(async () => {
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(datasetName);
+      });
 
       // Return to Dataset Quality Page
       await PageObjects.datasetQuality.navigateTo();

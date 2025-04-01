@@ -8,12 +8,17 @@
 import { useMemo } from 'react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useMlKibana } from '../contexts/kibana';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;
 
-export function dashboardServiceProvider(dashboardService: DashboardStart) {
+export function dashboardServiceProvider(
+  dashboardService: DashboardStart,
+  share: SharePluginStart
+) {
   return {
     /**
      * Fetches dashboards
@@ -39,7 +44,7 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
      * Generates dashboard url
      */
     async getDashboardUrl(dashboardId: string, viewMode: ViewMode = 'edit') {
-      return await dashboardService.locator?.getUrl({
+      return await share.url.locators.get(DASHBOARD_APP_LOCATOR)?.getUrl({
         dashboardId,
         viewMode: 'edit',
         useHash: false,
@@ -53,8 +58,8 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
  */
 export function useDashboardService(): DashboardService {
   const {
-    services: { dashboard },
+    services: { dashboard, share },
   } = useMlKibana();
 
-  return useMemo(() => dashboardServiceProvider(dashboard), [dashboard]);
+  return useMemo(() => dashboardServiceProvider(dashboard, share), [dashboard, share]);
 }

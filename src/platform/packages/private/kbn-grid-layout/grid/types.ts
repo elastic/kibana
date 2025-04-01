@@ -41,6 +41,7 @@ export interface GridSettings {
   gutterSize: number;
   rowHeight: number;
   columnCount: number;
+  keyboardDragTopLimit: number;
 }
 
 /**
@@ -60,6 +61,19 @@ export interface ActivePanel {
   };
 }
 
+export interface ActiveRowEvent {
+  id: string;
+  sensorType: 'mouse' | 'touch' | 'keyboard';
+  startingPosition: {
+    top: number;
+    left: number;
+  };
+  translate: {
+    top: number;
+    left: number;
+  };
+}
+
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
   proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
@@ -69,9 +83,12 @@ export interface GridLayoutStateManager {
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
+  activeRowEvent$: BehaviorSubject<ActiveRowEvent | undefined>;
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
+  layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{
     [rowId: string]: { [panelId: string]: HTMLDivElement | null };
   }>;
@@ -105,12 +122,13 @@ export interface PanelInteractionEvent {
    * The pixel offsets from where the mouse was at drag start to the
    * edges of the panel
    */
-  pointerOffsets: {
+  sensorOffsets: {
     top: number;
     left: number;
     right: number;
     bottom: number;
   };
+  sensorType: 'mouse' | 'touch' | 'keyboard';
 }
 
 /**

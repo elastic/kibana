@@ -15,14 +15,17 @@ import {
   dataTableActions,
   TableId,
   tableDefaults,
-  getTableByIdSelector,
+  dataTableSelectors,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import type { State } from '../../../../common/store/types';
@@ -35,7 +38,9 @@ import { sendBulkEventsToTimelineAction } from '../actions';
 import type { CreateTimelineProps } from '../types';
 import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 import type { Direction } from '../../../../../common/search_strategy';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { globalFiltersQuerySelector } from '../../../../common/store/inputs/selectors';
+
 const { setEventsLoading, setSelected } = dataTableActions;
 
 export interface UseAddBulkToTimelineActionProps {
@@ -51,6 +56,7 @@ export interface UseAddBulkToTimelineActionProps {
   scopeId: SourcererScopeName;
 }
 
+const fields = ['_id', 'timestamp'];
 /*
  * useAddBulkToTimelineAction  returns a bulk action that can be passed to the
  * TGrid so that multiple items at a time can be added to the timeline.
@@ -66,8 +72,13 @@ export const useAddBulkToTimelineAction = ({
   scopeId,
 }: UseAddBulkToTimelineActionProps) => {
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
+  const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const {
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(scopeId);
+  const experimentalBrowserFields = useBrowserFields(scopeId);
+  const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
+
+  let {
     browserFields,
     dataViewId,
     sourcererDataView,
@@ -75,14 +86,22 @@ export const useAddBulkToTimelineAction = ({
     // in order to include the exclude filters in the search that are not stored in the timeline
     selectedPatterns,
   } = useSourcererDataView(scopeId);
+
+  if (newDataViewPickerEnabled) {
+    dataViewId = experimentalDataView.id ?? '';
+    browserFields = experimentalBrowserFields;
+    sourcererDataView = experimentalDataView;
+    selectedPatterns = experimentalSelectedPatterns;
+  }
+
   const dispatch = useDispatch();
   const { uiSettings } = useKibana().services;
 
   const selectGlobalFiltersQuerySelector = useMemo(() => globalFiltersQuerySelector(), []);
   const filters = useSelector(selectGlobalFiltersQuerySelector);
-  const selectTableById = useMemo(() => getTableByIdSelector(), []);
+  const selectTableById = useMemo(() => dataTableSelectors.createTableSelector(tableId), [tableId]);
   const { selectAll, totalCount, sort, selectedEventIds } = useSelector(
-    (state: State) => selectTableById(state, tableId) ?? tableDefaults
+    (state: State) => selectTableById(state) ?? tableDefaults
   );
 
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
@@ -122,7 +141,7 @@ export const useAddBulkToTimelineAction = ({
     endDate: to,
     startDate: from,
     id: tableId,
-    fields: ['_id', 'timestamp'],
+    fields,
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,

@@ -68,6 +68,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -93,6 +94,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -132,6 +134,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -160,6 +163,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -190,6 +194,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         defaultScheduleInterval: 'foobar',
         validate: {
           params: { validate: (params) => params },
@@ -220,6 +225,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         defaultScheduleInterval: '10s',
         validate: {
           params: { validate: (params) => params },
@@ -250,6 +256,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         defaultScheduleInterval: '10s',
         validate: {
           params: { validate: (params) => params },
@@ -300,6 +307,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -353,6 +361,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -385,6 +394,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
+          solution: 'stack',
           minimumLicenseRequired: 'basic',
           isExportable: true,
           validate: {
@@ -423,6 +433,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
+          solution: 'stack',
           minimumLicenseRequired: 'basic',
           isExportable: true,
           validate: {
@@ -475,6 +486,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -520,6 +532,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -549,6 +562,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -581,6 +595,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -614,6 +629,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -641,6 +657,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -661,6 +678,7 @@ describe('Create Lifecycle', () => {
           executor: jest.fn(),
           category: 'test',
           producer: 'alerts',
+          solution: 'stack',
           validate: {
             params: { validate: (params) => params },
           },
@@ -685,6 +703,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         alerts: {
           context: 'test',
           mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
@@ -717,6 +736,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -741,6 +761,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -769,6 +790,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         ruleTaskTimeout: '20m',
         validate: {
           params: { validate: (params) => params },
@@ -801,6 +823,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },
@@ -835,6 +858,7 @@ describe('Create Lifecycle', () => {
             "id": "recovered",
             "name": "Recovered",
           },
+          "solution": "stack",
           "validLegacyConsumers": Array [],
           "validate": Object {
             "params": Object {
@@ -879,6 +903,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -935,6 +960,7 @@ describe('Create Lifecycle', () => {
               "name": "Recovered",
             },
             "ruleTaskTimeout": "20m",
+            "solution": "stack",
             "validLegacyConsumers": Array [],
           },
         }
@@ -1002,6 +1028,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: schema.any(),
         },
@@ -1029,6 +1056,7 @@ describe('Create Lifecycle', () => {
         executor: jest.fn(),
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         isExportable: true,
         minimumLicenseRequired: 'basic',
         recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
@@ -1080,6 +1108,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },

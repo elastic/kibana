@@ -633,7 +633,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })) => Partial<(",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }) => Partial<(",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -647,7 +647,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
         "deprecated": false,
@@ -690,7 +690,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/field_definition.ts",
             "deprecated": false,
@@ -1226,6 +1226,46 @@
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.isCondition.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "TValue"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/helpers/type_guards.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.isDateProcessorDefinition",
+        "type": "Function",
+        "tags": [],
+        "label": "isDateProcessorDefinition",
+        "description": [],
+        "signature": [
+          "<TValue extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ProcessorDefinition",
+            "text": "ProcessorDefinition"
+          },
+          ">(value: TValue) => value is Extract<TValue, any>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.isDateProcessorDefinition.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "value",
@@ -2377,6 +2417,177 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.ContentPack",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentPack",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.ContentPack.content",
+            "type": "string",
+            "tags": [],
+            "label": "content",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.DateProcessorConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateProcessorConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.DateProcessorConfig",
+            "text": "DateProcessorConfig"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ProcessorBase",
+            "text": "ProcessorBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DateProcessorConfig.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DateProcessorConfig.formats",
+            "type": "Array",
+            "tags": [],
+            "label": "formats",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DateProcessorConfig.locale",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DateProcessorConfig.target_field",
+            "type": "string",
+            "tags": [],
+            "label": "target_field",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DateProcessorConfig.timezone",
+            "type": "string",
+            "tags": [],
+            "label": "timezone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DateProcessorConfig.output_format",
+            "type": "string",
+            "tags": [],
+            "label": "output_format",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.DateProcessorDefinition",
+        "type": "Interface",
+        "tags": [],
+        "label": "DateProcessorDefinition",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.DateProcessorDefinition.date",
+            "type": "Object",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.DateProcessorConfig",
+                "text": "DateProcessorConfig"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.DissectProcessorConfig",
         "type": "Interface",
         "tags": [],
@@ -2492,10 +2703,10 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.ElasticsearchAsset",
+        "id": "def-common.ElasticsearchAssets",
         "type": "Interface",
         "tags": [],
-        "label": "ElasticsearchAsset",
+        "label": "ElasticsearchAssets",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/common.ts",
         "deprecated": false,
@@ -2503,13 +2714,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.ElasticsearchAsset.type",
-            "type": "CompoundType",
+            "id": "def-common.ElasticsearchAssets.ingestPipeline",
+            "type": "string",
             "tags": [],
-            "label": "type",
+            "label": "ingestPipeline",
             "description": [],
             "signature": [
-              "\"ingest_pipeline\" | \"data_stream\" | \"index_template\" | \"component_template\""
+              "string | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/common.ts",
             "deprecated": false,
@@ -2517,10 +2728,35 @@
           },
           {
             "parentPluginId": "@kbn/streams-schema",
-            "id": "def-common.ElasticsearchAsset.id",
+            "id": "def-common.ElasticsearchAssets.componentTemplates",
+            "type": "Array",
+            "tags": [],
+            "label": "componentTemplates",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.ElasticsearchAssets.indexTemplate",
             "type": "string",
             "tags": [],
-            "label": "id",
+            "label": "indexTemplate",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/common.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.ElasticsearchAssets.dataStream",
+            "type": "string",
+            "tags": [],
+            "label": "dataStream",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/common.ts",
             "deprecated": false,
@@ -2545,7 +2781,7 @@
             "id": "def-common.FieldDefinition.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (MappingKeywordProperty & { ...; }) | ... 4 more ... | (MappingLongNumberProperty & { ...; })",
+            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (MappingKeywordProperty & { ...; }) | ... 5 more ... | { ...; }",
             "description": [],
             "signature": [
               "[x: string]:  (",
@@ -2562,7 +2798,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
             "deprecated": false,
@@ -3321,7 +3557,7 @@
             "id": "def-common.InheritedFieldDefinition.Unnamed",
             "type": "IndexSignature",
             "tags": [],
-            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ... 5 more ... | (MappingLongNumberProperty & ... 1 more ... & { ...; })",
+            "label": "[x: string]: (MappingBooleanProperty & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ... 6 more ... | ({ ...; } & { ...; })",
             "description": [],
             "signature": [
               "[x: string]:  (",
@@ -3338,7 +3574,7 @@
               "MappingDoubleNumberProperty",
               " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
               "MappingLongNumberProperty",
-              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; })"
+              " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ({ type: \"system\"; } & { from: string; })"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
             "deprecated": false,
@@ -3834,7 +4070,7 @@
           {
             "parentPluginId": "@kbn/streams-schema",
             "id": "def-common.UnwiredStreamGetResponse.elasticsearch_assets",
-            "type": "Array",
+            "type": "Object",
             "tags": [],
             "label": "elasticsearch_assets",
             "description": [],
@@ -3843,10 +4079,10 @@
                 "pluginId": "@kbn/streams-schema",
                 "scope": "common",
                 "docId": "kibKbnStreamsSchemaPluginApi",
-                "section": "def-common.ElasticsearchAsset",
-                "text": "ElasticsearchAsset"
+                "section": "def-common.ElasticsearchAssets",
+                "text": "ElasticsearchAssets"
               },
-              "[]"
+              " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/api.ts",
             "deprecated": false,
@@ -4196,6 +4432,21 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.dateProcessorDefinitionSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "dateProcessorDefinitionSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.dissectProcessorDefinitionSchema",
         "type": "Any",
         "tags": [],
@@ -4231,7 +4482,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4246,11 +4497,7 @@
         "label": "FieldDefinitionConfigAdvancedParameters",
         "description": [],
         "signature": [
-          "{ meta?: Record<string, string> | undefined; fields?: Record<string, ",
-          "MappingProperty",
-          "> | undefined; copy_to?: ",
-          "Fields",
-          " | undefined; }"
+          "{}"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4479,16 +4726,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.WiredIngestStreamEffectiveLifecycle",
-            "text": "WiredIngestStreamEffectiveLifecycle"
+            "section": "def-common.UnwiredIngestStreamEffectiveLifecycle",
+            "text": "UnwiredIngestStreamEffectiveLifecycle"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.UnwiredIngestStreamEffectiveLifecycle",
-            "text": "UnwiredIngestStreamEffectiveLifecycle"
+            "section": "def-common.WiredIngestStreamEffectiveLifecycle",
+            "text": "WiredIngestStreamEffectiveLifecycle"
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/lifecycle/index.ts",
@@ -4628,7 +4875,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { from: string; }) | ({ type: \"system\"; } & { from: string; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4657,7 +4904,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; })"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -4706,6 +4953,14 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.DateProcessorConfig",
+            "text": "DateProcessorConfig"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
             "section": "def-common.DissectProcessorConfig",
             "text": "DissectProcessorConfig"
           },
@@ -4731,6 +4986,14 @@
         "label": "ProcessorDefinition",
         "description": [],
         "signature": [
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.DateProcessorDefinition",
+            "text": "DateProcessorDefinition"
+          },
+          " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
@@ -4782,7 +5045,7 @@
         "label": "ProcessorType",
         "description": [],
         "signature": [
-          "\"grok\" | \"dissect\""
+          "\"date\" | \"grok\" | \"dissect\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/processors/index.ts",
         "deprecated": false,
@@ -5166,10 +5429,10 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
-        "id": "def-common.elasticsearchAssetSchema",
+        "id": "def-common.contentPackSchema",
         "type": "Object",
         "tags": [],
-        "label": "elasticsearchAssetSchema",
+        "label": "contentPackSchema",
         "description": [],
         "signature": [
           "Zod.ZodType<",
@@ -5177,16 +5440,47 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ElasticsearchAsset",
-            "text": "ElasticsearchAsset"
+            "section": "def-common.ContentPack",
+            "text": "ContentPack"
           },
           ", Zod.ZodTypeDef, ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.ElasticsearchAsset",
-            "text": "ElasticsearchAsset"
+            "section": "def-common.ContentPack",
+            "text": "ContentPack"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/content/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.elasticsearchAssetsSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "elasticsearchAssetsSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodType<",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ElasticsearchAssets",
+            "text": "ElasticsearchAssets"
+          },
+          ", Zod.ZodTypeDef, ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.ElasticsearchAssets",
+            "text": "ElasticsearchAssets"
           },
           ">"
         ],
@@ -5232,7 +5526,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }), Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }, Zod.ZodTypeDef, (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingKeywordProperty",
@@ -5246,7 +5540,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; }) | { type: \"system\"; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,
@@ -5834,7 +6128,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }), Zod.ZodTypeDef, (",
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; }), Zod.ZodTypeDef, (",
           "MappingBooleanProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingKeywordProperty",
@@ -5848,7 +6142,7 @@
           "MappingDoubleNumberProperty",
           " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | (",
           "MappingLongNumberProperty",
-          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; })>"
+          " & { type: \"boolean\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"match_only_text\"; format?: string | undefined; } & { name: string; }) | ({ type: \"system\"; } & { name: string; })>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streams-schema/src/models/ingest/fields/index.ts",
         "deprecated": false,

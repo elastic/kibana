@@ -30,6 +30,7 @@ export type {
   WelcomeRenderTelemetryNotice,
   WelcomeServiceSetup,
 } from './services';
+export type { CustomComponentProps } from './services/tutorials/tutorial_service';
 
 export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';
 

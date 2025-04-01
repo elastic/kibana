@@ -18,7 +18,14 @@ import type { DiscoverAppStateContainer } from '../discover_app_state_container'
 import { addLog } from '../../../../utils/add_log';
 import type { DiscoverServices } from '../../../../build_services';
 import { getDataViewAppState } from './get_switch_data_view_app_state';
-import { internalStateActions, type InternalStateStore, type RuntimeStateManager } from '../redux';
+import {
+  internalStateActions,
+  selectTabRuntimeState,
+  type InternalStateStore,
+  type RuntimeStateManager,
+  type TabActionInjector,
+  type TabState,
+} from '../redux';
 
 /**
  * Function executed when switching data view in the UI
@@ -29,21 +36,29 @@ export async function changeDataView({
   internalState,
   runtimeStateManager,
   appState,
+  injectCurrentTab,
+  getCurrentTab,
 }: {
   dataViewId: string | DataView;
   services: DiscoverServices;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
   appState: DiscoverAppStateContainer;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
 }) {
   addLog('[ui] changeDataView', { id: dataViewId });
 
   const { dataViews, uiSettings } = services;
-  const currentDataView = runtimeStateManager.currentDataView$.getValue();
+  const { id: currentTabId } = getCurrentTab();
+  const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
+  const currentDataView = currentDataView$.getValue();
   const state = appState.getState();
   let nextDataView: DataView | null = null;
 
-  internalState.dispatch(internalStateActions.setIsDataViewLoading(true));
+  internalState.dispatch(
+    injectCurrentTab(internalStateActions.setIsDataViewLoading)({ isDataViewLoading: true })
+  );
 
   try {
     nextDataView =
@@ -62,10 +77,12 @@ export async function changeDataView({
   if (nextDataView && currentDataView) {
     // Reset the default profile state if we are switching to a different data view
     internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
+      injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+        },
       })
     );
 
@@ -87,5 +104,7 @@ export async function changeDataView({
     }
   }
 
-  internalState.dispatch(internalStateActions.setIsDataViewLoading(false));
+  internalState.dispatch(
+    injectCurrentTab(internalStateActions.setIsDataViewLoading)({ isDataViewLoading: false })
+  );
 }

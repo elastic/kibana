@@ -9,14 +9,19 @@ import { i18n } from '@kbn/i18n';
 import type { AppDeepLinkId, GroupDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
 import produce from 'immer';
 import { map } from 'rxjs';
+import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
+import { applyAiSocNavigation } from './ai_soc/ai_soc_navigation';
 
 const PROJECT_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectSettings.title',
   { defaultMessage: 'Project Settings' }
 );
 
-export const initSideNavigation = async (services: Services) => {
+export const initSideNavigation = async (
+  services: Services,
+  productTypes: SecurityProductTypes
+) => {
   services.securitySolution.setIsSolutionNavigationEnabled(true);
 
   const { navigationTree$, panelContentProvider } =
@@ -41,6 +46,8 @@ export const initSideNavigation = async (services: Services) => {
           footerGroup.title = PROJECT_SETTINGS_TITLE;
           footerGroup.children.push({ cloudLink: 'billingAndSub', openInNewTab: true });
         }
+
+        applyAiSocNavigation(draft, productTypes);
       })
     )
   );

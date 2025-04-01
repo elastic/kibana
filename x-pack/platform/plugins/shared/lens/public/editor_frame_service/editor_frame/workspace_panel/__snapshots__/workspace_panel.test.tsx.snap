@@ -20,7 +20,7 @@ Array [
           />
         </p>
         <p>
-          Error: Unable to parse expression: Expected "/*", "//", [ ,\\t,\\r,\\n], or function but "|" found.
+          Error: Unable to parse expression: Expected "/*", "//", [ \\t\\r\\n], or function but "|" found.
         </p>
       </React.Fragment>,
       "severity": "error",

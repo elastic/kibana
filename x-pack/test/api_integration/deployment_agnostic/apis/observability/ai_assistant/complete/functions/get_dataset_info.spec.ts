@@ -16,7 +16,7 @@ import {
   RelevantField,
   createLlmProxy,
 } from '../../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { chatComplete, getSystemMessage, systemMessageSorted } from './helpers';
+import { chatComplete, getSystemMessage, systemMessageSorted } from '../../utils/conversation';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import { createSimpleSyntheticLogs } from '../../synthtrace_scenarios/simple_logs';
 
@@ -44,6 +44,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
+    afterEach(async () => {
+      llmProxy.clear();
+    });
+
     // Calling `get_dataset_info` via the chat/complete endpoint
     describe('POST /internal/observability_ai_assistant/chat/complete', function () {
       let messageAddedEvents: MessageAddEvent[];
@@ -62,7 +66,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         void llmProxy.interceptWithFunctionRequest({
           name: 'get_dataset_info',
           arguments: () => JSON.stringify({ index: 'logs*' }),
-          when: () => true,
         });
 
         ({ getRelevantFields } = llmProxy.interceptSelectRelevantFieldsToolChoice());
@@ -84,6 +87,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       after(async () => {
         await logsSynthtraceEsClient.clean();
+      });
+
+      afterEach(async () => {
+        llmProxy.clear();
       });
 
       it('makes 3 requests to the LLM', () => {
