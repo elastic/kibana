@@ -47,9 +47,7 @@ export class LockManager {
     private lockId: LockId,
     private esClient: ElasticsearchClient,
     private logger: Logger
-  ) {
-    logger.debug(`LockManager initialized with lockId: ${lockId}`);
-  }
+  ) {}
 
   /**
    * Attempts to acquire a lock by creating a document with the given lockId.

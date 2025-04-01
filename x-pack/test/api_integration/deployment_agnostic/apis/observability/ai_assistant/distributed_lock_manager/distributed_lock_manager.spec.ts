@@ -350,7 +350,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             const lm = new LockManager(LOCK_ID, es, logger);
             const hasLock = await lm.acquire();
             if (hasLock) {
-              await sleep(10); // ensure the lock is held for a bit
+              await sleep(100); // ensure the lock is held for a bit
               await lm.release();
             }
             return hasLock;
@@ -366,25 +366,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const acquired = await initialManager.acquire({ ttl: 3000 });
         expect(acquired).to.be(true);
 
-        // Then launch multiple concurrent operations:
-        // Some attempts will try to release the lock while others try to acquire it.
+        const attempts = await Promise.all(
+          times(50).map(async () => {
+            const releaseResult = new LockManager(LOCK_ID, es, logger).release();
+            const acquireResult = new LockManager(LOCK_ID, es, logger).acquire();
 
-        const releaseAttemptsPromise = times(20).map(() => {
-          const manager1 = new LockManager(LOCK_ID, es, logger);
-          return manager1.release();
-        });
+            const [release, acquire] = await Promise.all([releaseResult, acquireResult]);
+            return { release, acquire };
+          })
+        );
 
-        const acquireAttemptsPromise = times(20).map(() => {
-          const manager2 = new LockManager(LOCK_ID, es, logger);
-          return manager2.acquire();
-        });
-
-        const releaseAttempts = await Promise.all(releaseAttemptsPromise);
-        const acquireAttempts = await Promise.all(acquireAttemptsPromise);
-
-        // only one acquire attempt should succeed
-        expect(acquireAttempts.filter((r) => r === true)).to.have.length(0);
-        expect(releaseAttempts.filter((r) => r === true)).to.have.length(0);
+        expect(attempts.filter((r) => r.acquire === true)).to.have.length(0);
+        expect(attempts.filter((r) => r.release === true)).to.have.length(0);
 
         // Finally, confirm that the lock still exists
         const lock = await getLockById(es, LOCK_ID);
