@@ -11,12 +11,14 @@ import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elas
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
+  ViewMode,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
@@ -48,10 +50,11 @@ export const PresentationPanelInternal = <
 
   const dragHandles = useRef<{ [dragHandleKey: string]: HTMLElement | null }>({});
 
-  const viewModeSubject = (() => {
+  const viewModeSubject = useMemo(() => {
     if (apiPublishesViewMode(api)) return api.viewMode$;
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode$;
-  })();
+    return new BehaviorSubject('view' as ViewMode);
+  }, [api]);
 
   const [
     dataLoading,
@@ -61,7 +64,7 @@ export const PresentationPanelInternal = <
     panelDescription,
     defaultPanelTitle,
     defaultPanelDescription,
-    rawViewMode,
+    viewMode,
     parentHidePanelTitle,
   ] = useBatchedOptionalPublishingSubjects(
     api?.dataLoading$,
@@ -74,7 +77,6 @@ export const PresentationPanelInternal = <
     viewModeSubject,
     api?.parentApi?.hideTitle$
   );
-  const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
   if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
