@@ -208,20 +208,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it(`should display an error toast when sending a request with invalid body`, async () => {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText(invalidRequestText);
-        await PageObjects.console.selectCurrentRequest();
-        await PageObjects.console.pressCtrlEnter();
+        await PageObjects.console.clickPlay();
 
+        expect(await toasts.getCount()).to.be(1);
         const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).to.be(
-          'The selected request contains errors. Please resolve them and try again.'
+          'The selected request contains an error. Please resolve it and try again.'
         );
+        await toasts.dismissAll();
       });
 
       it('should display an error toast to unsupported HTTP verbs', async () => {
         await PageObjects.console.clearEditorText();
         await PageObjects.console.enterText('OPTIONS /');
         await PageObjects.console.clickPlay();
+        expect(await toasts.getCount()).to.be(1);
         const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).to.be(
