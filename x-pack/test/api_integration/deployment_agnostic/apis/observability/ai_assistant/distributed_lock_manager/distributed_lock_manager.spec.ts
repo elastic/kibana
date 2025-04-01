@@ -345,20 +345,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const LOCK_ID = 'my_lock_with_concurrency';
 
       it('should allow only one lock acquisition among many concurrent attempts', async () => {
-        const results = await Promise.all(
-          times(50).map(async () => {
-            const lm = new LockManager(LOCK_ID, es, logger);
-            const hasLock = await lm.acquire();
-            if (hasLock) {
-              await sleep(100); // ensure the lock is held for a bit
-              await lm.release();
-            }
-            return hasLock;
-          })
+        const lockManagers = await Promise.all(
+          times(50).map(() => new LockManager(LOCK_ID, es, logger))
         );
 
-        expect(results.filter((v) => v === true)).to.have.length(1);
-        expect(results.filter((v) => v === false)).to.have.length(results.length - 1);
+        const acquireAttempts = await Promise.all(lockManagers.map((lm) => lm.acquire()));
+        const releaseAttempts = await Promise.all(lockManagers.map((lm) => lm.release()));
+
+        expect(acquireAttempts.filter((v) => v === true)).to.have.length(1);
+        expect(releaseAttempts.filter((v) => v === true)).to.have.length(1);
       });
 
       it('should handle concurrent release and acquisition without race conditions', async () => {
