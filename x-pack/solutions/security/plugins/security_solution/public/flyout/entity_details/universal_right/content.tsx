@@ -7,13 +7,11 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { FieldsTable } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
-import {
-  GENERIC_FLYOUT_STORAGE_KEYS
-} from "@kbn/security-solution-plugin/public/flyout/entity_details/universal_right/constants";
 
 interface UniversalEntityFlyoutContentProps {
   source: GenericEntityRecord;
