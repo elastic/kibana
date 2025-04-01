@@ -11031,6 +11031,35 @@ paths:
       summary: Create or update a protection updates note
       tags:
         - Security Endpoint Management API
+  /api/entity_analytics/monitoring/engine/init:
+    post:
+      operationId: InitMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_MonitoringEngineDescriptor'
+          description: Successful response
+      summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/privileges/health:
+    get:
+      operationId: PrivMonHealth
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+          description: Successful response
+      summary: Health check on Privilege Monitoring
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/enable:
     post:
       operationId: InitEntityStore
@@ -57403,6 +57432,14 @@ components:
       type: string
     Security_Entity_Analytics_API_Metadata:
       $ref: '#/components/schemas/Security_Entity_Analytics_API_TransformStatsMetadata'
+    Security_Entity_Analytics_API_MonitoringEngineDescriptor:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+      required:
+        - type
+        - status
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
