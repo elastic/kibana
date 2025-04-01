@@ -8,28 +8,51 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import { isNoneGroup, useGrouping } from '@kbn/grouping';
+import {
+  type GroupOption,
+  type GroupStatsItem,
+  isNoneGroup,
+  type RawBucket,
+  useGrouping,
+} from '@kbn/grouping';
 import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import type { GroupingArgs } from '@kbn/grouping/src';
+import type { GetGroupStats, GroupingArgs, GroupPanelRenderer } from '@kbn/grouping/src';
+import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
-import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import type { Status } from '../../../../common/api/detection_engine';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useSourcererDataView } from '../../../sourcerer/containers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { renderGroupPanel, getStats } from './grouping_settings';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
+import * as i18n from './translations';
 
 export interface AlertsTableComponentProps {
+  /**
+   * Allows to customize the `buttonContent` props of the EuiAccordion.
+   * It basically renders the text next to the chevron, used to expand/collapse the accordion.
+   * If none provided, the DefaultGroupPanelRenderer will be used (see kbn-grouping package).
+   */
+  accordionButtonContent?: GroupPanelRenderer<AlertsGroupingAggregation>;
+  /**
+   * Allow to partially customize the `extraAction` props of the EuiAccordion.
+   * It basically renders the statistics to right side of the title and the left side of the Take actions button.
+   * If none provided, we display the number of alerts for the group.
+   */
+  accordionExtraActionGroupStats?: GetGroupStats<AlertsGroupingAggregation>;
   currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
+  /**
+   * Default values to display in the group selection dropdown.
+   * If none are provided, the only options there will None (default) and be Custom field.
+   */
+  defaultGroupingOptions?: GroupOption[];
   from: string;
   globalFilters: Filter[];
   globalQuery: Query;
@@ -46,6 +69,20 @@ export interface AlertsTableComponentProps {
 const DEFAULT_PAGE_SIZE = 25;
 const DEFAULT_PAGE_INDEX = 0;
 const MAX_GROUPING_LEVELS = 3;
+export const DEFAULT_GROUPING_OPTIONS: GroupOption[] = [];
+export const DEFAULT_GROUP_STATS: GetGroupStats<AlertsGroupingAggregation> = (
+  _: string,
+  bucket: RawBucket<AlertsGroupingAggregation>
+): GroupStatsItem[] => [
+  {
+    title: i18n.STATS_GROUP_ALERTS,
+    badge: {
+      value: bucket.doc_count,
+      width: 50,
+      color: '#a83632',
+    },
+  },
+];
 
 const useStorage = (storage: Storage, tableId: string) =>
   useMemo(
@@ -110,14 +147,24 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
 
   const fields = useMemo(() => Object.values(sourcererDataView.fields || {}), [sourcererDataView]);
 
+  const groupingOptions = useMemo(
+    () => props.defaultGroupingOptions || DEFAULT_GROUPING_OPTIONS,
+    [props.defaultGroupingOptions]
+  );
+
+  const groupStats = useMemo(
+    () => props.accordionExtraActionGroupStats || DEFAULT_GROUP_STATS,
+    [props.accordionExtraActionGroupStats]
+  );
+
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
-      groupPanelRenderer: renderGroupPanel,
-      getGroupStats: getStats,
+      groupPanelRenderer: props.accordionButtonContent,
+      getGroupStats: groupStats,
       onGroupToggle,
       unit: defaultUnit,
     },
-    defaultGroupingOptions: getDefaultGroupingOptions(props.tableId),
+    defaultGroupingOptions: groupingOptions,
     fields,
     groupingId: props.tableId,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
@@ -134,11 +181,12 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       dispatch(
         updateGroups({
           activeGroups: selectedGroups,
+          options: groupingOptions,
           tableId: props.tableId,
         })
       );
     }
-  }, [dispatch, props.tableId, selectedGroups]);
+  }, [groupingOptions, dispatch, props.tableId, selectedGroups]);
 
   useEffect(() => {
     if (groupInRedux != null && !isNoneGroup(groupInRedux.activeGroups)) {

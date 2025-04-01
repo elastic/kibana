@@ -39,6 +39,11 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import {
+  defaultGroupingOptions,
+  defaultGroupPanelRenderers,
+  defaultGroupStats,
+} from '../../../../detections/components/alerts_table/grouping_settings';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -762,8 +767,11 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
+                        accordionButtonContent={defaultGroupPanelRenderers}
+                        accordionExtraActionGroupStats={defaultGroupStats}
                         currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
+                        defaultGroupingOptions={defaultGroupingOptions}
                         from={from}
                         globalFilters={filters}
                         globalQuery={query}

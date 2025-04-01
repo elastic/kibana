@@ -1,0 +1,166 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiIcon } from '@elastic/eui';
+import React from 'react';
+import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
+import { DEFAULT_GROUP_STATS } from '../alerts_grouping';
+import type { AlertsGroupingAggregation } from './types';
+import * as i18n from '../translations';
+
+const getSeverity = (severity?: string) => {
+  switch (severity) {
+    case 'low':
+      return (
+        <>
+          <EuiIcon type="dot" color="#54b399" />
+          {i18n.STATS_GROUP_SEVERITY_LOW}
+        </>
+      );
+    case 'medium':
+      return (
+        <>
+          <EuiIcon type="dot" color="#d6bf57" />
+          {i18n.STATS_GROUP_SEVERITY_MEDIUM}
+        </>
+      );
+    case 'high':
+      return (
+        <>
+          <EuiIcon type="dot" color="#da8b45" />
+          {i18n.STATS_GROUP_SEVERITY_HIGH}
+        </>
+      );
+    case 'critical':
+      return (
+        <>
+          <EuiIcon type="dot" color="#e7664c" />
+          {i18n.STATS_GROUP_SEVERITY_CRITICAL}
+        </>
+      );
+  }
+  return null;
+};
+
+const multiSeverity = (
+  <>
+    <span className="smallDot">
+      <EuiIcon type="dot" color="#54b399" />
+    </span>
+    <span className="smallDot">
+      <EuiIcon type="dot" color="#d6bf57" />
+    </span>
+    <span className="smallDot">
+      <EuiIcon type="dot" color="#da8b45" />
+    </span>
+
+    <span>
+      <EuiIcon type="dot" color="#e7664c" />
+    </span>
+    {i18n.STATS_GROUP_SEVERITY_MULTI}
+  </>
+);
+
+/**
+ * Returns stats to be used in the`extraAction` property of the EuiAccordion component used within the kbn-grouping package.
+ * It handles custom renders for the following fields:
+ * - kibana.alert.rule.name
+ * - host.name
+ * - user.name
+ * - source.ip
+ * And returns a default view for all the other fields.
+ * These go hand in hand with defaultGroupingOptions and defaultGroupPanelRenderers.
+ */
+export const defaultGroupStats = (
+  selectedGroup: string,
+  bucket: RawBucket<AlertsGroupingAggregation>
+): GroupStatsItem[] => {
+  const singleSeverityComponent =
+    bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
+      ? getSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())
+      : null;
+  const severityComponent =
+    bucket.countSeveritySubAggregation?.value && bucket.countSeveritySubAggregation?.value > 1
+      ? multiSeverity
+      : singleSeverityComponent;
+
+  const severityStat: GroupStatsItem[] = !severityComponent
+    ? []
+    : [
+        {
+          title: i18n.STATS_GROUP_SEVERITY,
+          component: severityComponent,
+        },
+      ];
+
+  const defaultBadges: GroupStatsItem[] = DEFAULT_GROUP_STATS(selectedGroup, bucket);
+
+  switch (selectedGroup) {
+    case 'kibana.alert.rule.name':
+      return [
+        ...severityStat,
+        {
+          title: i18n.STATS_GROUP_USERS,
+          badge: {
+            value: bucket.usersCountAggregation?.value ?? 0,
+          },
+        },
+        {
+          title: i18n.STATS_GROUP_HOSTS,
+          badge: {
+            value: bucket.hostsCountAggregation?.value ?? 0,
+          },
+        },
+        ...defaultBadges,
+      ];
+    case 'host.name':
+      return [
+        ...severityStat,
+        {
+          title: i18n.STATS_GROUP_USERS,
+          badge: {
+            value: bucket.usersCountAggregation?.value ?? 0,
+          },
+        },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          badge: {
+            value: bucket.rulesCountAggregation?.value ?? 0,
+          },
+        },
+        ...defaultBadges,
+      ];
+    case 'user.name':
+    case 'source.ip':
+      return [
+        ...severityStat,
+        {
+          title: i18n.STATS_GROUP_HOSTS,
+          badge: {
+            value: bucket.hostsCountAggregation?.value ?? 0,
+          },
+        },
+        {
+          title: i18n.STATS_GROUP_RULES,
+          badge: {
+            value: bucket.rulesCountAggregation?.value ?? 0,
+          },
+        },
+        ...defaultBadges,
+      ];
+  }
+  return [
+    ...severityStat,
+    {
+      title: i18n.STATS_GROUP_RULES,
+      badge: {
+        value: bucket.rulesCountAggregation?.value ?? 0,
+      },
+    },
+    ...defaultBadges,
+  ];
+};
