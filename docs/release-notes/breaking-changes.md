@@ -367,7 +367,9 @@ $$$kibana-199033$$$
 
 **Details**
 
-The functionality that allowed to download a CSV export from a dashboard's saved search panel without creating a report has been removed. To export CSV data from a dashboard panel, you may use the action menu of a saved search panel in a dashboard to generate a CSV report, and download the report from a toast popup when the report has finished generating. View [#199033]({{kib-pull}}199033).
+The functionality that allowed to download a CSV export from a dashboard's saved search panel without creating a report has been removed. To export CSV data from a dashboard panel, you may use the action menu of a saved search panel in a dashboard to generate a CSV report, and download the report from a toast popup when the report has finished generating. 
+
+View [#199033]({{kib-pull}}199033).
 ::::
 
 **Kibana management**
@@ -377,7 +379,7 @@ $$$kibana-214051$$$
 
 Upgrade Assistant public APIs for reindexing and batch reindexing have been made internal. You should instead use Elasticsearch’s native reindexing APIs for programmatic reindexing.
 
-View [#214051]({{kibana-pull}}214051)
+View [#214051]({{kib-pull}}214051).
 :::
 
 **Kibana security**

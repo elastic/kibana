@@ -82,7 +82,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * SLOs:
   * Fixes an issue where clicking on the name badge for a synthetics monitor on an SLO details page would lead to a page that failed to load monitor details [#210695]({{kib-pull}}210695).
   * Allows use of wildcard filters in SLO queries when DSL filters are also used [#213119]({{kib-pull}}213119).
-  * Ensures that when an SLO is created, its ID is correctly verified to be unique across all spaces [#214496]({{kibana-pull}}214496).
+  * Ensures that when an SLO is created, its ID is correctly verified to be unique across all spaces [#214496]({{kib-pull}}214496).
 
 **Elastic Security solution**:
 * For the Elastic Security 9.0.0 release information, refer to [Elastic Security Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
