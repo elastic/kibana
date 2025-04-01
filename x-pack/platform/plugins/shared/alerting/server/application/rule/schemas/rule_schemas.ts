@@ -153,6 +153,7 @@ export const dashboardSchema = schema.arrayOf(schema.object({ id: schema.string(
 
 export const artifactSchema = schema.object({
   dashboards: schema.maybe(dashboardSchema),
+  investigation_guide: schema.maybe(schema.object({ blob: schema.string() })),
 });
 
 /**
