@@ -72,13 +72,16 @@ export function SpanLinksTable({ items }: Props) {
                 type="stopSlash"
                 size="m"
                 color="subdued"
-                content={i18n.translate(
-                  'xpack.apm.apm.spanLinks.table.serviceName.unknown.tooltip',
+                aria-label={i18n.translate(
+                  'xpack.apm.spanLinks.table.serviceName.unknown.tooltip.ariaLabel',
                   {
-                    defaultMessage:
-                      'This span has not yet been completed, please check again in a while.',
+                    defaultMessage: 'Icon tooltip for unknown service name',
                   }
                 )}
+                content={i18n.translate('xpack.apm.spanLinks.table.serviceName.unknown.tooltip', {
+                  defaultMessage:
+                    'This span has not yet been completed, please check again in a while.',
+                })}
               />
             </EuiFlexItem>
             <EuiFlexItem>
@@ -146,7 +149,9 @@ export function SpanLinksTable({ items }: Props) {
             button={
               <EuiButtonIcon
                 data-test-subj="apmColumnsButton"
-                aria-label="Edit"
+                aria-label={i18n.translate('xpack.apm.spanLinks.table.actions.edit.ariaLabel', {
+                  defaultMessage: 'Edit',
+                })}
                 iconType="boxesHorizontal"
                 onClick={() => {
                   setIdActionMenuOpen(id);
@@ -177,6 +182,10 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={traceId}>
                   {(copy) => (
                     <EuiButtonEmpty
+                      aria-label={i18n.translate(
+                        'xpack.apm.spanLinks.table.actions.copyParentTraceId.ariaLabel',
+                        { defaultMessage: 'Copy parent trace id' }
+                      )}
                       data-test-subj="apmColumnsCopyParentTraceIdButton"
                       onClick={() => {
                         copy();
@@ -210,6 +219,12 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={spanId}>
                   {(copy) => (
                     <EuiButtonEmpty
+                      aria-label={i18n.translate(
+                        'xpack.apm.spanLinks.table.actions.copySpanId.ariaLabel',
+                        {
+                          defaultMessage: 'Copy span id',
+                        }
+                      )}
                       data-test-subj="apmColumnsCopySpanIdButton"
                       onClick={() => {
                         copy();
