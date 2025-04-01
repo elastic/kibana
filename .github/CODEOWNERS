@@ -1911,8 +1911,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-core @elastic/platform-analytics
-/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/platform-analytics
+/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
@@ -2231,6 +2231,9 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 /x-pack/solutions/security/plugins/security_solution_ess/public/upselling/pages/attack_discovery @elastic/security-generative-ai
 /x-pack/test/security_solution_cypress/cypress/e2e/automatic_import @elastic/security-scalability
+/x-pack/solutions/security/plugins/security_solution/public/configurations @elastic/security-generative-ai
+/x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/ai_soc @elastic/security-generative-ai @elastic/security-threat-hunting-explore
+
 
 # AI4DSOC in Security Solution
 /x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity

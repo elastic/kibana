@@ -239,7 +239,7 @@ export const AssetInventoryDataTable = ({
     };
   }, [persistedSettings]);
 
-  const { dataView } = useDataViewContext();
+  const { dataView, dataViewIsLoading } = useDataViewContext();
 
   const {
     uiActions,
@@ -369,8 +369,7 @@ export const AssetInventoryDataTable = ({
     },
   ];
 
-  const loadingState =
-    isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
+  const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
@@ -381,8 +380,13 @@ export const AssetInventoryDataTable = ({
           height: computeDataTableRendering.wrapperHeight,
         }}
       >
-        <EuiProgress size="xs" color="accent" style={{ opacity: isFetchingGridData ? 1 : 0 }} />
-        {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          className={styles.gridProgressBar}
+        />
+        {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
           <AssetInventoryEmptyState onResetFilters={onResetFilters} />
         ) : (
           <UnifiedDataTable

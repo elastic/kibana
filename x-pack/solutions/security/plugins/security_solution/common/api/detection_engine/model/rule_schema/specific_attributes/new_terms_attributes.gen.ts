@@ -15,11 +15,16 @@
  */
 
 import { z } from '@kbn/zod';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
-import { NonEmptyString } from '../../../../model/primitives.gen';
-
+/**
+ * Fields to monitor for new values.
+ */
 export type NewTermsFields = z.infer<typeof NewTermsFields>;
 export const NewTermsFields = z.array(z.string()).min(1).max(3);
 
+/**
+ * Start date to use when checking if a term has been seen before. Supports relative dates – for example, now-30d will search the last 30 days of data when checking if a term is new. We do not recommend using absolute dates, which can cause issues with rule performance due to querying increasing amounts of data over time.
+ */
 export type HistoryWindowStart = z.infer<typeof HistoryWindowStart>;
-export const HistoryWindowStart = NonEmptyString;
+export const HistoryWindowStart = z.string().min(1).superRefine(isNonEmptyString);
