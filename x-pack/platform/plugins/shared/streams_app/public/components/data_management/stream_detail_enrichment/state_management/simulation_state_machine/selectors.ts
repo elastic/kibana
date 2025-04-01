@@ -10,6 +10,27 @@ import { createSelector } from 'reselect';
 import { SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';
 import { SimulationContext } from './types';
+import { filterSimulationDocuments } from './utils';
+
+const EMPTY_ARRAY: [] = [];
+
+/**
+ * Selects the documents used for the data preview table.
+ */
+export const selectPreviewDocuments = createSelector(
+  [
+    (context: SimulationContext) => context.samples,
+    (context: SimulationContext) => context.previewDocsFilter,
+    (context: SimulationContext) => context.simulation?.documents,
+  ],
+  (samples, previewDocsFilter, documents) => {
+    return (
+      (previewDocsFilter && documents
+        ? filterSimulationDocuments(documents, previewDocsFilter)
+        : samples) || EMPTY_ARRAY
+    );
+  }
+);
 
 /**
  * Selects the set of dotted fields that are not supported by the current simulation.

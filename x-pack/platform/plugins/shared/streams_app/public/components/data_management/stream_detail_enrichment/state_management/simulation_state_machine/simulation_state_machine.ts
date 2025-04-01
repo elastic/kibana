@@ -36,7 +36,7 @@ import {
   createSimulationRunnerActor,
   createSimulationRunFailureNofitier,
 } from './simulation_runner_actor';
-import { filterSimulationDocuments, composeSamplingCondition } from './utils';
+import { composeSamplingCondition } from './utils';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
@@ -78,13 +78,6 @@ export const simulationMachine = setup({
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
       simulation: params.simulation,
     })),
-    derivePreviewDocuments: assign(({ context }) => {
-      return {
-        previewDocuments: context.simulation
-          ? filterSimulationDocuments(context.simulation.documents, context.previewDocsFilter)
-          : (context.samples.map(flattenObjectNestedLast) as FlattenRecord[]),
-      };
-    }),
     deriveSamplingCondition: assign(({ context }) => ({
       samplingCondition: composeSamplingCondition(context.processors),
     })),
@@ -131,14 +124,11 @@ export const simulationMachine = setup({
   on: {
     'dateRange.update': '.loadingSamples',
     'simulation.changePreviewDocsFilter': {
-      actions: [
-        { type: 'storePreviewDocsFilter', params: ({ event }) => event },
-        { type: 'derivePreviewDocuments' },
-      ],
+      actions: [{ type: 'storePreviewDocsFilter', params: ({ event }) => event }],
     },
     'simulation.reset': {
       target: '.idle',
-      actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+      actions: [{ type: 'resetSimulation' }],
     },
     // Handle adding/reordering processors
     'processors.*': {
@@ -164,7 +154,7 @@ export const simulationMachine = setup({
       },
       {
         target: '.idle',
-        actions: [{ type: 'resetSimulation' }, { type: 'derivePreviewDocuments' }],
+        actions: [{ type: 'resetSimulation' }],
       },
     ],
   },
@@ -216,10 +206,7 @@ export const simulationMachine = setup({
         }),
         onDone: {
           target: 'assertingSimulationRequirements',
-          actions: [
-            { type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) },
-            { type: 'derivePreviewDocuments' },
-          ],
+          actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
         },
         onError: {
           target: 'idle',
@@ -257,7 +244,6 @@ export const simulationMachine = setup({
           target: 'idle',
           actions: [
             { type: 'storeSimulation', params: ({ event }) => ({ simulation: event.output }) },
-            { type: 'derivePreviewDocuments' },
           ],
         },
         onError: {
