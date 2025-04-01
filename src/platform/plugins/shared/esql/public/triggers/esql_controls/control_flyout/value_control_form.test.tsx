@@ -39,6 +39,7 @@ jest.mock('@kbn/esql-utils', () => {
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     isQueryWrappedByPipes: jest.fn().mockReturnValue(false),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
+    getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
   };
 });
 
@@ -265,6 +266,34 @@ describe('ValueControlForm', () => {
 
         // values preview panel should be rendered
         expect(await findByTestId('esqlValuesPreview')).toBeInTheDocument();
+      });
+
+      it('should be able to change in fields type', async () => {
+        const { findByTestId } = render(
+          <IntlProvider locale="en">
+            <ESQLControlsFlyout
+              initialVariableType={ESQLVariableType.VALUES}
+              queryString="FROM foo | WHERE field =="
+              onSaveControl={jest.fn()}
+              closeFlyout={jest.fn()}
+              onCancelControl={jest.fn()}
+              search={searchMock}
+              esqlVariables={[]}
+            />
+          </IntlProvider>
+        );
+        // variable name input should be rendered and with the default value
+        expect(await findByTestId('esqlVariableName')).toHaveValue('?field');
+        // change the variable name to ?value
+        const variableNameInput = await findByTestId('esqlVariableName');
+        fireEvent.change(variableNameInput, { target: { value: '??field' } });
+
+        expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
+        const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
+        expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+        // identifiers dropdown should be rendered
+        const identifiersOptionsDropdown = await findByTestId('esqlIdentifiersOptions');
+        expect(identifiersOptionsDropdown).toBeInTheDocument();
       });
     });
   });

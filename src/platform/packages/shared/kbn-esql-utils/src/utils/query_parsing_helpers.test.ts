@@ -581,6 +581,24 @@ describe('esql query helpers', () => {
       } as monaco.Position);
       expect(values).toEqual('my_field');
     });
+
+    it('should return undefined if no column is found', () => {
+      const queryString = 'FROM my_index | STATS COUNT() ';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 31,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the column is *', () => {
+      const queryString = 'FROM my_index | STATS COUNT(*) ';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 31,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
   });
 
   describe('fixESQLQueryWithVariables', () => {

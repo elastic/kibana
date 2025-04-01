@@ -18,6 +18,7 @@ import { ESQLControlState, EsqlControlType } from '../types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
+  getValuesFromQueryField: jest.fn().mockReturnValue('field'),
 }));
 
 describe('IdentifierControlForm', () => {
@@ -76,6 +77,35 @@ describe('IdentifierControlForm', () => {
       expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
       const growSwitch = await findByTestId('esqlControlGrow');
       expect(growSwitch).not.toBeChecked();
+    });
+
+    it('should be able to change in value type', async () => {
+      const { findByTestId } = render(
+        <IntlProvider locale="en">
+          <ESQLControlsFlyout
+            initialVariableType={ESQLVariableType.FIELDS}
+            queryString="FROM foo | STATS BY"
+            onSaveControl={jest.fn()}
+            closeFlyout={jest.fn()}
+            onCancelControl={jest.fn()}
+            search={searchMock}
+            cursorPosition={{ column: 19, lineNumber: 1 } as monaco.Position}
+            esqlVariables={[]}
+          />
+        </IntlProvider>
+      );
+      // variable name input should be rendered and with the default value
+      expect(await findByTestId('esqlVariableName')).toHaveValue('??field');
+      // change the variable name to ?value
+      const variableNameInput = await findByTestId('esqlVariableName');
+      fireEvent.change(variableNameInput, { target: { value: '?value' } });
+
+      expect(await findByTestId('esqlControlTypeDropdown')).toBeInTheDocument();
+      const controlTypeInputPopover = await findByTestId('esqlControlTypeInputPopover');
+      expect(within(controlTypeInputPopover).getByRole('combobox')).toHaveValue(`Static values`);
+      // values dropdown should be rendered
+      const valuesOptionsDropdown = await findByTestId('esqlValuesOptions');
+      expect(valuesOptionsDropdown).toBeInTheDocument();
     });
 
     it('should call the onCreateControl callback, if no initialState is given', async () => {
