@@ -33,7 +33,7 @@ Object {
     "http.response.status_code",
     "http.request.method",
     "user_agent.name",
-    ".url.path",
+    "url.path",
     "url.scheme",
     "server.address",
     "server.port",
