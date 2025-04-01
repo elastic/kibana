@@ -34,9 +34,9 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     isServerless: boolean,
     mlCapabilities: MlCapabilities
   ) => {
-    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
-    if (isEsProject) return false;
     return (
+      // Can see Memory Usage & Notifications
+      mlCapabilities.canViewMlNodes ||
       (mlFeatures.nlp && mlCapabilities.canGetTrainedModels) ||
       (mlFeatures.dfa && mlCapabilities.canGetDataFrameAnalytics) ||
       (mlFeatures.ad && mlCapabilities.canGetJobs)
