@@ -11,7 +11,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
