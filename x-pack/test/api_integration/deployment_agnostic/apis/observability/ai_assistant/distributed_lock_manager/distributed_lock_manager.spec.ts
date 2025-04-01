@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let lockManager: LockManager;
 
       beforeEach(async () => {
-        lockManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        lockManager = new LockManager('knowledge_base_reindex', es, logger);
       });
 
       afterEach(async () => {
@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       beforeEach(async () => {
         manager1 = new LockManager('customLockId' as LockId, es, logger);
-        manager2 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        manager2 = new LockManager('knowledge_base_reindex', es, logger);
       });
 
       afterEach(async () => {
@@ -119,8 +119,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let manager2: LockManager;
 
       beforeEach(async () => {
-        manager1 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
-        manager2 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        manager1 = new LockManager('knowledge_base_reindex', es, logger);
+        manager2 = new LockManager('knowledge_base_reindex', es, logger);
       });
 
       afterEach(async () => {
@@ -135,7 +135,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const acquired2 = await manager2.acquire({ metadata: { attempt: 'two' } });
         expect(acquired2).to.be(false);
 
-        const lock = await getLockById(es, LockId.KnowledgeBaseReindex);
+        const lock = await getLockById(es, 'knowledge_base_reindex');
         expect(lock?.metadata).to.eql({ attempt: 'one' });
       });
 
@@ -156,8 +156,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let waitingManager: LockManager;
 
       beforeEach(async () => {
-        blockingManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
-        waitingManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        blockingManager = new LockManager('knowledge_base_reindex', es, logger);
+        waitingManager = new LockManager('knowledge_base_reindex', es, logger);
         await blockingManager.release();
         await waitingManager.release();
       });
@@ -201,13 +201,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       before(async () => {
         executions = 0;
         runWithLock = async () => {
-          return withLock(
-            { esClient: es, lockId: LockId.KnowledgeBaseReindex, logger },
-            async () => {
-              executions++;
-              return 'was called';
-            }
-          );
+          return withLock({ esClient: es, lockId: 'knowledge_base_reindex', logger }, async () => {
+            executions++;
+            return 'was called';
+          });
         };
 
         results = await Promise.all([runWithLock(), runWithLock(), runWithLock()]);
@@ -222,7 +219,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('releases the lock after execution', async () => {
-        const lock = await getLockById(es, LockId.KnowledgeBaseReindex);
+        const lock = await getLockById(es, 'knowledge_base_reindex');
         expect(lock).to.be(undefined);
       });
     });
@@ -231,7 +228,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let lockManager: LockManager;
 
       beforeEach(async () => {
-        lockManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        lockManager = new LockManager('knowledge_base_reindex', es, logger);
       });
 
       describe('when the lock is manually handled', () => {
@@ -244,13 +241,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const acquired = await lockManager.acquire({ ttl: 1000 });
           expect(acquired).to.be(true);
 
-          const lockExpiryBefore = (await getLockById(es, LockId.KnowledgeBaseReindex))!.expiresAt;
+          const lockExpiryBefore = (await getLockById(es, 'knowledge_base_reindex'))!.expiresAt;
 
           // Extend the TTL
           const extended = await lockManager.extendTtl();
           expect(extended).to.be(true);
 
-          const lockExpiryAfter = (await getLockById(es, LockId.KnowledgeBaseReindex))!.expiresAt;
+          const lockExpiryAfter = (await getLockById(es, 'knowledge_base_reindex'))!.expiresAt;
 
           // Verify that the new expiration is later than before.
           expect(new Date(lockExpiryAfter).getTime()).to.be.greaterThan(
@@ -268,11 +265,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           // Use a very short TTL (1 second) so that without extension the lock would expire.
           // The withLock helper extends the TTL periodically.
           result = await withLock(
-            { lockId: LockId.KnowledgeBaseReindex, esClient: es, logger, ttl: 100 },
+            { lockId: 'knowledge_base_reindex', esClient: es, logger, ttl: 100 },
             async () => {
-              lockExpiryBefore = (await getLockById(es, LockId.KnowledgeBaseReindex))?.expiresAt;
+              lockExpiryBefore = (await getLockById(es, 'knowledge_base_reindex'))?.expiresAt;
               await sleep(500); // Simulate a long-running operation
-              lockExpiryAfter = (await getLockById(es, LockId.KnowledgeBaseReindex))?.expiresAt;
+              lockExpiryAfter = (await getLockById(es, 'knowledge_base_reindex'))?.expiresAt;
               return 'done';
             }
           );
@@ -295,7 +292,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // Even though the initial TTL was short, the periodic extension should have kept the lock active.
         // After the withLock call completes, the lock should be released.
         it('should release the lock after the callback', async () => {
-          const lock = await getLockById(es, LockId.KnowledgeBaseReindex);
+          const lock = await getLockById(es, 'knowledge_base_reindex');
           expect(lock).to.be(undefined);
         });
       });
@@ -304,7 +301,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         it('should release the lock even if the callback throws an error', async () => {
           try {
             await withLock(
-              { lockId: LockId.KnowledgeBaseReindex, esClient: es, logger, ttl: 300000 },
+              { lockId: 'knowledge_base_reindex', esClient: es, logger, ttl: 300000 },
               async () => {
                 throw new Error('Simulated callback failure');
               }
@@ -314,7 +311,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             expect(err.message).to.be('Simulated callback failure');
           }
 
-          const lock = await getLockById(es, LockId.KnowledgeBaseReindex);
+          const lock = await getLockById(es, 'knowledge_base_reindex');
           expect(lock).to.be(undefined);
         });
       });
@@ -324,7 +321,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('should allow only one lock acquisition among many concurrent attempts', async () => {
         const results = await Promise.all(
           times(50).map(async () => {
-            const lm = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+            const lm = new LockManager('knowledge_base_reindex', es, logger);
             const hasLock = await lm.acquire();
             if (hasLock) {
               await sleep(10); // ensure the lock is held for a bit
@@ -339,7 +336,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('should handle concurrent release and acquisition without race conditions', async () => {
-        const initialManager = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        const initialManager = new LockManager('knowledge_base_reindex', es, logger);
         const acquired = await initialManager.acquire({ ttl: 3000 });
         expect(acquired).to.be(true);
 
@@ -347,12 +344,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // Some attempts will try to release the lock while others try to acquire it.
 
         const releaseAttemptsPromise = times(20).map(() => {
-          const manager1 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+          const manager1 = new LockManager('knowledge_base_reindex', es, logger);
           return manager1.release();
         });
 
         const acquireAttemptsPromise = times(20).map(() => {
-          const manager2 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+          const manager2 = new LockManager('knowledge_base_reindex', es, logger);
           return manager2.acquire();
         });
 
@@ -364,7 +361,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(releaseAttempts.filter((r) => r === true)).to.have.length(0);
 
         // Finally, confirm that the lock still exists
-        const lock = await getLockById(es, LockId.KnowledgeBaseReindex);
+        const lock = await getLockById(es, 'knowledge_base_reindex');
         expect(lock).not.to.be(undefined);
 
         // cleanup
@@ -377,8 +374,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let manager2: LockManager;
 
       beforeEach(async () => {
-        manager1 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
-        manager2 = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
+        manager1 = new LockManager('knowledge_base_reindex', es, logger);
+        manager2 = new LockManager('knowledge_base_reindex', es, logger);
       });
 
       afterEach(async () => {
@@ -395,7 +392,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const newToken = uuid();
         await es.update({
           index: LOCKS_CONCRETE_INDEX_NAME,
-          id: LockId.KnowledgeBaseReindex,
+          id: 'knowledge_base_reindex',
           doc: { token: newToken },
           refresh: true,
         });
@@ -407,7 +404,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(releaseResult).to.be(false);
 
         // Verify that the lock still exists and now carries the interfering token.
-        const lock = await getLockById(es, LockId.KnowledgeBaseReindex);
+        const lock = await getLockById(es, 'knowledge_base_reindex');
         expect(lock).not.to.be(undefined);
         expect(lock!.token).to.be(newToken);
 
@@ -420,7 +417,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(acquired1).to.be(true);
 
         // Get the current token.
-        const firstLock = await getLockById(es, LockId.KnowledgeBaseReindex);
+        const firstLock = await getLockById(es, 'knowledge_base_reindex');
 
         // Release the lock.
         const released = await manager1.release();
@@ -430,7 +427,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const acquired2 = await manager2.acquire();
         expect(acquired2).to.be(true);
 
-        const secondLock = await getLockById(es, LockId.KnowledgeBaseReindex);
+        const secondLock = await getLockById(es, 'knowledge_base_reindex');
         expect(secondLock!.token).not.to.be(firstLock!.token);
       });
     });

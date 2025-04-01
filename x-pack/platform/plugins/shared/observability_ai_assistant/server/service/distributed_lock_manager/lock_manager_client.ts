@@ -17,10 +17,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 export const LOCKS_INDEX_ALIAS = '.kibana_locks';
 export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
 
-export enum LockId {
-  KnowledgeBaseReindex = 'knowledge_base_reindex',
-}
-
+export type LockId = string;
 export interface LockDocument {
   createdAt: string;
   expiresAt: string;
