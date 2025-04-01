@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useToggle from 'react-use/lib/useToggle';
 import type { Field } from '../tabs/metadata/utils';
@@ -26,18 +26,22 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
   const [first, ...others] = list;
   const hasOthers = others.length > 0;
   const shouldShowMore = hasOthers && !isExpanded;
+  const hasInteracted = useRef(false);
 
   const handleToggle = () => {
+    hasInteracted.current = true;
     toggle();
-
-    setTimeout(() => {
-      if (isExpanded) {
-        showMoreRef.current?.focus();
-      } else {
-        showLessRef.current?.focus();
-      }
-    }, 0);
   };
+
+  useEffect(() => {
+    if (!hasInteracted.current) return;
+
+    if (isExpanded) {
+      showLessRef.current?.focus();
+    } else {
+      showMoreRef.current?.focus();
+    }
+  }, [isExpanded]);
 
   return (
     <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="baseline" wrap direction="column">
