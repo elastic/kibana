@@ -94,7 +94,7 @@ const defaultAggFunctionLocations: Location[] = [Location.STATS];
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['case']);
+const excludedFunctions = new Set(['case', 'cast']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
@@ -712,8 +712,6 @@ const enrichOperators = (
     // IS NULL | IS NOT NULL
     const arePredicates = op.name === 'is null' || op.name === 'is not null';
 
-    const isCastOperator = op.name === 'cast';
-
     const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
     const isNotOperator =
@@ -778,8 +776,7 @@ const enrichOperators = (
       locationsAvailable,
       type: FunctionDefinitionTypes.OPERATOR,
       validate: validators[op.name],
-      // ignore cast operator for now, it needs to be handled differently
-      ...(isNotOperator || isCastOperator ? { ignoreAsSuggestion: true } : {}),
+      ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
     };
   });
 };
