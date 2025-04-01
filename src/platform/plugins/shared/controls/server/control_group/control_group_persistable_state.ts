@@ -14,7 +14,7 @@ import {
 } from '@kbn/embeddable-plugin/common/types';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
-import type { ControlPanelsState, SerializedControlState } from '../../common';
+import type { ControlPanelState, ControlPanelsState, SerializedControlState } from '../../common';
 import {
   makeControlOrdersZeroBased,
   removeHideExcludeAndHideExists,
@@ -74,7 +74,12 @@ export const createControlGroupExtract = (
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
           ...panel.explicitInput,
           type: panel.type,
-        });
+          /**
+           * Forcing the type here because `explicitInput` no longer has ID but we cannot backport
+           * https://github.com/elastic/kibana/pull/210927 to fix the type concerns because it might
+           * have larger impacts on legacy embeddables.
+           */
+        } as EmbeddableStateWithType);
 
         // Map reference to its embeddable id for lookup in inject
         const mappedReferences = panelReferences.map((reference) => ({
