@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import { errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 import { v4 as uuid } from 'uuid';
@@ -275,7 +276,7 @@ export async function withLock<T>(
 
   if (!acquired) {
     logger.debug(`Lock "${lockId}" not acquired. Exiting.`);
-    throw new Error(`Lock "${lockId}" not acquired`);
+    throw new LockAcquisitionError(`Lock "${lockId}" not acquired`);
   }
 
   // extend the ttl periodically
@@ -283,20 +284,22 @@ export async function withLock<T>(
   logger.debug(
     `Lock "${lockId}" acquired. Extending TTL every ${prettyMilliseconds(extendInterval)}`
   );
-  const extendPromises: Array<Promise<boolean>> = [];
+
   const intervalId = setInterval(() => {
-    const p = lockManager.extendTtl().catch((err) => {
+    lockManager.extendTtl().catch((err) => {
       logger.error(`Failed to extend lock "${lockId}":`, err);
-      return false;
     });
-    extendPromises.push(p);
   }, extendInterval);
 
   try {
     return await callback();
   } finally {
     clearInterval(intervalId);
-    await lockManager.release();
+    try {
+      await lockManager.release();
+    } catch (error) {
+      logger.error(`Failed to release lock "${lockId}": ${error.message}`);
+    }
   }
 }
 
@@ -343,4 +346,11 @@ function isVersionConflictException(e: Error): boolean {
   return (
     e instanceof errors.ResponseError && e.body?.error?.type === 'version_conflict_engine_exception'
   );
+}
+
+export class LockAcquisitionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'LockAcquisitionException';
+  }
 }
