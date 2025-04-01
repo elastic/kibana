@@ -271,3 +271,6 @@ discover.enableUiSettingsValidations: true
 xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
+
+## Search Connectors in stack management
+xpack.searchConnectors.enabled: false
