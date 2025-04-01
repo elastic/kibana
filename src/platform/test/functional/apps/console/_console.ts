@@ -18,7 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
   const security = getService('security');
-  const toasts = getService('toasts');
 
   describe('console app', function describeIndexTests() {
     before(async () => {
