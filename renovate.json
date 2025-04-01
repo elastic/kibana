@@ -671,6 +671,7 @@
         "getos",
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
+        "@fast-check/jest",
         "json5",
         "load-json-file",
         "mock-fs",
