@@ -11,7 +11,6 @@ import type { Logger } from '@kbn/core/server';
 import { ASSET_INVENTORY_STATUS_API_PATH } from '../../../../common/api/asset_inventory/constants';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { AssetInventoryRoutesDeps } from '../types';
-import { checkAssetInventoryEnabled } from '../check_ui_settings';
 
 export const statusAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
@@ -35,11 +34,6 @@ export const statusAssetInventoryRoute = (
 
       async (context, _, response) => {
         const siemResponse = buildSiemResponse(response);
-
-        if (!(await checkAssetInventoryEnabled(context, logger))) {
-          return response.forbidden();
-        }
-
         const secSol = await context.securitySolution;
 
         try {

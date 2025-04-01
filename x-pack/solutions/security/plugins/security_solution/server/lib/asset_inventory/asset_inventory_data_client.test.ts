@@ -6,8 +6,11 @@
  */
 import { AssetInventoryDataClient } from './asset_inventory_data_client';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
-import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { mockGlobalState } from '../../../public/common/mock';
+import {
+  loggingSystemMock,
+  elasticsearchServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 
 const mockSecSolutionContext = {
   getEntityStoreDataClient: jest.fn(),
@@ -30,7 +33,7 @@ describe('AssetInventoryDataClient', () => {
   const client: AssetInventoryDataClient = new AssetInventoryDataClient({
     logger: loggerMock,
     clusterClient: clusterClientMock,
-    experimentalFeatures: mockGlobalState.app.enableExperimental,
+    uiSettingsClient: uiSettingsServiceMock.createClient(),
   });
 
   describe('status function', () => {

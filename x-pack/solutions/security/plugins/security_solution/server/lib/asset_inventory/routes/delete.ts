@@ -11,7 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ASSET_INVENTORY_DELETE_API_PATH } from '../../../../common/api/asset_inventory/constants';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { AssetInventoryRoutesDeps } from '../types';
-import { checkAssetInventoryEnabled } from '../check_ui_settings';
+import { errorInactiveFeature } from '../errors';
 
 export const deleteAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
@@ -37,16 +37,16 @@ export const deleteAssetInventoryRoute = (
       async (context, _request, response) => {
         const siemResponse = buildSiemResponse(response);
 
-        if (!(await checkAssetInventoryEnabled(context, logger))) {
-          return response.forbidden();
-        }
-
         try {
           const secSol = await context.securitySolution;
           const body = await secSol.getAssetInventoryClient().delete();
 
           return response.ok({ body });
         } catch (e) {
+          if (e instanceof Error && e.message === 'uiSetting') {
+            return errorInactiveFeature(response);
+          }
+
           logger.error('Error in DeleteEntityEngine:', e);
           const error = transformError(e);
           return siemResponse.error({

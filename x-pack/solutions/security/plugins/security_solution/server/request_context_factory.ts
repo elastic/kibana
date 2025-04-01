@@ -275,15 +275,14 @@ export class RequestContextFactory implements IRequestContextFactory {
           request,
         });
       }),
-      getAssetInventoryClient: memoize(() => {
-        const clusterClient = coreContext.elasticsearch.client;
-        const logger = options.logger;
-        return new AssetInventoryDataClient({
-          clusterClient,
-          logger,
-          experimentalFeatures: config.experimentalFeatures,
-        });
-      }),
+      getAssetInventoryClient: memoize(
+        () =>
+          new AssetInventoryDataClient({
+            logger: options.logger,
+            clusterClient: coreContext.elasticsearch.client,
+            uiSettingsClient: coreContext.uiSettings.client,
+          })
+      ),
     };
   }
 }
