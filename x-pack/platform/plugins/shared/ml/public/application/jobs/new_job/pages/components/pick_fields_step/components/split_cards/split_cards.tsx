@@ -34,10 +34,13 @@ interface Panel {
 
 export const SplitCards: FC<PropsWithChildren<Props>> = memo(
   ({ fieldValues, splitField, children, numberOfDetectors, jobType, animate = false }) => {
-    const { euiTheme } = useEuiTheme();
+    const { euiTheme, colorMode } = useEuiTheme();
     const panels: Panel[] = [];
 
+    const isLightTheme = colorMode === 'LIGHT';
+
     const splitCardStyle = {
+      ...(isLightTheme ? { border: euiTheme.border.thin } : {}),
       paddingTop: euiTheme.size.xs,
     };
 
