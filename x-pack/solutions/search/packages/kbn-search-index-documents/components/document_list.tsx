@@ -81,31 +81,35 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         onPageClick={onPaginate}
       />
       <EuiSpacer size="m" />
-      <EuiText size="xs">
-        <p>
-          <FormattedMessage
-            id="searchIndexDocuments.documentList.description"
-            defaultMessage="Showing {results} of {total}.
-            Search results maxed at {maximum} documents."
-            values={{
-              maximum: <FormattedNumber value={10000} />,
-              results: (
-                <strong>
-                  <FormattedNumber value={docs.length} />
-                </strong>
-              ),
-              total: (
-                <strong>
-                  <FormattedNumber value={meta.totalItemCount} />
-                </strong>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
-      <EuiBadge color="hollow" style={{ float: 'right' }}>
-        {convertMsToSec(executionTime)} Sec
-      </EuiBadge>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">
+            <p>
+              <FormattedMessage
+                id="searchIndexDocuments.documentList.description"
+                defaultMessage="Showing {results} of {total}.
+          Search results maxed at {maximum} documents."
+                values={{
+                  maximum: <FormattedNumber value={10000} />,
+                  results: (
+                    <strong>
+                      <FormattedNumber value={docs.length} />
+                    </strong>
+                  ),
+                  total: (
+                    <strong>
+                      <FormattedNumber value={meta.totalItemCount} />
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color="hollow">{convertMsToSec(executionTime)} Sec</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {isLoading && <EuiProgress size="xs" color="primary" />}
       <EuiSpacer size="m" />
       {docs.map((doc) => {
