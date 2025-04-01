@@ -44,7 +44,7 @@ describe('SiemRuleMigrationsDataService', () => {
   describe('constructor', () => {
     it('should create IndexPatternAdapters', () => {
       new RuleMigrationsDataService(logger, kibanaVersion);
-      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(2);
+      expect(MockedIndexPatternAdapter).toHaveBeenCalledTimes(3);
       expect(MockedIndexAdapter).toHaveBeenCalledTimes(2);
     });
 
@@ -117,7 +117,8 @@ describe('SiemRuleMigrationsDataService', () => {
         logger: loggerMock.create(),
         pluginStop$: new Subject(),
       };
-      const [rulesIndexPatternAdapter, resourcesIndexPatternAdapter] =
+
+      const [rulesIndexPatternAdapter, resourcesIndexPatternAdapter, migrationIndexPatternAdapter] =
         MockedIndexPatternAdapter.mock.instances;
       (rulesIndexPatternAdapter.install as jest.Mock).mockResolvedValueOnce(undefined);
 
@@ -126,12 +127,16 @@ describe('SiemRuleMigrationsDataService', () => {
 
       await mockIndexNameProviders.rules();
       await mockIndexNameProviders.resources();
+      await mockIndexNameProviders.migrations();
 
       expect(rulesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
       expect(rulesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
 
       expect(resourcesIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
       expect(resourcesIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
+
+      expect(migrationIndexPatternAdapter.createIndex).toHaveBeenCalledWith('space1');
+      expect(migrationIndexPatternAdapter.getIndexName).toHaveBeenCalledWith('space1');
     });
   });
 });

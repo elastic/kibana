@@ -28,11 +28,6 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
         op_type: 'create',
       })
       .catch((error) => {
-        if (error.statusCode === 409) {
-          const msg = `Migration ${migrationId} already exists.`;
-          this.logger.error(msg);
-          throw new Error(msg);
-        }
         this.logger.error(`Error creating migration ${migrationId}: ${error}`);
         throw error;
       });
