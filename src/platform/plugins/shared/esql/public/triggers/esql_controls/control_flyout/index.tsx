@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -118,21 +118,6 @@ export function ESQLControlsFlyout({
   const [formIsInvalid, setFormIsInvalid] = useState(false);
   const [controlState, setControlState] = useState<ESQLControlState | undefined>(initialState);
 
-  const onVariableNameChange = useCallback(
-    (e: { target: { value: React.SetStateAction<string> } }) => {
-      const text = validateVariableName(String(e.target.value), variableNamePrefix);
-      setVariableName(text);
-      const newType = getVariableTypeFromQuery(text, variableType);
-      setVariableType(newType);
-      setVariableNamePrefix(getVariableNamePrefix(newType));
-    },
-    [variableNamePrefix, variableType]
-  );
-
-  const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
-    setControlFlyoutType(controlType);
-  }, []);
-
   const areValuesValid = useMemo(() => {
     const available = controlState?.availableOptions ?? [];
     return variableType === ESQLVariableType.TIME_LITERAL
@@ -140,22 +125,37 @@ export function ESQLControlsFlyout({
       : true;
   }, [variableType, controlState?.availableOptions]);
 
-  useEffect(() => {
-    const variableExists =
-      esqlVariables.some(
-        (variable) => variable.key === variableName.replace(variableNamePrefix, '')
-      ) && !isControlInEditMode;
-    setFormIsInvalid(
-      !variableName || variableExists || !areValuesValid || !controlState?.availableOptions.length
-    );
-  }, [
-    areValuesValid,
-    controlState?.availableOptions.length,
-    esqlVariables,
-    isControlInEditMode,
-    variableName,
-    variableNamePrefix,
-  ]);
+  const onVariableNameChange = useCallback(
+    (e: { target: { value: React.SetStateAction<string> } }) => {
+      const text = validateVariableName(String(e.target.value), variableNamePrefix);
+      setVariableName(text);
+      const newType = getVariableTypeFromQuery(text, variableType);
+      setVariableType(newType);
+      setVariableNamePrefix(getVariableNamePrefix(newType));
+
+      const variableNameWithoutQuestionmark = text.replace(/^\?+/, '');
+      const variableExists = esqlVariables.some(
+        (variable) => variable.key === variableNameWithoutQuestionmark
+      );
+      setFormIsInvalid(
+        !variableNameWithoutQuestionmark ||
+          variableExists ||
+          !areValuesValid ||
+          !controlState?.availableOptions.length
+      );
+    },
+    [
+      areValuesValid,
+      controlState?.availableOptions.length,
+      esqlVariables,
+      variableNamePrefix,
+      variableType,
+    ]
+  );
+
+  const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
+    setControlFlyoutType(controlType);
+  }, []);
 
   const onCreateControl = useCallback(async () => {
     if (controlState && controlState.availableOptions.length) {

@@ -172,12 +172,19 @@ export function VariableName({
     />
   );
 
-  const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
-    defaultMessage: 'You can’t edit a control name after it’s been created.',
-  });
+  const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
   const variableExists =
-    esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
+    esqlVariables.some((variable) => variable.key === variableNameWithoutQuestionmark) &&
     !isControlInEditMode;
+  const errorMessage = !variableNameWithoutQuestionmark
+    ? i18n.translate('esql.flyout.variableName.error', {
+        defaultMessage: 'Variable name is required',
+      })
+    : variableExists
+    ? i18n.translate('esql.flyout.variableNameExists.error', {
+        defaultMessage: 'Variable name already exists',
+      })
+    : undefined;
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.variableName.label', {
@@ -186,21 +193,11 @@ export function VariableName({
       helpText={helpText}
       fullWidth
       autoFocus
-      isInvalid={!variableName || variableExists}
-      error={
-        !variableName
-          ? i18n.translate('esql.flyout.variableName.error', {
-              defaultMessage: 'Variable name is required',
-            })
-          : variableExists
-          ? i18n.translate('esql.flyout.variableNameExists.error', {
-              defaultMessage: 'Variable name already exists',
-            })
-          : undefined
-      }
+      isInvalid={!variableNameWithoutQuestionmark || variableExists}
+      error={errorMessage}
     >
       <EuiToolTip
-        content={isControlInEditMode ? isDisabledTooltipText : tooltipContent}
+        content={tooltipContent}
         css={css`
           width: 100%;
         `}
