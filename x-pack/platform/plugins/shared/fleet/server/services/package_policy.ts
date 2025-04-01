@@ -1149,16 +1149,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       currentVersion: newPolicy.package!.version,
     });
     const deleteSecretsPromise = secretsToDelete?.length
-      ? deleteSecrets({
-          esClient,
-          soClient,
-          ids: secretsToDelete.reduce((acc: string[], secret) => {
-            if (Array.isArray(secret)) {
-              return [...acc, ...secret.map((s) => s.id)];
-            }
-            return [...acc, secret.id];
-          }, []),
-        })
+      ? deleteSecrets({ esClient, soClient, ids: secretsToDelete.map((s) => s.id) })
       : Promise.resolve();
 
     await Promise.all([bumpPromise, assetRemovePromise, deleteSecretsPromise]);
@@ -1444,16 +1435,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     });
 
     const deleteSecretsPromise = allSecretsToDelete.length
-      ? deleteSecrets({
-          esClient,
-          soClient,
-          ids: allSecretsToDelete.reduce((acc: string[], secret) => {
-            if (Array.isArray(secret)) {
-              return [...acc, ...secret.map((s) => s.id)];
-            }
-            return [...acc, secret.id];
-          }, []),
-        })
+      ? deleteSecrets({ esClient, soClient, ids: allSecretsToDelete.map((s) => s.id) })
       : Promise.resolve();
 
     await Promise.all([
@@ -1616,14 +1598,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             policy_ids: packagePolicy.policy_ids,
           });
           if (packagePolicy?.secret_references?.length) {
-            secretsToDelete.push(
-              ...packagePolicy.secret_references.reduce((acc: string[], secret) => {
-                if (Array.isArray(secret)) {
-                  return [...acc, ...secret.map((s) => s.id)];
-                }
-                return [...acc, secret.id];
-              }, [])
-            );
+            secretsToDelete.push(...packagePolicy.secret_references.map((s) => s.id));
           }
         } else if (!success && error) {
           result.push({
