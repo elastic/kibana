@@ -52,4 +52,91 @@ describe('console parser', () => {
     expect(startOffset).toBe(0);
     expect(endOffset).toBe(52);
   });
+
+  it('parses requests with an error', () => {
+    const input =
+      'GET _search\n' +
+      '{ERROR\n' +
+      '  "query": {\n' +
+      '    "match_all": {}\n' +
+      '  }\n' +
+      '}\n\n' +
+      'POST _test_index';
+    const { requests, errors } = parser(input) as ConsoleParserResult;
+    expect(requests.length).toBe(2);
+    expect(requests[0].startOffset).toBe(0);
+    expect(requests[0].endOffset).toBe(57);
+    expect(requests[1].startOffset).toBe(59);
+    expect(requests[1].endOffset).toBe(75);
+    expect(errors.length).toBe(1);
+    expect(errors[0].offset).toBe(14);
+    expect(errors[0].text).toBe('Bad string');
+  });
+
+  it('parses requests with an error and a comment before the next request', () => {
+    const input =
+      'GET _search\n' +
+      '{ERROR\n' +
+      '  "query": {\n' +
+      '    "match_all": {}\n' +
+      '  }\n' +
+      '}\n\n' +
+      '# This is a comment\n' +
+      'POST _test_index\n' +
+      '// Another comment\n';
+    const { requests, errors } = parser(input) as ConsoleParserResult;
+    expect(requests.length).toBe(2);
+    expect(requests[0].startOffset).toBe(0);
+    expect(requests[0].endOffset).toBe(57);
+    expect(requests[1].startOffset).toBe(79); // The next request should start after the comment
+    expect(requests[1].endOffset).toBe(95);
+    expect(errors.length).toBe(1);
+    expect(errors[0].offset).toBe(14);
+    expect(errors[0].text).toBe('Bad string');
+  });
+
+  describe('case insensitive methods', () => {
+    const expectedRequests = [
+      {
+        startOffset: 0,
+        endOffset: 11,
+      },
+      {
+        startOffset: 12,
+        endOffset: 24,
+      },
+      {
+        startOffset: 25,
+        endOffset: 38,
+      },
+      {
+        startOffset: 39,
+        endOffset: 50,
+      },
+      {
+        startOffset: 51,
+        endOffset: 63,
+      },
+    ];
+    it('allows upper case methods', () => {
+      const input = 'GET _search\nPOST _search\nPATCH _search\nPUT _search\nHEAD _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
+
+    it('allows lower case methods', () => {
+      const input = 'get _search\npost _search\npatch _search\nput _search\nhead _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
+
+    it('allows mixed case methods', () => {
+      const input = 'GeT _search\npOSt _search\nPaTch _search\nPut _search\nheAD _search';
+      const { requests, errors } = parser(input) as ConsoleParserResult;
+      expect(errors.length).toBe(0);
+      expect(requests).toEqual(expectedRequests);
+    });
+  });
 });
