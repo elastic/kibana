@@ -85,6 +85,21 @@ export function ObservabilityAlertSearchBar({
     [appName, spaceId]
   );
 
+  const dataViewSpec = useMemo(
+    () => ({
+      id: 'observability-unified-alerts-dv',
+      title: indexNames?.join(',') ?? '',
+    }),
+    [indexNames]
+  );
+
+  const aggregatedFilters = useMemo(() => {
+    const _filters = timeFilter
+      ? [timeFilter, ...filters, ...defaultFilters]
+      : [...filters, ...defaultFilters];
+    return _filters.length ? _filters : undefined;
+  }, [timeFilter, filters, defaultFilters]);
+
   const submitQuery = useCallback(() => {
     try {
       onEsQueryChange(
@@ -184,19 +199,12 @@ export function ObservabilityAlertSearchBar({
       <EuiFlexItem>
         {indexNames && indexNames.length > 0 && (
           <AlertFilterControls
-            dataViewSpec={{
-              id: 'observability-unified-alerts-dv',
-              title: indexNames.join(','),
-            }}
+            dataViewSpec={dataViewSpec}
             spaceId={spaceId}
             chainingSystem="HIERARCHICAL"
             controlsUrlState={controlConfigs}
             setControlsUrlState={onControlConfigsChange}
-            filters={
-              timeFilter
-                ? [timeFilter, ...filters, ...defaultFilters]
-                : [...filters, ...defaultFilters]
-            }
+            filters={aggregatedFilters}
             onFiltersChange={onFilterControlsChange}
             storageKey={filterControlsStorageKey}
             disableLocalStorageSync={disableLocalStorageSync}
