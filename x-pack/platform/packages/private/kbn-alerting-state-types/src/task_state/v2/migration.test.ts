@@ -22,6 +22,7 @@ describe('upMigration', () => {
             flapping: true,
             maintenanceWindowIds: ['id1', 'id2'],
             pendingRecoveredCount: 3,
+            activeCount: 1,
             uuid: 'abc123',
           },
           state: { key: 'value' },
@@ -32,6 +33,7 @@ describe('upMigration', () => {
       summaryActions: {
         action1: { date: '2023-07-31T12:00:00Z' },
       },
+      trackedExecutions: ['111-22-33'],
     };
 
     const expectedOutput = {
@@ -47,6 +49,7 @@ describe('upMigration', () => {
             flapping: true,
             maintenanceWindowIds: ['id1', 'id2'],
             pendingRecoveredCount: 3,
+            activeCount: 1,
             uuid: 'abc123',
           },
           state: { key: 'value' },
@@ -57,7 +60,7 @@ describe('upMigration', () => {
       summaryActions: {
         action1: { date: '2023-07-31T12:00:00Z' },
       },
-      trackedExecutions: undefined,
+      trackedExecutions: ['111-22-33'],
     };
 
     const result = upMigration(inputState);

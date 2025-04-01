@@ -69,6 +69,7 @@ export function migrateMeta(meta: unknown): TypeOf<typeof metaSchema> | undefine
     pendingRecoveredCount: isNumber(meta.pendingRecoveredCount)
       ? meta.pendingRecoveredCount
       : undefined,
+    activeCount: isNumber(meta.activeCount) ? meta.activeCount : undefined,
     uuid: isString(meta.uuid) ? meta.uuid : undefined,
   };
 }
