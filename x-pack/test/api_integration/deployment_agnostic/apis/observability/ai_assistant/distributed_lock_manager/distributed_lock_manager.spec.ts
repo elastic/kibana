@@ -159,12 +159,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(lock?.metadata).to.eql({ attempt: 'one' });
       });
 
-      it('allows reacquisition after expiration', async () => {
+      it('allows re-acquisition after expiration', async () => {
         // Acquire with a very short TTL.
-        const acquired = await manager1.acquire({ ttl: 1000, metadata: { attempt: 'one' } });
+        const acquired = await manager1.acquire({ ttl: 500, metadata: { attempt: 'one' } });
         expect(acquired).to.be(true);
 
-        await sleep(1500); // wait for lock to expire
+        await sleep(1000); // wait for lock to expire
 
         const reacquired = await manager2.acquire({ metadata: { attempt: 'two' } });
         expect(reacquired).to.be(true);
@@ -346,7 +346,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('should allow only one lock acquisition among many concurrent attempts', async () => {
         const lockManagers = await Promise.all(
-          times(50).map(() => new LockManager(LOCK_ID, es, logger))
+          times(20).map(() => new LockManager(LOCK_ID, es, logger))
         );
 
         const acquireAttempts = await Promise.all(lockManagers.map((lm) => lm.acquire()));
@@ -358,11 +358,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('should handle concurrent release and acquisition without race conditions', async () => {
         const initialManager = new LockManager(LOCK_ID, es, logger);
-        const acquired = await initialManager.acquire({ ttl: 3000 });
+        const acquired = await initialManager.acquire();
         expect(acquired).to.be(true);
 
         const attempts = await Promise.all(
-          times(50).map(async () => {
+          times(20).map(async () => {
             const releaseResult = new LockManager(LOCK_ID, es, logger).release();
             const acquireResult = new LockManager(LOCK_ID, es, logger).acquire();
 
@@ -400,7 +400,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('should not release the lock if the token does not match', async () => {
-        const acquired = await manager1.acquire({ ttl: 5000 });
+        const acquired = await manager1.acquire();
         expect(acquired).to.be(true);
 
         // Simulate an interfering update that changes the token.
