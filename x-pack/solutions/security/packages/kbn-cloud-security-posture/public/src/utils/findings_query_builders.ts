@@ -211,3 +211,37 @@ const buildVulnerabilityFindingsQueryWithFilters = (query: UseCspOptions['query'
     },
   };
 };
+
+export const createGetVulnerabilityFindingsQuery = (
+  vulnerabilityId?: string,
+  resourceId?: string,
+  packageName?: string,
+  packageVersion?: string
+) => {
+  return {
+    bool: {
+      filter: [
+        {
+          term: {
+            'vulnerability.id': vulnerabilityId,
+          },
+        },
+        {
+          term: {
+            'resource.id': resourceId,
+          },
+        },
+        {
+          term: {
+            'package.name': packageName,
+          },
+        },
+        {
+          term: {
+            'package.version': packageVersion,
+          },
+        },
+      ],
+    },
+  };
+};
