@@ -78,22 +78,25 @@ export function injectReferencesIntoParams<
   }
 }
 
-export function injectReferencesIntoArtifacts(ruleId: string, artifacts: RawRule['artifacts'],
-  references: SavedObjectReference[]) {
-    if (!artifacts) {
-      return { dashboards: [] };
-    }
-    return {
-      ...artifacts,
-      dashboards: artifacts.dashboards?.map((dashboard) => {  
-        const reference = references.find((ref) => ref.name === dashboard.refId);
-        if (!reference) {
-          throw new Error(`Artifact reference "${dashboard.refId}" not found in rule id: ${ruleId}`);
-        }
-        return {
-          ...omit(dashboard, 'refId'),
-          id: reference.id,
-        };
-      })
-    };
+export function injectReferencesIntoArtifacts(
+  ruleId: string,
+  artifacts: RawRule['artifacts'],
+  references: SavedObjectReference[]
+) {
+  if (!artifacts) {
+    return { dashboards: [] };
   }
+  return {
+    ...artifacts,
+    dashboards: artifacts.dashboards?.map((dashboard) => {
+      const reference = references.find((ref) => ref.name === dashboard.refId);
+      if (!reference) {
+        throw new Error(`Artifact reference "${dashboard.refId}" not found in rule id: ${ruleId}`);
+      }
+      return {
+        ...omit(dashboard, 'refId'),
+        id: reference.id,
+      };
+    }),
+  };
+}

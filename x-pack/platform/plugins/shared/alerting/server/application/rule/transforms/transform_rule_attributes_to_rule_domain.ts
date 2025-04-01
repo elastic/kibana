@@ -12,7 +12,10 @@ import { getRuleSnoozeEndTime } from '../../../lib';
 import type { RuleDomain, Monitoring, RuleParams } from '../types';
 import type { PartialRule, RawRule, RawRuleExecutionStatus, SanitizedRule } from '../../../types';
 import type { UntypedNormalizedRuleType } from '../../../rule_type_registry';
-import { injectReferencesIntoParams, injectReferencesIntoArtifacts } from '../../../rules_client/common';
+import {
+  injectReferencesIntoParams,
+  injectReferencesIntoArtifacts,
+} from '../../../rules_client/common';
 import { getActiveScheduledSnoozes } from '../../../lib/is_rule_snoozed';
 import {
   transformRawActionsToDomainActions,
@@ -169,7 +172,11 @@ export const transformRuleAttributesToRuleDomain = <Params extends RuleParams = 
       omitGeneratedValues,
     });
 
-  const artifactsWithInjectedRefs = injectReferencesIntoArtifacts(id, esRule.artifacts, references || []);
+  const artifactsWithInjectedRefs = injectReferencesIntoArtifacts(
+    id,
+    esRule.artifacts,
+    references || []
+  );
   const params = injectReferencesIntoParams<Params, RuleParams>(
     id,
     ruleType,

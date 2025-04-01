@@ -103,6 +103,6 @@ export const transformCreateBody = <Params extends RuleParams = never>({
     ...(createBody.flapping !== undefined
       ? { flapping: transformCreateBodyFlapping(createBody.flapping) }
       : {}),
-    artifacts: createBody.artifacts,
+    ...(createBody.artifacts ? { artifacts: createBody.artifacts } : {}),
   };
 };
