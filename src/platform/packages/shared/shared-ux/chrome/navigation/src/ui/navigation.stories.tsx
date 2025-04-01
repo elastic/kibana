@@ -243,6 +243,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                       title: 'Item-Labs',
                       href: '/app/kibana',
                       withBadge: true,
+                      isElasticInternalLink: false,
                       badgeOptions: {
                         icon: 'bell',
                         tooltip: 'This is a tooltip',

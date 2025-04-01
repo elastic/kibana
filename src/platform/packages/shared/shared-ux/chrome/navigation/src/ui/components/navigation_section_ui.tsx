@@ -388,6 +388,7 @@ function nodeToEuiCollapsibleNavProps(
     deps
   );
   const { id, path, href, renderAs, isCollapsible, spaceBefore, isElasticInternalLink } = navNode;
+  const isExternalLink = isElasticInternalLink === false;
 
   if (navNode.renderItem) {
     // Leave the rendering to the consumer
@@ -431,7 +432,7 @@ function nodeToEuiCollapsibleNavProps(
       // accordion is rendered.
       ...(subItems
         ? { items: subItems, isCollapsible }
-        : { href, ...linkProps, external: !isElasticInternalLink }),
+        : { href, ...linkProps, external: isExternalLink }),
     },
   ];
 

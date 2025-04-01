@@ -27,6 +27,7 @@ export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab, isElasticInternalLink, renderItem } = item;
 
+  const isExternalLink = isElasticInternalLink === false;
   const href = deepLink?.url ?? item.href;
   const { euiTheme } = useEuiTheme();
 
@@ -64,7 +65,7 @@ export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
       href={href}
       iconType={icon}
       onClick={onClick}
-      external={isElasticInternalLink === false}
+      external={isExternalLink}
       target={openInNewTab ? '_blank' : undefined}
     />
   );
