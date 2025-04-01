@@ -21,7 +21,7 @@ import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strate
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -74,7 +74,7 @@ export const useAddBulkToTimelineAction = ({
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataView: experimentalDataView } = useDataView(scopeId);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(scopeId);
   const experimentalBrowserFields = useBrowserFields(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 

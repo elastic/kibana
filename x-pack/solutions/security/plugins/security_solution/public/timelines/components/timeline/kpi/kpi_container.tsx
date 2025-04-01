@@ -29,7 +29,7 @@ import {
   startSelector,
 } from '../../../../common/components/super_date_picker/selectors';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 
 interface KpiExpandedProps {
   timelineId: string;
@@ -38,7 +38,7 @@ interface KpiExpandedProps {
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const { newDataViewPickerEnabled } = useEnableExperimental();
   const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
   let { browserFields, sourcererDataView, selectedPatterns } = useSourcererDataView(

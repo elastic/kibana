@@ -22,7 +22,7 @@ import { useEnableExperimental } from '../../../../common/hooks/use_experimental
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { NewTimelineButton } from '../actions/new_timeline_button';
 import { OpenTimelineButton } from '../actions/open_timeline_button';
 import { APP_ID } from '../../../../../common';
@@ -81,7 +81,9 @@ export const TimelineModalHeader = React.memo<FlyoutHeaderPanelProps>(
       SourcererScopeName.timeline
     );
 
-    const { dataView: experimentalDataView } = useDataView(DataViewManagerScopeName.timeline);
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(
+      DataViewManagerScopeName.timeline
+    );
     const experimentalBrowserFields = useBrowserFields(DataViewManagerScopeName.timeline);
 
     const browserFields = useMemo(() => {

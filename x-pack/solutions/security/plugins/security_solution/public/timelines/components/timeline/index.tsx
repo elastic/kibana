@@ -32,7 +32,7 @@ import { useResolveConflict } from '../../../common/hooks/use_resolve_conflict';
 import { sourcererSelectors } from '../../../common/store';
 import { defaultUdtHeaders } from './body/column_headers/default_headers';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
-import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 import { TimelineContext } from './context';
 
 const TimelineBody = styled.div`
@@ -106,10 +106,10 @@ const StatefulTimelineComponent: React.FC<Props> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-  const experimentalDataView = useDataView(SourcererScopeName.timeline);
+  const experimentalDataView = useDataViewSpec(SourcererScopeName.timeline);
 
   const selectedDataViewId = newDataViewPickerEnabled
-    ? experimentalDataView.dataView?.id ?? ''
+    ? experimentalDataView.dataViewSpec?.id ?? ''
     : selectedDataViewIdSourcerer;
 
   const selectedPatterns = newDataViewPickerEnabled

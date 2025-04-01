@@ -8,22 +8,22 @@
 import { useMemo } from 'react';
 import type { BrowserFields } from '@kbn/timelines-plugin/common';
 import { type DataViewManagerScopeName } from '../constants';
-import { useDataView } from './use_data_view';
+import { useDataViewSpec } from './use_data_view_spec';
 import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 
 export const useBrowserFields = (scope: DataViewManagerScopeName): BrowserFields => {
-  const { dataView } = useDataView(scope);
+  const { dataViewSpec } = useDataViewSpec(scope);
 
   return useMemo(() => {
-    if (!dataView) {
+    if (!dataViewSpec) {
       return {};
     }
 
     const { browserFields } = getDataViewStateFromIndexFields(
-      dataView?.title ?? '',
-      dataView.fields
+      dataViewSpec?.title ?? '',
+      dataViewSpec.fields
     );
 
     return browserFields;
-  }, [dataView]);
+  }, [dataViewSpec]);
 };

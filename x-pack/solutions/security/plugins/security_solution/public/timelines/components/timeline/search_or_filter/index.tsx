@@ -18,7 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -77,7 +77,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
 
     let { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
 
-    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
+    const { dataViewSpec: experimentalDataView } = useDataViewSpec(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
     if (newDataViewPickerEnabled) {
