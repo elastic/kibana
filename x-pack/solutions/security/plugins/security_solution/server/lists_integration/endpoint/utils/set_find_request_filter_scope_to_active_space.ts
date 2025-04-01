@@ -31,7 +31,8 @@ export const setFindRequestFilterScopeToActiveSpace = async (
 
     logger.debug(() => `Find options prior to adjusting filter:\n${stringify(findOptions)}`);
 
-    const spaceVisibleDataFilter = await buildSpaceDataFilter(endpointServices, httpRequest);
+    const spaceVisibleDataFilter = (await buildSpaceDataFilter(endpointServices, httpRequest))
+      .filter;
 
     if (isSingleListFindOptions(findOptions)) {
       findOptions.filter = `${spaceVisibleDataFilter}${
