@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import _ from 'lodash';
 import {
   DataGridDensity,
@@ -246,9 +246,7 @@ export const CloudSecurityDataTable = ({
     return customCellRenderer(rows);
   }, [customCellRenderer, rows]);
 
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
-  const { onExpandDocClick } = useExpandableFlyoutCsp(setExpandedDoc);
+  const { expandedDoc, onExpandDocClick } = useExpandableFlyoutCsp();
 
   if (!onExpandDocClick) {
     return <></>;

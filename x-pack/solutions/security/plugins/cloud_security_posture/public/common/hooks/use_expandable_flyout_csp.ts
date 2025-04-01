@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { useContext, useCallback } from 'react';
+import { useContext, useCallback, useState } from 'react';
 import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { SecuritySolutionContext } from '../../application/security_solution_context';
 
-export const useExpandableFlyoutCsp = (onChange: (data: DataTableRecord | undefined) => void) => {
+export const useExpandableFlyoutCsp = () => {
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const securitySolutionContext = useContext(SecuritySolutionContext);
 
   const setFlyoutCloseCallback = useCallback(
-    (setExpandedDoc: any) => {
+    (onChange: any) => {
       // Check if the context and required methods exist
       if (securitySolutionContext && securitySolutionContext.useOnExpandableFlyoutClose) {
         securitySolutionContext.useOnExpandableFlyoutClose({
-          callback: () => setExpandedDoc(undefined),
+          callback: () => onChange(undefined),
         });
       }
     },
@@ -30,12 +31,12 @@ export const useExpandableFlyoutCsp = (onChange: (data: DataTableRecord | undefi
 
   const { openFlyout, closeFlyout } = securitySolutionContext.useExpandableFlyoutApi();
 
-  setFlyoutCloseCallback(onChange);
+  setFlyoutCloseCallback(setExpandedDoc);
 
   const onExpandDocClick = (record?: DataTableRecord | undefined) => {
     if (record) {
       const finding = record?.raw?._source as unknown as CspFinding;
-      onChange(record);
+      setExpandedDoc(record);
       openFlyout({
         right: {
           id: 'findings-misconfiguration-panel',
@@ -47,9 +48,9 @@ export const useExpandableFlyoutCsp = (onChange: (data: DataTableRecord | undefi
       });
     } else {
       closeFlyout();
-      onChange(undefined);
+      setExpandedDoc(undefined);
     }
   };
 
-  return { onExpandDocClick };
+  return { expandedDoc, setExpandedDoc, onExpandDocClick };
 };
