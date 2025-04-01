@@ -15,15 +15,13 @@ import { MetricVis, MetricVisComponentProps } from './metric_vis';
 import { MetricWTrend } from '@elastic/charts';
 import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
-import type { CoreSetup } from '@kbn/core/public';
 import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
 import { MetricVisParam } from '../../common';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import { PaletteOutput } from '@kbn/coloring';
 import { faker } from '@faker-js/faker';
-import { of } from 'rxjs';
 import { setupChartMocks, cleanChartMocks } from './chart_testing_utilities';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 const mockDeserialize = jest.fn(({ id }: { id: string }) => {
   const convertFn = (v: unknown) => `${id}-${v === null ? NaN : v}`;
@@ -218,13 +216,7 @@ function getDefaultProps() {
     renderComplete: jest.fn(),
     fireEvent: jest.fn(),
     filterable: true,
-    theme: {
-      theme$: of({
-        darkMode: false,
-        name: 'amsterdam',
-      }),
-    } as CoreSetup['theme'],
-  } as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable' | 'theme'>;
+  } as Pick<MetricVisComponentProps, 'renderComplete' | 'fireEvent' | 'filterable'>;
 }
 
 type RenderChartPropsType = Partial<Omit<MetricVisComponentProps, 'config'>> &
