@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 
+import { ALERT_START } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
@@ -689,6 +690,90 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result.rawResponse.hits.total).to.eql(9);
 
         validateRuleTypeIds(result, apmRuleTypeIds);
+      });
+    });
+
+    describe('observability', () => {
+      const apmRuleTypeIds = ['apm.transaction_error_rate', 'apm.error_rate'];
+
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+      });
+
+      it('should omit alerts when score is less than min score', async () => {
+        const query = {
+          bool: {
+            filter: [],
+            should: [
+              {
+                function_score: {
+                  functions: [
+                    {
+                      exp: {
+                        [ALERT_START]: {
+                          origin: '2021-10-19T14:58:08.539Z',
+                          scale: '10m',
+                          offset: '10m',
+                          decay: 0.5,
+                        },
+                      },
+                      weight: 10,
+                    },
+                  ],
+                  boost_mode: 'sum',
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+          },
+        };
+        const resultWithoutMinScore = await secureSearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        expect(resultWithoutMinScore.rawResponse.hits.total).to.eql(9);
+
+        validateRuleTypeIds(resultWithoutMinScore, apmRuleTypeIds);
+
+        const resultWithMinScore = await secureSearch.send<RuleRegistrySearchResponse>({
+          supertestWithoutAuth,
+          auth: {
+            username: obsOnlySpacesAll.username,
+            password: obsOnlySpacesAll.password,
+          },
+          referer: 'test',
+          kibanaVersion,
+          internalOrigin: 'Kibana',
+          options: {
+            ruleTypeIds: apmRuleTypeIds,
+            query,
+            minScore: 11,
+          },
+          strategy: 'privateRuleRegistryAlertsSearchStrategy',
+          space: 'default',
+        });
+
+        expect(resultWithMinScore.rawResponse.hits.total).to.eql(8);
+
+        validateRuleTypeIds(resultWithMinScore, apmRuleTypeIds);
       });
     });
 
