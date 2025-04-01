@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { ConfigurationTabs } from './constants';
-
+import * as i18n from './translations';
 import type { LinkItem } from '..';
 import { CONFIGURATIONS_PATH, SECURITY_FEATURE_ID, SecurityPageName } from '../../common/constants';
 import { CONFIGURATIONS } from '../app/translations';
@@ -15,11 +14,7 @@ import { CONFIGURATIONS } from '../app/translations';
 export const configurationsLinks: LinkItem = {
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.configurations`]],
   globalNavPosition: 3,
-  globalSearchKeywords: [
-    i18n.translate('xpack.securitySolution.appLinks.configurations', {
-      defaultMessage: 'Configurations',
-    }),
-  ],
+  globalSearchKeywords: [i18n.CONFIGURATIONS],
   hideTimeline: true,
   id: SecurityPageName.configurations,
   path: CONFIGURATIONS_PATH,
@@ -27,27 +22,22 @@ export const configurationsLinks: LinkItem = {
   links: [
     {
       id: SecurityPageName.configurationsIntegrations,
-      title: i18n.translate('xpack.securitySolution.appLinks.integrations', {
-        defaultMessage: 'Integrations',
-      }),
+      title: i18n.INTEGRATIONS,
       path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.integrations}`,
       skipUrlState: true,
       hideTimeline: true,
     },
     {
       id: SecurityPageName.configurationsBasicRules,
-      title: i18n.translate('xpack.securitySolution.appLinks.basicRules', {
-        defaultMessage: 'Rules',
-      }),
+      title: i18n.BASIC_RULES,
+
       path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.basicRules}`,
       skipUrlState: true,
       hideTimeline: true,
     },
     {
       id: SecurityPageName.configurationsAiSettings,
-      title: i18n.translate('xpack.securitySolution.appLinks.aiSettings', {
-        defaultMessage: 'AI settings',
-      }),
+      title: i18n.AI_SETTINGS,
       path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.aiSettings}`,
       skipUrlState: true,
       hideTimeline: true,

@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const CONFIGURATIONS = i18n.translate('xpack.securitySolution.appLinks.configurations', {
+  defaultMessage: 'Configurations',
+});
+
 export const BASIC_RULES = i18n.translate(
   'xpack.securitySolution.configurations.tabs.basic_rules',
   {
@@ -19,6 +23,7 @@ export const AI_SETTINGS = i18n.translate(
     defaultMessage: 'AI settings',
   }
 );
+
 export const INTEGRATIONS = i18n.translate(
   'xpack.securitySolution.configurations.tabs.integrations',
   {
