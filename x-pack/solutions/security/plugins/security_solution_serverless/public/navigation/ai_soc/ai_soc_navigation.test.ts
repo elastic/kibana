@@ -6,7 +6,7 @@
  */
 
 import { applyAiSocNavigation, aiGroup } from './ai_soc_navigation';
-import { alertSummaryLink } from './links';
+import { alertSummaryLink, configurationsLink } from './links';
 import { ProductLine, ProductTier } from '../../../common/product';
 import * as utils from './utils'; // We'll spy on the named export from here
 import type { WritableDraft } from 'immer/dist/internal';
@@ -129,7 +129,11 @@ describe('applyAiSocNavigation', () => {
         GroupDefinition<AppDeepLinkId, string, string>
       >;
       const originalChildren = securityGroup.children;
-      const expectedChildrenForFiltering = [...originalChildren, alertSummaryLink];
+      const expectedChildrenForFiltering = [
+        ...originalChildren,
+        alertSummaryLink,
+        configurationsLink,
+      ];
 
       expect(filterSpy).toHaveBeenCalledWith(expectedChildrenForFiltering, expect.any(Array));
     });
