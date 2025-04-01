@@ -104,18 +104,6 @@ describe('Testing pipeline templates', () => {
         },
       },
       {
-        script: {
-          description: 'Ensures the date processor does not receive an array value.',
-          tag: 'script_convert_array_to_string',
-          lang: 'painless',
-          source:
-            'if (ctx.xdfsfs?.ds?.identity?.expires != null &&\n' +
-            '    ctx.xdfsfs.ds.identity.expires instanceof ArrayList){\n' +
-            '    ctx.xdfsfs.ds.identity.expires = ctx.xdfsfs.ds.identity.expires[0];\n' +
-            '}\n',
-        },
-      },
-      {
         date: {
           field: 'xdfsfs.ds.identity.expires',
           target_field: 'user.changes.name',
@@ -131,18 +119,6 @@ describe('Testing pipeline templates', () => {
           ignore_missing: true,
           ignore_failure: true,
           type: 'ip',
-        },
-      },
-      {
-        script: {
-          description: 'Ensures the date processor does not receive an array value.',
-          tag: 'script_convert_array_to_string',
-          lang: 'painless',
-          source:
-            'if (ctx.xdfsfs?.ds?.identity?.prev_identity_expires != null &&\n' +
-            '    ctx.xdfsfs.ds.identity.prev_identity_expires instanceof ArrayList){\n' +
-            '    ctx.xdfsfs.ds.identity.prev_identity_expires = ctx.xdfsfs.ds.identity.prev_identity_expires[0];\n' +
-            '}\n',
         },
       },
       {
