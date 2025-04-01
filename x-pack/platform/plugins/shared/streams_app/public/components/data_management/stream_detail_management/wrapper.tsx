@@ -31,7 +31,7 @@ export function Wrapper({
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="l"
+      gutterSize="m"
       className={css`
         max-width: 100%;
       `}

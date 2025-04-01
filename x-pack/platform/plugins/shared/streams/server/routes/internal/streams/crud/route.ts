@@ -8,7 +8,45 @@
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { StreamDefinition, isGroupStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { estypes } from '@elastic/elasticsearch';
+import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { createServerRoute } from '../../../create_server_route';
+import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
+
+export interface ListStreamDetail {
+  stream: StreamDefinition;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
+  data_stream: estypes.IndicesDataStream;
+}
+
+export const listStreamsRoute = createServerRoute({
+  endpoint: 'GET /internal/streams',
+  options: {
+    access: 'internal',
+  },
+  params: z.object({}),
+  handler: async ({ request, getScopedClients }): Promise<{ streams: ListStreamDetail[] }> => {
+    const { streamsClient, scopedClusterClient } = await getScopedClients({ request });
+    const streams = await streamsClient.listStreams();
+    const dataStreams = await scopedClusterClient.asCurrentUser.indices.getDataStream({
+      name: streams.map((stream) => stream.name),
+    });
+
+    const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, stream) => {
+      const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
+      if (match) {
+        acc.push({
+          stream,
+          effective_lifecycle: getDataStreamLifecycle(match),
+          data_stream: match,
+        });
+      }
+      return acc;
+    }, []);
+
+    return { streams: enrichedStreams };
+  },
+});
 
 export interface StreamDetailsResponse {
   details: {
@@ -104,6 +142,7 @@ export const resolveIndexRoute = createServerRoute({
 });
 
 export const internalCrudRoutes = {
+  ...listStreamsRoute,
   ...streamDetailRoute,
   ...resolveIndexRoute,
 };

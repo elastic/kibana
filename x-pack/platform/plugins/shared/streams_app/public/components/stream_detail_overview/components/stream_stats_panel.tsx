@@ -120,7 +120,7 @@ export function StreamStatsPanel({
   });
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="s">
+    <EuiFlexGroup direction="row" gutterSize="m">
       <EuiFlexItem grow={3}>
         <EuiPanel hasShadow={false} hasBorder>
           <EuiFlexGroup direction="column" gutterSize="xs">
