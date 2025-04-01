@@ -19,7 +19,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AnomalyValueDisplay } from '../../../anomalies_table/anomaly_value_display';
 
 export function DetectorDescriptionList({ job, detector, anomaly }) {
-  console.log('detector description list');
   const listItems = [
     {
       title: (
