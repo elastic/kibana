@@ -12,6 +12,7 @@ import {
   UpdateSLOInput,
   SLODefinitionResponse,
 } from '@kbn/slo-schema';
+import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
 interface SavedObject<Attributes extends Record<string, any>> {
@@ -117,9 +118,9 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
       return body;
     },
 
-    async getSavedObject(roleAuthc: RoleCredentials, id: string): Promise<SavedObjectResponse> {
+    async getSavedObject(roleAuthc: RoleCredentials, sloId: string): Promise<SavedObjectResponse> {
       const { body } = await supertestWithoutAuth
-        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:*`)
+        .get(`/api/saved_objects/_find?type=slo&filter=slo.attributes.id:(${sloId})`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send()
@@ -130,7 +131,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
 
     async updateSavedObject(
       roleAuthc: RoleCredentials,
-      slo: (UpdateSLOInput & { version: number }) | SavedObject<SLODefinitionResponse>,
+      slo: StoredSLODefinition,
       id: string
     ): Promise<SavedObjectResponse> {
       const { body } = await supertestWithoutAuth

@@ -27,145 +27,81 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminRoleAuthc: RoleCredentials;
   let internalHeaders: InternalRequestHeader;
 
-  describe('Find SLOs', function () {
-    describe('Find SLOs using kql query', function () {
-      before(async () => {
-        adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-        internalHeaders = samlAuth.getInternalRequestHeader();
+  describe('Find SLOs using kql query', function () {
+    before(async () => {
+      adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+      internalHeaders = samlAuth.getInternalRequestHeader();
 
-        await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
+      await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 
-        await dataViewApi.create({
-          roleAuthc: adminRoleAuthc,
-          name: DATA_VIEW,
-          id: DATA_VIEW_ID,
-          title: DATA_VIEW,
-        });
-
-        await sloApi.deleteAllSLOs(adminRoleAuthc);
+      await dataViewApi.create({
+        roleAuthc: adminRoleAuthc,
+        name: DATA_VIEW,
+        id: DATA_VIEW_ID,
+        title: DATA_VIEW,
       });
 
-      after(async () => {
-        await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
-        await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
-        await sloApi.deleteAllSLOs(adminRoleAuthc);
-        await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
-      });
-
-      it('searches SLOs using kqlQuery', async () => {
-        const createResponse1 = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
-        const createResponse2 = await sloApi.create(
-          Object.assign({}, DEFAULT_SLO, { name: 'something irrelevant foo' }),
-          adminRoleAuthc
-        );
-
-        const sloId1 = createResponse1.id;
-        const sloId2 = createResponse2.id;
-
-        // search SLOs
-        await retry.tryForTime(180 * 1000, async () => {
-          let response = await supertestWithoutAuth
-            .get(`/api/observability/slos`)
-            .query({ page: 1, perPage: 333 })
-            .set(adminRoleAuthc.apiKeyHeader)
-            .set(internalHeaders)
-            .send();
-
-          expect(response.body.results).length(2);
-          expect(response.body.page).eql(1);
-          expect(response.body.perPage).eql(333);
-          expect(response.body.total).eql(2);
-
-          response = await supertestWithoutAuth
-            .get(`/api/observability/slos`)
-            .query({ size: 222, kqlQuery: 'slo.name:irrelevant' })
-            .set(adminRoleAuthc.apiKeyHeader)
-            .set(internalHeaders)
-            .send()
-            .expect(200);
-
-          expect(response.body.page).eql(1); // always return page with default value
-          expect(response.body.perPage).eql(25); // always return perPage with default value
-          expect(response.body.size).eql(222);
-          expect(response.body.searchAfter).ok();
-          expect(response.body.results).length(1);
-          expect(response.body.results[0].id).eql(sloId2);
-
-          response = await supertestWithoutAuth
-            .get(`/api/observability/slos`)
-            .query({ kqlQuery: 'slo.name:integration' })
-            .set(adminRoleAuthc.apiKeyHeader)
-            .set(internalHeaders)
-            .send()
-            .expect(200);
-
-          expect(response.body.results).length(1);
-          expect(response.body.results[0].id).eql(sloId1);
-
-          return true;
-        });
-      });
+      await sloApi.deleteAllSLOs(adminRoleAuthc);
     });
 
-    describe('Find outdated SLOs', function () {
-      before(async () => {
-        adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-        internalHeaders = samlAuth.getInternalRequestHeader();
+    after(async () => {
+      await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
+      await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
+      await sloApi.deleteAllSLOs(adminRoleAuthc);
+      await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
+    });
 
-        await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
+    it('searches SLOs using kqlQuery', async () => {
+      const createResponse1 = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      const createResponse2 = await sloApi.create(
+        Object.assign({}, DEFAULT_SLO, { name: 'something irrelevant foo' }),
+        adminRoleAuthc
+      );
 
-        await dataViewApi.create({
-          roleAuthc: adminRoleAuthc,
-          name: DATA_VIEW,
-          id: DATA_VIEW_ID,
-          title: DATA_VIEW,
-        });
+      const sloId1 = createResponse1.id;
+      const sloId2 = createResponse2.id;
 
-        await sloApi.deleteAllSLOs(adminRoleAuthc);
-      });
+      // search SLOs
+      await retry.tryForTime(180 * 1000, async () => {
+        let response = await supertestWithoutAuth
+          .get(`/api/observability/slos`)
+          .query({ page: 1, perPage: 333 })
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .send();
 
-      after(async () => {
-        await dataViewApi.delete({ roleAuthc: adminRoleAuthc, id: DATA_VIEW_ID });
-        await cleanup({ client: esClient, config: DATA_FORGE_CONFIG, logger });
-        await sloApi.deleteAllSLOs(adminRoleAuthc);
-        await samlAuth.invalidateM2mApiKeyWithRoleScope(adminRoleAuthc);
-      });
+        expect(response.body.results).length(2);
+        expect(response.body.page).eql(1);
+        expect(response.body.perPage).eql(333);
+        expect(response.body.total).eql(2);
 
-      it('finds outdated SLOs', async () => {
-        const outdatedSLO = {
-          ...DEFAULT_SLO,
-          name: 'outdated slo',
-        };
-        const recentSLO = {
-          ...DEFAULT_SLO,
-          name: 'recent slo',
-        };
-        const outdatedResponse = await sloApi.create(outdatedSLO, adminRoleAuthc);
-        const recentResponse = await sloApi.create(recentSLO, adminRoleAuthc);
-        const { id: outdatedSloId } = outdatedResponse;
-        const SOResponse = await sloApi.getSavedObject(adminRoleAuthc, outdatedSloId);
-        const savedObject = SOResponse.saved_objects[0];
-        const savedSlo = savedObject.attributes;
-        savedSlo.version = 1;
-        savedObject.attributes = savedSlo;
+        response = await supertestWithoutAuth
+          .get(`/api/observability/slos`)
+          .query({ size: 222, kqlQuery: 'slo.name:irrelevant' })
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .send()
+          .expect(200);
 
-        await sloApi.updateSavedObject(adminRoleAuthc, savedSlo, savedObject.id);
+        expect(response.body.page).eql(1); // always return page with default value
+        expect(response.body.perPage).eql(25); // always return perPage with default value
+        expect(response.body.size).eql(222);
+        expect(response.body.searchAfter).ok();
+        expect(response.body.results).length(1);
+        expect(response.body.results[0].id).eql(sloId2);
 
-        const allDefinitions = await sloApi.findDefinitions(adminRoleAuthc, {
-          includeOutdatedOnly: 'false',
-        });
-        expect(allDefinitions.results.find((slo) => slo.id === recentResponse.id)?.id).to.be(
-          recentResponse.id
-        );
+        response = await supertestWithoutAuth
+          .get(`/api/observability/slos`)
+          .query({ kqlQuery: 'slo.name:integration' })
+          .set(adminRoleAuthc.apiKeyHeader)
+          .set(internalHeaders)
+          .send()
+          .expect(200);
 
-        const definitions = await sloApi.findDefinitions(adminRoleAuthc, {
-          includeOutdatedOnly: 'true',
-        });
+        expect(response.body.results).length(1);
+        expect(response.body.results[0].id).eql(sloId1);
 
-        expect(definitions.results.find((slo) => slo.id === recentResponse.id)).to.be(undefined);
-        expect(definitions.results.find((slo) => slo.id === outdatedResponse.id)?.id).to.be(
-          outdatedSloId
-        );
+        return true;
       });
     });
   });
