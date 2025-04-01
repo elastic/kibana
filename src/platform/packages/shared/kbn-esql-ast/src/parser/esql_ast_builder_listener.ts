@@ -68,6 +68,7 @@ import {
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
+  private inFork: boolean = false;
 
   constructor(public src: string) {}
 
@@ -104,6 +105,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitWhereCommand(ctx: WhereCommandContext) {
+    if (this.inFork) {
+      return;
+    }
+
     const command = createWhereCommand(ctx);
 
     this.ast.push(command);
@@ -198,6 +203,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitLimitCommand(ctx: LimitCommandContext) {
+    if (this.inFork) {
+      return;
+    }
+
     const command = createLimitCommand(ctx);
 
     this.ast.push(command);
@@ -208,6 +217,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitSortCommand(ctx: SortCommandContext) {
+    if (this.inFork) {
+      return;
+    }
+
     const command = createSortCommand(ctx);
 
     this.ast.push(command);
@@ -309,10 +322,16 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     this.ast.push(command);
   }
 
+  enterForkCommand() {
+    this.inFork = true;
+  }
+
   exitForkCommand(ctx: ForkCommandContext): void {
     const command = createForkCommand(ctx);
 
     this.ast.push(command);
+
+    this.inFork = false;
   }
 
   /**

@@ -10,6 +10,7 @@
 import {
   CompositeForkSubQueryContext,
   ForkCommandContext,
+  ForkSubQueryCommandContext,
   ForkSubQueryProcessingCommandContext,
   SingleForkSubQueryCommandContext,
 } from '../../antlr/esql_parser';
@@ -28,19 +29,39 @@ export const createForkCommand = (ctx: ForkCommandContext): ESQLCommand<'fork'> 
     .map((subQueryCtx) => subQueryCtx.forkSubQueryCommand());
 
   for (const subCtx of subCommandContexts) {
-    if (subCtx instanceof SingleForkSubQueryCommandContext) {
-      command.args.push(
-        visitForkSubQueryProcessingCommandContext(subCtx.forkSubQueryProcessingCommand())
-      );
-    }
-
-    if (subCtx instanceof CompositeForkSubQueryContext) {
-      // const commandCtx = subCtx.forkSubQueryCommand();
-    }
+    const commands = visitForkSubQueryContext(subCtx);
+    command.args.push(commands);
   }
 
   return command;
 };
+
+function visitForkSubQueryContext(ctx: ForkSubQueryCommandContext) {
+  const commands = [];
+
+  let nextCtx: ForkSubQueryCommandContext = ctx;
+  while (nextCtx instanceof CompositeForkSubQueryContext) {
+    const command = visitForkSubQueryProcessingCommandContext(
+      nextCtx.forkSubQueryProcessingCommand()
+    );
+    if (command) {
+      commands.unshift(command);
+    }
+
+    nextCtx = nextCtx.forkSubQueryCommand();
+  }
+
+  if (nextCtx instanceof SingleForkSubQueryCommandContext) {
+    const command = visitForkSubQueryProcessingCommandContext(
+      nextCtx.forkSubQueryProcessingCommand()
+    );
+    if (command) {
+      commands.unshift(command);
+    }
+  }
+
+  return commands;
+}
 
 function visitForkSubQueryProcessingCommandContext(ctx: ForkSubQueryProcessingCommandContext) {
   const whereCtx = ctx.whereCommand();

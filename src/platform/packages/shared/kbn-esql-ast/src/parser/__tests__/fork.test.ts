@@ -11,15 +11,34 @@ import { parse } from '..';
 
 describe('FORK', () => {
   describe('correctly formatted', () => {
-    it('can parse basic FORK query', () => {
+    it('can parse single-command FORK query', () => {
       const text = `FROM kibana_ecommerce_data
 | FORK
     (WHERE bytes > 1)
     (SORT bytes ASC)
     (LIMIT 100)`;
-      const { ast, errors } = parse(text);
+      const { ast } = parse(text);
 
       expect(ast[1].args).toHaveLength(3);
+      expect(ast[1].args).toMatchObject([
+        [{ name: 'where' }],
+        [{ name: 'sort' }],
+        [{ name: 'limit' }],
+      ]);
+    });
+
+    it('can parse composite-command FORK query', () => {
+      const text = `FROM kibana_ecommerce_data
+| FORK
+    (WHERE bytes > 1 | SORT bytes ASC | LIMIT 1)
+    (WHERE extension.keyword == "txt" | LIMIT 100)`;
+      const { ast } = parse(text);
+
+      expect(ast[1].args).toHaveLength(2);
+      expect(ast[1].args).toMatchObject([
+        [{ name: 'where' }, { name: 'sort' }, { name: 'limit' }],
+        [{ name: 'where' }, { name: 'limit' }],
+      ]);
     });
   });
 });
