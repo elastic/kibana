@@ -33,7 +33,6 @@ import {
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import { ControlWidth, ControlLabel } from './shared_form_components';
-import { getVariableTypeFromQuery } from './helpers';
 import { EsqlControlType } from '../types';
 import { ChooseColumnPopover } from './choose_column_popover';
 
@@ -217,7 +216,7 @@ export function ValueControlForm({
       width: minimumWidth,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType: getVariableTypeFromQuery(variableName, variableType),
+      variableType,
       esqlQuery: valuesQuery || queryString,
       controlType: controlFlyoutType,
       grow,

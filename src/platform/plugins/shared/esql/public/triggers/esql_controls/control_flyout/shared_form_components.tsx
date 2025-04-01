@@ -217,7 +217,6 @@ export function VariableName({
           })}
           data-test-subj="esqlVariableName"
           fullWidth
-          disabled={isControlInEditMode}
           compressed
         />
       </EuiToolTip>

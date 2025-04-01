@@ -24,7 +24,7 @@ import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import { ControlWidth, ControlLabel } from './shared_form_components';
-import { getQueryForFields, getVariableTypeFromQuery } from './helpers';
+import { getQueryForFields } from './helpers';
 import { EsqlControlType } from '../types';
 
 interface IdentifierControlFormProps {
@@ -165,7 +165,7 @@ export function IdentifierControlForm({
       width: minimumWidth,
       title: label || variableNameWithoutQuestionmark,
       variableName: variableNameWithoutQuestionmark,
-      variableType: getVariableTypeFromQuery(variableName, variableType),
+      variableType,
       esqlQuery: queryString,
       controlType: EsqlControlType.STATIC_VALUES,
       grow,

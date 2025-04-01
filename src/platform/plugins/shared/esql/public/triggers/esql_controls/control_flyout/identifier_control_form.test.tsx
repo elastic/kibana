@@ -33,7 +33,7 @@ describe('IdentifierControlForm', () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.FIELDS}
+            initialVariableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
             onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
@@ -83,7 +83,7 @@ describe('IdentifierControlForm', () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.FIELDS}
+            initialVariableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
             onSaveControl={onCreateControlSpy}
             closeFlyout={jest.fn()}
@@ -111,7 +111,7 @@ describe('IdentifierControlForm', () => {
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.FIELDS}
+            initialVariableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
             onSaveControl={jest.fn()}
             onCancelControl={onCancelControlSpy}
@@ -142,7 +142,7 @@ describe('IdentifierControlForm', () => {
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.FIELDS}
+            initialVariableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
             onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
@@ -194,7 +194,7 @@ describe('IdentifierControlForm', () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.FIELDS}
+            initialVariableType={ESQLVariableType.FIELDS}
             queryString="FROM foo | STATS BY"
             onSaveControl={onEditControlSpy}
             closeFlyout={jest.fn()}
@@ -224,7 +224,7 @@ describe('IdentifierControlForm', () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.FUNCTIONS}
+            initialVariableType={ESQLVariableType.FUNCTIONS}
             queryString="FROM foo | STATS "
             onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}

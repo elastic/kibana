@@ -224,7 +224,7 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
 
   const column = Walker.match(lastCommand, { type: 'column' });
 
-  if (column) {
+  if (column && column.name && column.name !== '*') {
     return `${column.name}`;
   }
 };

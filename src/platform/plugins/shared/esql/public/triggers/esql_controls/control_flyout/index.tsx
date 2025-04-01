@@ -25,11 +25,12 @@ import {
   getRecurrentVariableName,
   validateVariableName,
   areValuesIntervalsValid,
+  getVariableTypeFromQuery,
 } from './helpers';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
-  variableType: ESQLVariableType;
+  initialVariableType: ESQLVariableType;
   queryString: string;
   esqlVariables: ESQLControlVariable[];
   onSaveControl?: (controlState: ESQLControlState, updatedQuery: string) => Promise<void>;
@@ -58,7 +59,7 @@ function getVariableNamePrefix(type: ESQLVariableType) {
 
 export function ESQLControlsFlyout({
   search,
-  variableType,
+  initialVariableType,
   queryString,
   esqlVariables,
   onSaveControl,
@@ -68,21 +69,22 @@ export function ESQLControlsFlyout({
   closeFlyout,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
-  const variableNamePrefix = useMemo(() => getVariableNamePrefix(variableType), [variableType]);
-
+  const [variableNamePrefix, setVariableNamePrefix] = useState(
+    getVariableNamePrefix(initialVariableType)
+  );
   const valuesField = useMemo(() => {
-    if (variableType === ESQLVariableType.VALUES) {
+    if (initialVariableType === ESQLVariableType.VALUES) {
       return getValuesFromQueryField(queryString);
     }
     return null;
-  }, [variableType, queryString]);
+  }, [initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
   const styling = useMemo(() => getFlyoutStyling(), []);
   const suggestedVariableName = useMemo(() => {
     const existingVariables = new Set(
       esqlVariables
-        .filter((variable) => variable.type === variableType)
+        .filter((variable) => variable.type === initialVariableType)
         .map((variable) => variable.key)
     );
 
@@ -90,9 +92,9 @@ export function ESQLControlsFlyout({
       return `${variableNamePrefix}${initialState.variableName}`;
     }
 
-    let variableNameSuggestion = getVariableSuggestion(variableType);
+    let variableNameSuggestion = getVariableSuggestion(initialVariableType);
 
-    if (valuesField && variableType === ESQLVariableType.VALUES) {
+    if (valuesField && initialVariableType === ESQLVariableType.VALUES) {
       // variables names can't have special characters, only underscore
       const fieldVariableName = valuesField.replace(/[^a-zA-Z0-9]/g, '_');
       variableNameSuggestion = fieldVariableName;
@@ -102,7 +104,7 @@ export function ESQLControlsFlyout({
       variableNameSuggestion,
       existingVariables
     )}`;
-  }, [esqlVariables, initialState, valuesField, variableNamePrefix, variableType]);
+  }, [esqlVariables, initialState, valuesField, variableNamePrefix, initialVariableType]);
 
   const [controlFlyoutType, setControlFlyoutType] = useState<EsqlControlType>(
     initialState?.controlType ??
@@ -111,6 +113,7 @@ export function ESQLControlsFlyout({
         : EsqlControlType.VALUES_FROM_QUERY)
   );
   const [variableName, setVariableName] = useState(suggestedVariableName);
+  const [variableType, setVariableType] = useState<ESQLVariableType>(initialVariableType);
 
   const [formIsInvalid, setFormIsInvalid] = useState(false);
   const [controlState, setControlState] = useState<ESQLControlState | undefined>(initialState);
@@ -119,8 +122,11 @@ export function ESQLControlsFlyout({
     (e: { target: { value: React.SetStateAction<string> } }) => {
       const text = validateVariableName(String(e.target.value), variableNamePrefix);
       setVariableName(text);
+      const newType = getVariableTypeFromQuery(text, variableType);
+      setVariableType(newType);
+      setVariableNamePrefix(getVariableNamePrefix(newType));
     },
-    [variableNamePrefix]
+    [variableNamePrefix, variableType]
   );
 
   const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
@@ -172,37 +178,6 @@ export function ESQLControlsFlyout({
     variableName,
     onSaveControl,
   ]);
-
-  // if (variableType === ESQLVariableType.VALUES || variableType === ESQLVariableType.TIME_LITERAL) {
-  //   return (
-  //     <ValueControlForm
-  //       queryString={queryString}
-  //       variableName={variableName}
-  //       controlFlyoutType={controlFlyoutType}
-  //       variableType={variableType}
-  //       initialState={initialState}
-  //       setControlState={setControlState}
-  //       search={search}
-  //       cursorPosition={cursorPosition}
-  //     />
-  //   );
-  // } else if (
-  //   variableType === ESQLVariableType.FIELDS ||
-  //   variableType === ESQLVariableType.FUNCTIONS
-  // ) {
-  //   return (
-  //     <IdentifierControlForm
-  //       variableType={variableType}
-  //       variableName={variableName}
-  //       esqlVariables={esqlVariables}
-  //       queryString={queryString}
-  //       setControlState={setControlState}
-  //       initialState={initialState}
-  //       search={search}
-  //       cursorPosition={cursorPosition}
-  //     />
-  //   );
-  // }
 
   const formBody =
     variableNamePrefix === VariableNamePrefix.VALUE ? (

@@ -65,7 +65,7 @@ describe('ValueControlForm', () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.TIME_LITERAL}
+            initialVariableType={ESQLVariableType.TIME_LITERAL}
             queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
             onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
@@ -113,7 +113,7 @@ describe('ValueControlForm', () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.TIME_LITERAL}
+            initialVariableType={ESQLVariableType.TIME_LITERAL}
             queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
             onSaveControl={onCreateControlSpy}
             closeFlyout={jest.fn()}
@@ -141,7 +141,7 @@ describe('ValueControlForm', () => {
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.TIME_LITERAL}
+            initialVariableType={ESQLVariableType.TIME_LITERAL}
             queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
             onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
@@ -171,7 +171,7 @@ describe('ValueControlForm', () => {
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.TIME_LITERAL}
+            initialVariableType={ESQLVariableType.TIME_LITERAL}
             queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
             onSaveControl={jest.fn()}
             closeFlyout={jest.fn()}
@@ -222,7 +222,7 @@ describe('ValueControlForm', () => {
       const { findByTestId } = render(
         <IntlProvider locale="en">
           <ESQLControlsFlyout
-            variableType={ESQLVariableType.TIME_LITERAL}
+            initialVariableType={ESQLVariableType.TIME_LITERAL}
             queryString="FROM foo | STATS BY BUCKET(@timestamp,)"
             onSaveControl={onEditControlSpy}
             closeFlyout={jest.fn()}
@@ -245,7 +245,7 @@ describe('ValueControlForm', () => {
           <KibanaContextProvider services={services}>
             <IntlProvider locale="en">
               <ESQLControlsFlyout
-                variableType={ESQLVariableType.VALUES}
+                initialVariableType={ESQLVariableType.VALUES}
                 queryString="FROM foo | WHERE field =="
                 onSaveControl={jest.fn()}
                 closeFlyout={jest.fn()}
