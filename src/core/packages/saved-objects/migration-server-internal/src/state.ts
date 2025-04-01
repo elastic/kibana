@@ -403,6 +403,7 @@ export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInit
   /** Update the mappings of the target index */
   readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK';
   readonly updateTargetMappingsTaskId: string;
+  readonly updatedTypesQuery: Option.Option<QueryDslQueryContainer>;
 }
 
 export interface UpdateTargetMappingsMeta extends PostInitState {

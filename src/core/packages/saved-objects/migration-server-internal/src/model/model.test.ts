@@ -2984,6 +2984,17 @@ describe('migrations v2 model', () => {
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
         updateTargetMappingsTaskId: 'update target mappings task',
+        updatedTypesQuery: Option.fromNullable({
+          bool: {
+            should: [
+              {
+                term: {
+                  type: 'type1',
+                },
+              },
+            ],
+          },
+        }),
       };
 
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META if response is right', () => {
