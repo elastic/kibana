@@ -12,7 +12,7 @@ This package provides components and utilities for handling the deletion of aler
 
 ### Modal
 
-The `AlertsDeleteModal` component can be used to display a confirmation modal for deleting alerts.
+The `AlertDeleteModal` component can be used to display a confirmation modal for deleting alerts.
 
 ```tsx
 import React, { useState } from 'react';
