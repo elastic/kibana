@@ -11606,10 +11606,10 @@
   resolved "https://registry.yarnpkg.com/@types/diff-match-patch/-/diff-match-patch-1.0.36.tgz#dcef10a69d357fe9d43ac4ff2eca6b85dbf466af"
   integrity sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==
 
-"@types/diff@^7.0.1":
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-7.0.1.tgz#acc505eb2e8337ca400503283a6ab44a59906d9f"
-  integrity sha512-R/BHQFripuhW6XPXy05hIvXJQdQ4540KnTvEFHSLjXfHYM41liOLKgIJEyYYiQe796xpaMHfe4Uj/p7Uvng2vA==
+"@types/diff@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-7.0.2.tgz#d638edebf3c97aa4962b6f1164a7921ab3de9f83"
+  integrity sha512-JSWRMozjFKsGlEjiiKajUjIJVKuKdE3oVy2DNtK+fUo8q82nhFZ2CPQwicAIkXrofahDXrWJ7mjelvZphMS98Q==
 
 "@types/ejs@^3.0.6":
   version "3.0.6"
