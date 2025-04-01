@@ -557,7 +557,7 @@ export interface RouteConfig<P, Q, B, Method extends RouteMethod> {
   /**
    * Defines the security requirements for a route, including authorization and authentication.
    */
-  security?: RouteSecurity;
+  security: RouteSecurity;
 
   /**
    * Additional route options {@link RouteConfigOptions}.
