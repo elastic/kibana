@@ -9,6 +9,7 @@
 
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray, once } from 'lodash';
+import { memoryUsage } from 'process';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
@@ -48,6 +49,10 @@ export async function startLiveDataUpload({
 
   const bucketSizeInMs = runOptions.liveBucketSize;
   let requestedUntil = from;
+
+  function mb(value: number): string {
+    return Math.round(value / 1024 ** 2).toString() + 'mb';
+  }
 
   async function uploadNextBatch() {
     const now = Date.now();
@@ -90,6 +95,22 @@ export async function startLiveDataUpload({
       requestedUntil = rangeEnd;
     }
   }
+
+  function startPeriodicPerfLogging() {
+    let cpuUsage = process.cpuUsage();
+
+    setInterval(() => {
+      cpuUsage = process.cpuUsage(cpuUsage);
+      const mem = memoryUsage();
+      logger.debug(
+        `cpu time: (user: ${Math.round(cpuUsage.user / 1000)}mss, sys: ${Math.round(
+          cpuUsage.system / 1000
+        )}ms), memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`
+      );
+    }, 5000);
+  }
+
+  startPeriodicPerfLogging();
 
   do {
     await uploadNextBatch();
