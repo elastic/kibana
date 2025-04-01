@@ -130,7 +130,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('groupByCustomFieldAddButton');
       await this.waitForLoading();
       const groupNameButtons = await testSubjects.findAll('groupNameButton');
-      return Promise.all(groupNameButtons.map(async (link) => link.getVisibleText()));
+      return Promise.all(groupNameButtons.map((link) => link.getVisibleText()));
     },
 
     async enterSearchTerm(query: string) {
