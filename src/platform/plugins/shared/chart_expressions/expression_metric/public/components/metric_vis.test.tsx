@@ -1185,7 +1185,6 @@ describe('MetricVisComponent', function () {
         },
         overrides: { settings: { theme: { metric: { border: color } } } },
       });
-      screen.debug();
 
       expect(screen.getByRole('figure')).toHaveStyle({ borderColor: color });
     });
