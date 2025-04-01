@@ -49876,7 +49876,8 @@ paths:
   /api/upgrade_assistant/reindex/batch:
     post:
       description: |
-        Start or resume multiple reindexing tasks in one request. Additionally, reindexing tasks started or resumed via the batch endpoint will be placed on a queue and run one-by-one, which ensures that minimal cluster resources are consumed over time.
+        Start or resume multiple reindexing tasks in one request. Additionally, [reindexing](https://www.elastic.co/docs/api/doc/kibana/operation/operation-start-upgrade-reindex) tasks for upgrading indices that are started or resumed via the batch endpoint will be placed on a queue and executed one-by-one. This ensures that minimal cluster resources are consumed over time.
+        Note that this API does not support data streams.
       operationId: batch-start-upgrade-reindex
       requestBody:
         content:
@@ -49962,7 +49963,6 @@ paths:
       summary: Batch start or resume reindexing
       tags:
         - upgrade
-      x-state: Technical Preview
   /api/upgrade_assistant/reindex/batch/queue:
     get:
       description: |
