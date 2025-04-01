@@ -28,6 +28,7 @@ import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
+import queryRulesBackground from '../../assets/quer-rule-background.svg';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
@@ -49,8 +50,20 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
     height: 'auto',
     margin: '0 auto',
   });
+  const backgroundProps = css({
+    backgroundImage: `url(${queryRulesBackground})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    // backgroundPosition: 'center center',
+  });
   return (
-    <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
+    <EuiFlexGroup
+      direction="row"
+      gutterSize="l"
+      alignItems="center"
+      justifyContent="center"
+      css={backgroundProps}
+    >
       <EuiFlexItem grow={false}>
         <div
           css={css`

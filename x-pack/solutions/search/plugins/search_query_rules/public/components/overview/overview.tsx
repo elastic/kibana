@@ -43,33 +43,33 @@ export const QueryRulesOverview = () => {
       offset={0}
       restrictWidth={false}
       grow={false}
-      data-test-subj="searchSynonymsOverviewPage"
+      data-test-subj="queryRulesOverviewPage"
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
     >
       {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
-          pageTitle="Synonyms"
+          pageTitle="Query Rules"
           restrictWidth
           color="primary"
           rightSideItems={[
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiLink
-                  data-test-subj="searchSynonymsSearchSynonymsOverviewApiDocumentationLink"
+                  data-test-subj="queryRulesOverviewApiDocumentationLink"
                   external
                   target="_blank"
                   href={docLinks.queryRulesApi}
                 >
                   <FormattedMessage
-                    id="xpack.searchSynonyms.synonymsSetDetail.documentationLink"
+                    id="xpack.queryRules.queryRulesSetDetail.documentationLink"
                     defaultMessage="API Documentation"
                   />
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj="searchSynonymsSearchSynonymsOverviewCreateButton"
+                  data-test-subj="queryRulesOverviewCreateButton"
                   fill
                   iconType="plusInCircle"
                   //   onClick={() => {
@@ -77,7 +77,7 @@ export const QueryRulesOverview = () => {
                   //   }}
                 >
                   <FormattedMessage
-                    id="xpack.searchSynonyms.synonymsSetDetail.createButton"
+                    id="xpack.queryRules.queryRulesSetDetail.createButton"
                     defaultMessage="Create"
                   />
                 </EuiButton>
@@ -87,7 +87,7 @@ export const QueryRulesOverview = () => {
         >
           <EuiText>
             <FormattedMessage
-              id="xpack.searchSynonyms.synonymsSetDetail.description"
+              id="xpack.queryRules.queryRulesSetDetail.description"
               defaultMessage="Create and manage synonym sets and synonym rules."
             />
           </EuiText>
@@ -95,6 +95,7 @@ export const QueryRulesOverview = () => {
       )}
       <KibanaPageTemplate.Section
         restrictWidth
+        alignment="center"
         contentProps={{
           css: css({
             height: '100%',
