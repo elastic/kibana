@@ -9,12 +9,7 @@
 
 import React, { FC, useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import {
-  EuiListGroupItem,
-  EuiListGroupItemExtraActionProps,
-  transparentize,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiListGroupItem, transparentize, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import { css } from '@emotion/css';
 
@@ -26,12 +21,6 @@ interface Props {
   item: ChromeProjectNavigationNode;
   parentIsAccordion?: boolean;
 }
-
-const externalLinkIcon: EuiListGroupItemExtraActionProps = {
-  iconType: 'popout',
-  iconSize: 's',
-  alwaysShow: true,
-};
 
 export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
   const { navigateToUrl } = useServices();
@@ -65,18 +54,19 @@ export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
           &.sideNavPanelLink:hover {
             background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
           }
-          .euiListGroupItemExtraAction.euiButtonIcon:hover {
-            background-color: transparent;
-          }
+          ${!isElasticInternalLink &&
+          `& svg[class*='EuiExternalLinkIcon'] {
+            margin-left: auto;
+          }`}
         `
       )}
+      external={true}
       size="s"
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}
       iconType={icon}
       onClick={onClick}
       target={openInNewTab ? '_blank' : undefined}
-      extraAction={!isElasticInternalLink ? externalLinkIcon : undefined}
     />
   );
 };

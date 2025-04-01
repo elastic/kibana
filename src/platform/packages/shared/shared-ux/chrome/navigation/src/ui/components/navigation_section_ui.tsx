@@ -118,7 +118,7 @@ const serializeNavNode = (
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
   };
-  serialized.isElasticInternalLink = serialized.isElasticInternalLink ?? true;
+  serialized.isElasticInternalLink = navNode.isElasticInternalLink ?? true;
   serialized.renderAs = getRenderAs(serialized, { isSideNavCollapsed });
   serialized.spaceBefore = getSpaceBefore(serialized, {
     isSideNavCollapsed,
