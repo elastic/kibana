@@ -193,8 +193,7 @@ components:
         created_by:
           type: string
         revision:
-          type: integer
-          minimum: 0
+          $ref: './common_attributes.schema.yaml#/components/schemas/RuleRevision'
         # NOTE: For now, Required Fields are
         # supported for prebuilt rules only. We don't want to allow users to edit these 3
         # fields via the API. If we added them to baseParams.defaultable, they would

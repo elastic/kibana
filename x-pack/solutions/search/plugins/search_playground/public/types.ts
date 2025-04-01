@@ -77,6 +77,8 @@ export enum ChatFormFields {
   prompt = 'prompt',
   indices = 'indices',
   elasticsearchQuery = 'elasticsearch_query',
+  userElasticsearchQuery = 'user_elasticsearch_query',
+  userElasticsearchQueryValidations = 'user_elasticsearch_query_validations',
   summarizationModel = 'summarization_model',
   sourceFields = 'source_fields',
   docSize = 'doc_size',
@@ -95,6 +97,14 @@ export interface ChatForm {
   [ChatFormFields.docSize]: number;
   [ChatFormFields.queryFields]: { [index: string]: string[] };
   [ChatFormFields.searchQuery]: string;
+  [ChatFormFields.userElasticsearchQuery]: string | null | undefined;
+  [ChatFormFields.userElasticsearchQueryValidations]: UserQueryValidations | undefined;
+}
+
+export interface UserQueryValidations {
+  isValid: boolean;
+  isUserCustomized: boolean;
+  userQueryErrors?: string[];
 }
 
 export interface Message {
