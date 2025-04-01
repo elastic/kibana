@@ -88,6 +88,6 @@ export enum SecurityPageName {
   alertSummary = 'alert_summary',
   configurations = 'configurations',
   configurationsIntegrations = 'configurations-integrations',
-  configurationsKnowledgeSources = 'configurations-knowledge_sources',
+  configurationsAiSettings = 'configurations-ai-settings',
   configurationsBasicRules = 'configurations-basic_rules',
 }

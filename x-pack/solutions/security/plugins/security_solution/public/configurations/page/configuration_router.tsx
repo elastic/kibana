@@ -10,7 +10,7 @@ import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
 import { BasicRules } from '../tabs/basic_rules';
-import { KnowledgeSources } from '../tabs/knowledge_sources';
+import { AiSettings } from '../tabs/ai_settings';
 import { Integrations } from '../tabs/integrations';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { ConfigurationTabs } from '../constants';
@@ -23,8 +23,8 @@ export const ConfigurationsRouter = React.memo(() => {
         component={Integrations}
       />
       <Route
-        path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.knowledgeSources})`}
-        component={KnowledgeSources}
+        path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.aiSettings})`}
+        component={AiSettings}
       />
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.basicRules})`}

@@ -13,10 +13,10 @@ export const BASIC_RULES = i18n.translate(
     defaultMessage: 'Rules',
   }
 );
-export const KNOWLEDGE_SOURCES = i18n.translate(
-  'xpack.securitySolution.configurations.tabs.knowledge_sources',
+export const AI_SETTINGS = i18n.translate(
+  'xpack.securitySolution.configurations.tabs.ai_settings',
   {
-    defaultMessage: 'Knowledge sources',
+    defaultMessage: 'AI settings',
   }
 );
 export const INTEGRATIONS = i18n.translate(

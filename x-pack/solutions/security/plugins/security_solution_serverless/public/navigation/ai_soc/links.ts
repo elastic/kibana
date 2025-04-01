@@ -22,7 +22,7 @@ export const configurationsLink: NodeDefinition<AppDeepLinkId, string, string> =
   renderAs: 'panelOpener',
   children: [
     {
-      link: `securitySolutionUI:configurations-knowledge_sources`,
+      link: `securitySolutionUI:configurations-ai_settings`,
     },
     {
       link: `securitySolutionUI:configurations-basic_rules`,

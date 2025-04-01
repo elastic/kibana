@@ -44,11 +44,11 @@ export const configurationsLinks: LinkItem = {
       hideTimeline: true,
     },
     {
-      id: SecurityPageName.configurationsKnowledgeSources,
-      title: i18n.translate('xpack.securitySolution.appLinks.knowledgeSources', {
-        defaultMessage: 'Knowledge sources',
+      id: SecurityPageName.configurationsAiSettings,
+      title: i18n.translate('xpack.securitySolution.appLinks.aiSettings', {
+        defaultMessage: 'AI settings',
       }),
-      path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.knowledgeSources}`,
+      path: `${CONFIGURATIONS_PATH}/${ConfigurationTabs.aiSettings}`,
       skipUrlState: true,
       hideTimeline: true,
     },

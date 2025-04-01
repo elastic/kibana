@@ -8,5 +8,5 @@
 export enum ConfigurationTabs {
   integrations = 'integrations',
   basicRules = 'basic_rules',
-  knowledgeSources = 'knowledge_sources',
+  aiSettings = 'ai_settings',
 }

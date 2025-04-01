@@ -20,14 +20,14 @@ const CONFIGURATION_TABS = [
     name: i18n.INTEGRATIONS,
   },
   {
-    tabId: ConfigurationTabs.knowledgeSources,
-    deepLinkId: SecurityPageName.configurationsKnowledgeSources,
-    name: i18n.KNOWLEDGE_SOURCES,
-  },
-  {
     tabId: ConfigurationTabs.basicRules,
     deepLinkId: SecurityPageName.configurationsBasicRules,
     name: i18n.BASIC_RULES,
+  },
+  {
+    tabId: ConfigurationTabs.aiSettings,
+    deepLinkId: SecurityPageName.configurationsAiSettings,
+    name: i18n.AI_SETTINGS,
   },
 ];
 export const ConfigurationsTabs = React.memo(() => {
