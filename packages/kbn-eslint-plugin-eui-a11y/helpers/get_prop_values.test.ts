@@ -21,9 +21,11 @@ describe('getPropValues', () => {
       }
     );
 
+    const element = (code.body[0] as any).expression as any;
+
     expect(
       getPropValues({
-        jsxOpeningElement: ((code.body[0] as any).expression as any).openingElement,
+        jsxOpeningElement: element.openingElement,
         propNames: ['prop1', 'prop2'],
         sourceCode: {
           getScope: () =>
@@ -34,18 +36,11 @@ describe('getPropValues', () => {
       })
     ).toEqual({
       prop1: { type: 'Literal', value: 'bar', raw: '"bar"' },
-      prop2: expect.objectContaining({
-        ...parse(`<div prop={i18n.translate('bar', {})} />`, {
-          ecmaFeatures: {
-            jsx: true,
-          },
-          // @ts-expect-error
-        }).body[0].expression.openingElement.attributes[0].value,
-      }),
+      prop2: element.openingElement.attributes[1].value,
     });
   });
 
-  it('should return an empty object if there are no props', () => {
+  it('should return an empty object if there are no props found', () => {
     const code = parse(`<MyComponent  />`, {
       ecmaFeatures: {
         jsx: true,
