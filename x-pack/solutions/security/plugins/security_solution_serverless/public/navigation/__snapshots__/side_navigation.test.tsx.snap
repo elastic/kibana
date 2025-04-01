@@ -503,7 +503,7 @@ Object {
                     Object {
                       "id": "ml:logRateAnalysis",
                       "link": "ml:logRateAnalysis",
-                      "title": "Log Rate Analysis",
+                      "title": "Log rate analysis",
                     },
                     Object {
                       "id": "ml:logPatternAnalysis",
@@ -866,7 +866,7 @@ Object {
                 Object {
                   "id": "ml:logRateAnalysis",
                   "link": "ml:logRateAnalysis",
-                  "title": "Log Rate Analysis",
+                  "title": "Log rate analysis",
                 },
                 Object {
                   "id": "ml:logPatternAnalysis",

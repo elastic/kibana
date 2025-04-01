@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export { i18nStrings } from './src/i18n_strings';
 export {
   useGetLinkUrl,
   useGetLinkProps,

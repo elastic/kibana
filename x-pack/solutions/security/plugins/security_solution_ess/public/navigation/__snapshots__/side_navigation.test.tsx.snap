@@ -719,11 +719,9 @@ Object {
         },
         Object {
           "link": "monitoring",
-          "title": "Stack Monitoring",
         },
         Object {
           "link": "integrations",
-          "title": "Integrations",
         },
       ],
       "icon": "gear",

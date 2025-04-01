@@ -11,7 +11,7 @@ import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { securityLink } from '@kbn/security-solution-navigation/links';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine } from '../../../common/product';
 import { AiForTheSocIcon } from './icons';
@@ -71,132 +71,132 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
                   {
                     id: 'ml:overview',
                     link: 'ml:overview',
-                    title: 'Overview',
+                    title: i18nStrings.ml.overview,
                   },
                   {
                     id: 'ml:notifications',
                     link: 'ml:notifications',
-                    title: 'Notifications',
+                    title: i18nStrings.ml.notifications,
                   },
                   {
                     id: 'ml:memoryUsage',
                     link: 'ml:memoryUsage',
-                    title: 'Memory usage',
+                    title: i18nStrings.ml.memoryUsage,
                   },
                 ],
               },
               {
                 id: 'category-anomaly_detection',
-                title: 'Anomaly detection',
+                title: i18nStrings.ml.anomalyDetection.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
                     id: 'ml:anomalyDetection',
                     link: 'ml:anomalyDetection',
-                    title: 'Jobs',
+                    title: i18nStrings.ml.anomalyDetection.jobs,
                   },
                   {
                     id: 'ml:anomalyExplorer',
                     link: 'ml:anomalyExplorer',
-                    title: 'Anomaly explorer',
+                    title: i18nStrings.ml.anomalyDetection.anomalyExplorer,
                   },
                   {
                     id: 'ml:singleMetricViewer',
                     link: 'ml:singleMetricViewer',
-                    title: 'Single metric viewer',
+                    title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
                   },
                   {
                     id: 'ml:suppliedConfigurations',
                     link: 'ml:suppliedConfigurations',
-                    title: 'Supplied configurations',
+                    title: i18nStrings.ml.anomalyDetection.suppliedConfigurations,
                   },
                   {
                     id: 'ml:settings',
                     link: 'ml:settings',
-                    title: 'Settings',
+                    title: i18nStrings.ml.anomalyDetection.settings,
                   },
                 ],
               },
               {
                 id: 'category-data_frame analytics',
-                title: 'Data frame analytics',
+                title: i18nStrings.ml.dataFrameAnalytics.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
                     id: 'ml:dataFrameAnalytics',
                     link: 'ml:dataFrameAnalytics',
-                    title: 'Jobs',
+                    title: i18nStrings.ml.dataFrameAnalytics.jobs,
                   },
                   {
                     id: 'ml:resultExplorer',
                     link: 'ml:resultExplorer',
-                    title: 'Result explorer',
+                    title: i18nStrings.ml.dataFrameAnalytics.resultExplorer,
                   },
                   {
                     id: 'ml:analyticsMap',
                     link: 'ml:analyticsMap',
-                    title: 'Analytics map',
+                    title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
                   },
                 ],
               },
               {
                 id: 'category-model_management',
-                title: 'Model management',
+                title: i18nStrings.ml.modelManagement.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
                     id: 'ml:nodesOverview',
                     link: 'ml:nodesOverview',
-                    title: 'Trained models',
+                    title: i18nStrings.ml.modelManagement.trainedModels,
                   },
                 ],
               },
               {
                 id: 'category-data_visualizer',
-                title: 'Data visualizer',
+                title: i18nStrings.ml.dataVisualizer.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
                     id: 'ml:fileUpload',
                     link: 'ml:fileUpload',
-                    title: 'File data visualizer',
+                    title: i18nStrings.ml.dataVisualizer.fileDataVisualizer,
                   },
                   {
                     id: 'ml:indexDataVisualizer',
                     link: 'ml:indexDataVisualizer',
-                    title: 'Data view data visualizer',
+                    title: i18nStrings.ml.dataVisualizer.dataViewDataVisualizer,
                   },
                   {
                     id: 'ml:esqlDataVisualizer',
                     link: 'ml:esqlDataVisualizer',
-                    title: 'ES|QL data visualizer',
+                    title: i18nStrings.ml.dataVisualizer.esqlDataVisualizer,
                   },
                   {
                     id: 'ml:dataDrift',
                     link: 'ml:dataDrift',
-                    title: 'Data drift',
+                    title: i18nStrings.ml.dataVisualizer.dataDrift,
                   },
                 ],
               },
               {
                 id: 'category-aiops_labs',
-                title: 'Aiops labs',
+                title: i18nStrings.ml.aiopsLabs.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
                     id: 'ml:logRateAnalysis',
                     link: 'ml:logRateAnalysis',
-                    title: 'Log Rate Analysis',
+                    title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
                   },
                   {
                     id: 'ml:logPatternAnalysis',
                     link: 'ml:logPatternAnalysis',
-                    title: 'Log pattern analysis',
+                    title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
                   },
                   {
                     id: 'ml:changePointDetections',
                     link: 'ml:changePointDetections',
-                    title: 'Change point detection',
+                    title: i18nStrings.ml.aiopsLabs.changePointDetection,
                   },
                 ],
               },
@@ -235,24 +235,24 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
       {
         type: 'navItem',
         link: 'dev_tools',
-        title: 'Developer tools',
+        title: i18nStrings.devTools,
         icon: 'editorCodeBlock',
       },
       {
         type: 'navGroup',
         id: 'category-management',
-        title: 'Project Settings',
+        title: i18nStrings.projectSettings.title,
         icon: 'gear',
         breadcrumbStatus: 'hidden',
         children: [
           {
-            title: 'Stack Management',
+            title: i18nStrings.stackManagement.title,
             renderAs: 'panelOpener',
             id: 'stack_management',
             spaceBefore: null,
             children: [
               {
-                title: 'Data',
+                title: i18nStrings.stackManagement.data.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
@@ -290,7 +290,7 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
                 ],
               },
               {
-                title: 'Access',
+                title: i18nStrings.stackManagement.access.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
@@ -303,12 +303,12 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
                   },
                   {
                     cloudLink: 'userAndRoles',
-                    title: 'Manage organization members',
+                    title: i18nStrings.stackManagement.access.usersAndRoles,
                   },
                 ],
               },
               {
-                title: 'Alerts and Insights',
+                title: i18nStrings.stackManagement.alertsAndInsights.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
@@ -334,7 +334,7 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
                 ],
               },
               {
-                title: 'Content',
+                title: i18nStrings.stackManagement.content.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {
@@ -366,7 +366,7 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
                 ],
               },
               {
-                title: 'Other',
+                title: i18nStrings.stackManagement.other.title,
                 breadcrumbStatus: 'hidden',
                 children: [
                   {

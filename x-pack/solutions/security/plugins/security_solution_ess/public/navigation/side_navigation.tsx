@@ -17,7 +17,7 @@ import {
   SECURITY_UI_APP_ID,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
-import { LinkButton, securityLink } from '@kbn/security-solution-navigation/links';
+import { LinkButton, securityLink, i18nStrings } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 
 export const SOLUTION_NAME = i18n.translate('xpack.securitySolutionEss.nav.solutionName', {
@@ -87,15 +87,11 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               {
                 id: 'rules-landing',
                 link: securityLink(SecurityPageName.rulesLanding),
-                title: i18n.translate('xpack.securitySolutionEss.nav.rules', {
-                  defaultMessage: 'Rules',
-                }),
+                title: i18nStrings.rules.title,
                 children: [
                   {
                     id: 'category-management',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.rules.management', {
-                      defaultMessage: 'Management',
-                    }),
+                    title: i18nStrings.rules.management.title,
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
@@ -124,18 +120,13 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                       {
                         id: 'siem_migrations-rules',
                         link: securityLink(SecurityPageName.siemMigrationsRules),
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.rules.management.siemRuleMigrations',
-                          { defaultMessage: 'SIEM rule migrations' }
-                        ),
+                        title: i18nStrings.rules.management.siemMigrationsRules,
                       },
                     ],
                   },
                   {
                     id: 'category-discover',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.rules.discover', {
-                      defaultMessage: 'Discover',
-                    }),
+                    title: i18nStrings.rules.management.discover,
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
@@ -184,9 +175,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               {
                 id: 'investigations',
                 link: securityLink(SecurityPageName.investigations),
-                title: i18n.translate('xpack.securitySolutionEss.nav.investigations', {
-                  defaultMessage: 'Investigations',
-                }),
+                title: i18nStrings.investigations.title,
                 children: [
                   {
                     id: 'timelines',
@@ -220,9 +209,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               {
                 id: 'explore',
                 link: securityLink(SecurityPageName.exploreLanding),
-                title: i18n.translate('xpack.securitySolutionEss.nav.explore', {
-                  defaultMessage: 'Explore',
-                }),
+                title: i18nStrings.explore.title,
                 children: [
                   {
                     id: 'hosts',
@@ -341,16 +328,12 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               {
                 id: 'assets',
                 link: securityLink(SecurityPageName.assets),
-                title: i18n.translate('xpack.securitySolutionEss.nav.assets', {
-                  defaultMessage: 'Assets',
-                }),
+                title: i18nStrings.assets.title,
                 children: [
                   {
                     id: 'fleet:',
                     link: 'fleet',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.assets.fleet', {
-                      defaultMessage: 'Fleet',
-                    }),
+                    title: i18nStrings.assets.fleet.title,
                     children: [
                       {
                         id: 'fleet:agents',
@@ -359,10 +342,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                       {
                         id: 'fleet:policies',
                         link: 'fleet:policies',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.assets.fleet.policies',
-                          { defaultMessage: 'Policies' }
-                        ),
+                        title: i18nStrings.assets.fleet.policies,
                       },
                       {
                         id: 'fleet:enrollment_tokens',
@@ -385,9 +365,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                   {
                     id: 'endpoints',
                     link: securityLink(SecurityPageName.endpoints),
-                    title: i18n.translate('xpack.securitySolutionEss.nav.assets.endpoints', {
-                      defaultMessage: 'Endpoints',
-                    }),
+                    title: i18nStrings.assets.endpoints.title,
                     children: [
                       {
                         id: 'endpoints',
@@ -471,9 +449,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               {
                 id: 'machine_learning-landing',
                 link: securityLink(SecurityPageName.mlLanding),
-                title: i18n.translate('xpack.securitySolutionEss.nav.ml', {
-                  defaultMessage: 'Machine learning',
-                }),
+                title: i18nStrings.ml.title,
                 children: [
                   {
                     breadcrumbStatus: 'hidden',
@@ -481,196 +457,132 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                       {
                         id: 'ml:overview',
                         link: 'ml:overview',
-                        title: i18n.translate('xpack.securitySolutionEss.nav.ml.overview', {
-                          defaultMessage: 'Overview',
-                        }),
+                        title: i18nStrings.ml.overview,
                       },
                       {
                         id: 'ml:notifications',
                         link: 'ml:notifications',
-                        title: i18n.translate('xpack.securitySolutionEss.nav.ml.notifications', {
-                          defaultMessage: 'Notifications',
-                        }),
+                        title: i18nStrings.ml.notifications,
                       },
                       {
                         id: 'ml:memoryUsage',
                         link: 'ml:memoryUsage',
-                        title: i18n.translate('xpack.securitySolutionEss.nav.ml.memoryUsage', {
-                          defaultMessage: 'Memory usage',
-                        }),
+                        title: i18nStrings.ml.memoryUsage,
                       },
                     ],
                   },
                   {
                     id: 'category-anomaly_detection',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.anomalyDetection', {
-                      defaultMessage: 'Anomaly detection',
-                    }),
+                    title: i18nStrings.ml.anomalyDetection.title,
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:anomalyDetection',
                         link: 'ml:anomalyDetection',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.anomalyDetection.jobs',
-                          { defaultMessage: 'Jobs' }
-                        ),
+                        title: i18nStrings.ml.anomalyDetection.jobs,
                       },
                       {
                         id: 'ml:anomalyExplorer',
                         link: 'ml:anomalyExplorer',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.anomalyExplorer',
-                          { defaultMessage: 'Anomaly explorer' }
-                        ),
+                        title: i18nStrings.ml.anomalyDetection.anomalyExplorer,
                       },
                       {
                         id: 'ml:singleMetricViewer',
                         link: 'ml:singleMetricViewer',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.singleMetricViewer',
-                          { defaultMessage: 'Single metric viewer' }
-                        ),
+                        title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
                       },
                       {
                         id: 'ml:suppliedConfigurations',
                         link: 'ml:suppliedConfigurations',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.suppliedConfigurations',
-                          { defaultMessage: 'Supplied configurations' }
-                        ),
+                        title: i18nStrings.ml.anomalyDetection.suppliedConfigurations,
                       },
                       {
                         id: 'ml:settings',
                         link: 'ml:settings',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.anomalyDetection.settings',
-                          { defaultMessage: 'Settings' }
-                        ),
+                        title: i18nStrings.ml.anomalyDetection.settings,
                       },
                     ],
                   },
                   {
                     id: 'category-data_frame analytics',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.dataFrameAnalytics', {
-                      defaultMessage: 'Data frame analytics',
-                    }),
+                    title: i18nStrings.ml.dataFrameAnalytics.title,
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:dataFrameAnalytics',
                         link: 'ml:dataFrameAnalytics',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.dataFrameAnalytics.jobs',
-                          { defaultMessage: 'Jobs' }
-                        ),
+                        title: i18nStrings.ml.dataFrameAnalytics.jobs,
                       },
                       {
                         id: 'ml:resultExplorer',
                         link: 'ml:resultExplorer',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.dataFrameAnalytics.resultExplorer',
-                          { defaultMessage: 'Result explorer' }
-                        ),
+                        title: i18nStrings.ml.dataFrameAnalytics.resultExplorer,
                       },
                       {
                         id: 'ml:analyticsMap',
                         link: 'ml:analyticsMap',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.dataFrameAnalytics.analyticsMap',
-                          { defaultMessage: 'Analytics map' }
-                        ),
+                        title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
                       },
                     ],
                   },
                   {
                     id: 'category-model_management',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.modelManagement', {
-                      defaultMessage: 'Model management',
-                    }),
+                    title: i18nStrings.ml.modelManagement.title,
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:nodesOverview',
                         link: 'ml:nodesOverview',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.modelManagement.trainedModels',
-                          { defaultMessage: 'Trained models' }
-                        ),
+                        title: i18nStrings.ml.modelManagement.trainedModels,
                       },
                     ],
                   },
                   {
                     id: 'category-data_visualizer',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.dataVisualizer', {
-                      defaultMessage: 'Data visualizer',
-                    }),
+                    title: i18nStrings.ml.dataVisualizer.title,
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:fileUpload',
                         link: 'ml:fileUpload',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.fileDataVisualizer',
-                          { defaultMessage: 'File data visualizer' }
-                        ),
+                        title: i18nStrings.ml.dataVisualizer.fileDataVisualizer,
                       },
                       {
                         id: 'ml:indexDataVisualizer',
                         link: 'ml:indexDataVisualizer',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.dataViewDataVisualizer',
-                          { defaultMessage: 'Data view data visualizer' }
-                        ),
+                        title: i18nStrings.ml.dataVisualizer.dataViewDataVisualizer,
                       },
                       {
                         id: 'ml:esqlDataVisualizer',
                         link: 'ml:esqlDataVisualizer',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.esqlDataVisualizer',
-                          { defaultMessage: 'ES|QL data visualizer' }
-                        ),
+                        title: i18nStrings.ml.dataVisualizer.esqlDataVisualizer,
                       },
                       {
                         id: 'ml:dataDrift',
                         link: 'ml:dataDrift',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.dataVisualizer.dataDrift',
-                          { defaultMessage: 'Data drift' }
-                        ),
+                        title: i18nStrings.ml.dataVisualizer.dataDrift,
                       },
                     ],
                   },
                   {
                     id: 'category-aiops_labs',
-                    title: i18n.translate('xpack.securitySolutionEss.nav.ml.aiopsLabs', {
-                      defaultMessage: 'Aiops labs',
-                    }),
+                    title: i18nStrings.ml.aiopsLabs.title,
                     breadcrumbStatus: 'hidden',
                     children: [
                       {
                         id: 'ml:logRateAnalysis',
                         link: 'ml:logRateAnalysis',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.aiopsLabs.logRateAnalysis',
-                          { defaultMessage: 'Log rate analysis' }
-                        ),
+                        title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
                       },
                       {
                         id: 'ml:logPatternAnalysis',
                         link: 'ml:logPatternAnalysis',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.aiopsLabs.logPatternAnalysis',
-                          { defaultMessage: 'Log pattern analysis' }
-                        ),
+                        title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
                       },
                       {
                         id: 'ml:changePointDetections',
                         link: 'ml:changePointDetections',
-                        title: i18n.translate(
-                          'xpack.securitySolutionEss.nav.ml.aiopsLabs.changePointDetection',
-                          { defaultMessage: 'Change point detection' }
-                        ),
+                        title: i18nStrings.ml.aiopsLabs.changePointDetection,
                       },
                     ],
                   },
@@ -685,17 +597,13 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
               {
                 id: 'entity_analytics-management',
                 link: securityLink(SecurityPageName.entityAnalyticsManagement),
-                title: i18n.translate('xpack.securitySolutionEss.nav.entityRiskScore', {
-                  defaultMessage: 'Entity Risk Score',
-                }),
+                title: i18nStrings.entityRiskScore,
                 sideNavStatus: 'hidden',
               },
               {
                 id: 'entity_analytics-entity_store_management',
                 link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-                title: i18n.translate('xpack.securitySolutionEss.nav.entityStore', {
-                  defaultMessage: 'Entity Store',
-                }),
+                title: i18nStrings.entityStore,
                 sideNavStatus: 'hidden',
               },
             ],
@@ -713,32 +621,24 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
       {
         type: 'navItem',
         link: 'dev_tools',
-        title: i18n.translate('xpack.securitySolutionEss.nav.devTools', {
-          defaultMessage: 'Developer tools',
-        }),
+        title: i18nStrings.devTools,
         icon: 'editorCodeBlock',
       },
       {
         type: 'navGroup',
         id: 'category-management',
-        title: i18n.translate('xpack.securitySolutionEss.nav.management', {
-          defaultMessage: 'Management',
-        }),
+        title: i18nStrings.management.title,
         icon: 'gear',
         breadcrumbStatus: 'hidden',
         children: [
           {
-            title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement', {
-              defaultMessage: 'Stack Management',
-            }),
+            title: i18nStrings.stackManagement.title,
             renderAs: 'panelOpener',
             id: 'stack_management',
             spaceBefore: null,
             children: [
               {
-                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.ingest', {
-                  defaultMessage: 'Ingest',
-                }),
+                title: i18nStrings.stackManagement.ingest.title,
                 children: [
                   {
                     link: 'management:ingest_pipelines',
@@ -749,9 +649,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                 ],
               },
               {
-                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.data', {
-                  defaultMessage: 'Data',
-                }),
+                title: i18nStrings.stackManagement.data.title,
                 children: [
                   {
                     link: 'management:index_management',
@@ -780,10 +678,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                 ],
               },
               {
-                title: i18n.translate(
-                  'xpack.securitySolutionEss.nav.stackManagement.alertsAndInsights',
-                  { defaultMessage: 'Alerts and Insights' }
-                ),
+                title: i18nStrings.stackManagement.alertsAndInsights.title,
                 children: [
                   {
                     link: 'management:triggersActions',
@@ -815,9 +710,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                 ],
               },
               {
-                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.security', {
-                  defaultMessage: 'Security',
-                }),
+                title: i18nStrings.stackManagement.security.title,
                 children: [
                   {
                     link: 'management:users',
@@ -834,9 +727,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                 ],
               },
               {
-                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.kibana', {
-                  defaultMessage: 'Kibana',
-                }),
+                title: i18nStrings.stackManagement.kibana.title,
                 children: [
                   {
                     link: 'management:dataViews',
@@ -877,9 +768,7 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                 ],
               },
               {
-                title: i18n.translate('xpack.securitySolutionEss.nav.stackManagement.stack', {
-                  defaultMessage: 'Stack',
-                }),
+                title: i18nStrings.stackManagement.stack.title,
                 children: [
                   {
                     link: 'management:license_management',
@@ -892,15 +781,9 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
             ],
           },
           {
-            title: i18n.translate('xpack.securitySolutionEss.nav.stackMonitoring', {
-              defaultMessage: 'Stack Monitoring',
-            }),
             link: 'monitoring',
           },
           {
-            title: i18n.translate('xpack.securitySolutionEss.nav.integrations', {
-              defaultMessage: 'Integrations',
-            }),
             link: 'integrations',
           },
         ],
