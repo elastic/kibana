@@ -121,6 +121,8 @@ export const esqlExecutor = async ({
           esClient: services.scopedClusterClient.asCurrentUser,
           requestBody: esqlRequest,
           requestQueryParams: esqlQueryString,
+          shouldStopExecution: services.shouldStopExecution,
+          ruleExecutionLogger,
         });
 
         const esqlSearchDuration = performance.now() - esqlSignalSearchStart;

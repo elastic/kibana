@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 
 export interface EsqlResultColumn {
   name: string;
@@ -24,29 +25,88 @@ export const performEsqlRequest = async ({
   esClient,
   requestBody,
   requestQueryParams,
+  ruleExecutionLogger,
+  shouldStopExecution,
 }: {
-  logger?: Logger;
+  ruleExecutionLogger?: IRuleExecutionLogForExecutors;
   esClient: ElasticsearchClient;
   requestBody: Record<string, unknown>;
   requestQueryParams?: { drop_null_columns?: boolean };
+  shouldStopExecution: () => boolean;
 }): Promise<EsqlTable> => {
-  const search = async () => {
-    try {
-      const rawResponse = await esClient.transport.request<EsqlTable>({
-        method: 'POST',
-        path: '/_query',
-        body: requestBody,
-        querystring: requestQueryParams,
-      });
-      return {
-        rawResponse,
-        isPartial: false,
-        isRunning: false,
-      };
-    } catch (e) {
-      throw getKbnServerError(e);
-    }
-  };
+  let pollInterval = 10 * 1000; // Poll every 10 seconds
+  let pollCount = 0;
+  let queryId: string = '';
 
-  return (await search()).rawResponse;
+  try {
+    const submitResponse = await esClient.transport.request<
+      { id: string; is_running: boolean } & EsqlTable
+    >({
+      method: 'POST',
+      path: '/_query/async',
+      body: requestBody,
+      querystring: requestQueryParams,
+    });
+
+    queryId = submitResponse.id;
+    const isRunning = submitResponse.is_running;
+
+    // If the query is not running, return results immediately
+    if (!isRunning) {
+      return submitResponse;
+    }
+
+    // Poll for long-executing query
+    while (true) {
+      try {
+        const pollResponse = await esClient.transport.request<
+          { id: string; is_running: boolean } & EsqlTable
+        >({
+          method: 'GET',
+          path: `/_query/async/${queryId}`,
+        });
+
+        // If the query is no longer running, return the results
+        if (!pollResponse.is_running) {
+          return pollResponse;
+        }
+
+        // Log that the query is still running
+        ruleExecutionLogger?.debug(`Query is still running for query ID: ${queryId}`);
+      } catch (error) {
+        ruleExecutionLogger?.error(
+          `Error while polling for query ID: ${queryId}, error: ${error.message}`
+        );
+        throw error;
+      }
+
+      pollCount++;
+
+      if (pollCount > 60) {
+        pollInterval = 60 * 1000; // Increase the poll interval after 10m
+      }
+      if (pollCount > 120) {
+        pollInterval = 10 * 60 * 1000; // Increase the poll interval further after ~ 1h
+      }
+
+      const isCancelled = shouldStopExecution();
+      ruleExecutionLogger?.debug(`Polling for query ID: ${queryId}, isCancelled: ${isCancelled}`);
+
+      if (isCancelled) {
+        throw new Error('Execution cancelled');
+      }
+      // Wait for the poll interval before the next attempt
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+    }
+  } catch (e) {
+    // If the query is still running after cancellation, delete it
+    if (queryId) {
+      await esClient.transport.request({
+        method: 'DELETE',
+        path: `/_query/async/${queryId}`,
+      });
+    }
+
+    throw getKbnServerError(e);
+  }
 };

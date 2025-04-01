@@ -289,7 +289,7 @@ export const previewRulesRoute = (
                 rule,
                 services: {
                   shouldWriteAlerts,
-                  shouldStopExecution: () => false,
+                  shouldStopExecution: () => isAborted,
                   alertsClient: null,
                   alertFactory,
                   savedObjectsClient: coreContext.savedObjects.client,
