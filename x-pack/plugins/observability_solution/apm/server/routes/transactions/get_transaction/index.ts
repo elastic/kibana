@@ -98,13 +98,8 @@ export async function getTransaction({
         },
       },
       fields: [...requiredFields, ...optionalFields],
-      _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
+      _source: [SPAN_LINKS, TRANSACTION_MARKS_AGENT],
     },
-<<<<<<< HEAD:x-pack/plugins/observability_solution/apm/server/routes/transactions/get_transaction/index.ts
-=======
-    fields: [...requiredFields, ...optionalFields],
-    _source: [SPAN_LINKS, TRANSACTION_MARKS_AGENT],
->>>>>>> d4d1c2b6ddf ([APM] Fix query for transaction marks (#215819)):x-pack/solutions/observability/plugins/apm/server/routes/transactions/get_transaction/index.ts
   });
 
   const hit = maybe(resp.hits.hits[0]);
