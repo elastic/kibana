@@ -23,7 +23,7 @@ export interface SecretPath {
 }
 export interface SOSecretPath {
   path: string;
-  value: string | { id: string } | { ids: string[] };
+  value: string | { id: string };
 }
 
 export type SOSecret =
