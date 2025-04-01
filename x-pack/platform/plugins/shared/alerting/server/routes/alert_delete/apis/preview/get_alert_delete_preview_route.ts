@@ -6,8 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/rule/apis/alert_delete';
-import { alertDeletePreviewQuerySchemaV1 } from '../../../../../common/routes/rule/apis/alert_delete';
+import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/rules_settings/apis/alert_delete';
+import { alertDeletePreviewQuerySchemaV1 } from '../../../../../common/routes/rules_settings/apis/alert_delete';
 import type { ILicenseState } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';

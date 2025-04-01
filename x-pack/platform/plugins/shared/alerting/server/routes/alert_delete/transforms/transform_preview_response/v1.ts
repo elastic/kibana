@@ -6,7 +6,7 @@
  */
 
 import type { AlertDeletePreview } from '@kbn/alerting-types';
-import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/rule/apis/alert_delete';
+import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/rules_settings/apis/alert_delete';
 
 export const transformAlertDeletePreviewToResponse = ({
   affectedAlertCount,
