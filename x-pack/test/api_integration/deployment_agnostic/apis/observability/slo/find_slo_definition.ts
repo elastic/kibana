@@ -7,7 +7,7 @@
 
 import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
@@ -23,12 +23,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const DATA_VIEW_ID = 'data-view-id';
 
   let adminRoleAuthc: RoleCredentials;
-  let internalHeaders: InternalRequestHeader;
 
   describe('Find SLOs by outdated status and tags', function () {
     before(async () => {
       adminRoleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
-      internalHeaders = samlAuth.getInternalRequestHeader();
 
       await generate({ client: esClient, config: DATA_FORGE_CONFIG, logger });
 

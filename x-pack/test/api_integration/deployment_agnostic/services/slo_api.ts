@@ -6,12 +6,7 @@
  */
 
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
-  CreateSLOInput,
-  FindSLODefinitionsResponse,
-  UpdateSLOInput,
-  SLODefinitionResponse,
-} from '@kbn/slo-schema';
+import { CreateSLOInput, FindSLODefinitionsResponse, UpdateSLOInput } from '@kbn/slo-schema';
 import { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
 
@@ -26,7 +21,7 @@ interface SavedObjectResponse {
   page: number;
   per_page: number;
   total: number;
-  saved_objects: Array<SavedObject<SLODefinitionResponse>>;
+  saved_objects: Array<SavedObject<StoredSLODefinition>>;
 }
 
 export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderContext) {
