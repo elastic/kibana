@@ -16,7 +16,6 @@
     "@kbn/esql-ast",
     "@kbn/esql-utils",
     "@kbn/dashboard-plugin",
-    "@kbn/lens-plugin",
     "@kbn/lens-embeddable-utils",
     "@kbn/core"
   ],

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { cloneDeep, mapValues, uniq } from 'lodash';
-import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type {
   DashboardAttributes,
   SavedDashboardPanel,
 } from '@kbn/dashboard-plugin/common/content_management/v2';
-import type { LensSerializedState } from '@kbn/lens-plugin/public';
+import { cloneDeep, mapValues, uniq } from 'lodash';
+import { AggregateQuery, Query } from '@kbn/es-query';
+import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
 import type { ContentPackSavedObject } from '../../..';
@@ -88,7 +88,10 @@ function locateIndexPatterns(
 
 function traversePanel(panel: SavedDashboardPanel, options: TraverseOptions) {
   if (panel.type === 'lens') {
-    const config = panel.embeddableConfig as LensSerializedState;
+    const config = panel.embeddableConfig as {
+      query?: Query | AggregateQuery;
+      attributes?: LensAttributes;
+    };
     if (config.query && 'esql' in config.query) {
       config.query.esql = options.esqlQuery(config.query.esql);
     }
