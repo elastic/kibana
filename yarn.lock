@@ -2062,10 +2062,10 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@69.1.1":
-  version "69.1.1"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-69.1.1.tgz#3a639965e9217de083b28d777517aeebf322f3ed"
-  integrity sha512-qW08ntBXr4MQ1JP3VNh2bJC6RLm8I0ha+UqZQ/J6p3alQd/6yxuoj568ugTCXvvRw3nBXAsnkEkYyJ0TXR9RtA==
+"@elastic/charts@69.2.1":
+  version "69.2.1"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-69.2.1.tgz#28243fa3a9c3dc1af5118d97d437b2ef62398a2b"
+  integrity sha512-odyqH1qnBvWkwtEcqGJ7EBei1/Yj+59aUr0L1zgLcTapyOZZjvD3gHzAnVmZ0RaFf6qakwSYt8MBodNw7+vujA==
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2713,6 +2713,13 @@
   version "8.3.1"
   resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-8.3.1.tgz#7753df0cb88d7649becf984a96dd1bd0a26f43e3"
   integrity sha512-FdgpFxY6V6rLZE9mmIBb9hM0xpfvQOSNOLnzolzKwsE1DH+gC7lEKV1p1IbR0lAYyvYd5a4u3qWJzowUkw1bIw==
+
+"@fast-check/jest@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@fast-check/jest/-/jest-2.1.0.tgz#67585ede285267dc9efc3ac3e05c41879887980a"
+  integrity sha512-9ZVvFnngR0EpfxWoGrq/e9ERrDv3qqE4RXVnn/mGv5Rn33LoDcIfg7xjqVREsyhGcwegEKeL0KJlrWzWiOBV8A==
+  dependencies:
+    fast-check "^3.0.0 || ^4.0.0"
 
 "@fastify/busboy@^2.0.0":
   version "2.0.0"
@@ -11073,10 +11080,10 @@
   resolved "https://registry.yarnpkg.com/@types/diff-match-patch/-/diff-match-patch-1.0.36.tgz#dcef10a69d357fe9d43ac4ff2eca6b85dbf466af"
   integrity sha512-xFdR6tkm0MWvBfO8xXCSsinYxHcqkQUlcHeSpMC2ukzOb6lwQAfDmW+Qt0AvlGd8HpsS28qKsB+oPeJn9I39jg==
 
-"@types/diff@^7.0.1":
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-7.0.1.tgz#acc505eb2e8337ca400503283a6ab44a59906d9f"
-  integrity sha512-R/BHQFripuhW6XPXy05hIvXJQdQ4540KnTvEFHSLjXfHYM41liOLKgIJEyYYiQe796xpaMHfe4Uj/p7Uvng2vA==
+"@types/diff@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-7.0.2.tgz#d638edebf3c97aa4962b6f1164a7921ab3de9f83"
+  integrity sha512-JSWRMozjFKsGlEjiiKajUjIJVKuKdE3oVy2DNtK+fUo8q82nhFZ2CPQwicAIkXrofahDXrWJ7mjelvZphMS98Q==
 
 "@types/doctrine@^0.0.9":
   version "0.0.9"
@@ -18179,6 +18186,13 @@ fancy-log@^1.3.3:
     parse-node-version "^1.0.0"
     time-stamp "^1.0.0"
 
+"fast-check@^3.0.0 || ^4.0.0":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/fast-check/-/fast-check-4.0.0.tgz#a5aff60fb20728458c91d1ff98ca1b65d991abc5"
+  integrity sha512-aXLyLemZ7qhLNn2oq+YpjT2Xed21+i29WGAYuyrGbU4r8oinB3i4XR4e62O3NY6qmm5qHEDoc/7d+gMsri3AfA==
+  dependencies:
+    pure-rand "^7.0.0"
+
 fast-content-type-parse@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/fast-content-type-parse/-/fast-content-type-parse-2.0.1.tgz#c236124534ee2cb427c8d8e5ba35a4856947847b"
@@ -22700,10 +22714,10 @@ lru-cache@^10.2.0:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-10.4.3.tgz#410fc8a17b70e598013df257c2446b7f3383f119"
   integrity sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==
 
-lru-cache@^11.0.2:
-  version "11.0.2"
-  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.0.2.tgz#fbd8e7cf8211f5e7e5d91905c415a3f55755ca39"
-  integrity sha512-123qHRfJBmo2jXDbo/a5YOQrJoHF/GNQTLzQ5+IdK5pWpceK17yRc6ozlWd25FxvGKQbIUs91fDFkXmDHTKcyA==
+lru-cache@^11.1.0:
+  version "11.1.0"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-11.1.0.tgz#afafb060607108132dbc1cf8ae661afb69486117"
+  integrity sha512-QIXZUBJUx+2zHUdQujWejBkcD9+cs94tLn0+YL8UrCh+D5sCXZ4c7LaEH48pNwRY3MLDgqUFyhlCyjJPf1WP0A==
 
 lru-cache@^4.1.5:
   version "4.1.5"
@@ -22855,10 +22869,10 @@ maplibre-gl@3.1.0:
     tinyqueue "^2.0.3"
     vt-pbf "^3.1.3"
 
-maplibre-gl@5.1.1:
-  version "5.1.1"
-  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-5.1.1.tgz#734444c730de4463d0469bb2782650d78ac6b356"
-  integrity sha512-0Z6ODzyFu/grwT6K1eIBpv6MZE4xnJD1AV+Yq1hPzOh/YCY36r9BlSaU7d7n2/HJOaoKOy0b2YF8cS4dD+iEVQ==
+maplibre-gl@5.3.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/maplibre-gl/-/maplibre-gl-5.3.0.tgz#31fcc6f689dd0d342446a2baa29bbb8015f9f3dc"
+  integrity sha512-qru6B6jHlDPR4Q9/P4W1zEPbPofR4wwYbrrjiHKWI7yLtyXmpJ1/G1KaIYDr5uNdFbPZ7uiZAWdqtfdNLmIhGg==
   dependencies:
     "@mapbox/geojson-rewind" "^0.5.2"
     "@mapbox/jsonlint-lines-primitives" "^2.0.2"
@@ -26084,6 +26098,11 @@ pure-rand@^6.0.0:
   version "6.0.2"
   resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-6.0.2.tgz#a9c2ddcae9b68d736a8163036f088a2781c8b306"
   integrity sha512-6Yg0ekpKICSjPswYOuC5sku/TSWaRYlA0qsXqJgM/d/4pLPHPuTxK7Nbf7jFKzAeedUhR8C7K9Uv63FBsSo8xQ==
+
+pure-rand@^7.0.0:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/pure-rand/-/pure-rand-7.0.1.tgz#6f53a5a9e3e4a47445822af96821ca509ed37566"
+  integrity sha512-oTUZM/NAZS8p7ANR3SHh30kXB+zK2r2BPcEn/awJIbOvq82WoMN4p62AWWp3Hhw50G0xMsw1mhIBLqHw64EcNQ==
 
 qs@6.13.0, qs@^6.11.0, qs@^6.7.0:
   version "6.13.0"
