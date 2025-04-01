@@ -40,3 +40,11 @@ export type DateFormState = DateProcessorConfig & { type: 'date' };
 export type SpecialisedFormState = GrokFormState | DissectFormState | DateFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+
+export type ExtractBooleanFields<TInput> = NonNullable<
+  TInput extends Record<string, unknown>
+    ? {
+        [K in keyof TInput]: boolean extends TInput[K] ? K : never;
+      }[keyof TInput]
+    : never
+>;

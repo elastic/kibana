@@ -5,34 +5,22 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiSwitch, htmlIdGenerator } from '@elastic/eui';
 import React from 'react';
-import { useController } from 'react-hook-form';
-import { FieldConfiguration } from '../types';
+import { ConfigDrivenProcessorFormState, FieldConfiguration } from '../types';
+import { ToggleField } from '../../toggle_field';
+import { ExtractBooleanFields } from '../../../types';
 
 export const BooleanField = ({
   fieldConfiguration,
-  id = createId(),
 }: {
   fieldConfiguration: FieldConfiguration;
-  id?: string;
 }) => {
-  const { helpText, label, field: fieldName } = fieldConfiguration;
-
-  const { field } = useController({
-    name: fieldName,
-  });
-
+  const { field, label, helpText } = fieldConfiguration;
   return (
-    <EuiFormRow label={label} helpText={helpText} fullWidth describedByIds={id ? [id] : undefined}>
-      <EuiSwitch
-        id={id}
-        label={label}
-        checked={(field.value as boolean) ?? false}
-        onChange={(e) => field.onChange(e.target.checked)}
-      />
-    </EuiFormRow>
+    <ToggleField
+      name={field as ExtractBooleanFields<ConfigDrivenProcessorFormState>}
+      label={label}
+      helpText={helpText}
+    />
   );
 };
-
-const createId = htmlIdGenerator();
