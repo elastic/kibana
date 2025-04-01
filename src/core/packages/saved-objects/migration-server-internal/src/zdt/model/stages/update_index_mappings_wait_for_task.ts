@@ -16,7 +16,7 @@ import type { ModelStage } from '../types';
 
 export const updateIndexMappingsWaitForTask: ModelStage<
   'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK',
-  'UPDATE_MAPPING_MODEL_VERSIONS' | 'FATAL'
+  'UPDATE_MAPPING_MODEL_VERSIONS' | 'UPDATE_INDEX_MAPPINGS' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
@@ -26,6 +26,32 @@ export const updateIndexMappingsWaitForTask: ModelStage<
       // exponential delay.  We will basically keep polling forever until the
       // Elasticsearch task succeeds or fails.
       return delayRetryState(state, left.message, Number.MAX_SAFE_INTEGER);
+    } else if (isTypeof(left, 'wait_for_task_completed_with_error_retry_original')) {
+      if (state.retryCount < context.maxRetryAttempts) {
+        const retryCount = state.retryCount + 1;
+        const retryDelay = 1500 + 1000 * Math.random();
+        return {
+          ...state,
+          controlState: 'UPDATE_INDEX_MAPPINGS',
+          additiveMappingChanges: state.additiveMappingChanges,
+          retryCount,
+          retryDelay,
+          logs: [
+            ...state.logs,
+            {
+              level: 'warning',
+              message: `Errors occurred whilst deleting unwanted documents. Retrying attempt ${retryCount}.`,
+            },
+          ],
+        };
+      } else {
+        const reason = `Migration was retried ${state.retryCount} times but failed with ${left.message}.`;
+        return {
+          ...state,
+          controlState: 'FATAL',
+          reason,
+        };
+      }
     } else {
       throwBadResponse(state, left);
     }

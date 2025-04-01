@@ -10,7 +10,11 @@
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { flow } from 'fp-ts/lib/function';
-import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
+import {
+  waitForTask,
+  WaitForTaskCompletionTimeout,
+  WaitForTaskCompletedWithErrorRetryOriginal,
+} from './wait_for_task';
 import { RetryableEsClientError } from './catch_retryable_es_client_errors';
 
 export const waitForPickupUpdatedMappingsTask = flow(
@@ -19,7 +23,9 @@ export const waitForPickupUpdatedMappingsTask = flow(
     (
       res
     ): TaskEither.TaskEither<
-      RetryableEsClientError | WaitForTaskCompletionTimeout,
+      | RetryableEsClientError
+      | WaitForTaskCompletionTimeout
+      | WaitForTaskCompletedWithErrorRetryOriginal,
       'pickup_updated_mappings_succeeded'
     > => {
       // We don't catch or type failures/errors because they should never
@@ -32,6 +38,14 @@ export const waitForPickupUpdatedMappingsTask = flow(
             JSON.stringify(res.failures.value)
         );
       } else if (Option.isSome(res.error)) {
+        if (res.error.value.type === 'search_phase_execution_exception') {
+          // This error is normally fixed in the next try, so let's retry instead of throwing
+          return TaskEither.left({
+            type: 'wait_for_task_completed_with_error_retry_original' as const,
+            message: 'search_phase_execution_exception',
+          });
+        }
+
         throw new Error(
           'pickupUpdatedMappings task failed with the following error:\n' +
             JSON.stringify(res.error.value)

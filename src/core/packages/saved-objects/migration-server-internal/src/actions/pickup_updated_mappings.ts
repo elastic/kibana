@@ -62,6 +62,6 @@ export const pickupUpdatedMappings =
       .then(({ task: taskId }) => {
         return Either.right({ taskId: String(taskId!) });
       })
-      .catch(catchRetryableSearchPhaseExecutionException)
+      .catch(catchRetryableSearchPhaseExecutionException) // TODO: can this fail?
       .catch(catchRetryableEsClientErrors);
   };

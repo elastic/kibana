@@ -42,6 +42,21 @@ export interface WaitForTaskCompletionTimeout {
   readonly error?: Error;
 }
 
+/**
+ * After waiting for the task, Elasticsearch returned a 200 response containing an error.
+ *
+ * When we use `wait_for_completion=false`, we won't get the errors right away, we'll get a
+ * task id. Then we have to query the tasks API with that id and Elasticsearch will tell us
+ * if there was any error in the original task inside a 200 response. In some cases we might
+ * want to retry the original task.
+ */
+export interface WaitForTaskCompletedWithErrorRetryOriginal {
+  /** While waiting, the original task encountered an error. It might need to be retried. */
+  readonly type: 'wait_for_task_completed_with_error_retry_original';
+  readonly message: string;
+  readonly error?: Error;
+}
+
 const catchWaitForTaskCompletionTimeout = (
   e: EsErrors.ResponseError
 ): Either.Either<WaitForTaskCompletionTimeout, never> => {

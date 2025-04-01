@@ -14,9 +14,10 @@ import {
   type MockedMigratorContext,
 } from '../../test_helpers';
 import type { ResponseType } from '../../next';
-import type { UpdateIndexMappingsState } from '../../state';
+import type { UpdateIndexMappingsState, UpdateIndexMappingsWaitForTaskState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { updateIndexMappings } from './update_index_mappings';
+import { updateIndexMappingsWaitForTask } from './update_index_mappings_wait_for_task';
 
 describe('Stage: updateIndexMappings', () => {
   let context: MockedMigratorContext;
@@ -27,6 +28,16 @@ describe('Stage: updateIndexMappings', () => {
     ...createPostInitState(),
     controlState: 'UPDATE_INDEX_MAPPINGS',
     additiveMappingChanges: {},
+    ...parts,
+  });
+
+  const createWaitState = (
+    parts: Partial<UpdateIndexMappingsWaitForTaskState> = {}
+  ): UpdateIndexMappingsWaitForTaskState => ({
+    ...createPostInitState(),
+    controlState: 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK',
+    additiveMappingChanges: {},
+    updateTargetMappingsTaskId: '73',
     ...parts,
   });
 
@@ -49,6 +60,42 @@ describe('Stage: updateIndexMappings', () => {
       ...state,
       controlState: 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK',
       updateTargetMappingsTaskId: '42',
+    });
+  });
+
+  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_INDEX_MAPPINGS in case of wait_for_task_completed_with_error_retry_original', () => {
+    const state = createWaitState();
+    const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+      type: 'wait_for_task_completed_with_error_retry_original' as const,
+      message: 'search_phase_execution_exception',
+    });
+
+    const newState = updateIndexMappingsWaitForTask(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'UPDATE_INDEX_MAPPINGS',
+      retryCount: 1,
+      retryDelay: expect.any(Number),
+      logs: expect.any(Array),
+    });
+  });
+
+  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL in case of  wait_for_task_completed_with_error_retry_original when exceeding retry count', () => {
+    const state = createWaitState({
+      retryCount: context.maxRetryAttempts + 1,
+    });
+    const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+      type: 'wait_for_task_completed_with_error_retry_original' as const,
+      message: 'search_phase_execution_exception',
+    });
+
+    const newState = updateIndexMappingsWaitForTask(state, res, context);
+
+    expect(newState).toEqual({
+      ...state,
+      controlState: 'FATAL',
+      reason: `Migration was retried ${state.retryCount} times but failed with search_phase_execution_exception.`,
     });
   });
 });
