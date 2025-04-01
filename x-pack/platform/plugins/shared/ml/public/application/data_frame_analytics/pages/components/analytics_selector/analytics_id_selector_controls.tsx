@@ -94,7 +94,10 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
   setIsIdSelectorFlyoutVisible,
   selectedId,
 }) => {
-  const [canCreateDataFrameAnalytics] = usePermissionCheck(['canCreateDataFrameAnalytics']);
+  const [canGetDataFrameAnalytics, canCreateDataFrameAnalytics] = usePermissionCheck([
+    'canGetDataFrameAnalytics',
+    'canCreateDataFrameAnalytics',
+  ]);
 
   const redirectToDfaJobManagement = useCreateAndNavigateToManagementMlLink('', 'analytics');
 
@@ -133,19 +136,29 @@ export const AnalyticsIdSelectorControls: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem />
 
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            size="s"
-            color="primary"
-            onClick={redirectToDfaJobManagement}
-            disabled={!canCreateDataFrameAnalytics}
-          >
-            <FormattedMessage
-              id="xpack.ml.embeddables.jobSelector.manageJobsLinkLabel"
-              defaultMessage="Manage jobs"
-            />
-          </EuiButtonEmpty>
-        </EuiFlexItem>
+        {canGetDataFrameAnalytics ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              color="primary"
+              onClick={redirectToDfaJobManagement}
+              disabled={!canGetDataFrameAnalytics}
+              data-test-subj="mlJobSelectorManageJobsButton"
+            >
+              {canCreateDataFrameAnalytics ? (
+                <FormattedMessage
+                  id="xpack.ml.jobSelector.manageJobsLinkLabel"
+                  defaultMessage="Manage jobs"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.ml.jobSelector.viewJobsLinkLabel"
+                  defaultMessage="View jobs"
+                />
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       <EuiHorizontalRule />
     </>

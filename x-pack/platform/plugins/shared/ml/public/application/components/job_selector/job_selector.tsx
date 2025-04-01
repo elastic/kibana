@@ -147,7 +147,7 @@ export function JobSelector({
     onSelectionChange?.({ jobIds: newSelection, time: undefined });
   };
 
-  const [canCreateJob] = usePermissionCheck(['canCreateJob']);
+  const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
 
   const redirectToADJobManagement = useCreateAndNavigateToManagementMlLink('', 'anomaly_detection');
 
@@ -202,19 +202,30 @@ export function JobSelector({
           <EuiFlexItem grow={false}>
             <FeedBackButton jobIds={selectedIds} page={page} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              color="primary"
-              onClick={redirectToADJobManagement}
-              disabled={!canCreateJob}
-            >
-              <FormattedMessage
-                id="xpack.ml.embeddables.jobSelector.manageJobsLinkLabel"
-                defaultMessage="Manage jobs"
-              />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
+
+          {canGetJobs ? (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                color="primary"
+                onClick={redirectToADJobManagement}
+                disabled={!canGetJobs}
+                data-test-subj="mlJobSelectorManageJobsButton"
+              >
+                {canCreateJob ? (
+                  <FormattedMessage
+                    id="xpack.ml.jobSelector.manageJobsLinkLabel"
+                    defaultMessage="Manage jobs"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.ml.jobSelector.viewJobsLinkLabel"
+                    defaultMessage="View jobs"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
       </>
