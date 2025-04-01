@@ -129,7 +129,7 @@ export const useIngestionRate = ({
         })),
       };
     },
-    [data.search, definition, timeRange, stats, core.uiSettings]
+    [definition, stats, timeRange, core, data.search]
   );
 
   return {
@@ -280,7 +280,7 @@ export const useIngestionRatePerTier = ({
 
       return { start, end, interval, buckets };
     },
-    [data.search, streamsRepositoryClient, definition, timeRange, stats, core.uiSettings, ilmPhases]
+    [definition, stats, timeRange, core, data.search, streamsRepositoryClient, ilmPhases]
   );
 
   return {
