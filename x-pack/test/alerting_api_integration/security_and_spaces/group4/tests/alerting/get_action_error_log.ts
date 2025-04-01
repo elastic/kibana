@@ -16,7 +16,7 @@ import {
   getEventLog,
   getUnauthorizedErrorMessage,
 } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetActionErrorLogTests({ getService }: FtrProviderContext) {

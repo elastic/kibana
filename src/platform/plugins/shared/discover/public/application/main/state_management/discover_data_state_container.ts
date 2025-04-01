@@ -30,8 +30,8 @@ import { fetchAll, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
 import { getFetch$ } from '../data_fetching/get_fetch_observable';
 import { getDefaultProfileState } from './utils/get_default_profile_state';
-import type { InternalStateStore, RuntimeStateManager } from './redux';
-import { internalStateActions } from './redux';
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -136,6 +136,8 @@ export function getDataStateContainer({
   runtimeStateManager,
   getSavedSearch,
   setDataView,
+  injectCurrentTab,
+  getCurrentTab,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
@@ -144,6 +146,8 @@ export function getDataStateContainer({
   runtimeStateManager: RuntimeStateManager;
   getSavedSearch: () => SavedSearch;
   setDataView: (dataView: DataView) => void;
+  injectCurrentTab: TabActionInjector;
+  getCurrentTab: () => TabState;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications, profilesManager } = services;
   const { timefilter } = data.query.timefilter;
@@ -251,9 +255,11 @@ export function getDataStateContainer({
           }
 
           internalState.dispatch(
-            internalStateActions.setDataRequestParams({
-              timeRangeAbsolute: timefilter.getAbsoluteTime(),
-              timeRangeRelative: timefilter.getTime(),
+            injectCurrentTab(internalStateActions.setDataRequestParams)({
+              dataRequestParams: {
+                timeRangeAbsolute: timefilter.getAbsoluteTime(),
+                timeRangeRelative: timefilter.getTime(),
+              },
             })
           );
 
@@ -263,8 +269,9 @@ export function getDataStateContainer({
             query: appStateContainer.getState().query,
           });
 
-          const { resetDefaultProfileState } = internalState.getState();
-          const dataView = runtimeStateManager.currentDataView$.getValue();
+          const { id: currentTabId, resetDefaultProfileState } = getCurrentTab();
+          const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
+          const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
             ? getDefaultProfileState({ profilesManager, resetDefaultProfileState, dataView })
             : undefined;
@@ -291,9 +298,9 @@ export function getDataStateContainer({
               abortController,
               ...commonFetchDeps,
             },
+            getCurrentTab,
             async () => {
-              const { resetDefaultProfileState: currentResetDefaultProfileState } =
-                internalState.getState();
+              const { resetDefaultProfileState: currentResetDefaultProfileState } = getCurrentTab();
 
               if (currentResetDefaultProfileState.resetId !== resetDefaultProfileState.resetId) {
                 return;
@@ -313,10 +320,12 @@ export function getDataStateContainer({
               // Clear the default profile state flags after the data fetching
               // is done so refetches don't reset the state again
               internalState.dispatch(
-                internalStateActions.setResetDefaultProfileState({
-                  columns: false,
-                  rowHeight: false,
-                  breakdownField: false,
+                injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+                  resetDefaultProfileState: {
+                    columns: false,
+                    rowHeight: false,
+                    breakdownField: false,
+                  },
                 })
               );
             }
