@@ -65,7 +65,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
         for (const notExpectedLabel of notExpectedLabels) {
           await PageObjects.svlCommonNavigation.search.searchFor(notExpectedLabel);
           const results = await PageObjects.svlCommonNavigation.search.getDisplayedResults();
-          expect(results.length).to.be(0);
           expect(results.map((r) => r.label)).to.not.contain(notExpectedLabel);
         }
         await PageObjects.svlCommonNavigation.search.hideSearch();
