@@ -179,7 +179,7 @@ export function generateLink(
     rawFilter,
     false,
     false,
-    null,
+    'Rule query DSL',
     FilterStateStore.APP_STATE
   );
   const redirectUrlParams: DiscoverAppLocatorParams = {
