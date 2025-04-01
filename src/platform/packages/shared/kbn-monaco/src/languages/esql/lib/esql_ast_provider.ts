@@ -8,6 +8,7 @@
  */
 
 import { type ESQLCallbacks, suggest, validateQuery } from '@kbn/esql-validation-autocomplete';
+import type { AstProviderFn } from '@kbn/esql-ast';
 import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
 import { wrapAsMonacoMessages } from './converters/positions';
@@ -16,20 +17,45 @@ import { monacoPositionToOffset, offsetRangeToMonacoRange } from './shared/utils
 import { getSignatureHelp } from './signature';
 import { SuggestionRawDefinitionWithMonacoRange } from './types';
 
+type CacheEntry = ReturnType<Awaited<AstProviderFn>>;
 export class ESQLAstAdapter {
+  private static queryCache: Map<string, CacheEntry> = new Map();
+  private static CACHE_LIMIT = 8;
+
   constructor(
     private worker: (...uris: monaco.Uri[]) => Promise<ESQLWorker>,
     private callbacks?: ESQLCallbacks
   ) {}
 
-  private async getAstWorker(model: monaco.editor.ITextModel) {
-    const worker = await this.worker(model.uri);
-    return worker.getAst;
+  /**
+   * Caches the AST for a particular query
+   */
+  private static addToCache(query: string, entry: CacheEntry) {
+    // If the cache exceeds the entry limit, evict the oldest one
+    if (this.queryCache.size >= this.CACHE_LIMIT) {
+      const oldestKey = this.queryCache.keys().next().value;
+      this.queryCache.delete(oldestKey);
+    }
+
+    // Add the new query and its AST to the cache
+    this.queryCache.set(query, entry);
   }
 
-  async getAst(model: monaco.editor.ITextModel, code?: string) {
-    const getAstFn = await this.getAstWorker(model);
-    return getAstFn(code ?? model.getValue());
+  private async getAstWorker(model: monaco.editor.ITextModel): Promise<AstProviderFn> {
+    const worker = await this.worker(model.uri);
+
+    return async (text: string) => {
+      if (ESQLAstAdapter.queryCache.has(text)) {
+        console.log('CACHE HIT!!!!');
+        return ESQLAstAdapter.queryCache.get(text)!;
+      }
+
+      const result = await worker.getAst(text);
+
+      ESQLAstAdapter.addToCache(text, result);
+
+      return result;
+    };
   }
 
   async validate(model: monaco.editor.ITextModel, code: string) {

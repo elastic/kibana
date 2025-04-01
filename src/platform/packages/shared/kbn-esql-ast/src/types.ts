@@ -467,7 +467,7 @@ export interface ESQLMessage {
   code: string;
 }
 
-export type AstProviderFn = (text: string | undefined) =>
+export type AstProviderFn = (text: string) =>
   | Promise<{
       ast: ESQLAst;
       errors: EditorError[];
