@@ -686,7 +686,7 @@ describe('fetchEsQuery', () => {
             ],
           },
           meta: {
-            alias: null,
+            alias: 'Rule query DSL',
             disabled: false,
             index: 'es_query_rule_adhoc_data_view',
             negate: false,
