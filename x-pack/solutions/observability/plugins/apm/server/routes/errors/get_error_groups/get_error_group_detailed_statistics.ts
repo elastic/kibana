@@ -59,36 +59,34 @@ export async function getErrorGroupDetailedStatistics({
       apm: {
         events: [ProcessorEvent.error],
       },
-      body: {
-        track_total_hits: false,
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...termsQuery(ERROR_GROUP_ID, ...groupIds),
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...rangeQuery(startWithOffset, endWithOffset),
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-            ],
-          },
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...termsQuery(ERROR_GROUP_ID, ...groupIds),
+            ...termQuery(SERVICE_NAME, serviceName),
+            ...rangeQuery(startWithOffset, endWithOffset),
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+          ],
         },
-        aggs: {
-          error_groups: {
-            terms: {
-              field: ERROR_GROUP_ID,
-              size: 500,
-            },
-            aggs: {
-              timeseries: {
-                date_histogram: {
-                  field: '@timestamp',
-                  fixed_interval: intervalString,
-                  min_doc_count: 0,
-                  extended_bounds: {
-                    min: startWithOffset,
-                    max: endWithOffset,
-                  },
+      },
+      aggs: {
+        error_groups: {
+          terms: {
+            field: ERROR_GROUP_ID,
+            size: 500,
+          },
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                fixed_interval: intervalString,
+                min_doc_count: 0,
+                extended_bounds: {
+                  min: startWithOffset,
+                  max: endWithOffset,
                 },
               },
             },

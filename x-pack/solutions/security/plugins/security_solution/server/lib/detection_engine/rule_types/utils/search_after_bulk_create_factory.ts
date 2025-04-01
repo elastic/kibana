@@ -6,7 +6,7 @@
  */
 
 import { identity } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
@@ -60,26 +60,30 @@ export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBul
 }
 
 export const searchAfterAndBulkCreateFactory = async ({
+  sharedParams,
   enrichment = identity,
   eventsTelemetry,
-  exceptionsList,
   filter,
-  inputIndexPattern,
-  listClient,
-  pageSize,
-  ruleExecutionLogger,
   services,
   sortOrder,
   trackTotalHits,
-  tuple,
-  runtimeMappings,
-  primaryTimestamp,
-  secondaryTimestamp,
   additionalFilters,
   bulkCreateExecutor,
   getWarningMessage,
   isLoggedRequestsEnabled,
+  maxSignalsOverride,
 }: SearchAfterAndBulkCreateFactoryParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  const {
+    inputIndex: inputIndexPattern,
+    runtimeMappings,
+    searchAfterSize: pageSize,
+    primaryTimestamp,
+    secondaryTimestamp,
+    unprocessedExceptions: exceptionsList,
+    tuple,
+    ruleExecutionLogger,
+    listClient,
+  } = sharedParams;
   // eslint-disable-next-line complexity
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
@@ -102,7 +106,9 @@ export const searchAfterAndBulkCreateFactory = async ({
       });
     }
 
-    while (toReturn.createdSignalsCount <= tuple.maxSignals) {
+    const maxSignals = maxSignalsOverride ?? tuple.maxSignals;
+
+    while (toReturn.createdSignalsCount <= maxSignals) {
       const cycleNum = `cycle ${searchingIteration++}`;
       try {
         let mergedSearchResults = createSearchResultReturnType();
@@ -127,7 +133,7 @@ export const searchAfterAndBulkCreateFactory = async ({
             services,
             ruleExecutionLogger,
             filter,
-            pageSize: Math.ceil(Math.min(tuple.maxSignals, pageSize)),
+            pageSize: Math.ceil(Math.min(maxSignals, pageSize)),
             primaryTimestamp,
             secondaryTimestamp,
             trackTotalHits,

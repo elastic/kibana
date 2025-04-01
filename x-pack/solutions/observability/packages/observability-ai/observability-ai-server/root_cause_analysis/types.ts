@@ -17,7 +17,7 @@ import { Logger } from '@kbn/logging';
 import { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import {
   RCA_END_PROCESS_TOOL_NAME,
   RCA_INVESTIGATE_ENTITY_TOOL_NAME,
@@ -92,7 +92,7 @@ export interface RootCauseAnalysisContext {
   inferenceClient: InferenceClient;
   tokenLimit: number;
   connectorId: string;
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   alertsClient: AlertsClient;
   rulesClient: RulesClient;
   logger: Logger;

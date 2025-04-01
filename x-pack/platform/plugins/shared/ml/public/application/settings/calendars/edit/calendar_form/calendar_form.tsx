@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useState, useCallback } from 'react';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,

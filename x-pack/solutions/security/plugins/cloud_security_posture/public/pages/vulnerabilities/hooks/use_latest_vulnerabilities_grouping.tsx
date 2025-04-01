@@ -55,27 +55,41 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       critical: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.CRITICAL,
+              case_insensitive: true,
+            },
           },
         },
       },
       high: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.HIGH,
+              case_insensitive: true,
+            },
           },
         },
       },
       medium: {
         filter: {
           term: {
-            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.MEDIUM,
+              case_insensitive: true,
+            },
           },
         },
       },
       low: {
         filter: {
-          term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
+          term: {
+            'vulnerability.severity': {
+              value: VULNERABILITIES_SEVERITY.LOW,
+              case_insensitive: true,
+            },
+          },
         },
       },
     },
@@ -180,8 +194,10 @@ export const useLatestVulnerabilitiesGrouping = ({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
     groupByField: currentSelectedGroup,
     uniqueValue,
-    from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
-    to: 'now',
+    timeRange: {
+      from: `now-${CDR_3RD_PARTY_RETENTION_POLICY}`,
+      to: 'now',
+    },
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }],

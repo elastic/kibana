@@ -12,6 +12,8 @@ import { resolveGridRow } from './resolve_grid_row';
 describe('resolve grid row', () => {
   test('does nothing if grid row has no collisions', () => {
     const gridRow = {
+      order: 0,
+      id: 'first',
       title: 'Test',
       isCollapsed: false,
       panels: {
@@ -27,6 +29,8 @@ describe('resolve grid row', () => {
 
   test('resolves grid row if it has collisions without drag event', () => {
     const result = resolveGridRow({
+      order: 0,
+      id: 'first',
       title: 'Test',
       isCollapsed: false,
       panels: {
@@ -37,6 +41,8 @@ describe('resolve grid row', () => {
       },
     });
     expect(result).toEqual({
+      order: 0,
+      id: 'first',
       title: 'Test',
       isCollapsed: false,
       panels: {
@@ -51,6 +57,8 @@ describe('resolve grid row', () => {
   test('drag causes no collision', () => {
     const result = resolveGridRow(
       {
+        order: 0,
+        id: 'first',
         title: 'Test',
         isCollapsed: false,
         panels: {
@@ -63,6 +71,8 @@ describe('resolve grid row', () => {
     );
 
     expect(result).toEqual({
+      order: 0,
+      id: 'first',
       title: 'Test',
       isCollapsed: false,
       panels: {
@@ -77,6 +87,8 @@ describe('resolve grid row', () => {
   test('drag causes collision with one panel that pushes down others', () => {
     const result = resolveGridRow(
       {
+        order: 0,
+        id: 'first',
         title: 'Test',
         isCollapsed: false,
         panels: {
@@ -90,6 +102,8 @@ describe('resolve grid row', () => {
     );
 
     expect(result).toEqual({
+      order: 0,
+      id: 'first',
       title: 'Test',
       isCollapsed: false,
       panels: {
@@ -105,6 +119,8 @@ describe('resolve grid row', () => {
   test('drag causes collision with multiple panels', () => {
     const result = resolveGridRow(
       {
+        order: 0,
+        id: 'first',
         title: 'Test',
         isCollapsed: false,
         panels: {
@@ -116,6 +132,8 @@ describe('resolve grid row', () => {
       { id: 'panel4', row: 0, column: 3, height: 5, width: 4 }
     );
     expect(result).toEqual({
+      order: 0,
+      id: 'first',
       title: 'Test',
       isCollapsed: false,
       panels: {
@@ -130,6 +148,8 @@ describe('resolve grid row', () => {
   test('drag causes collision with every panel', () => {
     const result = resolveGridRow(
       {
+        order: 0,
+        id: 'first',
         title: 'Test',
         isCollapsed: false,
         panels: {
@@ -142,6 +162,8 @@ describe('resolve grid row', () => {
     );
 
     expect(result).toEqual({
+      order: 0,
+      id: 'first',
       title: 'Test',
       isCollapsed: false,
       panels: {

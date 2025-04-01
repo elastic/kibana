@@ -16,6 +16,7 @@ import { createStreams } from './helpers/create_streams';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const esClient = getService('es');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
@@ -30,17 +31,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await disableStreams(apiClient);
+        await esClient.indices.deleteDataStream({ name: 'metrics-test-test' });
       });
 
       it('successfully creates a GroupStream', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{name}', {
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group' },
               body: {
                 stream: {
                   group: {
-                    members: ['logs', 'logs.test2'],
+                    members: ['logs', 'logs.test2', 'logs'],
                   },
                 },
                 dashboards: [],
@@ -53,7 +55,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully creates a second GroupStream', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{name}', {
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group-too' },
               body: {
@@ -72,7 +74,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('unsuccessfully updates a GroupStream with an uknown stream', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{name}', {
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group' },
               body: {
@@ -90,7 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('unsuccessfully updates a GroupStream with an itself as a member', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{name}', {
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group' },
               body: {
@@ -108,7 +110,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('unsuccessfully updates a GroupStream with a forbidden member', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{name}', {
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group' },
               body: {
@@ -126,7 +128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully deletes a GroupStream', async () => {
         await apiClient
-          .fetch('DELETE /api/streams/{name}', {
+          .fetch('DELETE /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group-too' },
             },
@@ -136,7 +138,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully reads a GroupStream', async () => {
         const response = await apiClient
-          .fetch('GET /api/streams/{name}', {
+          .fetch('GET /api/streams/{name} 2023-10-31', {
             params: {
               path: { name: 'test-group' },
             },
@@ -153,9 +155,81 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('successfully upserts a GroupStream from _group', async () => {
+        const response = await apiClient
+          .fetch('PUT /api/streams/{name}/_group 2023-10-31', {
+            params: {
+              path: { name: 'test-group-3' },
+              body: {
+                group: {
+                  members: ['logs.test2'],
+                },
+              },
+            },
+          })
+          .expect(200);
+        expect(response.body).to.eql({
+          acknowledged: true,
+          result: 'created',
+        });
+      });
+
+      it('successfully reads a GroupStream from _group', async () => {
+        const response = await apiClient
+          .fetch('GET /api/streams/{name}/_group 2023-10-31', {
+            params: {
+              path: { name: 'test-group-3' },
+            },
+          })
+          .expect(200);
+        expect(response.body).to.eql({
+          group: {
+            members: ['logs.test2'],
+          },
+        });
+      });
+
       it('successfully lists a GroupStream', async () => {
-        const response = await apiClient.fetch('GET /api/streams').expect(200);
+        const response = await apiClient.fetch('GET /api/streams 2023-10-31').expect(200);
         expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
+        expect(response.body.streams.some((stream) => stream.name === 'test-group-3')).to.eql(true);
+      });
+
+      it('unsuccessfully creates a group stream with the same name as a unwired stream', async () => {
+        await esClient.index({ index: 'metrics-test-test', document: { '@timestamp': '2025' } });
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'metrics-test-test' },
+              body: {
+                stream: {
+                  group: {
+                    members: ['logs'],
+                  },
+                },
+                dashboards: [],
+              },
+            },
+          })
+          .expect(400);
+      });
+
+      it('unsuccessfully creates a group stream prefixed with logs', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name} 2023-10-31', {
+            params: {
+              path: { name: 'logs.group' },
+              body: {
+                stream: {
+                  group: {
+                    members: ['logs'],
+                  },
+                },
+                dashboards: [],
+              },
+            },
+          })
+          .expect(400);
       });
     });
   });

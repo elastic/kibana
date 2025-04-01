@@ -78,13 +78,11 @@ export const routeHandler: RequestHandler<
       index: TRANSFORM_NOTIFICATIONS_INDEX,
       ignore_unavailable: true,
       size: DEFAULT_MAX_AUDIT_MESSAGE_SIZE,
-      body: {
-        sort: [
-          { [sortField]: { order: sortDirection } },
-          { transform_id: { order: 'asc' as const } },
-        ],
-        query,
-      },
+      sort: [
+        { [sortField]: { order: sortDirection } },
+        { transform_id: { order: 'asc' as const } },
+      ],
+      query,
       track_total_hits: true,
     });
     const totalHits =

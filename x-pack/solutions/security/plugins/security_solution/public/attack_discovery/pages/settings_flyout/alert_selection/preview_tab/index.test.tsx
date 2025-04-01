@@ -14,6 +14,8 @@ import { TestProviders } from '../../../../../common/mock';
 import { useSignalIndex } from '../../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 
+const mockDispatch = jest.fn();
+
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../sourcerer/containers');
 jest.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
@@ -23,6 +25,10 @@ jest.mock('react-router-dom', () => ({
     search: '',
   }),
   withRouter: jest.fn(),
+}));
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => mockDispatch,
 }));
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -153,5 +159,23 @@ describe('PreviewTab', () => {
     );
 
     expect(container.firstChild).toBeNull();
+  });
+
+  it('limits the fields in the StackByComboBox to the fields in the signal index', () => {
+    render(
+      <TestProviders>
+        <PreviewTab {...defaultProps} />
+      </TestProviders>
+    );
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      payload: {
+        id: 'detections',
+        selectedDataViewId: 'mock-signal-index',
+        selectedPatterns: ['mock-signal-index'],
+        shouldValidateSelectedPatterns: false,
+      },
+      type: 'x-pack/security_solution/local/sourcerer/SET_SELECTED_DATA_VIEW',
+    });
   });
 });

@@ -180,7 +180,7 @@ describe('upgrade agent policy schema version', () => {
 
       esRes = await esClient.search({
         index: AGENT_POLICY_INDEX,
-        body: { query: { match: { revision_idx: 2 } } },
+        query: { match: { revision_idx: 2 } },
       });
       // since only 2 were updated, only 2 should be written
       expect((esRes.hits.total as SearchTotalHits).value).toBe(2);

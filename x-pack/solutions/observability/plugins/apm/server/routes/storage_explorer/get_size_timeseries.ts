@@ -62,52 +62,50 @@ export async function getSizeTimeseries({
           ProcessorEvent.metric,
         ],
       },
-      body: {
-        size: 0,
-        track_total_hits: false,
-        query: {
-          bool: {
-            filter: [
-              ...environmentQuery(environment),
-              ...kqlQuery(kuery),
-              ...rangeQuery(start, end),
-              ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
-                ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
-                : []),
-            ],
-          },
+      size: 0,
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [
+            ...environmentQuery(environment),
+            ...kqlQuery(kuery),
+            ...rangeQuery(start, end),
+            ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
+              ? termQuery(TIER, indexLifeCyclePhaseToDataTier[indexLifecyclePhase])
+              : []),
+          ],
         },
-        aggs: {
-          sample: {
-            random_sampler: randomSampler,
-            aggs: {
-              services: {
-                terms: {
-                  field: SERVICE_NAME,
-                  size: 50,
-                },
-                aggs: {
-                  storageTimeSeries: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: intervalString,
-                      min_doc_count: 0,
-                      extended_bounds: {
-                        min: start,
-                        max: end,
-                      },
+      },
+      aggs: {
+        sample: {
+          random_sampler: randomSampler,
+          aggs: {
+            services: {
+              terms: {
+                field: SERVICE_NAME,
+                size: 50,
+              },
+              aggs: {
+                storageTimeSeries: {
+                  date_histogram: {
+                    field: '@timestamp',
+                    fixed_interval: intervalString,
+                    min_doc_count: 0,
+                    extended_bounds: {
+                      min: start,
+                      max: end,
                     },
-                    aggs: {
-                      indices: {
-                        terms: {
-                          field: INDEX,
-                          size: 500,
-                        },
-                        aggs: {
-                          number_of_metric_docs_for_index: {
-                            value_count: {
-                              field: INDEX,
-                            },
+                  },
+                  aggs: {
+                    indices: {
+                      terms: {
+                        field: INDEX,
+                        size: 500,
+                      },
+                      aggs: {
+                        number_of_metric_docs_for_index: {
+                          value_count: {
+                            field: INDEX,
                           },
                         },
                       },

@@ -50,6 +50,8 @@ import { unsecuredActionsClientMock } from '@kbn/actions-plugin/server/unsecured
 import type { PluginStartContract as ActionPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Mutable } from 'utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
 import { createSavedObjectsClientFactoryMock } from '../services/saved_objects/saved_objects_client_factory.mocks';
 import { EndpointMetadataService } from '../services/metadata';
@@ -148,6 +150,11 @@ export const createMockEndpointAppContextService = (
     savedObjects: createSavedObjectsClientFactoryMock({ savedObjectsServiceStart }).service,
     isServerless: jest.fn().mockReturnValue(false),
     getInternalEsClient: jest.fn().mockReturnValue(esClient),
+    getActiveSpace: jest.fn(async () => ({
+      id: DEFAULT_SPACE_ID,
+      name: 'default',
+      disabledFeatures: [],
+    })),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };
 
@@ -175,7 +182,7 @@ type CreateMockEndpointAppContextServiceStartContractType = Omit<
 export const createMockEndpointAppContextServiceStartContract =
   (): CreateMockEndpointAppContextServiceStartContractType => {
     const config = createMockConfig();
-
+    const spacesService = spacesMock.createStart().spacesService;
     const logger = loggingSystemMock.create().get('mock_endpoint_app_context');
     const security =
       securityServiceMock.createStart() as unknown as DeeplyMockedKeys<SecurityServiceStart>;
@@ -218,6 +225,7 @@ export const createMockEndpointAppContextServiceStartContract =
         getUnsecuredActionsClient: jest.fn().mockReturnValue(unsecuredActionsClientMock.create()),
       } as unknown as jest.Mocked<ActionPluginStartContract>,
       telemetryConfigProvider: createTelemetryConfigProviderMock(),
+      spacesService,
     };
 
     return startContract;

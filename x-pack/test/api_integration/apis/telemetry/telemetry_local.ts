@@ -14,9 +14,11 @@ import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_package
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import xpackPlatformTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_platform.json';
+// BOOKMARK - List of Kibana Solutions
 import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_observability.json';
 import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
 import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
+import xpackChatTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_chat.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
 import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
 import {
@@ -46,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     let stats: Record<string, any>;
 
     before('disable monitoring and pull local stats', async () => {
-      await es.cluster.putSettings({ body: disableCollection });
+      await es.cluster.putSettings(disableCollection);
       await new Promise((r) => setTimeout(r, 1000));
 
       const { body } = await supertest
@@ -73,6 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
         xpackObservabilityTelemetrySchema,
         xpackSearchTelemetrySchema,
         xpackSecurityTelemetrySchema,
+        xpackChatTelemetrySchema,
       ] as TelemetrySchemaObject[];
       const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 

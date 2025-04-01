@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, KibanaRequest } from '@kbn/core/server';
-import { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { DiscoverServerPluginLocatorService, DiscoverServerPluginStartDeps } from '..';
 import { columnsFromLocatorFactory } from './columns_from_locator';
 import { searchSourceFromLocatorFactory } from './searchsource_from_locator';
 import { titleFromLocatorFactory } from './title_from_locator';

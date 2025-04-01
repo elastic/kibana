@@ -64,7 +64,7 @@ For both of the above commands, it's crucial that you pass in `--config` to spec
 
 Read more about how the scripts work [here](../scripts/README.md).
 
-For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.mdx).
+For a deeper dive, read more about the way functional tests and servers work [here](../src/platform/packages/shared/kbn-test/README.mdx).
 
 #### Running API integration tests
 

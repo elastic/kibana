@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import Path from 'path';
 
-import webpack from 'webpack';
+import type { Compiler } from 'webpack';
 import { ToolingLog } from '@kbn/tooling-log';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { isNormalModule, isConcatenatedModule } from '@kbn/optimizer-webpack-helpers';
@@ -28,7 +26,7 @@ export class CiStatsPlugin {
     }
   ) {}
 
-  public apply(compiler: webpack.Compiler) {
+  public apply(compiler: Compiler) {
     const log = new ToolingLog({
       level: 'error',
       writeTo: process.stdout,

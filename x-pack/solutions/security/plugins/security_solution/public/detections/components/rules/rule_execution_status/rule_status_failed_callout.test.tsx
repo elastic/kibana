@@ -48,11 +48,23 @@ const ContextWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
 
 describe('RuleStatusFailedCallOut', () => {
   const renderWith = (status: RuleExecutionStatus | null | undefined) =>
-    render(<RuleStatusFailedCallOut status={status} date={DATE} message={MESSAGE} />);
+    render(
+      <RuleStatusFailedCallOut
+        status={status}
+        date={DATE}
+        message={MESSAGE}
+        ruleNameForChat="ruleNameForChat"
+      />
+    );
   const renderWithAssistant = (status: RuleExecutionStatus | null | undefined) =>
     render(
       <ContextWrapper>
-        <RuleStatusFailedCallOut status={status} date={DATE} message={MESSAGE} />{' '}
+        <RuleStatusFailedCallOut
+          status={status}
+          date={DATE}
+          message={MESSAGE}
+          ruleNameForChat="ruleNameForChat"
+        />{' '}
       </ContextWrapper>
     );
   it('is hidden if status is undefined', () => {

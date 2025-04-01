@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { DataViewsService, DataView } from '@kbn/data-views-plugin/common';
 import type { RollupFields } from '@kbn/ml-anomaly-utils';

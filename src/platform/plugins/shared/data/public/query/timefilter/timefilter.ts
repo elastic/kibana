@@ -25,6 +25,7 @@ import {
 } from '../../../common';
 import { TimeHistoryContract } from './time_history';
 import { createAutoRefreshLoop, AutoRefreshDoneFn } from './lib/auto_refresh_loop';
+import { TimefilterHook, createUseTimefilterHook } from './use_timefilter';
 
 export type { AutoRefreshDoneFn };
 
@@ -52,6 +53,8 @@ export class Timefilter {
   private readonly timeDefaults: TimeRange;
   private readonly refreshIntervalDefaults: RefreshInterval;
 
+  public readonly useTimefilter: () => TimefilterHook;
+
   // Used when an auto refresh is triggered
   private readonly autoRefreshLoop = createAutoRefreshLoop();
 
@@ -73,6 +76,8 @@ export class Timefilter {
     this._minRefreshInterval = config.minRefreshIntervalDefault;
     this._time = config.timeDefaults;
     this.setRefreshInterval(config.refreshIntervalDefaults);
+
+    this.useTimefilter = createUseTimefilterHook(this);
   }
 
   public isTimeRangeSelectorEnabled() {

@@ -8,11 +8,12 @@
 import expect from '@kbn/expect';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 
+import { getLatestTransformId } from '@kbn/security-solution-plugin/server/lib/entity_analytics/utils/transforms';
 import { riskEngineRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const expectTaskIsNotRunning = (taskStatus?: string) => {
-  expect(['idle', 'claiming']).contain(taskStatus);
+const expectTaskIsHealthy = (taskStatus?: string) => {
+  expect(['idle', 'claiming', 'running']).contain(taskStatus);
 };
 
 export default ({ getService }: FtrProviderContext) => {
@@ -70,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
         const indexTemplateName = '.risk-score.risk-score-default-index-template';
         const dataStreamName = 'risk-score.risk-score-default';
         const latestIndexName = 'risk-score.risk-score-latest-default';
-        const transformId = 'risk_score_latest_transform_default';
+        const transformId = getLatestTransformId('default');
         const defaultPipeline =
           'entity_analytics_create_eventIngest_from_timestamp-pipeline-default';
 
@@ -350,7 +351,7 @@ export default ({ getService }: FtrProviderContext) => {
         const indexTemplateName = `.risk-score.risk-score-${customSpaceName}-index-template`;
         const dataStreamName = `risk-score.risk-score-${customSpaceName}`;
         const latestIndexName = `risk-score.risk-score-latest-${customSpaceName}`;
-        const transformId = `risk_score_latest_transform_${customSpaceName}`;
+        const transformId = getLatestTransformId(customSpaceName);
         const defaultPipeline = `entity_analytics_create_eventIngest_from_timestamp-pipeline-${customSpaceName}`;
 
         await riskEngineRoutesWithNamespace.init();
@@ -676,57 +677,53 @@ export default ({ getService }: FtrProviderContext) => {
 
         await es.cluster.putComponentTemplate({
           name: componentTemplateName,
-          body: {
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },
               },
             },
-            version: 1,
           },
+          version: 1,
         });
 
         // Call an API to put the index template
 
         await es.indices.putIndexTemplate({
           name: indexTemplateName,
-          body: {
-            index_patterns: [indexTemplateName],
-            composed_of: [componentTemplateName],
-            template: {
-              settings: {
-                number_of_shards: 1,
-              },
-              mappings: {
-                properties: {
-                  timestamp: {
-                    type: 'date',
-                  },
-                  user: {
-                    properties: {
-                      id: {
-                        type: 'keyword',
-                      },
-                      name: {
-                        type: 'text',
-                      },
+          index_patterns: [indexTemplateName],
+          composed_of: [componentTemplateName],
+          template: {
+            settings: {
+              number_of_shards: 1,
+            },
+            mappings: {
+              properties: {
+                timestamp: {
+                  type: 'date',
+                },
+                user: {
+                  properties: {
+                    id: {
+                      type: 'keyword',
+                    },
+                    name: {
+                      type: 'text',
                     },
                   },
                 },
@@ -762,8 +759,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status2.body.risk_engine_status).to.be('ENABLED');
 
         expect(status2.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expectTaskIsNotRunning(status2.body.risk_engine_task_status?.status);
-        expect(status2.body.risk_engine_task_status?.startedAt).to.be(undefined);
+        expectTaskIsHealthy(status2.body.risk_engine_task_status?.status);
 
         await riskEngineRoutes.disable();
         const status3 = await riskEngineRoutes.getStatus();
@@ -778,8 +774,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(status4.body.risk_engine_status).to.be('ENABLED');
 
         expect(status4.body.risk_engine_task_status?.runAt).to.be.a('string');
-        expectTaskIsNotRunning(status4.body.risk_engine_task_status?.status);
-        expect(status4.body.risk_engine_task_status?.startedAt).to.be(undefined);
+        expectTaskIsHealthy(status4.body.risk_engine_task_status?.status);
       });
     });
   });

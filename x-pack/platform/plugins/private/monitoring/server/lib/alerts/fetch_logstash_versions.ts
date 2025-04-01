@@ -31,59 +31,57 @@ export async function fetchLogstashVersions(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
+            },
+          },
+          createDatasetFilter('logstash_stats', 'node_stats', getLogstashDataset('node_stats')),
+          {
+            range: {
+              timestamp: {
+                gte: 'now-2m',
               },
             },
-            createDatasetFilter('logstash_stats', 'node_stats', getLogstashDataset('node_stats')),
-            {
-              range: {
-                timestamp: {
-                  gte: 'now-2m',
-                },
-              },
-            },
-          ],
+          },
+        ],
+      },
+    },
+    aggs: {
+      index: {
+        terms: {
+          field: '_index',
+          size: 1,
         },
       },
-      aggs: {
-        index: {
-          terms: {
-            field: '_index',
-            size: 1,
-          },
+      cluster: {
+        terms: {
+          field: 'cluster_uuid',
+          size: 1,
         },
-        cluster: {
-          terms: {
-            field: 'cluster_uuid',
-            size: 1,
-          },
-          aggs: {
-            group_by_logstash: {
-              terms: {
-                field: 'logstash_stats.logstash.uuid',
-                size,
-              },
-              aggs: {
-                group_by_version: {
-                  terms: {
-                    field: 'logstash_stats.logstash.version',
-                    size: 1,
-                    order: {
-                      latest_report: 'desc' as const,
-                    },
+        aggs: {
+          group_by_logstash: {
+            terms: {
+              field: 'logstash_stats.logstash.uuid',
+              size,
+            },
+            aggs: {
+              group_by_version: {
+                terms: {
+                  field: 'logstash_stats.logstash.version',
+                  size: 1,
+                  order: {
+                    latest_report: 'desc' as const,
                   },
-                  aggs: {
-                    latest_report: {
-                      max: {
-                        field: 'timestamp',
-                      },
+                },
+                aggs: {
+                  latest_report: {
+                    max: {
+                      field: 'timestamp',
                     },
                   },
                 },
@@ -98,7 +96,7 @@ export async function fetchLogstashVersions(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

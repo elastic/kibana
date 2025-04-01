@@ -6,7 +6,6 @@
  */
 
 import { toExpression } from './embeddable';
-import { EmbeddableInput } from '../../../../types';
 import { decode } from '../../../../common/lib/embeddable_dataurl';
 import { fromExpression } from '@kbn/interpreter';
 
@@ -19,7 +18,7 @@ describe('toExpression', () => {
     };
 
     it('converts to an embeddable expression', () => {
-      const input: EmbeddableInput = baseEmbeddableInput;
+      const input = baseEmbeddableInput;
 
       const expression = toExpression(input, 'visualization');
       const ast = fromExpression(expression);
@@ -34,7 +33,7 @@ describe('toExpression', () => {
     });
 
     it('includes optional input values', () => {
-      const input: EmbeddableInput = {
+      const input = {
         ...baseEmbeddableInput,
         title: 'title',
         timeRange: {
@@ -55,7 +54,7 @@ describe('toExpression', () => {
     });
 
     it('includes empty panel title', () => {
-      const input: EmbeddableInput = {
+      const input = {
         ...baseEmbeddableInput,
         title: '',
       };
@@ -76,7 +75,7 @@ describe('toExpression', () => {
       filters: [],
     };
     it('converts to an embeddable expression', () => {
-      const input: EmbeddableInput = baseEmbeddableInput;
+      const input = baseEmbeddableInput;
 
       const expression = toExpression(input, 'visualization');
       const ast = fromExpression(expression);
@@ -91,7 +90,7 @@ describe('toExpression', () => {
     });
 
     it('includes optional input values', () => {
-      const input: EmbeddableInput = {
+      const input = {
         ...baseEmbeddableInput,
         title: 'title',
         timeRange: {
@@ -112,7 +111,7 @@ describe('toExpression', () => {
     });
 
     it('includes empty panel title', () => {
-      const input: EmbeddableInput = {
+      const input = {
         ...baseEmbeddableInput,
         title: '',
       };

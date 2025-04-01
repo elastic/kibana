@@ -42,11 +42,9 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
 
       const body = {
         index,
-        body: {
-          // Activate profiler mode for this query.
-          profile: true,
-          ...query,
-        },
+        // Activate profiler mode for this query.
+        profile: true,
+        ...query,
       };
 
       try {

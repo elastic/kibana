@@ -136,11 +136,9 @@ function fetchPipelineVersions({
     index: indexPatterns,
     size: 0,
     ignore_unavailable: true,
-    body: {
-      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
-      query,
-      aggs,
-    },
+    sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
+    query,
+    aggs,
   };
 
   return callWithRequest(req, 'search', params);

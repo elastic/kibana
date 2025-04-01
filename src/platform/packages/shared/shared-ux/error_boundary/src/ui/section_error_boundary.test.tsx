@@ -114,7 +114,7 @@ describe('<KibanaSectionErrorBoundary>', () => {
     ).toBe(true);
     expect(
       mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack.startsWith(
-        'Error: This is an error to show the test user!'
+        'FatalReactError: This is an error to show the test user!'
       )
     ).toBe(true);
   });

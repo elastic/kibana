@@ -16,6 +16,8 @@
 
 import { z } from '@kbn/zod';
 
+import { NonEmptyString } from '../common_attributes.gen';
+
 export type RootContext = z.infer<typeof RootContext>;
 export const RootContext = z.literal('security');
 
@@ -52,7 +54,7 @@ export const ChatMessage = z.object({
 
 export type ChatCompleteProps = z.infer<typeof ChatCompleteProps>;
 export const ChatCompleteProps = z.object({
-  conversationId: z.string().optional(),
+  conversationId: NonEmptyString.optional(),
   promptId: z.string().optional(),
   isStream: z.boolean().optional(),
   responseLanguage: z.string().optional(),

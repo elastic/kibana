@@ -41,25 +41,23 @@ export async function getAllEnvironments({
         ProcessorEvent.metric,
       ],
     },
-    body: {
-      // use timeout + min_doc_count to return as early as possible
-      // if filter is not defined to prevent timeouts
-      ...(!serviceName ? { timeout: '1ms' } : {}),
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [...termQuery(SERVICE_NAME, serviceName)],
-        },
+    // use timeout + min_doc_count to return as early as possible
+    // if filter is not defined to prevent timeouts
+    ...(!serviceName ? { timeout: '1ms' } : {}),
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [...termQuery(SERVICE_NAME, serviceName)],
       },
-      aggs: {
-        environments: {
-          terms: {
-            field: SERVICE_ENVIRONMENT,
-            size,
-            ...(!serviceName ? { min_doc_count: 0 } : {}),
-            missing: includeMissing ? ENVIRONMENT_NOT_DEFINED.value : undefined,
-          },
+    },
+    aggs: {
+      environments: {
+        terms: {
+          field: SERVICE_ENVIRONMENT,
+          size,
+          ...(!serviceName ? { min_doc_count: 0 } : {}),
+          missing: includeMissing ? ENVIRONMENT_NOT_DEFINED.value : undefined,
         },
       },
     },

@@ -48,94 +48,92 @@ export async function fetchCpuUsageNodeStats(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
             },
-            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: startMs,
-                  lte: endMs,
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        clusters: {
-          terms: {
-            field: 'cluster_uuid',
-            size,
-            include: clusters.map((cluster) => cluster.clusterUuid),
           },
-          aggs: {
-            nodes: {
-              terms: {
-                field: 'node_stats.node_id',
-                size,
+          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: startMs,
+                lte: endMs,
               },
-              aggs: {
-                index: {
-                  terms: {
-                    field: '_index',
-                    size: 1,
-                  },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          field: 'cluster_uuid',
+          size,
+          include: clusters.map((cluster) => cluster.clusterUuid),
+        },
+        aggs: {
+          nodes: {
+            terms: {
+              field: 'node_stats.node_id',
+              size,
+            },
+            aggs: {
+              index: {
+                terms: {
+                  field: '_index',
+                  size: 1,
                 },
-                average_cpu: {
-                  avg: {
-                    field: 'node_stats.process.cpu.percent',
-                  },
+              },
+              average_cpu: {
+                avg: {
+                  field: 'node_stats.process.cpu.percent',
                 },
-                average_quota: {
-                  avg: {
-                    field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
-                  },
+              },
+              average_quota: {
+                avg: {
+                  field: 'node_stats.os.cgroup.cpu.cfs_quota_micros',
                 },
-                name: {
-                  terms: {
-                    field: 'source_node.name',
-                    size: 1,
-                  },
+              },
+              name: {
+                terms: {
+                  field: 'source_node.name',
+                  size: 1,
                 },
-                histo: {
-                  date_histogram: {
-                    field: 'timestamp',
-                    fixed_interval: `${intervalInMinutes}m`,
-                  },
-                  aggs: {
-                    average_periods: {
-                      max: {
-                        field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
-                      },
+              },
+              histo: {
+                date_histogram: {
+                  field: 'timestamp',
+                  fixed_interval: `${intervalInMinutes}m`,
+                },
+                aggs: {
+                  average_periods: {
+                    max: {
+                      field: 'node_stats.os.cgroup.cpu.stat.number_of_elapsed_periods',
                     },
-                    average_usage: {
-                      max: {
-                        field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
-                      },
+                  },
+                  average_usage: {
+                    max: {
+                      field: 'node_stats.os.cgroup.cpuacct.usage_nanos',
                     },
-                    usage_deriv: {
-                      derivative: {
-                        buckets_path: 'average_usage',
-                        gap_policy: 'skip' as const,
-                        unit: NORMALIZED_DERIVATIVE_UNIT,
-                      },
+                  },
+                  usage_deriv: {
+                    derivative: {
+                      buckets_path: 'average_usage',
+                      gap_policy: 'skip' as const,
+                      unit: NORMALIZED_DERIVATIVE_UNIT,
                     },
-                    periods_deriv: {
-                      derivative: {
-                        buckets_path: 'average_periods',
-                        gap_policy: 'skip' as const,
-                        unit: NORMALIZED_DERIVATIVE_UNIT,
-                      },
+                  },
+                  periods_deriv: {
+                    derivative: {
+                      buckets_path: 'average_periods',
+                      gap_policy: 'skip' as const,
+                      unit: NORMALIZED_DERIVATIVE_UNIT,
                     },
                   },
                 },
@@ -150,7 +148,7 @@ export async function fetchCpuUsageNodeStats(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

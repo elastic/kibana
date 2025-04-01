@@ -64,61 +64,59 @@ export async function fetchMissingMonitoringData(
   const params = {
     index: indexPatterns,
     filter_path: ['aggregations.clusters.buckets'],
-    body: {
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
-              },
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          {
+            terms: {
+              cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
             },
-            createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
-            {
-              range: {
-                timestamp: {
-                  format: 'epoch_millis',
-                  gte: startMs,
-                  lte: endMs,
-                },
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        clusters: {
-          terms: {
-            field: 'cluster_uuid',
-            size,
           },
-          aggs: {
-            es_uuids: {
-              terms: {
-                field: 'node_stats.node_id',
-                size,
+          createDatasetFilter('node_stats', 'node_stats', getElasticsearchDataset('node_stats')),
+          {
+            range: {
+              timestamp: {
+                format: 'epoch_millis',
+                gte: startMs,
+                lte: endMs,
               },
-              aggs: {
-                most_recent: {
-                  max: {
-                    field: 'timestamp',
-                  },
+            },
+          },
+        ],
+      },
+    },
+    aggs: {
+      clusters: {
+        terms: {
+          field: 'cluster_uuid',
+          size,
+        },
+        aggs: {
+          es_uuids: {
+            terms: {
+              field: 'node_stats.node_id',
+              size,
+            },
+            aggs: {
+              most_recent: {
+                max: {
+                  field: 'timestamp',
                 },
-                document: {
-                  top_hits: {
-                    size: 1,
-                    sort: [
-                      {
-                        timestamp: {
-                          order: 'desc' as const,
-                          unmapped_type: 'long' as const,
-                        },
+              },
+              document: {
+                top_hits: {
+                  size: 1,
+                  sort: [
+                    {
+                      timestamp: {
+                        order: 'desc' as const,
+                        unmapped_type: 'long' as const,
                       },
-                    ],
-                    _source: {
-                      includes: ['source_node.name', 'elasticsearch.node.name'],
                     },
+                  ],
+                  _source: {
+                    includes: ['source_node.name', 'elasticsearch.node.name'],
                   },
                 },
               },
@@ -132,7 +130,7 @@ export async function fetchMissingMonitoringData(
   try {
     if (filterQuery) {
       const filterQueryObject = JSON.parse(filterQuery);
-      params.body.query.bool.filter.push(filterQueryObject);
+      params.query.bool.filter.push(filterQueryObject);
     }
   } catch (e) {
     // meh

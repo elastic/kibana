@@ -131,7 +131,7 @@ const applicationsLinks: AppDeepLink[] = [
         defaultMessage: 'Search Applications',
       }
     ),
-    visibleIn: ['globalSearch'],
+    visibleIn: [],
   },
 ];
 
@@ -389,6 +389,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
       title: ANALYTICS_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -435,7 +436,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         description: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.DESCRIPTION,
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElasticsearch',
         id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
         order: 100,
         path: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.URL,
@@ -465,7 +466,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       plugins.home.featureCatalogue.register({
         category: 'data',
         description: SEARCH_EXPERIENCES_PLUGIN.DESCRIPTION,
-        icon: 'logoEnterpriseSearch',
+        icon: 'logoElasticsearch',
         id: SEARCH_EXPERIENCES_PLUGIN.ID,
         path: SEARCH_EXPERIENCES_PLUGIN.URL,
         showOnHomePage: false,

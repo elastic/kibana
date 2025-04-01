@@ -8,8 +8,7 @@
 import type {
   ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateIndexTemplateItem,
-  IndicesPutIndexTemplateRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
@@ -44,16 +43,19 @@ const putIndexTemplateTotalFieldsLimitUsingComponentTemplate = async (
         () =>
           esClient.indices.putIndexTemplate({
             name: template.name,
-            body: {
-              ...template.index_template,
-              template: {
-                ...template.index_template.template,
-                settings: {
-                  ...template.index_template.template?.settings,
-                  'index.mapping.total_fields.limit': totalFieldsLimit,
-                },
+            ...template.index_template,
+            template: {
+              ...template.index_template.template,
+              settings: {
+                ...template.index_template.template?.settings,
+                'index.mapping.total_fields.limit': totalFieldsLimit,
               },
-            } as IndicesPutIndexTemplateRequest['body'],
+            },
+            // GET brings string | string[] | undefined but this PUT expects string[]
+            ignore_missing_component_templates: template.index_template
+              .ignore_missing_component_templates
+              ? [template.index_template.ignore_missing_component_templates].flat()
+              : undefined,
           }),
         { logger }
       );

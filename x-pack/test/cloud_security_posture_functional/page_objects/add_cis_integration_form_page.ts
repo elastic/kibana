@@ -6,7 +6,6 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { setTimeout as sleep } from 'node:timers/promises';
 import expect from '@kbn/expect';
 import { testSubjectIds } from '../constants/test_subject_ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
@@ -19,6 +18,7 @@ export function AddCisIntegrationFormPageProvider({
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
   const logger = getService('log');
+  const retry = getService('retry');
 
   const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 
@@ -256,8 +256,9 @@ export function AddCisIntegrationFormPageProvider({
     const button = await testSubjects.find(buttonId);
     await button.click();
     // Wait a bit to allow the new tab to load the URL
-    await sleep(3000);
-    await browser.switchTab(1);
+    await retry.tryForTime(3000, async () => {
+      await browser.switchTab(1);
+    });
     const currentUrl = await browser.getCurrentUrl();
     await browser.closeCurrentWindow();
     await browser.switchTab(0);

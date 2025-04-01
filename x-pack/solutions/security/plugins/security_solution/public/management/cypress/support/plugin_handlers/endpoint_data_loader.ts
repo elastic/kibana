@@ -277,7 +277,7 @@ const waitForEndpoints = async (
       const response = await esClient.search({
         index,
         size: expectedSize,
-        body,
+        ...body,
         rest_total_hits_as_int: true,
       });
 

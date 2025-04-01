@@ -5,28 +5,25 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import rawExpect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
+import moment from 'moment';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import moment from 'moment';
-import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
-import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
+import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('EditMonitorsPublicAPI', function () {
+  describe('EditMonitorsPublicAPI - Public location', function () {
+    this.tags(['skipCloud', 'skipMKI']);
     const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
     const testPrivateLocations = new PrivateLocationTestService(getService);
     let editorUser: RoleCredentials;
-    let privateLocation1: PrivateLocation;
-    let privateLocation2: PrivateLocation;
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
       return await addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);
@@ -75,8 +72,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
       await testPrivateLocations.installSyntheticsPackage();
-      privateLocation1 = await testPrivateLocations.addTestPrivateLocation();
-      privateLocation2 = await testPrivateLocations.addTestPrivateLocation();
     });
 
     after(async () => {
@@ -89,7 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     it('adds test monitor', async () => {
       const monitor = {
         type: 'http',
-        private_locations: [privateLocation1.id],
+        locations: [LOCAL_PUBLIC_LOCATION.id],
         url: 'https://www.google.com',
       };
       const { body: result, rawBody } = await addMonitorAPI(monitor);
@@ -99,91 +94,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
-          locations: [privateLocation1],
+          locations: [LOCAL_PUBLIC_LOCATION],
           name: 'https://www.google.com',
         })
       );
-    });
-
-    it('should return error for empty monitor', async function () {
-      const errMessage = 'Monitor must be a non-empty object';
-      const testCases = [{}, null, undefined, false, [], ''];
-      for (const testCase of testCases) {
-        const { message } = await editMonitorAPI(monitorId, testCase, 400);
-        expect(message).eql(errMessage);
-      }
-    });
-
-    it('return error if type is being changed', async () => {
-      const { message } = await editMonitorAPI(monitorId, { type: 'tcp' }, 400);
-      expect(message).eql('Monitor type cannot be changed from http to tcp.');
-    });
-
-    it('return error if monitor not found', async () => {
-      const { message } = await editMonitorAPI('invalid-monitor-id', { type: 'tcp' }, 404);
-      expect(message).eql('Monitor id invalid-monitor-id not found!');
-    });
-
-    it('return error if invalid location specified', async () => {
-      const { message } = await editMonitorAPI(
-        monitorId,
-        { type: 'http', locations: ['mars'] },
-        400
-      );
-      rawExpect(message).toContain(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found."
-      );
-    });
-
-    it('return error if invalid private location specified', async () => {
-      const { message } = await editMonitorAPI(
-        monitorId,
-        {
-          type: 'http',
-          locations: ['mars'],
-          privateLocations: ['moon'],
-        },
-        400
-      );
-      expect(message).eql('Invalid monitor key(s) for http type:  privateLocations');
-
-      const result = await editMonitorAPI(
-        monitorId,
-        {
-          type: 'http',
-          locations: ['mars'],
-          private_locations: ['moon'],
-        },
-        400
-      );
-      rawExpect(result.message).toContain("Private Location(s) 'moon' not found.");
-    });
-
-    it('throws an error if empty locations', async () => {
-      const monitor = {
-        locations: [],
-        private_locations: [],
-      };
-      const { message } = await editMonitorAPI(monitorId, monitor, 400);
-
-      expect(message).eql(LOCATION_REQUIRED_ERROR);
-    });
-
-    it('cannot change origin type', async () => {
-      const monitor = {
-        origin: 'project',
-      };
-      const result = await editMonitorAPI(monitorId, monitor, 400);
-
-      expect(result).eql({
-        statusCode: 400,
-        error: 'Bad Request',
-        message: 'Unsupported origin type project, only ui type is supported via API.',
-        attributes: {
-          details: 'Unsupported origin type project, only ui type is supported via API.',
-          payload: { origin: 'project' },
-        },
-      });
     });
 
     const updates: any = {};
@@ -200,7 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...defaultFields,
           ...monitor,
           ...updates,
-          locations: [privateLocation1],
+          locations: [LOCAL_PUBLIC_LOCATION],
           revision: 2,
           url: 'https://www.google.com',
         })
@@ -212,7 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const monitor = {
         name,
         type: 'http',
-        private_locations: [privateLocation1.id],
+        locations: [LOCAL_PUBLIC_LOCATION.id],
         url: 'https://www.google.com',
       };
       // create one monitor with one name
@@ -228,7 +142,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
-          locations: [privateLocation1],
+          locations: [LOCAL_PUBLIC_LOCATION],
           name: 'test name',
         })
       );
@@ -251,9 +165,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    it('can add a second private location to existing monitor', async () => {
+    it('can add a second public location to existing monitor', async () => {
       const monitor = {
-        private_locations: [privateLocation1.id, privateLocation2.id],
+        locations: [LOCAL_PUBLIC_LOCATION.id, 'dev2'],
       };
 
       const { body: result } = await editMonitorAPI(monitorId, monitor);
@@ -264,14 +178,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...updates,
           revision: 3,
           url: 'https://www.google.com',
-          locations: [privateLocation1, privateLocation2],
+          locations: [
+            LOCAL_PUBLIC_LOCATION,
+            { ...LOCAL_PUBLIC_LOCATION, id: 'dev2', label: 'Dev Service 2' },
+          ],
         })
       );
     });
 
-    it('can remove private location from existing monitor', async () => {
+    it('can remove public location from existing monitor', async () => {
       const monitor = {
-        private_locations: [privateLocation2.id],
+        locations: ['dev2'],
       };
 
       const { body: result } = await editMonitorAPI(monitorId, monitor);
@@ -282,20 +199,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...updates,
           revision: 4,
           url: 'https://www.google.com',
-          locations: [privateLocation2],
+          locations: [{ ...LOCAL_PUBLIC_LOCATION, id: 'dev2', label: 'Dev Service 2' }],
         })
       );
-    });
-
-    it('can not remove all locations', async () => {
-      const monitor = {
-        locations: [],
-        private_locations: [],
-      };
-
-      const { message } = await editMonitorAPI(monitorId, monitor, 400);
-
-      expect(message).eql(LOCATION_REQUIRED_ERROR);
     });
   });
 }

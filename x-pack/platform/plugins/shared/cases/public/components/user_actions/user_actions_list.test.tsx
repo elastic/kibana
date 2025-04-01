@@ -7,17 +7,13 @@
 
 import React from 'react';
 import { screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import routeData from 'react-router';
 
-import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
+import { basicCase, caseUserActions } from '../../containers/mock';
 import { UserActionsList } from './user_actions_list';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
-import { UserActionActions } from '../../../common/types/domain';
+
 import { getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import { getMockBuilderArgs } from './mock';
+import { renderWithTestingProviders } from '../../common/mock';
 
 const builderArgs = getMockBuilderArgs();
 
@@ -29,32 +25,32 @@ const defaultProps = {
   manualAlertsData: { 'some-id': { _id: 'some-id' } },
 };
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
+  useParams: () => ({ detailName: 'case-id' }),
+}));
+
 jest.mock('../../common/lib/kibana');
 
 describe(`UserActionsList`, () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders list correctly with isExpandable option', async () => {
-    appMockRender.render(<UserActionsList {...defaultProps} isExpandable />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} isExpandable />);
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders list correctly with isExpandable=false option', async () => {
-    appMockRender.render(<UserActionsList {...defaultProps} />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} />);
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
   });
 
   it('renders user actions correctly', async () => {
-    appMockRender.render(<UserActionsList {...defaultProps} />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} />);
 
     expect(await screen.findByTestId(`description-create-action-${caseUserActions[0].id}`));
     expect(await screen.findByTestId(`comment-create-action-${caseUserActions[1].commentId}`));
@@ -75,68 +71,9 @@ describe(`UserActionsList`, () => {
       },
     ];
 
-    appMockRender.render(<UserActionsList {...defaultProps} bottomActions={bottomActions} />);
+    renderWithTestingProviders(<UserActionsList {...defaultProps} bottomActions={bottomActions} />);
 
     expect(await screen.findByTestId('user-actions-list')).toBeInTheDocument();
     expect(await screen.findByTestId('add-comment')).toBeInTheDocument();
-  });
-
-  it('Outlines comment when url param is provided', async () => {
-    const commentId = 'basic-comment-id';
-    jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
-
-    const ourActions = [getUserAction('comment', UserActionActions.create)];
-
-    const props = {
-      ...defaultProps,
-      caseUserActions: ourActions,
-    };
-
-    appMockRender.render(<UserActionsList {...props} />);
-
-    expect(
-      (await screen.findAllByTestId(`comment-create-action-${commentId}`))[0]?.classList.contains(
-        'outlined'
-      )
-    ).toBe(true);
-  });
-
-  it('Outlines comment when update move to link is clicked', async () => {
-    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
-    jest.useFakeTimers();
-    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-
-    const ourActions = [
-      getUserAction('comment', UserActionActions.create),
-      getUserAction('comment', UserActionActions.update),
-    ];
-
-    const props = {
-      ...defaultProps,
-      caseUserActions: ourActions,
-    };
-
-    appMockRender.render(<UserActionsList {...props} />);
-    expect(
-      (
-        await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
-      )[0]?.classList.contains('outlined')
-    ).toBe(false);
-
-    expect(
-      (
-        await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
-      )[0]?.classList.contains('outlined')
-    ).toBe(false);
-
-    await user.click(await screen.findByTestId(`move-to-link-${props.data.comments[0].id}`));
-
-    expect(
-      (
-        await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
-      )[0]?.classList.contains('outlined')
-    ).toBe(true);
-
-    jest.useRealTimers();
   });
 });

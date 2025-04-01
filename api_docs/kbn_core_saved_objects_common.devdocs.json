@@ -1280,6 +1280,22 @@
             "path": "x-pack/solutions/security/plugins/lists/server/services/exception_lists/exception_list_client.mock.ts"
           },
           {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/export_transform.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
+          },
+          {
+            "plugin": "@kbn/test-suites-src",
+            "path": "src/platform/test/plugin_functional/test_suites/saved_objects_management/hidden_from_http_apis.ts"
+          },
+          {
             "plugin": "savedObjectsManagement",
             "path": "src/platform/plugins/shared/saved_objects_management/server/lib/find_relationships.test.ts"
           },
@@ -1444,22 +1460,6 @@
           {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/saved_visualization_references.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
             "plugin": "@kbn/core",
@@ -1983,6 +1983,14 @@
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
           },
           {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+          },
+          {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+          },
+          {
             "plugin": "graph",
             "path": "x-pack/platform/plugins/private/graph/public/services/persistence/saved_workspace_references.ts"
           },
@@ -2013,14 +2021,6 @@
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/datasources/form_based/form_based.test.ts"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/solutions/observability/plugins/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
             "plugin": "dashboard",
@@ -2236,23 +2236,23 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
           },
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
           },
           {
             "plugin": "maps",

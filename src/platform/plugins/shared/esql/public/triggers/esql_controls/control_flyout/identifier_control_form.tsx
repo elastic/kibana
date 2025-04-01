@@ -20,11 +20,8 @@ import {
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import {
-  ESQLVariableType,
-  ESQLControlVariable,
-  aggregationFunctionDefinitions,
-} from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { aggFunctionDefinitions } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
@@ -41,6 +38,7 @@ import {
   getQueryForFields,
   validateVariableName,
   getVariablePrefix,
+  getVariableTypeFromQuery,
 } from './helpers';
 import { EsqlControlType } from '../types';
 
@@ -56,6 +54,8 @@ interface IdentifierControlFormProps {
   initialState?: ESQLControlState;
   onCancelControl?: () => void;
 }
+
+const IDENTIFIER_VARIABLE_PREFIX = '??';
 
 export function IdentifierControlForm({
   variableType,
@@ -78,11 +78,14 @@ export function IdentifierControlForm({
     );
 
     if (initialState) {
-      return initialState.variableName;
+      return `${IDENTIFIER_VARIABLE_PREFIX}${initialState.variableName}`;
     }
 
     const variablePrefix = getVariablePrefix(variableType);
-    return getRecurrentVariableName(variablePrefix, existingVariables);
+    return `${IDENTIFIER_VARIABLE_PREFIX}${getRecurrentVariableName(
+      variablePrefix,
+      existingVariables
+    )}`;
   }, [esqlVariables, initialState, variableType]);
 
   const [availableIdentifiersOptions, setAvailableIdentifiersOptions] = useState<
@@ -131,7 +134,7 @@ export function IdentifierControlForm({
         });
       }
       if (variableType === ESQLVariableType.FUNCTIONS) {
-        const aggregatedFunctions = aggregationFunctionDefinitions.map((func) => {
+        const aggregatedFunctions = aggFunctionDefinitions.map((func) => {
           return {
             label: func.name,
             key: func.name,
@@ -153,8 +156,9 @@ export function IdentifierControlForm({
 
   useEffect(() => {
     const variableExists =
-      esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
-      !isControlInEditMode;
+      esqlVariables.some(
+        (variable) => variable.key === variableName.replace(IDENTIFIER_VARIABLE_PREFIX, '')
+      ) && !isControlInEditMode;
 
     setFormIsInvalid(!selectedIdentifiers.length || !variableName || variableExists);
   }, [esqlVariables, isControlInEditMode, selectedIdentifiers.length, variableName]);
@@ -165,7 +169,7 @@ export function IdentifierControlForm({
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
-      const text = validateVariableName(String(e.target.value));
+      const text = validateVariableName(String(e.target.value), IDENTIFIER_VARIABLE_PREFIX);
       setVariableName(text);
     },
     []
@@ -214,13 +218,15 @@ export function IdentifierControlForm({
 
   const onCreateFieldControl = useCallback(async () => {
     const availableOptions = selectedIdentifiers.map((field) => field.label);
+    // removes the double question mark from the variable name
+    const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
       width: minimumWidth,
-      title: label || variableName,
-      variableName,
-      variableType,
+      title: label || variableNameWithoutQuestionmark,
+      variableName: variableNameWithoutQuestionmark,
+      variableType: getVariableTypeFromQuery(variableName, variableType),
       controlType: EsqlControlType.STATIC_VALUES,
       esqlQuery: queryString,
       grow,

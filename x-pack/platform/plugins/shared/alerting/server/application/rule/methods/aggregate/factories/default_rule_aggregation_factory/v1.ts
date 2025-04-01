@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { DefaultRuleAggregationParams } from '../../types';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { DefaultRuleAggregationParams } from '../../types';
 
 export const defaultRuleAggregationFactory = (
   params?: DefaultRuleAggregationParams

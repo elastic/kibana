@@ -38,7 +38,7 @@ export const createLensEmbeddableFactory = (
      * final state will contain the attributes object
      */
     deserializeState: async ({ rawState, references }) =>
-      deserializeState(services.attributeService, rawState, references),
+      deserializeState(services, rawState, references),
     /**
      * This is called after the deserialize, so some assumptions can be made about its arguments:
      * @param state     the Lens "runtime" state, which means that 'attributes' is always present.

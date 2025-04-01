@@ -142,7 +142,7 @@ export const assertCommonPropertiesShown = (properties: Partial<PrebuiltRuleAsse
   cy.get(BUILDING_BLOCK_TITLE).should('have.text', 'Building block');
   cy.get(BUILDING_BLOCK_VALUE).should(
     'have.text',
-    'All generated alerts will be marked as "building block" alerts'
+    'All generated alerts will be marked as building block alerts'
   );
 
   cy.get(SEVERITY_TITLE).should('have.text', 'Severity');

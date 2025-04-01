@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 
 import { partiallyUpdateRule } from '../saved_objects/partially_update_rule';
 import { RuleRunningHandler } from './rule_running_handler';

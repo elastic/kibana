@@ -10,6 +10,7 @@ import { LOG_FORMAT_DETECTION_PROMPT } from './prompts';
 import type { LogDetectionNodeParams } from './types';
 import { SamplesFormat } from '../../../common';
 import { LOG_FORMAT_DETECTION_SAMPLE_ROWS } from '../../../common/constants';
+import { LOG_FORMAT_EXAMPLE_LOGS } from './constants';
 
 export async function handleLogFormatDetection({
   state,
@@ -26,6 +27,7 @@ export async function handleLogFormatDetection({
   const logFormatDetectionResult = await logFormatDetectionNode.invoke({
     ex_answer: state.exAnswer,
     log_samples: samples.join('\n'),
+    example_logs: LOG_FORMAT_EXAMPLE_LOGS,
     package_title: state.packageTitle,
     datastream_title: state.dataStreamTitle,
   });

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   SearchResponse,
   SearchHit,
   SearchHitsMetadata,
   AggregationsSingleMetricAggregateBase,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Group } from '@kbn/alerting-rule-utils';
 
 export const UngroupedGroupId = 'all documents';
@@ -86,7 +86,7 @@ export const parseAggregationResults = ({
   for (const groupBucket of groupBuckets) {
     if (resultLimit && results.results.length === resultLimit) break;
 
-    const groupName: string = `${groupBucket?.key}`;
+    const groupName = `${groupBucket?.key}`;
     const groups =
       termField && groupBucket?.key
         ? [termField].flat().reduce<Group[]>((resultGroups, groupByItem, groupIndex) => {

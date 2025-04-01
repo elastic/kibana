@@ -30,7 +30,7 @@
           "(alertStart: string, alertEnd?: string | undefined, lookBackWindow?: { size: number; unit: \"m\" | \"s\" | \"d\" | \"h\"; } | undefined) => ",
           "TimeRange"
         ],
-        "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+        "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -44,7 +44,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -59,7 +59,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -71,7 +71,7 @@
             "tags": [],
             "label": "lookBackWindow",
             "description": [],
-            "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+            "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -82,7 +82,7 @@
                 "tags": [],
                 "label": "size",
                 "description": [],
-                "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+                "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -96,7 +96,7 @@
                 "signature": [
                   "\"m\" | \"s\" | \"d\" | \"h\""
                 ],
-                "path": "x-pack/solutions/observability/packages/get_padded_alert_time_range_util/src/get_padded_alert_time_range.ts",
+                "path": "x-pack/solutions/observability/packages/get-padded-alert-time-range-util/src/get_padded_alert_time_range.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

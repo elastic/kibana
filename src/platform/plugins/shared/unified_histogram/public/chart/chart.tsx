@@ -28,7 +28,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import { IKibanaSearchResponse } from '@kbn/search-types';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
 import {
   UnifiedHistogramSuggestionContext,

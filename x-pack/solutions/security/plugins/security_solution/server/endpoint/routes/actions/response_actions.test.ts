@@ -8,7 +8,7 @@
 
 import { Subject } from 'rxjs';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { License } from '@kbn/licensing-plugin/common/license';

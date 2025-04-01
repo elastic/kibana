@@ -40,15 +40,13 @@ export default function (providerContext: FtrProviderContext) {
     const res = await esClient.search({
       index: AGENT_POLICY_INDEX,
       ignore_unavailable: true,
-      body: {
-        query: {
-          term: {
-            policy_id: policyId,
-          },
+      query: {
+        term: {
+          policy_id: policyId,
         },
-        size: 1,
-        sort: [{ revision_idx: { order: 'desc' } }],
       },
+      size: 1,
+      sort: [{ revision_idx: { order: 'desc' } }],
     });
 
     if (spaceId) {
@@ -64,14 +62,12 @@ export default function (providerContext: FtrProviderContext) {
     const res = await esClient.search({
       index: ENROLLMENT_API_KEYS_INDEX,
       ignore_unavailable: true,
-      body: {
-        query: {
-          term: {
-            policy_id: policyId,
-          },
+      query: {
+        term: {
+          policy_id: policyId,
         },
-        size: 1,
       },
+      size: 1,
     });
 
     if (spaceId) {

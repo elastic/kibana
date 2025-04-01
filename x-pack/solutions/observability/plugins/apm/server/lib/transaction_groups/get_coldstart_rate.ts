@@ -78,26 +78,24 @@ export async function getColdstartRate({
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: { bool: { filter } },
-      aggs: {
-        coldstartStates,
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: getBucketSizeForAggregatedTransactions({
-              start: startWithOffset,
-              end: endWithOffset,
-              searchAggregatedTransactions,
-            }).intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
-          },
-          aggs: {
-            coldstartStates,
-          },
+    track_total_hits: false,
+    size: 0,
+    query: { bool: { filter } },
+    aggs: {
+      coldstartStates,
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: getBucketSizeForAggregatedTransactions({
+            start: startWithOffset,
+            end: endWithOffset,
+            searchAggregatedTransactions,
+          }).intervalString,
+          min_doc_count: 0,
+          extended_bounds: { min: startWithOffset, max: endWithOffset },
+        },
+        aggs: {
+          coldstartStates,
         },
       },
     },

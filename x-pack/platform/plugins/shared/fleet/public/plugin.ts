@@ -76,7 +76,10 @@ import { CUSTOM_LOGS_INTEGRATION_NAME, INTEGRATIONS_BASE_PATH } from './constant
 import type { RequestError } from './hooks';
 import { licenseService, sendGetBulkAssets } from './hooks';
 import { setHttpClient } from './hooks/use_request';
-import { createPackageSearchProvider } from './search_provider';
+import {
+  createCustomIntegrationsSearchProvider,
+  createPackageSearchProvider,
+} from './search_provider';
 import { TutorialDirectoryHeaderLink, TutorialModuleNotice } from './components/home_integration';
 import { createExtensionRegistrationCallback } from './services/ui_extensions';
 import { ExperimentalFeaturesService } from './services/experimental_features';
@@ -291,6 +294,9 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
 
     if (deps.globalSearch) {
       deps.globalSearch.registerResultProvider(createPackageSearchProvider(core));
+      deps.globalSearch.registerResultProvider(
+        createCustomIntegrationsSearchProvider(deps.customIntegrations)
+      );
     }
 
     return {};

@@ -34,7 +34,7 @@ import { IntegrationsPopover } from '../../../../detections/components/rules/rel
 import { RuleStatusBadge } from '../../../../detections/components/rules/rule_execution_status';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as i18n from '../../../common/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';
 import { PopoverTooltip } from './popover_tooltip';
@@ -44,10 +44,8 @@ import { useHasActionsPrivileges } from './use_has_actions_privileges';
 import { useHasMlPermissions } from './use_has_ml_permissions';
 import { useRulesTableActions } from './use_rules_table_actions';
 import { MlRuleWarningPopover } from '../ml_rule_warning_popover/ml_rule_warning_popover';
-import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
+import { getMachineLearningJobId } from '../../../common/helpers';
 import type { TimeRange } from '../../../rule_gaps/types';
-import { usePrebuiltRulesCustomizationStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
-import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -231,7 +229,7 @@ const INTEGRATIONS_COLUMN: TableColumn = {
 
     return <IntegrationsPopover relatedIntegrations={integrations} />;
   },
-  width: '143px',
+  width: '70px',
   truncateText: true,
 };
 
@@ -296,11 +294,6 @@ export const useRulesColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const { isRulesCustomizationEnabled, customizationDisabledReason } =
-    usePrebuiltRulesCustomizationStatus();
-  const shouldShowModifiedColumn =
-    isRulesCustomizationEnabled ||
-    customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License;
 
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
@@ -316,14 +309,10 @@ export const useRulesColumns = ({
   });
   const snoozeColumn = useRuleSnoozeColumn();
 
-  if (shouldShowModifiedColumn) {
-    INTEGRATIONS_COLUMN.width = '70px';
-  }
-
   return useMemo(
     () => [
       ruleNameColumn,
-      ...(shouldShowModifiedColumn ? [MODIFIED_COLUMN] : []),
+      MODIFIED_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -395,7 +384,6 @@ export const useRulesColumns = ({
     ],
     [
       ruleNameColumn,
-      shouldShowModifiedColumn,
       showRelatedIntegrations,
       executionStatusColumn,
       snoozeColumn,
@@ -423,11 +411,6 @@ export const useMonitoringColumns = ({
   });
   const ruleNameColumn = useRuleNameColumn();
   const [showRelatedIntegrations] = useUiSetting$<boolean>(SHOW_RELATED_INTEGRATIONS_SETTING);
-  const { isRulesCustomizationEnabled, customizationDisabledReason } =
-    usePrebuiltRulesCustomizationStatus();
-  const shouldShowModifiedColumn =
-    isRulesCustomizationEnabled ||
-    customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License;
 
   const enabledColumn = useEnabledColumn({
     hasCRUDPermissions,
@@ -442,17 +425,13 @@ export const useMonitoringColumns = ({
     mlJobs,
   });
 
-  if (shouldShowModifiedColumn) {
-    INTEGRATIONS_COLUMN.width = '70px';
-  }
-
   return useMemo(
     () => [
       {
         ...ruleNameColumn,
         width: '28%',
       },
-      ...(shouldShowModifiedColumn ? [MODIFIED_COLUMN] : []),
+      MODIFIED_COLUMN,
       ...(showRelatedIntegrations ? [INTEGRATIONS_COLUMN] : []),
       TAGS_COLUMN,
       {
@@ -572,7 +551,6 @@ export const useMonitoringColumns = ({
       executionStatusColumn,
       hasCRUDPermissions,
       ruleNameColumn,
-      shouldShowModifiedColumn,
       showRelatedIntegrations,
     ]
   );

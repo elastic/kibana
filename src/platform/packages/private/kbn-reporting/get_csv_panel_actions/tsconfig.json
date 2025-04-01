@@ -23,7 +23,6 @@
     "@kbn/discover-utils",
     "@kbn/saved-search-plugin",
     "@kbn/discover-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/reporting-public",

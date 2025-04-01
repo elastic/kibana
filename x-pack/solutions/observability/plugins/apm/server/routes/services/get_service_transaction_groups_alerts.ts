@@ -105,7 +105,7 @@ export async function getServiceTransactionGroupsAlerts({
         terms: {
           field: TRANSACTION_NAME,
           size: MAX_NUMBER_OF_TX_GROUPS,
-          order: { _count: 'desc' },
+          order: { _count: 'desc' as const },
         },
       },
     },

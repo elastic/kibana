@@ -6,7 +6,7 @@
  */
 
 import type { IEsSearchRequest } from '@kbn/search-types';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { LogsOsqueryAction } from '@kbn/osquery-plugin/common/types/osquery_action';
 import type { LogsEndpointActionWithHosts } from '../../../endpoint/types';
 import type { ResponseActionsQueries } from '.';

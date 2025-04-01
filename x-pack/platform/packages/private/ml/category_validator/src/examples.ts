@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { chunk } from 'lodash';
 import type { IScopedClusterClient } from '@kbn/core/server';
@@ -90,13 +90,11 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
       {
         index: indexPatternTitle,
         size,
-        body: {
-          fields: [categorizationFieldName],
-          _source: false,
-          query,
-          sort: ['_doc'],
-          ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-        },
+        fields: [categorizationFieldName],
+        _source: false,
+        query,
+        sort: ['_doc'],
+        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
         ...(indicesOptions ?? {}),
       },
       { maxRetries: 0 }
@@ -155,10 +153,8 @@ export function categorizationExamplesProvider(client: IScopedClusterClient) {
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
     const { tokens } = await asInternalUser.indices.analyze(
       {
-        body: {
-          ...getAnalyzer(analyzer),
-          text: examples,
-        },
+        ...getAnalyzer(analyzer),
+        text: examples,
       },
       { maxRetries: 0 }
     );

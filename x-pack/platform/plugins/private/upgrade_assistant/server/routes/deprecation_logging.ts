@@ -111,21 +111,19 @@ export function registerDeprecationLoggingRoutes({
 
         const body = await client.asCurrentUser.count({
           index: DEPRECATION_LOGS_INDEX,
-          body: {
-            query: {
-              bool: {
-                must: {
-                  range: {
-                    '@timestamp': {
-                      gte: request.query.from,
-                      lte: now,
-                    },
+          query: {
+            bool: {
+              must: {
+                range: {
+                  '@timestamp': {
+                    gte: request.query.from,
+                    lte: now,
                   },
                 },
-                must_not: {
-                  terms: {
-                    [DEPRECATION_LOGS_ORIGIN_FIELD]: [...APPS_WITH_DEPRECATION_LOGS],
-                  },
+              },
+              must_not: {
+                terms: {
+                  [DEPRECATION_LOGS_ORIGIN_FIELD]: [...APPS_WITH_DEPRECATION_LOGS],
                 },
               },
             },

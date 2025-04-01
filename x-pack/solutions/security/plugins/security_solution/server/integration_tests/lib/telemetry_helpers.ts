@@ -150,7 +150,7 @@ export function getTelemetryTask(
 export async function createMockedEndpointAlert(esClient: ElasticsearchClient) {
   const index = `${DEFAULT_DIAGNOSTIC_INDEX_PATTERN.replace('-*', '')}-001`;
 
-  await esClient.indices.create({ index, body: { settings: { hidden: true } } });
+  await esClient.indices.create({ index, settings: { hidden: true } });
 
   if (mockEndpointAlert['event']) {
     mockEndpointAlert['event']['ingested'] = new Date().toISOString();
@@ -242,10 +242,8 @@ export async function cleanupMockedAlerts(
   await esClient
     .deleteByQuery({
       index: alias[0],
-      body: {
-        query: {
-          match_all: {},
-        },
+      query: {
+        match_all: {},
       },
     })
     .catch(() => {

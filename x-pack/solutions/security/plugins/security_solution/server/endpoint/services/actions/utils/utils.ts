@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { EcsError } from '@elastic/ecs';
 import moment from 'moment/moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';

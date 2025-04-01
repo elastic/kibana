@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
+import type {
+  TransformPutTransformRequest,
+  AggregationsAggregationContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,

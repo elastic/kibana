@@ -376,14 +376,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    validateSSLCertificate,
+    output?.type === 'logstash' ? validateSSLCertificate : undefined,
     isSSLEditable
   );
-  const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isSSLEditable);
+  const sslKeyInput = useInput(
+    output?.ssl?.key ?? '',
+    output?.type === 'logstash' ? validateSSLKey : undefined,
+    isSSLEditable
+  );
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    validateSSLKeySecret,
+    output?.type === 'logstash' ? validateSSLKeySecret : undefined,
     isSSLEditable
   );
 
@@ -447,7 +451,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isSSLEditable
   );
   const kafkaSslKeyInput = useInput(
-    kafkaOutput?.ssl?.key,
+    kafkaOutput?.ssl?.key as string,
     kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKey : undefined,
     isSSLEditable
   );
@@ -919,7 +923,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                   }
                 : kafkaTopicsInput.value === kafkaTopicsType.Dynamic && kafkaDynamicTopicInput.value
                 ? {
-                    topic: `%{[${kafkaDynamicTopicInput.value}]}`,
+                    topic: kafkaDynamicTopicInput.value,
                   }
                 : {}),
               headers: kafkaHeadersInput.value,
@@ -970,6 +974,14 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 kibana_api_key: kibanaAPIKeySecretInput.value,
               };
             }
+            if (!sslKeyInput.value && sslKeySecretInput.value) {
+              secrets = {
+                ...(secrets ?? {}),
+                ssl: {
+                  key: sslKeySecretInput.value,
+                },
+              };
+            }
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
@@ -985,6 +997,13 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               kibana_url: kibanaURLInput.value || null,
               proxy_id: proxyIdValue,
               ...shipperParams,
+              ssl: {
+                certificate: sslCertificateInput.value,
+                key: sslKeyInput.value || undefined,
+                certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                  (val) => val !== ''
+                ),
+              },
             } as NewRemoteElasticsearchOutput;
           case outputType.Elasticsearch:
           default:
@@ -999,6 +1018,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               ...shipperParams,
+              ssl: {
+                certificate: sslCertificateInput.value,
+                key: sslKeyInput.value || undefined,
+                certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                  (val) => val !== ''
+                ),
+              },
+              ...(!sslKeyInput.value &&
+                sslKeySecretInput.value && {
+                  secrets: {
+                    ssl: {
+                      key: sslKeySecretInput.value,
+                    },
+                  },
+                }),
             } as NewElasticsearchOutput;
         }
       })();
@@ -1009,7 +1043,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
           setIsloading(false);
           return;
         }
-
         const res = await sendPutOutput(output.id, payload);
         if (res.error) {
           throw res.error;

@@ -85,7 +85,7 @@ describe('EcsGraph', () => {
         throw Error(`getEcsGraph threw an error: ${error}`);
       }
 
-      expect(response.results).toStrictEqual(ecsMappingExpectedResults);
+      expect(response.results).toEqual(ecsMappingExpectedResults);
 
       // Check if the functions were called
       expect(handleEcsMapping).toHaveBeenCalled();

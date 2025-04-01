@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
 import { RulesParams } from '@kbn/observability-plugin/public';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -64,6 +65,7 @@ export interface Props {
 }
 
 export function SloListCompactView({ sloList, loading, error }: Props) {
+  const { services } = useKibana();
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -71,8 +73,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     share: {
       url: { locators },
     },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana().services;
+    triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+  } = services;
   const spaceId = useSpace();
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
@@ -133,8 +135,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     setSloToDisable(undefined);
   };
 
-  const handleSavedRule = async () => {
+  const handleSavedRule = () => {
     queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
+    setSloToAddRule(undefined);
   };
 
   const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
@@ -514,7 +517,8 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         tableLayout="auto"
       />
       {sloToAddRule ? (
-        <AddRuleFlyout
+        <RuleFormFlyout
+          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
@@ -522,11 +526,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
             name: `${sloToAddRule.name} burn rate rule`,
             params: { sloId: sloToAddRule.id },
           }}
-          onSave={handleSavedRule}
-          onClose={() => {
+          onSubmit={handleSavedRule}
+          onCancel={() => {
             setSloToAddRule(undefined);
           }}
-          useRuleProducer
+          shouldUseRuleProducer
         />
       ) : null}
 

@@ -97,6 +97,8 @@ export const calculateEndpointAuthz = (
   const canReadEndpointExceptions = hasAuth('showEndpointExceptions');
   const canWriteEndpointExceptions = hasAuth('crudEndpointExceptions');
 
+  const canManageGlobalArtifacts = hasAuth('writeGlobalArtifacts');
+
   const canReadWorkflowInsights = hasAuth('readWorkflowInsights');
   const canWriteWorkflowInsights = hasAuth('writeWorkflowInsights');
 
@@ -156,6 +158,7 @@ export const calculateEndpointAuthz = (
     canReadEventFilters,
     canReadEndpointExceptions,
     canWriteEndpointExceptions,
+    canManageGlobalArtifacts,
   };
 
   // Response console is only accessible when license is Enterprise and user has access to any
@@ -212,6 +215,7 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canReadEventFilters: false,
     canReadEndpointExceptions: false,
     canWriteEndpointExceptions: false,
+    canManageGlobalArtifacts: false,
     canReadWorkflowInsights: false,
     canWriteWorkflowInsights: false,
   };

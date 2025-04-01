@@ -60,7 +60,7 @@ export const registerPrivilegesRoute = ({ router, config }: RouteDependencies) =
       const requiredPrivileges = requiredPrivilegesMap[permissionsType];
       const { has_all_requested: hasAllPrivileges, cluster } =
         await clusterClient.asCurrentUser.security.hasPrivileges({
-          body: { cluster: requiredPrivileges },
+          cluster: requiredPrivileges,
         });
 
       if (!hasAllPrivileges) {

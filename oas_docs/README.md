@@ -14,7 +14,7 @@ These bundles form the basis of our OpenAPI bundles to which we append and layer
 
 ### Step 1
 
-Append pre-existing bundles not extracted from code using [`kbn-openapi-bundler`](../packages/kbn-openapi-bundler/README.md) to produce the final resulting bundles.
+Append pre-existing bundles not extracted from code using [`kbn-openapi-bundler`](../src/platform/packages/shared/kbn-openapi-bundler/README.md) to produce the final resulting bundles.
 
 To add more files into the final bundle, edit the appropriate `oas_docs/scripts/merge*.js` files.
 

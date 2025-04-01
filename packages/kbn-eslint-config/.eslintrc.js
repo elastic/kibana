@@ -28,6 +28,7 @@ module.exports = {
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
     '@kbn/eslint-plugin-i18n',
+    '@kbn/eslint-plugin-eui-a11y',
     '@kbn/eslint-plugin-css',
     'eslint-plugin-depend',
     'prettier',
@@ -120,7 +121,7 @@ module.exports = {
           from: 'zod',
           to: '@kbn/zod',
           disallowedMessage: `import from @kbn/zod instead`,
-          exclude: [/packages[\/\\]kbn-zod[\/\\]/],
+          exclude: [/src[\/\\]platform[\/\\]packages[\/\\]shared[\/\\]kbn-zod[\/\\]/],
         },
         {
           from: 'styled-components',

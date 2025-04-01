@@ -12,9 +12,6 @@ import { Vis } from '../../types';
 import type {
   VisualizeInput,
   VisualizeEmbeddable,
-  VisualizeByValueInput,
-  VisualizeByReferenceInput,
-  VisualizeSavedObjectAttributes,
   VisualizeEmbeddableDeps,
 } from './visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../../services';
@@ -32,11 +29,7 @@ export const createVisEmbeddableFromObject =
   async (
     vis: Vis,
     input: Partial<VisualizeInput> & { id: string },
-    attributeService?: AttributeService<
-      VisualizeSavedObjectAttributes,
-      VisualizeByValueInput,
-      VisualizeByReferenceInput
-    >
+    attributeService?: AttributeService
   ): Promise<VisualizeEmbeddable | ErrorEmbeddable> => {
     try {
       const visId = vis.id as string;

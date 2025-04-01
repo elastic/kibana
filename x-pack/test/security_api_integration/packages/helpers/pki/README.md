@@ -5,8 +5,8 @@ and hence trusted by both test Kibana and Elasticsearch servers. The files were 
 in `kbn-dev-utils`, using the following commands:
 
 ```
-bin/elasticsearch-certutil cert -days 18250 --ca $KIBANA_HOME/packages/kbn-dev-utils/certs/ca.p12 --ca-pass castorepass --name first_client --pass ""
-bin/elasticsearch-certutil cert -days 18250 --ca $KIBANA_HOME/packages/kbn-dev-utils/certs/ca.p12 --ca-pass castorepass --name second_client --pass ""
+bin/elasticsearch-certutil cert -days 18250 --ca $KIBANA_HOME/src/platform/packages/shared/kbn-dev-utils/certs/ca.p12 --ca-pass castorepass --name first_client --pass ""
+bin/elasticsearch-certutil cert -days 18250 --ca $KIBANA_HOME/src/platform/packages/shared/kbn-dev-utils/certs/ca.p12 --ca-pass castorepass --name second_client --pass ""
 ```
 
 The CA certificate and key (`kibana_ca.crt` and `kibana_ca.key`) are used to sign client certificates (`untrusted_client.p12`) that are only trusted

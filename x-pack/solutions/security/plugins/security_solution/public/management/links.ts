@@ -42,7 +42,6 @@ import {
 import { licenseService } from '../common/hooks/use_license';
 import type { LinkItem } from '../common/links/types';
 import type { StartPlugins } from '../types';
-import { cloudDefendLink } from '../cloud_defend/links';
 import { links as notesLink } from '../notes/links';
 import { IconConsole } from '../common/icons/console';
 import { IconShield } from '../common/icons/shield';
@@ -78,12 +77,6 @@ const categories = [
       SecurityPageName.blocklist,
       SecurityPageName.responseActionsHistory,
     ],
-  },
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.cloudSecurity', {
-      defaultMessage: 'Cloud Security',
-    }),
-    linkIds: [SecurityPageName.cloudDefendPolicies],
   },
   {
     label: i18n.translate('xpack.securitySolution.appLinks.category.investigations', {
@@ -216,7 +209,6 @@ export const links: LinkItem = {
       skipUrlState: true,
       hideTimeline: true,
     },
-    cloudDefendLink,
     notesLink,
   ],
 };
@@ -261,7 +253,6 @@ export const getManagementFilteredLinks = async (
 
   if (!canReadPolicyManagement) {
     linksToExclude.push(SecurityPageName.policies);
-    linksToExclude.push(SecurityPageName.cloudDefendPolicies);
   }
 
   if (!canReadActionsLogManagement) {

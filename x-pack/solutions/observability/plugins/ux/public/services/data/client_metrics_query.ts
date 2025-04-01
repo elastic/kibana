@@ -30,31 +30,29 @@ export function clientMetricsQuery(
   });
 
   const params = mergeProjection(projection, {
-    body: {
-      size: 0,
-      track_total_hits: true,
-      aggs: {
-        hasFetchStartField: {
-          filter: {
-            exists: { field: 'transaction.marks.navigationTiming.fetchStart' },
-          },
-          aggs: {
-            totalPageLoadDuration: {
-              percentiles: {
-                field: TRANSACTION_DURATION,
-                percents: [percentile],
-                hdr: {
-                  number_of_significant_value_digits: 3,
-                },
+    size: 0,
+    track_total_hits: true,
+    aggs: {
+      hasFetchStartField: {
+        filter: {
+          exists: { field: 'transaction.marks.navigationTiming.fetchStart' },
+        },
+        aggs: {
+          totalPageLoadDuration: {
+            percentiles: {
+              field: TRANSACTION_DURATION,
+              percents: [percentile],
+              hdr: {
+                number_of_significant_value_digits: 3,
               },
             },
-            backEnd: {
-              percentiles: {
-                field: TRANSACTION_TIME_TO_FIRST_BYTE,
-                percents: [percentile],
-                hdr: {
-                  number_of_significant_value_digits: 3,
-                },
+          },
+          backEnd: {
+            percentiles: {
+              field: TRANSACTION_TIME_TO_FIRST_BYTE,
+              percents: [percentile],
+              hdr: {
+                number_of_significant_value_digits: 3,
               },
             },
           },

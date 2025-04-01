@@ -16,7 +16,7 @@ import type {
   AggregationsGeoBoundsAggregate,
   LatLonGeoLocation,
   TopLeftBottomRightGeoBounds,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { i18n } from '@kbn/i18n';
 import { UpdateSourceEditor } from './update_source_editor';

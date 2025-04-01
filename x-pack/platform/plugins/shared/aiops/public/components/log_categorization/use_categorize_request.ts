@@ -18,7 +18,7 @@ import {
 import { processCategoryResults } from '@kbn/aiops-log-pattern-analysis/process_category_results';
 import type { CatResponse } from '@kbn/aiops-log-pattern-analysis/types';
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 import type { RandomSamplerStorage } from './sampling_menu';

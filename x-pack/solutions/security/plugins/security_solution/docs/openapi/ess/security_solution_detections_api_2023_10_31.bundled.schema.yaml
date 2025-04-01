@@ -393,193 +393,6 @@ paths:
       tags:
         - Security Detections API
         - Bulk API
-  /api/detection_engine/rules/_bulk_create:
-    post:
-      deprecated: true
-      description: Create new detection rules in bulk.
-      operationId: BulkCreateRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/RuleCreateProps'
-              type: array
-        description: A JSON array of rules, where each rule contains the required fields.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BulkCrudRulesResponse'
-          description: Indicates a successful call.
-      summary: Create multiple detection rules
-      tags:
-        - Security Detections API
-        - Bulk API
-  /api/detection_engine/rules/_bulk_delete:
-    delete:
-      deprecated: true
-      description: Delete detection rules in bulk.
-      operationId: BulkDeleteRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                type: object
-                properties:
-                  id:
-                    $ref: '#/components/schemas/RuleObjectId'
-                  rule_id:
-                    $ref: '#/components/schemas/RuleSignatureId'
-              type: array
-        description: >-
-          A JSON array of `id` or `rule_id` fields of the rules you want to
-          delete.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BulkCrudRulesResponse'
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/PlatformErrorResponse'
-                  - $ref: '#/components/schemas/SiemErrorResponse'
-          description: Invalid input data response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformErrorResponse'
-          description: Unsuccessful authentication response
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SiemErrorResponse'
-          description: Internal server error response
-      summary: Delete multiple detection rules
-      tags:
-        - Security Detections API
-        - Bulk API
-    post:
-      deprecated: true
-      description: Deletes multiple rules.
-      operationId: BulkDeleteRulesPost
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                type: object
-                properties:
-                  id:
-                    $ref: '#/components/schemas/RuleObjectId'
-                  rule_id:
-                    $ref: '#/components/schemas/RuleSignatureId'
-              type: array
-        description: >-
-          A JSON array of `id` or `rule_id` fields of the rules you want to
-          delete.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BulkCrudRulesResponse'
-          description: Indicates a successful call.
-        '400':
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: '#/components/schemas/PlatformErrorResponse'
-                  - $ref: '#/components/schemas/SiemErrorResponse'
-          description: Invalid input data response
-        '401':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PlatformErrorResponse'
-          description: Unsuccessful authentication response
-        '500':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SiemErrorResponse'
-          description: Internal server error response
-      summary: Delete multiple detection rules
-      tags:
-        - Security Detections API
-        - Bulk API
-  /api/detection_engine/rules/_bulk_update:
-    patch:
-      deprecated: true
-      description: >-
-        Update specific fields of existing detection rules using the `rule_id`
-        or `id` field.
-      operationId: BulkPatchRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/RulePatchProps'
-              type: array
-        description: A JSON array of rules, where each rule contains the required fields.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BulkCrudRulesResponse'
-          description: Indicates a successful call.
-      summary: Patch multiple detection rules
-      tags:
-        - Security Detections API
-        - Bulk API
-    put:
-      deprecated: true
-      description: >
-        Update multiple detection rules using the `rule_id` or `id` field. The
-        original rules are replaced, and all unspecified fields are deleted.
-
-        > info
-
-        > You cannot modify the `id` or `rule_id` values.
-      operationId: BulkUpdateRules
-      requestBody:
-        content:
-          application/json:
-            schema:
-              items:
-                $ref: '#/components/schemas/RuleUpdateProps'
-              type: array
-        description: >-
-          A JSON array where each element includes the `id` or `rule_id` field
-          of the rule you want to update and the fields you want to modify.
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/BulkCrudRulesResponse'
-          description: Indicates a successful call.
-      summary: Update multiple detection rules
-      tags:
-        - Security Detections API
-        - Bulk API
   /api/detection_engine/rules/_export:
     post:
       description: >
@@ -2118,12 +1931,6 @@ components:
       required:
         - id
         - skip_reason
-    BulkCrudRulesResponse:
-      items:
-        oneOf:
-          - $ref: '#/components/schemas/RuleResponse'
-          - $ref: '#/components/schemas/ErrorSchema'
-      type: array
     BulkDeleteRules:
       type: object
       properties:
@@ -5298,8 +5105,7 @@ components:
         required_fields:
           $ref: '#/components/schemas/RequiredFieldArray'
         revision:
-          minimum: 0
-          type: integer
+          $ref: '#/components/schemas/RuleRevision'
         rule_id:
           $ref: '#/components/schemas/RuleSignatureId'
         rule_source:
@@ -5688,6 +5494,25 @@ components:
         - $ref: '#/components/schemas/EsqlRule'
       discriminator:
         propertyName: type
+    RuleRevision:
+      description: >
+        The rule's revision number.
+
+
+        It represents the version of rule's object in Kibana. It is set to `0`
+        when the rule is installed or created and then gets incremented on each
+        update.
+
+        > info
+
+        > Not all updates to any rule fields will increment the revision. Only
+        those fields that are considered static `rule parameters` can trigger
+        revision increments. For example, an update to a rule's query or index
+        fields will increment the rule's revision by `1`. However, changes to
+        dynamic or technical fields like enabled or execution_summary will not
+        cause revision increments.
+      minimum: 0
+      type: integer
     RuleSignatureId:
       description: Could be any string, not necessarily a UUID
       type: string
@@ -5721,7 +5546,21 @@ components:
       discriminator:
         propertyName: type
     RuleVersion:
-      description: The rule's version number.
+      description: >
+        The rule's version number.
+
+
+        - For prebuilt rules it represents the version of the rule's content in
+        the source [detection-rules](https://github.com/elastic/detection-rules)
+        repository (and the corresponding `security_detection_engine` Fleet
+        package that is used for distributing prebuilt rules). 
+
+        - For custom rules it is set to `1` when the rule is created. 
+
+        > info
+
+        > It is not incremented on each update. Compare this to the `revision`
+        field.
       minimum: 1
       type: integer
     SavedObjectResolveAliasPurpose:

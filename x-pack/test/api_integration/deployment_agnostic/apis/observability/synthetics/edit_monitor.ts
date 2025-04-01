@@ -12,7 +12,6 @@ import {
   EncryptedSyntheticsSavedMonitor,
   HTTPFields,
   MonitorFields,
-  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
@@ -20,24 +19,21 @@ import expect from '@kbn/expect';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { omitResponseTimestamps, omitEmptyValues } from './helpers/monitor';
-import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 import { SyntheticsMonitorTestService } from '../../../services/synthetics_monitor';
+import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  describe('EditMonitorAPI', function () {
+  describe('EditMonitorAPI - Public Location', function () {
+    this.tags(['skipCloud', 'skipMKI']);
     const supertestWithAuth = getService('supertest');
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
 
-    const testPrivateLocations = new PrivateLocationTestService(getService);
     const monitorTestService = new SyntheticsMonitorTestService(getService);
 
-    let _httpMonitorJson: HTTPFields;
     let httpMonitorJson: HTTPFields;
-    let testPolicyId = '';
     let editorUser: RoleCredentials;
-    let privateLocations: PrivateLocation[];
 
     const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
       const apiURL = spaceId
@@ -82,24 +78,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         .set(samlAuth.getInternalRequestHeader())
         .expect(200);
 
-      const testPolicyName = 'Fleet test server policy' + Date.now();
-      const apiResponse = await testPrivateLocations.addFleetPolicy(testPolicyName);
-      testPolicyId = apiResponse.body.item.id;
-      privateLocations = await testPrivateLocations.setTestLocations([testPolicyId]);
-      _httpMonitorJson = getFixtureJson('http_monitor');
+      httpMonitorJson = getFixtureJson('http_monitor');
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    beforeEach(() => {
-      httpMonitorJson = { ..._httpMonitorJson, locations: [privateLocations[0]] };
-    });
-
     it('edits the monitor', async () => {
       const newMonitor = httpMonitorJson;
-
       const savedMonitor = await saveMonitor(newMonitor as MonitorFields);
       const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
 
@@ -114,7 +101,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name',
-        [ConfigKey.LOCATIONS]: [privateLocations[0]],
         [ConfigKey.REQUEST_HEADERS_CHECK]: {
           sampleHeader2: 'sampleValue2',
         },
@@ -165,7 +151,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const updates: Partial<HTTPFields> = {
         [ConfigKey.URLS]: 'https://modified-host.com',
         [ConfigKey.NAME]: 'Modified name like that',
-        [ConfigKey.LOCATIONS]: [privateLocations[0]],
         [ConfigKey.REQUEST_HEADERS_CHECK]: {
           sampleHeader2: 'sampleValue2',
         },
@@ -311,14 +296,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
-      const spaceScopedPrivateLocation = await testPrivateLocations.addTestPrivateLocation(
-        SPACE_ID
-      );
       const newMonitor = {
         name,
         type: 'http',
         urls: 'https://elastic.co',
-        locations: [spaceScopedPrivateLocation],
+        locations: [LOCAL_PUBLIC_LOCATION],
       };
 
       const savedMonitor = await saveMonitor(newMonitor as MonitorFields, SPACE_ID);

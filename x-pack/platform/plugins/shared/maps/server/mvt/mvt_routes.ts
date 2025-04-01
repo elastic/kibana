@@ -13,7 +13,7 @@ import { CoreStart, KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/co
 import { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
-import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   APP_ID,
   MVT_GETTILE_API_PATH,
@@ -21,6 +21,8 @@ import {
   RENDER_AS,
 } from '../../common/constants';
 import { getAggsTileRequest, getHitsTileRequest } from '../../common/mvt_request_body';
+
+type SearchMvtRequestBody = Omit<SearchMvtRequest, 'index' | 'x' | 'y' | 'field' | 'zoom'>;
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;
 
@@ -37,17 +39,17 @@ export function initMVTRoutes({
     .get({
       path: `${MVT_GETTILE_API_PATH}/{z}/{x}/{y}.pbf`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -77,7 +79,10 @@ export function initMVTRoutes({
         const y = parseInt((params as any).y, 10) as number;
         const z = parseInt((params as any).z, 10) as number;
 
-        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
+        let tileRequest: {
+          path: string;
+          body: SearchMvtRequestBody;
+        } = {
           path: '',
           body: {},
         };
@@ -120,17 +125,17 @@ export function initMVTRoutes({
     .get({
       path: `${MVT_GETGRIDTILE_API_PATH}/{z}/{x}/{y}.pbf`,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because permissions will be checked by elasticsearch.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because permissions will be checked by elasticsearch.',
-          },
-        },
         validate: {
           request: {
             params: schema.object({
@@ -162,7 +167,7 @@ export function initMVTRoutes({
         const y = parseInt((params as any).y, 10) as number;
         const z = parseInt((params as any).z, 10) as number;
 
-        let tileRequest: { path: string; body: SearchMvtRequest['body'] } = {
+        let tileRequest: { path: string; body: SearchMvtRequestBody } = {
           path: '',
           body: {},
         };
@@ -214,7 +219,7 @@ async function getTile({
   path,
 }: {
   abortController: AbortController;
-  body: SearchMvtRequest['body'];
+  body: SearchMvtRequestBody;
   context: DataRequestHandlerContext;
   core: CoreStart;
   executionContext: KibanaExecutionContext;

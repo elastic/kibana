@@ -3955,6 +3955,20 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleType.solution",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "solution",
+            "description": [],
+            "signature": [
+              "\"security\" | \"observability\" | \"stack\""
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleType.actionVariables",
             "type": "Object",
             "tags": [],
@@ -4788,7 +4802,15 @@
           "BulkDisableRulesResult",
           "<Record<string, any>>>; updateRuleApiKey: (params: { id: string; }) => Promise<void>; disableRule: (params: Readonly<{ untrack?: boolean | undefined; } & { id: string; }>) => Promise<void>; enableRule: (params: Readonly<{} & { id: string; }>) => Promise<void>; snooze: (options: ",
           "SnoozeRuleOptions",
-          ") => Promise<void>; unsnooze: (options: ",
+          ") => Promise<",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.SanitizedRule",
+            "text": "SanitizedRule"
+          },
+          "<never>>; unsnooze: (options: ",
           "UnsnoozeParams",
           ") => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; ruleTypeIds?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<",
           "RegistryAlertTypeWithAuth",
@@ -4826,7 +4848,7 @@
           },
           "; getAuditLogger: () => ",
           "AuditLogger",
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; data: string[]; perPage: number; total: number; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; findGaps: (params: Readonly<{ sortField?: \"@timestamp\" | \"kibana.alert.rule.gap.status\" | \"kibana.alert.rule.gap.total_gap_duration_ms\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; } & { page: number; start: string; end: string; perPage: number; ruleId: string; }>) => Promise<{ total: number; data: ",
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; ruleTypeIds?: string[] | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; data: string[]; perPage: number; total: number; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; findGaps: (params: Readonly<{ sortField?: \"@timestamp\" | \"kibana.alert.rule.gap.status\" | \"kibana.alert.rule.gap.total_gap_duration_ms\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; statuses?: (\"unfilled\" | \"filled\" | \"partially_filled\")[] | undefined; } & { page: number; start: string; end: string; perPage: number; ruleId: string; }>) => Promise<{ total: number; data: ",
           "Gap",
           "[]; page: number; perPage: number; }>; fillGapById: (params: Readonly<{} & { ruleId: string; gapId: string; }>) => Promise<(Readonly<{ end?: string | undefined; warnings?: string[] | undefined; } & { id: string; spaceId: string; start: string; rule: Readonly<{ apiKeyCreatedByUser?: boolean | null | undefined; } & { params: Record<string, any>; id: string; consumer: string; name: string; tags: string[]; actions: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
@@ -10641,63 +10663,63 @@
         "references": [
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/types.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/types.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_tooltip_content.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_tooltip_content.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_tooltip_content.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_tooltip_content.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
           },
           {
             "plugin": "triggersActionsUi",

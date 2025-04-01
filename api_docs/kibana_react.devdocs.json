@@ -900,6 +900,14 @@
         "trackAdoption": false,
         "references": [
           {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/header_menu/header_menu_portal.tsx"
+          },
+          {
             "plugin": "monitoring",
             "path": "x-pack/platform/plugins/private/monitoring/public/components/header_menu/header_menu_portal.tsx"
           },
@@ -2856,16 +2864,16 @@
         "signature": [
           "(storyFn: ",
           "PartialStoryFn",
-          "<ReturnTypeFramework<",
-          "StoryFnReactReturnType",
-          ">, ",
-          "Args",
+          "<",
+          "R",
+          ", ",
+          "StrictArgs",
           ">, { globals }: ",
           "StoryContext",
-          "<ReturnTypeFramework<",
-          "StoryFnReactReturnType",
-          ">, ",
-          "Args",
+          "<",
+          "R",
+          ", ",
+          "StrictArgs",
           ">) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
@@ -2887,10 +2895,10 @@
             "description": [],
             "signature": [
               "PartialStoryFn",
-              "<ReturnTypeFramework<",
-              "StoryFnReactReturnType",
-              ">, ",
-              "Args",
+              "<",
+              "R",
+              ", ",
+              "StrictArgs",
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
@@ -2901,16 +2909,16 @@
           {
             "parentPluginId": "kibanaReact",
             "id": "def-common.KibanaStyledComponentsThemeProviderDecorator.$2",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ globals }",
             "description": [],
             "signature": [
               "StoryContext",
-              "<ReturnTypeFramework<",
-              "StoryFnReactReturnType",
-              ">, ",
-              "Args",
+              "<",
+              "R",
+              ", ",
+              "StrictArgs",
               ">"
             ],
             "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",

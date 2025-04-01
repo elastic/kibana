@@ -7,7 +7,7 @@
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import { type KibanaExecutionContext } from '@kbn/core/public';
 import {
   BehaviorSubject,
@@ -304,7 +304,7 @@ export function loadEmbeddableData(
     // make sure to reload on viewMode change
     api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
-      if (getState().enhancements?.dynamicActions) {
+      if (getState().enhancements?.dynamicActions?.events.length) {
         reload('viewMode');
       }
     }),

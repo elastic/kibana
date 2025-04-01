@@ -108,6 +108,12 @@ export const ENDPOINT_PRIVILEGES: Record<string, PrivilegeMapObject> = deepFreez
     privilegeType: 'api',
     privilegeName: 'readEventFilters',
   },
+  writeGlobalArtifacts: {
+    appId: DEFAULT_APP_CATEGORIES.security.id,
+    privilegeSplit: '-',
+    privilegeType: 'api',
+    privilegeName: 'writeGlobalArtifacts',
+  },
   writePolicyManagement: {
     appId: DEFAULT_APP_CATEGORIES.security.id,
     privilegeSplit: '-',

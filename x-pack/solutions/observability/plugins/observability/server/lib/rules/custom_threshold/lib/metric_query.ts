@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { EsQueryConfig, Filter } from '@kbn/es-query';
 import {

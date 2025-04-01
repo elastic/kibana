@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import {
   DETECTION_ENGINE_ALERT_ASSIGNEES_URL,

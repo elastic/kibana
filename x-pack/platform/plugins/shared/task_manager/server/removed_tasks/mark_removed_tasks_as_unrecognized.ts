@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
-import { CoreStart } from '@kbn/core-lifecycle-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TaskScheduling } from '../task_scheduling';
-import { TaskTypeDictionary } from '../task_type_dictionary';
-import { ConcreteTaskInstance, TaskManagerStartContract } from '..';
+import type { Logger } from '@kbn/logging';
+import type { CoreStart } from '@kbn/core-lifecycle-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { TaskScheduling } from '../task_scheduling';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
+import type { ConcreteTaskInstance, TaskManagerStartContract } from '..';
 import { TaskStatus } from '../task';
 import { REMOVED_TYPES } from '../task_type_dictionary';
 import { TASK_MANAGER_INDEX } from '../constants';
-import { TaskManagerPluginsStart } from '../plugin';
+import type { TaskManagerPluginsStart } from '../plugin';
 
 export const TASK_ID = 'mark_removed_tasks_as_unrecognized';
 const TASK_TYPE = `task_manager:${TASK_ID}`;
@@ -90,19 +90,17 @@ async function queryForRemovedTasks(
 ): Promise<Array<SearchHit<ConcreteTaskInstance>>> {
   const result = await esClient.search<ConcreteTaskInstance>({
     index: TASK_MANAGER_INDEX,
-    body: {
-      size: 100,
-      _source: false,
-      query: {
-        bool: {
-          must: [
-            {
-              terms: {
-                'task.taskType': REMOVED_TYPES,
-              },
+    size: 100,
+    _source: false,
+    query: {
+      bool: {
+        must: [
+          {
+            terms: {
+              'task.taskType': REMOVED_TYPES,
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

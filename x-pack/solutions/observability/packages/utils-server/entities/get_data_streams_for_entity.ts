@@ -6,7 +6,7 @@
  */
 
 import { compact, uniq } from 'lodash';
-import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { excludeFrozenQuery } from '../es/queries/exclude_frozen_query';
 import { kqlQuery } from '../es/queries/kql_query';
 
@@ -15,7 +15,7 @@ export async function getDataStreamsForEntity({
   kuery,
   index,
 }: {
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   kuery: string;
   index: string | string[];
 }) {

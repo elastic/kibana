@@ -30,7 +30,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           body: {
             type: 'fs',
             settings: {
-              // use one of the values defined in path.repo in test/functional/config.base.js
+              // use one of the values defined in path.repo in src/platform/test/functional/config.base.js
               location: '/tmp/',
             },
           },

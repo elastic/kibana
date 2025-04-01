@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import type { InfraBackendLibs } from '../../../lib/infra_types';

@@ -8,9 +8,9 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import FieldsPreview from './case_fields_preview';
-import type { AppMockRenderer } from '../../../common/mock';
+
 import { theHiveConnector } from '../mock';
-import { createAppMockRenderer } from '../../../common/mock';
+import { renderWithTestingProviders } from '../../../common/mock';
 import { createQueryWithMarkup } from '../../../common/test_utils';
 
 describe('TheHive Fields: Preview', () => {
@@ -18,17 +18,14 @@ describe('TheHive Fields: Preview', () => {
     tlp: 1,
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('renders all fields correctly', () => {
-    appMockRenderer.render(<FieldsPreview connector={theHiveConnector} fields={fields} />);
+    renderWithTestingProviders(<FieldsPreview connector={theHiveConnector} fields={fields} />);
 
-    const getByText = createQueryWithMarkup(screen.getByText);
-    expect(getByText('TLP: GREEN')).toBeInTheDocument();
+    const getByTextWithMarkup = createQueryWithMarkup(screen.getByText);
+    expect(getByTextWithMarkup('TLP: GREEN')).toBeInTheDocument();
   });
 });

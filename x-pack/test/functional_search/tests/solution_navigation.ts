@@ -53,7 +53,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Web Crawlers' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Playground' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Search applications' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Behavioral Analytics' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Inference Endpoints' });
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Other tools' });
     });
@@ -66,8 +65,14 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkActive({
         deepLinkId: 'enterpriseSearch',
       });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearch',
+        text: 'Indices',
+      });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
+        text: 'Create your first index',
       });
 
       // check Dev tools
@@ -111,13 +116,13 @@ export default function searchSolutionNavigation({
       // check the Content
       // > Indices section
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         text: 'Indices',
@@ -174,20 +179,6 @@ export default function searchSolutionNavigation({
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         deepLinkId: 'enterpriseSearchApplications:searchApplications',
       });
-      // > Behavioral Analytics
-      await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.sidenav.expectLinkActive({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Build' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        text: 'Behavioral Analytics',
-      });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-        deepLinkId: 'enterpriseSearchAnalytics',
-      });
 
       // check Relevance
       // > Inference Endpoints
@@ -243,9 +234,9 @@ export default function searchSolutionNavigation({
 
     it("should redirect to index management when clicking on 'Indices'", async () => {
       await solutionNavigation.sidenav.clickLink({
-        deepLinkId: 'management:index_management',
+        deepLinkId: 'elasticsearchIndexManagement',
       });
-      await indexManagement.expectToBeOnIndicesManagement();
+      await indexManagement.expectToBeOnIndexManagement();
     });
 
     it('renders only expected items', async () => {
@@ -262,13 +253,13 @@ export default function searchSolutionNavigation({
         'discover',
         'dashboards',
         'content',
-        'management:index_management',
+        'elasticsearchIndexManagement',
         'enterpriseSearchContent:connectors',
         'enterpriseSearchContent:webCrawlers',
         'build',
         'searchPlayground',
+        'searchSynonyms:synonyms',
         'enterpriseSearchApplications:searchApplications',
-        'enterpriseSearchAnalytics',
         'relevance',
         'searchInferenceEndpoints:inferenceEndpoints',
         'otherTools',

@@ -12,7 +12,8 @@ import useLatest from 'react-use/lib/useLatest';
 import useUnmount from 'react-use/lib/useUnmount';
 import type { RootProfileState } from './use_root_profile';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import type { DiscoverStateContainer } from '../../application/main/state_management/discover_state';
+import type { InternalStateStore } from '../../application/main/state_management/redux';
+import { internalStateActions } from '../../application/main/state_management/redux';
 
 /**
  * Hook to retrieve and initialize the default profile ad hoc data views
@@ -20,44 +21,44 @@ import type { DiscoverStateContainer } from '../../application/main/state_manage
  * @returns An object containing the initialization function
  */
 export const useDefaultAdHocDataViews = ({
-  stateContainer,
-  rootProfileState,
+  internalState,
 }: {
-  stateContainer: DiscoverStateContainer;
-  rootProfileState: RootProfileState;
+  internalState: InternalStateStore;
 }) => {
   const { dataViews } = useDiscoverServices();
-  const { internalState } = stateContainer;
 
-  const initializeDataViews = useLatest(async () => {
-    if (rootProfileState.rootProfileLoading) {
-      return;
+  const initializeDataViews = useLatest(
+    async (rootProfileState: Extract<RootProfileState, { rootProfileLoading: false }>) => {
+      // Clear the cache of old data views before creating
+      // the new ones to avoid cache hits on duplicate IDs
+      for (const prevId of internalState.getState().defaultProfileAdHocDataViewIds) {
+        dataViews.clearInstanceCache(prevId);
+      }
+
+      const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
+      const profileDataViews = await Promise.all(
+        profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
+      );
+
+      internalState.dispatch(
+        internalStateActions.setDefaultProfileAdHocDataViews(profileDataViews)
+      );
     }
-
-    // Clear the cache of old data views before creating
-    // the new ones to avoid cache hits on duplicate IDs
-    for (const prevId of internalState.get().defaultProfileAdHocDataViewIds) {
-      dataViews.clearInstanceCache(prevId);
-    }
-
-    const profileDataViewSpecs = rootProfileState.getDefaultAdHocDataViews();
-    const profileDataViews = await Promise.all(
-      profileDataViewSpecs.map((spec) => dataViews.create(spec, true))
-    );
-
-    internalState.transitions.setDefaultProfileAdHocDataViews(profileDataViews);
-  });
+  );
 
   // This approach allows us to return a callback with a stable reference
-  const [initializeProfileDataViews] = useState(() => () => initializeDataViews.current());
+  const [initializeProfileDataViews] = useState(() => {
+    return (...params: Parameters<typeof initializeDataViews.current>) =>
+      initializeDataViews.current(...params);
+  });
 
   // Make sure to clean up on unmount
   useUnmount(() => {
-    for (const prevId of internalState.get().defaultProfileAdHocDataViewIds) {
+    for (const prevId of internalState.getState().defaultProfileAdHocDataViewIds) {
       dataViews.clearInstanceCache(prevId);
     }
 
-    internalState.transitions.setDefaultProfileAdHocDataViews([]);
+    internalState.dispatch(internalStateActions.setDefaultProfileAdHocDataViews([]));
   });
 
   return { initializeProfileDataViews };

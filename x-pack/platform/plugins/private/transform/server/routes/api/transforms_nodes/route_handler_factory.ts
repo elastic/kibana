@@ -41,9 +41,7 @@ export const routeHandlerFactory: (
     if (license.getStatus().isSecurityEnabled === true) {
       const { has_all_requested: hasAllPrivileges } =
         await esClient.asCurrentUser.security.hasPrivileges({
-          body: {
-            cluster: NODES_INFO_PRIVILEGES,
-          },
+          cluster: NODES_INFO_PRIVILEGES,
         });
 
       if (!hasAllPrivileges) {

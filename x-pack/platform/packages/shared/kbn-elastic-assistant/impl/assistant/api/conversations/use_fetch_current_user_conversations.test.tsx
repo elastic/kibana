@@ -19,11 +19,8 @@ import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 const http = {
   fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
 };
-const onFetch = jest.fn();
-
 const defaultProps = {
   http,
-  onFetch,
   isAssistantEnabled: true,
 } as unknown as UseFetchCurrentUserConversationsParams;
 
@@ -48,14 +45,16 @@ describe('useFetchCurrentUserConversations', () => {
           method: 'GET',
           query: {
             page: 1,
-            per_page: 99,
+            fields: ['id', 'title', 'apiConfig', 'updatedAt'],
+            filter: undefined,
+            per_page: 28,
+            sort_field: 'updated_at',
+            sort_order: 'desc',
           },
           version: '2023-10-31',
           signal: undefined,
         }
       );
-
-      expect(onFetch).toHaveBeenCalled();
     });
   });
 });

@@ -26,7 +26,7 @@ import {
   RULE_FLYOUT_FOOTER_BACK_TEXT,
   RULE_FLYOUT_HEADER_BACK_TEXT,
 } from '../translations';
-import { RequestCodeBlock } from '../request_code_block';
+import { RequestCodeBlock } from '../components';
 
 interface RuleFlyoutShowRequestProps {
   isEdit: boolean;

@@ -30,16 +30,14 @@ export async function getServiceCount({
         ProcessorEvent.metric,
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: rangeQuery(start, end),
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: rangeQuery(start, end),
       },
-      aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
     },
+    aggs: { serviceCount: { cardinality: { field: SERVICE_NAME } } },
   };
 
   const { aggregations } = await apmEventClient.search(

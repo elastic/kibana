@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type {
   GetViewInAppRelativeUrlFnOpts,
   ActionGroupIdsOf,
@@ -21,6 +21,7 @@ import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   getAlertDetailsUrl,
+  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
@@ -51,6 +52,7 @@ import {
 import type {
   THRESHOLD_MET_GROUP,
   ApmRuleParamsType,
+  AdditionalContext,
 } from '../../../../../common/rules/apm_rule_types';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
@@ -96,6 +98,7 @@ export function registerAnomalyRuleType({
     id: ApmRuleType.Anomaly,
     name: ruleTypeConfig.name,
     actionGroups: ruleTypeConfig.actionGroups,
+    doesSetRecoveryContext: true,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: anomalyParamsSchema },
     schemas: {
@@ -118,6 +121,7 @@ export function registerAnomalyRuleType({
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: APM_SERVER_FEATURE_ID,
+    solution: observabilityFeatureId,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async (
@@ -179,64 +183,61 @@ export function registerAnomalyRuleType({
 
       const jobIds = mlJobs.map((job) => job.jobId);
       const anomalySearchParams = {
-        body: {
-          track_total_hits: false,
-          size: 0,
-          query: {
-            bool: {
-              filter: [
-                { term: { result_type: 'record' } },
-                { terms: { job_id: jobIds } },
-                { term: { is_interim: false } },
-                {
-                  range: {
-                    timestamp: {
-                      gte: dateStart,
-                    },
+        track_total_hits: false,
+        size: 0,
+        query: {
+          bool: {
+            filter: [
+              { term: { result_type: 'record' } },
+              { terms: { job_id: jobIds } },
+              { term: { is_interim: false } },
+              {
+                range: {
+                  timestamp: {
+                    gte: dateStart,
                   },
                 },
-                ...termQuery('partition_field_value', ruleParams.serviceName, {
-                  queryEmptyString: false,
-                }),
-                ...termQuery('by_field_value', ruleParams.transactionType, {
-                  queryEmptyString: false,
-                }),
-                ...termsQuery(
-                  'detector_index',
-                  ...(ruleParams.anomalyDetectorTypes?.map((type) =>
-                    getAnomalyDetectorIndex(type)
-                  ) ?? [])
-                ),
-              ] as QueryDslQueryContainer[],
-            },
-          },
-          aggs: {
-            anomaly_groups: {
-              multi_terms: {
-                terms: [
-                  { field: 'partition_field_value' },
-                  { field: 'by_field_value' },
-                  { field: 'job_id' },
-                  { field: 'detector_index' },
-                ],
-                size: 1000,
-                order: { 'latest_score.record_score': 'desc' as const },
               },
-              aggs: {
-                latest_score: {
-                  top_metrics: {
-                    metrics: asMutableArray([
-                      { field: 'record_score' },
-                      { field: 'partition_field_value' },
-                      { field: 'by_field_value' },
-                      { field: 'job_id' },
-                      { field: 'timestamp' },
-                      { field: 'bucket_span' },
-                      { field: 'detector_index' },
-                    ] as const),
-                    sort: {
-                      timestamp: 'desc' as const,
-                    },
+              ...termQuery('partition_field_value', ruleParams.serviceName, {
+                queryEmptyString: false,
+              }),
+              ...termQuery('by_field_value', ruleParams.transactionType, {
+                queryEmptyString: false,
+              }),
+              ...termsQuery(
+                'detector_index',
+                ...(ruleParams.anomalyDetectorTypes?.map((type) => getAnomalyDetectorIndex(type)) ??
+                  [])
+              ),
+            ] as QueryDslQueryContainer[],
+          },
+        },
+        aggs: {
+          anomaly_groups: {
+            multi_terms: {
+              terms: [
+                { field: 'partition_field_value' },
+                { field: 'by_field_value' },
+                { field: 'job_id' },
+                { field: 'detector_index' },
+              ],
+              size: 1000,
+              order: { 'latest_score.record_score': 'desc' as const },
+            },
+            aggs: {
+              latest_score: {
+                top_metrics: {
+                  metrics: asMutableArray([
+                    { field: 'record_score' },
+                    { field: 'partition_field_value' },
+                    { field: 'by_field_value' },
+                    { field: 'job_id' },
+                    { field: 'timestamp' },
+                    { field: 'bucket_span' },
+                    { field: 'detector_index' },
+                  ] as const),
+                  sort: {
+                    timestamp: 'desc' as const,
                   },
                 },
               },
@@ -256,7 +257,7 @@ export function registerAnomalyRuleType({
             const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
             if (!job) {
-              logger.warn(`Could not find matching job for job id ${latest.job_id}`);
+              logger.debug(`Could not find matching job for job id ${latest.job_id}`);
               return undefined;
             }
 
@@ -355,6 +356,45 @@ export function registerAnomalyRuleType({
           context,
         });
       });
+      // Handle recovered alerts context
+      const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
+      for (const recoveredAlert of recoveredAlerts) {
+        const alertHits = recoveredAlert.hit as AdditionalContext;
+        const recoveredAlertId = recoveredAlert.alert.getId();
+        const alertUuid = recoveredAlert.alert.getUuid();
+        const alertDetailsUrl = await getAlertDetailsUrl(basePath, spaceId, alertUuid);
+
+        const environment = alertHits?.[SERVICE_ENVIRONMENT];
+        const serviceName = alertHits?.[SERVICE_NAME];
+        const transactionType = alertHits?.[TRANSACTION_TYPE];
+        const severityLevel = alertHits?.[ALERT_SEVERITY];
+        const reasonMessage = alertHits?.[ALERT_REASON];
+
+        const relativeViewInAppUrl = getAlertUrlTransaction(
+          serviceName,
+          environment,
+          transactionType
+        );
+        const viewInAppUrl = addSpaceIdToPath(
+          basePath.publicBaseUrl,
+          spaceId,
+          relativeViewInAppUrl
+        );
+        const recoveredContext = {
+          alertDetailsUrl,
+          environment: getEnvironmentLabel(environment),
+          reason: reasonMessage,
+          serviceName,
+          threshold: selectedOption?.label,
+          transactionType,
+          triggerValue: severityLevel,
+          viewInAppUrl,
+        };
+        alertsClient.setAlertData({
+          id: recoveredAlertId,
+          context: recoveredContext,
+        });
+      }
 
       return { state: {} };
     },

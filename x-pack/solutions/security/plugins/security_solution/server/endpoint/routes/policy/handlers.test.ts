@@ -18,7 +18,7 @@ import {
   httpServerMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { requestContextMock } from '../../../lib/detection_engine/routes/__mocks__';

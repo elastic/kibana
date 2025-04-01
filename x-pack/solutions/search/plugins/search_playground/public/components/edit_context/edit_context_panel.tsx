@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiPanel,
-  EuiSelect,
-  EuiSuperSelect,
-  EuiText,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useController } from 'react-hook-form';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { ContextFieldsSelect } from './context_fields_select';
 
 export const EditContextPanel: React.FC = () => {
   const usageTracker = useUsageTracker();
@@ -40,13 +32,16 @@ export const EditContextPanel: React.FC = () => {
     name: ChatFormFields.sourceFields,
   });
 
-  const updateSourceField = (index: string, field: string) => {
-    onChangeSourceFields({
-      ...sourceFields,
-      [index]: [field],
-    });
-    usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
-  };
+  const updateSourceField = useCallback(
+    (index: string, contextFields: string[]) => {
+      onChangeSourceFields({
+        ...sourceFields,
+        [index]: contextFields,
+      });
+      usageTracker?.click(AnalyticsEvents.editContextFieldToggled);
+    },
+    [onChangeSourceFields, sourceFields, usageTracker]
+  );
 
   const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
@@ -64,6 +59,7 @@ export const EditContextPanel: React.FC = () => {
             fullWidth
           >
             <EuiSelect
+              data-test-subj="contextPanelDocumentNumberSelect"
               options={[
                 {
                   value: 1,
@@ -100,32 +96,15 @@ export const EditContextPanel: React.FC = () => {
                 </h5>
               </EuiText>
             </EuiFlexItem>
-            {Object.entries(fields).map(([index, group], indexNum) => (
+            {Object.entries(fields).map(([index, group]) => (
               <EuiFlexItem grow={false} key={index}>
                 <EuiFormRow label={index} fullWidth>
-                  {!!group.source_fields?.length ? (
-                    <EuiSuperSelect
-                      data-test-subj={`contextFieldsSelectable-${indexNum}`}
-                      options={group.source_fields.map((field) => ({
-                        value: field,
-                        inputDisplay: field,
-                        'data-test-subj': 'contextField',
-                      }))}
-                      valueOfSelected={sourceFields[index]?.[0]}
-                      onChange={(value) => updateSourceField(index, value)}
-                      fullWidth
-                    />
-                  ) : (
-                    <EuiCallOut
-                      title={i18n.translate(
-                        'xpack.searchPlayground.editContext.noSourceFieldWarning',
-                        { defaultMessage: 'No source fields found' }
-                      )}
-                      color="warning"
-                      iconType="warning"
-                      size="s"
-                    />
-                  )}
+                  <ContextFieldsSelect
+                    indexName={index}
+                    indexFields={group}
+                    selectedContextFields={sourceFields[index] ?? []}
+                    updateSelectedContextFields={updateSourceField}
+                  />
                 </EuiFormRow>
               </EuiFlexItem>
             ))}

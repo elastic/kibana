@@ -5,19 +5,16 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 import type { IEventLogClient } from '@kbn/event-log-plugin/server';
 import type {
   ClusterHealthParameters,
-  ClusterHealthSnapshot,
   HealthInterval,
   RuleHealthParameters,
-  RuleHealthSnapshot,
   SpaceHealthParameters,
-  SpaceHealthSnapshot,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as f from '../../event_log/event_log_fields';
@@ -32,6 +29,7 @@ import {
   getRuleHealthAggregation,
   normalizeRuleHealthAggregationResult,
 } from './aggregations/health_stats_for_rule';
+import type { HealthOverInterval } from './aggregations/types';
 
 /**
  * Client for calculating health stats based on events in .kibana-event-log-* index.
@@ -56,9 +54,9 @@ export interface IEventLogHealthClient {
   calculateClusterHealth(args: ClusterHealthParameters): Promise<ClusterHealth>;
 }
 
-type RuleHealth = Omit<RuleHealthSnapshot, 'state_at_the_moment'>;
-type SpaceHealth = Omit<SpaceHealthSnapshot, 'state_at_the_moment'>;
-type ClusterHealth = Omit<ClusterHealthSnapshot, 'state_at_the_moment'>;
+type RuleHealth = HealthOverInterval;
+type SpaceHealth = HealthOverInterval;
+type ClusterHealth = HealthOverInterval;
 
 export const createEventLogHealthClient = (
   eventLog: IEventLogClient,

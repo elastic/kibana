@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { parse as parseCookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
 

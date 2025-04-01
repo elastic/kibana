@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { SYNONYMS_SETS_QUERY_KEY } from '../../common/constants';
 import { DEFAULT_PAGE_VALUE, Page, Paginate } from '../../common/pagination';
 import { APIRoutes } from '../../common/api_routes';
@@ -16,7 +17,7 @@ export const useFetchSynonymsSets = (page: Page = DEFAULT_PAGE_VALUE) => {
   const {
     services: { http },
   } = useKibana();
-  return useQuery({
+  return useQuery<Paginate<SynonymsGetSynonymsSetsSynonymsSetItem>, { body: KibanaServerError }>({
     queryKey: [SYNONYMS_SETS_QUERY_KEY, page.from, page.size],
     queryFn: async () => {
       return await http.get<Paginate<SynonymsGetSynonymsSetsSynonymsSetItem>>(
@@ -26,5 +27,7 @@ export const useFetchSynonymsSets = (page: Page = DEFAULT_PAGE_VALUE) => {
         }
       );
     },
+    refetchOnWindowFocus: false,
+    retry: false,
   });
 };

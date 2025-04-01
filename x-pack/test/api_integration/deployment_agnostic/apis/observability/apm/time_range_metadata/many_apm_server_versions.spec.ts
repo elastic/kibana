@@ -60,14 +60,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('ingests transaction metrics with transaction.duration.summary', async () => {
         const res = await es.search({
           index: 'metrics-apm*',
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-                  { exists: { field: TRANSACTION_DURATION_SUMMARY } },
-                ],
-              },
+          query: {
+            bool: {
+              filter: [
+                { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
+                { exists: { field: TRANSACTION_DURATION_SUMMARY } },
+              ],
             },
           },
         });
@@ -79,12 +77,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('ingests transaction metrics without transaction.duration.summary', async () => {
         const res = await es.search({
           index: 'metrics-apm*',
-          body: {
-            query: {
-              bool: {
-                filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
-                must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
-              },
+          query: {
+            bool: {
+              filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
+              must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
             },
           },
         });

@@ -62,18 +62,16 @@ describe('updateDeprecatedComponentTemplates', () => {
 
     expect(esClientMock.cluster.putComponentTemplate).toHaveBeenCalledTimes(1);
     expect(esClientMock.cluster.putComponentTemplate).toHaveBeenCalledWith({
-      body: {
-        template: {
-          mappings: {
-            _source: {},
-            properties: {},
-          },
-          settings: {
-            index: {
-              mapping: {
-                source: {
-                  mode: 'synthetic',
-                },
+      template: {
+        mappings: {
+          _source: {},
+          properties: {},
+        },
+        settings: {
+          index: {
+            mapping: {
+              source: {
+                mode: 'synthetic',
               },
             },
           },

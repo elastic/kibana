@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf, ZodType } from '@kbn/zod';
-import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core/server';
+import type { RouteValidationFunction, RouteValidationResultFactory } from '@kbn/core-http-server';
 import { stringifyZodError } from './stringify_zod_error';
 
 /**

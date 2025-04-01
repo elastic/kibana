@@ -68,34 +68,32 @@ async function getHttpRequestsTimeseries({
 
   const response = await apmEventClient.search('get_http_requests_chart', {
     apm: { events: [ProcessorEvent.span] },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SPAN_TYPE, MobileSpanType.External),
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(SPAN_TYPE, 'external'),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SPAN_TYPE, MobileSpanType.External),
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...termQuery(SPAN_TYPE, 'external'),
+          ...termQuery(TRANSACTION_NAME, transactionName),
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: intervalString,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
-          },
-          aggs,
+    },
+    aggs: {
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: intervalString,
+          min_doc_count: 0,
+          extended_bounds: { min: startWithOffset, max: endWithOffset },
         },
-        ...aggs,
+        aggs,
       },
+      ...aggs,
     },
   });
 

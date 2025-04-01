@@ -10,7 +10,7 @@ import type {
   AggregationsCompositeBucket,
   AggregationsMaxAggregate,
   AggregationsMinAggregate,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ESSearchResponse } from '@kbn/es-types';
 import type { RuleTypeState } from '@kbn/alerting-plugin/server';
 import type { SignalSource } from '../types';
@@ -29,18 +29,14 @@ export interface ThresholdLeafAggregates {
 export type ThresholdMultiBucketAggregationResult = ESSearchResponse<
   SignalSource,
   {
-    body: {
-      aggregations: ReturnType<typeof buildThresholdMultiBucketAggregation>;
-    };
+    aggregations: ReturnType<typeof buildThresholdMultiBucketAggregation>;
   }
 >;
 
 export type ThresholdSingleBucketAggregationResult = ESSearchResponse<
   SignalSource,
   {
-    body: {
-      aggregations: ReturnType<typeof buildThresholdSingleBucketAggregation>;
-    };
+    aggregations: ReturnType<typeof buildThresholdSingleBucketAggregation>;
   }
 >;
 

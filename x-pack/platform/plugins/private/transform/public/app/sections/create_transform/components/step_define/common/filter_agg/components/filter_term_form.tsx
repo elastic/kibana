@@ -16,7 +16,7 @@ import React, {
 } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
@@ -77,25 +77,23 @@ export const FilterTermForm: FilterAggConfigTerm['aggTypeConfig']['FilterAggForm
   const { data, isError, isLoading } = useDataSearch(
     {
       index: dataView!.title,
-      body: {
-        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
-        query: {
-          wildcard: {
-            [selectedField!]: {
-              value: `*${searchValue}*`,
-            },
+      ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+      query: {
+        wildcard: {
+          [selectedField!]: {
+            value: `*${searchValue}*`,
           },
         },
-        aggs: {
-          field_values: {
-            terms: {
-              field: selectedField,
-              size: 10,
-            },
-          },
-        },
-        size: 0,
       },
+      aggs: {
+        field_values: {
+          terms: {
+            field: selectedField,
+            size: 10,
+          },
+        },
+      },
+      size: 0,
     },
     // Check whether fetching should be enabled
     selectedField !== undefined

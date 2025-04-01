@@ -16,6 +16,7 @@
       "apm"
     ],
     "requiredPlugins": [
+      "apmSourcesAccess",
       "apmDataAccess",
       "data",
       "dashboard",
@@ -39,7 +40,8 @@
       "uiActions",
       "logsDataAccess",
       "savedSearch",
-      "entityManager"
+      "entityManager",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "actions",
@@ -60,7 +62,8 @@
       "licenseManagement",
       "profilingDataAccess",
       "cases",
-      "observabilityAIAssistant"
+      "observabilityAIAssistant",
+      "share"
     ],
     "requiredBundles": [
       "fleet",

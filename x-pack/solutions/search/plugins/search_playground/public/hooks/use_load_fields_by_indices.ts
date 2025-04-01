@@ -35,13 +35,16 @@ export const useLoadFieldsByIndices = ({
 }: Pick<UseFormReturn<ChatForm>, 'watch' | 'getValues' | 'setValue'>) => {
   const usageTracker = useUsageTracker();
   const selectedIndices = watch(ChatFormFields.indices);
-  const { fields } = useIndicesFields(selectedIndices);
+  const { fields, isFetched } = useIndicesFields(selectedIndices);
 
   useEffect(() => {
-    const [queryFields, sourceFields] = getValues([
-      ChatFormFields.queryFields,
-      ChatFormFields.sourceFields,
-    ]);
+    // Don't merge fields if we haven't fetched them from indices yet, otherwise we'll overwrite save values with a race condition
+    if (!isFetched) return;
+    const {
+      [ChatFormFields.queryFields]: queryFields,
+      [ChatFormFields.sourceFields]: sourceFields,
+    } = getValues();
+
     const defaultFields = getDefaultQueryFields(fields);
     const defaultSourceFields = getDefaultSourceFields(fields);
     const mergedQueryFields = mergeDefaultAndCurrentValues(defaultFields, queryFields);
@@ -55,5 +58,5 @@ export const useLoadFieldsByIndices = ({
     setValue(ChatFormFields.sourceFields, mergedSourceFields);
 
     usageTracker?.count(AnalyticsEvents.sourceFieldsLoaded, Object.values(fields)?.flat()?.length);
-  }, [fields, getValues, setValue, usageTracker]);
+  }, [fields, getValues, setValue, usageTracker, isFetched]);
 };

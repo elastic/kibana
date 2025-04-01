@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsBuckets } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsBuckets } from '@elastic/elasticsearch/lib/api/types';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 
 export interface ConnectorsByConsumersBucket {

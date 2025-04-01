@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BrowserFields } from '../../common/search_strategy/index_fields';
 
 const DEFAULT_INDEX_PATTERN = [

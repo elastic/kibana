@@ -10,8 +10,8 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseAndLogError } from './parse_and_log_error';
@@ -43,56 +43,54 @@ export async function getFailedAndUnrecognizedTasksPerDay({
     const query = {
       index: taskManagerIndex,
       size: 0,
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      term: {
-                        'task.status': 'unrecognized',
-                      },
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      'task.status': 'unrecognized',
                     },
-                    {
-                      term: {
-                        'task.status': 'failed',
-                      },
+                  },
+                  {
+                    term: {
+                      'task.status': 'failed',
                     },
-                  ],
-                },
-              },
-              {
-                wildcard: {
-                  'task.taskType': {
-                    value: 'alerting:*',
                   },
-                },
+                ],
               },
-              {
-                range: {
-                  'task.runAt': {
-                    gte: 'now-1d',
-                  },
-                },
-              },
-            ],
-          },
-        },
-        aggs: {
-          by_status: {
-            terms: {
-              field: 'task.status',
-              size: 10,
             },
-            aggs: {
-              by_task_type: {
-                terms: {
-                  field: 'task.taskType',
-                  // Use number of alerting rule types because we're filtering by 'alerting:'
-                  size: NUM_ALERTING_RULE_TYPES,
+            {
+              wildcard: {
+                'task.taskType': {
+                  value: 'alerting:*',
                 },
+              },
+            },
+            {
+              range: {
+                'task.runAt': {
+                  gte: 'now-1d',
+                },
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        by_status: {
+          terms: {
+            field: 'task.status',
+            size: 10,
+          },
+          aggs: {
+            by_task_type: {
+              terms: {
+                field: 'task.taskType',
+                // Use number of alerting rule types because we're filtering by 'alerting:'
+                size: NUM_ALERTING_RULE_TYPES,
               },
             },
           },

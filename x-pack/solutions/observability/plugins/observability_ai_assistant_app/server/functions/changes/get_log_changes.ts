@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregationContainer,
+  AggregationsAutoDateHistogramAggregation,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ChangePointType } from '@kbn/es-types/src';
+import type { AggregateOf } from '@kbn/es-types/src/search';
 import type { ObservabilityAIAssistantElasticsearchClient } from '../../clients/elasticsearch';
 
 export async function getLogChanges({
@@ -68,7 +72,8 @@ export async function getLogChanges({
                 change_point: {
                   buckets_path: 'over_time>_count',
                 },
-              },
+                // elasticsearch@9.0.0 change_point aggregation is missing in the types: https://github.com/elastic/elasticsearch-specification/issues/3671
+              } as AggregationsAggregationContainer,
             },
           },
         },
@@ -78,6 +83,11 @@ export async function getLogChanges({
 
   return (
     response.aggregations?.sampler.groups.buckets.map((group) => {
+      const changes = group.changes as AggregateOf<
+        { change_point: { buckets_path: string } },
+        unknown
+      >;
+
       return {
         key: group.key,
         pattern: group.regex,
@@ -86,12 +96,12 @@ export async function getLogChanges({
           y: bucket.doc_count,
         })),
         changes:
-          group.changes.type.indeterminable || !group.changes.bucket?.key
+          changes.type.indeterminable || !changes.bucket?.key
             ? { type: 'indeterminable' as ChangePointType }
             : {
-                time: new Date(group.changes.bucket.key).toISOString(),
-                type: Object.keys(group.changes.type)[0] as keyof typeof group.changes.type,
-                ...Object.values(group.changes.type)[0],
+                time: new Date(changes.bucket.key).toISOString(),
+                type: Object.keys(changes.type)[0] as keyof typeof changes.type,
+                ...Object.values(changes.type)[0],
               },
       };
     }) ?? []

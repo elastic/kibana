@@ -15,7 +15,7 @@ import {
 import { sortAndTruncateAnalyzedFields } from '@kbn/observability-utils-common/llm/log_analysis/sort_and_truncate_analyzed_fields';
 import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analyze_documents';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery } from '@kbn/observability-utils-server/es/queries/kql_query';
 import { rangeQuery } from '@kbn/observability-utils-server/es/queries/range_query';
 import { chunk, isEmpty, isEqual } from 'lodash';
@@ -202,7 +202,7 @@ export async function analyzeFetchedRelatedEntities({
 }: {
   connectorId: string;
   inferenceClient: InferenceClient;
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   start: number;
   end: number;
   searches: RelatedEntityKeywordSearch[];

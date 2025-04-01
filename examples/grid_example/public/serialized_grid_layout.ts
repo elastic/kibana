@@ -28,10 +28,10 @@ export function setSerializedGridLayout(state: MockSerializedDashboardState) {
 
 const initialState: MockSerializedDashboardState = {
   panels: logsPanels,
-  rows: [
-    { title: 'Request Sizes', collapsed: false },
-    { title: 'Visitors', collapsed: false },
-    { title: 'Response Codes', collapsed: false },
-    { title: 'Entire Flights Dashboard', collapsed: true },
-  ],
+  rows: {
+    first: { id: 'first', order: 0, title: 'Request Sizes', collapsed: false },
+    second: { id: 'second', order: 1, title: 'Visitors', collapsed: false },
+    third: { id: 'third', order: 2, title: 'Response Codes', collapsed: false },
+    fourth: { id: 'fourth', order: 3, title: 'Entire Flights Dashboard', collapsed: true },
+  },
 };

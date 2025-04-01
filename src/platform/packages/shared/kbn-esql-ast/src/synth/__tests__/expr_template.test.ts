@@ -39,3 +39,12 @@ test('can compose nodes into templated string', () => {
 
   expect(text).toBe('a.b.c = FN(1, a.b.c)');
 });
+
+test('creates a list of nodes separated by command, if array passed in', () => {
+  const arg1 = expr`1`;
+  const arg2 = expr`a.b.c`;
+  const value = expr`fn(${[arg1, arg2]})`;
+  const text = BasicPrettyPrinter.expression(value);
+
+  expect(text).toBe('FN(1, a.b.c)');
+});

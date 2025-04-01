@@ -34,16 +34,16 @@ const definitionsIndexTemplate = {
       dynamic: false,
       properties: {
         template_version: {
-          type: 'short',
+          type: 'short' as const,
         },
         definition_type: {
-          type: 'keyword',
+          type: 'keyword' as const,
         },
         source: {
-          type: 'object',
+          type: 'object' as const,
           properties: {
             type_id: {
-              type: 'keyword',
+              type: 'keyword' as const,
             },
           },
         },

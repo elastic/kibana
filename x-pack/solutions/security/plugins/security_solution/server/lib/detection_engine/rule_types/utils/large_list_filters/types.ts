@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Type, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { ListClient } from '@kbn/lists-plugin/server';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';

@@ -86,13 +86,11 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
 
   const params = {
     index: indexPatternList,
-    body: {
-      size: 0,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: filters,
-        },
+    size: 0,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: filters,
       },
     },
   };
