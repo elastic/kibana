@@ -29,6 +29,8 @@ import {
   useInternalStateSelector,
   useRuntimeState,
   useCurrentTabRuntimeState,
+  useCurrentTabSelector,
+  useCurrentTabAction,
 } from '../../state_management/redux';
 import type {
   CustomizationCallback,
@@ -89,11 +91,14 @@ export const DiscoverSessionView = forwardRef<DiscoverSessionViewRef, DiscoverSe
     const services = useDiscoverServices();
     const { core, history, getScopedHistory } = services;
     const { id: discoverSessionId } = useParams<{ id?: string }>();
+    const currentTabId = useCurrentTabSelector((tab) => tab.id);
+    const initializeSessionAction = useCurrentTabAction(internalStateActions.initializeSession);
     const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
       async ({ dataViewSpec, defaultUrlState } = {}) => {
         initializeSessionState.value?.stateContainer?.actions.stopSyncing();
 
         const stateContainer = getDiscoverStateContainer({
+          tabId: currentTabId,
           services,
           customizationContext,
           stateStorageContainer: urlStateStorage,
@@ -101,11 +106,13 @@ export const DiscoverSessionView = forwardRef<DiscoverSessionViewRef, DiscoverSe
           runtimeStateManager,
         });
         const { showNoDataPage } = await dispatch(
-          internalStateActions.initializeSession({
-            stateContainer,
-            discoverSessionId,
-            dataViewSpec,
-            defaultUrlState,
+          initializeSessionAction({
+            initializeSessionParams: {
+              stateContainer,
+              discoverSessionId,
+              dataViewSpec,
+              defaultUrlState,
+            },
           })
         );
 
