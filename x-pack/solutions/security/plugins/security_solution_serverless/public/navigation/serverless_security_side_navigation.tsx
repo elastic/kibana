@@ -24,12 +24,9 @@ const SOLUTION_NAME = i18n.translate(
   { defaultMessage: 'Security' }
 );
 
-const PROJECT_SETTINGS_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.navLinks.projectSettings.title',
-  { defaultMessage: 'Project Settings' }
-);
-
-const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTreeDefinition> => {
+export const createServerlessSecurityNavigationTree$ = (
+  services: Services
+): Rx.Observable<NavigationTreeDefinition> => {
   return Rx.of({
     body: [
       {
@@ -738,7 +735,9 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
       {
         type: 'navGroup',
         id: 'category-management',
-        title: PROJECT_SETTINGS_TITLE,
+        title: i18n.translate('xpack.securitySolutionServerless.navLinks.projectSettings.title', {
+          defaultMessage: 'Project Settings',
+        }),
         icon: 'gear',
         breadcrumbStatus: 'hidden',
         children: [
@@ -901,13 +900,5 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
         ],
       },
     ],
-  });
-};
-
-export const initSideNavigation = async (services: Services) => {
-  services.securitySolution.setIsSolutionNavigationEnabled(true);
-
-  services.serverless.initNavigation('security', createNavigationTree$(services), {
-    dataTestSubj: 'securitySolutionSideNav',
   });
 };

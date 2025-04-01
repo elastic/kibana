@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ESS Security Side Nav registers the navigation tree definition 1`] = `
+exports[`Security Side Nav registers the navigation tree definition for serverless security 1`] = `
 Object {
   "body": Array [
     Object {
@@ -703,6 +703,376 @@ Object {
           "renderAs": "panelOpener",
           "spaceBefore": null,
           "title": "Stack Management",
+        },
+      ],
+      "icon": "gear",
+      "id": "category-management",
+      "title": "Project Settings",
+      "type": "navGroup",
+    },
+  ],
+}
+`;
+
+exports[`Security Side Nav registers the navigation tree definition for serverless security with AI SOC 1`] = `
+Object {
+  "body": Array [
+    Object {
+      "breadcrumbStatus": "hidden",
+      "children": Array [
+        Object {
+          "id": "discover:",
+          "link": "discover",
+        },
+        Object {
+          "id": "attack_discovery",
+          "link": "securitySolutionUI:attack_discovery",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "id": "cases_create",
+              "link": "securitySolutionUI:cases_create",
+              "sideNavStatus": "hidden",
+            },
+            Object {
+              "id": "cases_configure",
+              "link": "securitySolutionUI:cases_configure",
+              "sideNavStatus": "hidden",
+            },
+          ],
+          "id": "cases",
+          "link": "securitySolutionUI:cases",
+          "renderAs": "panelOpener",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "ml:overview",
+                  "link": "ml:overview",
+                  "title": "Overview",
+                },
+                Object {
+                  "id": "ml:notifications",
+                  "link": "ml:notifications",
+                  "title": "Notifications",
+                },
+                Object {
+                  "id": "ml:memoryUsage",
+                  "link": "ml:memoryUsage",
+                  "title": "Memory usage",
+                },
+              ],
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "ml:anomalyDetection",
+                  "link": "ml:anomalyDetection",
+                  "title": "Jobs",
+                },
+                Object {
+                  "id": "ml:anomalyExplorer",
+                  "link": "ml:anomalyExplorer",
+                  "title": "Anomaly explorer",
+                },
+                Object {
+                  "id": "ml:singleMetricViewer",
+                  "link": "ml:singleMetricViewer",
+                  "title": "Single metric viewer",
+                },
+                Object {
+                  "id": "ml:suppliedConfigurations",
+                  "link": "ml:suppliedConfigurations",
+                  "title": "Supplied configurations",
+                },
+                Object {
+                  "id": "ml:settings",
+                  "link": "ml:settings",
+                  "title": "Settings",
+                },
+              ],
+              "id": "category-anomaly_detection",
+              "title": "Anomaly detection",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "ml:dataFrameAnalytics",
+                  "link": "ml:dataFrameAnalytics",
+                  "title": "Jobs",
+                },
+                Object {
+                  "id": "ml:resultExplorer",
+                  "link": "ml:resultExplorer",
+                  "title": "Result explorer",
+                },
+                Object {
+                  "id": "ml:analyticsMap",
+                  "link": "ml:analyticsMap",
+                  "title": "Analytics map",
+                },
+              ],
+              "id": "category-data_frame analytics",
+              "title": "Data frame analytics",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "ml:nodesOverview",
+                  "link": "ml:nodesOverview",
+                  "title": "Trained models",
+                },
+              ],
+              "id": "category-model_management",
+              "title": "Model management",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "ml:fileUpload",
+                  "link": "ml:fileUpload",
+                  "title": "File data visualizer",
+                },
+                Object {
+                  "id": "ml:indexDataVisualizer",
+                  "link": "ml:indexDataVisualizer",
+                  "title": "Data view data visualizer",
+                },
+                Object {
+                  "id": "ml:esqlDataVisualizer",
+                  "link": "ml:esqlDataVisualizer",
+                  "title": "ES|QL data visualizer",
+                },
+                Object {
+                  "id": "ml:dataDrift",
+                  "link": "ml:dataDrift",
+                  "title": "Data drift",
+                },
+              ],
+              "id": "category-data_visualizer",
+              "title": "Data visualizer",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "id": "ml:logRateAnalysis",
+                  "link": "ml:logRateAnalysis",
+                  "title": "Log Rate Analysis",
+                },
+                Object {
+                  "id": "ml:logPatternAnalysis",
+                  "link": "ml:logPatternAnalysis",
+                  "title": "Log pattern analysis",
+                },
+                Object {
+                  "id": "ml:changePointDetections",
+                  "link": "ml:changePointDetections",
+                  "title": "Change point detection",
+                },
+              ],
+              "id": "category-aiops_labs",
+              "title": "Aiops labs",
+            },
+          ],
+          "id": "machine_learning-landing",
+          "link": "securitySolutionUI:machine_learning-landing",
+          "renderAs": "panelOpener",
+        },
+        Object {
+          "id": "alert_summary",
+          "link": "securitySolutionUI:alert_summary",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "link": "securitySolutionUI:configurations-ai_settings",
+            },
+            Object {
+              "link": "securitySolutionUI:configurations-basic_rules",
+            },
+            Object {
+              "link": "securitySolutionUI:configurations-integrations",
+            },
+          ],
+          "id": "configurations",
+          "link": "securitySolutionUI:configurations",
+          "renderAs": "panelOpener",
+        },
+      ],
+      "defaultIsCollapsed": false,
+      "icon": [Function],
+      "id": "security_solution_ai_nav",
+      "isCollapsible": false,
+      "title": "AI for SOC",
+      "type": "navGroup",
+    },
+  ],
+  "footer": Array [
+    Object {
+      "icon": "launch",
+      "link": "securitySolutionUI:get_started",
+      "type": "navItem",
+    },
+    Object {
+      "icon": "editorCodeBlock",
+      "link": "dev_tools",
+      "title": "Developer tools",
+      "type": "navItem",
+    },
+    Object {
+      "breadcrumbStatus": "hidden",
+      "children": Array [
+        Object {
+          "children": Array [
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:index_management",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:transform",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:ingest_pipelines",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:dataViews",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:jobsListLink",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:pipelines",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:data_quality",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:data_usage",
+                },
+              ],
+              "title": "Data",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:api_keys",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:roles",
+                },
+                Object {
+                  "cloudLink": "userAndRoles",
+                  "title": "Manage organization members",
+                },
+              ],
+              "title": "Access",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:triggersActions",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:triggersActionsConnectors",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:maintenanceWindows",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "securitySolutionUI:entity_analytics-management",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "securitySolutionUI:entity_analytics-entity_store_management",
+                },
+              ],
+              "title": "Alerts and Insights",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:spaces",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:objects",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:filesManagement",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:reporting",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:tags",
+                },
+                Object {
+                  "link": "maps",
+                },
+                Object {
+                  "link": "visualize",
+                },
+              ],
+              "title": "Content",
+            },
+            Object {
+              "breadcrumbStatus": "hidden",
+              "children": Array [
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:settings",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:securityAiAssistantManagement",
+                },
+              ],
+              "title": "Other",
+            },
+          ],
+          "id": "stack_management",
+          "renderAs": "panelOpener",
+          "spaceBefore": null,
+          "title": "Stack Management",
+        },
+        Object {
+          "link": "integrations",
+        },
+        Object {
+          "cloudLink": "billingAndSub",
+          "openInNewTab": true,
         },
       ],
       "icon": "gear",
