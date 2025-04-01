@@ -18,15 +18,18 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiHorizontalRule,
-  EuiModal,
-  EuiModalHeader,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeaderTitle,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiTitle,
   EuiSpacer,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
+import { css } from '@emotion/react';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -44,7 +47,7 @@ export const RulesSettingsErrorPrompt = memo(() => {
       title={
         <h4>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptTitle"
+            id="xpack.triggersActionsUI.rulesSettings.flyout.errorPromptTitle"
             defaultMessage="Unable to load your rules settings"
           />
         </h4>
@@ -52,7 +55,7 @@ export const RulesSettingsErrorPrompt = memo(() => {
       body={
         <p>
           <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.errorPromptBody"
+            id="xpack.triggersActionsUI.rulesSettings.flyout.errorPromptBody"
             defaultMessage="There was an error loading your rules settings. Contact your administrator for help"
           />
         </p>
@@ -81,14 +84,14 @@ const useResettableState: <T>(
   return [value, hasChanged, updateValue, reset];
 };
 
-export interface RulesSettingsModalProps {
+export interface RulesSettingsFlyoutProps {
   isVisible: boolean;
   setUpdatingRulesSettings?: (isUpdating: boolean) => void;
   onClose: () => void;
   onSave?: () => void;
 }
 
-export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
+export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
   const { isVisible, onClose, setUpdatingRulesSettings, onSave } = props;
 
   const {
@@ -142,7 +145,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
     },
   });
 
-  const onCloseModal = useCallback(() => {
+  const onCloseFlyout = useCallback(() => {
     resetFlappingSettings();
     resetQueryDelaySettings();
     onClose();
@@ -252,46 +255,59 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   };
 
   return (
-    <EuiModal data-test-subj="rulesSettingsModal" onClose={onCloseModal} maxWidth={880}>
-      <EuiModalHeader>
-        <EuiModalHeaderTitle component="h3">
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.title"
-            defaultMessage="Rule settings"
-          />
-        </EuiModalHeaderTitle>
-      </EuiModalHeader>
-      <EuiModalBody>
-        <EuiCallOut
-          size="s"
-          title={i18n.translate('xpack.triggersActionsUI.rulesSettings.modal.calloutMessage', {
-            defaultMessage: 'Apply to all rules within the current space.',
-          })}
-        />
-        <EuiHorizontalRule />
-        {maybeRenderForm()}
-        <EuiSpacer />
-        <EuiHorizontalRule margin="none" />
-      </EuiModalBody>
-      <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="rulesSettingsModalCancelButton" onClick={onCloseModal}>
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.cancelButton"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-        <EuiButton
-          fill
-          data-test-subj="rulesSettingsModalSaveButton"
-          onClick={handleSave}
-          disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
-        >
-          <FormattedMessage
-            id="xpack.triggersActionsUI.rulesSettings.modal.saveButton"
-            defaultMessage="Save"
-          />
-        </EuiButton>
-      </EuiModalFooter>
-    </EuiModal>
+    <EuiFlyout type="push" data-test-subj="rulesSettingsFlyout" onClose={onCloseFlyout} size="s">
+      <EuiFlyoutHeader>
+        <EuiTitle>
+          <h3>
+            <FormattedMessage
+              id="xpack.triggersActionsUI.rulesSettings.flyout.title"
+              defaultMessage="Rule settings"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+      </EuiFlyoutHeader>
+      <EuiHorizontalRule margin="none" />
+
+      <EuiCallOut
+        size="m"
+        title={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.calloutMessage', {
+          defaultMessage: 'Apply to all rules within the current space.',
+        })}
+        css={css`
+          position: sticky;
+        `}
+      />
+      <EuiFlyoutBody>{maybeRenderForm()}</EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              data-test-subj="rulesSettingsFlyoutCancelButton"
+              onClick={onCloseFlyout}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.rulesSettings.flyout.cancelButton"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              data-test-subj="rulesSettingsFlyoutSaveButton"
+              onClick={handleSave}
+              disabled={!canWriteFlappingSettings && !canWriteQueryDelaySettings}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.rulesSettings.flyout.saveButton"
+                defaultMessage="Save"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
   );
 });

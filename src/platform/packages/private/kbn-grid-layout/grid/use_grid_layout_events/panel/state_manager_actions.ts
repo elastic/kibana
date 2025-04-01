@@ -10,11 +10,12 @@
 import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
-import { GridLayoutStateManager, GridPanelData } from '../types';
-import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './pointer_event_utils';
-import { resolveGridRow } from '../utils/resolve_grid_row';
-import { isGridDataEqual } from '../utils/equality_checks';
-import { PointerPosition, UserInteractionEvent } from './types';
+import { GridLayoutStateManager, GridPanelData } from '../../types';
+import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './utils';
+import { resolveGridRow } from '../../utils/resolve_grid_row';
+import { isGridDataEqual } from '../../utils/equality_checks';
+import { PointerPosition, UserInteractionEvent } from '../types';
+import { getSensorType, isKeyboardEvent } from '../sensors';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -33,28 +34,15 @@ export const startAction = (
     id: panelId,
     panelDiv: panelRef,
     targetRow: rowId,
-    pointerOffsets: getPointerOffsets(e, panelRect),
+    sensorType: getSensorType(e),
+    sensorOffsets: getSensorOffsets(e, panelRect),
   });
 
   gridLayoutStateManager.proposedGridLayout$.next(gridLayoutStateManager.gridLayout$.value);
 };
 
-export const commitAction = ({
-  activePanel$,
-  interactionEvent$,
-  gridLayout$,
-  proposedGridLayout$,
-}: GridLayoutStateManager) => {
-  activePanel$.next(undefined);
-  interactionEvent$.next(undefined);
-  const proposedGridLayoutValue = proposedGridLayout$.getValue();
-  if (proposedGridLayoutValue && !deepEqual(proposedGridLayoutValue, gridLayout$.getValue())) {
-    gridLayout$.next(cloneDeep(proposedGridLayoutValue));
-  }
-  proposedGridLayout$.next(undefined);
-};
-
 export const moveAction = (
+  e: UserInteractionEvent,
   gridLayoutStateManager: GridLayoutStateManager,
   pointerPixel: PointerPosition,
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
@@ -83,15 +71,15 @@ export const moveAction = (
   const isResize = interactionEvent.type === 'resize';
 
   const previewRect = (() => {
-    return isResize
-      ? getResizePreviewRect({
-          interactionEvent,
-          pointerPixel,
-        })
-      : getDragPreviewRect({
-          interactionEvent,
-          pointerPixel,
-        });
+    if (isResize) {
+      const layoutRef = gridLayoutStateManager.layoutRef.current;
+      const maxRight = layoutRef
+        ? layoutRef.getBoundingClientRect().right - runtimeSettings.gutterSize
+        : window.innerWidth;
+      return getResizePreviewRect({ interactionEvent, pointerPixel, maxRight });
+    } else {
+      return getDragPreviewRect({ interactionEvent, pointerPixel });
+    }
   })();
 
   activePanel$.next({ id: interactionEvent.id, position: previewRect });
@@ -101,7 +89,8 @@ export const moveAction = (
   // find the grid that the preview rect is over
   const lastRowId = interactionEvent.targetRow;
   const targetRowId = (() => {
-    if (isResize) return lastRowId;
+    // TODO: temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
+    if (isResize || isKeyboardEvent(e)) return lastRowId;
     const previewBottom = previewRect.top + rowHeight;
 
     let highestOverlap = -Infinity;
@@ -185,4 +174,28 @@ export const moveAction = (
       proposedGridLayout$.next(nextLayout);
     }
   }
+};
+
+export const commitAction = ({
+  activePanel$,
+  interactionEvent$,
+  gridLayout$,
+  proposedGridLayout$,
+}: GridLayoutStateManager) => {
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {
+    gridLayout$.next(cloneDeep(proposedGridLayout$.value));
+  }
+  proposedGridLayout$.next(undefined);
+};
+
+export const cancelAction = ({
+  activePanel$,
+  interactionEvent$,
+  proposedGridLayout$,
+}: GridLayoutStateManager) => {
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  proposedGridLayout$.next(undefined);
 };
