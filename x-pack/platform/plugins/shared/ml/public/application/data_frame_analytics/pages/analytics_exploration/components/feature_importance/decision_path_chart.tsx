@@ -113,6 +113,9 @@ export const DecisionPathChart = ({
             visible: 'always',
           },
         },
+        chartMargins: {
+          top: 10,
+        },
       },
     };
   }, [euiTheme]);
