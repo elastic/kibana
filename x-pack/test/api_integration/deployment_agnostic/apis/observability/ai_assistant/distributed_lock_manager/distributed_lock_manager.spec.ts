@@ -35,10 +35,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('Basic lock operations', () => {
       let lockManager: LockManager;
-      const BASIC_LOCK_ID = 'knowledge_base_reindex';
+      const LOCK_ID = 'basic_lock_operations';
 
       beforeEach(async () => {
-        lockManager = new LockManager(BASIC_LOCK_ID, es, logger);
+        lockManager = new LockManager(LOCK_ID, es, logger);
       });
 
       afterEach(async () => {
@@ -49,7 +49,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const acquired = await lockManager.acquire();
         expect(acquired).to.be(true);
 
-        const lock = await getLockById(es, BASIC_LOCK_ID);
+        const lock = await getLockById(es, LOCK_ID);
         expect(true).to.be(true);
 
         expect(lock).not.to.be(undefined);
@@ -58,7 +58,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('stores and retrieves metadata', async () => {
         const metadata = { foo: 'bar' };
         await lockManager.acquire({ metadata });
-        const lock = await getLockById(es, BASIC_LOCK_ID);
+        const lock = await getLockById(es, LOCK_ID);
         expect(lock?.metadata).to.eql(metadata);
       });
 
@@ -68,29 +68,45 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         await lockManager.release();
 
-        const lock = await getLockById(es, BASIC_LOCK_ID);
+        const lock = await getLockById(es, LOCK_ID);
         expect(lock).to.be(undefined);
       });
 
       it('it sets expiresAt according to the ttl', async () => {
         await lockManager.acquire({ ttl: 8 * 60 * 1000 });
-        const lock = await getLockById(es, BASIC_LOCK_ID);
+        const lock = await getLockById(es, LOCK_ID);
         const ttl = new Date(lock!.expiresAt).getTime() - new Date(lock!.createdAt).getTime();
         expect(prettyMilliseconds(ttl)).to.be('8m');
-      });
-
-      it('removes expired lock upon get()', async () => {
-        await lockManager.acquire({ ttl: 500 });
-        await sleep(1000);
-        const lock = await lockManager.get();
-        expect(lock).to.be(undefined);
       });
 
       it('does not throw when releasing a non-existent lock', async () => {
         await lockManager.release();
         await lockManager.release();
-        const lock = await getLockById(es, BASIC_LOCK_ID);
+        const lock = await getLockById(es, LOCK_ID);
         expect(lock).to.be(undefined);
+      });
+    });
+
+    describe('get', () => {
+      let lockManager: LockManager;
+      const LOCK_ID = 'my_lock_with_get';
+
+      beforeEach(async () => {
+        lockManager = new LockManager(LOCK_ID, es, logger);
+      });
+
+      afterEach(async () => {
+        await lockManager.release();
+      });
+
+      it('does not return expired locks', async () => {
+        await lockManager.acquire({ ttl: 500 });
+        await sleep(1000);
+        const lock = await lockManager.get();
+        expect(lock).to.be(undefined);
+
+        const lockRaw = await getLockById(es, LOCK_ID);
+        expect(lockRaw).to.not.be(undefined);
       });
     });
 

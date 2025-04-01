@@ -122,10 +122,7 @@ export class LockManager {
         throw new Error(`Unexpected response: ${response.result}`);
       }
     } catch (e) {
-      if (
-        e instanceof errors.ResponseError &&
-        e.body?.error?.type === 'version_conflict_engine_exception'
-      ) {
+      if (isVersionConflictException(e)) {
         this.logger.debug(`Lock "${this.lockId}" already held (version conflict)`);
         return false;
       }
@@ -186,28 +183,6 @@ export class LockManager {
   }
 
   /**
-   * Releases a lock if it is expired.
-   */
-  public async releaseIfExpired(): Promise<boolean> {
-    const res = await this.esClient.deleteByQuery({
-      index: LOCKS_CONCRETE_INDEX_NAME,
-      query: {
-        bool: {
-          filter: [{ term: { _id: this.lockId } }, { range: { expiresAt: { lte: 'now' } } }],
-        },
-      },
-      refresh: true,
-    });
-    if (res.deleted === 0) {
-      this.logger.debug(`Lock "${this.lockId}" not found`);
-      return false;
-    }
-
-    this.logger.debug(`Lock "${this.lockId}" expired and was released.`);
-    return true;
-  }
-
-  /**
    * Retrieves the lock document for a given lockId.
    * If the lock is expired, it will be released.
    */
@@ -222,12 +197,7 @@ export class LockManager {
     });
 
     const hits = result.hits.hits;
-    if (hits.length === 0) {
-      await this.releaseIfExpired();
-      return undefined;
-    }
-
-    return hits[0]._source;
+    return hits[0]?._source;
   }
 
   public async acquireWithRetry({
@@ -269,11 +239,7 @@ export class LockManager {
       this.logger.debug(`Lock "${this.lockId}" extended ttl with ${prettyMilliseconds(ttl)}.`);
       return true;
     } catch (error) {
-      if (
-        error instanceof errors.ResponseError &&
-        error.message.includes('version_conflict_engine_exception') &&
-        error.message.includes('but no document was found')
-      ) {
+      if (isVersionConflictException(error)) {
         this.logger.debug(`Lock "${this.lockId}" was released concurrently. Not extending TTL.`);
         return false;
       }
@@ -373,4 +339,10 @@ export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClie
 
 async function createLocksWriteIndex(esClient: ElasticsearchClient): Promise<void> {
   await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
+}
+
+function isVersionConflictException(e: Error): boolean {
+  return (
+    e instanceof errors.ResponseError && e.body?.error?.type === 'version_conflict_engine_exception'
+  );
 }
