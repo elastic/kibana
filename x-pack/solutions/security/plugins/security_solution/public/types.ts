@@ -84,6 +84,7 @@ import type { Assets } from './assets';
 import type { Investigations } from './investigations';
 import type { MachineLearning } from './machine_learning';
 import type { SiemMigrations } from './siem_migrations';
+import type { Configurations } from './configurations';
 
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
@@ -246,6 +247,7 @@ export interface SubPlugins {
   investigations: Investigations;
   machineLearning: MachineLearning;
   siemMigrations: SiemMigrations;
+  configurations: Configurations;
 }
 
 // TODO: find a better way to defined these types
@@ -269,4 +271,5 @@ export interface StartedSubPlugins {
   investigations: ReturnType<Investigations['start']>;
   machineLearning: ReturnType<MachineLearning['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
+  configurations: ReturnType<Configurations['start']>;
 }
