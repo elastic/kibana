@@ -144,35 +144,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    describe('Generate Embeddable CSV in data view mode', () => {
-      beforeEach(async () => {
-        await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
-      });
+    [SAVED_DISCOVER_SESSION_WITH_DATA_VIEW, SAVED_DISCOVER_SESSION_WITH_ESQL].map(
+      (title: string) => {
+        describe(`Generate Embeddable CSV for ${title}`, () => {
+          beforeEach(async () => {
+            await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
+          });
 
-      it('generates a report with global time range', async () => {
-        await dashboard.navigateToApp();
-        await dashboard.clickNewDashboard();
-        await setDashboardGlobalTimeRange();
-        await addEmbeddableToDashboard(SAVED_DISCOVER_SESSION_WITH_DATA_VIEW);
+          it('generates a report with global time range', async () => {
+            await dashboard.navigateToApp();
+            await dashboard.clickNewDashboard();
+            await setDashboardGlobalTimeRange();
+            await addEmbeddableToDashboard(title);
 
-        const { text: csvFile } = await getDashboardPanelReport(
-          SAVED_DISCOVER_SESSION_WITH_DATA_VIEW
-        );
-        expectSnapshot(csvFile).toMatch();
-      });
+            const { text: csvFile } = await getDashboardPanelReport(title);
+            expectSnapshot(csvFile).toMatch();
+          });
 
-      it('generates a report with custom time range', async () => {
-        await dashboard.navigateToApp();
-        await dashboard.clickNewDashboard();
-        await setDashboardGlobalTimeRange();
-        await addEmbeddableToDashboard(SAVED_DISCOVER_SESSION_WITH_DATA_VIEW);
-        await setDashboardPanelCustomTimeRange();
+          it('generates a report with custom time range', async () => {
+            await dashboard.navigateToApp();
+            await dashboard.clickNewDashboard();
+            await setDashboardGlobalTimeRange();
+            await addEmbeddableToDashboard(title);
+            await setDashboardPanelCustomTimeRange();
 
-        const { text: csvFile } = await getDashboardPanelReport(
-          SAVED_DISCOVER_SESSION_WITH_DATA_VIEW
-        );
-        expectSnapshot(csvFile).toMatch();
-      });
-    });
+            const { text: csvFile } = await getDashboardPanelReport(title);
+            expectSnapshot(csvFile).toMatch();
+          });
+        });
+      }
+    );
   });
 }
