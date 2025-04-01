@@ -196,7 +196,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.body.documents_metrics.parsed_rate).to.be(0);
-        expect(response.body.documents_metrics.failed_rate).to.be(1);
+        expect(response.body.documents_metrics.partially_parsed_rate).to.be(1);
+        expect(response.body.documents_metrics.failed_rate).to.be(0);
 
         const { detected_fields, status, value } = response.body.documents[0];
         expect(status).to.be('partially_parsed');
@@ -251,7 +252,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(grokMetrics.parsed_rate).to.be(0);
       });
 
-      it('should return accurate success/failure rates', async () => {
+      it('should return accurate rates', async () => {
         const response = await simulateProcessingForStream(apiClient, 'logs.test', {
           processing: [
             basicDissectProcessor,
@@ -273,7 +274,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         expect(response.body.documents_metrics.parsed_rate).to.be(0.25);
-        expect(response.body.documents_metrics.failed_rate).to.be(0.75);
+        expect(response.body.documents_metrics.partially_parsed_rate).to.be(0.5);
+        expect(response.body.documents_metrics.failed_rate).to.be(0.25);
         expect(response.body.documents).to.have.length(4);
         expect(response.body.documents[0].status).to.be('parsed');
         expect(response.body.documents[1].status).to.be('partially_parsed');
