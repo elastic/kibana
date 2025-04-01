@@ -41,31 +41,31 @@ export interface StreamsApplicationProps {
 export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
 
 export interface StreamsAppSetupDependencies {
-  streams: StreamsPluginSetup;
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
   discoverShared: DiscoverSharedPublicSetup;
-  unifiedSearch: {};
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePublicSetup;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  streams: StreamsPluginSetup;
+  unifiedSearch: {};
 }
 
 export interface StreamsAppStartDependencies {
-  streams: StreamsPluginStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  share: SharePublicStart;
-  savedObjectsTagging: SavedObjectTaggingPluginStart;
-  navigation: NavigationPublicStart;
-  fieldsMetadata: FieldsMetadataPublicStart;
   discoverShared: DiscoverSharedPublicStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
-  licensing: LicensingPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
   indexManagement: IndexManagementPluginStart;
   ingestPipelines: IngestPipelinesPluginStart;
+  licensing: LicensingPluginStart;
+  navigation: NavigationPublicStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
+  share: SharePublicStart;
+  streams: StreamsPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

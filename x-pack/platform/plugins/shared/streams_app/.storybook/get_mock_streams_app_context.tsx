@@ -21,6 +21,8 @@ import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-p
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
+import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
 
@@ -51,6 +53,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         discoverShared: {} as unknown as DiscoverSharedPublicStart,
         charts: {} as unknown as ChartsPluginStart,
         discover: {} as unknown as DiscoverStart,
+        observabilityAIAssistant: {} as unknown as ObservabilityAIAssistantPublicStart,
       },
     },
     services: {
