@@ -144,9 +144,15 @@ const getEntity = (record: DataTableRecord) => {
 
 export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
+  height?: number;
+  groupSelectorComponent?: JSX.Element;
 }
 
-export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps) => {
+export const AssetInventoryDataTable = ({
+  state,
+  height,
+  groupSelectorComponent,
+}: AssetInventoryDataTableProps) => {
   const {
     pageSize,
     sort,
@@ -283,6 +289,8 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
     const isVirtualizationEnabled = pageSize >= 100;
 
     const getWrapperHeight = () => {
+      if (height) return height;
+
       // If virtualization is not needed the table will render unconstrained.
       if (!isVirtualizationEnabled) return 'auto';
 
@@ -294,7 +302,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize]);
+  }, [pageSize, height]);
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -341,6 +349,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onResetColumns={onResetColumns}
+      groupSelectorComponent={groupSelectorComponent}
     />
   );
 
