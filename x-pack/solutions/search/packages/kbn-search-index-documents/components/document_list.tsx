@@ -80,7 +80,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem>
           <EuiText size="xs">
             <p>
               <FormattedMessage
