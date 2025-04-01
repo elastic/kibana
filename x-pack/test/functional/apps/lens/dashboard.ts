@@ -236,7 +236,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('save lens panel to embeddable library', async () => {
       const originalPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis');
       await panelActions.saveToLibrary('lnsPieVis - copy', originalPanel);
-      await testSubjects.click('confirmSaveSavedObjectButton');
       await testSubjects.existOrFail('addPanelToLibrarySuccess');
 
       const updatedPanel = await testSubjects.find('embeddablePanelHeading-lnsPieVis-copy');
