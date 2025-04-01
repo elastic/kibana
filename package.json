@@ -1609,7 +1609,7 @@
     "@types/dagre": "^0.7.47",
     "@types/dedent": "^0.7.0",
     "@types/deep-freeze-strict": "^1.1.0",
-    "@types/diff": "^7.0.1",
+    "@types/diff": "^7.0.2",
     "@types/ejs": "^3.0.6",
     "@types/enzyme": "^3.10.12",
     "@types/eslint": "^8.44.2",
