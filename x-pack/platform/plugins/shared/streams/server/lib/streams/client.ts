@@ -15,8 +15,6 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   Condition,
-  GroupStreamDefinition,
-  IngestStreamLifecycle,
   StreamDefinition,
   StreamUpsertRequest,
   UnwiredStreamDefinition,
@@ -24,56 +22,21 @@ import {
   assertsSchema,
   getAncestors,
   getParentId,
-  isChildOf,
   isGroupStreamDefinition,
   isIngestStreamDefinition,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isInheritLifecycle,
-  isRootStreamDefinition,
-  isUnwiredStreamDefinition,
   isWiredStreamDefinition,
   streamDefinitionSchema,
-  findInheritedLifecycle,
-  findInheritingStreams,
   asWiredStreamDefinition,
 } from '@kbn/streams-schema';
-import { cloneDeep, keyBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
-import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
-import {
-  syncUnwiredStreamDefinitionObjects,
-  syncWiredStreamDefinitionObjects,
-} from './helpers/sync';
-import {
-  validateAncestorFields,
-  validateDescendantFields,
-  validateSystemFields,
-} from './helpers/validate_fields';
-import {
-  validateRootStreamChanges,
-  validateStreamChildrenChanges,
-  validateStreamLifecycle,
-  validateStreamTypeChanges,
-} from './helpers/validate_stream';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
 import { StreamsStorageClient } from './service';
-import {
-  checkAccess,
-  checkAccessBulk,
-  deleteStreamObjects,
-  deleteUnmanagedStreamObjects,
-  getDataStreamLifecycle,
-} from './stream_crud';
-import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
+import { checkAccess, checkAccessBulk } from './stream_crud';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
 } from './errors/definition_not_found_error';
-import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
-import { NameTakenError } from './errors/name_taken_error';
-import { MalformedStreamError } from './errors/malformed_stream_error';
 import { State } from './state_management/state';
 import { StatusError } from './errors/status_error';
 
