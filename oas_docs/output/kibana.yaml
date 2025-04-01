@@ -57871,6 +57871,7 @@ components:
               type: string
           required:
             - start_date
+            - end_date
       required:
         - action
         - run
