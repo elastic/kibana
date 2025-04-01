@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useMemo } from 'react';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
@@ -19,6 +19,7 @@ export interface UseKnowledgeBaseResult {
   isInstalling: boolean;
   installError?: Error;
   install: () => Promise<void>;
+  kbState: 'NOT_INSTALLED' | 'CREATING_ENDPOINT' | 'DEPLOYING_MODEL' | 'READY' | 'ERROR';
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -89,6 +90,24 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     }
   }, [ml, service, notifications, statusRequest]);
 
+  // Start polling if the current status is in a transitional or error state
+  useEffect(() => {
+    const currentStatus = statusRequest.value;
+
+    const shouldStartPolling =
+      currentStatus &&
+      !isPollingForDeployment &&
+      !currentStatus.ready &&
+      (!currentStatus.endpoint ||
+        currentStatus.model_stats?.deployment_state === 'starting' ||
+        currentStatus.model_stats?.allocation_state === 'starting' ||
+        currentStatus.model_stats?.deployment_state === 'failed');
+
+    if (shouldStartPolling) {
+      setIsPollingForDeployment(true);
+    }
+  }, [statusRequest.value, isPollingForDeployment]);
+
   // poll the status if isPollingForDeployment === true
   // stop when ready === true or some error
   useEffect(() => {
@@ -126,10 +145,60 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     };
   }, [isPollingForDeployment, statusRequest]);
 
+  // Define the finite states for the knowledge base
+  type KnowledgeBaseState =
+    | 'NOT_INSTALLED'
+    | 'CREATING_ENDPOINT'
+    | 'DEPLOYING_MODEL'
+    | 'READY'
+    | 'ERROR';
+
+  // Compute the overall knowledge base state by combining isInstalling, installError and the API status
+  const kbState: KnowledgeBaseState = useMemo(() => {
+    // If there was an error during installation, mark as ERROR
+    if (installError) return 'ERROR';
+
+    // If installation was triggered but we haven't received a status yet
+    if (isInstalling) {
+      // If no status or no endpoint, then we're still creating the endpoint
+      if (!statusRequest.value || !statusRequest.value.endpoint) {
+        return 'CREATING_ENDPOINT';
+      } else {
+        // If the endpoint exists but the model isn't fully deployed, we're in the deploying phase
+        return 'DEPLOYING_MODEL';
+      }
+    }
+
+    // If installation is not active, determine state from the status response
+    if (!statusRequest.value || !statusRequest.value.endpoint) return 'NOT_INSTALLED';
+    if (statusRequest.value.ready) return 'READY';
+
+    // If endpoint exists but is not ready, inspect the model stats
+    if (statusRequest.value.model_stats) {
+      const {
+        allocation_count: allocationCount,
+        deployment_state: deploymentState,
+        allocation_state: allocationState,
+      } = statusRequest.value.model_stats;
+      // If there are no allocations or states indicate 'starting', then we're in the deploying phase
+      if (
+        allocationCount === 0 ||
+        deploymentState === 'starting' ||
+        allocationState === 'starting'
+      ) {
+        return 'DEPLOYING_MODEL';
+      }
+    }
+
+    // Fallback
+    return 'ERROR';
+  }, [installError, isInstalling, statusRequest.value]);
+
   return {
     status: statusRequest,
     install,
     isInstalling,
     installError,
+    kbState,
   };
 }
