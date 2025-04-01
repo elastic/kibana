@@ -74,9 +74,9 @@ describe('autocomplete.suggest', () => {
         ]);
       });
 
-      it('suggests pipe after complete command, without requiring pressing a space', async () => {
-        await assertSuggestions(`from a | change_point value on field as changePointType,pValue/`, [
-          'changePointType,pValue | ',
+      it('suggests a default pValue column name', async () => {
+        await assertSuggestions(`from a | change_point value on field as changePointType,pValu/`, [
+          'pValue',
         ]);
       });
 

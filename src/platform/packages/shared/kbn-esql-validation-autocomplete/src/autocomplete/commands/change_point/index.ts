@@ -9,7 +9,6 @@
 
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
-import { handleFragment } from '../../helper';
 import { ESQL_NUMBER_TYPES } from '../../../shared/esql_types';
 import { findFinalWord, isSingleItem } from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
@@ -127,33 +126,17 @@ export async function suggest({
       return [asSuggestion, pipeCompleteItem];
     case Position.AS_TYPE_COLUMN: {
       // add comma and space
-      const suggestions: SuggestionRawDefinition[] = buildVariablesDefinitions([
-        'changePointType',
-      ]).map((v) => ({ ...v, text: v.text + ', ', command: TRIGGER_SUGGESTION_COMMAND }));
-      return suggestions;
+      return buildVariablesDefinitions(['changePointType']).map((v) => ({
+        ...v,
+        text: v.text + ', ',
+        command: TRIGGER_SUGGESTION_COMMAND,
+      }));
     }
     case Position.AS_P_VALUE_COLUMN: {
-      return handleFragment(
-        innerText,
-        (fragment) => {
-          const isFragmentComplete = fragment.trim().split(',').filter(Boolean).length > 1;
-          return isFragmentComplete;
-        },
-        // incomplete suggestion
-        (fragment, rangeToReplace) => {
-          return buildVariablesDefinitions(['pValue']);
-        },
-        // complete suggestion
-        (fragment, rangeToReplace) => {
-          return [{ ...pipeCompleteItem, text: ' | ' }].map((suggestion) => ({
-            ...suggestion,
-            filterText: fragment,
-            text: fragment + suggestion.text,
-            rangeToReplace,
-            command: TRIGGER_SUGGESTION_COMMAND,
-          }));
-        }
-      );
+      return buildVariablesDefinitions(['pValue']).map((v) => ({
+        ...v,
+        command: TRIGGER_SUGGESTION_COMMAND,
+      }));
     }
     case Position.AFTER_AS_CLAUSE: {
       return [pipeCompleteItem];
