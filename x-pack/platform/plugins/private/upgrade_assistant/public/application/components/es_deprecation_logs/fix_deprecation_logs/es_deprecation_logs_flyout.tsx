@@ -76,7 +76,7 @@ const i18nTexts = {
   deniedPrivilegeTitle: i18n.translate(
     'xpack.upgradeAssistant.overview.deprecationLogs.deniedPrivilegeTitle',
     {
-      defaultMessage: 'You require index privileges to analyze the deprecation logs',
+      defaultMessage: 'You need index privileges to analyze the deprecation logs',
     }
   ),
   deniedPrivilegeDescription: (privilegesMissing: MissingPrivileges) => (

@@ -134,7 +134,7 @@ const DiscoverAppLink: FunctionComponent<Omit<Props, 'showInfoParagraph'>> = ({
   ) : (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={discoveryUrl} onClick={handleClick} data-test-subj="viewDiscoverLogs">
-      {content}
+      <EuiText> {content}</EuiText>
     </EuiLink>
   );
 };
@@ -163,7 +163,7 @@ export const DiscoverExternalLinks: FunctionComponent<Omit<Props, 'deprecationDa
     <React.Fragment>
       {showInfoParagraph && (
         <>
-          <EuiText size="s">
+          <EuiText>
             <p>
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.observe.discoveryDescription"

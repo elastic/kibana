@@ -32,7 +32,7 @@ export class UpgradeAssistantFlyoutObject extends FtrService {
 
   async clickVerifyLoggingButton() {
     return await this.retry.try(async () => {
-      await this.testSubjects.click('verifyChangesLink');
+      await this.testSubjects.click('viewDetailsLink');
     });
   }
 

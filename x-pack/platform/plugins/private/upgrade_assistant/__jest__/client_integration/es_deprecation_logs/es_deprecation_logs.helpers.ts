@@ -32,7 +32,7 @@ const createActions = (testBed: TestBed) => {
     const { find, component } = testBed;
 
     await act(async () => {
-      find('verifyChangesLink').simulate('click');
+      find('viewDetailsLink').simulate('click');
     });
 
     component.update();

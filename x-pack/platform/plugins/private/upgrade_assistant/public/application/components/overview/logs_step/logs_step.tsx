@@ -43,10 +43,10 @@ const i18nTexts = {
   logsStepDescription: i18n.translate('xpack.upgradeAssistant.overview.logsStep.description', {
     defaultMessage: `Review the Elasticsearch deprecation logs to ensure you're not using deprecated APIs.`,
   }),
-  verifyChangesButtonLabel: i18n.translate(
-    'xpack.upgradeAssistant.overview.logsStep.verifyChangesButtonLabel',
+  viewDetailsButtonLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.logsStep.viewDetailsButtonLabel',
     {
-      defaultMessage: 'Verify changes',
+      defaultMessage: 'View details',
     }
   ),
   enableLogsButtonLabel: i18n.translate(
@@ -266,8 +266,8 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
               showInfoParagraph={false}
               isButtonFormat={true}
             />
-            <EuiButton onClick={() => setShowFlyout(true)} data-test-subj="verifyChangesLink">
-              {i18nTexts.verifyChangesButtonLabel}
+            <EuiButton onClick={() => setShowFlyout(true)} data-test-subj="viewDetailsLink">
+              {i18nTexts.viewDetailsButtonLabel}
             </EuiButton>
           </EuiFlexGroup>
         </>

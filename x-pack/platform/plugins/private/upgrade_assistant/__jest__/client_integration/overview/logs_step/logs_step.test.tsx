@@ -53,7 +53,7 @@ describe('Overview - Logs Step', () => {
 
       expect(exists('logsCountDescription')).toBe(false);
       expect(exists('viewDiscoverLogsButton')).toBe(false);
-      expect(exists('verifyChangesLink')).toBe(false);
+      expect(exists('viewDetailsLink')).toBe(false);
 
       httpRequestsMockHelpers.setLoadDeprecationLogsCountResponse({
         count: 10,
@@ -63,7 +63,7 @@ describe('Overview - Logs Step', () => {
 
       expect(exists('logsCountDescription')).toBe(true);
       expect(exists('viewDiscoverLogsButton')).toBe(true);
-      expect(exists('verifyChangesLink')).toBe(true);
+      expect(exists('viewDetailsLink')).toBe(true);
 
       expect(exists('deprecationLogsErrorCallout')).toBe(false);
       expect(exists('deprecationLogsRetryButton')).toBe(false);
@@ -130,9 +130,9 @@ describe('Overview - Logs Step', () => {
       test('displays discover and verify changes buttons', async () => {
         const { exists, find } = testBed;
         expect(exists('viewDiscoverLogsButton')).toBe(true);
-        expect(exists('verifyChangesLink')).toBe(true);
+        expect(exists('viewDetailsLink')).toBe(true);
         expect(find('viewDiscoverLogsButton').text()).toContain('Analyze logs in Discover');
-        expect(find('verifyChangesLink').text()).toContain('Verify changes');
+        expect(find('viewDetailsLink').text()).toContain('View details');
         expect(exists('enableLogsLink')).toBe(false);
       });
 
@@ -181,7 +181,7 @@ describe('Overview - Logs Step', () => {
         expect(exists('logsCountDescription')).toBe(false);
         expect(find('enableLogsLink').text()).toContain('Enable logging');
         expect(exists('viewDiscoverLogsButton')).toBe(false);
-        expect(exists('verifyChangesLink')).toBe(false);
+        expect(exists('viewDetailsLink')).toBe(false);
       });
     });
   });
