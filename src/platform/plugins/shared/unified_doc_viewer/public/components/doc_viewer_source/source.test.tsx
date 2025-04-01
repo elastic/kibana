@@ -107,7 +107,7 @@ describe('Source Viewer component', () => {
       extension: 'html',
     };
     const mockHit = {
-      id: record._id,
+      id: '22',
       raw: record,
       flattened: record,
     };
@@ -116,7 +116,7 @@ describe('Source Viewer component', () => {
     });
     const comp = mountWithIntl(
       <DocViewerSource
-        id={record._id}
+        id={mockHit.id}
         index={'index1'}
         dataView={mockDataView}
         esqlHit={mockHit}

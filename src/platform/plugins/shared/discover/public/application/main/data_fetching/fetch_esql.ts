@@ -82,7 +82,7 @@ export function fetchEsql({
             esqlHeaderWarning = table.warning ?? undefined;
             finalData = rows.map((row, idx) => {
               const record: DataTableRecord = {
-                id: row._id || String(idx), // `_id` will be available for queries like `FROM logs* METADATA _id`
+                id: String(idx),
                 raw: row,
                 flattened: row,
               };
