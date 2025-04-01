@@ -10,13 +10,12 @@ import { ProductInterceptPrompter } from './lib/prompter';
 import type { ServerConfigSchema } from '../common/config';
 
 export class ProductInterceptPublicPlugin implements Plugin {
-  private readonly config: ServerConfigSchema;
   private readonly prompter?: ProductInterceptPrompter;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<ServerConfigSchema>();
+    const { enabled } = initializerContext.config.get<ServerConfigSchema>();
 
-    if (this.config.enabled) {
+    if (enabled) {
       this.prompter = new ProductInterceptPrompter();
     }
   }
