@@ -43,7 +43,7 @@ class LosslessHistogram {
     const histogram = Histogram.build({
       lowestDiscernibleValue: this.min,
       highestTrackableValue: this.max,
-      useWebAssembly: false
+      useWebAssembly: false,
     });
 
     this.backingHistogram = histogram;
@@ -98,8 +98,9 @@ class LosslessHistogram {
       const minRecordedValue = this.backingHistogram.minNonZeroValue;
       const maxRecordedValue = this.backingHistogram.maxValue;
 
-      const distribution: Array<{ value: number; count: number }> =
-        this.linearCounts(Math.max(1, (maxRecordedValue - minRecordedValue) / 50));
+      const distribution: Array<{ value: number; count: number }> = this.linearCounts(
+        Math.max(1, (maxRecordedValue - minRecordedValue) / 50)
+      );
 
       const values: number[] = [];
       const counts: number[] = [];
