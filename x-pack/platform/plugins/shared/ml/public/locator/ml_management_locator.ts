@@ -9,7 +9,7 @@ import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { MlLocatorParams } from '../../common/types/locator';
+import type { AnomalyDetectionQueryState, MlLocatorParams } from '../../common/types/locator';
 import { ML_PAGES } from '../../common/constants/locator';
 import {
   formatAnomalyDetectionCreateJobSelectIndex,
@@ -37,7 +37,7 @@ export class MlManagementLocatorInternal {
     this._locator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
   }
 
-  private getPath = (params: MlLocatorParams) => {
+  private getPath = (params: MlLocatorParams, appId: string) => {
     let path: string = '';
     if (params?.page === undefined) return path;
     if (!this.validPaths.has(params.page)) {
@@ -45,8 +45,20 @@ export class MlManagementLocatorInternal {
     }
 
     switch (params.page) {
-      case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
-        path = formatAnomalyDetectionJobManagementUrl('', params.pageState);
+      //  This case covers ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE || ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE as they are empty strings.
+      //  This is because they are each the root page for their respective sections/apps in Stack Management > Machine Learning
+      case '':
+        if (appId === 'anomaly_detection') {
+          path = formatAnomalyDetectionJobManagementUrl(
+            '',
+            params.pageState as AnomalyDetectionQueryState
+          );
+        } else if (appId === 'analytics') {
+          path = formatDataFrameAnalyticsJobManagementUrl('', params.pageState);
+        }
+        break;
+      case ML_PAGES.TRAINED_MODELS_MANAGE:
+        path = formatTrainedModelsManagementUrl('', params.pageState);
         break;
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE:
         path = formatAnomalyDetectionCreateJobSelectType('', params.pageState);
@@ -54,14 +66,8 @@ export class MlManagementLocatorInternal {
       case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX:
         path = formatAnomalyDetectionCreateJobSelectIndex('', params.pageState);
         break;
-      case ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE:
-        path = formatDataFrameAnalyticsJobManagementUrl('', params.pageState);
-        break;
       case ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB:
         path = formatDataFrameAnalyticsCreateJobUrl('', params.pageState);
-        break;
-      case ML_PAGES.TRAINED_MODELS_MANAGE:
-        path = formatTrainedModelsManagementUrl('', params.pageState);
         break;
       case ML_PAGES.FILTER_LISTS_EDIT:
         path = formatEditFilterUrl('', params.pageState);
@@ -84,7 +90,7 @@ export class MlManagementLocatorInternal {
     params: MlLocatorParams | undefined,
     appId: string = 'anomaly_detection'
   ) => {
-    const path = params ? this.getPath(params) : '';
+    const path = params ? this.getPath(params, appId) : '';
     const url = await this._locator?.getUrl({
       sectionId: this._sectionId,
       appId: `${appId}${path}`,
@@ -97,7 +103,7 @@ export class MlManagementLocatorInternal {
     params: MlLocatorParams,
     appId: string = 'anomaly_detection'
   ) => {
-    const path = this.getPath(params);
+    const path = this.getPath(params, appId);
     const url = this._locator?.getRedirectUrl({
       sectionId: this._sectionId,
       appId: `${appId}/${path}`,

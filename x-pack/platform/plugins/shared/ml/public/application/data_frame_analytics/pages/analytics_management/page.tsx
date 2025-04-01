@@ -28,7 +28,7 @@ import { ExportJobsFlyout, ImportJobsFlyout } from '../../../components/import_e
 import { SynchronizeSavedObjectsButton } from '../../../jobs/jobs_list/components/top_level_actions/synchronize_saved_objects_button';
 
 interface PageUrlState {
-  pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE;
+  pageKey: typeof ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL;
   pageUrlState: ListingPageUrlState;
 }
 
@@ -43,7 +43,7 @@ export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
 
   const [dfaPageState, setDfaPageState] = usePageUrlState<PageUrlState>(
-    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+    ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE_FOR_URL,
     getDefaultDFAListState()
   );
 

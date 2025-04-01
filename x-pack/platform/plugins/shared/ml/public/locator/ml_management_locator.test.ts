@@ -24,34 +24,6 @@ const mockShareService = {
   },
 };
 
-const jobIds = ['test-job-id-0', 'test-job-id-1'];
-const groupIds = ['test-group-id-0'];
-
-const basicJobsManageParams = {
-  page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-  pageState: {
-    jobId: jobIds[0],
-  },
-};
-
-const basicDfaJobsManageParams = {
-  page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-  pageState: {
-    jobId: jobIds[1],
-  },
-};
-
-const jobsManageParamsGroupId = {
-  page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-  pageState: {
-    groupIds,
-    globalState: {
-      time: { from: 'now-1h', to: 'now' },
-      refreshInterval: { pause: true, value: 10000 },
-    },
-  },
-};
-
 const anomalyDetectionAppId = 'anomaly_detection';
 const dfaAppId = 'analytics';
 
@@ -60,42 +32,129 @@ describe('ML management internal locator', () => {
     mockShareService as unknown as SharePublicStart
   );
 
-  it('should return the correct url for the given ML section and appId', async () => {
-    const { url } = await mlManagementLocatorInternal.getUrl(
-      basicJobsManageParams,
-      anomalyDetectionAppId
-    );
-    const { url: paramsGroupIdUrl } = await mlManagementLocatorInternal.getUrl(
-      jobsManageParamsGroupId,
-      anomalyDetectionAppId
-    );
-    const { url: basicDfaJobUrl } = await mlManagementLocatorInternal.getUrl(
-      basicDfaJobsManageParams,
-      dfaAppId
-    );
-    expect(url).toEqual(
-      "/app/management/ml/anomaly_detection?_a=('':(queryText:'id:test-job-id-0'))"
-    );
-    expect(paramsGroupIdUrl).toEqual(
-      "/app/management/ml/anomaly_detection?_a=('':(queryText:'groups:(test-group-id-0)'))&_g=(refreshInterval:(pause:!t,value:10000),time:(from:now-1h,to:now))"
-    );
-    expect(basicDfaJobUrl).toEqual(
-      "/app/management/ml/analytics?_a=('':(queryText:'id:test-job-id-1'))"
-    );
+  describe('Job Management Page', () => {
+    it('should generate valid URL for the Anomaly Detection job management page', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl(
+        {
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+        },
+        anomalyDetectionAppId
+      );
+      expect(url).toEqual('/app/management/ml/anomaly_detection');
+    });
+
+    it('should generate valid URL for the Anomaly Detection job management page for job', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl(
+        {
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+          pageState: {
+            jobId: 'fq_single_1',
+          },
+        },
+        anomalyDetectionAppId
+      );
+
+      expect(url).toEqual(
+        "/app/management/ml/anomaly_detection?_a=(jobs:(queryText:'id:fq_single_1'))"
+      );
+    });
+
+    it('should generate valid URL for the Anomaly Detection job management page for groupIds', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl(
+        {
+          page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+          pageState: {
+            groupIds: ['farequote', 'categorization'],
+          },
+        },
+        anomalyDetectionAppId
+      );
+
+      expect(url).toEqual(
+        "/app/management/ml/anomaly_detection?_a=(jobs:(queryText:'groups:(farequote%20or%20categorization)'))"
+      );
+    });
+
+    it('should generate valid URL for the page for selecting the type of anomaly detection job to create', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl({
+        page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE,
+        pageState: {
+          index: `3da93760-e0af-11ea-9ad3-3bcfc330e42a`,
+          globalState: {
+            time: {
+              from: 'now-30m',
+              to: 'now',
+            },
+          },
+        },
+      });
+
+      expect(url).toEqual(
+        '/app/management/ml/anomaly_detection/jobs/new_job/step/job_type?index=3da93760-e0af-11ea-9ad3-3bcfc330e42a&_g=(time:(from:now-30m,to:now))'
+      );
+    });
   });
 
-  it('should return a valid path for the given ML section and appId', async () => {
-    const { path } = await mlManagementLocatorInternal.getUrl(
-      basicJobsManageParams,
-      anomalyDetectionAppId
-    );
-    const { path: paramsGroupIdPath } = await mlManagementLocatorInternal.getUrl(
-      jobsManageParamsGroupId,
-      anomalyDetectionAppId
-    );
-    expect(path).toEqual("?_a=('':(queryText:'id:test-job-id-0'))");
-    expect(paramsGroupIdPath).toEqual(
-      "?_a=('':(queryText:'groups:(test-group-id-0)'))&_g=(refreshInterval:(pause:!t,value:10000),time:(from:now-1h,to:now))"
-    );
+  describe('DataFrameAnalytics job management page', () => {
+    it('should generate valid URL for the Data Frame Analytics job management page', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl(
+        {
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+        },
+        dfaAppId
+      );
+
+      expect(url).toEqual('/app/management/ml/analytics');
+    });
+
+    it('should generate valid URL for the Data Frame Analytics job management page with jobId', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl(
+        {
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+          pageState: {
+            jobId: 'grid_regression_1',
+          },
+        },
+        dfaAppId
+      );
+
+      expect(url).toEqual(
+        "/app/management/ml/analytics?_a=(data_frame_analytics:(queryText:'id:grid_regression_1'))"
+      );
+    });
+
+    it('should generate valid URL for the Data Frame Analytics job management page with groupIds', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl(
+        {
+          page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+          pageState: {
+            groupIds: ['group_1', 'group_2'],
+          },
+        },
+        dfaAppId
+      );
+
+      expect(url).toEqual(
+        "/app/management/ml/analytics?_a=(data_frame_analytics:(queryText:'groups:(group_1%20or%20group_2)'))"
+      );
+    });
+  });
+
+  describe('Trained Models', () => {
+    it('should generate valid URL for the Trained Models page with model id', async () => {
+      const { url } = await mlManagementLocatorInternal.getUrl(
+        {
+          page: ML_PAGES.TRAINED_MODELS_MANAGE,
+          pageState: {
+            modelId: 'my_model_01',
+          },
+        },
+        'trained_models'
+      );
+
+      expect(url).toEqual(
+        "/app/management/ml/trained_models?_a=(trained_models:(queryText:'model_id:(my_model_01)'))"
+      );
+    });
   });
 });

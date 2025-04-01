@@ -32,7 +32,7 @@ import { ImportJobsFlyout } from '../../components/import_export_jobs/import_job
 import { ExportJobsFlyout } from '../../components/import_export_jobs';
 
 interface PageUrlState {
-  pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
+  pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL;
   pageUrlState: ListingPageUrlState;
 }
 
@@ -51,7 +51,7 @@ export const getDefaultAnomalyDetectionJobsListState = (): ListingPageUrlState =
 
 export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh, refreshList }) => {
   const [pageState, setPageState] = usePageUrlState<PageUrlState>(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL,
     getDefaultAnomalyDetectionJobsListState()
   );
   const {

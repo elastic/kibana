@@ -49,7 +49,7 @@ export function formatAnomalyDetectionJobManagementUrl(
     };
 
     const queryState: AppPageState<ListingPageUrlState> = {
-      [ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE]: jobsListState,
+      [ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE_FOR_URL]: jobsListState,
     };
 
     url = setStateToKbnUrl<AppPageState<ListingPageUrlState>>(
