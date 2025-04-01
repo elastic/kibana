@@ -16,7 +16,7 @@ The `AlertDeleteModal` component can be used to display a confirmation modal for
 
 ```tsx
 import React, { useState } from 'react';
-import { AlertsDeleteModal } from '@kbn/response-ops-alerts-delete';
+import { AlertDeleteModal } from '@kbn/response-ops-alerts-delete';
 
 function Example() {
   const [isModalVisible, setModalVisible] = useState(false);
