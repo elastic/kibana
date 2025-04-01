@@ -1,14 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import axios, { AxiosInstance } from 'axios';
 import { execSync, ExecSyncOptions } from 'child_process';
+
 import { dump } from 'js-yaml';
+
 import { parseLinkHeader } from './parse_link_header';
 import { Artifact } from './types/artifact';
 import { Build, BuildStatus } from './types/build';
@@ -29,17 +32,34 @@ export interface BuildkiteGroup {
   steps: BuildkiteStep[];
 }
 
-export type BuildkiteStep = BuildkiteCommandStep | BuildkiteInputStep;
+export type BuildkiteStep =
+  | BuildkiteCommandStep
+  | BuildkiteInputStep
+  | BuildkiteTriggerStep
+  | BuildkiteWaitStep;
 
 export interface BuildkiteCommandStep {
   command: string;
   label: string;
   parallelism?: number;
-  agents: {
-    queue: string;
-  };
+  concurrency?: number;
+  concurrency_group?: string;
+  concurrency_method?: 'eager' | 'ordered';
+  agents:
+    | {
+        queue: string;
+      }
+    | {
+        provider?: string;
+        image?: string;
+        imageProject?: string;
+        machineType?: string;
+        minCpuPlatform?: string;
+        preemptible?: boolean;
+      };
   timeout_in_minutes?: number;
   key?: string;
+  cancel_on_build_failing?: boolean;
   depends_on?: string | string[];
   retry?: {
     automatic: Array<{
@@ -47,7 +67,7 @@ export interface BuildkiteCommandStep {
       limit: number;
     }>;
   };
-  env?: { [key: string]: string };
+  env?: { [key: string]: string | number };
 }
 
 interface BuildkiteInputTextField {
@@ -91,7 +111,26 @@ export interface BuildkiteInputStep {
       limit: number;
     }>;
   };
-  env?: { [key: string]: string };
+  env?: { [key: string]: string | number };
+}
+
+export interface BuildkiteTriggerStep {
+  trigger: string;
+  label?: string;
+  build?: {
+    message?: string; // The message for the build. Supports emoji.
+    commit?: string; // The commit hash for the build.
+    branch?: string; // The branch for the build.
+    meta_data?: string; // A map of meta-data for the build.
+    env?: Record<string, string>; // A map of environment variables for the build.
+  };
+  async?: boolean;
+  branches?: string;
+  if?: string;
+  allow_dependency_failure?: boolean;
+  soft_fail?: boolean;
+  depends_on?: string | string[];
+  skip?: string;
 }
 
 export interface BuildkiteTriggerBuildParams {
@@ -110,24 +149,34 @@ export interface BuildkiteTriggerBuildParams {
   pull_request_repository?: string;
 }
 
+export interface BuildkiteWaitStep {
+  wait: string;
+  if?: string;
+  allow_dependency_failure?: boolean;
+  continue_on_failure?: boolean;
+  branches?: string;
+}
+
 export class BuildkiteClient {
   http: AxiosInstance;
   exec: ExecType;
+  baseUrl: string;
 
   constructor(config: BuildkiteClientConfig = {}) {
-    const BUILDKITE_BASE_URL =
-      config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
     const BUILDKITE_TOKEN = config.token ?? process.env.BUILDKITE_TOKEN;
+
+    this.baseUrl = config.baseUrl ?? process.env.BUILDKITE_BASE_URL ?? 'https://api.buildkite.com';
 
     // const BUILDKITE_AGENT_BASE_URL =
     //   process.env.BUILDKITE_AGENT_BASE_URL || 'https://agent.buildkite.com/v3';
     // const BUILDKITE_AGENT_TOKEN = process.env.BUILDKITE_AGENT_TOKEN;
 
     this.http = axios.create({
-      baseURL: BUILDKITE_BASE_URL,
+      baseURL: this.baseUrl,
       headers: {
         Authorization: `Bearer ${BUILDKITE_TOKEN}`,
       },
+      allowAbsoluteUrls: false,
     });
 
     this.exec = config.exec ?? execSync;
@@ -238,7 +287,7 @@ export class BuildkiteClient {
         hasRetries = true;
         const isPreemptionFailure =
           job.state === 'failed' &&
-          job.agent?.meta_data?.includes('spot=true') &&
+          job.agent_query_rules?.includes('preemptible=true') &&
           job.exit_status === -1;
 
         if (!isPreemptionFailure) {
@@ -278,10 +327,10 @@ export class BuildkiteClient {
       const resp = await this.http.get(link);
       link = '';
 
-      artifacts.push(await resp.data);
+      artifacts.push(resp.data);
 
       if (resp.headers.link) {
-        const result = parseLinkHeader(resp.headers.link as string);
+        const result = parseLinkHeader(resp.headers.link as string, this.baseUrl);
         if (result?.next) {
           link = result.next;
         }

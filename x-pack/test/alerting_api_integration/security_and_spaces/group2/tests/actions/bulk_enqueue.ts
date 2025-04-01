@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
 import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -39,11 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
       it(`should handle enqueue request appropriately: ${scenario.id}`, async () => {
         const startDate = new Date().toISOString();
 
-        const { body: createdAction } = await supertest
+        const { body: createdConnector } = await supertest
           .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'My action',
+            name: 'My Connector',
             connector_type_id: 'test.index-record',
             config: {
               unencrypted: `This value shouldn't get encrypted`,
@@ -54,10 +54,10 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .expect(200);
 
-        objectRemover.add(space.id, createdAction.id, 'action', 'actions');
+        objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
 
-        const connectorId = createdAction.id;
-        const name = 'My action';
+        const connectorId = createdConnector.id;
+        const name = 'My Connector';
         const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
 
         const response = await supertestWithoutAuth
@@ -100,7 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         const startDate = new Date().toISOString();
 
         const connectorId = 'system-connector-test.system-action-kibana-privileges';
-        const name = 'System action: test.system-action-kibana-privileges';
+        const name = 'Test system action with kibana privileges';
         const reference = `actions-enqueue-${scenario.id}:${space.id}:${connectorId}`;
 
         const response = await supertestWithoutAuth

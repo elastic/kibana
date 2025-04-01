@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { expect as jestExpect } from 'expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { adminTestUser } from '@kbn/test';
 import { resolve } from 'path';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
+import expect from '@kbn/expect';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
 } from '@kbn/security-api-integration-helpers/kerberos/kerberos_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -454,7 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
         // some period of time.
         const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          body: { query: { match: { doc_type: 'token' } } },
+          query: { match: { doc_type: 'token' } },
           refresh: true,
         });
         expect(esResponse).to.have.property('deleted').greaterThan(0);
@@ -519,7 +522,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(2);
@@ -545,7 +548,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
           .expect(401);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(1);

@@ -5,57 +5,28 @@
  * 2.0.
  */
 
-import type { SuperTest, Test } from 'supertest';
-import { Client } from '@elastic/elasticsearch';
-import expect from '@kbn/expect';
+import type { Agent as SuperTestAgent } from 'supertest';
+
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types_old';
-import { SecurityService } from '../../../../../test/common/services/security/security';
-
-export const deleteIndex = (es: Client, indexToBeDeleted: string[]) => {
-  Promise.all([
-    ...indexToBeDeleted.map((indexes) =>
-      es.deleteByQuery({
-        index: indexes,
-        query: {
-          match_all: {},
-        },
-        ignore_unavailable: true,
-        refresh: true,
-      })
-    ),
-  ]);
-};
-
-export const addIndex = async <T>(es: Client, findingsMock: T[], indexName: string) => {
-  await Promise.all([
-    ...findingsMock.map((finding) =>
-      es.index({
-        index: indexName,
-        body: {
-          ...finding,
-          '@timestamp': new Date().toISOString(),
-        },
-        refresh: true,
-      })
-    ),
-  ]);
-};
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { RoleCredentials, SecurityService } from '@kbn/ftr-common-functional-services';
 
 export async function createPackagePolicy(
-  supertest: SuperTest<Test>,
+  supertest: SuperTestAgent,
   agentPolicyId: string,
   policyTemplate: string,
   input: string,
   deployment: string,
   posture: string,
-  packageName: string = 'cloud_security_posture-1'
+  packageName: string = 'cloud_security_posture-1',
+  roleAuthc?: RoleCredentials,
+  internalRequestHeader?: { 'x-elastic-internal-origin': string; 'kbn-xsrf': string }
 ) {
-  const version = '1.3.0';
+  const version = CLOUD_SECURITY_PLUGIN_VERSION;
   const title = 'Security Posture Management';
   const streams = [
     {
-      enabled: false,
+      enabled: true,
       data_stream: {
         type: 'logs',
         dataset: 'cloud_security_posture.vulnerabilities',
@@ -71,35 +42,67 @@ export async function createPackagePolicy(
 
   const inputs = posture === 'vuln_mgmt' ? { ...inputTemplate, streams } : { ...inputTemplate };
 
-  const { body: postPackageResponse } = await supertest
-    .post(`/api/fleet/package_policies`)
-    .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-    .set('kbn-xsrf', 'xxxx')
-    .send({
-      force: true,
-      name: packageName,
-      description: '',
-      namespace: 'default',
-      policy_id: agentPolicyId,
-      enabled: true,
-      inputs: [inputs],
-      package: {
-        name: 'cloud_security_posture',
-        title,
-        version,
-      },
-      vars: {
-        deployment: {
-          value: deployment,
-          type: 'text',
-        },
-        posture: {
-          value: posture,
-          type: 'text',
-        },
-      },
-    })
-    .expect(200);
+  const { body: postPackageResponse } =
+    roleAuthc && internalRequestHeader
+      ? await supertest
+          .post(`/api/fleet/package_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set(internalRequestHeader)
+          .set(roleAuthc.apiKeyHeader)
+          .send({
+            force: true,
+            name: packageName,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [inputs],
+            package: {
+              name: 'cloud_security_posture',
+              title,
+              version,
+            },
+            vars: {
+              deployment: {
+                value: deployment,
+                type: 'text',
+              },
+              posture: {
+                value: posture,
+                type: 'text',
+              },
+            },
+          })
+          .expect(200)
+      : await supertest
+          .post(`/api/fleet/package_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            force: true,
+            name: packageName,
+            description: '',
+            namespace: 'default',
+            policy_id: agentPolicyId,
+            enabled: true,
+            inputs: [inputs],
+            package: {
+              name: 'cloud_security_posture',
+              title,
+              version,
+            },
+            vars: {
+              deployment: {
+                value: deployment,
+                type: 'text',
+              },
+              posture: {
+                value: posture,
+                type: 'text',
+              },
+            },
+          })
+          .expect(200);
 
   return postPackageResponse.item;
 }
@@ -112,24 +115,24 @@ export const createUser = async (security: SecurityService, userName: string, ro
   });
 };
 
-export const createCSPOnlyRole = async (
+export const createCSPRole = async (
   security: SecurityService,
   roleName: string,
-  indicesName: string
+  indicesName?: string[]
 ) => {
   await security.role.create(roleName, {
     kibana: [
       {
-        feature: { siem: ['read'], fleetv2: ['all'], fleet: ['read'] },
+        feature: { siemV2: ['read'], fleetv2: ['all'], fleet: ['read'] },
         spaces: ['*'],
       },
     ],
-    ...(indicesName.length !== 0
+    ...(indicesName && indicesName.length > 0
       ? {
           elasticsearch: {
             indices: [
               {
-                names: [indicesName],
+                names: indicesName,
                 privileges: ['read'],
               },
             ],
@@ -145,16 +148,4 @@ export const deleteRole = async (security: SecurityService, roleName: string) =>
 
 export const deleteUser = async (security: SecurityService, userName: string) => {
   await security.user.delete(userName);
-};
-
-export const assertIndexStatus = (
-  indicesDetails: IndexDetails[],
-  indexName: string,
-  expectedStatus: string
-) => {
-  const actualValue = indicesDetails.find((idx) => idx.index === indexName)?.status;
-  expect(actualValue).to.eql(
-    expectedStatus,
-    `expected ${indexName} status to be ${expectedStatus} but got  ${actualValue} instead`
-  );
 };

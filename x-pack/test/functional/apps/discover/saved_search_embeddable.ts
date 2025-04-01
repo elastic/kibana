@@ -13,24 +13,37 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardDrilldownPanelActions = getService('dashboardDrilldownPanelActions');
+  const dashboardDrilldownsManage = getService('dashboardDrilldownsManage');
   const filterBar = getService('filterBar');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const find = getService('find');
+  const queryBar = getService('queryBar');
+  const { common, dashboard, header, discover } = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'discover',
+  ]);
 
   describe('discover saved search embeddable', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.setTime({
+      await common.setTime({
         from: 'Sep 22, 2015 @ 00:00:00.000',
         to: 'Sep 23, 2015 @ 00:00:00.000',
       });
@@ -38,29 +51,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.unsetTime();
+      await common.unsetTime();
     });
 
     beforeEach(async () => {
-      await PageObjects.dashboard.navigateToApp();
+      await dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
     });
 
     const addSearchEmbeddableToDashboard = async (title = 'Rendering-Test:-saved-search') => {
       await dashboardAddPanel.addSavedSearch(title);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const rows = await dataGrid.getDocTableRows();
       expect(rows.length).to.be.above(0);
     };
 
     const refreshDashboardPage = async (requireRenderComplete = false) => {
       await browser.refresh();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       if (requireRenderComplete) {
-        await PageObjects.dashboard.waitForRenderComplete();
+        await dashboard.waitForRenderComplete();
       }
     };
 
@@ -90,9 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ],
       });
       await addSearchEmbeddableToDashboard(searchTitle);
-      await PageObjects.dashboard.saveDashboard('Dashboard with deleted saved search', {
+      await dashboard.saveDashboard('Dashboard with deleted saved search', {
         waitDialogIsClosed: true,
         exitFromEditMode: false,
+        saveAsNew: true,
       });
       await kibanaServer.savedObjects.delete({
         type: 'search',
@@ -100,10 +114,44 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await refreshDashboardPage();
       await testSubjects.existOrFail('embeddableError');
-      const panels = await PageObjects.dashboard.getDashboardPanels();
+      const panels = await dashboard.getDashboardPanels();
       await dashboardPanelActions.removePanel(panels[0]);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('embeddableError');
+    });
+
+    it('should support URL drilldown', async () => {
+      await addSearchEmbeddableToDashboard();
+      await dashboardDrilldownPanelActions.clickCreateDrilldown();
+      const drilldownName = 'URL drilldown';
+      const urlTemplate =
+        "{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{context.panel.timeRange.from}}',to:'{{context.panel.timeRange.to}}'))" +
+        "&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto," +
+        "query:(language:{{context.panel.query.language}},query:'clientip:239.190.189.77'),sort:!())";
+      await testSubjects.click('actionFactoryItem-URL_DRILLDOWN');
+      await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
+        drilldownName,
+        destinationURLTemplate: urlTemplate,
+        trigger: 'CONTEXT_MENU_TRIGGER',
+      });
+      await testSubjects.click('urlDrilldownAdditionalOptions');
+      await testSubjects.click('urlDrilldownOpenInNewTab');
+      await dashboardDrilldownsManage.saveChanges();
+      await dashboard.saveDashboard('Dashboard with URL drilldown', {
+        saveAsNew: true,
+        waitDialogIsClosed: true,
+        exitFromEditMode: true,
+      });
+      await browser.refresh();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
+      await dashboardPanelActions.openContextMenu();
+      await find.clickByLinkText(drilldownName);
+      await discover.waitForDiscoverAppOnScreen();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitForDocTableLoadingComplete();
+      expect(await queryBar.getQueryString()).to.be('clientip:239.190.189.77');
+      expect(await discover.getHitCount()).to.be('6');
     });
   });
 }

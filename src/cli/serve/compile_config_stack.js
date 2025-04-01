@@ -1,14 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import _ from 'lodash';
 
-import { readFileSync, writeFileSync, statSync, existsSync } from 'fs';
+import { statSync } from 'fs';
 import { resolve } from 'path';
 import { getConfigPath, getConfigDirectory } from '@kbn/utils';
 import { getConfigFromFiles } from '@kbn/config';
@@ -16,9 +17,11 @@ import { getConfigFromFiles } from '@kbn/config';
 const isNotEmpty = _.negate(_.isEmpty);
 const isNotNull = _.negate(_.isNull);
 
-/** @typedef {'es' | 'oblt' | 'security'} ServerlessProjectMode */
-/** @type {ServerlessProjectMode[]} */
-const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security'];
+/**
+ * BOOKMARK - List of Kibana project types
+ * @type {import('@kbn/projects-solutions-groups').KibanaProject[]}
+ * */
+const VALID_SERVERLESS_PROJECT_MODE = ['es', 'oblt', 'security', 'chat'];
 
 /**
  * Collects paths to configurations to be included in the final configuration stack.
@@ -36,11 +39,6 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
     configs.push(resolveConfig('kibana.dev.yml'));
   }
 
-  if (dev && serverless) {
-    writeProjectSwitcherConfig('serverless.recent.dev.yml', serverless);
-    configs.push(resolveConfig('serverless.recent.dev.yml'));
-  }
-
   // Filter out all config paths that didn't exist
   configs = configs.filter(isNotNull);
 
@@ -52,6 +50,19 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
     if (dev && devConfig !== false) {
       configs.push(resolveConfig('serverless.dev.yml'));
       configs.push(resolveConfig(`serverless.${serverlessMode}.dev.yml`));
+    }
+  }
+
+  if (serverlessMode === 'security') {
+    // Security specific tier configs
+    const serverlessSecurityTier = getSecurityTierFromCfg(configs);
+    if (serverlessSecurityTier) {
+      configs.push(resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.yml`));
+      if (dev && devConfig !== false) {
+        configs.push(
+          resolveConfig(`serverless.${serverlessMode}.${serverlessSecurityTier}.dev.yml`)
+        );
+      }
     }
   }
 
@@ -68,6 +79,18 @@ function getServerlessModeFromCfg(configs) {
   return config.serverless;
 }
 
+/** @typedef {'search_ai_lake' | 'essentials' | 'complete'} ServerlessSecurityTier */
+/**
+ * @param {string[]} configs List of configuration file paths
+ * @returns {ServerlessSecurityTier|undefined} The serverless security tier in the summed configs
+ */
+function getSecurityTierFromCfg(configs) {
+  const config = getConfigFromFiles(configs.filter(isNotNull));
+
+  const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
+  return productType?.product_tier;
+}
+
 /**
  * @param {string} fileName Name of the config within the config directory
  * @returns {string | null} The resolved path to the config, if it exists, null otherwise
@@ -78,27 +101,6 @@ function resolveConfig(fileName) {
     return filePath;
   } else {
     return null;
-  }
-}
-
-/**
- * @param {string} fileName
- * @param {object} opts
- */
-function writeProjectSwitcherConfig(fileName, serverlessOption) {
-  const path = resolve(getConfigDirectory(), fileName);
-  const configAlreadyExists = existsSync(path);
-
-  const preserveExistingConfig = serverlessOption === true;
-  const serverlessMode = validateServerlessMode(serverlessOption) || 'es';
-
-  if (configAlreadyExists && preserveExistingConfig) {
-    return;
-  } else {
-    const content = `xpack.serverless.plugin.developer.projectSwitcher.enabled: true\nserverless: ${serverlessMode}\n`;
-    if (!configAlreadyExists || readFileSync(path).toString() !== content) {
-      writeFileSync(path, content);
-    }
   }
 }
 
@@ -142,7 +144,6 @@ function validateServerlessMode(serverlessMode) {
   }
 
   if (serverlessMode === true) {
-    // Defaulting to read the project-switcher's settings in `serverless.recent.dev.yml`
     return null;
   }
 

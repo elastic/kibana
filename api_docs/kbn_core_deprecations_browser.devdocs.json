@@ -3,39 +3,23 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-deprecations-browser",
-        "id": "def-common.DeprecationsServiceStart",
+        "id": "def-public.DeprecationsServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "DeprecationsServiceStart",
         "description": [
           "\nDeprecationsService provides methods to fetch domain deprecation details from\nthe Kibana server.\n"
         ],
-        "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+        "path": "src/core/packages/deprecations/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.getAllDeprecations",
+            "id": "def-public.DeprecationsServiceStart.getAllDeprecations",
             "type": "Function",
             "tags": [],
             "label": "getAllDeprecations",
@@ -44,16 +28,12 @@
             ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
-              "[]>"
+              "DomainDeprecationDetails",
+              "<",
+              "DeprecationsDetails",
+              ">[]>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -61,7 +41,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.getDeprecations",
+            "id": "def-public.DeprecationsServiceStart.getDeprecations",
             "type": "Function",
             "tags": [],
             "label": "getDeprecations",
@@ -70,22 +50,18 @@
             ],
             "signature": [
               "(domainId: string) => Promise<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
-              "[]>"
+              "DomainDeprecationDetails",
+              "<",
+              "DeprecationsDetails",
+              ">[]>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
-                "id": "def-common.DeprecationsServiceStart.getDeprecations.$1",
+                "id": "def-public.DeprecationsServiceStart.getDeprecations.$1",
                 "type": "string",
                 "tags": [],
                 "label": "domainId",
@@ -93,7 +69,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "path": "src/core/packages/deprecations/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -103,7 +79,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.isDeprecationResolvable",
+            "id": "def-public.DeprecationsServiceStart.isDeprecationResolvable",
             "type": "Function",
             "tags": [],
             "label": "isDeprecationResolvable",
@@ -112,36 +88,29 @@
             ],
             "signature": [
               "(details: ",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
-              ") => boolean"
+              "DomainDeprecationDetails",
+              "<",
+              "DeprecationsDetails",
+              ">) => boolean"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
-                "id": "def-common.DeprecationsServiceStart.isDeprecationResolvable.$1",
+                "id": "def-public.DeprecationsServiceStart.isDeprecationResolvable.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "details",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-deprecations-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                    "section": "def-common.DomainDeprecationDetails",
-                    "text": "DomainDeprecationDetails"
-                  }
+                  "DomainDeprecationDetails",
+                  "<",
+                  "DeprecationsDetails",
+                  ">"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "path": "src/core/packages/deprecations/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -151,7 +120,7 @@
           },
           {
             "parentPluginId": "@kbn/core-deprecations-browser",
-            "id": "def-common.DeprecationsServiceStart.resolveDeprecation",
+            "id": "def-public.DeprecationsServiceStart.resolveDeprecation",
             "type": "Function",
             "tags": [],
             "label": "resolveDeprecation",
@@ -160,44 +129,31 @@
             ],
             "signature": [
               "(details: ",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
-              ") => Promise<",
-              {
-                "pluginId": "@kbn/core-deprecations-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-                "section": "def-common.ResolveDeprecationResponse",
-                "text": "ResolveDeprecationResponse"
-              },
+              "DomainDeprecationDetails",
+              "<",
+              "DeprecationsDetails",
+              ">) => Promise<",
+              "ResolveDeprecationResponse",
               ">"
             ],
-            "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+            "path": "src/core/packages/deprecations/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-deprecations-browser",
-                "id": "def-common.DeprecationsServiceStart.resolveDeprecation.$1",
+                "id": "def-public.DeprecationsServiceStart.resolveDeprecation.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "details",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-deprecations-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                    "section": "def-common.DomainDeprecationDetails",
-                    "text": "DomainDeprecationDetails"
-                  }
+                  "DomainDeprecationDetails",
+                  "<",
+                  "DeprecationsDetails",
+                  ">"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-browser/src/contracts.ts",
+                "path": "src/core/packages/deprecations/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -213,7 +169,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-deprecations-browser",
-        "id": "def-common.ResolveDeprecationResponse",
+        "id": "def-public.ResolveDeprecationResponse",
         "type": "Type",
         "tags": [],
         "label": "ResolveDeprecationResponse",
@@ -223,12 +179,28 @@
         "signature": [
           "{ status: \"ok\"; } | { status: \"fail\"; reason: string; }"
         ],
-        "path": "packages/core/deprecations/core-deprecations-browser/src/types.ts",
+        "path": "src/core/packages/deprecations/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

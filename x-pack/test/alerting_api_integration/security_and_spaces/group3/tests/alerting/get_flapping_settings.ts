@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, resetRulesSettings } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function getFlappingSettingsTests({ getService }: FtrProviderContext) {
@@ -42,7 +42,8 @@ export default function getFlappingSettingsTests({ getService }: FtrProviderCont
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Forbidden',
+                message:
+                  'API [GET /internal/alerting/rules/settings/_flapping] is unauthorized for user, this action is granted by the Kibana privileges [read-flapping-settings]',
                 statusCode: 403,
               });
               break;

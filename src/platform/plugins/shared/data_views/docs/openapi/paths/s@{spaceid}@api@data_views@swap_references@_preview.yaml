@@ -1,0 +1,38 @@
+post:
+  summary: Preview a saved object reference swap
+  operationId: previewSwapDataViews
+  description: >
+    Preview the impact of swapping saved object references from one data view identifier to another.
+  tags:
+    - data views
+  parameters:
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../components/schemas/swap_data_view_request_object.yaml'
+        examples:
+          previewSwapDataViewRequest:
+            $ref: '../components/examples/preview_swap_data_view_request.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              result:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: A saved object identifier.
+                    type:
+                      type: string
+                      description: The saved object type.

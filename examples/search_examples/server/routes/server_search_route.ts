@@ -1,15 +1,15 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Observable } from 'rxjs';
-import { IEsSearchRequest } from '@kbn/data-plugin/server';
+import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { schema } from '@kbn/config-schema';
-import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { IRouter } from '@kbn/core/server';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common';
@@ -23,6 +23,12 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
           index: schema.maybe(schema.string()),
           field: schema.maybe(schema.string()),
         }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization check to es.',
+        },
       },
     },
     async (context, request, response) => {
@@ -39,12 +45,10 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
             {
               params: {
                 index,
-                body: {
-                  aggs: {
-                    '1': {
-                      avg: {
-                        field,
-                      },
+                aggs: {
+                  '1': {
+                    avg: {
+                      field,
                     },
                   },
                 },

@@ -1,0 +1,24 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    // Emotion theme typing
+    "../../../../../typings/emotion.d.ts"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/data-plugin",
+    "@kbn/i18n",
+    "@kbn/data-views-plugin",
+    "@kbn/i18n-react",
+    "@kbn/react-kibana-mount",
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

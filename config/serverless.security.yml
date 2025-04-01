@@ -1,11 +1,91 @@
 # Security Project config
 
 ## Disable plugins
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
-xpack.observabilityLogExplorer.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
+xpack.observabilityAIAssistant.enabled: false
+xpack.searchNotebooks.enabled: false
+xpack.searchPlayground.enabled: false
+xpack.searchInferenceEndpoints.enabled: false
+xpack.inventory.enabled: false
+xpack.searchIndices.enabled: false
+xpack.searchSynonyms.enabled: false
+
+## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
+xpack.features.overrides:
+  ### The following features are hidden in Role management since they're automatically granted by SIEM feature.
+  discover.hidden: true
+  discover_v2.hidden: true
+  dashboard.hidden: true
+  dashboard_v2.hidden: true
+  visualize.hidden: true
+  visualize_v2.hidden: true
+  maps.hidden: true
+  maps_v2.hidden: true
+  ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
+  ml:
+    category: "security"
+    order: 1101
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siemV2:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siem:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+        - feature: "dashboard_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+        - feature: "savedQueryManagement"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "dashboard_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+        - feature: "savedQueryManagement"
+          privileges: [ "read" ]
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: security
@@ -16,45 +96,55 @@ xpack.securitySolutionServerless.productTypes:
   [
     { product_line: 'security', product_tier: 'complete' },
     { product_line: 'endpoint', product_tier: 'complete' },
+    { product_line: 'cloud', product_tier: 'complete' },
   ]
 
 xpack.securitySolution.offeringSettings: {
-    sideNavEnabled: false, # Internal security side navigation disabled, the serverless global chrome navigation is used instead
-    ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
-    ESQLEnabled: false, # ES|QL disabled, not supported by serverless Elasticsearch
-  }
+  ILMEnabled: false, # Index Lifecycle Management (ILM) functionalities disabled, not supported by serverless Elasticsearch
+}
 
 newsfeed.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
 
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
-
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['security']
-xpack.fleet.internal.registry.spec.max: '3.0'
+xpack.fleet.internal.registry.spec.min: '3.0'
+xpack.fleet.internal.registry.spec.max: '3.3'
 xpack.fleet.internal.registry.kibanaVersionCheckEnabled: false
-# Temporary until all packages implement new spec https://github.com/elastic/kibana/issues/166742
-xpack.fleet.internal.registry.spec.min: '1.0'
 xpack.fleet.internal.registry.excludePackages: [
     # Oblt integrations
     'apm',
     'synthetics',
     'synthetics_dashboards',
 
-    # Removed in 8.11 integrations
+    # Deprecated security integrations
+    'bluecoat',
     'cisco',
-    'microsoft',
-    'symantec',
     'cyberark',
+    'cylance',
+    'f5',
+    'fortinet_forticlient',
+    'juniper_junos',
+    'juniper_netscreen',
+    'microsoft',
+    'netscout',
+    'radware',
+    'symantec',
+    'tomcat',
 
     # ML integrations
     'dga',
+
+    # Unsupported in serverless
+    'cloud_defend',
+
+    # Search connectors
+    'elastic_connectors',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
@@ -63,5 +153,30 @@ xpack.fleet.packages:
 
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
-xpack.ml.nlp.enabled: false
+xpack.ml.nlp:
+  enabled: true
+  modelDeployment:
+    allowStaticAllocations: false
+    vCPURange:
+      low:
+        min: 0
+        max: 2
+      medium:
+        min: 1
+        max: 32
+      high:
+        min: 1
+        max: 128
 xpack.ml.compatibleModuleType: 'security'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false
+
+# Enable project level rentention checks in DSL form from Index Management UI
+xpack.index_management.enableProjectLevelRetentionChecks: true
+
+# Increase task manager capacity because security projects have more resources (Memory and CPU)
+xpack.task_manager.capacity: 20
+
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true

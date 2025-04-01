@@ -9,14 +9,23 @@ import expect from '@kbn/expect';
 import deepmerge from 'deepmerge';
 import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import ossPlatformTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_platform.json';
+import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
+import xpackPlatformTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_platform.json';
+// BOOKMARK - List of Kibana Solutions
+import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_observability.json';
+import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
+import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
+import xpackChatTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_chat.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { flatKeys } from '../../../../../test/api_integration/apis/telemetry/utils';
+import { flatKeys } from '@kbn/test-suites-src/api_integration/apis/telemetry/utils';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const disableCollection = {
@@ -39,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     let stats: Record<string, any>;
 
     before('disable monitoring and pull local stats', async () => {
-      await es.cluster.putSettings({ body: disableCollection });
+      await es.cluster.putSettings(disableCollection);
       await new Promise((r) => setTimeout(r, 1000));
 
       const { body } = await supertest
@@ -56,12 +65,24 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should pass the schema validation', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
-      const plugins = deepmerge(ossPluginsTelemetrySchema, xpackPluginsTelemetrySchema);
+
+      const schemas = [
+        ossPluginsTelemetrySchema,
+        ossPackagesTelemetrySchema,
+        ossPlatformTelemetrySchema,
+        xpackPluginsTelemetrySchema,
+        xpackPlatformTelemetrySchema,
+        xpackObservabilityTelemetrySchema,
+        xpackSearchTelemetrySchema,
+        xpackSecurityTelemetrySchema,
+        xpackChatTelemetrySchema,
+      ] as TelemetrySchemaObject[];
+      const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 
       try {
         assertTelemetryPayload({ root, plugins }, stats);
       } catch (err) {
-        err.message = `The telemetry schemas in 'x-pack/plugins/telemetry_collection_xpack/schema/' are out-of-date, please update it as required: ${err.message}`;
+        err.message = `The telemetry schemas in are out-of-date. Please define the schema of your collector and run "node scripts/telemetry_check --fix" to update them: ${err.message}`;
         throw err;
       }
     });
@@ -112,6 +133,13 @@ export default function ({ getService }: FtrProviderContext) {
       expect(stats.stack_stats.kibana.plugins.fileUpload.file_upload.index_creation_count).to.be.a(
         'number'
       );
+
+      // Logs data telemetry
+      const logsDataTelemetryData =
+        stats.stack_stats.kibana.plugins.usage_collector_stats.not_ready.names.includes('logs_data')
+          ? []
+          : stats.stack_stats.kibana.plugins.logs_data?.data;
+      expect(logsDataTelemetryData).to.an('array');
 
       expect(stats.stack_stats.kibana.os.platforms[0].platform).to.be.a('string');
       expect(stats.stack_stats.kibana.os.platforms[0].count).to.be(1);

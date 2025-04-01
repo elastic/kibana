@@ -1,0 +1,7 @@
+in: query
+name: createNewCopies
+schema:
+  type: boolean
+required: false
+description: |
+  Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict errors are avoided. NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.

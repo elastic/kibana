@@ -116,11 +116,9 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
         return map;
       }, {});
       const apiKey = await esClient.security.createApiKey({
-        body: {
-          name: `Transform API Key ${user.full_name}`,
-          role_descriptors: roleDescriptors,
-          metadata: user,
-        },
+        name: `Transform API Key ${user.full_name}`,
+        role_descriptors: roleDescriptors,
+        metadata: user,
       });
       return { user: { name: user.name as USER, roles: user.roles }, apiKey };
     },
@@ -139,7 +137,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
       if (existingKeys.count > 0) {
         await Promise.all(
           existingKeys.api_keys.map(async (key) => {
-            esClient.security.invalidateApiKey({ ids: [key.id] });
+            await esClient.security.invalidateApiKey({ ids: [key.id] });
           })
         );
       }

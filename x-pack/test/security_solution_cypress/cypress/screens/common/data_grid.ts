@@ -9,6 +9,10 @@ export const GET_DATA_GRID_HEADER = (fieldName: string) => {
   return `[data-test-subj="dataGridHeaderCell-${fieldName}"]`;
 };
 
+export const GET_DATA_GRID_HEADER_ACTION_BUTTON = (fieldName: string) => {
+  return `[data-test-subj="dataGridHeaderCellActionButton-${fieldName}"]`;
+};
+
 export const DATA_GRID_FIELDS = {
   TIMESTAMP: {
     fieldName: '@timestamp',
@@ -39,10 +43,3 @@ export const DATA_GRID_FULL_SCREEN =
 export const DATA_GRID_FIELD_SORT_BTN = '[data-test-subj="dataGridColumnSortingButton"]';
 
 export const DATA_GRID_COLUMN_ORDER_BTN = '[data-test-subj="dataGridColumnSelectorButton"]';
-
-export const DATA_GRID_COLUMNS = '.euiDataGridHeaderCell__content';
-
-export const COLUMN_ORDER_POPUP = {
-  TIMESTAMP: '[data-test-subj="dataGridColumnSelectorColumnItem-@timestamp"]',
-  REASON: '[data-test-subj="dataGridColumnSelectorColumnItem-kibana.alert.reason"]',
-};

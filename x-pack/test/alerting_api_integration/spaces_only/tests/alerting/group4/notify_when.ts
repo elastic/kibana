@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createNotifyWhenTests({ getService }: FtrProviderContext) {
@@ -92,7 +92,11 @@ export default function createNotifyWhenTests({ getService }: FtrProviderContext
         });
       });
 
-      const executeActionEvents = getEventsByAction(events, 'execute-action');
+      // Slice in case the rule ran more times than we are asserting on
+      const executeActionEvents = getEventsByAction(events, 'execute-action').slice(
+        0,
+        expectedActionGroupBasedOnPattern.length
+      );
       const executeActionEventsActionGroup = executeActionEvents.map(
         (event) => event?.kibana?.alerting?.action_group_id
       );

@@ -1,0 +1,21 @@
+{
+  "type": "plugin",
+  "id": "@kbn/search-navigation",
+  "owner": "@elastic/search-kibana",
+  "group": "search",
+  "visibility": "private",
+  "plugin": {
+    "id": "searchNavigation",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "searchNavigation"
+    ],
+    "requiredPlugins": [],
+    "optionalPlugins": [
+      "serverless"
+    ],
+    "requiredBundles": []
+  }
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../../helpers';
 
 // eslint-disable-next-line import/no-default-export
@@ -27,5 +27,6 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./alerts_default_space'));
     loadTestFile(require.resolve('./transform_rule_types'));
     loadTestFile(require.resolve('./ml_rule_types'));
+    loadTestFile(require.resolve('./bulk_edit'));
   });
 }

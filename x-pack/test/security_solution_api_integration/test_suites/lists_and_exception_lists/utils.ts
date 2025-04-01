@@ -7,6 +7,7 @@
 
 import type SuperTest from 'supertest';
 import { v4 as uuidv4 } from 'uuid';
+import limit from 'p-limit';
 
 import type {
   Type,
@@ -33,7 +34,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { getImportListItemAsBuffer } from '@kbn/lists-plugin/common/schemas/request/import_list_item_schema.mock';
 import { encodeHitVersion } from '@kbn/securitysolution-es-utils';
 
-import { countDownTest } from '../detections_response/utils';
+import { countDownTest } from '../../../common/utils/security_solution';
 
 /**
  * Creates the lists and lists items index for use inside of beforeEach blocks of tests
@@ -41,7 +42,7 @@ import { countDownTest } from '../detections_response/utils';
  * @param supertest The supertest client library
  */
 export const createListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -61,7 +62,7 @@ export const createListsIndex = async (
  * @param supertest The supertest client library
  */
 export const deleteListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -82,7 +83,7 @@ export const deleteListsIndex = async (
  * @param supertest The supertest client library
  */
 export const createExceptionListsIndex = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   return countDownTest(
@@ -205,7 +206,7 @@ export const binaryToString = (res: any, callback: any): void => {
  * @param supertest The supertest handle
  */
 export const deleteAllExceptions = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   await deleteAllExceptionsByType(supertest, log, 'single');
@@ -218,7 +219,7 @@ export const deleteAllExceptions = async (
  * @param supertest The supertest handle
  */
 export const deleteAllExceptionsByType = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: NamespaceType
 ): Promise<void> => {
@@ -229,12 +230,16 @@ export const deleteAllExceptionsByType = async (
         .set('kbn-xsrf', 'true')
         .send();
       const ids: string[] = body.data.map((exception: ExceptionList) => exception.id);
-      for await (const id of ids) {
-        await supertest
-          .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
-          .set('kbn-xsrf', 'true')
-          .send();
-      }
+      const limiter = limit(10);
+      const promises = ids.map((id) =>
+        limiter(() =>
+          supertest
+            .delete(`${EXCEPTION_LIST_URL}?id=${id}&namespace_type=${type}`)
+            .set('kbn-xsrf', 'true')
+            .send()
+        )
+      );
+      await Promise.all(promises);
       const { body: finalCheck } = await supertest
         .get(`${EXCEPTION_LIST_URL}/_find?namespace_type=${type}`)
         .set('kbn-xsrf', 'true')
@@ -260,7 +265,7 @@ export const deleteAllExceptionsByType = async (
  * @param testValues Optional test values in case you're using CIDR or range based lists
  */
 export const importFile = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: Type,
   contents: string[],
@@ -297,7 +302,7 @@ export const importFile = async (
  * @param fileName filename to import as
  */
 export const importTextFile = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   type: Type,
   contents: string[],
@@ -330,7 +335,7 @@ export const importTextFile = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItem = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValue: string,
   fileName: string
@@ -362,7 +367,7 @@ export const waitForListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForListItems = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValues: string[],
   fileName: string
@@ -378,7 +383,7 @@ export const waitForListItems = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItem = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValue: string,
   fileName: string
@@ -417,7 +422,7 @@ export const waitForTextListItem = async (
  * @param itemValue The item value to wait for
  */
 export const waitForTextListItems = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   itemValues: string[],
   fileName: string
@@ -563,10 +568,104 @@ export const createLegacyListsIndices = async (es: Client) => {
 };
 
 /**
+ * Helper function to emulate reindexed lists/items from version 7 index to version 8
+ * These indices has prefix .lists-v8-, .items-v8-, that hints they are v8 compatible after reindex
+ * @param es es client
+ */
+export const createReindexedListsIndices = async (es: Client) => {
+  await configurePolicyAndIndexTemplate(es);
+  await createReindexedBootstrapIndex(es, 'lists-default');
+  await createReindexedBootstrapIndex(es, 'items-default');
+};
+
+/**
  * Utility to create list indices, before they were migrated to data streams
  * @param es ES client
  */
 export const createListsIndices = async (es: Client) => {
+  await configurePolicyAndIndexTemplate(es);
+  await createBootstrapIndex(es, '.lists-default');
+  await createBootstrapIndex(es, '.items-default');
+};
+
+/**
+ * utility to create list directly by using ES, bypassing all checks
+ * useful, to create list in legacy indices
+ */
+export const createListBypassingChecks = async ({ es, id }: { es: Client; id: string }) => {
+  const createdAt = new Date().toISOString();
+  const document = {
+    created_at: createdAt,
+    created_by: 'mock-user',
+    description: 'mock-description',
+    name: 'mock-name',
+    tie_breaker_id: uuidv4(),
+    type: 'keyword',
+    updated_at: createdAt,
+    updated_by: 'mock-user',
+    immutable: false,
+    version: 1,
+  };
+
+  const response = await es.create({
+    document,
+    id,
+    index: '.lists-default',
+    refresh: 'wait_for',
+  });
+
+  return {
+    _version: encodeHitVersion(response),
+    id: response._id,
+    ...document,
+  };
+};
+
+/**
+ * utility to create list item directly by using ES, bypassing all checks
+ * useful, to create list item in legacy indices
+ * supports keyword only
+ */
+export const createListItemBypassingChecks = async ({
+  es,
+  listId,
+  id,
+  value,
+}: {
+  es: Client;
+  listId: string;
+  id: string;
+  value: string;
+}) => {
+  const createdAt = new Date().toISOString();
+  const document = {
+    created_at: createdAt,
+    created_by: 'mock-user',
+    tie_breaker_id: uuidv4(),
+    updated_at: createdAt,
+    updated_by: 'mock-user',
+    list_id: listId,
+    keyword: value,
+  };
+
+  const response = await es.create({
+    document,
+    id,
+    index: '.items-default',
+    refresh: 'wait_for',
+  });
+
+  return {
+    _version: encodeHitVersion(response),
+    id: response._id,
+    ...document,
+  };
+};
+
+/**
+ * Creates policies and index templates for both the Lists and List Items indices.
+ */
+const configurePolicyAndIndexTemplate = async (es: Client) => {
   await setPolicy(es, '.lists-default', testPolicy);
   await setPolicy(es, '.items-default', testPolicy);
   await setIndexTemplate(es, '.lists-default', {
@@ -607,80 +706,26 @@ export const createListsIndices = async (es: Client) => {
       },
     },
   });
-  await createBootstrapIndex(es, '.lists-default');
-  await createBootstrapIndex(es, '.items-default');
 };
 
 /**
- * utility to create list directly by using ES, bypassing all checks
- * useful, to create list in legacy indices
+ * Emulates an index that was reindexed from 7.x to 8.x
+ * 1. this index has  prefix .reindexed-v8-
+ * 2. it has 2 aliases: index and name of origjnal index(usually bootstrap index with number in the end). For example: .items-another-4, .items-another-4-000001
  */
-export const createListBypassingChecks = async ({ es, id }: { es: Client; id: string }) => {
-  const createdAt = new Date().toISOString();
-  const body = {
-    created_at: createdAt,
-    created_by: 'mock-user',
-    description: 'mock-description',
-    name: 'mock-name',
-    tie_breaker_id: uuidv4(),
-    type: 'keyword',
-    updated_at: createdAt,
-    updated_by: 'mock-user',
-    immutable: false,
-    version: 1,
-  };
-
-  const response = await es.create({
-    body,
-    id,
-    index: '.lists-default',
-    refresh: 'wait_for',
-  });
-
-  return {
-    _version: encodeHitVersion(response),
-    id: response._id,
-    ...body,
-  };
-};
-
-/**
- * utility to create list item directly by using ES, bypassing all checks
- * useful, to create list item in legacy indices
- * supports keyword only
- */
-export const createListItemBypassingChecks = async ({
-  es,
-  listId,
-  id,
-  value,
-}: {
-  es: Client;
-  listId: string;
-  id: string;
-  value: string;
-}) => {
-  const createdAt = new Date().toISOString();
-  const body = {
-    created_at: createdAt,
-    created_by: 'mock-user',
-    tie_breaker_id: uuidv4(),
-    updated_at: createdAt,
-    updated_by: 'mock-user',
-    list_id: listId,
-    keyword: value,
-  };
-
-  const response = await es.create({
-    body,
-    id,
-    index: '.items-default',
-    refresh: 'wait_for',
-  });
-
-  return {
-    _version: encodeHitVersion(response),
-    id: response._id,
-    ...body,
-  };
+const createReindexedBootstrapIndex = async (esClient: Client, index: string): Promise<unknown> => {
+  return (
+    await esClient.indices.create(
+      {
+        index: `.reindexed-v8-${index}-000001`,
+        aliases: {
+          [`.${index}`]: {
+            is_write_index: true,
+          },
+          [`.${index}-000001`]: {},
+        },
+      },
+      { meta: true }
+    )
+  ).body;
 };

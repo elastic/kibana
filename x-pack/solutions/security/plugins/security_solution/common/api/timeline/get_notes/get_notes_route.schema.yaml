@@ -1,0 +1,103 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Notes API
+  version: '2023-10-31'
+paths:
+  /api/note:
+    get:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: GetNotes
+      description: Get all notes for a given document.
+      summary: Get notes
+      tags:
+        - access:securitySolution
+      parameters:
+        - name: documentIds
+          in: query
+          schema:
+            $ref: '#/components/schemas/DocumentIds'
+        - name: savedObjectIds
+          in: query
+          schema:
+            $ref: '#/components/schemas/SavedObjectIds'
+        - name: page
+          in: query
+          schema:
+            type: string
+            nullable: true
+        - name: perPage
+          in: query
+          schema:
+            type: string
+            nullable: true
+        - name: search
+          in: query
+          schema:
+            type: string
+            nullable: true
+        - name: sortField
+          in: query
+          schema:
+            type: string
+            nullable: true
+        - name: sortOrder
+          in: query
+          schema:
+            type: string
+            nullable: true
+        - name: filter
+          in: query
+          schema:
+            type: string
+            nullable: true
+        - in: query
+          name: createdByFilter
+          schema:
+            nullable: true
+            type: string
+        - name: associatedFilter
+          in: query
+          schema:
+            $ref: '#/components/schemas/AssociatedFilterType'
+      responses:
+        '200':
+          description: Indicates the requested notes were returned.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetNotesResult'
+
+components:
+  schemas:
+    AssociatedFilterType:
+        type: string
+        enum:
+          - all
+          - document_only
+          - saved_object_only
+          - document_and_saved_object
+          - orphan
+        description: Filter notes based on their association with a document or saved object.
+    DocumentIds:
+      oneOf:
+        - type: array
+          items:
+            type: string
+        - type: string
+    SavedObjectIds:
+      oneOf:
+        - type: array
+          items:
+            type: string
+        - type: string
+    GetNotesResult:
+      type: object
+      required: [totalCount, notes]
+      properties:
+        totalCount:
+          type: number
+        notes:
+          type: array
+          items:
+            $ref: '../model/components.schema.yaml#/components/schemas/Note'

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -13,10 +12,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const spaces = getService('spaces');
-  const toasts = getService('toasts');
-  const PageObjects = getPageObjects([
+  const { common, settings, shareSavedObjectsToSpace } = getPageObjects([
     'common',
-    'discover',
     'settings',
     'shareSavedObjectsToSpace',
   ]);
@@ -26,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const savedQueryName = 'shared-saved-query';
   const destinationSpaceId = 'nondefaultspace';
 
-  // Failing: See https://github.com/elastic/kibana/issues/173094
-  describe.skip('Discover Saved Queries', () => {
+  describe('Discover Saved Queries', () => {
     before('initialize tests', async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
@@ -51,23 +47,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('Manage saved queries', () => {
       it('delete saved query shared in multiple spaces', async () => {
         // Navigate to Discover & create a saved query
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
+        await queryBar.submitQuery();
         await savedQueryManagementComponent.saveNewQuery(savedQueryName, '', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail(savedQueryName);
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
         // Navigate to settings & share the saved query between multiple spaces
-        await PageObjects.common.navigateToApp('settings');
-        await PageObjects.settings.clickKibanaSavedObjects();
-        await PageObjects.shareSavedObjectsToSpace.openShareToSpaceFlyoutForObject(savedQueryName);
-        await PageObjects.shareSavedObjectsToSpace.setupForm({
+        await common.navigateToApp('settings');
+        await settings.clickKibanaSavedObjects();
+        await shareSavedObjectsToSpace.openShareToSpaceFlyoutForObject(savedQueryName);
+        await shareSavedObjectsToSpace.setupForm({
           destinationSpaceId,
         });
-        await PageObjects.shareSavedObjectsToSpace.saveShare();
+        await shareSavedObjectsToSpace.saveShare();
 
         // Navigate back to Discover and delete the query
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await savedQueryManagementComponent.deleteSavedQuery(savedQueryName);
 
         // Refresh to ensure the object is actually deleted
@@ -76,24 +73,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('updates a saved query', async () => {
+        const name = `${savedQueryName}-update`;
+
         // Navigate to Discover & create a saved query
-        await PageObjects.common.navigateToApp('discover');
+        await common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
-        await savedQueryManagementComponent.saveNewQuery(savedQueryName, '', true, false);
-        await savedQueryManagementComponent.savedQueryExistOrFail(savedQueryName);
+        await queryBar.submitQuery();
+        await savedQueryManagementComponent.saveNewQuery(name, '', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail(name);
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
-        // Navigate to Discover & create a saved query
+        // Update the saved query
         await queryBar.setQuery('response:404');
+        await queryBar.submitQuery();
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('', true, false);
 
-        // Expect to see a success toast
-        const successToast = await toasts.getToastElement(1);
-        const successText = await successToast.getVisibleText();
-        expect(successText).to.equal(`Your query "${savedQueryName}" was saved`);
-
-        await PageObjects.common.navigateToApp('discover');
-        await savedQueryManagementComponent.deleteSavedQuery(savedQueryName);
+        // Navigate to Discover ensure updated query exists
+        await common.navigateToApp('discover');
+        await savedQueryManagementComponent.savedQueryExistOrFail(name);
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+        await savedQueryManagementComponent.deleteSavedQuery(name);
       });
     });
   });

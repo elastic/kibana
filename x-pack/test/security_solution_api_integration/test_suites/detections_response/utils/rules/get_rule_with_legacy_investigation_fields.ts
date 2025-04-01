@@ -7,7 +7,9 @@
 
 import { InternalRuleCreate } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 
-export const getRuleSavedObjectWithLegacyInvestigationFields = (): InternalRuleCreate =>
+export const getRuleSavedObjectWithLegacyInvestigationFields = (
+  rewrites?: Partial<InternalRuleCreate>
+): InternalRuleCreate =>
   ({
     name: 'Test investigation fields',
     tags: ['migration'],
@@ -54,6 +56,7 @@ export const getRuleSavedObjectWithLegacyInvestigationFields = (): InternalRuleC
       responseActions: undefined,
       alertSuppression: undefined,
       dataViewId: undefined,
+      ...rewrites?.params,
     },
     schedule: {
       interval: '5m',
@@ -61,11 +64,14 @@ export const getRuleSavedObjectWithLegacyInvestigationFields = (): InternalRuleC
     enabled: false,
     actions: [],
     throttle: null,
+    ...rewrites,
     // cast is due to alerting API expecting rule_type_id
     // and our internal schema expecting alertTypeId
   } as unknown as InternalRuleCreate);
 
-export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (): InternalRuleCreate =>
+export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (
+  rewrites?: Partial<InternalRuleCreate>
+): InternalRuleCreate =>
   ({
     name: 'Test investigation fields empty array',
     tags: ['migration'],
@@ -112,6 +118,7 @@ export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (): Int
       responseActions: undefined,
       alertSuppression: undefined,
       dataViewId: undefined,
+      ...rewrites?.params,
     },
     schedule: {
       interval: '5m',
@@ -119,6 +126,7 @@ export const getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray = (): Int
     enabled: false,
     actions: [],
     throttle: null,
+    ...rewrites,
     // cast is due to alerting API expecting rule_type_id
     // and our internal schema expecting alertTypeId
   } as unknown as InternalRuleCreate);

@@ -8,13 +8,13 @@
 import expect from 'expect';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createRuleSuggestionValuesTests({ getService }: FtrProviderContext) {
   const space1 = Spaces[0].id;
 
-  describe('alerts/suggestions/values', async () => {
+  describe('alerts/suggestions/values', () => {
     const esArchiver = getService('esArchiver');
     const supertest = getService('supertest');
 

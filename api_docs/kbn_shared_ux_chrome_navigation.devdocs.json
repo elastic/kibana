@@ -5,10 +5,10 @@
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.DefaultNavigation",
+        "id": "def-public.Navigation",
         "type": "Function",
         "tags": [],
-        "label": "DefaultNavigation",
+        "label": "Navigation",
         "description": [],
         "signature": [
           "React.FunctionComponent<",
@@ -16,41 +16,33 @@
             "pluginId": "@kbn/shared-ux-chrome-navigation",
             "scope": "public",
             "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.ProjectNavigationDefinition",
-            "text": "ProjectNavigationDefinition"
+            "section": "def-public.Props",
+            "text": "Props"
           },
-          "<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.AppDeepLinkId",
-            "text": "AppDeepLinkId"
-          },
-          ", string, string> & Props>"
+          ">"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/default_navigation.tsx",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.DefaultNavigation.$1",
-            "type": "CompoundType",
+            "id": "def-public.Navigation.$1",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "P & { children?: React.ReactNode; }"
+              "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.DefaultNavigation.$2",
+            "id": "def-public.Navigation.$2",
             "type": "Any",
             "tags": [],
             "label": "context",
@@ -58,381 +50,11 @@
             "signature": [
               "any"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.getPresets",
-        "type": "Function",
-        "tags": [],
-        "label": "getPresets",
-        "description": [],
-        "signature": [
-          "(preset: \"devtools\") => ",
-          {
-            "pluginId": "@kbn/default-nav-devtools",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
-            "section": "def-common.DevToolsNodeDefinition",
-            "text": "DevToolsNodeDefinition"
-          }
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.getPresets.$1",
-            "type": "string",
-            "tags": [],
-            "label": "preset",
-            "description": [],
-            "signature": [
-              "\"devtools\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.getPresets",
-        "type": "Function",
-        "tags": [],
-        "label": "getPresets",
-        "description": [],
-        "signature": [
-          "(preset: \"management\") => ",
-          {
-            "pluginId": "@kbn/default-nav-management",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavManagementPluginApi",
-            "section": "def-common.ManagementNodeDefinition",
-            "text": "ManagementNodeDefinition"
-          }
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.getPresets.$1",
-            "type": "string",
-            "tags": [],
-            "label": "preset",
-            "description": [],
-            "signature": [
-              "\"management\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.getPresets",
-        "type": "Function",
-        "tags": [],
-        "label": "getPresets",
-        "description": [],
-        "signature": [
-          "(preset: \"ml\") => ",
-          {
-            "pluginId": "@kbn/default-nav-ml",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavMlPluginApi",
-            "section": "def-common.MlNodeDefinition",
-            "text": "MlNodeDefinition"
-          }
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.getPresets.$1",
-            "type": "string",
-            "tags": [],
-            "label": "preset",
-            "description": [],
-            "signature": [
-              "\"ml\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.getPresets",
-        "type": "Function",
-        "tags": [],
-        "label": "getPresets",
-        "description": [],
-        "signature": [
-          "(preset: \"analytics\") => ",
-          {
-            "pluginId": "@kbn/default-nav-analytics",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
-            "section": "def-common.AnalyticsNodeDefinition",
-            "text": "AnalyticsNodeDefinition"
-          }
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.getPresets.$1",
-            "type": "string",
-            "tags": [],
-            "label": "preset",
-            "description": [],
-            "signature": [
-              "\"analytics\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.getPresets",
-        "type": "Function",
-        "tags": [],
-        "label": "getPresets",
-        "description": [],
-        "signature": [
-          "(preset: \"all\") => { analytics: ",
-          {
-            "pluginId": "@kbn/default-nav-analytics",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
-            "section": "def-common.AnalyticsNodeDefinition",
-            "text": "AnalyticsNodeDefinition"
-          },
-          "; devtools: ",
-          {
-            "pluginId": "@kbn/default-nav-devtools",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
-            "section": "def-common.DevToolsNodeDefinition",
-            "text": "DevToolsNodeDefinition"
-          },
-          "; ml: ",
-          {
-            "pluginId": "@kbn/default-nav-ml",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavMlPluginApi",
-            "section": "def-common.MlNodeDefinition",
-            "text": "MlNodeDefinition"
-          },
-          "; management: ",
-          {
-            "pluginId": "@kbn/default-nav-management",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavManagementPluginApi",
-            "section": "def-common.ManagementNodeDefinition",
-            "text": "ManagementNodeDefinition"
-          },
-          "; }"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.getPresets.$1",
-            "type": "string",
-            "tags": [],
-            "label": "preset",
-            "description": [],
-            "signature": [
-              "\"all\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.getPresets",
-        "type": "Function",
-        "tags": [],
-        "label": "getPresets",
-        "description": [],
-        "signature": [
-          "(preset: \"all\" | ",
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.NavigationGroupPreset",
-            "text": "NavigationGroupPreset"
-          },
-          ") => ",
-          {
-            "pluginId": "@kbn/default-nav-analytics",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
-            "section": "def-common.AnalyticsNodeDefinition",
-            "text": "AnalyticsNodeDefinition"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/default-nav-devtools",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
-            "section": "def-common.DevToolsNodeDefinition",
-            "text": "DevToolsNodeDefinition"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/default-nav-management",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavManagementPluginApi",
-            "section": "def-common.ManagementNodeDefinition",
-            "text": "ManagementNodeDefinition"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/default-nav-ml",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavMlPluginApi",
-            "section": "def-common.MlNodeDefinition",
-            "text": "MlNodeDefinition"
-          },
-          " | { analytics: ",
-          {
-            "pluginId": "@kbn/default-nav-analytics",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavAnalyticsPluginApi",
-            "section": "def-common.AnalyticsNodeDefinition",
-            "text": "AnalyticsNodeDefinition"
-          },
-          "; devtools: ",
-          {
-            "pluginId": "@kbn/default-nav-devtools",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavDevtoolsPluginApi",
-            "section": "def-common.DevToolsNodeDefinition",
-            "text": "DevToolsNodeDefinition"
-          },
-          "; ml: ",
-          {
-            "pluginId": "@kbn/default-nav-ml",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavMlPluginApi",
-            "section": "def-common.MlNodeDefinition",
-            "text": "MlNodeDefinition"
-          },
-          "; management: ",
-          {
-            "pluginId": "@kbn/default-nav-management",
-            "scope": "common",
-            "docId": "kibKbnDefaultNavManagementPluginApi",
-            "section": "def-common.ManagementNodeDefinition",
-            "text": "ManagementNodeDefinition"
-          },
-          "; }"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.getPresets.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "preset",
-            "description": [],
-            "signature": [
-              "\"all\" | ",
-              {
-                "pluginId": "@kbn/shared-ux-chrome-navigation",
-                "scope": "public",
-                "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                "section": "def-public.NavigationGroupPreset",
-                "text": "NavigationGroupPreset"
-              }
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/nav_tree_presets.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.Navigation",
-        "type": "Function",
-        "tags": [],
-        "label": "Navigation",
-        "description": [],
-        "signature": [
-          "({\n  children,\n  panelContentProvider,\n  unstyled = false,\n  dataTestSubj,\n}: Props) => JSX.Element"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/components/navigation.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.Navigation.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  children,\n  panelContentProvider,\n  unstyled = false,\n  dataTestSubj,\n}",
-            "description": [],
-            "signature": [
-              "Props"
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/navigation.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -446,10 +68,16 @@
         ],
         "signature": [
           "({ children, ...dependencies }: React.PropsWithChildren<",
-          "NavigationKibanaDependencies",
-          ">) => JSX.Element"
+          {
+            "pluginId": "@kbn/shared-ux-chrome-navigation",
+            "scope": "public",
+            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
+            "section": "def-public.NavigationKibanaDependencies",
+            "text": "NavigationKibanaDependencies"
+          },
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -462,10 +90,16 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "NavigationKibanaDependencies",
+              {
+                "pluginId": "@kbn/shared-ux-chrome-navigation",
+                "scope": "public",
+                "docId": "kibKbnSharedUxChromeNavigationPluginApi",
+                "section": "def-public.NavigationKibanaDependencies",
+                "text": "NavigationKibanaDependencies"
+              },
               ">"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -492,9 +126,9 @@
             "section": "def-public.NavigationServices",
             "text": "NavigationServices"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -503,7 +137,7 @@
             "id": "def-public.NavigationProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{ children, ...services }",
+            "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -516,7 +150,7 @@
               },
               ">"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/services.tsx",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -529,111 +163,69 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.GroupDefinition",
+        "id": "def-public.NavigationKibanaDependencies",
         "type": "Interface",
         "tags": [],
-        "label": "GroupDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.GroupDefinition",
-            "text": "GroupDefinition"
-          },
-          "<LinkId, Id, ChildrenId> extends Omit<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.NodeDefinition",
-            "text": "NodeDefinition"
-          },
-          "<LinkId, Id, ChildrenId>, \"children\">"
+        "label": "NavigationKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana dependencies required to\nrender this component"
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.GroupDefinition.type",
-            "type": "string",
+            "id": "def-public.NavigationKibanaDependencies.core",
+            "type": "Object",
             "tags": [],
-            "label": "type",
+            "label": "core",
             "description": [],
             "signature": [
-              "\"navGroup\""
+              "{ application: { navigateToUrl: (url: string, options?: ",
+              "NavigateToUrlOptions",
+              " | undefined) => Promise<void>; }; chrome: { recentlyAccessed: { get$: () => ",
+              "Observable",
+              "<",
+              "ChromeRecentlyAccessedHistoryItem",
+              "[]>; }; navLinks: { getNavLinks$: () => ",
+              "Observable",
+              "<readonly ",
+              "ChromeNavLink",
+              "[]>; }; sideNav: { getIsCollapsed$: () => ",
+              "Observable",
+              "<boolean>; getPanelSelectedNode$: () => ",
+              "Observable",
+              "<",
+              "PanelSelectedNode",
+              " | null>; setPanelSelectedNode(node: string | ",
+              "PanelSelectedNode",
+              " | null): void; getIsFeedbackBtnVisible$: () => ",
+              "Observable",
+              "<boolean>; }; }; http: { basePath: ",
+              "BasePathService",
+              "; getLoadingCount$(): ",
+              "Observable",
+              "<number>; }; analytics: { reportEvent: (eventType: string, eventData: object) => void; }; }"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.GroupDefinition.children",
-            "type": "Array",
+            "id": "def-public.NavigationKibanaDependencies.activeNodes$",
+            "type": "Object",
             "tags": [],
-            "label": "children",
+            "label": "activeNodes$",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.NodeDefinition",
-                "text": "NodeDefinition"
-              },
-              "<LinkId, Id, ChildrenId>[]"
+              "Observable",
+              "<",
+              "ChromeProjectNavigationNode",
+              "[][]>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.ItemDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "ItemDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.ItemDefinition",
-            "text": "ItemDefinition"
-          },
-          "<LinkId, Id, ChildrenId> extends Omit<",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-common.NodeDefinition",
-            "text": "NodeDefinition"
-          },
-          "<LinkId, Id, ChildrenId>, \"children\">"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.ItemDefinition.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"navItem\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -649,7 +241,7 @@
         "description": [
           "\nA list of services that are consumed by this component."
         ],
-        "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -661,9 +253,9 @@
             "label": "basePath",
             "description": [],
             "signature": [
-              "{ prepend: (url: string) => string; }"
+              "{ prepend: (url: string) => string; remove: (url: string) => string; }"
             ],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -677,44 +269,10 @@
             "signature": [
               "Observable",
               "<",
-              "RecentItem",
+              "ChromeRecentlyAccessedHistoryItem",
               "[]>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationServices.deepLinks$",
-            "type": "Object",
-            "tags": [],
-            "label": "deepLinks$",
-            "description": [],
-            "signature": [
-              "Observable",
-              "<Readonly<Record<string, ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeNavLink",
-                "text": "ChromeNavLink"
-              },
-              ">>>"
-            ],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationServices.navIsOpen",
-            "type": "boolean",
-            "tags": [],
-            "label": "navIsOpen",
-            "description": [],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -727,16 +285,10 @@
             "description": [],
             "signature": [
               "(url: string, options?: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToUrlOptions",
-                "text": "NavigateToUrlOptions"
-              },
+              "NavigateToUrlOptions",
               " | undefined) => Promise<void>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -748,7 +300,7 @@
                 "tags": [],
                 "label": "url",
                 "description": [],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -760,66 +312,14 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.NavigateToUrlOptions",
-                    "text": "NavigateToUrlOptions"
-                  },
+                  "NavigateToUrlOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationServices.onProjectNavigationChange",
-            "type": "Function",
-            "tags": [],
-            "label": "onProjectNavigationChange",
-            "description": [],
-            "signature": [
-              "(chromeProjectNavigation: ",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigation",
-                "text": "ChromeProjectNavigation"
-              },
-              ") => void"
-            ],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-                "id": "def-public.NavigationServices.onProjectNavigationChange.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "chromeProjectNavigation",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-chrome-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreChromeBrowserPluginApi",
-                    "section": "def-common.ChromeProjectNavigation",
-                    "text": "ChromeProjectNavigation"
-                  }
-                ],
-                "path": "packages/shared-ux/chrome/navigation/types/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
@@ -831,38 +331,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               "[][]>"
             ],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationServices.cloudLinks",
-            "type": "Object",
-            "tags": [],
-            "label": "cloudLinks",
-            "description": [],
-            "signature": [
-              "{ userAndRoles?: ",
-              "CloudLink",
-              " | undefined; performance?: ",
-              "CloudLink",
-              " | undefined; billingAndSub?: ",
-              "CloudLink",
-              " | undefined; deployment?: ",
-              "CloudLink",
-              " | undefined; }"
-            ],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -873,77 +345,86 @@
             "tags": [],
             "label": "isSideNavCollapsed",
             "description": [],
-            "path": "packages/shared-ux/chrome/navigation/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.NavigationTreeDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "NavigationTreeDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.NavigationTreeDefinition",
-            "text": "NavigationTreeDefinition"
-          },
-          "<LinkId, Id, ChildrenId>"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationTreeDefinition.body",
-            "type": "Array",
-            "tags": [],
-            "label": "body",
-            "description": [
-              "\nMain content of the navigation. Can contain any number of \"cloudLink\", \"recentlyAccessed\"\nor \"group\" items. Be mindeful though, with great power comes great responsibility."
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/shared-ux-chrome-navigation",
-                "scope": "public",
-                "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                "section": "def-public.RootNavigationItemDefinition",
-                "text": "RootNavigationItemDefinition"
-              },
-              "<LinkId, Id, ChildrenId>[] | undefined"
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.NavigationTreeDefinition.footer",
-            "type": "Array",
+            "id": "def-public.NavigationServices.eventTracker",
+            "type": "Object",
             "tags": [],
-            "label": "footer",
-            "description": [
-              "\nFooter content of the navigation. Can contain any number of \"cloudLink\", \"recentlyAccessed\"\nor \"group\" items. Be mindeful though, with great power comes great responsibility."
-            ],
+            "label": "eventTracker",
+            "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/shared-ux-chrome-navigation",
-                "scope": "public",
-                "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                "section": "def-public.RootNavigationItemDefinition",
-                "text": "RootNavigationItemDefinition"
-              },
-              "<LinkId, Id, ChildrenId>[] | undefined"
+              "EventTracker"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.selectedPanelNode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "selectedPanelNode",
+            "description": [],
+            "signature": [
+              "PanelSelectedNode",
+              " | null | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.setSelectedPanelNode",
+            "type": "Function",
+            "tags": [],
+            "label": "setSelectedPanelNode",
+            "description": [],
+            "signature": [
+              "((node: ",
+              "PanelSelectedNode",
+              " | null) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+                "id": "def-public.NavigationServices.setSelectedPanelNode.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "node",
+                "description": [],
+                "signature": [
+                  "PanelSelectedNode",
+                  " | null"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.NavigationServices.isFeedbackBtnVisible$",
+            "type": "Object",
+            "tags": [],
+            "label": "isFeedbackBtnVisible$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -957,7 +438,7 @@
         "tags": [],
         "label": "PanelComponentProps",
         "description": [],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -973,7 +454,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -990,16 +471,10 @@
             ],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
-              ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\"> & { title: React.ReactNode; }"
+              "ChromeProjectNavigationNode",
+              ", \"id\" | \"children\" | \"path\" | \"sideNavStatus\" | \"deepLink\"> & { title: React.ReactNode; }"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1013,16 +488,10 @@
               "Jagged array of active nodes that match the current URL location"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeProjectNavigationNode",
-                "text": "ChromeProjectNavigationNode"
-              },
+              "ChromeProjectNavigationNode",
               "[][]"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1036,7 +505,7 @@
         "tags": [],
         "label": "PanelContent",
         "description": [],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1048,9 +517,9 @@
             "label": "title",
             "description": [],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1072,7 +541,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1081,161 +550,64 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.PresetDefinition",
+        "id": "def-public.Props",
         "type": "Interface",
         "tags": [],
-        "label": "PresetDefinition",
+        "label": "Props",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.PresetDefinition",
-            "text": "PresetDefinition"
-          },
-          "<LinkId, Id, ChildrenId> extends Omit<",
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.GroupDefinition",
-            "text": "GroupDefinition"
-          },
-          "<LinkId, Id, ChildrenId>, \"type\" | \"children\">"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.PresetDefinition.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"preset\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.PresetDefinition.preset",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "preset",
-            "description": [],
-            "signature": [
-              "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.ProjectNavigationDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "ProjectNavigationDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.ProjectNavigationDefinition",
-            "text": "ProjectNavigationDefinition"
-          },
-          "<LinkId, Id, ChildrenId>"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.ProjectNavigationDefinition.projectNavigationTree",
-            "type": "Array",
-            "tags": [],
-            "label": "projectNavigationTree",
-            "description": [
-              "\nA navigation tree structure with object items containing labels, links, and sub-items\nfor a project. Use it if you only need to configure your project navigation and leave\nall the other navigation items to the default (Recently viewed items, Management, etc.)"
-            ],
-            "signature": [
-              "ProjectNavigationTreeDefinition",
-              "<LinkId, Id, ChildrenId> | undefined"
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.ProjectNavigationDefinition.navigationTree",
+            "id": "def-public.Props.navigationTree$",
             "type": "Object",
             "tags": [],
-            "label": "navigationTree",
-            "description": [
-              "\nA navigation tree structure with object items containing labels, links, and sub-items\nthat defines a complete side navigation. This configuration overrides `projectNavigationTree`\nif both are provided."
+            "label": "navigationTree$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<",
+              "NavigationTreeDefinitionUI",
+              ">"
             ],
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.Props.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+            "id": "def-public.Props.panelContentProvider",
+            "type": "Function",
+            "tags": [],
+            "label": "panelContentProvider",
+            "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-chrome-navigation",
                 "scope": "public",
                 "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-                "section": "def-public.NavigationTreeDefinition",
-                "text": "NavigationTreeDefinition"
+                "section": "def-public.ContentProvider",
+                "text": "ContentProvider"
               },
-              "<LinkId, Id, ChildrenId> | undefined"
+              " | undefined"
             ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.RecentlyAccessedDefinition",
-        "type": "Interface",
-        "tags": [],
-        "label": "RecentlyAccessedDefinition",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.RecentlyAccessedDefinition",
-            "text": "RecentlyAccessedDefinition"
-          },
-          " extends ",
-          "Props"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-            "id": "def-public.RecentlyAccessedDefinition.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "signature": [
-              "\"recentlyAccessed\""
-            ],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/navigation.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1243,7 +615,20 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
+        "id": "def-public.FieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "FieldType",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
@@ -1262,7 +647,7 @@
             "text": "PanelContent"
           }
         ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1274,7 +659,7 @@
             "tags": [],
             "label": "nodeId",
             "description": [],
-            "path": "packages/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
+            "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/ui/components/panel/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1283,63 +668,12 @@
       },
       {
         "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.NavigationGroupPreset",
-        "type": "Type",
+        "id": "def-public.EventType",
+        "type": "string",
         "tags": [],
-        "label": "NavigationGroupPreset",
-        "description": [
-          "The preset that can be pass to the NavigationBucket component"
-        ],
-        "signature": [
-          "\"ml\" | \"management\" | \"analytics\" | \"devtools\""
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/shared-ux-chrome-navigation",
-        "id": "def-public.RootNavigationItemDefinition",
-        "type": "Type",
-        "tags": [],
-        "label": "RootNavigationItemDefinition",
+        "label": "EventType",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.RecentlyAccessedDefinition",
-            "text": "RecentlyAccessedDefinition"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.GroupDefinition",
-            "text": "GroupDefinition"
-          },
-          "<LinkId, Id, ChildrenId> | ",
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.PresetDefinition",
-            "text": "PresetDefinition"
-          },
-          "<LinkId, Id, ChildrenId> | ",
-          {
-            "pluginId": "@kbn/shared-ux-chrome-navigation",
-            "scope": "public",
-            "docId": "kibKbnSharedUxChromeNavigationPluginApi",
-            "section": "def-public.ItemDefinition",
-            "text": "ItemDefinition"
-          },
-          "<LinkId, Id, ChildrenId>"
-        ],
-        "path": "packages/shared-ux/chrome/navigation/src/ui/types.ts",
+        "path": "src/platform/packages/shared/shared-ux/chrome/navigation/src/analytics/event_tracker.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

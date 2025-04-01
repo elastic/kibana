@@ -9,15 +9,15 @@ import {
   ExternalServiceSimulator,
   getExternalServiceSimulatorPath,
 } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function swimlaneTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const mockSwimlane = {
-    name: 'A swimlane action',
-    actionTypeId: '.swimlane',
+    name: 'A swimlane connector',
+    connector_type_id: '.swimlane',
     config: {
       apiUrl: 'http://swimlane.mynonexistent.co',
       appId: '123456asdf',
@@ -69,9 +69,9 @@ export default function swimlaneTest({ getService }: FtrProviderContext) {
         getExternalServiceSimulatorPath(ExternalServiceSimulator.SWIMLANE)
       );
     });
-    it('should return 403 when creating a swimlane action', async () => {
+    it('should return 403 when creating a swimlane connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'foo')
         .send({
           ...mockSwimlane,

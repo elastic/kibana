@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { CreateChatCompletionResponseChunk } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { v4 } from 'uuid';
+import type OpenAI from 'openai';
+import { ToolMessage } from './create_llm_proxy';
 
-export function createOpenAiChunk(
-  msg: string | { content?: string; function_call?: { name: string; arguments?: string } }
-): CreateChatCompletionResponseChunk {
+export function createOpenAiChunk(msg: string | ToolMessage): OpenAI.ChatCompletionChunk {
   msg = typeof msg === 'string' ? { content: msg } : msg;
 
   return {
@@ -21,6 +20,8 @@ export function createOpenAiChunk(
     choices: [
       {
         delta: msg,
+        index: 0,
+        finish_reason: null,
       },
     ],
   };

@@ -29,9 +29,9 @@
         "signature": [
           "({ title, titleId, ...props }: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/drop_illustration.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/drop_illustration.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/drop_illustration.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/drop_illustration.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,9 +64,11 @@
         "label": "EuiIconAxisBottom",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: { title: string; titleId: string; }) => JSX.Element"
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_bottom.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -75,35 +77,17 @@
             "id": "def-common.EuiIconAxisBottom.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
-            "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_bottom.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisBottom.$1.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisBottom.$1.titleId",
-                "type": "string",
-                "tags": [],
-                "label": "titleId",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_bottom.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -117,9 +101,11 @@
         "label": "EuiIconAxisLeft",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: { title: string; titleId: string; }) => JSX.Element"
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_left.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,35 +114,17 @@
             "id": "def-common.EuiIconAxisLeft.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
-            "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_left.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisLeft.$1.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisLeft.$1.titleId",
-                "type": "string",
-                "tags": [],
-                "label": "titleId",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_left.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -170,9 +138,11 @@
         "label": "EuiIconAxisRight",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: { title: string; titleId: string; }) => JSX.Element"
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_right.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -181,35 +151,17 @@
             "id": "def-common.EuiIconAxisRight.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
-            "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_right.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisRight.$1.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisRight.$1.titleId",
-                "type": "string",
-                "tags": [],
-                "label": "titleId",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_right.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -223,9 +175,11 @@
         "label": "EuiIconAxisTop",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: { title: string; titleId: string; }) => JSX.Element"
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_top.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -234,35 +188,17 @@
             "id": "def-common.EuiIconAxisTop.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
-            "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/axis_top.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisTop.$1.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconAxisTop.$1.titleId",
-                "type": "string",
-                "tags": [],
-                "label": "titleId",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/axis_top.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -276,9 +212,11 @@
         "label": "EuiIconLegend",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: { title: string; titleId: string; }) => JSX.Element"
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/legend.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -287,35 +225,17 @@
             "id": "def-common.EuiIconLegend.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
-            "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/legend.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconLegend.$1.title",
-                "type": "string",
-                "tags": [],
-                "label": "title",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/chart-icons",
-                "id": "def-common.EuiIconLegend.$1.titleId",
-                "type": "string",
-                "tags": [],
-                "label": "titleId",
-                "description": [],
-                "path": "packages/kbn-chart-icons/src/assets/legend.tsx",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -331,9 +251,9 @@
         "signature": [
           "({ title, titleId, ...props }: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/globe_illustration.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/globe_illustration.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -349,7 +269,7 @@
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/globe_illustration.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/globe_illustration.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -366,11 +286,11 @@
         "label": "IconChartArea",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_area.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -379,14 +299,14 @@
             "id": "def-common.IconChartArea.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_area.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -403,11 +323,11 @@
         "label": "IconChartAreaPercentage",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -416,14 +336,14 @@
             "id": "def-common.IconChartAreaPercentage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_percentage.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -440,11 +360,11 @@
         "label": "IconChartAreaStacked",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -453,14 +373,14 @@
             "id": "def-common.IconChartAreaStacked.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_area_stacked.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -477,11 +397,11 @@
         "label": "IconChartBar",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -490,14 +410,14 @@
             "id": "def-common.IconChartBar.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -514,11 +434,11 @@
         "label": "IconChartBarAnnotations",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -527,14 +447,14 @@
             "id": "def-common.IconChartBarAnnotations.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_annotations.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -551,11 +471,11 @@
         "label": "IconChartBarHorizontal",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -564,14 +484,14 @@
             "id": "def-common.IconChartBarHorizontal.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -588,11 +508,11 @@
         "label": "IconChartBarHorizontalPercentage",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -601,14 +521,14 @@
             "id": "def-common.IconChartBarHorizontalPercentage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_percentage.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -625,11 +545,11 @@
         "label": "IconChartBarHorizontalStacked",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -638,14 +558,14 @@
             "id": "def-common.IconChartBarHorizontalStacked.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_horizontal_stacked.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -662,11 +582,11 @@
         "label": "IconChartBarPercentage",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -675,14 +595,14 @@
             "id": "def-common.IconChartBarPercentage.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_percentage.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -701,9 +621,9 @@
         "signature": [
           "({ title, titleId, ...props }: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -719,7 +639,7 @@
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_reference_line.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -736,11 +656,11 @@
         "label": "IconChartBarStacked",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -749,14 +669,14 @@
             "id": "def-common.IconChartBarStacked.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_bar_stacked.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -773,11 +693,11 @@
         "label": "IconChartDatatable",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_datatable.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_datatable.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -786,14 +706,14 @@
             "id": "def-common.IconChartDatatable.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_datatable.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_datatable.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -810,11 +730,11 @@
         "label": "IconChartDonut",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_donut.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_donut.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -823,14 +743,273 @@
             "id": "def-common.IconChartDonut.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_donut.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_donut.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGauge",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGauge",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGauge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeArc",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeArc",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_arc.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeArc.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_arc.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeArcSimple",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeArcSimple",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeArcSimple.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeCircle",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeCircle",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_circle.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeCircle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_circle.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeCircleSimple",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeCircleSimple",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeCircleSimple.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeSemiCircle",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeSemiCircle",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_semi_circle.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeSemiCircle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_semi_circle.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartGaugeSemiCircleSimple",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartGaugeSemiCircleSimple",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartGaugeSemiCircleSimple.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -847,11 +1026,11 @@
         "label": "IconChartHeatmap",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_heatmap.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_heatmap.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -860,14 +1039,14 @@
             "id": "def-common.IconChartHeatmap.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_heatmap.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_heatmap.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -884,11 +1063,11 @@
         "label": "IconChartHorizontalBullet",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -897,14 +1076,14 @@
             "id": "def-common.IconChartHorizontalBullet.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_horizontal_bullet.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -921,11 +1100,11 @@
         "label": "IconChartLine",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_line.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_line.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -934,14 +1113,51 @@
             "id": "def-common.IconChartLine.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_line.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_line.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconChartLinearSimple",
+        "type": "Function",
+        "tags": [],
+        "label": "IconChartLinearSimple",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconChartLinearSimple.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_gauge_simple_icons.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -958,11 +1174,11 @@
         "label": "IconChartMetric",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_metric.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_metric.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -971,14 +1187,14 @@
             "id": "def-common.IconChartMetric.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_metric.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_metric.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -995,11 +1211,11 @@
         "label": "IconChartMixedXy",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1008,14 +1224,14 @@
             "id": "def-common.IconChartMixedXy.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mixed_xy.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1032,11 +1248,11 @@
         "label": "IconChartMosaic",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_mosaic.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mosaic.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1045,14 +1261,14 @@
             "id": "def-common.IconChartMosaic.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_mosaic.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_mosaic.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1069,11 +1285,11 @@
         "label": "IconChartPie",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_pie.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_pie.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1082,14 +1298,14 @@
             "id": "def-common.IconChartPie.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_pie.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_pie.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1106,11 +1322,11 @@
         "label": "IconChartTagcloud",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1119,14 +1335,14 @@
             "id": "def-common.IconChartTagcloud.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_tagcloud.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1143,11 +1359,11 @@
         "label": "IconChartTreemap",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_treemap.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_treemap.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1156,14 +1372,14 @@
             "id": "def-common.IconChartTreemap.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_treemap.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_treemap.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1180,11 +1396,11 @@
         "label": "IconChartVerticalBullet",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1193,14 +1409,14 @@
             "id": "def-common.IconChartVerticalBullet.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_vertical_bullet.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1217,11 +1433,11 @@
         "label": "IconChartWaffle",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/chart_waffle.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_waffle.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1230,14 +1446,14 @@
             "id": "def-common.IconChartWaffle.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/chart_waffle.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/chart_waffle.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1254,11 +1470,11 @@
         "label": "IconCircle",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1267,14 +1483,125 @@
             "id": "def-common.IconCircle.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/circle.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconDonutHoleLarge",
+        "type": "Function",
+        "tags": [],
+        "label": "IconDonutHoleLarge",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconDonutHoleLarge.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconDonutHoleMedium",
+        "type": "Function",
+        "tags": [],
+        "label": "IconDonutHoleMedium",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconDonutHoleMedium.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/chart-icons",
+        "id": "def-common.IconDonutHoleSmall",
+        "type": "Function",
+        "tags": [],
+        "label": "IconDonutHoleSmall",
+        "description": [],
+        "signature": [
+          "(props: Omit<",
+          "EuiIconProps",
+          ", \"type\">) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/chart-icons",
+            "id": "def-common.IconDonutHoleSmall.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "EuiIconProps",
+              ", \"type\">"
+            ],
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/donut_hole_icons.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1291,11 +1618,11 @@
         "label": "IconRegionMap",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/region_map.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/region_map.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1304,14 +1631,14 @@
             "id": "def-common.IconRegionMap.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  title,\n  titleId,\n  ...props\n}",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/region_map.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/region_map.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1328,11 +1655,11 @@
         "label": "IconTriangle",
         "description": [],
         "signature": [
-          "({ title, titleId, ...props }: Omit<",
+          "(props: Omit<",
           "EuiIconProps",
-          ", \"type\">) => JSX.Element"
+          ", \"type\">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
+        "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1341,14 +1668,14 @@
             "id": "def-common.IconTriangle.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ title, titleId, ...props }",
+            "label": "props",
             "description": [],
             "signature": [
               "Omit<",
               "EuiIconProps",
               ", \"type\">"
             ],
-            "path": "packages/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
+            "path": "src/platform/packages/shared/kbn-chart-icons/src/assets/annotation_icons/triangle.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

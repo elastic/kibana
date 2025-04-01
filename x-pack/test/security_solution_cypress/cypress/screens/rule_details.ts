@@ -8,6 +8,8 @@
 export const POPOVER_ACTIONS_TRIGGER_BUTTON =
   '[data-test-subj="rules-details-popover-button-icon"]';
 
+export const EXPORT_RULE_ACTION_BUTTON = '[data-test-subj="rules-details-export-rule"]';
+
 export const ABOUT_INVESTIGATION_NOTES = '[data-test-subj="stepAboutDetailsNoteContent"]';
 
 export const ABOUT_RULE_DESCRIPTION = '[data-test-subj=stepAboutRuleDetailsToggleDescriptionText]';
@@ -16,6 +18,8 @@ export const ABOUT_DETAILS =
   '[data-test-subj="aboutRule"] [data-test-subj="listItemColumnStepRuleDescription"]';
 
 export const ADDITIONAL_LOOK_BACK_DETAILS = 'Additional look-back time';
+
+export const INTERVAL_ABBR_VALUE = '[data-test-subj="interval-abbr-value"]';
 
 export const ALERTS_TAB = '[data-test-subj="navigation-alerts"]';
 
@@ -53,6 +57,8 @@ export const EXCEPTIONS_ITEM_CONTAINER = '[data-test-subj="exceptionsContainer"]
 export const FALSE_POSITIVES_DETAILS = 'False positive examples';
 
 export const INDEX_PATTERNS_DETAILS = 'Index patterns';
+
+export const INVESTIGATION_FIELDS_DETAILS = 'Custom highlighted fields';
 
 export const ENDPOINT_EXCEPTIONS_TAB = 'a[data-test-subj="navigation-endpoint_exceptions"]';
 
@@ -135,7 +141,7 @@ export const TIMELINE_FIELD = (field: string) => {
 };
 
 export const removeExternalLinkText = (str: string) =>
-  str.replace(/\(opens in a new tab or window\)/g, '');
+  str.replace(/\([^)]*(opens in a new tab or window)[^)]*\)/g, '');
 
 export const DEFINE_RULE_PANEL_PROGRESS =
   '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
@@ -148,5 +154,54 @@ export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
 
+export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON =
+  '[data-test-subj="alertSuppressionInsufficientLicensingIcon"]';
+
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';
+
+export const MAX_SIGNALS_DETAILS = '[data-test-subj="maxSignalsPropertyValue"]';
+
+export const DESCRIPTION_SETUP_GUIDE_BUTTON = '[data-test-subj="stepAboutDetailsToggle-setup"]';
+
+export const DESCRIPTION_SETUP_GUIDE_CONTENT = '[data-test-subj="stepAboutDetailsSetupContent"]';
+
+export const EXECUTIONS_TAB = 'a[data-test-subj="navigation-execution_results"]';
+
+export const EXECUTION_SHOWING = `[data-test-subj="executionsShowing"]`;
+
+export const EXECUTION_TABLE = `[data-test-subj="executionsTable"]`;
+
+export const EXECUTION_LOG_CONTAINER = `[data-test-subj="executionLogContainer"]`;
+
+export const EXECUTION_RUN_TYPE_FILTER = `[data-test-subj="ExecutionRunTypeFilter"]`;
+
+export const EXECUTION_RUN_TYPE_FILTER_ITEM = `[data-test-subj="ExecutionRunTypeFilter-item"]`;
+
+export const RULE_BACKFILLS_INFO_HEADEAR =
+  '[data-test-subj="rule-backfills-info"] [data-test-subj="header-section"]';
+
+export const RULE_BACKFILLS_TABLE = '[data-test-subj="rule-backfills-table"]';
+
+export const RULE_BACKFILLS_COLUMN_ERROR = '[data-test-subj="rule-backfills-column-error"]';
+export const RULE_BACKFILLS_COLUMN_PENDING = '[data-test-subj="rule-backfills-column-pending"]';
+export const RULE_BACKFILLS_COLUMN_RUNNING = '[data-test-subj="rule-backfills-column-running"]';
+export const RULE_BACKFILLS_COLUMN_COMPLETED = '[data-test-subj="rule-backfills-column-completed"]';
+export const RULE_BACKFILLS_COLUMN_TOTAL = '[data-test-subj="rule-backfills-column-total"]';
+export const RULE_BACKFILLS_DELETE_BUTTON = '[data-test-subj="rule-backfills-delete-button"]';
+export const RULE_BACKFILLS_DELETE_MODAL = '[data-test-subj="rule-backfills-delete-modal"]';
+export const RULE_BACKFILL_DELETE_MODAL_CONFIRM_BUTTON = `${RULE_BACKFILLS_DELETE_MODAL} [data-test-subj="confirmModalConfirmButton"]`;
+
+// Rule gaps selectors
+export const RULE_GAPS_INFO = '[data-test-subj="rule-gaps-info"]';
+export const RULE_GAPS_TABLE = '[data-test-subj="rule-gaps-table"]';
+export const RULE_GAPS_STATUS_FILTER = '[data-test-subj="rule-gaps-status-filter"]';
+export const RULE_GAPS_DATE_FILTER_OPTION = `[data-test-subj="rule-gaps-status-filter-item"]`;
+export const RULE_GAPS_FILL_BUTTON =
+  '[data-test-subj="rule-gaps-table"] [data-test-subj="rule-gaps-fill-gap-button"]';
+export const RULE_GAPS_FILL_TOOLTIP = '[data-test-subj="rule-gaps-fill-gap-tooltip"]';
+export const RULE_GAPS_PROGRESS_BAR = '[data-test-subj="rule-gaps-progress-bar"]';
+export const RULE_GAPS_DATE_PICKER = '[data-test-subj="rule-gaps-date-picker"]';
+export const RULE_GAPS_DATE_PICKER_APPLY_REFRESH = `${RULE_GAPS_DATE_PICKER} .euiSuperUpdateButton`;
+
+export const MODIFIED_PREBUILT_RULE_BADGE = '[data-test-subj="modified-prebuilt-rule-badge"]';

@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { parse as parseCookie, Cookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -197,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
         // after some period of time.
         const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          body: { query: { match: { doc_type: 'token' } } },
+          query: { match: { doc_type: 'token' } },
           refresh: true,
         });
         expect(esResponse).to.have.property('deleted').greaterThan(0);

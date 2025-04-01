@@ -2,26 +2,10 @@
   "id": "@kbn/securitysolution-data-table",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.addBuildingBlockStyle",
+        "id": "def-public.addBuildingBlockStyle",
         "type": "Function",
         "tags": [],
         "label": "addBuildingBlockStyle",
@@ -45,15 +29,15 @@
           },
           ", setCellProps: (props: ",
           "EuiDataGridSetCellProps",
-          ") => void, defaultStyles?: React.CSSProperties | undefined) => void"
+          ") => void) => void"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$1",
+            "id": "def-public.addBuildingBlockStyle.$1",
             "type": "Object",
             "tags": [],
             "label": "ecs",
@@ -67,14 +51,14 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$2",
+            "id": "def-public.addBuildingBlockStyle.$2",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -88,14 +72,14 @@
                 "text": "EuiTheme"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$3",
+            "id": "def-public.addBuildingBlockStyle.$3",
             "type": "Function",
             "tags": [],
             "label": "setCellProps",
@@ -105,25 +89,10 @@
               "EuiDataGridSetCellProps",
               ") => void"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "defaultStyles",
-            "description": [],
-            "signature": [
-              "React.CSSProperties | undefined"
-            ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -131,7 +100,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.DataTableComponent",
+        "id": "def-public.DataTableComponent",
         "type": "Function",
         "tags": [],
         "label": "DataTableComponent",
@@ -141,14 +110,14 @@
           "DataTableProps",
           ">"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx",
+        "path": "x-pack/solutions/security/packages/data-table/components/data_table/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableComponent.$1",
+            "id": "def-public.DataTableComponent.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -156,7 +125,7 @@
             "signature": [
               "P"
             ],
-            "path": "node_modules/@types/react/index.d.ts",
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -165,7 +134,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.dataTableReducer",
+        "id": "def-public.dataTableReducer",
         "type": "Function",
         "tags": [],
         "label": "dataTableReducer",
@@ -176,28 +145,28 @@
           "(state: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
+            "section": "def-public.TableState",
             "text": "TableState"
           },
           " | undefined, action: { type: any; }) => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
+            "section": "def-public.TableState",
             "text": "TableState"
           }
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/reducer.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/reducer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.dataTableReducer.$1",
+            "id": "def-public.dataTableReducer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -211,7 +180,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.dataTableReducer.$2",
+            "id": "def-public.dataTableReducer.$2",
             "type": "Object",
             "tags": [],
             "label": "action",
@@ -228,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getColumnHeaders",
+        "id": "def-public.getColumnHeaders",
         "type": "Function",
         "tags": [],
         "label": "getColumnHeaders",
@@ -250,13 +219,13 @@
           "ColumnHeaderOptions",
           "[]"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getColumnHeaders.$1",
+            "id": "def-public.getColumnHeaders.$1",
             "type": "Array",
             "tags": [],
             "label": "headers",
@@ -265,14 +234,14 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getColumnHeaders.$2",
+            "id": "def-public.getColumnHeaders.$2",
             "type": "Object",
             "tags": [],
             "label": "browserFields",
@@ -286,14 +255,14 @@
                 "text": "BrowserFields"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getColumnHeaders.$3",
+            "id": "def-public.getColumnHeaders.$3",
             "type": "CompoundType",
             "tags": [],
             "label": "isEventRenderedView",
@@ -301,7 +270,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/column_headers/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -312,7 +281,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getEventIdToDataMapping",
+        "id": "def-public.getEventIdToDataMapping",
         "type": "Function",
         "tags": [],
         "label": "getEventIdToDataMapping",
@@ -338,13 +307,13 @@
           },
           "[]>"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$1",
+            "id": "def-public.getEventIdToDataMapping.$1",
             "type": "Array",
             "tags": [],
             "label": "timelineData",
@@ -359,14 +328,14 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$2",
+            "id": "def-public.getEventIdToDataMapping.$2",
             "type": "Array",
             "tags": [],
             "label": "eventIds",
@@ -374,14 +343,14 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$3",
+            "id": "def-public.getEventIdToDataMapping.$3",
             "type": "Array",
             "tags": [],
             "label": "fieldsToKeep",
@@ -389,14 +358,14 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$4",
+            "id": "def-public.getEventIdToDataMapping.$4",
             "type": "boolean",
             "tags": [],
             "label": "hasAlertsCrud",
@@ -404,7 +373,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -415,7 +384,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getPageRowIndex",
+        "id": "def-public.getPageRowIndex",
         "type": "Function",
         "tags": [],
         "label": "getPageRowIndex",
@@ -425,13 +394,13 @@
         "signature": [
           "(rowIndex: number, itemsPerPage: number) => number"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
+        "path": "x-pack/solutions/security/packages/data-table/components/data_table/pagination.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getPageRowIndex.$1",
+            "id": "def-public.getPageRowIndex.$1",
             "type": "number",
             "tags": [],
             "label": "rowIndex",
@@ -439,14 +408,14 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getPageRowIndex.$2",
+            "id": "def-public.getPageRowIndex.$2",
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
@@ -454,7 +423,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/pagination.ts",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/pagination.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -465,26 +434,26 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getTableByIdSelector",
+        "id": "def-public.getTableByIdSelector",
         "type": "Function",
         "tags": [],
         "label": "getTableByIdSelector",
         "description": [],
         "signature": [
-          "() => ((state: { dataTable: ",
+          "() => ((state: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
-            "text": "TableState"
+            "section": "def-public.DataTableState",
+            "text": "DataTableState"
           },
-          "; }, params_0: string) => ",
+          ", tableId: string) => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
           ") & ",
@@ -492,22 +461,22 @@
           "<(args_0: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
           ") => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
-          " & { clearCache: () => void; }> & { clearCache: () => void; }"
+          ", { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/selectors.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/selectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -516,7 +485,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.isEventBuildingBlockType",
+        "id": "def-public.isEventBuildingBlockType",
         "type": "Function",
         "tags": [],
         "label": "isEventBuildingBlockType",
@@ -532,13 +501,13 @@
           },
           ") => boolean"
         ],
-        "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+        "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.isEventBuildingBlockType.$1",
+            "id": "def-public.isEventBuildingBlockType.$1",
             "type": "Object",
             "tags": [],
             "label": "event",
@@ -552,7 +521,7 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/helpers.tsx",
+            "path": "x-pack/solutions/security/packages/data-table/components/data_table/helpers.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -565,7 +534,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.DataTableModel",
+        "id": "def-public.DataTableModel",
         "type": "Interface",
         "tags": [],
         "label": "DataTableModel",
@@ -573,21 +542,21 @@
         "signature": [
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
           " extends ",
           "DataTableModelSettings"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.columns",
+            "id": "def-public.DataTableModel.columns",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -599,9 +568,25 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+              ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
               "ColumnHeaderType",
-              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.SerializedFieldFormat",
+                "text": "SerializedFieldFormat"
+              },
+              "<{}, ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -611,13 +596,13 @@
               },
               " | undefined; type?: string | undefined; })[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.dataViewId",
+            "id": "def-public.DataTableModel.dataViewId",
             "type": "CompoundType",
             "tags": [],
             "label": "dataViewId",
@@ -627,13 +612,13 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.deletedEventIds",
+            "id": "def-public.DataTableModel.deletedEventIds",
             "type": "Array",
             "tags": [],
             "label": "deletedEventIds",
@@ -643,31 +628,13 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.expandedDetail",
-            "type": "Object",
-            "tags": [],
-            "label": "expandedDetail",
-            "description": [
-              "This holds the view information for the flyout when viewing data in a consuming view (i.e. hosts page) or the side panel in the primary data view"
-            ],
-            "signature": [
-              "{ [x: string]: ",
-              "ExpandedDetailType",
-              " | undefined; }"
-            ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.filters",
+            "id": "def-public.DataTableModel.filters",
             "type": "Array",
             "tags": [],
             "label": "filters",
@@ -682,13 +649,13 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.graphEventId",
+            "id": "def-public.DataTableModel.graphEventId",
             "type": "string",
             "tags": [],
             "label": "graphEventId",
@@ -698,26 +665,26 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.id",
+            "id": "def-public.DataTableModel.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [
               "Uniquely identifies the data table"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.indexNames",
+            "id": "def-public.DataTableModel.indexNames",
             "type": "Array",
             "tags": [],
             "label": "indexNames",
@@ -725,50 +692,50 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.isLoading",
+            "id": "def-public.DataTableModel.isLoading",
             "type": "boolean",
             "tags": [],
             "label": "isLoading",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.isSelectAllChecked",
+            "id": "def-public.DataTableModel.isSelectAllChecked",
             "type": "boolean",
             "tags": [],
             "label": "isSelectAllChecked",
             "description": [
               "If selectAll checkbox in header is checked"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.itemsPerPage",
+            "id": "def-public.DataTableModel.itemsPerPage",
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
             "description": [
               "The number of items to show in a single page of results"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.itemsPerPageOptions",
+            "id": "def-public.DataTableModel.itemsPerPageOptions",
             "type": "Array",
             "tags": [],
             "label": "itemsPerPageOptions",
@@ -778,13 +745,13 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.loadingEventIds",
+            "id": "def-public.DataTableModel.loadingEventIds",
             "type": "Array",
             "tags": [],
             "label": "loadingEventIds",
@@ -794,13 +761,13 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.selectedEventIds",
+            "id": "def-public.DataTableModel.selectedEventIds",
             "type": "Object",
             "tags": [],
             "label": "selectedEventIds",
@@ -818,13 +785,13 @@
               },
               "[]; }"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.initialized",
+            "id": "def-public.DataTableModel.initialized",
             "type": "CompoundType",
             "tags": [],
             "label": "initialized",
@@ -832,13 +799,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.sessionViewConfig",
+            "id": "def-public.DataTableModel.sessionViewConfig",
             "type": "CompoundType",
             "tags": [],
             "label": "sessionViewConfig",
@@ -847,13 +814,13 @@
               "SessionViewConfig",
               " | null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.updated",
+            "id": "def-public.DataTableModel.updated",
             "type": "number",
             "tags": [],
             "label": "updated",
@@ -863,26 +830,26 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.totalCount",
+            "id": "def-public.DataTableModel.totalCount",
             "type": "number",
             "tags": [],
             "label": "totalCount",
             "description": [
               "Total number of fetched events/alerts"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.viewMode",
+            "id": "def-public.DataTableModel.viewMode",
             "type": "CompoundType",
             "tags": [],
             "label": "viewMode",
@@ -890,13 +857,13 @@
             "signature": [
               "\"gridView\" | \"eventRenderedView\""
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.additionalFilters",
+            "id": "def-public.DataTableModel.additionalFilters",
             "type": "Object",
             "tags": [],
             "label": "additionalFilters",
@@ -904,7 +871,7 @@
             "signature": [
               "{ showOnlyThreatIndicatorAlerts: boolean; showBuildingBlockAlerts: boolean; }"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -913,20 +880,20 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.DataTableState",
+        "id": "def-public.DataTableState",
         "type": "Interface",
         "tags": [],
         "label": "DataTableState",
         "description": [
           "The state of all timelines is stored here"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableState.dataTable",
+            "id": "def-public.DataTableState.dataTable",
             "type": "Object",
             "tags": [],
             "label": "dataTable",
@@ -934,13 +901,13 @@
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-data-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-                "section": "def-common.TableState",
+                "section": "def-public.TableState",
                 "text": "TableState"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -949,40 +916,40 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.SortColumnTable",
+        "id": "def-public.SortColumnTable",
         "type": "Interface",
         "tags": [],
         "label": "SortColumnTable",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.columnId",
+            "id": "def-public.SortColumnTable.columnId",
             "type": "string",
             "tags": [],
             "label": "columnId",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.columnType",
+            "id": "def-public.SortColumnTable.columnType",
             "type": "string",
             "tags": [],
             "label": "columnType",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.esTypes",
+            "id": "def-public.SortColumnTable.esTypes",
             "type": "Array",
             "tags": [],
             "label": "esTypes",
@@ -990,13 +957,13 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.sortDirection",
+            "id": "def-public.SortColumnTable.sortDirection",
             "type": "CompoundType",
             "tags": [],
             "label": "sortDirection",
@@ -1011,7 +978,7 @@
                 "text": "Direction"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+            "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1020,20 +987,20 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableById",
+        "id": "def-public.TableById",
         "type": "Interface",
         "tags": [],
         "label": "TableById",
         "description": [
           "A map of id to data table"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.TableById.Unnamed",
+            "id": "def-public.TableById.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[id: string]: DataTableModel",
@@ -1042,13 +1009,13 @@
               "[id: string]:  ",
               {
                 "pluginId": "@kbn/securitysolution-data-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-                "section": "def-common.DataTableModel",
+                "section": "def-public.DataTableModel",
                 "text": "DataTableModel"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1057,20 +1024,20 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableState",
+        "id": "def-public.TableState",
         "type": "Interface",
         "tags": [],
         "label": "TableState",
         "description": [
           "The state of all data tables is stored here"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.TableState.tableById",
+            "id": "def-public.TableState.tableById",
             "type": "Object",
             "tags": [],
             "label": "tableById",
@@ -1078,13 +1045,13 @@
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-data-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-                "section": "def-common.TableById",
+                "section": "def-public.TableById",
                 "text": "TableById"
               }
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/types.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1095,48 +1062,48 @@
     "enums": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.Direction",
+        "id": "def-public.Direction",
         "type": "Enum",
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableEntityType",
+        "id": "def-public.TableEntityType",
         "type": "Enum",
         "tags": [],
         "label": "TableEntityType",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableId",
+        "id": "def-public.TableId",
         "type": "Enum",
         "tags": [],
         "label": "TableId",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TimelineTabs",
+        "id": "def-public.TimelineTabs",
         "type": "Enum",
         "tags": [],
         "label": "TimelineTabs",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/common/types/detail_panel.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/detail_panel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1145,7 +1112,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.defaultColumnHeaderType",
+        "id": "def-public.defaultColumnHeaderType",
         "type": "CompoundType",
         "tags": [],
         "label": "defaultColumnHeaderType",
@@ -1153,14 +1120,14 @@
         "signature": [
           "\"not-filtered\" | \"text-filter\""
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.defaultHeaders",
+        "id": "def-public.defaultHeaders",
         "type": "Array",
         "tags": [],
         "label": "defaultHeaders",
@@ -1169,14 +1136,14 @@
           "ColumnHeaderOptions",
           "[]"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.FILTER_OPEN",
+        "id": "def-public.FILTER_OPEN",
         "type": "string",
         "tags": [],
         "label": "FILTER_OPEN",
@@ -1184,14 +1151,14 @@
         "signature": [
           "\"open\""
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.SortDirectionTable",
+        "id": "def-public.SortDirectionTable",
         "type": "Type",
         "tags": [],
         "label": "SortDirectionTable",
@@ -1206,42 +1173,44 @@
             "text": "Direction"
           }
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.SubsetDataTableModel",
+        "id": "def-public.SubsetDataTableModel",
         "type": "Type",
         "tags": [],
         "label": "SubsetDataTableModel",
         "description": [],
         "signature": [
           "{ readonly sort: ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.SortColumnTable",
-            "text": "SortColumnTable"
-          },
-          "[]; readonly title: string; readonly isLoading: boolean; readonly filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
-          "[] | undefined; readonly columns: (Pick<",
+          "SortColumnTable",
+          "[]; readonly title: string; readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1250,20 +1219,38 @@
             "text": "IFieldSubType"
           },
           " | undefined; type?: string | undefined; })[]; readonly viewMode: ",
+          "ViewSelection",
+          "; readonly filters?: ",
           {
-            "pluginId": "@kbn/securitysolution-data-table",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.ViewSelection",
-            "text": "ViewSelection"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
           },
-          "; readonly dataViewId: string | null; readonly initialized?: boolean | undefined; readonly defaultColumns: (Pick<",
+          "[] | undefined; readonly initialized?: boolean | undefined; readonly isLoading: boolean; readonly dataViewId: string | null; readonly totalCount: number; readonly defaultColumns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1271,9 +1258,9 @@
             "section": "def-common.IFieldSubType",
             "text": "IFieldSubType"
           },
-          " | undefined; type?: string | undefined; })[]; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly expandedDetail: Partial<Record<string, ",
-          "ExpandedDetailType",
-          ">>; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPage: number; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
+          " | undefined; type?: string | undefined; })[]; readonly additionalFilters: Record<",
+          "AlertPageFilterType",
+          ", boolean>; readonly itemsPerPage: number; readonly queryFields: string[]; readonly selectAll: boolean; readonly showCheckboxes: boolean; readonly deletedEventIds: string[]; readonly graphEventId?: string | undefined; readonly indexNames: string[]; readonly isSelectAllChecked: boolean; readonly itemsPerPageOptions: number[]; readonly loadingEventIds: string[]; readonly selectedEventIds: Record<string, ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -1283,120 +1270,52 @@
           },
           "[]>; readonly sessionViewConfig: ",
           "SessionViewConfig",
-          " | null; readonly totalCount: number; readonly additionalFilters: Record<",
-          "AlertPageFilterType",
-          ", boolean>; }"
+          " | null; }"
         ],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/model.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/model.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableIdLiteral",
+        "id": "def-public.TableIdLiteral",
         "type": "Type",
         "tags": [],
         "label": "TableIdLiteral",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".usersPageEvents | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".hostsPageEvents | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".networkPageEvents | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".hostsPageSessions | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsOnRuleDetailsPage | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsOnAlertsPage | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".test | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".rulePreview | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".kubernetesPageSessions | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsOnCasePage | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsRiskInputs"
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.ViewSelection",
+        "id": "def-public.ViewSelection",
         "type": "Type",
         "tags": [],
         "label": "ViewSelection",
@@ -1404,7 +1323,7 @@
         "signature": [
           "\"gridView\" | \"eventRenderedView\""
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1413,18 +1332,18 @@
     "objects": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.tableDefaults",
+        "id": "def-public.tableDefaults",
         "type": "Object",
         "tags": [],
         "label": "tableDefaults",
         "description": [],
-        "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+        "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.defaultColumns",
+            "id": "def-public.tableDefaults.defaultColumns",
             "type": "Array",
             "tags": [],
             "label": "defaultColumns",
@@ -1433,13 +1352,13 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.dataViewId",
+            "id": "def-public.tableDefaults.dataViewId",
             "type": "Uncategorized",
             "tags": [],
             "label": "dataViewId",
@@ -1447,13 +1366,13 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.deletedEventIds",
+            "id": "def-public.tableDefaults.deletedEventIds",
             "type": "Array",
             "tags": [],
             "label": "deletedEventIds",
@@ -1461,25 +1380,13 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.expandedDetail",
-            "type": "Object",
-            "tags": [],
-            "label": "expandedDetail",
-            "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": []
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.filters",
+            "id": "def-public.tableDefaults.filters",
             "type": "Array",
             "tags": [],
             "label": "filters",
@@ -1487,13 +1394,13 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.indexNames",
+            "id": "def-public.tableDefaults.indexNames",
             "type": "Array",
             "tags": [],
             "label": "indexNames",
@@ -1501,13 +1408,13 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.isSelectAllChecked",
+            "id": "def-public.tableDefaults.isSelectAllChecked",
             "type": "boolean",
             "tags": [],
             "label": "isSelectAllChecked",
@@ -1515,13 +1422,13 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.isLoading",
+            "id": "def-public.tableDefaults.isLoading",
             "type": "boolean",
             "tags": [],
             "label": "isLoading",
@@ -1529,24 +1436,24 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.itemsPerPage",
+            "id": "def-public.tableDefaults.itemsPerPage",
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.itemsPerPageOptions",
+            "id": "def-public.tableDefaults.itemsPerPageOptions",
             "type": "Array",
             "tags": [],
             "label": "itemsPerPageOptions",
@@ -1554,13 +1461,13 @@
             "signature": [
               "number[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.loadingEventIds",
+            "id": "def-public.tableDefaults.loadingEventIds",
             "type": "Array",
             "tags": [],
             "label": "loadingEventIds",
@@ -1568,25 +1475,25 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.selectedEventIds",
+            "id": "def-public.tableDefaults.selectedEventIds",
             "type": "Object",
             "tags": [],
             "label": "selectedEventIds",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.showCheckboxes",
+            "id": "def-public.tableDefaults.showCheckboxes",
             "type": "boolean",
             "tags": [],
             "label": "showCheckboxes",
@@ -1594,13 +1501,13 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.sort",
+            "id": "def-public.tableDefaults.sort",
             "type": "Array",
             "tags": [],
             "label": "sort",
@@ -1608,13 +1515,13 @@
             "signature": [
               "{ columnId: string; columnType: string; esTypes: string[]; sortDirection: \"desc\"; }[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.selectAll",
+            "id": "def-public.tableDefaults.selectAll",
             "type": "boolean",
             "tags": [],
             "label": "selectAll",
@@ -1622,24 +1529,24 @@
             "signature": [
               "false"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.graphEventId",
+            "id": "def-public.tableDefaults.graphEventId",
             "type": "string",
             "tags": [],
             "label": "graphEventId",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.sessionViewConfig",
+            "id": "def-public.tableDefaults.sessionViewConfig",
             "type": "Uncategorized",
             "tags": [],
             "label": "sessionViewConfig",
@@ -1647,13 +1554,13 @@
             "signature": [
               "null"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.columns",
+            "id": "def-public.tableDefaults.columns",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -1662,13 +1569,13 @@
               "ColumnHeaderOptions",
               "[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.queryFields",
+            "id": "def-public.tableDefaults.queryFields",
             "type": "Array",
             "tags": [],
             "label": "queryFields",
@@ -1676,35 +1583,35 @@
             "signature": [
               "never[]"
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.title",
+            "id": "def-public.tableDefaults.title",
             "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.totalCount",
+            "id": "def-public.tableDefaults.totalCount",
             "type": "number",
             "tags": [],
             "label": "totalCount",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.viewMode",
+            "id": "def-public.tableDefaults.viewMode",
             "type": "string",
             "tags": [],
             "label": "viewMode",
@@ -1712,24 +1619,24 @@
             "signature": [
               "\"gridView\""
             ],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.additionalFilters",
+            "id": "def-public.tableDefaults.additionalFilters",
             "type": "Object",
             "tags": [],
             "label": "additionalFilters",
             "description": [],
-            "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+            "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-data-table",
-                "id": "def-common.tableDefaults.additionalFilters.showBuildingBlockAlerts",
+                "id": "def-public.tableDefaults.additionalFilters.showBuildingBlockAlerts",
                 "type": "boolean",
                 "tags": [],
                 "label": "showBuildingBlockAlerts",
@@ -1737,13 +1644,13 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+                "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/securitysolution-data-table",
-                "id": "def-common.tableDefaults.additionalFilters.showOnlyThreatIndicatorAlerts",
+                "id": "def-public.tableDefaults.additionalFilters.showOnlyThreatIndicatorAlerts",
                 "type": "boolean",
                 "tags": [],
                 "label": "showOnlyThreatIndicatorAlerts",
@@ -1751,7 +1658,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "x-pack/packages/security-solution/data_table/store/data_table/defaults.ts",
+                "path": "x-pack/solutions/security/packages/data-table/store/data_table/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1762,123 +1669,61 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.tableEntity",
+        "id": "def-public.tableEntity",
         "type": "Object",
         "tags": [],
         "label": "tableEntity",
         "description": [],
         "signature": [
           "{ \"users-page-events\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"hosts-page-events\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"network-page-events\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"hosts-page-sessions-v2\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-rules-details-page\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-page\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"table-test\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; alternateTest: ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"rule-preview\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"kubernetes-page-sessions\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-case-page\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-risk-inputs\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"risk-inputs\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; }"
         ],
-        "path": "x-pack/packages/security-solution/data_table/common/types/data_table/index.ts",
+        "path": "x-pack/solutions/security/packages/data-table/common/types/data_table/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

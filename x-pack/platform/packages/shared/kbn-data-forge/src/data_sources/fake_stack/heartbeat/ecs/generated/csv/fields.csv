@@ -1,0 +1,12 @@
+ECS_Version,Indexed,Field_Set,Field,Type,Level,Normalization,Example,Description
+8.0.0,true,base,@timestamp,date,core,,2016-05-23T08:05:34.853Z,Date/time when the event originated.
+8.0.0,true,base,labels,object,core,,"{""application"": ""foo-bar"", ""env"": ""production""}",Custom key/value pairs.
+8.0.0,true,base,message,match_only_text,core,,Hello World,Log message optimized for viewing in a log viewer.
+8.0.0,true,base,tags,keyword,core,array,"[""production"", ""env2""]",List of keywords used to tag each event.
+8.0.0,true,event,event.action,keyword,core,,user-password-change,The action captured by the event.
+8.0.0,true,event,event.duration,long,core,,,Duration of the event in nanoseconds.
+8.0.0,true,event,event.outcome,keyword,core,,success,The outcome of the event. The lowest level categorization field in the hierarchy.
+8.0.0,true,event,event.type,keyword,core,array,,Event type. The third categorization field in the hierarchy.
+8.0.0,true,event,event.url,keyword,extended,,https://mysystem.example.com/alert/5271dedb-f5b0-4218-87f0-4ac4870a38fe,Event investigation URL
+8.0.0,true,log,log.level,keyword,core,,error,Log level of the log event.
+8.0.0,true,log,log.logger,keyword,core,,org.elasticsearch.bootstrap.Bootstrap,Name of the logger.

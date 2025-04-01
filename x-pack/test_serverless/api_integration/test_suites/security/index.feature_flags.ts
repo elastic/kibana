@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export default function () {
-  describe('Serverless security API - feature flags', function () {
-    // add tests that require feature flags, defined in config.feature_flags.ts
-    // loadTestFile(require.resolve(<path_to_test_file>));
-  });
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Serverless security API - feature flags', function () {});
 }

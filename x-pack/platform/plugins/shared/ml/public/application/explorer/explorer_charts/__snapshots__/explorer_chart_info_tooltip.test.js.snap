@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExplorerChartTooltip Render tooltip based on infoTooltip data. 1`] = `
+<div
+  css={
+    Object {
+      "map": undefined,
+      "name": "xotwi",
+      "next": undefined,
+      "styles": "max-width:384px;",
+      "toString": [Function],
+    }
+  }
+>
+  <TooltipDefinitionList
+    toolTipData={
+      Array [
+        Object {
+          "description": "mock-job-id",
+          "title": "job ID",
+        },
+        Object {
+          "description": "15m",
+          "title": "aggregation interval",
+        },
+        Object {
+          "description": "avg responsetime",
+          "title": "chart function",
+        },
+        Object {
+          "description": "JAL",
+          "title": "airline",
+        },
+      ]
+    }
+  />
+</div>
+`;

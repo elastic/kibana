@@ -37,9 +37,9 @@
             "section": "def-common.KibanaRenderContextProviderProps",
             "text": "KibanaRenderContextProviderProps"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/render/render_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -48,7 +48,7 @@
             "id": "def-common.KibanaRenderContextProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...props\n}",
+            "label": "{ children, ...props }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -61,7 +61,7 @@
               },
               ">"
             ],
-            "path": "packages/react/kibana_context/render/render_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,21 +85,11 @@
         ],
         "signature": [
           "{ i18n: ",
-          {
-            "pluginId": "@kbn/core-i18n-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-common.I18nStart",
-            "text": "I18nStart"
-          },
-          "; analytics?: ",
-          {
-            "pluginId": "@kbn/core-analytics-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-            "section": "def-common.AnalyticsServiceStart",
-            "text": "AnalyticsServiceStart"
-          },
+          "I18nStart",
+          "; analytics?: Pick<",
+          "AnalyticsServiceStart",
+          ", \"reportEvent\"> | undefined; executionContext?: ",
+          "ExecutionContextSetup",
           " | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
@@ -108,15 +98,17 @@
             "section": "def-common.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          "; modify?: ",
+          "; userProfile?: Pick<",
+          "UserProfileService",
+          ", \"getUserProfile$\"> | undefined; colorMode?: ",
+          "EuiThemeColorMode",
+          " | undefined; modify?: ",
           "RecursivePartial",
           "<",
           "EuiThemeShape",
-          "> | undefined; colorMode?: ",
-          "EuiThemeColorMode",
-          " | undefined; }"
+          "> | undefined; }"
         ],
-        "path": "packages/react/kibana_context/render/render_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/render/render_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

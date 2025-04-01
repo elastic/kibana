@@ -1,0 +1,39 @@
+# REPLACE
+
+The REPLACE function substitutes any match of a regular expression within a string with a replacement string.
+
+## Syntax
+
+`REPLACE(string, regex, newString)`
+
+### Parameters
+
+#### string
+
+The string expression where the replacement will occur.
+
+#### regex
+
+The regular expression that will be matched in the string.
+
+#### newString
+
+The string that will replace the matched regular expression in the string.
+
+## Examples
+
+The following example replaces any occurrence of the word "World" with the word "Universe":
+
+```esql
+ROW str = "Hello World"
+| EVAL str = REPLACE(str, "World", "Universe")
+| KEEP str
+```
+
+Another example could be replacing digits in a string with a specific character:
+
+```esql
+ROW str = "User123"
+| EVAL str = REPLACE(str, "\\d", "*")
+| KEEP str
+```

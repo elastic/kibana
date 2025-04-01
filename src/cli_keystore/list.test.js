@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const mockKeystoreData =
@@ -42,17 +43,17 @@ describe('Kibana keystore', () => {
       sandbox.restore();
     });
 
-    it('outputs keys', () => {
+    it('outputs keys', async () => {
       const keystore = new Keystore('/data/test.keystore');
-      list(keystore);
+      await list(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.log);
       sinon.assert.calledWith(Logger.prototype.log, 'a1.b2.c3\na2');
     });
 
-    it('handles a nonexistent keystore', () => {
+    it('handles a nonexistent keystore', async () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
-      list(keystore);
+      await list(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.error);
       sinon.assert.calledWith(

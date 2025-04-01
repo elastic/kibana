@@ -3,80 +3,52 @@
   "client": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.App",
+        "id": "def-public.App",
         "type": "Interface",
         "tags": [],
         "label": "App",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.App",
-            "text": "App"
-          },
+          "App",
           "<HistoryLocationState> extends ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavOptions",
-            "text": "AppNavOptions"
-          }
+          "AppNavOptions"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.id",
+            "id": "def-public.App.id",
             "type": "string",
             "tags": [],
             "label": "id",
             "description": [
               "\nThe unique identifier of the application.\n\nCan only be composed of alphanumeric characters, `-`, `:` and `_`"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.title",
+            "id": "def-public.App.title",
             "type": "string",
             "tags": [],
             "label": "title",
             "description": [
               "\nThe title of the application."
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.category",
+            "id": "def-public.App.category",
             "type": "Object",
             "tags": [],
             "label": "category",
@@ -84,22 +56,16 @@
               "\nThe category definition of the product\nSee {@link AppCategory}\nSee DEFAULT_APP_CATEGORIES for more reference"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-common",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationCommonPluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
-              },
+              "AppCategory",
               " | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.status",
+            "id": "def-public.App.status",
             "type": "CompoundType",
             "tags": [],
             "label": "status",
@@ -107,61 +73,36 @@
               "\nThe initial status of the application.\nDefaulting to `accessible`"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppStatus",
-                "text": "AppStatus"
-              },
+              "AppStatus",
               " | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.navLinkStatus",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "navLinkStatus",
+            "id": "def-public.App.visibleIn",
+            "type": "Array",
+            "tags": [
+              "default",
+              "note"
+            ],
+            "label": "visibleIn",
             "description": [
-              "\nThe initial status of the application's navLink.\nDefaulting to `visible` if `status` is `accessible` and `hidden` if status is `inaccessible`\nSee {@link AppNavLinkStatus}"
+              "\nOptional list of locations where the app is visible.\n\nAccepts the following values:\n- \"globalSearch\": the link will appear in the global search bar\n- \"home\": the link will appear on the Kibana home page\n- \"kibanaOverview\": the link will appear in the Kibana overview page\n- \"sideNav\": the link will appear in the side navigation.\n  Note: \"sideNav\" will be deprecated when we change the navigation to \"solutions\" style.\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppNavLinkStatus",
-                "text": "AppNavLinkStatus"
-              },
-              " | undefined"
+              "AppDeepLinkLocations",
+              "[] | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.searchable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "searchable",
-            "description": [
-              "\nThe initial flag to determine if the application is searchable in the global search.\nDefaulting to `true` if `navLinkStatus` is `visible` or omitted."
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.defaultPath",
+            "id": "def-public.App.defaultPath",
             "type": "string",
             "tags": [],
             "label": "defaultPath",
@@ -171,13 +112,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.updater$",
+            "id": "def-public.App.updater$",
             "type": "Object",
             "tags": [],
             "label": "updater$",
@@ -187,22 +128,16 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUpdater",
-                "text": "AppUpdater"
-              },
+              "AppUpdater",
               "> | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.capabilities",
+            "id": "def-public.App.capabilities",
             "type": "Object",
             "tags": [],
             "label": "capabilities",
@@ -211,22 +146,16 @@
             ],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               "> | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.chromeless",
+            "id": "def-public.App.chromeless",
             "type": "CompoundType",
             "tags": [],
             "label": "chromeless",
@@ -236,13 +165,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.mount",
+            "id": "def-public.App.mount",
             "type": "Function",
             "tags": [],
             "label": "mount",
@@ -251,54 +180,30 @@
             ],
             "signature": [
               "(params: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppMountParameters",
-                "text": "AppMountParameters"
-              },
+              "AppMountParameters",
               "<HistoryLocationState>) => ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUnmount",
-                "text": "AppUnmount"
-              },
+              "AppUnmount",
               " | Promise<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUnmount",
-                "text": "AppUnmount"
-              },
+              "AppUnmount",
               ">"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.App.mount.$1",
+                "id": "def-public.App.mount.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "params",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.AppMountParameters",
-                    "text": "AppMountParameters"
-                  },
+                  "AppMountParameters",
                   "<HistoryLocationState>"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+                "path": "src/core/packages/application/browser/src/app_mount.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -306,7 +211,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.appRoute",
+            "id": "def-public.App.appRoute",
             "type": "string",
             "tags": [],
             "label": "appRoute",
@@ -316,13 +221,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.exactRoute",
+            "id": "def-public.App.exactRoute",
             "type": "CompoundType",
             "tags": [],
             "label": "exactRoute",
@@ -332,13 +237,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.keywords",
+            "id": "def-public.App.keywords",
             "type": "Array",
             "tags": [],
             "label": "keywords",
@@ -348,13 +253,13 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.App.deepLinks",
+            "id": "def-public.App.deepLinks",
             "type": "Array",
             "tags": [],
             "label": "deepLinks",
@@ -362,16 +267,10 @@
               "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible.\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppDeepLink",
-                "text": "AppDeepLink"
-              },
+              "AppDeepLink",
               "<string>[] | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -380,20 +279,20 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppLeaveActionFactory",
+        "id": "def-public.AppLeaveActionFactory",
         "type": "Interface",
         "tags": [],
         "label": "AppLeaveActionFactory",
         "description": [
           "\nFactory provided when invoking a {@link AppLeaveHandler} to retrieve the {@link AppLeaveAction} to execute."
         ],
-        "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+        "path": "src/core/packages/application/browser/src/app_leave.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveActionFactory.confirm",
+            "id": "def-public.AppLeaveActionFactory.confirm",
             "type": "Function",
             "tags": [],
             "label": "confirm",
@@ -401,22 +300,16 @@
               "\nReturns a confirm action, resulting on prompting a message to the user before leaving the\napplication, allowing him to choose if he wants to stay on the app or confirm that he\nwants to leave.\n"
             ],
             "signature": [
-              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined) => ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppLeaveConfirmAction",
-                "text": "AppLeaveConfirmAction"
-              }
+              "(text: string, title?: string | undefined, callback?: (() => void) | undefined, confirmButtonText?: string | undefined, buttonColor?: \"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined) => ",
+              "AppLeaveConfirmAction"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.AppLeaveActionFactory.confirm.$1",
+                "id": "def-public.AppLeaveActionFactory.confirm.$1",
                 "type": "string",
                 "tags": [],
                 "label": "text",
@@ -426,14 +319,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+                "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.AppLeaveActionFactory.confirm.$2",
+                "id": "def-public.AppLeaveActionFactory.confirm.$2",
                 "type": "string",
                 "tags": [],
                 "label": "title",
@@ -443,14 +336,14 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+                "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.AppLeaveActionFactory.confirm.$3",
+                "id": "def-public.AppLeaveActionFactory.confirm.$3",
                 "type": "Function",
                 "tags": [],
                 "label": "callback",
@@ -460,14 +353,14 @@
                 "signature": [
                   "(() => void) | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+                "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.AppLeaveActionFactory.confirm.$4",
+                "id": "def-public.AppLeaveActionFactory.confirm.$4",
                 "type": "string",
                 "tags": [],
                 "label": "confirmButtonText",
@@ -477,14 +370,14 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+                "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.AppLeaveActionFactory.confirm.$5",
+                "id": "def-public.AppLeaveActionFactory.confirm.$5",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "buttonColor",
@@ -492,9 +385,9 @@
                   "(optional) color for the confirmation button\nso we can show to the user the right UX for him to saved his/her/their changes"
                 ],
                 "signature": [
-                  "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+                  "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+                "path": "src/core/packages/application/browser/src/app_leave.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -504,7 +397,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveActionFactory.default",
+            "id": "def-public.AppLeaveActionFactory.default",
             "type": "Function",
             "tags": [],
             "label": "default",
@@ -513,15 +406,9 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppLeaveDefaultAction",
-                "text": "AppLeaveDefaultAction"
-              }
+              "AppLeaveDefaultAction"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -532,52 +419,46 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppLeaveConfirmAction",
+        "id": "def-public.AppLeaveConfirmAction",
         "type": "Interface",
         "tags": [],
         "label": "AppLeaveConfirmAction",
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to show a confirmation\nmessage when trying to leave an application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+        "path": "src/core/packages/application/browser/src/app_leave.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveConfirmAction.type",
+            "id": "def-public.AppLeaveConfirmAction.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppLeaveActionType",
-                "text": "AppLeaveActionType"
-              },
+              "AppLeaveActionType",
               ".confirm"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveConfirmAction.text",
+            "id": "def-public.AppLeaveConfirmAction.text",
             "type": "string",
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveConfirmAction.title",
+            "id": "def-public.AppLeaveConfirmAction.title",
             "type": "string",
             "tags": [],
             "label": "title",
@@ -585,13 +466,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveConfirmAction.confirmButtonText",
+            "id": "def-public.AppLeaveConfirmAction.confirmButtonText",
             "type": "string",
             "tags": [],
             "label": "confirmButtonText",
@@ -599,27 +480,27 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveConfirmAction.buttonColor",
+            "id": "def-public.AppLeaveConfirmAction.buttonColor",
             "type": "CompoundType",
             "tags": [],
             "label": "buttonColor",
             "description": [],
             "signature": [
-              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"danger\" | undefined"
+              "\"text\" | \"warning\" | \"success\" | \"primary\" | \"accent\" | \"accentSecondary\" | \"danger\" | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveConfirmAction.callback",
+            "id": "def-public.AppLeaveConfirmAction.callback",
             "type": "Function",
             "tags": [],
             "label": "callback",
@@ -627,7 +508,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -638,35 +519,29 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppLeaveDefaultAction",
+        "id": "def-public.AppLeaveDefaultAction",
         "type": "Interface",
         "tags": [],
         "label": "AppLeaveDefaultAction",
         "description": [
           "\nAction to return from a {@link AppLeaveHandler} to execute the default\nbehaviour when leaving the application.\n\nSee {@link AppLeaveActionFactory}\n"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+        "path": "src/core/packages/application/browser/src/app_leave.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveDefaultAction.type",
+            "id": "def-public.AppLeaveDefaultAction.type",
             "type": "string",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppLeaveActionType",
-                "text": "AppLeaveActionType"
-              },
+              "AppLeaveActionType",
               ".default"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -675,18 +550,18 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.ApplicationSetup",
+        "id": "def-public.ApplicationSetup",
         "type": "Interface",
         "tags": [],
         "label": "ApplicationSetup",
         "description": [],
-        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+        "path": "src/core/packages/application/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationSetup.register",
+            "id": "def-public.ApplicationSetup.register",
             "type": "Function",
             "tags": [],
             "label": "register",
@@ -695,22 +570,16 @@
             ],
             "signature": [
               "<HistoryLocationState = unknown>(app: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.App",
-                "text": "App"
-              },
+              "App",
               "<HistoryLocationState>) => void"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationSetup.register.$1",
+                "id": "def-public.ApplicationSetup.register.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "app",
@@ -718,16 +587,10 @@
                   "- an {@link App }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.App",
-                    "text": "App"
-                  },
+                  "App",
                   "<HistoryLocationState>"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -737,7 +600,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationSetup.registerAppUpdater",
+            "id": "def-public.ApplicationSetup.registerAppUpdater",
             "type": "Function",
             "tags": [],
             "label": "registerAppUpdater",
@@ -748,22 +611,16 @@
               "(appUpdater$: ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppUpdater",
-                "text": "AppUpdater"
-              },
+              "AppUpdater",
               ">) => void"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationSetup.registerAppUpdater.$1",
+                "id": "def-public.ApplicationSetup.registerAppUpdater.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "appUpdater$",
@@ -771,16 +628,10 @@
                 "signature": [
                   "Observable",
                   "<",
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.AppUpdater",
-                    "text": "AppUpdater"
-                  },
+                  "AppUpdater",
                   ">"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -793,18 +644,18 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.ApplicationStart",
+        "id": "def-public.ApplicationStart",
         "type": "Interface",
         "tags": [],
         "label": "ApplicationStart",
         "description": [],
-        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+        "path": "src/core/packages/application/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationStart.capabilities",
+            "id": "def-public.ApplicationStart.capabilities",
             "type": "Object",
             "tags": [],
             "label": "capabilities",
@@ -812,15 +663,15 @@
               "\nGets the read-only capabilities."
             ],
             "signature": [
-              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
+              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; readonly discover?: Readonly<{}> | undefined; readonly dashboard?: Readonly<{}> | undefined; readonly maps?: Readonly<{}> | undefined; readonly visualize?: Readonly<{}> | undefined; }"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationStart.applications$",
+            "id": "def-public.ApplicationStart.applications$",
             "type": "Object",
             "tags": [],
             "label": "applications$",
@@ -830,61 +681,51 @@
             "signature": [
               "Observable",
               "<ReadonlyMap<string, ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.PublicAppInfo",
-                "text": "PublicAppInfo"
-              },
+              "PublicAppInfo",
               ">>"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationStart.navigateToApp",
+            "id": "def-public.ApplicationStart.navigateToApp",
             "type": "Function",
             "tags": [],
             "label": "navigateToApp",
             "description": [
-              "\nNavigate to a given app\n"
+              "\nNavigate to a given app.\nIf a plugin is disabled any applications it registers won't be available either.\nBefore rendering a UI element that a user could use to navigate to another application,\nfirst check if the destination application is actually available using the isAppRegistered API.\n"
             ],
             "signature": [
               "(appId: string, options?: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToAppOptions",
-                "text": "NavigateToAppOptions"
-              },
+              "NavigateToAppOptions",
               " | undefined) => Promise<void>"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationStart.navigateToApp.$1",
+                "id": "def-public.ApplicationStart.navigateToApp.$1",
                 "type": "string",
                 "tags": [],
                 "label": "appId",
-                "description": [],
+                "description": [
+                  "- The identifier of the app to navigate to"
+                ],
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationStart.navigateToApp.$2",
+                "id": "def-public.ApplicationStart.navigateToApp.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -892,16 +733,10 @@
                   "- navigation options"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.NavigateToAppOptions",
-                    "text": "NavigateToAppOptions"
-                  },
+                  "NavigateToAppOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -911,7 +746,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationStart.navigateToUrl",
+            "id": "def-public.ApplicationStart.navigateToUrl",
             "type": "Function",
             "tags": [],
             "label": "navigateToUrl",
@@ -920,22 +755,16 @@
             ],
             "signature": [
               "(url: string, options?: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.NavigateToUrlOptions",
-                "text": "NavigateToUrlOptions"
-              },
+              "NavigateToUrlOptions",
               " | undefined) => Promise<void>"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationStart.navigateToUrl.$1",
+                "id": "def-public.ApplicationStart.navigateToUrl.$1",
                 "type": "string",
                 "tags": [],
                 "label": "url",
@@ -945,14 +774,14 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationStart.navigateToUrl.$2",
+                "id": "def-public.ApplicationStart.navigateToUrl.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
@@ -960,16 +789,10 @@
                   "- navigation options"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.NavigateToUrlOptions",
-                    "text": "NavigateToUrlOptions"
-                  },
+                  "NavigateToUrlOptions",
                   " | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -979,7 +802,45 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationStart.getUrlForApp",
+            "id": "def-public.ApplicationStart.isAppRegistered",
+            "type": "Function",
+            "tags": [],
+            "label": "isAppRegistered",
+            "description": [
+              "\nChecks whether a given application is registered.\n"
+            ],
+            "signature": [
+              "(appId: string) => boolean"
+            ],
+            "path": "src/core/packages/application/browser/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-application-browser",
+                "id": "def-public.ApplicationStart.isAppRegistered.$1",
+                "type": "string",
+                "tags": [],
+                "label": "appId",
+                "description": [
+                  "- The identifier of the app to check"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/core/packages/application/browser/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "true if the given appId is registered in the system, false otherwise."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-application-browser",
+            "id": "def-public.ApplicationStart.getUrlForApp",
             "type": "Function",
             "tags": [],
             "label": "getUrlForApp",
@@ -989,13 +850,13 @@
             "signature": [
               "(appId: string, options?: { path?: string | undefined; absolute?: boolean | undefined; deepLinkId?: string | undefined; } | undefined) => string"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationStart.getUrlForApp.$1",
+                "id": "def-public.ApplicationStart.getUrlForApp.$1",
                 "type": "string",
                 "tags": [],
                 "label": "appId",
@@ -1003,25 +864,25 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ApplicationStart.getUrlForApp.$2",
+                "id": "def-public.ApplicationStart.getUrlForApp.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                "path": "src/core/packages/application/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-application-browser",
-                    "id": "def-common.ApplicationStart.getUrlForApp.$2.path",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.path",
                     "type": "string",
                     "tags": [],
                     "label": "path",
@@ -1029,13 +890,13 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                    "path": "src/core/packages/application/browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-application-browser",
-                    "id": "def-common.ApplicationStart.getUrlForApp.$2.absolute",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.absolute",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "absolute",
@@ -1043,13 +904,13 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                    "path": "src/core/packages/application/browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
                   {
                     "parentPluginId": "@kbn/core-application-browser",
-                    "id": "def-common.ApplicationStart.getUrlForApp.$2.deepLinkId",
+                    "id": "def-public.ApplicationStart.getUrlForApp.$2.deepLinkId",
                     "type": "string",
                     "tags": [],
                     "label": "deepLinkId",
@@ -1057,7 +918,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/application/core-application-browser/src/contracts.ts",
+                    "path": "src/core/packages/application/browser/src/contracts.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1068,7 +929,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationStart.currentAppId$",
+            "id": "def-public.ApplicationStart.currentAppId$",
             "type": "Object",
             "tags": [],
             "label": "currentAppId$",
@@ -1079,13 +940,13 @@
               "Observable",
               "<string | undefined>"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ApplicationStart.currentLocation$",
+            "id": "def-public.ApplicationStart.currentLocation$",
             "type": "Object",
             "tags": [],
             "label": "currentLocation$",
@@ -1096,7 +957,7 @@
               "Observable",
               "<string>"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1105,28 +966,22 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppMountParameters",
+        "id": "def-public.AppMountParameters",
         "type": "Interface",
         "tags": [],
         "label": "AppMountParameters",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppMountParameters",
-            "text": "AppMountParameters"
-          },
+          "AppMountParameters",
           "<HistoryLocationState>"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+        "path": "src/core/packages/application/browser/src/app_mount.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppMountParameters.element",
+            "id": "def-public.AppMountParameters.element",
             "type": "Object",
             "tags": [],
             "label": "element",
@@ -1136,13 +991,13 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+            "path": "src/core/packages/application/browser/src/app_mount.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppMountParameters.history",
+            "id": "def-public.AppMountParameters.history",
             "type": "Object",
             "tags": [],
             "label": "history",
@@ -1150,22 +1005,16 @@
               "\nA scoped history instance for your application. Should be used to wire up\nyour applications Router.\n"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<HistoryLocationState>"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+            "path": "src/core/packages/application/browser/src/app_mount.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppMountParameters.appBasePath",
+            "id": "def-public.AppMountParameters.appBasePath",
             "type": "string",
             "tags": [
               "deprecated"
@@ -1174,34 +1023,41 @@
             "description": [
               "\nThe route path for configuring navigation to the application.\nThis string should not include the base path from HTTP.\n"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+            "path": "src/core/packages/application/browser/src/app_mount.ts",
             "deprecated": true,
-            "removeBy": "8.8.0",
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/core-application-browser-internal",
-                "path": "packages/core/application/core-application-browser-internal/src/ui/app_container.tsx"
-              },
-              {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-internal/src/ui/app_container.tsx"
               },
               {
                 "plugin": "management",
-                "path": "src/plugins/management/public/application.tsx"
+                "path": "src/platform/plugins/shared/management/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts"
               },
               {
                 "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/integrations/index.tsx"
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/integrations/index.tsx"
               },
               {
                 "plugin": "security",
-                "path": "x-pack/plugins/security/public/authentication/logout/logout_app.test.ts"
+                "path": "x-pack/platform/plugins/shared/security/public/authentication/logout/logout_app.test.ts"
               },
               {
                 "plugin": "kibanaOverview",
-                "path": "src/plugins/kibana_overview/public/application.tsx"
+                "path": "src/platform/plugins/private/kibana_overview/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/core_plugin_chromeless/public/application.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-src",
+                "path": "src/platform/test/plugin_functional/plugins/kbn_top_nav/public/application.tsx"
               },
               {
                 "plugin": "@kbn/core",
@@ -1211,7 +1067,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppMountParameters.onAppLeave",
+            "id": "def-public.AppMountParameters.onAppLeave",
             "type": "Function",
             "tags": [],
             "label": "onAppLeave",
@@ -1220,36 +1076,24 @@
             ],
             "signature": [
               "(handler: ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppLeaveHandler",
-                "text": "AppLeaveHandler"
-              },
+              "AppLeaveHandler",
               ") => void"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+            "path": "src/core/packages/application/browser/src/app_mount.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.AppMountParameters.onAppLeave.$1",
+                "id": "def-public.AppMountParameters.onAppLeave.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "handler",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-application-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                    "section": "def-common.AppLeaveHandler",
-                    "text": "AppLeaveHandler"
-                  }
+                  "AppLeaveHandler"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+                "path": "src/core/packages/application/browser/src/app_mount.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1259,7 +1103,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppMountParameters.setHeaderActionMenu",
+            "id": "def-public.AppMountParameters.setHeaderActionMenu",
             "type": "Function",
             "tags": [],
             "label": "setHeaderActionMenu",
@@ -1268,37 +1112,25 @@
             ],
             "signature": [
               "(menuMount: ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-common.MountPoint",
-                "text": "MountPoint"
-              },
+              "MountPoint",
               "<HTMLElement> | undefined) => void"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+            "path": "src/core/packages/application/browser/src/app_mount.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.AppMountParameters.setHeaderActionMenu.$1",
+                "id": "def-public.AppMountParameters.setHeaderActionMenu.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "menuMount",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-mount-utils-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                    "section": "def-common.MountPoint",
-                    "text": "MountPoint"
-                  },
+                  "MountPoint",
                   "<HTMLElement> | undefined"
                 ],
-                "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+                "path": "src/core/packages/application/browser/src/app_mount.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1308,7 +1140,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppMountParameters.theme$",
+            "id": "def-public.AppMountParameters.theme$",
             "type": "Object",
             "tags": [],
             "label": "theme$",
@@ -1318,16 +1150,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+            "path": "src/core/packages/application/browser/src/app_mount.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1336,20 +1162,20 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppNavOptions",
+        "id": "def-public.AppNavOptions",
         "type": "Interface",
         "tags": [],
         "label": "AppNavOptions",
         "description": [
           "\nApp navigation menu options"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppNavOptions.order",
+            "id": "def-public.AppNavOptions.order",
             "type": "number",
             "tags": [],
             "label": "order",
@@ -1359,13 +1185,13 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppNavOptions.tooltip",
+            "id": "def-public.AppNavOptions.tooltip",
             "type": "string",
             "tags": [],
             "label": "tooltip",
@@ -1375,13 +1201,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppNavOptions.euiIconType",
+            "id": "def-public.AppNavOptions.euiIconType",
             "type": "string",
             "tags": [],
             "label": "euiIconType",
@@ -1391,13 +1217,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppNavOptions.icon",
+            "id": "def-public.AppNavOptions.icon",
             "type": "string",
             "tags": [],
             "label": "icon",
@@ -1407,7 +1233,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1416,20 +1242,20 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.NavigateToAppOptions",
+        "id": "def-public.NavigateToAppOptions",
         "type": "Interface",
         "tags": [],
         "label": "NavigateToAppOptions",
         "description": [
           "\nOptions for the {@link ApplicationStart.navigateToApp | navigateToApp API}"
         ],
-        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+        "path": "src/core/packages/application/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToAppOptions.deepLinkId",
+            "id": "def-public.NavigateToAppOptions.deepLinkId",
             "type": "string",
             "tags": [],
             "label": "deepLinkId",
@@ -1439,13 +1265,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToAppOptions.path",
+            "id": "def-public.NavigateToAppOptions.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -1455,13 +1281,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToAppOptions.state",
+            "id": "def-public.NavigateToAppOptions.state",
             "type": "Unknown",
             "tags": [],
             "label": "state",
@@ -1471,13 +1297,13 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToAppOptions.replace",
+            "id": "def-public.NavigateToAppOptions.replace",
             "type": "CompoundType",
             "tags": [],
             "label": "replace",
@@ -1487,13 +1313,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToAppOptions.openInNewTab",
+            "id": "def-public.NavigateToAppOptions.openInNewTab",
             "type": "CompoundType",
             "tags": [],
             "label": "openInNewTab",
@@ -1503,13 +1329,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToAppOptions.skipAppLeave",
+            "id": "def-public.NavigateToAppOptions.skipAppLeave",
             "type": "CompoundType",
             "tags": [],
             "label": "skipAppLeave",
@@ -1519,7 +1345,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1528,20 +1354,20 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.NavigateToUrlOptions",
+        "id": "def-public.NavigateToUrlOptions",
         "type": "Interface",
         "tags": [],
         "label": "NavigateToUrlOptions",
         "description": [
           "\nOptions for the {@link ApplicationStart.navigateToUrl | navigateToUrl API}"
         ],
-        "path": "packages/core/application/core-application-browser/src/contracts.ts",
+        "path": "src/core/packages/application/browser/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToUrlOptions.skipAppLeave",
+            "id": "def-public.NavigateToUrlOptions.skipAppLeave",
             "type": "CompoundType",
             "tags": [],
             "label": "skipAppLeave",
@@ -1551,13 +1377,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToUrlOptions.forceRedirect",
+            "id": "def-public.NavigateToUrlOptions.forceRedirect",
             "type": "CompoundType",
             "tags": [],
             "label": "forceRedirect",
@@ -1567,13 +1393,13 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.NavigateToUrlOptions.state",
+            "id": "def-public.NavigateToUrlOptions.state",
             "type": "Unknown",
             "tags": [],
             "label": "state",
@@ -1583,7 +1409,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/core/application/core-application-browser/src/contracts.ts",
+            "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1592,7 +1418,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.ScopedHistory",
+        "id": "def-public.ScopedHistory",
         "type": "Interface",
         "tags": [],
         "label": "ScopedHistory",
@@ -1600,24 +1426,18 @@
           "\nA wrapper around a `History` instance that is scoped to a particular base path of the history stack. Behaves\nsimilarly to the `basename` option except that this wrapper hides any history stack entries from outside the scope\nof this base path.\n\nThis wrapper also allows Core and Plugins to share a single underlying global `History` instance without exposing\nthe history of other applications.\n\nThe {@link ScopedHistory.createSubHistory | createSubHistory} method is particularly useful for applications that\ncontain any number of \"sub-apps\" which should not have access to the main application's history or basePath.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.ScopedHistory",
-            "text": "ScopedHistory"
-          },
+          "ScopedHistory",
           "<HistoryLocationState> extends ",
           "History",
           "<HistoryLocationState>"
         ],
-        "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
+        "path": "src/core/packages/application/browser/src/scoped_history.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ScopedHistory.createSubHistory",
+            "id": "def-public.ScopedHistory.createSubHistory",
             "type": "Function",
             "tags": [],
             "label": "createSubHistory",
@@ -1626,22 +1446,16 @@
             ],
             "signature": [
               "(basePath: string) => ",
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.ScopedHistory",
-                "text": "ScopedHistory"
-              },
+              "ScopedHistory",
               "<unknown>"
             ],
-            "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
+            "path": "src/core/packages/application/browser/src/scoped_history.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ScopedHistory.createSubHistory.$1",
+                "id": "def-public.ScopedHistory.createSubHistory.$1",
                 "type": "string",
                 "tags": [],
                 "label": "basePath",
@@ -1651,7 +1465,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
+                "path": "src/core/packages/application/browser/src/scoped_history.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1661,7 +1475,7 @@
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.ScopedHistory.createHref",
+            "id": "def-public.ScopedHistory.createHref",
             "type": "Function",
             "tags": [],
             "label": "createHref",
@@ -1673,13 +1487,13 @@
               "LocationDescriptorObject",
               "<HistoryLocationState>, options?: { prependBasePath?: boolean | undefined; } | undefined) => string"
             ],
-            "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
+            "path": "src/core/packages/application/browser/src/scoped_history.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ScopedHistory.createHref.$1",
+                "id": "def-public.ScopedHistory.createHref.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "location",
@@ -1688,25 +1502,25 @@
                   "LocationDescriptorObject",
                   "<HistoryLocationState>"
                 ],
-                "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
+                "path": "src/core/packages/application/browser/src/scoped_history.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               },
               {
                 "parentPluginId": "@kbn/core-application-browser",
-                "id": "def-common.ScopedHistory.createHref.$2",
+                "id": "def-public.ScopedHistory.createHref.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
+                "path": "src/core/packages/application/browser/src/scoped_history.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
                   {
                     "parentPluginId": "@kbn/core-application-browser",
-                    "id": "def-common.ScopedHistory.createHref.$2.prependBasePath",
+                    "id": "def-public.ScopedHistory.createHref.$2.prependBasePath",
                     "type": "CompoundType",
                     "tags": [],
                     "label": "prependBasePath",
@@ -1714,7 +1528,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "packages/core/application/core-application-browser/src/scoped_history.ts",
+                    "path": "src/core/packages/application/browser/src/scoped_history.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1730,42 +1544,28 @@
     "enums": [
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppLeaveActionType",
+        "id": "def-public.AppLeaveActionType",
         "type": "Enum",
         "tags": [],
         "label": "AppLeaveActionType",
         "description": [
           "\nPossible type of actions on application leave.\n"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+        "path": "src/core/packages/application/browser/src/app_leave.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppNavLinkStatus",
-        "type": "Enum",
-        "tags": [],
-        "label": "AppNavLinkStatus",
-        "description": [
-          "\nStatus of the application's navLink.\n"
-        ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppStatus",
+        "id": "def-public.AppStatus",
         "type": "Enum",
         "tags": [],
         "label": "AppStatus",
         "description": [
           "\nAccessibility status of an application.\n"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1774,7 +1574,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppDeepLink",
+        "id": "def-public.AppDeepLink",
         "type": "Type",
         "tags": [],
         "label": "AppDeepLink",
@@ -1782,56 +1582,43 @@
           "\nInput type for registering secondary in-app locations for an application.\n\nDeep links must include at least one of `path` or `deepLinks`. A deep link that does not have a `path`\nrepresents a topological level in the application's hierarchy, but does not have a destination URL that is\nuser-accessible."
         ],
         "signature": [
-          "{ id: Id; title: string; keywords?: string[] | undefined; navLinkStatus?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
-          },
-          " | undefined; searchable?: boolean | undefined; category?: ",
-          {
-            "pluginId": "@kbn/core-application-common",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationCommonPluginApi",
-            "section": "def-common.AppCategory",
-            "text": "AppCategory"
-          },
+          "{ id: Id; title: string; keywords?: string[] | undefined; visibleIn?: ",
+          "AppDeepLinkLocations",
+          "[] | undefined; category?: ",
+          "AppCategory",
           " | undefined; } & ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavOptions",
-            "text": "AppNavOptions"
-          },
+          "AppNavOptions",
           " & ({ path: string; deepLinks?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
-            "text": "AppDeepLink"
-          },
+          "AppDeepLink",
           "<Id>[] | undefined; } | { path?: string | undefined; deepLinks: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
-            "text": "AppDeepLink"
-          },
+          "AppDeepLink",
           "<Id>[]; })"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppLeaveAction",
+        "id": "def-public.AppDeepLinkLocations",
+        "type": "Type",
+        "tags": [],
+        "label": "AppDeepLinkLocations",
+        "description": [
+          "The places in the UI where a deepLink can be shown"
+        ],
+        "signature": [
+          "\"home\" | \"kibanaOverview\" | \"globalSearch\" | \"sideNav\""
+        ],
+        "path": "src/core/packages/application/browser/src/application.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-application-browser",
+        "id": "def-public.AppLeaveAction",
         "type": "Type",
         "tags": [],
         "label": "AppLeaveAction",
@@ -1839,30 +1626,18 @@
           "\nPossible actions to return from a {@link AppLeaveHandler}\n\nSee {@link AppLeaveConfirmAction} and {@link AppLeaveDefaultAction}\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppLeaveDefaultAction",
-            "text": "AppLeaveDefaultAction"
-          },
+          "AppLeaveDefaultAction",
           " | ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppLeaveConfirmAction",
-            "text": "AppLeaveConfirmAction"
-          }
+          "AppLeaveConfirmAction"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+        "path": "src/core/packages/application/browser/src/app_leave.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppLeaveHandler",
+        "id": "def-public.AppLeaveHandler",
         "type": "Type",
         "tags": [],
         "label": "AppLeaveHandler",
@@ -1871,50 +1646,32 @@
         ],
         "signature": [
           "(factory: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppLeaveActionFactory",
-            "text": "AppLeaveActionFactory"
-          },
+          "AppLeaveActionFactory",
           ", nextAppId?: string | undefined) => ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppLeaveAction",
-            "text": "AppLeaveAction"
-          }
+          "AppLeaveAction"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+        "path": "src/core/packages/application/browser/src/app_leave.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveHandler.$1",
+            "id": "def-public.AppLeaveHandler.$1",
             "type": "Object",
             "tags": [],
             "label": "factory",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppLeaveActionFactory",
-                "text": "AppLeaveActionFactory"
-              }
+              "AppLeaveActionFactory"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppLeaveHandler.$2",
+            "id": "def-public.AppLeaveHandler.$2",
             "type": "string",
             "tags": [],
             "label": "nextAppId",
@@ -1922,7 +1679,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_leave.ts",
+            "path": "src/core/packages/application/browser/src/app_leave.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1931,7 +1688,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppMount",
+        "id": "def-public.AppMount",
         "type": "Type",
         "tags": [],
         "label": "AppMount",
@@ -1940,32 +1697,14 @@
         ],
         "signature": [
           "(params: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppMountParameters",
-            "text": "AppMountParameters"
-          },
+          "AppMountParameters",
           "<HistoryLocationState>) => ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppUnmount",
-            "text": "AppUnmount"
-          },
+          "AppUnmount",
           " | Promise<",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppUnmount",
-            "text": "AppUnmount"
-          },
+          "AppUnmount",
           ">"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+        "path": "src/core/packages/application/browser/src/app_mount.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [
@@ -1974,7 +1713,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppMount.$1",
+            "id": "def-public.AppMount.$1",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -1982,16 +1721,10 @@
               "{@link AppMountParameters }"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.AppMountParameters",
-                "text": "AppMountParameters"
-              },
+              "AppMountParameters",
               "<HistoryLocationState>"
             ],
-            "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+            "path": "src/core/packages/application/browser/src/app_mount.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2000,7 +1733,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppUnmount",
+        "id": "def-public.AppUnmount",
         "type": "Type",
         "tags": [],
         "label": "AppUnmount",
@@ -2010,7 +1743,7 @@
         "signature": [
           "() => void"
         ],
-        "path": "packages/core/application/core-application-browser/src/app_mount.ts",
+        "path": "src/core/packages/application/browser/src/app_mount.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2019,7 +1752,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppUpdatableFields",
+        "id": "def-public.AppUpdatableFields",
         "type": "Type",
         "tags": [],
         "label": "AppUpdatableFields",
@@ -2028,39 +1761,21 @@
         ],
         "signature": [
           "{ status?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppStatus",
-            "text": "AppStatus"
-          },
-          " | undefined; navLinkStatus?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
-          },
-          " | undefined; searchable?: boolean | undefined; tooltip?: string | undefined; deepLinks?: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
-            "text": "AppDeepLink"
-          },
+          "AppStatus",
+          " | undefined; tooltip?: string | undefined; visibleIn?: ",
+          "AppDeepLinkLocations",
+          "[] | undefined; deepLinks?: ",
+          "AppDeepLink",
           "<string>[] | undefined; defaultPath?: string | undefined; }"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.AppUpdater",
+        "id": "def-public.AppUpdater",
         "type": "Type",
         "tags": [],
         "label": "AppUpdater",
@@ -2069,46 +1784,28 @@
         ],
         "signature": [
           "(app: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.App",
-            "text": "App"
-          },
+          "App",
           "<unknown>) => Partial<",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppUpdatableFields",
-            "text": "AppUpdatableFields"
-          },
+          "AppUpdatableFields",
           "> | undefined"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-application-browser",
-            "id": "def-common.AppUpdater.$1",
+            "id": "def-public.AppUpdater.$1",
             "type": "Object",
             "tags": [],
             "label": "app",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-application-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreApplicationBrowserPluginApi",
-                "section": "def-common.App",
-                "text": "App"
-              },
+              "App",
               "<unknown>"
             ],
-            "path": "packages/core/application/core-application-browser/src/application.ts",
+            "path": "src/core/packages/application/browser/src/application.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2117,7 +1814,7 @@
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.PublicAppDeepLinkInfo",
+        "id": "def-public.PublicAppDeepLinkInfo",
         "type": "Type",
         "tags": [],
         "label": "PublicAppDeepLinkInfo",
@@ -2126,39 +1823,21 @@
         ],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppDeepLink",
-            "text": "AppDeepLink"
-          },
-          "<string>, \"keywords\" | \"navLinkStatus\" | \"searchable\" | \"deepLinks\"> & { deepLinks: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.PublicAppDeepLinkInfo",
-            "text": "PublicAppDeepLinkInfo"
-          },
-          "[]; keywords: string[]; navLinkStatus: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
-          },
-          "; searchable: boolean; }"
+          "AppDeepLink",
+          "<string>, \"keywords\" | \"visibleIn\" | \"deepLinks\"> & { deepLinks: ",
+          "PublicAppDeepLinkInfo",
+          "[]; keywords: string[]; visibleIn: ",
+          "AppDeepLinkLocations",
+          "[]; }"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-application-browser",
-        "id": "def-common.PublicAppInfo",
+        "id": "def-public.PublicAppInfo",
         "type": "Type",
         "tags": [],
         "label": "PublicAppInfo",
@@ -2167,45 +1846,37 @@
         ],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.App",
-            "text": "App"
-          },
-          "<unknown>, \"keywords\" | \"searchable\" | \"deepLinks\" | \"mount\" | \"updater$\"> & { status: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppStatus",
-            "text": "AppStatus"
-          },
-          "; navLinkStatus: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.AppNavLinkStatus",
-            "text": "AppNavLinkStatus"
-          },
+          "App",
+          "<unknown>, \"keywords\" | \"visibleIn\" | \"deepLinks\" | \"mount\" | \"updater$\"> & { status: ",
+          "AppStatus",
           "; appRoute: string; keywords: string[]; deepLinks: ",
-          {
-            "pluginId": "@kbn/core-application-browser",
-            "scope": "common",
-            "docId": "kibKbnCoreApplicationBrowserPluginApi",
-            "section": "def-common.PublicAppDeepLinkInfo",
-            "text": "PublicAppDeepLinkInfo"
-          },
-          "[]; searchable: boolean; }"
+          "PublicAppDeepLinkInfo",
+          "[]; visibleIn: ",
+          "AppDeepLinkLocations",
+          "[]; }"
         ],
-        "path": "packages/core/application/core-application-browser/src/application.ts",
+        "path": "src/core/packages/application/browser/src/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

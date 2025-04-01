@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { PartialRuleDiff } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { REVIEW_RULE_UPGRADE_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/urls';
 import { ReviewRuleUpgradeResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules/review_rule_upgrade/review_rule_upgrade_route';
 import type SuperTest from 'supertest';
@@ -16,7 +17,7 @@ import type SuperTest from 'supertest';
  * @returns Review Upgrade prebuilt rules response
  */
 export const reviewPrebuiltRulesToUpgrade = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<ReviewRuleUpgradeResponseBody> => {
   const response = await supertest
     .post(REVIEW_RULE_UPGRADE_URL)
@@ -28,3 +29,11 @@ export const reviewPrebuiltRulesToUpgrade = async (
 
   return response.body;
 };
+
+export async function fetchFirstPrebuiltRuleUpgradeReviewDiff(
+  supertest: SuperTest.Agent
+): Promise<PartialRuleDiff> {
+  const response = await reviewPrebuiltRulesToUpgrade(supertest);
+
+  return response.rules[0].diff;
+}

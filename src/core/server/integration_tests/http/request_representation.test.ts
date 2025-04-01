@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 jest.mock('uuid', () => ({
@@ -16,7 +17,7 @@ import { executionContextServiceMock } from '@kbn/core-execution-context-server-
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { inspect } from 'util';
 
 let server: HttpService;
@@ -32,7 +33,7 @@ const setupDeps = {
 beforeEach(async () => {
   logger = loggingSystemMock.create();
 
-  server = createHttpServer({ logger });
+  server = createHttpService({ logger });
   await server.preboot({ context: contextServiceMock.createPrebootContract() });
 });
 
@@ -48,7 +49,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           return res.ok({ body: { req: String(req) } });
         }
@@ -65,7 +71,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           return res.ok({ body: { req: JSON.stringify(req) } });
         }
@@ -86,6 +97,7 @@ describe('request logging', () => {
         route: {
           method: 'get',
           path: '/',
+          routePath: '/',
           options: expect.any(Object),
         },
         uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
@@ -96,7 +108,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           return res.ok({ body: { req: inspect(req) } });
         }
@@ -115,16 +132,21 @@ describe('request logging', () => {
           auth: { isAuthenticated: false },
           route: {
             path: '/',
+            routePath: '/',
             method: 'get',
             options: {
               authRequired: true,
               xsrfRequired: false,
+              deprecated: undefined,
               access: 'internal',
               tags: [],
+              security: [Object],
               timeout: [Object],
               body: undefined
             }
-          }
+          },
+          authzResult: undefined,
+          apiVersion: undefined
         }"
       `);
     });
@@ -135,7 +157,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
           return res.ok({ body: { req: String(rawRequest) } });
@@ -153,7 +180,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
           return res.ok({ body: { req: JSON.stringify(rawRequest) } });
@@ -172,7 +204,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           const rawRequest = ensureRawRequest(req);
           return res.ok({ body: { req: inspect(rawRequest) } });
@@ -192,7 +229,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;
           return res.ok({ body: { req: String(rawRawRequest) } });
@@ -210,7 +252,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;
           return res.ok({ body: { req: JSON.stringify(rawRawRequest) } });
@@ -231,7 +278,12 @@ describe('request logging', () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);
       const router = createRouter('/');
       router.get(
-        { path: '/', validate: false, options: { authRequired: true } },
+        {
+          path: '/',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+          options: { authRequired: true },
+        },
         (context, req, res) => {
           const rawRawRequest = ensureRawRequest(req).raw.req;
           return res.ok({ body: { req: inspect(rawRawRequest) } });

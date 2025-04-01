@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { run } from '@kbn/dev-cli-runner';
@@ -13,7 +14,7 @@ import { parse } from './parse_owners';
 import { flush } from './flush';
 import { enumeratePatterns } from './enumerate_patterns';
 import { pipe } from '../utils';
-import { reduce } from 'rxjs/operators';
+import { reduce } from 'rxjs';
 
 const flags = {
   string: ['src', 'dest'],

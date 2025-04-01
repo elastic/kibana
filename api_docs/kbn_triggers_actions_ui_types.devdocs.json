@@ -22,6 +22,73 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.ActionGroupWithMessageVariables",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionGroupWithMessageVariables",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.ActionGroupWithMessageVariables",
+            "text": "ActionGroupWithMessageVariables"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.ActionGroup",
+            "text": "ActionGroup"
+          },
+          "<string>"
+        ],
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/triggers-actions-ui-types",
+            "id": "def-common.ActionGroupWithMessageVariables.omitMessageVariables",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "omitMessageVariables",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/triggers-actions-ui-types",
+                "scope": "common",
+                "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+                "section": "def-common.OmitMessageVariablesType",
+                "text": "OmitMessageVariablesType"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/triggers-actions-ui-types",
+            "id": "def-common.ActionGroupWithMessageVariables.defaultActionMessage",
+            "type": "string",
+            "tags": [],
+            "label": "defaultActionMessage",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
         "id": "def-common.RuleType",
         "type": "Interface",
         "tags": [],
@@ -43,9 +110,9 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"producer\" | \"minimumLicenseRequired\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\">"
         ],
-        "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +126,7 @@
             "signature": [
               "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
             ],
-            "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -73,7 +140,7 @@
             "signature": [
               "{ [x: string]: { read: boolean; all: boolean; }; }"
             ],
-            "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -84,7 +151,7 @@
             "tags": [],
             "label": "enabledInLicense",
             "description": [],
-            "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,7 +165,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -112,7 +179,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -132,7 +199,22 @@
         "signature": [
           "AsActionVariables<\"params\"> & Partial<AsActionVariables<\"context\" | \"state\">>"
         ],
-        "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.OmitMessageVariablesType",
+        "type": "Type",
+        "tags": [],
+        "label": "OmitMessageVariablesType",
+        "description": [],
+        "signature": [
+          "\"all\" | \"keepContext\""
+        ],
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_group_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -155,7 +237,52 @@
           },
           "<string, string>>"
         ],
-        "path": "packages/kbn-triggers-actions-ui-types/rule_types.ts",
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.RuleTypeIndexWithDescriptions",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeIndexWithDescriptions",
+        "description": [],
+        "signature": [
+          "Map<string, ",
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleTypeWithDescription",
+            "text": "RuleTypeWithDescription"
+          },
+          ">"
+        ],
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/triggers-actions-ui-types",
+        "id": "def-common.RuleTypeWithDescription",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeWithDescription",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/triggers-actions-ui-types",
+            "scope": "common",
+            "docId": "kibKbnTriggersActionsUiTypesPluginApi",
+            "section": "def-common.RuleType",
+            "text": "RuleType"
+          },
+          "<string, string> & { description?: string | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -172,7 +299,7 @@
         "signature": [
           "readonly [\"context\"]"
         ],
-        "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -187,7 +314,7 @@
         "signature": [
           "readonly [\"context\", \"state\"]"
         ],
-        "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -202,7 +329,7 @@
         "signature": [
           "readonly [\"params\"]"
         ],
-        "path": "packages/kbn-triggers-actions-ui-types/action_variable_types.ts",
+        "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/action_variable_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

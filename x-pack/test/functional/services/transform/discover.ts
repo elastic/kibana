@@ -11,14 +11,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const dataViews = getService('dataViews');
 
   return {
     async assertDiscoverQueryHits(expectedDiscoverQueryHits: string) {
-      await testSubjects.existOrFail('unifiedHistogramQueryHits');
+      await testSubjects.existOrFail('discoverQueryHits');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
-        'unifiedHistogramQueryHits'
-      );
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
 
       expect(actualDiscoverQueryHits).to.eql(
         expectedDiscoverQueryHits,
@@ -27,23 +26,20 @@ export function TransformDiscoverProvider({ getService }: FtrProviderContext) {
     },
 
     async assertDiscoverQueryHitsMoreThanZero() {
-      await testSubjects.existOrFail('unifiedHistogramQueryHits');
+      await testSubjects.existOrFail('discoverQueryHits');
 
-      const actualDiscoverQueryHits = await testSubjects.getVisibleText(
-        'unifiedHistogramQueryHits'
-      );
+      const actualDiscoverQueryHits = await testSubjects.getVisibleText('discoverQueryHits');
 
       const hits = parseInt(actualDiscoverQueryHits, 10);
       expect(hits).to.greaterThan(0, `Discover query hits should be more than 0, got ${hits}`);
     },
 
     async assertNoResults(expectedDestinationIndex: string) {
-      await testSubjects.missingOrFail('unifiedHistogramQueryHits');
+      await testSubjects.missingOrFail('discoverQueryHits');
 
       // Discover should use the destination index pattern
-      const actualIndexPatternSwitchLinkText = await (
-        await testSubjects.find('discover-dataView-switch-link')
-      ).getVisibleText();
+      const actualIndexPatternSwitchLinkText = await dataViews.getSelectedName();
+
       expect(actualIndexPatternSwitchLinkText).to.eql(
         expectedDestinationIndex,
         `Destination index should be ${expectedDestinationIndex}, got ${actualIndexPatternSwitchLinkText}`

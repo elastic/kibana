@@ -6,13 +6,14 @@
  */
 
 import expect from 'expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
 import type { SavedObjectReference } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { getUrlPrefix } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -207,14 +208,12 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('7.16.0 migrates existing alerts to contain legacyId field', async () => {
-      const searchResult = await es.search<RawRule>(
+      const searchResult = await es.search<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              term: {
-                _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
-              },
+          query: {
+            term: {
+              _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
             },
           },
         },
@@ -223,20 +222,16 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).toEqual(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).toEqual(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).legacyId).toEqual(
-        '74f3e6d7-b7bb-477d-ac28-92ee22728e6e'
-      );
+      expect(hit!._source!.alert.legacyId).toEqual('74f3e6d7-b7bb-477d-ac28-92ee22728e6e');
     });
 
     it('7.16.0 migrates existing rules so predefined connectors are not stored in references', async () => {
-      const searchResult = await es.search<RawRule>(
+      const searchResult = await es.search<{ alert: RawRule; references: {} }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              term: {
-                _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
-              },
+          query: {
+            term: {
+              _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
             },
           },
         },
@@ -245,7 +240,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(searchResult.statusCode).toEqual(200);
       expect((searchResult.body.hits.total as estypes.SearchTotalHits).value).toEqual(1);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).actions! as RawRuleAction[]).toEqual([
+      expect(hit!._source!.alert.actions! as RawRuleAction[]).toEqual([
         expect.objectContaining({
           actionRef: 'action_0',
           actionTypeId: 'test.noop',
@@ -284,7 +279,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         {
           name: 'param:alert_0',
           id: '1a4ed6ae-3c89-44b2-999d-db554144504c',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
         },
       ]);
     });
@@ -447,14 +442,12 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('8.4.1 removes IsSnoozedUntil', async () => {
-      const searchResult = await es.search<RawRule>(
+      const searchResult = await es.search<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              term: {
-                _id: 'alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7',
-              },
+          query: {
+            term: {
+              _id: 'alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7',
             },
           },
         },
@@ -463,7 +456,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       expect(searchResult.statusCode).toEqual(200);
       const hit = searchResult.body.hits.hits[0];
-      expect((hit!._source!.alert! as RawRule).isSnoozedUntil).toBe(undefined);
+      expect(hit!._source!.alert.isSnoozedUntil).toBe(undefined);
     });
 
     it('8.5.0 removes runtime and field params from older ES Query rules', async () => {
@@ -586,20 +579,18 @@ export default function createGetTests({ getService }: FtrProviderContext) {
     });
 
     it('8.7.0 adds aggType and groupBy to ES query rules', async () => {
-      const response = await es.search<RawRule>(
+      const response = await es.search<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'alert.alertTypeId': '.es-query',
-                    },
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'alert.alertTypeId': '.es-query',
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         },
@@ -607,8 +598,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       );
       expect(response.statusCode).toEqual(200);
       response.body.hits.hits.forEach((hit) => {
-        expect((hit?._source?.alert as RawRule)?.params?.aggType).toEqual('count');
-        expect((hit?._source?.alert as RawRule)?.params?.groupBy).toEqual('all');
+        expect(hit?._source?.alert?.params?.aggType).toEqual('count');
+        expect(hit?._source?.alert?.params?.groupBy).toEqual('all');
       });
     });
 
@@ -700,7 +691,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       const { docs } = await es.mget<{ alert: RawRule }>({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-        body: { ids: [securityCustomRuleId, securityImmutableRuleId, nonSecurityRuleId] },
+        ids: [securityCustomRuleId, securityImmutableRuleId, nonSecurityRuleId],
       });
 
       const securityCustomRuleMuteAll =

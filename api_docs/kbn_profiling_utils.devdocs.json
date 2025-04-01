@@ -29,7 +29,7 @@
         "signature": [
           "(value: number) => number"
         ],
-        "path": "packages/kbn-profiling-utils/common/utils.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-profiling-utils/common/utils.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -70,7 +70,7 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
-          ") => ",
+          ", showErrorFrames: boolean) => ",
           {
             "pluginId": "@kbn/profiling-utils",
             "scope": "common",
@@ -79,7 +79,7 @@
             "text": "ElasticFlameGraph"
           }
         ],
-        "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,7 +101,22 @@
                 "text": "BaseFlameGraph"
               }
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.createFlameGraph.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "showErrorFrames",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -124,7 +139,7 @@
         "signature": [
           "(fileID: string, addressOrLine: number, exeFilename: string, sourceFilename: string, functionName: string) => string"
         ],
-        "path": "packages/kbn-profiling-utils/common/frame_group.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/frame_group.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -140,7 +155,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-profiling-utils/common/frame_group.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -157,7 +172,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-profiling-utils/common/frame_group.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -174,7 +189,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-profiling-utils/common/frame_group.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -191,7 +206,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-profiling-utils/common/frame_group.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -208,7 +223,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-profiling-utils/common/frame_group.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/frame_group.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -246,7 +261,7 @@
             "text": "StackFrameMetadata"
           }
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,7 +285,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -289,7 +304,7 @@
         "label": "createTopNFunctions",
         "description": [],
         "signature": [
-          "({\n  endIndex,\n  events,\n  executables,\n  samplingRate,\n  stackFrames,\n  stackTraces,\n  startIndex,\n}: { endIndex: number; events: Map<string, number>; executables: Map<string, ",
+          "({\n  endIndex,\n  events,\n  executables,\n  samplingRate,\n  stackFrames,\n  stackTraces,\n  startIndex,\n  showErrorFrames,\n}: { endIndex: number; events: Map<string, number>; executables: Map<string, ",
           {
             "pluginId": "@kbn/profiling-utils",
             "scope": "common",
@@ -313,7 +328,7 @@
             "section": "def-common.StackTrace",
             "text": "StackTrace"
           },
-          ">; startIndex: number; }) => ",
+          ">; startIndex: number; showErrorFrames: boolean; }) => ",
           {
             "pluginId": "@kbn/profiling-utils",
             "scope": "common",
@@ -322,7 +337,7 @@
             "text": "TopNFunctions"
           }
         ],
-        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -331,9 +346,9 @@
             "id": "def-common.createTopNFunctions.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  endIndex,\n  events,\n  executables,\n  samplingRate,\n  stackFrames,\n  stackTraces,\n  startIndex,\n}",
+            "label": "{\n  endIndex,\n  events,\n  executables,\n  samplingRate,\n  stackFrames,\n  stackTraces,\n  startIndex,\n  showErrorFrames,\n}",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -344,7 +359,7 @@
                 "tags": [],
                 "label": "endIndex",
                 "description": [],
-                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -358,7 +373,7 @@
                 "signature": [
                   "Map<string, number>"
                 ],
-                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -380,7 +395,7 @@
                   },
                   ">"
                 ],
-                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -391,7 +406,7 @@
                 "tags": [],
                 "label": "samplingRate",
                 "description": [],
-                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -413,7 +428,7 @@
                   },
                   ">"
                 ],
-                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -435,7 +450,7 @@
                   },
                   ">"
                 ],
-                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -446,7 +461,18 @@
                 "tags": [],
                 "label": "startIndex",
                 "description": [],
-                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.showErrorFrames",
+                "type": "boolean",
+                "tags": [],
+                "label": "showErrorFrames",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -474,7 +500,7 @@
             "section": "def-common.StackTraceResponse",
             "text": "StackTraceResponse"
           },
-          ") => ",
+          ", showErrorFrames: boolean) => ",
           {
             "pluginId": "@kbn/profiling-utils",
             "scope": "common",
@@ -483,7 +509,7 @@
             "text": "DecodedStackTraceResponse"
           }
         ],
-        "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -505,7 +531,22 @@
                 "text": "StackTraceResponse"
               }
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.decodeStackTraceResponse.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "showErrorFrames",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -536,7 +577,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -558,7 +599,7 @@
                 "text": "FrameType"
               }
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -589,7 +630,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -611,7 +652,7 @@
                 "text": "StackFrameMetadata"
               }
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -642,7 +683,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -664,7 +705,7 @@
                 "text": "StackFrameMetadata"
               }
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -695,7 +736,7 @@
           },
           ") => string"
         ],
-        "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -717,7 +758,7 @@
                 "text": "TopNType"
               }
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -747,7 +788,7 @@
             "text": "FrameSymbolStatus"
           }
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -763,7 +804,7 @@
             "signature": [
               "FrameSymbolStatusParams"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -786,7 +827,7 @@
         "signature": [
           "(param: LanguageTypeParams) => \"NATIVE\" | \"INTERPRETED\""
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -802,7 +843,7 @@
             "signature": [
               "LanguageTypeParams"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -857,7 +898,7 @@
           },
           "[]>"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -881,7 +922,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -906,7 +947,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -931,7 +972,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -939,6 +980,66 @@
         ],
         "returnComment": [
           "Record<string, StackFrameMetadata[]>"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.normalizeFrameType",
+        "type": "Function",
+        "tags": [],
+        "label": "normalizeFrameType",
+        "description": [
+          "\nnormalize the given frame type"
+        ],
+        "signature": [
+          "(ft: ",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.FrameType",
+            "text": "FrameType"
+          },
+          ") => ",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.FrameType",
+            "text": "FrameType"
+          }
+        ],
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.normalizeFrameType.$1",
+            "type": "Enum",
+            "tags": [],
+            "label": "ft",
+            "description": [
+              "FrameType"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/profiling-utils",
+                "scope": "common",
+                "docId": "kibKbnProfilingUtilsPluginApi",
+                "section": "def-common.FrameType",
+                "text": "FrameType"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "FrameType"
         ],
         "initialIsOpen": false
       }
@@ -953,7 +1054,7 @@
         "description": [
           "\nBase Flamegraph"
         ],
-        "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -966,7 +1067,7 @@
             "description": [
               "size"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -982,7 +1083,7 @@
             "signature": [
               "number[][]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -998,7 +1099,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1014,7 +1115,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1030,7 +1131,7 @@
             "signature": [
               "boolean[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1046,7 +1147,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1062,7 +1163,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1078,7 +1179,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1094,7 +1195,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1110,7 +1211,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1126,7 +1227,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1142,7 +1243,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1158,7 +1259,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1171,7 +1272,7 @@
             "description": [
               "total seconds"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1184,7 +1285,7 @@
             "description": [
               "sampling rate"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1195,18 +1296,7 @@
             "tags": [],
             "label": "TotalSamples",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.BaseFlameGraph.TotalCPU",
-            "type": "number",
-            "tags": [],
-            "label": "TotalCPU",
-            "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1217,7 +1307,7 @@
             "tags": [],
             "label": "SelfCPU",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1231,7 +1321,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1245,7 +1335,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1259,7 +1349,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1273,7 +1363,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1289,7 +1379,7 @@
         "description": [
           "Decoded stack trace response"
         ],
-        "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1305,7 +1395,7 @@
             "signature": [
               "Map<string, number>"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1329,7 +1419,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1353,7 +1443,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1377,20 +1467,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.DecodedStackTraceResponse.totalFrames",
-            "type": "number",
-            "tags": [],
-            "label": "totalFrames",
-            "description": [
-              "Total number of frames"
-            ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1403,7 +1480,7 @@
             "description": [
               "sampling rate"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1435,9 +1512,9 @@
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
           },
-          ", \"AnnualCO2TonsExclusive\" | \"AnnualCO2TonsInclusive\" | \"SelfAnnualCO2Tons\" | \"TotalAnnualCO2Tons\" | \"AnnualCostsUSDInclusive\" | \"AnnualCostsUSDExclusive\">"
+          ", \"AnnualCO2TonsExclusive\" | \"AnnualCO2TonsInclusive\" | \"AnnualCostsUSDInclusive\" | \"AnnualCostsUSDExclusive\" | \"SelfAnnualCO2Tons\" | \"TotalAnnualCO2Tons\">"
         ],
-        "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1453,7 +1530,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1469,7 +1546,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1483,7 +1560,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1497,7 +1574,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1511,7 +1588,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1525,7 +1602,79 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.ESTopNFunctions",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESTopNFunctions",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/es_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.self_count",
+            "type": "number",
+            "tags": [],
+            "label": "self_count",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.total_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_count",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.self_annual_co2_tons",
+            "type": "number",
+            "tags": [],
+            "label": "self_annual_co2_tons",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.self_annual_cost_usd",
+            "type": "number",
+            "tags": [],
+            "label": "self_annual_cost_usd",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/es_functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ESTopNFunctions.topn",
+            "type": "Array",
+            "tags": [],
+            "label": "topn",
+            "description": [],
+            "signature": [
+              "TopNFunction[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/es_functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1541,7 +1690,7 @@
         "description": [
           "Executable"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1554,7 +1703,7 @@
             "description": [
               "file name"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1568,7 +1717,7 @@
         "tags": [],
         "label": "ProfilingStatus",
         "description": [],
-        "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1579,7 +1728,7 @@
             "tags": [],
             "label": "has_setup",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1590,7 +1739,7 @@
             "tags": [],
             "label": "has_data",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1601,7 +1750,7 @@
             "tags": [],
             "label": "pre_8_9_1_data",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1615,7 +1764,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1631,7 +1780,7 @@
         "description": [
           "Profiling status response"
         ],
-        "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1647,7 +1796,7 @@
             "signature": [
               "{ enabled: boolean; }"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1663,7 +1812,7 @@
             "signature": [
               "{ enabled: boolean; }"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1679,7 +1828,7 @@
             "signature": [
               "{ created: boolean; pre_8_9_1_data: boolean; }"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1695,7 +1844,7 @@
         "description": [
           "Stack frame"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1708,7 +1857,7 @@
             "description": [
               "file name"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1721,7 +1870,7 @@
             "description": [
               "function name"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1734,7 +1883,7 @@
             "description": [
               "function offset"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1747,7 +1896,7 @@
             "description": [
               "line number"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1760,7 +1909,7 @@
             "description": [
               "inline"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1776,7 +1925,7 @@
         "description": [
           "Stack frame metadata"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1789,7 +1938,7 @@
             "description": [
               "StackTrace.FrameID"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1802,7 +1951,7 @@
             "description": [
               "StackTrace.FileID"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1815,7 +1964,7 @@
             "description": [
               "StackTrace.Type"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1828,7 +1977,7 @@
             "description": [
               "StackFrame.Inline"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1841,7 +1990,7 @@
             "description": [
               "StackTrace.AddressOrLine"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1854,7 +2003,7 @@
             "description": [
               "StackFrame.FunctionName"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1867,20 +2016,7 @@
             "description": [
               "StackFrame.FunctionOffset"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourceID",
-            "type": "string",
-            "tags": [],
-            "label": "SourceID",
-            "description": [
-              "should this be StackFrame.SourceID?"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1893,7 +2029,7 @@
             "description": [
               "StackFrame.Filename"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1906,20 +2042,7 @@
             "description": [
               "StackFrame.LineNumber"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.FunctionSourceLine",
-            "type": "number",
-            "tags": [],
-            "label": "FunctionSourceLine",
-            "description": [
-              "auto-generated - see createStackFrameMetadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1932,72 +2055,7 @@
             "description": [
               "Executable.FileName"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.CommitHash",
-            "type": "string",
-            "tags": [],
-            "label": "CommitHash",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourceCodeURL",
-            "type": "string",
-            "tags": [],
-            "label": "SourceCodeURL",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourcePackageHash",
-            "type": "string",
-            "tags": [],
-            "label": "SourcePackageHash",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourcePackageURL",
-            "type": "string",
-            "tags": [],
-            "label": "SourcePackageURL",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SamplingRate",
-            "type": "number",
-            "tags": [],
-            "label": "SamplingRate",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2013,7 +2071,7 @@
         "description": [
           "Stack trace"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2029,7 +2087,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2045,7 +2103,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2061,7 +2119,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2077,7 +2135,7 @@
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2088,7 +2146,7 @@
             "tags": [],
             "label": "selfAnnualCO2Kgs",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2099,7 +2157,7 @@
             "tags": [],
             "label": "selfAnnualCostUSD",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2110,7 +2168,7 @@
             "tags": [],
             "label": "Count",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2126,7 +2184,7 @@
         "description": [
           "Profiling stacktrace"
         ],
-        "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2142,7 +2200,7 @@
             "signature": [
               "ProfilingEvents | undefined"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2158,7 +2216,7 @@
             "signature": [
               "ProfilingStackTraces | undefined"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2174,7 +2232,7 @@
             "signature": [
               "ProfilingStackFrames | undefined"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2190,20 +2248,7 @@
             "signature": [
               "ProfilingExecutables | undefined"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackTraceResponse.total_frames",
-            "type": "number",
-            "tags": [],
-            "label": "['total_frames']",
-            "description": [
-              "total frames"
-            ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2216,7 +2261,7 @@
             "description": [
               "sampling rate"
             ],
-            "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2230,7 +2275,7 @@
         "tags": [],
         "label": "TopNFunctions",
         "description": [],
-        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2241,7 +2286,7 @@
             "tags": [],
             "label": "TotalCount",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2255,7 +2300,7 @@
             "signature": [
               "TopNFunction[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2266,7 +2311,7 @@
             "tags": [],
             "label": "SamplingRate",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2277,7 +2322,7 @@
             "tags": [],
             "label": "selfCPU",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2288,7 +2333,7 @@
             "tags": [],
             "label": "totalCPU",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2299,7 +2344,7 @@
             "tags": [],
             "label": "totalAnnualCO2Kgs",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2310,7 +2355,7 @@
             "tags": [],
             "label": "totalAnnualCostUSD",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2328,7 +2373,7 @@
         "description": [
           "\nFrame symbol status"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2340,9 +2385,9 @@
         "tags": [],
         "label": "FrameType",
         "description": [
-          "\nFrame type"
+          "\nFrame type\nThese frame types need to match with the constants defined in\nhttps://github.com/open-telemetry/opentelemetry-ebpf-profiler/blob/main/libpf/frametype.go"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2356,7 +2401,7 @@
         "description": [
           "\nProfiling Elasticsearch fields"
         ],
-        "path": "packages/kbn-profiling-utils/common/elasticsearch.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/elasticsearch.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2370,7 +2415,7 @@
         "description": [
           "\nStacktraces options"
         ],
-        "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2382,7 +2427,7 @@
         "tags": [],
         "label": "TopNComparisonFunctionSortField",
         "description": [],
-        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2394,7 +2439,7 @@
         "tags": [],
         "label": "TopNFunctionSortField",
         "description": [],
-        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2408,13 +2453,28 @@
         "description": [
           "\nFunctions TopN types definition"
         ],
-        "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/stack_traces.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.AggregationField",
+        "type": "Type",
+        "tags": [],
+        "label": "AggregationField",
+        "description": [],
+        "signature": [
+          "\"service.name\" | \"transaction.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/es_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/profiling-utils",
         "id": "def-common.FileID",
@@ -2427,7 +2487,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2444,7 +2504,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-profiling-utils/common/frame_group.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/frame_group.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2461,7 +2521,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2478,7 +2538,7 @@
         "signature": [
           "string"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2494,7 +2554,7 @@
         "description": [
           "\nEmpty exectutable"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2507,7 +2567,7 @@
             "description": [
               "/** file name */"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2523,7 +2583,7 @@
         "description": [
           "\nEmpty stack frame"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2536,7 +2596,7 @@
             "description": [
               "/** File name */"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2549,7 +2609,7 @@
             "description": [
               "/** Function name */"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2562,7 +2622,7 @@
             "description": [
               "/** Function offset */"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2575,7 +2635,7 @@
             "description": [
               "/** Line number */"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2591,7 +2651,7 @@
             "signature": [
               "false"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2607,7 +2667,7 @@
         "description": [
           "\nEmpty stack trace"
         ],
-        "path": "packages/kbn-profiling-utils/common/profiling.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2623,7 +2683,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2639,7 +2699,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2655,7 +2715,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2671,7 +2731,7 @@
             "signature": [
               "never[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2682,7 +2742,7 @@
             "tags": [],
             "label": "selfAnnualCO2Kgs",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2693,7 +2753,7 @@
             "tags": [],
             "label": "selfAnnualCostUSD",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2704,7 +2764,7 @@
             "tags": [],
             "label": "Count",
             "description": [],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "path": "src/platform/packages/shared/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2782,7 +2842,7 @@
           },
           ".ComparisonDiff>]>"
         ],
-        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2878,7 +2938,7 @@
           },
           ".AnnualizedDollarCost>]>"
         ],
-        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "path": "src/platform/packages/shared/kbn-profiling-utils/common/functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

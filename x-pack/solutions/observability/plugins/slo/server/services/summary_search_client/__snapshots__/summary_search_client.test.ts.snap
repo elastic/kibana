@@ -1,0 +1,136 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 1`] = `
+Array [
+  Object {
+    "index": ".slo-observability.summary-v3*",
+    "query": Object {
+      "bool": Object {
+        "filter": Array [
+          Object {
+            "terms": Object {
+              "slo.id": Array [
+                "slo-one",
+                "slo_two",
+                "slo-three",
+                "slo-five",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "isTempDoc": true,
+            },
+          },
+        ],
+      },
+    },
+    "wait_for_completion": false,
+  },
+]
+`;
+
+exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 2`] = `
+Object {
+  "page": 1,
+  "perPage": 20,
+  "results": Array [
+    Object {
+      "groupings": Object {},
+      "instanceId": "*",
+      "sloId": "slo-one",
+      "summary": Object {
+        "errorBudget": Object {
+          "consumed": 0,
+          "initial": 0.001,
+          "isEstimated": false,
+          "remaining": 1,
+        },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
+        "sliValue": -1,
+        "status": "NO_DATA",
+        "summaryUpdatedAt": null,
+      },
+    },
+    Object {
+      "groupings": Object {},
+      "instanceId": "*",
+      "sloId": "slo_two",
+      "summary": Object {
+        "errorBudget": Object {
+          "consumed": 0,
+          "initial": 0.001,
+          "isEstimated": false,
+          "remaining": 1,
+        },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
+        "sliValue": -1,
+        "status": "NO_DATA",
+        "summaryUpdatedAt": null,
+      },
+    },
+    Object {
+      "groupings": Object {},
+      "instanceId": "*",
+      "sloId": "slo-three",
+      "summary": Object {
+        "errorBudget": Object {
+          "consumed": 0,
+          "initial": 0.001,
+          "isEstimated": false,
+          "remaining": 1,
+        },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
+        "sliValue": -1,
+        "status": "NO_DATA",
+        "summaryUpdatedAt": null,
+      },
+    },
+    Object {
+      "groupings": Object {},
+      "instanceId": "*",
+      "sloId": "slo-five",
+      "summary": Object {
+        "errorBudget": Object {
+          "consumed": 0,
+          "initial": 0.001,
+          "isEstimated": false,
+          "remaining": 1,
+        },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
+        "sliValue": -1,
+        "status": "NO_DATA",
+        "summaryUpdatedAt": null,
+      },
+    },
+    Object {
+      "groupings": Object {},
+      "instanceId": "*",
+      "sloId": "slo-four",
+      "summary": Object {
+        "errorBudget": Object {
+          "consumed": 0,
+          "initial": 0.001,
+          "isEstimated": false,
+          "remaining": 1,
+        },
+        "fiveMinuteBurnRate": 0,
+        "oneDayBurnRate": 0,
+        "oneHourBurnRate": 0,
+        "sliValue": -1,
+        "status": "NO_DATA",
+        "summaryUpdatedAt": null,
+      },
+    },
+  ],
+  "total": 5,
+}
+`;

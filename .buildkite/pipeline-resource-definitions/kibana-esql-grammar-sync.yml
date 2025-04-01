@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-esql-grammar-sync
+  description: Opens a PR if anything changes in the ES|QL grammar in Elasticsearch
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-esql-grammar-sync'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-esql'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / ES|QL grammar sync
+      description: Opens a PR if anything changes in the ES|QL grammar in Elasticsearch
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-esql-project-team'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: false
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/esql_grammar_sync.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        build_tags: false
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: true
+      teams:
+        kibana-esql:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: BUILD_AND_READ
+      schedules:
+        Weekly build:
+          cronline: 0 0 * * 1 America/New_York
+          message: Weekly build
+          branch: main
+      tags:
+        - kibana

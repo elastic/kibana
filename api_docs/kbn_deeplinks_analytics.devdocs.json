@@ -30,9 +30,9 @@
         "label": "AppId",
         "description": [],
         "signature": [
-          "\"dashboards\" | \"discover\" | \"visualize\""
+          "\"graph\" | \"canvas\" | \"dashboards\" | \"discover\" | \"maps\" | \"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,22 @@
         "signature": [
           "\"dashboards\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DASHBOARD_APP_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "DASHBOARD_APP_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DASHBOARD_APP_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -60,9 +75,9 @@
         "label": "DeepLinkId",
         "description": [],
         "signature": [
-          "\"dashboards\" | \"discover\" | \"visualize\""
+          "\"graph\" | \"canvas\" | \"dashboards\" | \"discover\" | \"maps\" | \"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +92,22 @@
         "signature": [
           "\"discover\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-analytics",
+        "id": "def-common.DISCOVER_ESQL_LOCATOR",
+        "type": "string",
+        "tags": [],
+        "label": "DISCOVER_ESQL_LOCATOR",
+        "description": [],
+        "signature": [
+          "\"DISCOVER_ESQL_LOCATOR\""
+        ],
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -92,7 +122,7 @@
         "signature": [
           "\"visualize\""
         ],
-        "path": "packages/deeplinks/analytics/constants.ts",
+        "path": "src/platform/packages/shared/deeplinks/analytics/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

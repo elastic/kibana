@@ -22,42 +22,46 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeatureParams",
+        "id": "def-common.ProductFeatureParams",
         "type": "Interface",
         "tags": [],
-        "label": "AppFeatureParams",
+        "label": "ProductFeatureParams",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
             "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
-            "section": "def-common.AppFeatureParams",
-            "text": "AppFeatureParams"
+            "section": "def-common.ProductFeatureParams",
+            "text": "ProductFeatureParams"
           },
           "<T>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/security-solution-features",
-            "id": "def-common.AppFeatureParams.baseKibanaFeature",
+            "id": "def-common.ProductFeatureParams.baseKibanaFeature",
             "type": "Object",
             "tags": [],
             "label": "baseKibanaFeature",
             "description": [],
             "signature": [
-              "{ id: string; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
+              "{ id: string; scope?: readonly ",
               {
-                "pluginId": "@kbn/core-application-common",
+                "pluginId": "features",
                 "scope": "common",
-                "docId": "kibKbnCoreApplicationCommonPluginApi",
-                "section": "def-common.AppCategory",
-                "text": "AppCategory"
+                "docId": "kibFeaturesPluginApi",
+                "section": "def-common.KibanaFeatureScope",
+                "text": "KibanaFeatureScope"
               },
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; privileges: { all: ",
+              "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+              "AlertingKibanaPrivilege",
+              " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+              "AppCategory",
+              "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -73,17 +77,17 @@
                 "section": "def-common.FeatureKibanaPrivileges",
                 "text": "FeatureKibanaPrivileges"
               },
-              "; } | null; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
+              "; } | null; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
               "ReservedKibanaPrivilege",
               "[]; } | undefined; }"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/security-solution-features",
-            "id": "def-common.AppFeatureParams.baseKibanaSubFeatureIds",
+            "id": "def-common.ProductFeatureParams.baseKibanaSubFeatureIds",
             "type": "Array",
             "tags": [],
             "label": "baseKibanaSubFeatureIds",
@@ -91,13 +95,13 @@
             "signature": [
               "T[]"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/security-solution-features",
-            "id": "def-common.AppFeatureParams.subFeaturesMap",
+            "id": "def-common.ProductFeatureParams.subFeaturesMap",
             "type": "Object",
             "tags": [],
             "label": "subFeaturesMap",
@@ -113,9 +117,197 @@
               },
               ">"
             ],
-            "path": "x-pack/packages/security-solution/features/src/types.ts",
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeaturesConfigurator",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProductFeaturesConfigurator",
+        "description": [],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/security-solution-features",
+            "id": "def-common.ProductFeaturesConfigurator.security",
+            "type": "Function",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-solution-features",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                "section": "def-common.ProductFeaturesConfig",
+                "text": "ProductFeaturesConfig"
+              },
+              "<",
+              "SecuritySubFeatureId",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-features",
+            "id": "def-common.ProductFeaturesConfigurator.cases",
+            "type": "Function",
+            "tags": [],
+            "label": "cases",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-solution-features",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                "section": "def-common.ProductFeaturesConfig",
+                "text": "ProductFeaturesConfig"
+              },
+              "<",
+              "CasesSubFeatureId",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-features",
+            "id": "def-common.ProductFeaturesConfigurator.securityAssistant",
+            "type": "Function",
+            "tags": [],
+            "label": "securityAssistant",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-solution-features",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                "section": "def-common.ProductFeaturesConfig",
+                "text": "ProductFeaturesConfig"
+              },
+              "<",
+              "AssistantSubFeatureId",
+              ">"
+            ],
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-features",
+            "id": "def-common.ProductFeaturesConfigurator.attackDiscovery",
+            "type": "Function",
+            "tags": [],
+            "label": "attackDiscovery",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-solution-features",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                "section": "def-common.ProductFeaturesConfig",
+                "text": "ProductFeaturesConfig"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-features",
+            "id": "def-common.ProductFeaturesConfigurator.timeline",
+            "type": "Function",
+            "tags": [],
+            "label": "timeline",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-solution-features",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                "section": "def-common.ProductFeaturesConfig",
+                "text": "ProductFeaturesConfig"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-features",
+            "id": "def-common.ProductFeaturesConfigurator.notes",
+            "type": "Function",
+            "tags": [],
+            "label": "notes",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-solution-features",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                "section": "def-common.ProductFeaturesConfig",
+                "text": "ProductFeaturesConfig"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/security-solution-features",
+            "id": "def-common.ProductFeaturesConfigurator.siemMigrations",
+            "type": "Function",
+            "tags": [],
+            "label": "siemMigrations",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/security-solution-features",
+                "scope": "common",
+                "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+                "section": "def-common.ProductFeaturesConfig",
+                "text": "ProductFeaturesConfig"
+              },
+              "<string>"
+            ],
+            "path": "x-pack/solutions/security/packages/features/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -125,51 +317,127 @@
     "misc": [
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeatureKeys",
+        "id": "def-common.AppSubFeaturesMap",
         "type": "Type",
         "tags": [],
-        "label": "AppFeatureKeys",
+        "label": "AppSubFeaturesMap",
+        "description": [],
+        "signature": [
+          "Map<T, ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.SubFeatureConfig",
+            "text": "SubFeatureConfig"
+          },
+          ">"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.BaseKibanaFeatureConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "BaseKibanaFeatureConfig",
+        "description": [],
+        "signature": [
+          "{ id: string; scope?: readonly ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.KibanaFeatureScope",
+            "text": "KibanaFeatureScope"
+          },
+          "[] | undefined; order?: number | undefined; name: string; alerting?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; cases?: readonly string[] | undefined; hidden?: boolean | undefined; description?: string | undefined; category: ",
+          "AppCategory",
+          "; management?: { [sectionId: string]: readonly string[]; } | undefined; app: readonly string[]; readonly deprecated?: Readonly<{ notice: string; replacedBy?: readonly string[] | undefined; }> | undefined; privileges: { all: ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.FeatureKibanaPrivileges",
+            "text": "FeatureKibanaPrivileges"
+          },
+          "; read: ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.FeatureKibanaPrivileges",
+            "text": "FeatureKibanaPrivileges"
+          },
+          "; } | null; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
+          "ReservedKibanaPrivilege",
+          "[]; } | undefined; }"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeatureKeys",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeatureKeys",
         "description": [],
         "signature": [
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
             "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
-            "section": "def-common.AppFeatureKeyType",
-            "text": "AppFeatureKeyType"
+            "section": "def-common.ProductFeatureKeyType",
+            "text": "ProductFeatureKeyType"
           },
           "[]"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeatureKeyType",
+        "id": "def-common.ProductFeatureKeyType",
         "type": "Type",
         "tags": [],
-        "label": "AppFeatureKeyType",
+        "label": "ProductFeatureKeyType",
         "description": [],
         "signature": [
-          "AppFeatureSecurityKey",
+          "ProductFeatureSecurityKey",
           " | ",
-          "AppFeatureCasesKey",
+          "ProductFeatureCasesKey",
           " | ",
-          "AppFeatureAssistantKey"
+          "ProductFeatureAssistantKey",
+          " | ",
+          "ProductFeatureAttackDiscoveryKey",
+          " | ",
+          "ProductFeatureSiemMigrationsKey",
+          " | ",
+          "ProductFeatureTimelineFeatureKey",
+          " | ",
+          "ProductFeatureNotesFeatureKey"
         ],
-        "path": "x-pack/packages/security-solution/features/src/app_features_keys.ts",
+        "path": "x-pack/solutions/security/packages/features/src/product_features_keys.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeatureKibanaConfig",
+        "id": "def-common.ProductFeatureKibanaConfig",
         "type": "Type",
         "tags": [],
-        "label": "AppFeatureKibanaConfig",
+        "label": "ProductFeatureKibanaConfig",
         "description": [],
         "signature": [
           {
@@ -205,71 +473,96 @@
           },
           ">[] | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeaturesAssistantConfig",
+        "id": "def-common.ProductFeaturesAssistantConfig",
         "type": "Type",
         "tags": [],
-        "label": "AppFeaturesAssistantConfig",
+        "label": "ProductFeaturesAssistantConfig",
         "description": [],
         "signature": [
           "Map<",
-          "AppFeatureAssistantKey",
+          "ProductFeatureAssistantKey",
           ", ",
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
             "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
-            "section": "def-common.AppFeatureKibanaConfig",
-            "text": "AppFeatureKibanaConfig"
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
           },
           "<",
           "AssistantSubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeaturesCasesConfig",
+        "id": "def-common.ProductFeaturesAttackDiscoveryConfig",
         "type": "Type",
         "tags": [],
-        "label": "AppFeaturesCasesConfig",
+        "label": "ProductFeaturesAttackDiscoveryConfig",
         "description": [],
         "signature": [
           "Map<",
-          "AppFeatureCasesKey",
+          "ProductFeatureAttackDiscoveryKey",
           ", ",
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
             "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
-            "section": "def-common.AppFeatureKibanaConfig",
-            "text": "AppFeatureKibanaConfig"
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<string>>"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeaturesCasesConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeaturesCasesConfig",
+        "description": [],
+        "signature": [
+          "Map<",
+          "ProductFeatureCasesKey",
+          ", ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
           },
           "<",
           "CasesSubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeaturesConfig",
+        "id": "def-common.ProductFeaturesConfig",
         "type": "Type",
         "tags": [],
-        "label": "AppFeaturesConfig",
+        "label": "ProductFeaturesConfig",
         "description": [],
         "signature": [
           "Map<",
@@ -277,111 +570,122 @@
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
             "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
-            "section": "def-common.AppFeatureKeyType",
-            "text": "AppFeatureKeyType"
+            "section": "def-common.ProductFeatureKeyType",
+            "text": "ProductFeatureKeyType"
           },
           ", ",
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
             "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
-            "section": "def-common.AppFeatureKibanaConfig",
-            "text": "AppFeatureKibanaConfig"
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
           },
           "<T>>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppFeaturesSecurityConfig",
+        "id": "def-common.ProductFeaturesNotesConfig",
         "type": "Type",
         "tags": [],
-        "label": "AppFeaturesSecurityConfig",
+        "label": "ProductFeaturesNotesConfig",
         "description": [],
         "signature": [
           "Map<",
-          "AppFeatureSecurityKey",
+          "ProductFeatureNotesFeatureKey",
           ", ",
           {
             "pluginId": "@kbn/security-solution-features",
             "scope": "common",
             "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
-            "section": "def-common.AppFeatureKibanaConfig",
-            "text": "AppFeatureKibanaConfig"
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
+          },
+          "<string>>"
+        ],
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/security-solution-features",
+        "id": "def-common.ProductFeaturesSecurityConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "ProductFeaturesSecurityConfig",
+        "description": [],
+        "signature": [
+          "Map<",
+          "ProductFeatureSecurityKey",
+          ", ",
+          {
+            "pluginId": "@kbn/security-solution-features",
+            "scope": "common",
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
           },
           "<",
           "SecuritySubFeatureId",
           ">>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.AppSubFeaturesMap",
+        "id": "def-common.ProductFeaturesSiemMigrationsConfig",
         "type": "Type",
         "tags": [],
-        "label": "AppSubFeaturesMap",
+        "label": "ProductFeaturesSiemMigrationsConfig",
         "description": [],
         "signature": [
-          "Map<T, ",
+          "Map<",
+          "ProductFeatureSiemMigrationsKey",
+          ", ",
           {
-            "pluginId": "features",
+            "pluginId": "@kbn/security-solution-features",
             "scope": "common",
-            "docId": "kibFeaturesPluginApi",
-            "section": "def-common.SubFeatureConfig",
-            "text": "SubFeatureConfig"
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
           },
-          ">"
+          "<string>>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/security-solution-features",
-        "id": "def-common.BaseKibanaFeatureConfig",
+        "id": "def-common.ProductFeaturesTimelineConfig",
         "type": "Type",
         "tags": [],
-        "label": "BaseKibanaFeatureConfig",
+        "label": "ProductFeaturesTimelineConfig",
         "description": [],
         "signature": [
-          "{ id: string; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
+          "Map<",
+          "ProductFeatureTimelineFeatureKey",
+          ", ",
           {
-            "pluginId": "@kbn/core-application-common",
+            "pluginId": "@kbn/security-solution-features",
             "scope": "common",
-            "docId": "kibKbnCoreApplicationCommonPluginApi",
-            "section": "def-common.AppCategory",
-            "text": "AppCategory"
+            "docId": "kibKbnSecuritySolutionFeaturesPluginApi",
+            "section": "def-common.ProductFeatureKibanaConfig",
+            "text": "ProductFeatureKibanaConfig"
           },
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; privileges: { all: ",
-          {
-            "pluginId": "features",
-            "scope": "common",
-            "docId": "kibFeaturesPluginApi",
-            "section": "def-common.FeatureKibanaPrivileges",
-            "text": "FeatureKibanaPrivileges"
-          },
-          "; read: ",
-          {
-            "pluginId": "features",
-            "scope": "common",
-            "docId": "kibFeaturesPluginApi",
-            "section": "def-common.FeatureKibanaPrivileges",
-            "text": "FeatureKibanaPrivileges"
-          },
-          "; } | null; catalogue?: readonly string[] | undefined; excludeFromBasePrivileges?: boolean | undefined; minimumLicense?: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined; app: readonly string[]; privilegesTooltip?: string | undefined; reserved?: { description: string; privileges: readonly ",
-          "ReservedKibanaPrivilege",
-          "[]; } | undefined; }"
+          "<string>>"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -402,7 +706,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined>; alerting?: ",
+          "<\"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\" | undefined>; replacedBy?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -410,7 +714,15 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ rule?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; alert?: { all?: readonly string[] | undefined; read?: readonly string[] | undefined; } | undefined; } | undefined>; cases?: ",
+          "<readonly ",
+          {
+            "pluginId": "features",
+            "scope": "common",
+            "docId": "kibFeaturesPluginApi",
+            "section": "def-common.FeatureKibanaPrivilegesReference",
+            "text": "FeatureKibanaPrivilegesReference"
+          },
+          "[] | undefined>; alerting?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -418,7 +730,23 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; } | undefined>; disabled?: ",
+          "<{ rule?: { all?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; } | undefined; alert?: { all?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; read?: ",
+          "AlertingKibanaPrivilege",
+          " | undefined; } | undefined; } | undefined>; cases?: ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.RecursivePartial",
+            "text": "RecursivePartial"
+          },
+          "<{ all?: readonly string[] | undefined; push?: readonly string[] | undefined; create?: readonly string[] | undefined; read?: readonly string[] | undefined; update?: readonly string[] | undefined; delete?: readonly string[] | undefined; settings?: readonly string[] | undefined; createComment?: readonly string[] | undefined; reopenCase?: readonly string[] | undefined; assign?: readonly string[] | undefined; } | undefined>; disabled?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -434,7 +762,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<{ [sectionId: string]: readonly string[]; } | undefined>; ui?: readonly string[] | undefined; catalogue?: ",
+          "<{ [sectionId: string]: readonly string[]; } | undefined>; app?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -442,7 +770,7 @@
             "section": "def-common.RecursivePartial",
             "text": "RecursivePartial"
           },
-          "<readonly string[] | undefined>; app?: ",
+          "<readonly string[] | undefined>; ui?: readonly string[] | undefined; catalogue?: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -476,7 +804,7 @@
           },
           "<{ all: readonly string[]; read: readonly string[]; }> | undefined; }"
         ],
-        "path": "x-pack/packages/security-solution/features/src/types.ts",
+        "path": "x-pack/solutions/security/packages/features/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

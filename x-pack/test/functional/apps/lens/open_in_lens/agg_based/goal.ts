@@ -9,28 +9,24 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const { visualize, lens, visChart, timePicker, visEditor } = getPageObjects([
+  const { visualize, lens, visChart, visEditor } = getPageObjects([
     'visualize',
     'lens',
     'visChart',
-    'timePicker',
     'visEditor',
   ]);
 
   const testSubjects = getService('testSubjects');
 
   describe('Goal', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickGoal();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the "Edit Visualization in Lens" menu item', async () => {
@@ -48,7 +44,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '140.05%',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -80,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '131,040,360.81%',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -112,7 +108,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           subtitle: undefined,
           extraText: '',
           value: '14.37%',
-          color: 'rgba(245, 247, 250, 1)',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -155,8 +151,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'ios',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,047,486.03',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '65,047,486.03%',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -165,8 +161,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'osx',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '66,144,823.35',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '66,144,823.35%',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -175,8 +171,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 7',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,933,477.76',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '65,933,477.76%',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -185,8 +181,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win 8',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,157,898.23',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '65,157,898.23%',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -195,8 +191,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           title: 'win xp',
           subtitle: 'Average machine.ram',
           extraText: '',
-          value: '65,365,950.93',
-          color: 'rgba(245, 247, 250, 1)',
+          value: '65,365,950.93%',
+          color: 'rgba(255, 255, 255, 1)',
           trendlineColor: undefined,
           showingBar: true,
           showingTrendline: false,
@@ -215,7 +211,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await dimensions[0].click();
 
-      await lens.openPalettePanel('lnsMetric');
+      await lens.openPalettePanel();
       const colorStops = await lens.getPaletteColorStops();
 
       expect(colorStops).to.eql([

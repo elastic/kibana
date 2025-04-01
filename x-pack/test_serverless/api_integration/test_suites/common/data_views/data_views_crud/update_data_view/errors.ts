@@ -6,21 +6,32 @@
  */
 
 import expect from '@kbn/expect';
+import { RoleCredentials, InternalRequestHeader } from '../../../../../../shared/services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { configArray } from '../../constants';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
   const svlCommonApi = getService('svlCommonApi');
+  const svlUserManager = getService('svlUserManager');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  let roleAuthc: RoleCredentials;
+  let internalReqHeader: InternalRequestHeader;
 
   describe('errors', () => {
+    before(async () => {
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
+      internalReqHeader = svlCommonApi.getInternalRequestHeader();
+    });
+    after(async () => {
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+    });
     configArray.forEach((config) => {
       describe(config.name, () => {
         it('returns error when index_pattern object is not provided', async () => {
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(`${config.path}/foo`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader());
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader);
 
           expect(response.status).to.be(400);
           expect(response.body.statusCode).to.be(400);
@@ -30,10 +41,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('returns error on non-existing index_pattern', async () => {
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(`${config.path}/non-existing-index-pattern`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {},
             });
@@ -46,10 +57,10 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         it('returns error when "refresh_fields" parameter is not a boolean', async () => {
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(`${config.path}/foo`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               refresh_fields: 123,
               [config.serviceKey]: {
@@ -66,20 +77,20 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('returns success when update patch is empty', async () => {
           const title1 = `foo-${Date.now()}-${Math.random()}*`;
-          const response = await supertest
+          const response = await supertestWithoutAuth
             .post(config.path)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {
                 title: title1,
               },
             });
           const id = response.body[config.serviceKey].id;
-          const response2 = await supertest
+          const response2 = await supertestWithoutAuth
             .post(`${config.path}/${id}`)
-            // TODO: API requests in Serverless require internal request headers
-            .set(svlCommonApi.getInternalRequestHeader())
+            .set(internalReqHeader)
+            .set(roleAuthc.apiKeyHeader)
             .send({
               [config.serviceKey]: {},
             });

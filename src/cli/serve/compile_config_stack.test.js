@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -14,7 +15,7 @@ jest.mock('@kbn/repo-info', () => ({
 }));
 jest.mock('@kbn/config');
 
-import { statSync, existsSync, writeFileSync } from 'fs';
+import { statSync } from 'fs';
 import { getConfigFromFiles } from '@kbn/config';
 
 import { compileConfigStack } from './compile_config_stack';
@@ -68,20 +69,80 @@ describe('compileConfigStack', () => {
       'serverless.security.yml',
       'kibana.yml',
       'kibana.dev.yml',
-      'serverless.recent.dev.yml',
+      'serverless.dev.yml',
+      'serverless.security.dev.yml',
+    ]);
+  });
+
+  it.each(['search_ai_lake', 'essentials', 'complete'])(
+    'adds all `security` %s tier config to the stack',
+    async (productTier) => {
+      getConfigFromFiles.mockImplementationOnce(() => {
+        return {
+          serverless: 'es',
+          xpack: {
+            securitySolutionServerless: {
+              enabled: true,
+              productTypes: [
+                {
+                  product_line: 'security',
+                  product_tier: productTier,
+                },
+              ],
+            },
+          },
+        };
+      });
+      const configList = compileConfigStack({
+        serverless: 'security',
+        dev: true,
+      }).map(toFileNames);
+
+      expect(configList).toEqual([
+        'serverless.yml',
+        'serverless.security.yml',
+        'kibana.yml',
+        'kibana.dev.yml',
+        'serverless.dev.yml',
+        'serverless.security.dev.yml',
+        `serverless.security.${productTier}.yml`,
+        `serverless.security.${productTier}.dev.yml`,
+      ]);
+    }
+  );
+
+  it('adds no additional `security` tier config to the stack when no product tier', async () => {
+    getConfigFromFiles.mockImplementationOnce(() => {
+      return {
+        serverless: 'es',
+        xpack: {
+          securitySolutionServerless: {
+            enabled: true,
+            productTypes: [
+              {
+                product_line: 'security',
+              },
+            ],
+          },
+        },
+      };
+    });
+    const configList = compileConfigStack({
+      serverless: 'security',
+      dev: true,
+    }).map(toFileNames);
+
+    expect(configList).toEqual([
+      'serverless.yml',
+      'serverless.security.yml',
+      'kibana.yml',
+      'kibana.dev.yml',
       'serverless.dev.yml',
       'serverless.security.dev.yml',
     ]);
   });
 
   it('defaults to "es" if --serverless and --dev are there', async () => {
-    existsSync.mockImplementationOnce((filename) => {
-      if (Path.basename(filename) === 'serverless.recent.dev.yml') {
-        return false;
-      } else {
-        return true;
-      }
-    });
     getConfigFromFiles.mockImplementationOnce(() => {
       return {
         serverless: 'es',
@@ -93,53 +154,13 @@ describe('compileConfigStack', () => {
       serverless: true,
     }).map(toFileNames);
 
-    expect(existsSync).toHaveBeenCalledWith(
-      '/some/imaginary/path/config/serverless.recent.dev.yml'
-    );
-    expect(writeFileSync).toHaveBeenCalledWith(
-      '/some/imaginary/path/config/serverless.recent.dev.yml',
-      expect.stringContaining('serverless: es')
-    );
     expect(configList).toEqual([
       'serverless.yml',
       'serverless.es.yml',
       'kibana.yml',
       'kibana.dev.yml',
-      'serverless.recent.dev.yml',
       'serverless.dev.yml',
       'serverless.es.dev.yml',
-    ]);
-  });
-
-  it('respects persisted project-switcher decision when --serverless && --dev true', async () => {
-    existsSync.mockImplementationOnce((filename) => {
-      if (Path.basename(filename) === 'serverless.recent.dev.yml') {
-        return true;
-      }
-    });
-    getConfigFromFiles.mockImplementationOnce(() => {
-      return {
-        serverless: 'oblt',
-      };
-    });
-
-    const configList = compileConfigStack({
-      dev: true,
-      serverless: true,
-    }).map(toFileNames);
-
-    expect(existsSync).toHaveBeenCalledWith(
-      '/some/imaginary/path/config/serverless.recent.dev.yml'
-    );
-    expect(writeFileSync).not.toHaveBeenCalled();
-    expect(configList).toEqual([
-      'serverless.yml',
-      'serverless.oblt.yml',
-      'kibana.yml',
-      'kibana.dev.yml',
-      'serverless.recent.dev.yml',
-      'serverless.dev.yml',
-      'serverless.oblt.dev.yml',
     ]);
   });
 });

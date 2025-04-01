@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
@@ -38,7 +38,7 @@ export const TEST_CASES: Record<string, DeleteTestCase> = Object.freeze({
  */
 const createRequest = ({ type, id, force }: DeleteTestCase) => ({ type, id, force });
 
-export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTest<any>) {
+export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: SuperTestAgent) {
   const expectSavedObjectForbidden = expectResponses.forbiddenTypes('delete');
   const expectResponseBody =
     (testCase: DeleteTestCase): ExpectResponseBody =>
@@ -58,11 +58,9 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
           await es.indices.refresh({ index: '.kibana' }); // alias deletion uses refresh: false, so we need to manually refresh the index before searching
           const searchResponse = await es.search({
             index: '.kibana',
-            body: {
-              size: 0,
-              query: { terms: { type: ['legacy-url-alias'] } },
-              track_total_hits: true,
-            },
+            size: 0,
+            query: { terms: { type: ['legacy-url-alias'] } },
+            track_total_hits: true,
           });
           const expectAliasWasDeleted = !![ALIAS_DELETE_INCLUSIVE, ALIAS_DELETE_EXCLUSIVE].find(
             ({ type, id }) => testCase.type === type && testCase.id === id
@@ -118,7 +116,7 @@ export function deleteTestSuiteFactory(es: Client, esArchiver: any, supertest: S
             await supertest
               .delete(`${getUrlPrefix(spaceId)}/api/saved_objects/${type}/${id}`)
               .query({ ...(force && { force }) })
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .expect(test.responseStatusCode)
               .then(test.responseBody);
           });

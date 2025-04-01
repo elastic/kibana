@@ -1,0 +1,15 @@
+{
+  "esql.async_query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "_query/async"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-async-query-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

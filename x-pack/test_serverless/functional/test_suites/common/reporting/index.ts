@@ -9,6 +9,8 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Reporting', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./management'));
   });
 };

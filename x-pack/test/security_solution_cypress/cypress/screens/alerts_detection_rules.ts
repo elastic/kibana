@@ -26,6 +26,8 @@ export const EDIT_RULE_ACTION_BTN = '[data-test-subj="editRuleAction"]';
 
 export const DUPLICATE_RULE_ACTION_BTN = '[data-test-subj="duplicateRuleAction"]';
 
+export const MANUAL_RULE_RUN_ACTION_BTN = '[data-test-subj="manualRuleRunAction"]';
+
 export const DUPLICATE_RULE_MENU_PANEL_BTN = '[data-test-subj="rules-details-duplicate-rule"]';
 export const CONFIRM_DUPLICATE_RULE = '[data-test-subj="confirmModalConfirmButton"]';
 
@@ -35,6 +37,9 @@ export const DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION =
   '[data-test-subj="withExceptionsExcludeExpiredExceptions"] label';
 
 export const DUPLICATE_WITHOUT_EXCEPTIONS_OPTION = '[data-test-subj="withoutExceptions"] label';
+
+export const CONFIRM_MANUAL_RULE_RUN_WARNING_BTN =
+  '[data-test-subj="bulkActionConfirmationModal"] [data-test-subj="confirmModalConfirmButton"]';
 
 export const RULE_SEARCH_FIELD = '[data-test-subj="ruleSearchField"]';
 
@@ -105,6 +110,8 @@ export const ADD_ELASTIC_RULES_TABLE = '[data-test-subj="add-prebuilt-rules-tabl
 
 export const RULES_ROW = '.euiTableRow';
 
+export const RULE_ROW_MODIFIED_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';
+
 export const SEVERITY = '[data-test-subj="severity"]';
 
 export const SELECT_ALL_RULES_BTN = '[data-test-subj="selectAllRules"]';
@@ -125,6 +132,8 @@ export const MODAL_CONFIRMATION_CANCEL_BTN = '[data-test-subj="confirmModalCance
 
 export const RULE_DETAILS_DELETE_BTN = '[data-test-subj="rules-details-delete-rule"]';
 
+export const RULE_DETAILS_MANUAL_RULE_RUN_BTN = '[data-test-subj="rules-details-manual-rule-run"]';
+
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
 
 export const SELECT_ALL_RULES_ON_PAGE_CHECKBOX = '[data-test-subj="checkboxSelectAll"]';
@@ -137,7 +146,12 @@ export const INPUT_FILE = 'input[type=file]';
 
 export const TOASTER = '[data-test-subj="euiToastHeader"]';
 
+export const SUCCESS_TOASTER = '[class*="euiToast-success"] [data-test-subj="euiToastHeader"]';
+
 export const TOASTER_BODY = '[data-test-subj="globalToastList"] [data-test-subj="euiToastBody"]';
+
+export const SUCCESS_TOASTER_BODY =
+  '[data-test-subj="globalToastList"] [class*="euiToast-success"] [data-test-subj="euiToastBody"]';
 
 export const TOASTER_ERROR_BTN = '[data-test-subj="errorToastBtn"]';
 
@@ -185,6 +199,10 @@ export const getInstallSingleRuleButtonByRuleId = (ruleId: string) => {
 
 export const getUpgradeSingleRuleButtonByRuleId = (ruleId: string) => {
   return `[data-test-subj="upgradeSinglePrebuiltRuleButton-${ruleId}"]`;
+};
+
+export const getReviewSingleRuleButtonByRuleId = (ruleId: string) => {
+  return `[data-test-subj="reviewSinglePrebuiltRuleButton-${ruleId}"]`;
 };
 
 export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE =
@@ -262,8 +280,8 @@ export const TIMELINE_TEMPLATE_VALUE = '[data-test-subj="timelineTemplatePropert
 export const INTERVAL_TITLE = '[data-test-subj="intervalPropertyTitle"]';
 export const INTERVAL_VALUE = '[data-test-subj="intervalPropertyValue"]';
 
-export const FROM_TITLE = '[data-test-subj="fromPropertyTitle"]';
-export const FROM_VALUE = '[data-test-subj^="fromPropertyValue"]';
+export const LOOK_BACK_TITLE = '[data-test-subj="lookBackPropertyTitle"]';
+export const LOOK_BACK_VALUE = '[data-test-subj^="lookBackPropertyValue"]';
 
 export const INDEX_TITLE = '[data-test-subj="indexPropertyTitle"]';
 export const INDEX_VALUE_ITEM = '[data-test-subj="indexPropertyValueItem"]';
@@ -273,7 +291,7 @@ export const CUSTOM_QUERY_VALUE = '[data-test-subj="customQueryPropertyValue"]';
 
 export const FILTERS_TITLE = '[data-test-subj="filtersPropertyTitle"]';
 export const FILTERS_VALUE_ITEM =
-  '[data-test-subj="filtersPropertyValue"] [data-test-subj^="filterItem-"]';
+  '[data-test-subj="filtersPropertyValue"] [data-test-subj*="filter-badge-"]';
 
 export const ALERT_SUPPRESSION_GROUP_BY_TITLE =
   '[data-test-subj="alertSuppressionGroupByPropertyTitle"]';
@@ -285,10 +303,10 @@ export const ALERT_SUPPRESSION_DURATION_TITLE =
 export const ALERT_SUPPRESSION_DURATION_VALUE =
   '[data-test-subj="alertSuppressionDurationPropertyValue"]';
 
-export const ALERT_SUPPRESSION_FIELD_TITLE =
-  '[data-test-subj="alertSuppressionSuppressionFieldPropertyTitle"]';
-export const ALERT_SUPPRESSION_FIELD_VALUE =
-  '[data-test-subj="alertSuppressionSuppressionFieldPropertyValue"]';
+export const ALERT_SUPPRESSION_MISSING_FIELD_TITLE =
+  '[data-test-subj="alertSuppressionMissingFieldPropertyTitle"]';
+export const ALERT_SUPPRESSION_MISSING_FIELD_VALUE =
+  '[data-test-subj="alertSuppressionMissingFieldsPropertyValue"]';
 
 export const DATA_VIEW_ID_TITLE = '[data-test-subj="dataViewIdPropertyTitle"]';
 export const DATA_VIEW_ID_VALUE = '[data-test-subj="dataViewIdPropertyValue"]';
@@ -301,7 +319,7 @@ export const SAVED_QUERY_CONTENT_VALUE = '[data-test-subj="savedQueryContentProp
 
 export const SAVED_QUERY_FILTERS_TITLE = '[data-test-subj="savedQueryFiltersPropertyTitle"]';
 export const SAVED_QUERY_FILTERS_VALUE =
-  '[data-test-subj="savedQueryFiltersPropertyValue"] [data-test-subj^="filterItem-"]';
+  '[data-test-subj="savedQueryFiltersPropertyValue"] [data-test-subj*="filter-badge-"]';
 
 export const SAVED_QUERY_NAME_TITLE = '[data-test-subj="savedQueryNamePropertyTitle"]';
 export const SAVED_QUERY_NAME_VALUE = '[data-test-subj="savedQueryNamePropertyValue"]';
@@ -326,7 +344,7 @@ export const THREAT_MAPPING_VALUE = '[data-test-subj="threatMappingPropertyValue
 
 export const THREAT_FILTERS_TITLE = '[data-test-subj="threatFiltersPropertyTitle"]';
 export const THREAT_FILTERS_VALUE_ITEM =
-  '[data-test-subj="threatFiltersPropertyValue"] [data-test-subj^="filterItem-"]';
+  '[data-test-subj="threatFiltersPropertyValue"] [data-test-subj*="filter-badge-"]';
 
 export const THREAT_QUERY_TITLE = '[data-test-subj="threatQueryPropertyTitle"]';
 export const THREAT_QUERY_VALUE = '[data-test-subj="threatQueryPropertyValue"]';
@@ -339,3 +357,10 @@ export const NEW_TERMS_WINDOW_SIZE_VALUE = '[data-test-subj^="newTermsWindowSize
 
 export const ESQL_QUERY_TITLE = '[data-test-subj="esqlQueryPropertyTitle"]';
 export const ESQL_QUERY_VALUE = '[data-test-subj="esqlQueryPropertyValue"]';
+
+export const PER_FIELD_DIFF_WRAPPER = '[data-test-subj="ruleUpgradePerFieldDiffWrapper"]';
+export const PER_FIELD_DIFF_DEFINITION_SECTION = '[data-test-subj="perFieldDiffDefinitionSection"]';
+
+export const MODIFIED_RULE_BADGE = '[data-test-subj="upgradeRulesTableModifiedColumnBadge"]';
+
+export const RULES_TABLE_MODIFIED_RULE_BADGE = '[data-test-subj="rulesTableModifiedColumnBadge"]';

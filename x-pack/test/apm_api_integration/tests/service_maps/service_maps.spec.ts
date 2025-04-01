@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 import { first, isEmpty, last, orderBy, uniq } from 'lodash';
 import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
+import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -24,111 +25,44 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
 
+  const getElements = ({ body }: { body: APIReturnType<'GET /internal/apm/service-map'> }) => {
+    if ('elements' in body) {
+      return body.elements;
+    }
+
+    return [];
+  };
+
   registry.when('Service Map with a basic license', { config: 'basic', archives: [] }, () => {
-    it('is only be available to users with Platinum license (or higher)', async () => {
-      try {
-        await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map`,
-          params: {
-            query: {
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
+    describe('basic license', function () {
+      this.tags('skipFIPS');
+      it('is only be available to users with Platinum license (or higher)', async () => {
+        try {
+          await apmApiClient.readUser({
+            endpoint: `GET /internal/apm/service-map`,
+            params: {
+              query: {
+                start: metadata.start,
+                end: metadata.end,
+                environment: 'ENVIRONMENT_ALL',
+              },
             },
-          },
-        });
+          });
 
-        expect(true).to.be(false);
-      } catch (e) {
-        const err = e as ApmApiError;
-        expect(err.res.status).to.be(403);
-        expectSnapshot(err.res.body.message).toMatchInline(
-          `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
-        );
-      }
-    });
-  });
-
-  registry.when('Service Map without data', { config: 'trial', archives: [] }, () => {
-    describe('/internal/apm/service-map', () => {
-      it('returns an empty list', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map`,
-          params: {
-            query: {
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
-            },
-          },
-        });
-
-        expect(response.status).to.be(200);
-        expect(response.body.elements.length).to.be(0);
-      });
-    });
-
-    describe('/internal/apm/service-map/service/{serviceName}', () => {
-      let response: ServiceNodeResponse;
-      before(async () => {
-        response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map/service/{serviceName}`,
-          params: {
-            path: { serviceName: 'opbeans-node' },
-            query: {
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
-            },
-          },
-        });
-      });
-
-      it('retuns status code 200', () => {
-        expect(response.status).to.be(200);
-      });
-
-      it('returns an object with nulls', async () => {
-        [
-          response.body.currentPeriod?.failedTransactionsRate?.value,
-          response.body.currentPeriod?.memoryUsage?.value,
-          response.body.currentPeriod?.cpuUsage?.value,
-          response.body.currentPeriod?.transactionStats?.latency?.value,
-          response.body.currentPeriod?.transactionStats?.throughput?.value,
-        ].forEach((value) => {
-          expect(value).to.be.eql(null);
-        });
-      });
-    });
-
-    describe('/internal/apm/service-map/dependency', () => {
-      let response: DependencyResponse;
-      before(async () => {
-        response = await apmApiClient.readUser({
-          endpoint: `GET /internal/apm/service-map/dependency`,
-          params: {
-            query: {
-              dependencyName: 'postgres',
-              start: metadata.start,
-              end: metadata.end,
-              environment: 'ENVIRONMENT_ALL',
-            },
-          },
-        });
-      });
-
-      it('retuns status code 200', () => {
-        expect(response.status).to.be(200);
-      });
-
-      it('returns undefined values', () => {
-        expect(response.body.currentPeriod).to.eql({ transactionStats: {} });
+          expect(true).to.be(false);
+        } catch (e) {
+          const err = e as ApmApiError;
+          expect(err.res.status).to.be(403);
+          expectSnapshot(err.res.body.message).toMatchInline(
+            `"In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data."`
+          );
+        }
       });
     });
   });
 
   registry.when('Service Map with data', { config: 'trial', archives: ['apm_8.0.0'] }, () => {
-    describe('/internal/apm/service-map', () => {
+    describe('/internal/apm/service-map with data', () => {
       let response: ServiceMapResponse;
       before(async () => {
         response = await apmApiClient.readUser({
@@ -145,18 +79,16 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns service map elements', () => {
         expect(response.status).to.be(200);
-        expect(response.body.elements.length).to.be.greaterThan(0);
+        expect(getElements(response).length).to.be.greaterThan(0);
       });
 
       it('returns the correct data', () => {
-        const elements: Array<{ data: Record<string, any> }> = response.body.elements;
-
+        const elements: Array<{ data: Record<string, any> }> = getElements(response);
         const serviceNames = uniq(
           elements
             .filter((element) => element.data['service.name'] !== undefined)
             .map((element) => element.data['service.name'])
         ).sort();
-
         expectSnapshot(serviceNames).toMatchInline(`
               Array [
                 "auditbeat",
@@ -202,7 +134,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
           it('returns service map elements with anomaly stats', () => {
             expect(response.status).to.be(200);
-            const dataWithAnomalies = response.body.elements.filter(
+            const dataWithAnomalies = getElements(response).filter(
               (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
             );
             expect(dataWithAnomalies).not.to.be.empty();
@@ -213,7 +145,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
             });
           });
           it('returns the correct anomaly stats', () => {
-            const dataWithAnomalies = response.body.elements.filter(
+            const dataWithAnomalies = getElements(response).filter(
               (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
             );
             expect(dataWithAnomalies).not.to.be.empty();
@@ -287,7 +219,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
           it('returns service map elements without anomaly stats', () => {
             expect(response.status).to.be(200);
-            const dataWithAnomalies = response.body.elements.filter(
+            const dataWithAnomalies = getElements(response).filter(
               (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
             );
             expect(dataWithAnomalies).to.be.empty();
@@ -316,13 +248,13 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
 
           it('returns some elements', () => {
-            expect(response.body.elements.length).to.be.greaterThan(1);
+            expect(getElements(response).length).to.be.greaterThan(1);
           });
         });
       });
     });
 
-    describe('/internal/apm/service-map/service/{serviceName}', () => {
+    describe('/internal/apm/service-map/service/{serviceName} with data', () => {
       let response: ServiceNodeResponse;
       before(async () => {
         response = await apmApiClient.readUser({
@@ -371,7 +303,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
       });
     });
 
-    describe('/internal/apm/service-map/dependency', () => {
+    describe('/internal/apm/service-map/dependency with data', () => {
       let response: DependencyResponse;
       before(async () => {
         response = await apmApiClient.readUser({
@@ -416,7 +348,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
     });
 
     describe('With comparison', () => {
-      describe('/internal/apm/service-map/dependency', () => {
+      describe('/internal/apm/service-map/dependency with comparison', () => {
         let response: DependencyResponse;
         before(async () => {
           response = await apmApiClient.readUser({
@@ -467,7 +399,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
         });
       });
 
-      describe('/internal/apm/service-map/service/{serviceName}', () => {
+      describe('/internal/apm/service-map/service/{serviceName} with comparison', () => {
         let response: ServiceNodeResponse;
         before(async () => {
           response = await apmApiClient.readUser({

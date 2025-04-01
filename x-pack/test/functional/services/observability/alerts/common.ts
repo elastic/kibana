@@ -6,10 +6,12 @@
  */
 
 import expect from '@kbn/expect';
+import { ToolingLog } from '@kbn/tooling-log';
 import { chunk } from 'lodash';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, AlertStatus } from '@kbn/rule-data-utils';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Agent as SuperTestAgent } from 'supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
 
 // Based on the x-pack/test/functional/es_archives/observability/alerts archive.
 const DATE_WITH_DATA = {
@@ -19,10 +21,13 @@ const DATE_WITH_DATA = {
 
 const ALERTS_FLYOUT_SELECTOR = 'alertsFlyout';
 const FILTER_FOR_VALUE_BUTTON_SELECTOR = 'filterForValue';
-const ALERTS_TABLE_CONTAINER_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_WITH_DATA_SELECTOR = 'alertsTable';
+const ALERTS_TABLE_NO_DATA_SELECTOR = 'alertsTableEmptyState';
+const ALERTS_TABLE_ERROR_PROMPT_SELECTOR = 'alertsTableErrorPrompt';
 const ALERTS_TABLE_ACTIONS_MENU_SELECTOR = 'alertsTableActionsMenu';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
+const ALERTS_TABLE_LOADING_SELECTOR = 'internalAlertsPageLoading';
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -33,19 +38,20 @@ export function ObservabilityAlertsCommonProvider({
   const find = getService('find');
   const testSubjects = getService('testSubjects');
   const flyoutService = getService('flyout');
-  const pageObjects = getPageObjects(['common']);
   const retry = getService('retry');
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
   const retryOnStale = getService('retryOnStale');
+  const pageObjects = getPageObjects(['common', 'header']);
 
   const navigateToTimeWithData = async () => {
-    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+    await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts',
       `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
       { ensureCurrentUrl: false }
     );
+    await pageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const navigateToRulesPage = async () => {
@@ -99,8 +105,23 @@ export function ObservabilityAlertsCommonProvider({
     });
   };
 
+  // Alert table
+  const waitForAlertsTableLoadingToDisappear = async () => {
+    await testSubjects.missingOrFail(ALERTS_TABLE_LOADING_SELECTOR, { timeout: 30_000 });
+  };
+
+  const waitForAlertTableToLoad = async () => {
+    await waitForAlertsTableLoadingToDisappear();
+    await retry.waitFor('alerts table to appear', async () => {
+      return (
+        (await testSubjects.exists(ALERTS_TABLE_NO_DATA_SELECTOR)) ||
+        (await testSubjects.exists(ALERTS_TABLE_WITH_DATA_SELECTOR))
+      );
+    });
+  };
+
   const getTableColumnHeaders = async () => {
-    const table = await testSubjects.find(ALERTS_TABLE_CONTAINER_SELECTOR);
+    const table = await testSubjects.find(ALERTS_TABLE_WITH_DATA_SELECTOR);
     const tableHeaderRow = await testSubjects.findDescendant('dataGridHeader', table);
     const columnHeaders = await tableHeaderRow.findAllByXpath('./div');
     return columnHeaders;
@@ -129,7 +150,11 @@ export function ObservabilityAlertsCommonProvider({
   });
 
   const getTableOrFail = async () => {
-    return await testSubjects.existOrFail(ALERTS_TABLE_CONTAINER_SELECTOR);
+    return await testSubjects.existOrFail(ALERTS_TABLE_WITH_DATA_SELECTOR);
+  };
+
+  const ensureNoTableErrorPrompt = async () => {
+    return await testSubjects.missingOrFail(ALERTS_TABLE_ERROR_PROMPT_SELECTOR);
   };
 
   const getNoDataPageOrFail = async () => {
@@ -137,11 +162,14 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('alertsStateTableEmptyState');
+    return await testSubjects.existOrFail('alertsTableEmptyState');
   };
 
   // Query Bar
   const getQueryBar = async () => {
+    await retry.try(async () => {
+      await testSubjects.existOrFail('queryInput');
+    });
     return await testSubjects.find('queryInput');
   };
 
@@ -153,15 +181,26 @@ export function ObservabilityAlertsCommonProvider({
     return await (await getQueryBar()).type(query);
   });
 
+  const clickOnQueryBar = retryOnStale.wrap(async () => {
+    return await (await getQueryBar()).click();
+  });
+
   const submitQuery = async (query: string) => {
     await typeInQueryBar(query);
     await testSubjects.click('querySubmitButton');
   };
 
   // Flyout
-  const openAlertsFlyout = retryOnStale.wrap(async () => {
-    await openActionsMenuForRow(0);
-    await testSubjects.click('viewAlertDetailsFlyout');
+  const getReasonMessageLinkByIndex = async (index: number) => {
+    const reasonMessageLinks = await find.allByCssSelector(
+      '[data-test-subj="o11yGetRenderCellValueLink"]'
+    );
+    return reasonMessageLinks[index] || null;
+  };
+
+  const openAlertsFlyout = retryOnStale.wrap(async (index: number = 0) => {
+    const reasonMessageLink = await getReasonMessageLinkByIndex(index);
+    await reasonMessageLink.click();
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
@@ -241,8 +280,8 @@ export function ObservabilityAlertsCommonProvider({
     }
 
     // wait for a confirmation toast (the css index is 1-based)
-    await toasts.getToastElement(1);
-    await toasts.dismissAllToasts();
+    await toasts.getElementByIndex(1);
+    await toasts.dismissAll();
   };
 
   const setWorkflowStatusFilter = retryOnStale.wrap(async (workflowStatus: WorkflowStatus) => {
@@ -307,9 +346,73 @@ export function ObservabilityAlertsCommonProvider({
     return value;
   });
 
+  // Data view
+  const createDataView = async ({
+    supertest,
+    id,
+    name,
+    title,
+    logger,
+  }: {
+    supertest: SuperTestAgent;
+    id: string;
+    name: string;
+    title: string;
+    logger: ToolingLog;
+  }) => {
+    const { body } = await supertest
+      .post(`/api/content_management/rpc/create`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        contentTypeId: 'index-pattern',
+        data: {
+          fieldAttrs: '{}',
+          title,
+          timeFieldName: '@timestamp',
+          sourceFilters: '[]',
+          fields: '[]',
+          fieldFormatMap: '{}',
+          typeMeta: '{}',
+          runtimeFieldMap: '{}',
+          name,
+        },
+        options: { id },
+        version: 1,
+      })
+      .expect(200);
+
+    logger.debug(`Created data view: ${JSON.stringify(body)}`);
+    return body;
+  };
+
+  const deleteDataView = async ({
+    supertest,
+    id,
+    logger,
+  }: {
+    supertest: SuperTestAgent;
+    id: string;
+    logger: ToolingLog;
+  }) => {
+    const { body } = await supertest
+      .post(`/api/content_management/rpc/delete`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        contentTypeId: 'index-pattern',
+        id,
+        options: { force: true },
+        version: 1,
+      })
+      .expect(200);
+
+    logger.debug(`Deleted data view id: ${id}`);
+    return body;
+  };
+
   return {
     getQueryBar,
     clearQueryBar,
+    clickOnQueryBar,
     closeAlertsFlyout,
     filterForValueButtonExists,
     getAlertsFlyout,
@@ -327,6 +430,8 @@ export function ObservabilityAlertsCommonProvider({
     getTableCellsInRows,
     getTableColumnHeaders,
     getTableOrFail,
+    waitForAlertTableToLoad,
+    ensureNoTableErrorPrompt,
     navigateToTimeWithData,
     setKibanaTimeZoneToUTC,
     openAlertsFlyout,
@@ -350,5 +455,7 @@ export function ObservabilityAlertsCommonProvider({
     navigateToRulesLogsPage,
     navigateToRuleDetailsByRuleId,
     navigateToAlertDetails,
+    createDataView,
+    deleteDataView,
   };
 }

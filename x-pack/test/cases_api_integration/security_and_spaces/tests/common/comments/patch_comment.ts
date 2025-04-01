@@ -8,12 +8,12 @@
 import { set } from '@kbn/safer-lodash-set';
 import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
-import {
+import type {
   AlertAttachmentAttributes,
   UserCommentAttachmentAttributes,
-  AttachmentType,
 } from '@kbn/cases-plugin/common/types/domain';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { AttachmentType, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   defaultUser,
@@ -34,6 +34,7 @@ import {
   updateComment,
   superUserSpace1Auth,
   removeServerGeneratedPropertiesFromSavedObject,
+  updateCase,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -547,6 +548,48 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       }
+    });
+
+    describe('partial updates', () => {
+      it('should not result to a version conflict (409) when updating a comment to an updated case', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const caseWithComments = await createComment({
+          supertest,
+          caseId: postedCase.id,
+          params: postCommentUserReq,
+          expectedHttpCode: 200,
+        });
+
+        /**
+         * Updating the status of the case will
+         * change the version of the case
+         */
+        await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: caseWithComments.id,
+                version: caseWithComments.version,
+                status: CaseStatuses['in-progress'],
+              },
+            ],
+          },
+        });
+
+        await updateComment({
+          supertest,
+          caseId: postedCase.id,
+          req: {
+            id: caseWithComments.comments![0].id,
+            version: caseWithComments.comments![0].version,
+            comment: 'my new comment',
+            type: AttachmentType.user,
+            owner: 'securitySolutionFixture',
+          },
+          expectedHttpCode: 200,
+        });
+      });
     });
 
     describe('rbac', () => {

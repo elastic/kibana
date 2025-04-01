@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('transform basic license', function () {
-    this.tags(['skipFirefox', 'transform']);
+    this.tags(['skipFirefox', 'transform', 'skipFIPS']);
 
     // The transform UI should work the same as with a trial license
     loadTestFile(require.resolve('../../../../functional/apps/transform/permissions'));

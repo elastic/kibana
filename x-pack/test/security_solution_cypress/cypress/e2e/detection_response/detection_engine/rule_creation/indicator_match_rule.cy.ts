@@ -14,17 +14,17 @@ import {
 } from '../../../../objects/rule';
 
 import {
-  ALERT_RULE_NAME,
   ALERT_RISK_SCORE,
+  ALERT_RULE_NAME,
   ALERT_SEVERITY,
   ALERTS_COUNT,
 } from '../../../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
-  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
+  RULES_MANAGEMENT_TABLE,
   SEVERITY,
 } from '../../../../screens/alerts_detection_rules';
 import {
@@ -40,6 +40,7 @@ import {
   INDICATOR_INDEX_QUERY,
   INDICATOR_MAPPING,
   INDICATOR_PREFIX_OVERRIDE,
+  INTERVAL_ABBR_VALUE,
   INVESTIGATION_NOTES_MARKDOWN,
   INVESTIGATION_NOTES_TOGGLE,
   MITRE_ATTACK_DETAILS,
@@ -57,13 +58,13 @@ import {
 import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../../../screens/timeline';
 import { investigateFirstAlertInTimeline } from '../../../../tasks/alerts';
 import {
+  checkDuplicatedRule,
+  disableAutoRefresh,
   duplicateFirstRule,
   duplicateRuleFromMenu,
-  checkDuplicatedRule,
   expectNumberOfRules,
-  selectAllRules,
   goToRuleDetailsOf,
-  disableAutoRefresh,
+  selectAllRules,
 } from '../../../../tasks/alerts_detection_rules';
 import { duplicateSelectedRulesWithExceptions } from '../../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -84,12 +85,13 @@ import {
   getIndicatorAndButton,
   getIndicatorAtLeastOneInvalidationText,
   getIndicatorDeleteButton,
-  getIndicatorIndex,
   getIndicatorIndexComboField,
   getIndicatorIndicatorIndex,
   getIndicatorInvalidationText,
   getIndicatorMappingComboField,
   getIndicatorOrButton,
+  getRuleIndexInput,
+  getThreatMatchQueryInvalidationText,
   selectIndicatorMatchType,
   waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
@@ -103,10 +105,10 @@ import { goBackToRuleDetails } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import {
-  goBackToRulesTable,
   getDetails,
-  waitForTheRuleToBeExecuted,
+  goBackToRulesTable,
   visitRuleDetailsPage,
+  waitForTheRuleToBeExecuted,
 } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
@@ -115,8 +117,8 @@ import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
 const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"';
 
-// TODO: https://github.com/elastic/kibana/issues/161539
-describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// Skipping in MKI due to flake
+describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   describe('Detection rules, Indicator Match', () => {
     const expectedUrls = getNewThreatIndicatorRule().references?.join('');
     const expectedFalsePositives = getNewThreatIndicatorRule().false_positives?.join('');
@@ -136,13 +138,12 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
     describe('Creating new indicator match rules', () => {
       describe('Index patterns', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
 
         it('Contains a predefined index pattern', () => {
-          getIndicatorIndex().should('have.text', getIndexPatterns().join(''));
+          getRuleIndexInput().should('have.text', getIndexPatterns().join(''));
         });
 
         it('Does NOT show invalidation text on initial page load if indicator index pattern is filled out', () => {
@@ -160,7 +161,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('Indicator index patterns', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -182,7 +182,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('custom query input', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -197,9 +196,8 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         });
       });
 
-      describe('custom indicator query input', () => {
+      describe('indicator query input', () => {
         beforeEach(() => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
         });
@@ -210,13 +208,13 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
         it('Shows invalidation text if text is removed', () => {
           getCustomIndicatorQueryInput().type('{selectall}{del}');
-          getCustomQueryInvalidationText().should('exist');
+          getThreatMatchQueryInvalidationText().should('exist');
         });
       });
 
-      describe('Indicator mapping', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/182669
+      describe.skip('Indicator mapping', () => {
         beforeEach(() => {
-          login();
           const rule = getNewThreatIndicatorRule();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
@@ -287,10 +285,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
           });
           getIndicatorDeleteButton().click();
           getIndicatorIndexComboField().find('input').should('have.value', 'agent.name');
-          getIndicatorMappingComboField().should(
-            'have.text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('have.value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -343,8 +340,14 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             indicatorIndexField: getNewThreatIndicatorRule().threat_mapping[0].entries[0].value,
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should('text', 'Search');
-          getIndicatorMappingComboField().should('text', 'Search');
+          getIndicatorIndexComboField()
+            .find('input')
+            .should('value', '')
+            .should('have.attr', 'placeholder', 'Search');
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('value', '')
+            .should('have.attr', 'placeholder', 'Search');
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -368,22 +371,18 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             indicatorIndexField: getNewThreatIndicatorRule().threat_mapping[0].entries[0].value,
           });
           getIndicatorDeleteButton(2).click();
-          getIndicatorIndexComboField(1).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          );
-          getIndicatorMappingComboField(1).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
-          getIndicatorIndexComboField(2).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          );
-          getIndicatorMappingComboField(2).should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
+          getIndicatorIndexComboField(1)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].field);
+          getIndicatorMappingComboField(1)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
+          getIndicatorIndexComboField(2)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].field);
+          getIndicatorMappingComboField(2)
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
           getIndicatorIndexComboField(3).should('not.exist');
           getIndicatorMappingComboField(3).should('not.exist');
         });
@@ -401,14 +400,12 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
             indicatorIndexField: getNewThreatIndicatorRule().threat_mapping[0].entries[0].value,
           });
           getIndicatorDeleteButton().click();
-          getIndicatorIndexComboField().should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          );
-          getIndicatorMappingComboField().should(
-            'text',
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].value
-          );
+          getIndicatorIndexComboField()
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].field);
+          getIndicatorMappingComboField()
+            .find('input')
+            .should('value', getNewThreatIndicatorRule().threat_mapping[0].entries[0].value);
           getIndicatorIndexComboField(2).should('not.exist');
           getIndicatorMappingComboField(2).should('not.exist');
         });
@@ -416,7 +413,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
       describe('Schedule', () => {
         it('IM rule has 1h time interval and lookback by default', () => {
-          login();
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
@@ -486,12 +482,16 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
         });
 
         cy.get(SCHEDULE_DETAILS).within(() => {
-          getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+          getDetails(RUNS_EVERY_DETAILS)
+            .find(INTERVAL_ABBR_VALUE)
+            .should('have.text', `${rule.interval}`);
           const humanizedDuration = getHumanizedDuration(
             rule.from ?? 'now-6m',
             rule.interval ?? '5m'
           );
-          getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+          getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+            .find(INTERVAL_ABBR_VALUE)
+            .should('have.text', `${humanizedDuration}`);
         });
 
         waitForTheRuleToBeExecuted();
@@ -504,8 +504,6 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
       });
 
       it('Investigate alert in timeline', () => {
-        const accessibilityText = `Press enter for options, or press space to begin dragging.`;
-
         loadPrepackagedTimelineTemplates();
         createRule(getNewThreatIndicatorRule({ rule_id: 'rule_testing', enabled: true })).then(
           (rule) => visitRuleDetailsPage(rule.body.id)
@@ -526,14 +524,9 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@brokenInServerless
 
         cy.get(INDICATOR_MATCH_ROW_RENDER).should(
           'have.text',
-          `threat.enrichments.matched.field${
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          }${accessibilityText}matched${
-            getNewThreatIndicatorRule().threat_mapping[0].entries[0].field
-          }${
+          `${getNewThreatIndicatorRule().threat_mapping[0].entries[0].field}matched${
             indicatorRuleMatchingDoc.atomic
-          }${accessibilityText}threat.enrichments.matched.typeindicator_match_rule${accessibilityText}provided` +
-            ` byfeed.nameAbuseCH malware${accessibilityText}`
+          }indicator_match_ruleprovided` + ` byAbuseCH malware`
         );
       });
     });

@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConfirmAlterActiveSpaceModal renders as expected 1`] = `
+<EuiConfirmModal
+  cancelButtonText="Cancel"
+  confirmButtonText="Update space"
+  defaultFocusedButton="confirm"
+  onCancel={[MockFunction]}
+  onConfirm={[MockFunction]}
+  title={
+    <Memo(MemoizedFormattedMessage)
+      defaultMessage="Confirm update space"
+      id="xpack.spaces.management.confirmAlterActiveSpaceModal.title"
+    />
+  }
+>
+  <p>
+    <MemoizedFormattedMessage
+      defaultMessage="You have updated the visible features in this space. Your page will reload after saving."
+      id="xpack.spaces.management.confirmAlterActiveSpaceModal.reloadWarningMessage"
+    />
+  </p>
+</EuiConfirmModal>
+`;

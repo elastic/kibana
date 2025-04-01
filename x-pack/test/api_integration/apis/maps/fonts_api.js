@@ -23,7 +23,7 @@ export default function ({ getService }) {
     // x-pack tests can be run from root directory or from within x-pack so need to cater for both possibilities.
     const fontPath = path.join(
       process.cwd().replace(/x-pack.*$/, ''),
-      'x-pack/plugins/maps/server/fonts/open_sans/0-255.pbf'
+      'x-pack/platform/plugins/shared/maps/server/fonts/open_sans/0-255.pbf'
     );
     const destinationPath = path.join(path.dirname(fontPath), '..', path.basename(fontPath));
 

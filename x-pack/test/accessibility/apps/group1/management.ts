@@ -25,16 +25,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    describe('index management', async () => {
-      describe('indices', async () => {
+    describe('index management', () => {
+      describe('indices', () => {
         it('empty state', async () => {
           await PageObjects.settings.clickIndexManagement();
           await a11y.testAppSnapshot();
         });
-        describe('indices with data', async () => {
+        describe('indices with data', () => {
           before(async () => {
             await esArchiver.loadIfNeeded(
-              'test/functional/fixtures/es_archiver/logstash_functional'
+              'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
             );
             await kibanaServer.uiSettings.update({
               defaultIndex: 'logstash-*',
@@ -42,13 +42,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.settings.navigateTo();
           });
           after(async () => {
-            await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+            await esArchiver.unload(
+              'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+            );
           });
           it('index list', async () => {
             await a11y.testAppSnapshot();
           });
 
-          describe('index details', async () => {
+          describe('index details', () => {
             it('index details - overview', async () => {
               await PageObjects.settings.clickIndexManagement();
               await PageObjects.indexManagement.clickIndexAt(0);

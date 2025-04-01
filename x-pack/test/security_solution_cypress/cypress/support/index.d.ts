@@ -16,6 +16,14 @@ declare namespace Cypress {
         timeout: number;
       }
     ): Chainable<Subject>;
+    /**
+     * Sets a new non-default space id as current
+     */
+    setCurrentSpace(spaceId: string): void;
+    /**
+     * Reads current space id value. `undefined` is returned for default space.
+     */
+    currentSpace(): Chainable<string>;
   }
 }
 

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 import { superUser } from '../../../common/lib/authentication/users';
 
@@ -39,7 +39,7 @@ export default ({ getService }: FtrProviderContext) => {
         .send({
           gte: '2020-12-16T15:00:00.000Z',
           lte: '2020-12-16T16:00:00.000Z',
-          featureIds: ['logs'],
+          ruleTypeIds: ['logs.alert.document.count'],
           fixed_interval: '10m',
         })
         .expect(200);
@@ -83,7 +83,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ],
-          featureIds: ['logs'],
+          ruleTypeIds: ['logs.alert.document.count'],
           fixed_interval: '10m',
         })
         .expect(200);
@@ -127,7 +127,7 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           ],
-          featureIds: ['logs'],
+          ruleTypeIds: ['logs.alert.document.count'],
           fixed_interval: '10m',
         })
         .expect(200);

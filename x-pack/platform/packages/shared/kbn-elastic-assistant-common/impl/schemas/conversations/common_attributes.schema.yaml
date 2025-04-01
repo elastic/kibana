@@ -1,0 +1,409 @@
+openapi: 3.0.0
+info:
+  title: Common Conversation Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+
+    TraceData:
+      type: object
+      description: trace Data
+      properties:
+        transactionId:
+          type: string
+          description: Could be any string, not necessarily a UUID
+        traceId:
+          type: string
+          description: Could be any string, not necessarily a UUID
+
+    BaseContentReference:
+      type: object
+      description: The basis of a content reference
+      required:
+        - 'id'
+        - 'type'
+      properties:
+        id: 
+          type: string
+          description: Id of the content reference
+        type: 
+          type: string
+          description: Type of the content reference
+
+    KnowledgeBaseEntryContentReference:
+      description: References a knowledge base entry
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'knowledgeBaseEntryId'
+            - 'knowledgeBaseEntryName'
+          properties:
+            type: 
+              type: string
+              enum: [KnowledgeBaseEntry]
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+
+    EsqlContentReference:
+      description: References an ESQL query
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'query'
+            - 'label'
+          properties:
+            type: 
+              type: string
+              enum: [EsqlQuery]
+            query:
+              description: An ESQL query
+              type: string
+            label:
+              description: Label of the query
+              type: string
+            timerange:
+                description: Time range to select in the time picker.
+                type: object
+                required:
+                  - 'from'
+                  - 'to'
+                properties:
+                  from:
+                    type: string
+                  to:
+                    type: string
+
+    SecurityAlertContentReference:
+      description: References a security alert
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'alertId'
+          properties:
+            type: 
+              type: string
+              enum: [SecurityAlert]
+            alertId:
+              description: ID of the Alert
+              type: string
+
+    SecurityAlertsPageContentReference:
+      description: References the security alerts page
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+          properties:
+            type: 
+              type: string
+              enum: [SecurityAlertsPage]
+
+    ProductDocumentationContentReference:
+        description: References the product documentation
+        allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          required:
+            - 'type'
+            - 'title'
+            - 'url'
+          properties:
+            type: 
+              type: string
+              enum: [ProductDocumentation]
+            title:
+              description: Title of the documentation
+              type: string
+            url:
+              description: URL to the documentation
+              type: string
+
+    ContentReference:
+      description: A content reference
+      oneOf:
+        - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+        - $ref: '#/components/schemas/SecurityAlertContentReference'
+        - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+        - $ref: '#/components/schemas/ProductDocumentationContentReference'
+        - $ref: '#/components/schemas/EsqlContentReference'
+          additionalProperties: false
+
+    ContentReferences:
+      description: A union of all content reference types
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+          - $ref: '#/components/schemas/SecurityAlertContentReference'
+          - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/ProductDocumentationContentReference'
+          - $ref: '#/components/schemas/EsqlContentReference'
+            additionalProperties: false
+      type: object
+
+    MessageMetadata:
+      type: object
+      description: Message metadata
+      properties:
+        contentReferences: 
+          $ref: '#/components/schemas/ContentReferences'
+          description: Data refered to by the message content.
+
+    Replacements:
+      type: object
+      additionalProperties:
+        type: string
+      description: Replacements object used to anonymize/deanomymize messsages
+
+    Reader:
+      type: object
+      additionalProperties: true
+
+    Provider:
+      type: string
+      description: Provider
+      enum:
+        - OpenAI
+        - Azure OpenAI
+        - Other
+
+    MessageRole:
+      type: string
+      description: Message role.
+      enum:
+        - system
+        - user
+        - assistant
+
+    ConversationCategory:
+      type: string
+      description: The conversation category.
+      enum:
+        - assistant
+        - insights
+
+    ConversationConfidence:
+      type: string
+      description: The conversation confidence.
+      enum:
+        - low
+        - medium
+        - high
+
+    Message:
+      type: object
+      description: AI assistant conversation message.
+      required:
+        - 'timestamp'
+        - 'content'
+        - 'role'
+      properties:
+        content:
+          type: string
+          description: Message content.
+        reader:
+          $ref: '#/components/schemas/Reader'
+          description: Message content.
+        role:
+          $ref: '#/components/schemas/MessageRole'
+          description: Message role.
+        timestamp:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          description: The timestamp message was sent or received.
+        isError:
+          type: boolean
+          description: Is error message.
+        traceData:
+          $ref: '#/components/schemas/TraceData'
+          description: trace Data
+        metadata:
+          $ref: '#/components/schemas/MessageMetadata'
+          description: metadata
+
+    ApiConfig:
+      type: object
+      required:
+        - connectorId
+        - actionTypeId
+      properties:
+        connectorId:
+          type: string
+          description: connector id
+        actionTypeId:
+          type: string
+          description: action type id
+        defaultSystemPromptId:
+          type: string
+          description: defaultSystemPromptId
+        provider:
+          $ref: '#/components/schemas/Provider'
+          description: Provider
+        model:
+          type: string
+          description: model
+
+    ConversationSummary:
+      type: object
+      properties:
+        content:
+          type: string
+          description: Summary text of the conversation over time.
+        timestamp:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+          description: The timestamp summary was updated.
+        public:
+          type: boolean
+          description: Define if summary is marked as publicly available.
+        confidence:
+          $ref: '#/components/schemas/ConversationConfidence'
+          description: How confident you are about this being a correct and useful learning.
+
+    ErrorSchema:
+      type: object
+      required:
+        - error
+      additionalProperties: false
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        error:
+          type: object
+          required:
+            - status_code
+            - message
+          properties:
+            status_code:
+              type: integer
+              minimum: 400
+            message:
+              type: string
+
+    ConversationResponse:
+      type: object
+      required:
+        - id
+        - title
+        - createdAt
+        - users
+        - namespace
+        - category
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        title:
+          type: string
+          description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
+        'timestamp':
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        updatedAt:
+          description: The last time conversation was updated.
+          type: string
+        createdAt:
+          description: The time conversation was created.
+          type: string
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+        users:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        namespace:
+          type: string
+          description: Kibana space
+
+    ConversationUpdateProps:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        title:
+          type: string
+          description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        summary:
+          $ref: '#/components/schemas/ConversationSummary'
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+
+    ConversationCreateProps:
+      type: object
+      required:
+        - title
+      properties:
+        id:
+          type: string
+          description: The conversation id.
+        title:
+          type: string
+          description: The conversation title.
+        category:
+          $ref: '#/components/schemas/ConversationCategory'
+          description: The conversation category.
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+        apiConfig:
+          $ref: '#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        excludeFromLastConversationStorage:
+          description: excludeFromLastConversationStorage.
+          type: boolean
+        replacements:
+          $ref: '#/components/schemas/Replacements'
+
+    ConversationMessageCreateProps:
+      type: object
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+

@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
 import { MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import type { Alerts } from '../../../../common/lib/alerts';
 import {
-  Alerts,
   createCaseAttachAlertAndDeleteCase,
   createSecuritySolutionAlerts,
   getAlertById,
   getSecuritySolutionAlerts,
 } from '../../../../common/lib/alerts';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getFilesAttachmentReq,
@@ -29,7 +29,7 @@ import {
   getComment,
   getCase,
   superUserSpace1Auth,
-  getCaseUserActions,
+  findCaseUserActions,
   deleteAllCaseItems,
   createAndUploadFile,
   deleteAllFiles,
@@ -62,12 +62,12 @@ import {
   OBSERVABILITY_FILE_KIND,
   SECURITY_SOLUTION_FILE_KIND,
 } from '../../../../common/lib/constants';
-import { User } from '../../../../common/lib/authentication/types';
+import type { User } from '../../../../common/lib/authentication/types';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../../../../common/utils/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -79,6 +79,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('delete_cases', () => {
     afterEach(async () => {
+      await deleteAllFiles({
+        supertest,
+      });
       await deleteAllCaseItems(es);
     });
 
@@ -97,11 +100,17 @@ export default ({ getService }: FtrProviderContext): void => {
 
       await deleteCases({ supertest, caseIDs: [case1.id, case2.id] });
 
-      const userActionsCase1 = await getCaseUserActions({ supertest, caseID: case1.id });
-      expect(userActionsCase1.length).to.be(0);
+      await findCaseUserActions({
+        supertest,
+        caseID: case1.id,
+        expectedHttpCode: 404,
+      });
 
-      const userActionsCase2 = await getCaseUserActions({ supertest, caseID: case2.id });
-      expect(userActionsCase2.length).to.be(0);
+      await findCaseUserActions({
+        supertest,
+        caseID: case2.id,
+        expectedHttpCode: 404,
+      });
     });
 
     it(`should delete a case's comments and user actions when that case gets deleted`, async () => {
@@ -128,15 +137,13 @@ export default ({ getService }: FtrProviderContext): void => {
         expectedHttpCode: 404,
       });
 
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-      expect(userActions.length).to.be(0);
+      await findCaseUserActions({ supertest, caseID: postedCase.id, expectedHttpCode: 404 });
     });
 
     it('should delete all user actions when deleting a case', async () => {
       const postedCase = await createCase(supertest, getPostCaseRequest());
       await deleteCases({ supertest, caseIDs: [postedCase.id] });
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
-      expect(userActions.length).to.be(0);
+      await findCaseUserActions({ supertest, caseID: postedCase.id, expectedHttpCode: 404 });
     });
 
     it('unhappy path - 404s when case is not there', async () => {
@@ -260,9 +267,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
           const signals = await createSecuritySolutionAlerts(supertest, log, 2);
-          alerts = [signals.hits.hits[0], signals.hits.hits[1]];
+          alerts = [signals.hits.hits[0] as Alerts[number], signals.hits.hits[1] as Alerts[number]];
         });
 
         afterEach(async () => {
@@ -700,7 +707,7 @@ const createCaseWithFiles = async ({
   owner,
   auth = { user: superUser, space: null },
 }: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  supertest: SuperTest.Agent;
   fileKind: string;
   owner: string;
   auth?: { user: User; space: string | null };

@@ -1,0 +1,116 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { FC } from 'react';
+import React, { memo } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { KibanaObjectUi } from '../page';
+
+export interface KibanaObjectItemProps {
+  objectType: string;
+  kibanaObjects: KibanaObjectUi[] | undefined;
+  isSaving: boolean;
+}
+
+export const KibanaObjectList: FC<KibanaObjectItemProps> = memo(
+  ({ objectType, kibanaObjects, isSaving }) => {
+    const kibanaObjectLabels: Record<string, string> = {
+      dashboard: i18n.translate('xpack.ml.newJob.recognize.dashboardsLabel', {
+        defaultMessage: 'Dashboards',
+      }),
+      search: i18n.translate('xpack.ml.newJob.recognize.searchesLabel', {
+        defaultMessage: 'Searches',
+      }),
+      visualization: i18n.translate('xpack.ml.newJob.recognize.visualizationsLabel', {
+        defaultMessage: 'Visualizations',
+      }),
+    };
+
+    if (kibanaObjects === undefined) {
+      return null;
+    }
+
+    return (
+      <>
+        <EuiTitle size="s">
+          <h4>{kibanaObjectLabels[objectType]}</h4>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <ul>
+          {kibanaObjects.map(({ id, title, success, exists, error }, i) => (
+            <li key={id}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem>
+                      <EuiText size="s" color={exists ? 'subdued' : 'success'}>
+                        {title}
+                      </EuiText>
+                      {success === false && error !== undefined && (
+                        <EuiText size="xs" color="danger">
+                          {extractErrorMessage(error)}
+                        </EuiText>
+                      )}
+                    </EuiFlexItem>
+                    {exists && (
+                      <EuiFlexItem grow={false}>
+                        <EuiText size="xs" color="default">
+                          <FormattedMessage
+                            id="xpack.ml.newJob.recognize.alreadyExistsLabel"
+                            defaultMessage="(already exists)"
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+                {!exists && (
+                  <EuiFlexItem grow={false} style={{ width: '60px' }}>
+                    <EuiText textAlign="center">
+                      {isSaving ? <EuiLoadingSpinner size="m" /> : null}
+                      {success !== undefined ? (
+                        <EuiIcon
+                          type={success ? 'check' : 'cross'}
+                          color={success ? 'success' : 'danger'}
+                          aria-label={
+                            success
+                              ? i18n.translate('xpack.ml.newJob.recognize.results.savedAriaLabel', {
+                                  defaultMessage: 'Saved',
+                                })
+                              : i18n.translate(
+                                  'xpack.ml.newJob.recognize.results.saveFailedAriaLabel',
+                                  { defaultMessage: 'Save failed' }
+                                )
+                          }
+                        />
+                      ) : null}
+                    </EuiText>
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+              {(kibanaObjects.length === 1 || i < kibanaObjects.length - 1) && (
+                <EuiHorizontalRule margin="s" />
+              )}
+            </li>
+          ))}
+        </ul>
+      </>
+    );
+  }
+);

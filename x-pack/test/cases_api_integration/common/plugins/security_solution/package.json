@@ -7,8 +7,8 @@
   },
   "main": "target/test/plugin_api_integration/plugins/security_solution_fixtures",
   "scripts": {
-    "kbn": "node ../../../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && ../../../../../../../node_modules/.bin/tsc"
+    "kbn": "node ../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
   },
   "license": "Elastic License 2.0"
 }

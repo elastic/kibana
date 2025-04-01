@@ -1,0 +1,48 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import Related API endpoint
+  version: "1"
+paths:
+  /internal/automatic_import/related:
+    post:
+      summary: Builds related.* fields for integration with the given input samples
+      operationId: Related
+      x-codegen-enabled: true
+      description: Add Related mappings for the given samples.
+      tags:
+        - Related API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - packageName
+                - dataStreamName
+                - rawSamples
+                - currentPipeline
+                - connectorId
+                - samplesFormat
+              properties:
+                packageName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageName"
+                dataStreamName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
+                rawSamples:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/RawSamples"
+                currentPipeline:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/Pipeline"
+                connectorId:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
+                samplesFormat:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/SamplesFormat"
+                langSmithOptions:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: "../model/response_schemas.schema.yaml#/components/schemas/RelatedAPIResponse"

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProcessDraggable rendering it renders against shallow snapshot 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="none"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="context-123"
+      eventId="event-123"
+      field="process.name"
+      fieldType="keyword"
+      iconType="console"
+      isAggregatable={true}
+      scopeId="some_scope"
+      value="process-name-1"
+    />
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <DraggableBadge
+      contextId="context-123"
+      eventId="event-123"
+      field="process.pid"
+      fieldType="keyword"
+      isAggregatable={true}
+      queryValue="123"
+      scopeId="some_scope"
+      value="(123)"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

@@ -8,14 +8,14 @@
 import expect from '@kbn/expect';
 import { sample } from 'lodash';
 import { duration } from 'moment';
-import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
+import type { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
 import { ANOMALY_SCORE_MATCH_GROUP_ID } from '@kbn/ml-plugin/server/lib/alerts/register_anomaly_detection_alert_type';
 import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 
 const ACTION_TYPE_ID = '.index';
 const ALERT_TYPE_ID = ML_ALERT_TYPES.ANOMALY_DETECTION;
@@ -75,7 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  describe('alert', async () => {
+  describe('alert', () => {
     const objectRemover = new ObjectRemover(supertest);
     let actionId: string;
 
@@ -156,6 +156,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
         expect(doc._source['kibana.alert.url']).to.contain(
           '/s/space1/app/ml/explorer/?_g=(ml%3A(jobIds%3A!(rt-anomaly-mean-value))'
         );
+        expect(doc._source['kibana.alert.anomaly_score'][0]).to.be.above(0);
       }
     });
 
@@ -293,13 +294,13 @@ export default function alertTests({ getService }: FtrProviderContext) {
         docTime += step;
       }
 
-      const body = docs.flatMap(({ _index, ...doc }) => {
+      const operations = docs.flatMap(({ _index, ...doc }) => {
         return [{ index: { _index } }, doc];
       });
 
       await es.bulk({
         refresh: 'wait_for',
-        body,
+        operations,
       });
 
       log.debug('> docs ingested.');

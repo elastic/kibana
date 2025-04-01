@@ -7,24 +7,24 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile, getPageObject }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('discover/group1', function () {
+    this.tags(['esGate']);
+
     before(async function () {
       await browser.setWindowSize(1300, 800);
-      // TODO: Serverless tests require login first
-      await svlCommonPage.login();
     });
 
     after(async function unloadMakelogs() {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     loadTestFile(require.resolve('./_discover'));
     loadTestFile(require.resolve('./_discover_histogram'));
-    loadTestFile(require.resolve('./_url_state'));
   });
 }

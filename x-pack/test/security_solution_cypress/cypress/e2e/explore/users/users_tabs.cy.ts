@@ -12,29 +12,27 @@ import {
   AUTHENTICATIONS_TABLE,
 } from '../../../screens/users/user_authentications';
 import { EVENTS_TAB, EVENTS_TAB_CONTENT } from '../../../screens/users/user_events';
-import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from '../../../screens/users/user_risk_score';
+import { RISK_SCORE_TAB } from '../../../screens/users/user_risk_score';
 
 import { login } from '../../../tasks/login';
 import { visitUserDetailsPage, visitWithTimeRange } from '../../../tasks/navigation';
 
-import { USERS_URL } from '../../../urls/navigation';
+import { usersUrl } from '../../../urls/navigation';
 import { waitForTabToBeLoaded } from '../../../tasks/common';
+import { ENABLE_RISK_SCORE_BUTTON } from '../../../screens/entity_analytics';
 
 describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'users' });
-
-    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
   });
 
   beforeEach(() => {
     login();
-    visitWithTimeRange(USERS_URL);
+    visitWithTimeRange(usersUrl('allUsers'));
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'users');
-    cy.task('esArchiverUnload', 'risk_users');
+    cy.task('esArchiverUnload', { archiveName: 'users' });
   });
 
   describe('Users page tabs', () => {
@@ -68,10 +66,11 @@ describe('Users stats and tables', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EVENTS_TAB_CONTENT).should('exist');
     });
 
-    it(`renders users risk tab`, () => {
+    // https://github.com/elastic/kibana/issues/184201
+    it(`renders users risk tab`, { tags: ['@skipInServerless'] }, () => {
       waitForTabToBeLoaded(RISK_SCORE_TAB);
 
-      cy.get(RISK_SCORE_TAB_CONTENT).should('exist');
+      cy.get(ENABLE_RISK_SCORE_BUTTON).should('exist');
     });
   });
 

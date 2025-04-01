@@ -9,10 +9,11 @@ import crypto from 'crypto';
 import fs from 'fs';
 import { stringify } from 'query-string';
 import url from 'url';
-import zlib from 'zlib';
 import { promisify } from 'util';
-import { parseString } from 'xml2js';
 import { SignedXml } from 'xml-crypto';
+import { parseString } from 'xml2js';
+import zlib from 'zlib';
+
 import { KBN_KEY_PATH } from '@kbn/dev-utils';
 
 /**
@@ -28,6 +29,7 @@ const parseStringAsync = promisify(parseString);
 
 const signingKey = fs.readFileSync(KBN_KEY_PATH);
 const signatureAlgorithm = 'http://www.w3.org/2001/04/xmldsig-more#rsa-sha256';
+const canonicalizationAlgorithm = 'http://www.w3.org/2001/10/xml-exc-c14n#';
 
 export async function getSAMLRequestId(urlWithSAMLRequestId: string) {
   const inflatedSAMLRequest = (await inflateRawAsync(
@@ -83,19 +85,19 @@ export async function getSAMLResponse({
     </saml:Assertion>
   `;
 
-  const signature = new SignedXml();
+  const signature = new SignedXml({ privateKey: signingKey });
   signature.signatureAlgorithm = signatureAlgorithm;
-  signature.signingKey = signingKey;
+  signature.canonicalizationAlgorithm = canonicalizationAlgorithm;
 
   // Adds a reference to a `Assertion` xml element and an array of transform algorithms to be used during signing.
-  signature.addReference(
-    `//*[local-name(.)='Assertion']`,
-    [
+  signature.addReference({
+    xpath: `//*[local-name(.)='Assertion']`,
+    digestAlgorithm: 'http://www.w3.org/2001/04/xmlenc#sha256',
+    transforms: [
       'http://www.w3.org/2000/09/xmldsig#enveloped-signature',
       'http://www.w3.org/2001/10/xml-exc-c14n#',
     ],
-    'http://www.w3.org/2001/04/xmlenc#sha256'
-  );
+  });
 
   signature.computeSignature(samlAssertionTemplateXML, {
     location: { reference: `//*[local-name(.)='Issuer']`, action: 'after' },

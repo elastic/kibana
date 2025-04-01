@@ -1,0 +1,452 @@
+{
+  "id": "@kbn/code-owners",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.findAreaForCodeOwner",
+        "type": "Function",
+        "tags": [],
+        "label": "findAreaForCodeOwner",
+        "description": [
+          "\nFind what area a code owner belongs to\n"
+        ],
+        "signature": [
+          "(owner: string) => \"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\" | undefined"
+        ],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.findAreaForCodeOwner.$1",
+            "type": "string",
+            "tags": [],
+            "label": "owner",
+            "description": [
+              "Owner to find an area name"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The code owner area if a match for the given owner is found"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.findCodeOwnersEntryForPath",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "findCodeOwnersEntryForPath",
+        "description": [
+          "\nGet a list of matching code owners for a given path\n\nTip:\n  If you're making a lot of calls to this function, fetch the code owner paths once using\n  `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries.\n"
+        ],
+        "signature": [
+          "(searchPath: string, codeOwnersEntries: ",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.CodeOwnersEntry",
+            "text": "CodeOwnersEntry"
+          },
+          "[] | undefined) => ",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.CodeOwnersEntry",
+            "text": "CodeOwnersEntry"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.findCodeOwnersEntryForPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "searchPath",
+            "description": [
+              "The path to find code owners for"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.findCodeOwnersEntryForPath.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "codeOwnersEntries",
+            "description": [
+              "Pre-defined list of code owner paths to search in"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/code-owners",
+                "scope": "common",
+                "docId": "kibKbnCodeOwnersPluginApi",
+                "section": "def-common.CodeOwnersEntry",
+                "text": "CodeOwnersEntry"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "Code owners entry if a match is found."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.getCodeOwnersEntries",
+        "type": "Function",
+        "tags": [],
+        "label": "getCodeOwnersEntries",
+        "description": [
+          "\nGet all code owner entries from the CODEOWNERS file\n\nEntries are ordered in reverse relative to how they're defined in the CODEOWNERS file\nas patterns defined lower in the CODEOWNERS file can override earlier entries."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.CodeOwnersEntry",
+            "text": "CodeOwnersEntry"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.getOwningTeamsForPath",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "getOwningTeamsForPath",
+        "description": [
+          "\nGet a list of matching code owners for a given path\n\nTip:\n  If you're making a lot of calls to this function, fetch the code owner paths once using\n  `getCodeOwnersEntries` and pass it in the `getCodeOwnersEntries` parameter to speed up your queries.\n"
+        ],
+        "signature": [
+          "(searchPath: string, codeOwnersEntries: ",
+          {
+            "pluginId": "@kbn/code-owners",
+            "scope": "common",
+            "docId": "kibKbnCodeOwnersPluginApi",
+            "section": "def-common.CodeOwnersEntry",
+            "text": "CodeOwnersEntry"
+          },
+          "[] | undefined) => string[]"
+        ],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.getOwningTeamsForPath.$1",
+            "type": "string",
+            "tags": [],
+            "label": "searchPath",
+            "description": [
+              "The path to find code owners for"
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.getOwningTeamsForPath.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "codeOwnersEntries",
+            "description": [
+              "Pre-defined list of code owner entries"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/code-owners",
+                "scope": "common",
+                "docId": "kibKbnCodeOwnersPluginApi",
+                "section": "def-common.CodeOwnersEntry",
+                "text": "CodeOwnersEntry"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [
+          "List of code owners for the given path. Empty list if no matching entry is found."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.CodeOwnersEntry",
+        "type": "Interface",
+        "tags": [],
+        "label": "CodeOwnersEntry",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CodeOwnersEntry.pattern",
+            "type": "string",
+            "tags": [],
+            "label": "pattern",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CodeOwnersEntry.matcher",
+            "type": "Object",
+            "tags": [],
+            "label": "matcher",
+            "description": [],
+            "signature": [
+              "Ignore"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CodeOwnersEntry.teams",
+            "type": "Array",
+            "tags": [],
+            "label": "teams",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CodeOwnersEntry.areas",
+            "type": "Array",
+            "tags": [],
+            "label": "areas",
+            "description": [],
+            "signature": [
+              "(\"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\")[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CodeOwnersEntry.comment",
+            "type": "string",
+            "tags": [],
+            "label": "comment",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.CodeOwnerArea",
+        "type": "Type",
+        "tags": [],
+        "label": "CodeOwnerArea",
+        "description": [],
+        "signature": [
+          "\"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\""
+        ],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.CODE_OWNER_AREA_MAPPINGS",
+        "type": "Object",
+        "tags": [],
+        "label": "CODE_OWNER_AREA_MAPPINGS",
+        "description": [
+          "\nArea mappings for code owners"
+        ],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.platform",
+            "type": "Array",
+            "tags": [],
+            "label": "platform",
+            "description": [
+              "// BOOKMARK - List of Kibana solutions"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.search",
+            "type": "Array",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.observability",
+            "type": "Array",
+            "tags": [],
+            "label": "observability",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.security",
+            "type": "Array",
+            "tags": [],
+            "label": "security",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-owners",
+            "id": "def-common.CODE_OWNER_AREA_MAPPINGS.chat",
+            "type": "Array",
+            "tags": [],
+            "label": "chat",
+            "description": [],
+            "signature": [
+              "never[]"
+            ],
+            "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/code-owners",
+        "id": "def-common.CODE_OWNER_AREAS",
+        "type": "Object",
+        "tags": [],
+        "label": "CODE_OWNER_AREAS",
+        "description": [
+          "\nCode owner area names"
+        ],
+        "signature": [
+          "readonly [\"platform\", \"search\", \"observability\", \"security\", \"chat\"]"
+        ],
+        "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

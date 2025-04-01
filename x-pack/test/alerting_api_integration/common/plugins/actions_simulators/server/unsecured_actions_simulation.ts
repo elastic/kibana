@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   CoreSetup,
   RequestHandlerContext,
   KibanaRequest,
@@ -14,12 +14,18 @@ import {
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
-import { FixtureStartDeps } from './plugin';
+import type { FixtureStartDeps } from './plugin';
 
 export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDeps>) {
   router.post(
     {
       path: `/api/sample_unsecured_action`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: {
         body: schema.object({
           requesterId: schema.string(),
@@ -42,6 +48,94 @@ export function initPlugin(router: IRouter, coreSetup: CoreSetup<FixtureStartDep
         await unsecuredActionsClient.bulkEnqueueExecution(requesterId, [{ id, params }]);
 
         return res.ok({ body: { status: 'success' } });
+      } catch (err) {
+        return res.ok({ body: { status: 'error', error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/execute_unsecured_action`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          requesterId: schema.string(),
+          id: schema.string(),
+          spaceId: schema.string(),
+          params: schema.recordOf(schema.string(), schema.any()),
+          relatedSavedObjects: schema.maybe(
+            schema.arrayOf(
+              schema.object({
+                id: schema.string(),
+                type: schema.string(),
+                typeId: schema.maybe(schema.string()),
+              })
+            )
+          ),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const [_, { actions }] = await coreSetup.getStartServices();
+      const { body } = req;
+
+      try {
+        const unsecuredActionsClient = actions.getUnsecuredActionsClient();
+        const { requesterId, spaceId, id, params, relatedSavedObjects } = body;
+        const result = await unsecuredActionsClient.execute({
+          requesterId,
+          id,
+          params,
+          spaceId,
+          relatedSavedObjects,
+        });
+
+        return res.ok({ body: { status: 'success', result } });
+      } catch (err) {
+        return res.ok({ body: { status: 'error', error: `${err}` } });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: `/api/get_all_unsecured_actions`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {
+        body: schema.object({
+          spaceId: schema.string(),
+        }),
+      },
+    },
+    async function (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> {
+      const [_, { actions }] = await coreSetup.getStartServices();
+      const { body } = req;
+
+      try {
+        const unsecuredActionsClient = actions.getUnsecuredActionsClient();
+        const { spaceId } = body;
+        const result = await unsecuredActionsClient.getAll(spaceId);
+
+        return res.ok({ body: { status: 'success', result } });
       } catch (err) {
         return res.ok({ body: { status: 'error', error: `${err}` } });
       }

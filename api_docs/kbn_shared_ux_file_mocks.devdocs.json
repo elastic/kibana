@@ -45,7 +45,7 @@
           },
           "<unknown>>"
         ],
-        "path": "packages/shared-ux/file/mocks/index.ts",
+        "path": "src/platform/packages/shared/shared-ux/file/mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

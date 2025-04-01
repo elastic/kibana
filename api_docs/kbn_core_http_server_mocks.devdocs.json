@@ -10,24 +10,16 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.createConfigService",
+        "id": "def-server.createConfigService",
         "type": "Function",
         "tags": [],
         "label": "createConfigService",
         "description": [],
         "signature": [
-          "({ server, externalUrl, csp, }?: Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | undefined; } & {}>; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+          "({ server, externalUrl, csp, }?: Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"required\" | \"optional\"; }>; host: string; protocol: \"http1\" | \"http2\"; port: number; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; prototypeHardening: boolean; http2: Readonly<{} & { allowUnsecure: boolean; }>; versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | null | undefined; } & {}>; oas: Readonly<{} & { enabled: boolean; }>; securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -35,15 +27,9 @@
             "section": "def-common.ByteSizeValue",
             "text": "ByteSizeValue"
           },
-          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
-          {
-            "pluginId": "@kbn/core-http-common",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpCommonPluginApi",
-            "section": "def-common.IExternalUrlPolicy",
-            "text": "IExternalUrlPolicy"
-          },
-          "[]; }>>; csp: Partial<Readonly<{} & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>) => ",
+          "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; rateLimiter: Readonly<{} & { enabled: boolean; term: \"long\" | \"short\" | \"medium\"; elu: number; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+          "IExternalUrlPolicy",
+          "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { form_action: string[]; object_src: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>) => ",
           {
             "pluginId": "@kbn/config-mocks",
             "scope": "common",
@@ -52,19 +38,19 @@
             "text": "IConfigServiceMock"
           }
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.createConfigService.$1",
+            "id": "def-server.createConfigService.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  server,\n  externalUrl,\n  csp,\n}",
             "description": [],
             "signature": [
-              "Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificateAuthorities?: string | string[] | undefined; certificate?: string | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; truststore: Readonly<{ path?: string | undefined; password?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"optional\" | \"required\"; }>; host: string; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; port: number; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; versioned: Readonly<{} & { versionResolution: \"none\" | \"newest\" | \"oldest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | undefined; } & {}>; securityResponseHeaders: Readonly<{} & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
+              "Partial<{ server: Partial<Readonly<{ uuid?: string | undefined; basePath?: string | undefined; publicBaseUrl?: string | undefined; } & { name: string; ssl: Readonly<{ key?: string | undefined; certificate?: string | undefined; certificateAuthorities?: string | string[] | undefined; keyPassphrase?: string | undefined; redirectHttpFromPort?: number | undefined; } & { enabled: boolean; keystore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; truststore: Readonly<{ password?: string | undefined; path?: string | undefined; } & {}>; cipherSuites: string[]; supportedProtocols: string[]; clientAuthentication: \"none\" | \"required\" | \"optional\"; }>; host: string; protocol: \"http1\" | \"http2\"; port: number; compression: Readonly<{ referrerWhitelist?: string[] | undefined; } & { enabled: boolean; brotli: Readonly<{} & { enabled: boolean; quality: number; }>; }>; cors: Readonly<{} & { enabled: boolean; allowCredentials: boolean; allowOrigin: string[] | \"*\"[]; }>; prototypeHardening: boolean; http2: Readonly<{} & { allowUnsecure: boolean; }>; versioned: Readonly<{} & { useVersionResolutionStrategyForInternalPaths: string[]; versionResolution: \"none\" | \"oldest\" | \"newest\"; strictClientVersionCheck: boolean; }>; autoListen: boolean; shutdownTimeout: moment.Duration; cdn: Readonly<{ url?: string | null | undefined; } & {}>; oas: Readonly<{} & { enabled: boolean; }>; securityResponseHeaders: Readonly<{ permissionsPolicyReportOnly?: string | null | undefined; } & { referrerPolicy: \"origin\" | \"no-referrer\" | \"no-referrer-when-downgrade\" | \"origin-when-cross-origin\" | \"same-origin\" | \"strict-origin\" | \"strict-origin-when-cross-origin\" | \"unsafe-url\" | null; strictTransportSecurity: string | null; xContentTypeOptions: \"nosniff\" | null; permissionsPolicy: string | null; disableEmbedding: boolean; crossOriginOpenerPolicy: \"same-origin\" | \"unsafe-none\" | \"same-origin-allow-popups\" | null; }>; customResponseHeaders: Record<string, any>; maxPayload: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",
@@ -72,17 +58,11 @@
                 "section": "def-common.ByteSizeValue",
                 "text": "ByteSizeValue"
               },
-              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
-              {
-                "pluginId": "@kbn/core-http-common",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpCommonPluginApi",
-                "section": "def-common.IExternalUrlPolicy",
-                "text": "IExternalUrlPolicy"
-              },
-              "[]; }>>; csp: Partial<Readonly<{} & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>"
+              "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; rateLimiter: Readonly<{} & { enabled: boolean; term: \"long\" | \"short\" | \"medium\"; elu: number; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
+              "IExternalUrlPolicy",
+              "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { form_action: string[]; object_src: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+            "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,7 +73,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.createCoreContext",
+        "id": "def-server.createCoreContext",
         "type": "Function",
         "tags": [],
         "label": "createCoreContext",
@@ -104,13 +84,13 @@
           ">) => ",
           "CoreContext"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.createCoreContext.$1",
+            "id": "def-server.createCoreContext.$1",
             "type": "Object",
             "tags": [],
             "label": "overrides",
@@ -120,7 +100,7 @@
               "CoreContext",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+            "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -131,12 +111,12 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.createHttpServer",
+        "id": "def-server.createHttpService",
         "type": "Function",
         "tags": [],
-        "label": "createHttpServer",
+        "label": "createHttpService",
         "description": [
-          "\nCreates a concrete HttpServer with a mocked context."
+          "\nCreates a concrete HttpService with a mocked context."
         ],
         "signature": [
           "({ buildNum, ...overrides }?: Partial<",
@@ -144,13 +124,13 @@
           " & { buildNum: number; }>) => ",
           "HttpService"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+        "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.createHttpServer.$1",
+            "id": "def-server.createHttpService.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  buildNum,\n  ...overrides\n}",
@@ -160,7 +140,7 @@
               "CoreContext",
               " & { buildNum: number; }>"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
+            "path": "src/core/packages/http/server-mocks/src/test_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -175,498 +155,206 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.HttpServicePrebootMock",
+        "id": "def-server.HttpServicePrebootMock",
         "type": "Type",
         "tags": [],
         "label": "HttpServicePrebootMock",
         "description": [],
         "signature": [
           "{ registerRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">) => void], unknown>; basePath: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServicePreboot",
-            "text": "HttpServicePreboot"
-          },
+          "HttpServicePreboot",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.HttpServiceSetupMock",
+        "id": "def-server.HttpServiceSetupMock",
         "type": "Type",
         "tags": [],
         "label": "HttpServiceSetupMock",
         "description": [],
         "signature": [
           "{ csp: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ICspConfig",
-            "text": "ICspConfig"
-          },
+          "ICspConfig",
           "; staticAssets: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IStaticAssets",
-            "text": "IStaticAssets"
-          },
+          "IStaticAssets",
           "; registerRouteHandlerContext: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IContextContainer",
-            "text": "IContextContainer"
-          },
+          "IContextContainer",
           ", [contextName: Exclude<keyof ContextType, \"resolve\">, provider: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IContextProvider",
-            "text": "IContextProvider"
-          },
+          "IContextProvider",
           "<ContextType, Exclude<keyof ContextType, \"resolve\">>], unknown>; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; createCookieSessionStorageFactory: jest.MockInstance<Promise<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.SessionStorageFactory",
-            "text": "SessionStorageFactory"
-          },
-          "<unknown>>, [cookieOptions: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.SessionStorageCookieOptions",
-            "text": "SessionStorageCookieOptions"
-          },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPreRoutingHandler",
-            "text": "OnPreRoutingHandler"
-          },
+          "SessionStorageFactory",
+          "<object>>, [cookieOptions: ",
+          "SessionStorageCookieOptions",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "OnPreRoutingHandler",
           "], unknown>; registerOnPreAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPreAuthHandler",
-            "text": "OnPreAuthHandler"
-          },
+          "OnPreAuthHandler",
           "], unknown>; registerAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.AuthenticationHandler",
-            "text": "AuthenticationHandler"
-          },
+          "AuthenticationHandler",
           "], unknown>; registerOnPostAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPostAuthHandler",
-            "text": "OnPostAuthHandler"
-          },
+          "OnPostAuthHandler",
           "], unknown>; registerOnPreResponse: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPreResponseHandler",
-            "text": "OnPreResponseHandler"
-          },
-          "], unknown>; } & Omit<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServiceSetup",
-            "text": "HttpServiceSetup"
-          },
-          "<ContextType>, \"createRouter\" | \"basePath\"> & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; createRouter: jest.MockedFunction<() => ",
-          {
-            "pluginId": "@kbn/core-http-router-server-mocks",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-            "section": "def-common.RouterMock",
-            "text": "RouterMock"
-          },
+          "OnPreResponseHandler",
+          "], unknown>; getDeprecatedRoutes: jest.MockInstance<",
+          "RouterDeprecatedApiDetails",
+          "[], [], unknown>; } & Omit<",
+          "HttpServiceSetup",
+          "<ContextType>, \"basePath\" | \"createRouter\"> & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; createRouter: jest.MockedFunction<() => ",
+          "RouterMock",
           ">; }"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.HttpServiceStartMock",
+        "id": "def-server.HttpServiceStartMock",
         "type": "Type",
         "tags": [],
         "label": "HttpServiceStartMock",
         "description": [],
         "signature": [
           "{ basePath: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; staticAssets: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IStaticAssets",
-            "text": "IStaticAssets"
-          },
+          "IStaticAssets",
           "; auth: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpAuth",
-            "text": "HttpAuth"
-          },
+          "HttpAuth",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServiceStart",
-            "text": "HttpServiceStart"
-          },
+          "HttpServiceStart",
           " & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; }"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.InternalHttpServicePrebootMock",
+        "id": "def-server.InternalHttpServicePrebootMock",
         "type": "Type",
         "tags": [],
         "label": "InternalHttpServicePrebootMock",
         "description": [],
         "signature": [
-          "{ externalUrl: ",
-          {
-            "pluginId": "@kbn/core-http-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerInternalPluginApi",
-            "section": "def-common.ExternalUrlConfig",
-            "text": "ExternalUrlConfig"
-          },
+          "{ auth: ",
+          "HttpAuth",
+          "; externalUrl: ",
+          "ExternalUrlConfig",
           "; csp: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ICspConfig",
-            "text": "ICspConfig"
-          },
-          "; auth: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpAuth",
-            "text": "HttpAuth"
-          },
+          "ICspConfig",
           "; server: ",
           "Server",
-          "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string], unknown>; registerRouteHandlerContext: <Context extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
-          ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IContextProvider",
-            "text": "IContextProvider"
-          },
-          "<Context, ContextName>) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IContextContainer",
-            "text": "IContextContainer"
-          },
-          "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
-          ", [], unknown>; registerRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "ServerApplicationState",
+          ">; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string], unknown>; registerRouteHandlerContext: <Context extends ",
+          "RequestHandlerContextBase",
+          ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
+          "IContextProvider",
+          "<Context, ContextName>) => ",
+          "IContextContainer",
+          "; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", [], unknown>; prototypeHardening: boolean; registerRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContextBase",
           ">) => void], unknown>; } & Omit<",
           "InternalHttpServicePreboot",
           ", \"basePath\" | \"staticAssets\"> & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.InternalHttpServiceSetupMock",
+        "id": "def-server.InternalHttpServiceSetupMock",
         "type": "Type",
         "tags": [],
         "label": "InternalHttpServiceSetupMock",
         "description": [],
         "signature": [
           "{ externalUrl: ",
-          {
-            "pluginId": "@kbn/core-http-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerInternalPluginApi",
-            "section": "def-common.ExternalUrlConfig",
-            "text": "ExternalUrlConfig"
-          },
+          "ExternalUrlConfig",
           "; csp: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.ICspConfig",
-            "text": "ICspConfig"
-          },
+          "ICspConfig",
           "; server: ",
           "Server",
-          "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string], unknown>; registerRouteHandlerContext: <Context extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
-          ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IContextProvider",
-            "text": "IContextProvider"
-          },
-          "<Context, ContextName>) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IContextContainer",
-            "text": "IContextContainer"
-          },
-          "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
-          ", [], unknown>; createCookieSessionStorageFactory: jest.MockInstance<Promise<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.SessionStorageFactory",
-            "text": "SessionStorageFactory"
-          },
-          "<unknown>>, [cookieOptions: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.SessionStorageCookieOptions",
-            "text": "SessionStorageCookieOptions"
-          },
-          "<unknown>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPreRoutingHandler",
-            "text": "OnPreRoutingHandler"
-          },
-          "], unknown>; registerOnPreAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPreAuthHandler",
-            "text": "OnPreAuthHandler"
-          },
-          "], unknown>; registerAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.AuthenticationHandler",
-            "text": "AuthenticationHandler"
-          },
-          "], unknown>; registerOnPostAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPostAuthHandler",
-            "text": "OnPostAuthHandler"
-          },
-          "], unknown>; registerOnPreResponse: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.OnPreResponseHandler",
-            "text": "OnPreResponseHandler"
-          },
-          "], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
-          ">], unknown>; } & Omit<",
+          "ServerApplicationState",
+          ">; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string], unknown>; registerRouteHandlerContext: <Context extends ",
+          "RequestHandlerContextBase",
+          ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
+          "IContextProvider",
+          "<Context, ContextName>) => ",
+          "IContextContainer",
+          "; getServerInfo: jest.MockInstance<",
+          "HttpServerInfo",
+          ", [], unknown>; prototypeHardening: boolean; createCookieSessionStorageFactory: jest.MockInstance<Promise<",
+          "SessionStorageFactory",
+          "<object>>, [cookieOptions: ",
+          "SessionStorageCookieOptions",
+          "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
+          "OnPreRoutingHandler",
+          "], unknown>; registerOnPreAuth: jest.MockInstance<void, [handler: ",
+          "OnPreAuthHandler",
+          "], unknown>; registerAuth: jest.MockInstance<void, [handler: ",
+          "AuthenticationHandler",
+          "], unknown>; registerOnPostAuth: jest.MockInstance<void, [handler: ",
+          "OnPostAuthHandler",
+          "], unknown>; registerOnPreResponse: jest.MockInstance<void, [handler: ",
+          "OnPreResponseHandler",
+          "], unknown>; getDeprecatedRoutes: jest.MockInstance<",
+          "RouterDeprecatedApiDetails",
+          "[], [], unknown>; rateLimiter: Readonly<{} & { enabled: boolean; term: \"long\" | \"short\" | \"medium\"; elu: number; }>; registerOnPostValidation: jest.MockInstance<void, [cb: (req: ",
+          "CoreKibanaRequest",
+          "<unknown, unknown, unknown, any>, metadata: ",
+          "PostValidationMetadata",
+          ") => void], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
+          "IRouter",
+          "<",
+          "RequestHandlerContextBase",
+          ">], unknown>; getRegisteredDeprecatedApis: jest.MockInstance<",
+          "RouterDeprecatedApiDetails",
+          "[], [], unknown>; } & Omit<",
           "InternalHttpServiceSetup",
-          ", \"createRouter\" | \"basePath\" | \"auth\" | \"staticAssets\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; createRouter: jest.MockedFunction<(path: string) => ",
-          {
-            "pluginId": "@kbn/core-http-router-server-mocks",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-            "section": "def-common.RouterMock",
-            "text": "RouterMock"
-          },
+          ", \"auth\" | \"basePath\" | \"staticAssets\" | \"createRouter\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; createRouter: jest.MockedFunction<(path: string) => ",
+          "RouterMock",
           ">; authRequestHeaders: jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IAuthHeadersStorage",
-            "text": "IAuthHeadersStorage"
-          },
+          "IAuthHeadersStorage",
           ">; }"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.InternalHttpServiceStartMock",
+        "id": "def-server.InternalHttpServiceStartMock",
         "type": "Type",
         "tags": [],
         "label": "InternalHttpServiceStartMock",
@@ -674,35 +362,17 @@
         "signature": [
           "{ staticAssets: ",
           "InternalStaticAssets",
-          "; isListening: jest.MockInstance<boolean, [], unknown>; basePath: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IBasePath",
-            "text": "IBasePath"
-          },
-          "; auth: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpAuth",
-            "text": "HttpAuth"
-          },
+          "; isListening: jest.MockInstance<boolean, [], unknown>; auth: ",
+          "HttpAuth",
+          "; basePath: ",
+          "IBasePath",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; } & ",
           "InternalHttpServiceStart",
           " & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
         ],
-        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -711,18 +381,18 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.httpServerMock",
+        "id": "def-server.httpServerMock",
         "type": "Object",
         "tags": [],
         "label": "httpServerMock",
         "description": [],
-        "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_server.mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServerMock.createKibanaRequest",
+            "id": "def-server.httpServerMock.createKibanaRequest",
             "type": "Function",
             "tags": [],
             "label": "createKibanaRequest",
@@ -731,23 +401,17 @@
               "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
               "RequestFixtureOptions",
               "<P, Q, B>) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<P, Q, B, any>"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-server-mocks",
-                "id": "def-common.httpServerMock.createKibanaRequest.$1",
+                "id": "def-server.httpServerMock.createKibanaRequest.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -756,7 +420,7 @@
                   "RequestFixtureOptions",
                   "<P, Q, B>"
                 ],
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -764,7 +428,40 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServerMock.createRawRequest",
+            "id": "def-server.httpServerMock.createFakeKibanaRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "createFakeKibanaRequest",
+            "description": [],
+            "signature": [
+              "({ headers, }: { headers?: Record<string, string> | undefined; }) => ",
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
+            ],
+            "path": "src/core/packages/http/server-mocks/src/http_server.mocks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server-mocks",
+                "id": "def-server.httpServerMock.createFakeKibanaRequest.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  "{ headers?: Record<string, string> | undefined; }"
+                ],
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server-mocks",
+            "id": "def-server.httpServerMock.createRawRequest",
             "type": "Function",
             "tags": [],
             "label": "createRawRequest",
@@ -780,17 +477,22 @@
               },
               "<",
               "Request",
-              ">) => ",
-              "Request"
+              "<",
+              "ReqRefDefaults",
+              ">>) => ",
+              "Request",
+              "<",
+              "ReqRefDefaults",
+              ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-server-mocks",
-                "id": "def-common.httpServerMock.createRawRequest.$1",
+                "id": "def-server.httpServerMock.createRawRequest.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "customization",
@@ -816,7 +518,11 @@
                   },
                   "<",
                   "RequestAuth",
-                  "> | undefined; events?: ",
+                  "<",
+                  "UserCredentials",
+                  ", ",
+                  "AppCredentials",
+                  ", Record<string, unknown>, Record<string, unknown>>> | undefined; events?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -834,9 +540,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<",
-                  "Util",
-                  ".Dictionary<string>> | undefined; readonly info?: ",
+                  "<Record<string, any>> | undefined; readonly info?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -856,9 +560,7 @@
                   },
                   "<",
                   "RequestLog",
-                  "> | undefined; readonly method?: ",
-                  "Util",
-                  ".HTTP_METHODS_PARTIAL_LOWERCASE | undefined; readonly mime?: string | undefined; readonly orig?: ",
+                  "> | undefined; readonly method?: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\" | undefined; readonly mime?: string | undefined; readonly orig?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -876,9 +578,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<",
-                  "Util",
-                  ".Dictionary<any>> | undefined; readonly paramsArray?: ",
+                  "<Record<string, any>> | undefined; readonly paramsArray?: string | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -922,19 +622,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<",
-                  "Util",
-                  ".Dictionary<any>> | undefined; response?: ",
-                  {
-                    "pluginId": "@kbn/utility-types",
-                    "scope": "common",
-                    "docId": "kibKbnUtilityTypesPluginApi",
-                    "section": "def-common.DeepPartialObject",
-                    "text": "DeepPartialObject"
-                  },
-                  "<",
-                  "ResponseObject",
-                  "> | ",
+                  "<Record<string, any>> | undefined; response?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -944,7 +632,7 @@
                   },
                   "<",
                   "Boom",
-                  "<any>> | undefined; readonly preResponses?: ",
+                  "<any>> | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -953,8 +641,16 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "Util",
-                  ".Dictionary<any>> | undefined; readonly query?: ",
+                  "ResponseObject",
+                  "> | undefined; readonly preResponses?: ",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
+                  "<Record<string, any>> | undefined; readonly query?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -988,7 +684,9 @@
                   },
                   "<",
                   "RequestRoute",
-                  "> | undefined; server?: ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">> | undefined; readonly server?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -998,7 +696,9 @@
                   },
                   "<",
                   "Server",
-                  "> | undefined; readonly state?: ",
+                  "<",
+                  "ServerApplicationState",
+                  ">> | undefined; readonly state?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1006,9 +706,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<",
-                  "Util",
-                  ".Dictionary<any>> | undefined; readonly url?: ",
+                  "<Record<string, any>> | undefined; readonly url?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1062,9 +760,9 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<(method: ",
-                  "Util",
-                  ".HTTP_METHODS_PARTIAL) => void> | undefined; setUrl?: ",
+                  "<(method: \"source\" | \"get\" | \"delete\" | \"options\" | \"search\" | \"link\" | \"head\" | \"post\" | \"put\" | \"patch\" | \"purge\" | \"unlink\" | \"copy\" | \"move\" | \"merge\" | \"trace\" | \"subscribe\" | \"lock\" | \"unsubscribe\" | \"report\" | ",
+                  "HTTP_METHODS",
+                  " | \"acl\" | \"bind\" | \"checkout\" | \"connect\" | \"m-search\" | \"mkactivity\" | \"mkcalendar\" | \"mkcol\" | \"notify\" | \"propfind\" | \"proppatch\" | \"rebind\" | \"unbind\" | \"unlock\") => void> | undefined; setUrl?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1091,10 +789,12 @@
                     "text": "DeepPartialObject"
                   },
                   "<(events: ",
-                  "Event",
-                  " | ",
-                  "Event",
-                  "[]) => void> | undefined; registerPodium?: ",
+                  "Podium",
+                  ".EventOptions<string> | ",
+                  "Podium",
+                  ".EventOptions<string>[], options?: ",
+                  "Podium",
+                  ".EventSettings | undefined) => void> | undefined; emit?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1102,11 +802,9 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<(podiums: ",
-                  "node_modules/@hapi/podium/lib/index",
-                  " | ",
-                  "node_modules/@hapi/podium/lib/index",
-                  "[]) => void> | undefined; emit?: ",
+                  "<(criteria: ",
+                  "Podium",
+                  ".EmitCriteria<string>, data?: any) => void> | undefined; gauge?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1114,9 +812,9 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<(criteria: string | ",
-                  "EmitCriteria",
-                  ", data?: any) => Promise<void>> | undefined; on?: ",
+                  "<(<T = unknown>(criteria: ",
+                  "Podium",
+                  ".EmitCriteria<string>, data?: any) => Promise<PromiseSettledResult<T>[]>)> | undefined; on?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1124,23 +822,19 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<{ <TArgs extends any[] = unknown[], Tcontext extends object = ",
+                  "<(<TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
-                  ">(criteria: string | ",
-                  "CriteriaObject",
-                  ", listener: ",
-                  "Listener",
-                  "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">>(criteria: ",
+                  "Podium",
+                  ".Criteria<string>, listener: ",
+                  "EventListener",
+                  "<undefined, TArgs, Tcontext>, context?: Tcontext | undefined) => ",
                   "Request",
-                  "; <TArgs extends any[] = any[], Tcontext extends object = ",
-                  "Request",
-                  ">(criteria: string | ",
-                  "CriteriaObject",
-                  ", listener: ",
-                  "Listener",
-                  "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
-                  "Request",
-                  "; }> | undefined; addListener?: ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">)> | undefined; addListener?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1148,23 +842,19 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<{ <TArgs extends any[] = unknown[], Tcontext extends object = ",
+                  "<(<TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
-                  ">(criteria: string | ",
-                  "CriteriaObject",
-                  ", listener: ",
-                  "Listener",
-                  "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">>(criteria: ",
+                  "Podium",
+                  ".Criteria<string>, listener: ",
+                  "EventListener",
+                  "<undefined, TArgs, Tcontext>, context?: Tcontext | undefined) => ",
                   "Request",
-                  "; <TArgs extends any[] = any[], Tcontext extends object = ",
-                  "Request",
-                  ">(criteria: string | ",
-                  "CriteriaObject",
-                  ", listener: ",
-                  "Listener",
-                  "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
-                  "Request",
-                  "; }> | undefined; once?: ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">)> | undefined; once?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1174,25 +864,37 @@
                   },
                   "<{ <TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
-                  ">(criteria: string | Omit<",
-                  "CriteriaObject",
-                  ", \"count\">, listener: ",
-                  "Listener",
-                  "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">>(criteria: ",
+                  "Podium",
+                  ".OnceCriteria<string>, listener: ",
+                  "EventListener",
+                  "<undefined, TArgs, Tcontext>, context?: Tcontext | undefined): ",
                   "Request",
-                  "; <TArgs extends any[] = any[], Tcontext extends object = ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">; <TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
-                  ">(criteria: string | Omit<",
-                  "CriteriaObject",
-                  ", \"count\">, listener: ",
-                  "Listener",
-                  "<Tcontext, TArgs>, context?: Tcontext | undefined): ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">>(criteria: ",
+                  "Podium",
+                  ".OnceCriteria<string>): Promise<TArgs>; }> | undefined; few?: ",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
+                  "<(<TArgs extends any[] = unknown[], Tcontext extends object = ",
                   "Request",
-                  "; <TArgs extends any[] = unknown[], Tcontext extends void = void>(criteria: string | Omit<",
-                  "CriteriaObject",
-                  ", \"count\">): Promise<TArgs>; <TArgs extends any[] = any[], Tcontext extends void = void>(criteria: string | Omit<",
-                  "CriteriaObject",
-                  ", \"count\">): Promise<TArgs>; }> | undefined; removeListener?: ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">>(criteria: ",
+                  "Podium",
+                  ".FewCriteria<string>) => Promise<TArgs>)> | undefined; off?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1201,10 +903,26 @@
                     "text": "DeepPartialObject"
                   },
                   "<(name: string, listener: ",
-                  "Listener",
-                  "<any, any[]>) => ",
+                  "Podium",
+                  ".Listener<any, any[]>) => ",
                   "Request",
-                  "> | undefined; removeAllListeners?: ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">> | undefined; removeListener?: ",
+                  {
+                    "pluginId": "@kbn/utility-types",
+                    "scope": "common",
+                    "docId": "kibKbnUtilityTypesPluginApi",
+                    "section": "def-common.DeepPartialObject",
+                    "text": "DeepPartialObject"
+                  },
+                  "<(name: string, listener: ",
+                  "Podium",
+                  ".Listener<any, any[]>) => ",
+                  "Request",
+                  "<",
+                  "ReqRefDefaults",
+                  ">> | undefined; removeAllListeners?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1214,7 +932,9 @@
                   },
                   "<(name: string) => ",
                   "Request",
-                  "> | undefined; hasListeners?: ",
+                  "<",
+                  "ReqRefDefaults",
+                  ">> | undefined; hasListeners?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -1224,7 +944,7 @@
                   },
                   "<(name: string) => boolean> | undefined; }"
                 ],
-                "path": "packages/kbn-hapi-mocks/src/request.ts",
+                "path": "src/platform/packages/private/kbn-hapi-mocks/src/request.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1232,23 +952,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServerMock.createResponseFactory",
+            "id": "def-server.httpServerMock.createResponseFactory",
             "type": "Function",
             "tags": [],
             "label": "createResponseFactory",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.KibanaResponseFactory",
-                "text": "KibanaResponseFactory"
-              },
+              "KibanaResponseFactory",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1256,23 +970,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServerMock.createLifecycleResponseFactory",
+            "id": "def-server.httpServerMock.createLifecycleResponseFactory",
             "type": "Function",
             "tags": [],
             "label": "createLifecycleResponseFactory",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.LifecycleResponseFactory",
-                "text": "LifecycleResponseFactory"
-              },
+              "LifecycleResponseFactory",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1280,7 +988,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServerMock.createToolkit",
+            "id": "def-server.httpServerMock.createToolkit",
             "type": "Function",
             "tags": [],
             "label": "createToolkit",
@@ -1288,7 +996,7 @@
             "signature": [
               "() => ToolkitMock"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_server.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1299,18 +1007,18 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.httpServiceMock",
+        "id": "def-server.httpServiceMock",
         "type": "Object",
         "tags": [],
         "label": "httpServiceMock",
         "description": [],
-        "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+        "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.create",
+            "id": "def-server.httpServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -1318,7 +1026,7 @@
             "signature": [
               "() => jest.Mocked<HttpServiceContract>"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1326,7 +1034,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createBasePath",
+            "id": "def-server.httpServiceMock.createBasePath",
             "type": "Function",
             "tags": [],
             "label": "createBasePath",
@@ -1334,30 +1042,30 @@
             "signature": [
               "(serverBasePath?: string, publicBaseUrl?: string) => BasePathMocked"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-server-mocks",
-                "id": "def-common.httpServiceMock.createBasePath.$1",
+                "id": "def-server.httpServiceMock.createBasePath.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serverBasePath",
                 "description": [],
-                "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+                "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
               {
                 "parentPluginId": "@kbn/core-http-server-mocks",
-                "id": "def-common.httpServiceMock.createBasePath.$2",
+                "id": "def-server.httpServiceMock.createBasePath.$2",
                 "type": "string",
                 "tags": [],
                 "label": "publicBaseUrl",
                 "description": [],
-                "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+                "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1365,7 +1073,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createAuth",
+            "id": "def-server.httpServiceMock.createAuth",
             "type": "Function",
             "tags": [],
             "label": "createAuth",
@@ -1373,7 +1081,7 @@
             "signature": [
               "() => AuthMocked"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1381,29 +1089,23 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createInternalPrebootContract",
+            "id": "def-server.httpServiceMock.createInternalPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalPrebootContract",
             "description": [],
             "signature": [
               "(args?: CreateMockArgs) => ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-common.InternalHttpServicePrebootMock",
-                "text": "InternalHttpServicePrebootMock"
-              }
+              "InternalHttpServicePrebootMock"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-server-mocks",
-                "id": "def-common.httpServiceMock.createInternalPrebootContract.$1",
+                "id": "def-server.httpServiceMock.createInternalPrebootContract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "args",
@@ -1411,7 +1113,7 @@
                 "signature": [
                   "CreateMockArgs"
                 ],
-                "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+                "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1419,22 +1121,16 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createPrebootContract",
+            "id": "def-server.httpServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-common.HttpServicePrebootMock",
-                "text": "HttpServicePrebootMock"
-              }
+              "HttpServicePrebootMock"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1442,22 +1138,16 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createInternalSetupContract",
+            "id": "def-server.httpServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-common.InternalHttpServiceSetupMock",
-                "text": "InternalHttpServiceSetupMock"
-              }
+              "InternalHttpServiceSetupMock"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1465,39 +1155,21 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createSetupContract",
+            "id": "def-server.httpServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "<ContextType extends ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RequestHandlerContextBase",
-                "text": "RequestHandlerContextBase"
-              },
+              "RequestHandlerContextBase",
               " = ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RequestHandlerContextBase",
-                "text": "RequestHandlerContextBase"
-              },
+              "RequestHandlerContextBase",
               ">() => ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-common.HttpServiceSetupMock",
-                "text": "HttpServiceSetupMock"
-              },
+              "HttpServiceSetupMock",
               "<ContextType>"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1505,22 +1177,16 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createInternalStartContract",
+            "id": "def-server.httpServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-common.InternalHttpServiceStartMock",
-                "text": "InternalHttpServiceStartMock"
-              }
+              "InternalHttpServiceStartMock"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1528,22 +1194,16 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createStartContract",
+            "id": "def-server.httpServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-http-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerMocksPluginApi",
-                "section": "def-common.HttpServiceStartMock",
-                "text": "HttpServiceStartMock"
-              }
+              "HttpServiceStartMock"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1551,23 +1211,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createOnPreAuthToolkit",
+            "id": "def-server.httpServiceMock.createOnPreAuthToolkit",
             "type": "Function",
             "tags": [],
             "label": "createOnPreAuthToolkit",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.OnPreAuthToolkit",
-                "text": "OnPreAuthToolkit"
-              },
+              "OnPreAuthToolkit",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1575,23 +1229,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createOnPostAuthToolkit",
+            "id": "def-server.httpServiceMock.createOnPostAuthToolkit",
             "type": "Function",
             "tags": [],
             "label": "createOnPostAuthToolkit",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.OnPostAuthToolkit",
-                "text": "OnPostAuthToolkit"
-              },
+              "OnPostAuthToolkit",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1599,23 +1247,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createOnPreResponseToolkit",
+            "id": "def-server.httpServiceMock.createOnPreResponseToolkit",
             "type": "Function",
             "tags": [],
             "label": "createOnPreResponseToolkit",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.OnPreResponseToolkit",
-                "text": "OnPreResponseToolkit"
-              },
+              "OnPreResponseToolkit",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1623,23 +1265,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createOnPreRoutingToolkit",
+            "id": "def-server.httpServiceMock.createOnPreRoutingToolkit",
             "type": "Function",
             "tags": [],
             "label": "createOnPreRoutingToolkit",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.OnPreRoutingToolkit",
-                "text": "OnPreRoutingToolkit"
-              },
+              "OnPreRoutingToolkit",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1647,23 +1283,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createAuthToolkit",
+            "id": "def-server.httpServiceMock.createAuthToolkit",
             "type": "Function",
             "tags": [],
             "label": "createAuthToolkit",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.AuthToolkit",
-                "text": "AuthToolkit"
-              },
+              "AuthToolkit",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1671,23 +1301,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createAuthHeaderStorage",
+            "id": "def-server.httpServiceMock.createAuthHeaderStorage",
             "type": "Function",
             "tags": [],
             "label": "createAuthHeaderStorage",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IAuthHeadersStorage",
-                "text": "IAuthHeadersStorage"
-              },
+              "IAuthHeadersStorage",
               ">"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1695,29 +1319,23 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.httpServiceMock.createRouter",
+            "id": "def-server.httpServiceMock.createRouter",
             "type": "Function",
             "tags": [],
             "label": "createRouter",
             "description": [],
             "signature": [
               "({ routerPath }?: { routerPath?: string | undefined; }) => ",
-              {
-                "pluginId": "@kbn/core-http-router-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpRouterServerMocksPluginApi",
-                "section": "def-common.RouterMock",
-                "text": "RouterMock"
-              }
+              "RouterMock"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
+            "path": "src/core/packages/http/server-mocks/src/http_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-server-mocks",
-                "id": "def-common.httpServiceMock.createRouter.$1",
+                "id": "def-server.httpServiceMock.createRouter.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -1725,7 +1343,7 @@
                 "signature": [
                   "{ routerPath?: string | undefined; }"
                 ],
-                "path": "packages/core/http/core-http-router-server-mocks/src/router.mock.ts",
+                "path": "src/core/packages/http/router-server-mocks/src/router.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1736,34 +1354,28 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server-mocks",
-        "id": "def-common.sessionStorageMock",
+        "id": "def-server.sessionStorageMock",
         "type": "Object",
         "tags": [],
         "label": "sessionStorageMock",
         "description": [],
-        "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
+        "path": "src/core/packages/http/server-mocks/src/cookie_session_storage.mocks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.sessionStorageMock.create",
+            "id": "def-server.sessionStorageMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "<T>() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.SessionStorage",
-                "text": "SessionStorage"
-              },
+              "SessionStorage",
               "<T>>"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
+            "path": "src/core/packages/http/server-mocks/src/cookie_session_storage.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1771,23 +1383,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server-mocks",
-            "id": "def-common.sessionStorageMock.createFactory",
+            "id": "def-server.sessionStorageMock.createFactory",
             "type": "Function",
             "tags": [],
             "label": "createFactory",
             "description": [],
             "signature": [
-              "<T>() => DeepMocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.SessionStorageFactory",
-                "text": "SessionStorageFactory"
-              },
+              "<T extends object>() => DeepMocked<",
+              "SessionStorageFactory",
               "<T>>"
             ],
-            "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
+            "path": "src/core/packages/http/server-mocks/src/cookie_session_storage.mocks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1797,5 +1403,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

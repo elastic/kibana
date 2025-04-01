@@ -29,8 +29,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     const {
       body: { data: rules },
     } = await supertest
-      .get(`${INTERNAL_RULE_ENDPOINT}/_find?search=${name}&search_fields=name`)
+      .post(`${INTERNAL_RULE_ENDPOINT}/_find`)
+      .set('kbn-xsrf', 'kibana')
+      .send({
+        search: name,
+        search_fields: ['name'],
+      })
       .expect(200);
+
     return rules.find((rule: any) => rule.name === name);
   }
 
@@ -56,8 +62,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   };
 
   const selectAndFillInEsQueryRule = async (ruleName: string) => {
-    await testSubjects.setValue('ruleNameInput', ruleName);
     await testSubjects.click(`.es-query-SelectOption`);
+    await retry.waitFor(
+      'Create Rule form is visible',
+      async () => await testSubjects.exists('ruleForm')
+    );
+
+    await testSubjects.setValue('ruleDetailsNameInput', ruleName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -79,7 +90,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     const observability = getService('observability');
 
-    const navigateAndOpenCreateRuleFlyout = async () => {
+    const navigateAndOpenRuleTypeModal = async () => {
       await observability.alerts.common.navigateToRulesPage();
       await retry.waitFor(
         'Create Rule button is visible',
@@ -91,8 +102,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       );
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await retry.waitFor(
-        'Create Rule flyout is visible',
-        async () => await testSubjects.exists('addRuleFlyoutTitle')
+        'Rule Type Modal is visible',
+        async () => await testSubjects.exists('ruleTypeModal')
       );
     };
 
@@ -109,18 +120,19 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Feature flag', () => {
       it('Link point to O11y Rules pages by default', async () => {
-        const manageRulesPageHref = await observability.alerts.rulesPage.getManageRulesPageHref();
+        const manageRulesPageHref =
+          (await observability.alerts.rulesPage.getManageRulesPageHref()) ?? '';
         expect(new URL(manageRulesPageHref).pathname).equal('/app/observability/alerts/rules');
       });
     });
 
     describe('Create rule button', () => {
-      it('Show Create Rule flyout when Create Rule button is clicked', async () => {
-        await navigateAndOpenCreateRuleFlyout();
+      it('Show Rule Type Modal when Create Rule button is clicked', async () => {
+        await navigateAndOpenRuleTypeModal();
       });
     });
 
-    describe('Create rules flyout', async () => {
+    describe('Create rules form', () => {
       const ruleName = 'esQueryRule';
 
       afterEach(async () => {
@@ -131,42 +143,52 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await observability.users.restoreDefaultTestUserRole();
       });
 
-      it('Allows ES query rules to be created by users with only infrastructure feature enabled', async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            infrastructure: ['all'],
-          })
-        );
-        await navigateAndOpenCreateRuleFlyout();
-        await selectAndFillInEsQueryRule(ruleName);
+      describe('only infrastructure feature enabled', function () {
+        this.tags('skipFIPS');
+        it('Allows ES query rules to be created by users with only infrastructure feature enabled', async () => {
+          await observability.users.setTestUserRole(
+            observability.users.defineBasicObservabilityRole({
+              infrastructure: ['all'],
+            })
+          );
+          await navigateAndOpenRuleTypeModal();
+          await selectAndFillInEsQueryRule(ruleName);
 
-        await testSubjects.click('saveRuleButton');
+          await testSubjects.click('rulePageFooterSaveButton');
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const tableRows = await find.allByCssSelector('.euiTableRow');
-        const rows = await getRulesList(tableRows);
-        expect(rows.length).to.be(1);
-        expect(rows[0].name).to.contain(ruleName);
+          await observability.alerts.common.navigateToRulesPage();
+
+          const tableRows = await find.allByCssSelector('.euiTableRow');
+          const rows = await getRulesList(tableRows);
+          expect(rows.length).to.be(1);
+          expect(rows[0].name).to.contain(ruleName);
+        });
       });
 
-      it('allows ES query rules to be created by users with only logs feature enabled', async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            logs: ['all'],
-          })
-        );
-        await navigateAndOpenCreateRuleFlyout();
-        await selectAndFillInEsQueryRule(ruleName);
+      describe('only logs feature enabled', function () {
+        this.tags('skipFIPS');
 
-        await testSubjects.click('saveRuleButton');
+        it('allows ES query rules to be created by users with only logs feature enabled', async () => {
+          await observability.users.setTestUserRole(
+            observability.users.defineBasicObservabilityRole({
+              logs: ['all'],
+            })
+          );
+          await navigateAndOpenRuleTypeModal();
+          await selectAndFillInEsQueryRule(ruleName);
 
-        await PageObjects.header.waitUntilLoadingHasFinished();
+          await testSubjects.click('rulePageFooterSaveButton');
 
-        const tableRows = await find.allByCssSelector('.euiTableRow');
-        const rows = await getRulesList(tableRows);
-        expect(rows.length).to.be(1);
-        expect(rows[0].name).to.contain(ruleName);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await observability.alerts.common.navigateToRulesPage();
+          const tableRows = await find.allByCssSelector('.euiTableRow');
+          const rows = await getRulesList(tableRows);
+          expect(rows.length).to.be(1);
+          expect(rows[0].name).to.contain(ruleName);
+        });
       });
 
       it('Should allow the user to select consumers when creating ES query rules', async () => {
@@ -177,17 +199,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           })
         );
 
-        await navigateAndOpenCreateRuleFlyout();
+        await navigateAndOpenRuleTypeModal();
         await selectAndFillInEsQueryRule(ruleName);
 
         await retry.waitFor('consumer select modal is visible', async () => {
-          return await testSubjects.exists('ruleFormConsumerSelect');
+          return await testSubjects.exists('ruleConsumerSelection');
         });
 
-        const consumerSelect = await testSubjects.find('ruleFormConsumerSelect');
+        const consumerSelect = await testSubjects.find('ruleConsumerSelection');
         await consumerSelect.click();
         const consumerOptionsList = await testSubjects.find(
-          'comboBoxOptionsList ruleFormConsumerSelect-optionsList'
+          'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
         );
         const consumerOptions = await consumerOptionsList.findAllByClassName(
           'euiComboBoxOption__content'
@@ -270,6 +292,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await observability.alerts.rulesPage.clickRuleStatusDropDownMenu();
         await observability.alerts.rulesPage.clickDisableFromDropDownMenu();
+
+        await testSubjects.click('confirmModalConfirmButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         await retry.waitFor('The rule to be disabled', async () => {
           const tableRows = await find.allByCssSelector('.euiTableRow');
           const rows = await getRulesList(tableRows);
@@ -303,51 +329,57 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
       });
 
-      it(`shows the no permission prompt when the user has no permissions`, async () => {
-        // We kept this test to make sure that the stack management rule page
-        // is showing the right prompt corresponding to the right privileges.
-        // Knowing that o11y alert page won't come up if you do not have any
-        // kind of privileges to o11y
-        await observability.users.setTestUserRole({
-          elasticsearch: {
-            cluster: [],
-            indices: [],
-            run_as: [],
-          },
-          kibana: [
-            {
-              base: [],
-              feature: {
-                discover: ['read'],
-              },
-              spaces: ['*'],
+      describe('permission prompt', function () {
+        this.tags('skipFIPS');
+        it(`shows the no permission prompt when the user has no permissions`, async () => {
+          // We kept this test to make sure that the stack management rule page
+          // is showing the right prompt corresponding to the right privileges.
+          // Knowing that o11y alert page won't come up if you do not have any
+          // kind of privileges to o11y
+          await observability.users.setTestUserRole({
+            elasticsearch: {
+              cluster: [],
+              indices: [],
+              run_as: [],
             },
-          ],
+            kibana: [
+              {
+                base: [],
+                feature: {
+                  discover: ['read'],
+                },
+                spaces: ['*'],
+              },
+            ],
+          });
+          await observability.alerts.common.navigateToRulesPage();
+          await retry.waitFor(
+            'No permissions prompt',
+            async () => await testSubjects.exists('noPermissionPrompt')
+          );
+          await observability.users.restoreDefaultTestUserRole();
         });
-        await observability.alerts.common.navigateToRulesPage();
-        await retry.waitFor(
-          'No permissions prompt',
-          async () => await testSubjects.exists('noPermissionPrompt')
-        );
-        await observability.users.restoreDefaultTestUserRole();
       });
 
-      it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
-        await observability.users.setTestUserRole(
-          observability.users.defineBasicObservabilityRole({
-            logs: ['read'],
-          })
-        );
-        await observability.alerts.common.navigateToRulesPage();
-        await retry.waitFor(
-          'Read-only rules list is visible',
-          async () => await testSubjects.exists('rulesList')
-        );
-        await retry.waitFor(
-          'Create rule button is disabled',
-          async () => !(await testSubjects.isEnabled('createRuleButton'))
-        );
-        await observability.users.restoreDefaultTestUserRole();
+      describe('rules list', function () {
+        this.tags('skipFIPS');
+        it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
+          await observability.users.setTestUserRole(
+            observability.users.defineBasicObservabilityRole({
+              logs: ['read'],
+            })
+          );
+          await observability.alerts.common.navigateToRulesPage();
+          await retry.waitFor(
+            'Read-only rules list is visible',
+            async () => await testSubjects.exists('rulesList')
+          );
+          await retry.waitFor(
+            'Create rule button is disabled',
+            async () => !(await testSubjects.isEnabled('createRuleButton'))
+          );
+          await observability.users.restoreDefaultTestUserRole();
+        });
       });
     });
   });

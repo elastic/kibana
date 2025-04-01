@@ -1,0 +1,8 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ambient-ui-types",
+  "owner": "@elastic/kibana-operations",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

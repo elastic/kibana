@@ -32,6 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const security = getPageObject('security');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
 
   const hasFocus = async (testSubject: string) => {
     const targetElement = await testSubjects.find(testSubject);
@@ -39,6 +40,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
   };
 
+  // https://github.com/elastic/kibana/pull/190690
+  // fails after missing `awaits` were added
   describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -46,7 +49,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('should show the case view page correctly', async () => {
         await testSubjects.existOrFail('case-view-title');
         await testSubjects.existOrFail('header-page-supplements');
+        await testSubjects.existOrFail('case-action-bar-wrapper');
 
+        await testSubjects.existOrFail('case-view-tabs');
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-title-files');
         await testSubjects.existOrFail('description');
@@ -129,7 +135,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('comment area does not have focus on page load', async () => {
-        browser.refresh();
+        await browser.refresh();
         expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(false);
       });
 
@@ -437,7 +443,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          */
         await setTimeoutAsync(2000);
 
-        await testSubjects.click('backToCases');
+        await testSubjects.click('breadcrumb');
 
         await cases.casesTable.waitForCasesToBeListed();
         await cases.casesTable.goToFirstListedCase();
@@ -576,12 +582,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
 
-      /**
-       * There is this bug https://github.com/elastic/kibana/issues/157280
-       * where this test randomly reproduces thus making the test flaky.
-       * Skipping for now until we fix it.
-       */
-      it.skip('should persist the draft of new comment while description is updated', async () => {
+      it('should persist the draft of new comment while description is updated', async () => {
         let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -782,6 +783,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
+        await header.waitUntilLoadingHasFinished();
+
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
 
         await header.waitUntilLoadingHasFinished();
@@ -818,7 +821,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('pagination', async () => {
+    describe('pagination', () => {
       let createdCase: any;
 
       before(async () => {
@@ -866,17 +869,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(userActionsLists).length(2);
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(10);
 
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
 
-        testSubjects.click('cases-show-more-user-actions');
+        await testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
-
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(20);
       });
     });
 
@@ -1013,13 +1014,27 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('Tabs', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
+      it('renders tabs correctly', async () => {
+        await testSubjects.existOrFail('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-title-alerts');
+      });
+
       it('shows the "activity" tab by default', async () => {
         await testSubjects.existOrFail('case-view-tab-title-activity');
         await testSubjects.existOrFail('case-view-tab-content-activity');
       });
 
-      // there are no alerts in stack management yet
-      it.skip("shows the 'alerts' tab when clicked", async () => {
+      it("shows the 'activity' tab when clicked", async () => {
+        // Go to the files tab first
+        await testSubjects.click('case-view-tab-title-files');
+        await testSubjects.existOrFail('case-view-tab-content-files');
+
+        await testSubjects.click('case-view-tab-title-activity');
+        await testSubjects.existOrFail('case-view-tab-content-activity');
+      });
+
+      it("shows the 'alerts' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-alerts');
         await testSubjects.existOrFail('case-view-tab-content-alerts');
       });
@@ -1027,6 +1042,78 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it("shows the 'files' tab when clicked", async () => {
         await testSubjects.click('case-view-tab-title-files');
         await testSubjects.existOrFail('case-view-tab-content-files');
+      });
+
+      describe('Query params', () => {
+        it('renders the activity tab when the query parameter tabId=activity', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'activity');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        it('renders the activity tab when the query parameter tabId=alerts', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'alerts');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+
+        it('renders the activity tab when the query parameter tabId=files', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'files');
+          await testSubjects.existOrFail('case-view-tab-content-files');
+        });
+
+        it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
+          const theCase = await createAndNavigateToCase(getPageObject, getService);
+
+          await cases.navigation.navigateToSingleCase('cases', theCase.id, 'fake');
+          await testSubjects.existOrFail('case-view-tab-title-activity');
+        });
+      });
+    });
+
+    describe('Tabs - alerts linked to case', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/rule_registry/alerts');
+        await cases.navigation.navigateToApp();
+        const theCase = await cases.api.createCase();
+        await cases.casesTable.waitForCasesToBeListed();
+        await retry.try(async () => {
+          await cases.api.createAttachment({
+            caseId: theCase.id,
+            params: {
+              type: AttachmentType.alert,
+              alertId: ['NoxgpHkBqbdrfX07MqXV'],
+              index: '.alerts-observability.apm.alerts',
+              rule: { id: 'id', name: 'name' },
+              owner: theCase.owner,
+            },
+          });
+        });
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts/');
+      });
+
+      beforeEach(async () => {
+        await cases.navigation.navigateToApp();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      it('should show the right amount of alerts linked to a case', async () => {
+        const visibleText = await testSubjects.getVisibleText('case-view-alerts-stats-badge');
+        expect(visibleText).to.be('1');
+      });
+
+      it('should render the alerts table when opening the alerts tab', async () => {
+        await testSubjects.click('case-view-tab-title-alerts');
+        await testSubjects.existOrFail('alertsTableEmptyState');
       });
     });
 
@@ -1183,13 +1270,22 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         {
           key: 'valid_key_1',
           label: 'Summary',
-          type: CustomFieldTypes.TEXT,
+          type: CustomFieldTypes.TEXT as const,
+          defaultValue: 'foobar',
           required: true,
         },
         {
           key: 'valid_key_2',
           label: 'Sync',
-          type: CustomFieldTypes.TOGGLE,
+          type: CustomFieldTypes.TOGGLE as const,
+          defaultValue: false,
+          required: true,
+        },
+        {
+          key: 'valid_key_3',
+          label: 'Sync',
+          type: CustomFieldTypes.NUMBER as const,
+          defaultValue: 123,
           required: true,
         },
       ];
@@ -1209,6 +1305,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               type: CustomFieldTypes.TOGGLE,
               value: true,
             },
+            {
+              key: 'valid_key_3',
+              type: CustomFieldTypes.NUMBER,
+              value: 1234,
+            },
           ],
         });
         await cases.casesTable.waitForCasesToBeListed();
@@ -1216,7 +1317,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
       });
 
-      afterEach(async () => {
+      after(async () => {
         await cases.api.deleteAllCases();
       });
 
@@ -1247,19 +1348,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('update toast exist', async () => {
-          return await testSubjects.exists('toastCloseButton');
-        });
-
-        await testSubjects.click('toastCloseButton');
-
-        await header.waitUntilLoadingHasFinished();
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         await toggle.click();
 
         await header.waitUntilLoadingHasFinished();
-
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         expect(await toggle.getAttribute('aria-checked')).equal('false');
 
@@ -1269,6 +1362,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         expect(userActions).length(2);
+      });
+
+      it('updates a number custom field correctly', async () => {
+        const numberField = await testSubjects.find(
+          `case-number-custom-field-${customFields[2].key}`
+        );
+        expect(await numberField.getVisibleText()).equal('1234');
+
+        await testSubjects.click(`case-number-custom-field-edit-button-${customFields[2].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-number-custom-field-form-field-${customFields[2].key}`
+          );
+        });
+
+        const inputField = await testSubjects.find(
+          `case-number-custom-field-form-field-${customFields[2].key}`
+        );
+
+        await inputField.type('12345');
+
+        await testSubjects.click(`case-number-custom-field-submit-button-${customFields[2].key}`);
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await numberField.getVisibleText()).equal('123412345');
       });
     });
   });

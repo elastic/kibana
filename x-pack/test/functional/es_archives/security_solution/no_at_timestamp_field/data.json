@@ -1,0 +1,38 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "auditbeat-no_at_timestamp_field",
+    "source": {
+      "locale": "pt",
+      "event.category": "configuration",
+      "event.ingested": 1608131778
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "auditbeat-no_at_timestamp_field",
+    "source": {
+      "locale": "es",
+      "event.category": "configuration",
+      "event.ingested": 1608131778
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "auditbeat-no_at_timestamp_field",
+    "source": {
+      "locale": "ua",
+      "event.category": "configuration",
+      "event.ingested": 1608131779
+    },
+    "type": "_doc"
+  }
+}

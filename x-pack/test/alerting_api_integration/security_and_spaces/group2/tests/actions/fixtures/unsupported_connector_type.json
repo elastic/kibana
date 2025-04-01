@@ -1,0 +1,20 @@
+{
+    "attributes": {
+        "actionTypeId": ".invalid-type",
+        "config": {
+            "apiUrl": "https://localhost:5601/"
+        },
+        "isMissingSecrets": true,
+        "name": "Invalid connector",
+        "secrets": {}
+    },
+    "coreMigrationVersion": "8.8.0",
+    "created_at": "2025-01-28T08:46:46.614Z",
+    "id": "e6dca811-c3c1-4eca-8eb0-54c792c0b662",
+    "managed": false,
+    "references": [],
+    "type": "action",
+    "typeMigrationVersion": "10.1.0",
+    "updated_at": "2025-01-28T08:46:46.614Z",
+    "version": "WzUsMl0="
+}

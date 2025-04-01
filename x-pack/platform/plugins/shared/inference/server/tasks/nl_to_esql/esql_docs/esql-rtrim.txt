@@ -1,0 +1,25 @@
+# RTRIM
+
+The RTRIM function is used to remove trailing whitespaces from a string.
+
+## Syntax
+
+`RTRIM(string)`
+
+### Parameters
+
+#### string
+
+This is the string expression from which trailing whitespaces will be removed.
+
+## Examples
+
+The following example demonstrates how to use the RTRIM function:
+
+```esql
+ROW message = "   some text  ",  color = " red "
+| EVAL message = RTRIM(message)
+| EVAL color = RTRIM(color)
+| EVAL message = CONCAT("'", message, "'")
+| EVAL color = CONCAT("'", color, "'")
+```

@@ -10,12 +10,12 @@ export function MonitoringAlertsProvider({ getService }) {
 
   return new (class MonitoringAlerts {
     async deleteAlerts() {
-      const apiResponse = await supertest.get('/api/alerts/_find?per_page=20');
+      const apiResponse = await supertest.get('/api/alerting/rules/_find?per_page=20');
       const alerts = apiResponse.body.data.filter(({ consumer }) => consumer === 'monitoring');
 
       return await Promise.all(
         alerts.map(async (alert) =>
-          supertest.delete(`/api/alerts/alert/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
+          supertest.delete(`/api/alerting/rule/${alert.id}`).set('kbn-xsrf', 'true').expect(204)
         )
       );
     }

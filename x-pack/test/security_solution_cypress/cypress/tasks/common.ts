@@ -56,6 +56,22 @@ export const drop = (dropTarget: JQuery<HTMLElement>) => {
     .wait(300);
 };
 
+const getUserValue = (taskName: 'getFullname' | 'getUsername', role: string = 'admin') => {
+  if (Cypress.env('IS_SERVERLESS')) {
+    return cy.task(taskName, role);
+  } else {
+    return cy.wrap(Cypress.env('ELASTICSEARCH_USERNAME'));
+  }
+};
+
+export const getFullname = (role: string = 'admin') => {
+  return getUserValue('getFullname', role);
+};
+
+export const getUsername = (role: string = 'admin') => {
+  return getUserValue('getUsername', role);
+};
+
 export const reload = () => {
   cy.reload();
   cy.contains('a', 'Security');
@@ -85,7 +101,7 @@ export const waitForTableToLoad = () => {
 
 export const waitForTabToBeLoaded = (tabId: string) => {
   recurse(
-    () => cy.get(tabId).should('be.visible').click(),
+    () => cy.get(tabId).click(),
     ($el) => expect($el).to.have.class('euiTab-isSelected'),
     {
       delay: 500,

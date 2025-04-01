@@ -1,0 +1,50 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: buildkite-pipeline-serverless-release
+  description: Initiate kibana serverless releases
+  links:
+    - title: Pipeline
+      url: https://buildkite.com/elastic/kibana-serverless-release
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / serverless / release
+      description: Initiate kibana serverless releases
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-mission-control'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      default_branch: main
+      allow_rebuilds: false
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/serverless_deployment/run_serverless_release_assistant.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        build_tags: false
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        kibana-release-operators:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
+      schedules:
+        Weekly automated promotion to QA:
+          cronline: 0 6 * * 1
+          message: Weekly automated promotion to QA
+          env:
+            AUTO_SELECT_COMMIT: 'true'
+          branch: main
+      tags:
+        - kibana
+        - kibana-serverless-release

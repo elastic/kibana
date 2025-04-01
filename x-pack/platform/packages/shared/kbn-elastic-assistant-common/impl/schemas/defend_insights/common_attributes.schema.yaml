@@ -1,0 +1,224 @@
+openapi: 3.0.0
+info:
+  title: Common Defend Insights Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    DefendInsightEvent:
+      type: object
+      description: A Defend insight event
+      required:
+        - 'id'
+        - 'endpointId'
+        - 'value'
+      properties:
+        id:
+          description: The event's ID
+          type: string
+        endpointId:
+          description: The endpoint's ID
+          type: string
+        value:
+          description: The value of the event
+          type: string
+
+    DefendInsightType:
+      description: The insight type (ie. incompatible_antivirus)
+      type: string
+      enum:
+        - incompatible_antivirus
+        - noisy_process_tree
+
+    DefendInsight:
+      type: object
+      description: A Defend insight generated from endpoint events
+      required:
+        - 'group'
+      properties:
+        group:
+          description: The group category of the events (ie. Windows Defender)
+          type: string
+        events:
+          description: An array of event objects
+          type: array
+          items:
+            $ref: '#/components/schemas/DefendInsightEvent'
+
+    DefendInsights:
+      type: array
+      description: Array of Defend insights
+      items:
+        $ref: '#/components/schemas/DefendInsight'
+
+    DefendInsightsResponse:
+      type: object
+      required:
+        - apiConfig
+        - id
+        - createdAt
+        - updatedAt
+        - lastViewedAt
+        - users
+        - namespace
+        - endpointIds
+        - insightType
+        - insights
+        - status
+        - backingIndex
+        - generationIntervals
+        - averageIntervalMs
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        'timestamp':
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        updatedAt:
+          description: The last time the Defend insight was updated.
+          type: string
+        lastViewedAt:
+          description: The last time the Defend insight was viewed in the browser.
+          type: string
+        eventsContextCount:
+            type: integer
+            description: The number of events in the context.
+        createdAt:
+          description: The time the Defend insight was created.
+          type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        users:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/User'
+        status:
+          $ref: '#/components/schemas/DefendInsightStatus'
+          description: The status of the Defend insight.
+        endpointIds:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        insightType:
+          $ref: '#/components/schemas/DefendInsightType'
+        insights:
+          $ref: '#/components/schemas/DefendInsights'
+          description: The Defend insights.
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        namespace:
+          type: string
+          description: Kibana space
+        backingIndex:
+          type: string
+          description: The backing index required for update requests.
+        generationIntervals:
+          type: array
+          description: The most 5 recent generation intervals
+          items:
+            $ref: '#/components/schemas/DefendInsightGenerationInterval'
+        averageIntervalMs:
+          type: integer
+          description: The average generation interval in milliseconds
+        failureReason:
+          type: string
+          description: The reason for a status of failed.
+
+    DefendInsightGenerationInterval:
+      type: object
+      description: Run durations for the Defend insight
+      required:
+        - 'date'
+        - 'durationMs'
+      properties:
+        date:
+          description: The time the Defend insight was generated
+          type: string
+        durationMs:
+          description: The duration of the Defend insight generation
+          type: integer
+
+    DefendInsightStatus:
+      type: string
+      description: The status of the Defend insight.
+      enum:
+        - running
+        - succeeded
+        - failed
+        - canceled
+
+    DefendInsightUpdateProps:
+      type: object
+      required:
+        - id
+        - backingIndex
+      properties:
+        id:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        eventsContextCount:
+          type: integer
+          description: The number of events in the context.
+        insights:
+          $ref: '#/components/schemas/DefendInsights'
+          description: The Defend insights.
+        status:
+          $ref: '#/components/schemas/DefendInsightStatus'
+          description: The status of the Defend insight.
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        generationIntervals:
+          type: array
+          description: The most 5 recent generation intervals
+          items:
+            $ref: '#/components/schemas/DefendInsightGenerationInterval'
+        backingIndex:
+          type: string
+          description: The backing index required for update requests.
+        failureReason:
+          type: string
+          description: The reason for a status of failed.
+        lastViewedAt:
+          description: The last time the Defend insight was viewed in the browser.
+          type: string
+
+    DefendInsightsUpdateProps:
+      type: array
+      items:
+        $ref: '#/components/schemas/DefendInsightUpdateProps'
+
+    DefendInsightCreateProps:
+      type: object
+      required:
+        - endpointIds
+        - insightType
+        - insights
+        - apiConfig
+        - status
+      properties:
+        id:
+          type: string
+          description: The Defend insight id.
+        status:
+          $ref: '#/components/schemas/DefendInsightStatus'
+          description: The status of the Defend insight.
+        eventsContextCount:
+          type: integer
+          description: The number of events in the context.
+        endpointIds:
+          type: array
+          items:
+            $ref: '../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+        insightType:
+          $ref: '#/components/schemas/DefendInsightType'
+        insights:
+          $ref: '#/components/schemas/DefendInsights'
+          description: The Defend insights.
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'

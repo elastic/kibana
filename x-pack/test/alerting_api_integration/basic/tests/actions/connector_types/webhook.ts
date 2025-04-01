@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import http from 'http';
+import type http from 'http';
 import getPort from 'get-port';
 import { getWebhookServer } from '@kbn/actions-simulators-plugin/server/plugin';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function webhookTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('webhook action', () => {
+  describe('webhook connector', () => {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     // need to wait for kibanaServer to settle ...
@@ -25,13 +25,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       webhookSimulatorURL = `http://localhost:${availablePort}`;
     });
 
-    it('should return 403 when creating a webhook action', async () => {
+    it('should return 403 when creating a webhook connector', async () => {
       await supertest
-        .post('/api/actions/action')
+        .post('/api/actions/connector')
         .set('kbn-xsrf', 'test')
         .send({
-          name: 'A generic Webhook action',
-          actionTypeId: '.webhook',
+          name: 'A generic Webhook connector',
+          connector_type_id: '.webhook',
           secrets: {
             user: 'username',
             password: 'mypassphrase',

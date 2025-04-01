@@ -150,13 +150,13 @@ export const StreamingResponse = ({
         id={`streamingResponse`}
         css={css`
           .euiButtonIcon {
-            color: ${euiTheme.colors.primaryText};
+            color: ${euiTheme.colors.textPrimary};
           }
         `}
         buttonContent={
           <EuiFlexGroup direction="row" alignItems="center">
             <EuiFlexItem grow>
-              <EuiText size="m" color={euiTheme.colors.primaryText}>
+              <EuiText size="m" color={euiTheme.colors.textPrimary}>
                 <strong>
                   {i18n.translate(
                     'genAiStreamingResponseExample.app.component.streamingResponseTitle',

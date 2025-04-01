@@ -39,27 +39,27 @@ export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
 const getMitre1 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
-    name: getMockThreatData().tactic.name,
-    id: getMockThreatData().tactic.id,
-    reference: getMockThreatData().tactic.reference,
+    name: getMockThreatData()[0].tactic.name,
+    id: getMockThreatData()[0].tactic.id,
+    reference: getMockThreatData()[0].tactic.reference,
   },
   technique: [
     {
-      id: getMockThreatData().technique.id,
-      reference: getMockThreatData().technique.reference,
-      name: getMockThreatData().technique.name,
+      id: getMockThreatData()[0].technique.id,
+      reference: getMockThreatData()[0].technique.reference,
+      name: getMockThreatData()[0].technique.name,
       subtechnique: [
         {
-          id: getMockThreatData().subtechnique.id,
-          name: getMockThreatData().subtechnique.name,
-          reference: getMockThreatData().subtechnique.reference,
+          id: getMockThreatData()[0].subtechnique.id,
+          name: getMockThreatData()[0].subtechnique.name,
+          reference: getMockThreatData()[0].subtechnique.reference,
         },
       ],
     },
     {
-      name: getMockThreatData().technique.name,
-      id: getMockThreatData().technique.id,
-      reference: getMockThreatData().technique.reference,
+      name: getMockThreatData()[0].technique.name,
+      id: getMockThreatData()[0].technique.id,
+      reference: getMockThreatData()[0].technique.reference,
       subtechnique: [],
     },
   ],
@@ -68,20 +68,20 @@ const getMitre1 = (): Threat => ({
 const getMitre2 = (): Threat => ({
   framework: 'MITRE ATT&CK',
   tactic: {
-    name: getMockThreatData().tactic.name,
-    id: getMockThreatData().tactic.id,
-    reference: getMockThreatData().tactic.reference,
+    name: getMockThreatData()[1].tactic.name,
+    id: getMockThreatData()[1].tactic.id,
+    reference: getMockThreatData()[1].tactic.reference,
   },
   technique: [
     {
-      id: getMockThreatData().technique.id,
-      reference: getMockThreatData().technique.reference,
-      name: getMockThreatData().technique.name,
+      id: getMockThreatData()[1].technique.id,
+      reference: getMockThreatData()[1].technique.reference,
+      name: getMockThreatData()[1].technique.name,
       subtechnique: [
         {
-          id: getMockThreatData().subtechnique.id,
-          name: getMockThreatData().subtechnique.name,
-          reference: getMockThreatData().subtechnique.reference,
+          id: getMockThreatData()[1].subtechnique.id,
+          name: getMockThreatData()[1].subtechnique.name,
+          reference: getMockThreatData()[1].subtechnique.reference,
         },
       ],
     },
@@ -216,7 +216,7 @@ export const getUnmappedRule = (
 ): QueryRuleCreateProps => ({
   type: 'query',
   query: '*:*',
-  index: ['unmapped*'],
+  index: ['auditbeat-unmapped*'],
   name: 'Rule with unmapped fields',
   description: 'The new rule description.',
   severity: 'high',
@@ -361,8 +361,8 @@ export const getMachineLearningRule = (
 ): MachineLearningRuleCreateProps => ({
   type: 'machine_learning',
   machine_learning_job_id: [
-    'Unusual Linux Network Activity',
-    'Anomalous Process for a Linux Population',
+    'v3_linux_anomalous_network_activity',
+    'v3_linux_anomalous_process_all_hosts',
   ],
   anomaly_threshold: 20,
   name: 'New ML Rule Test',
@@ -406,7 +406,7 @@ export const getEsqlRule = (
 ): EsqlRuleCreateProps => ({
   type: 'esql',
   language: 'esql',
-  query: 'from auditbeat-* [metadata _id, _version, _index] | keep agent.*,_id | eval test_id=_id',
+  query: 'from auditbeat-* metadata _id, _version, _index | keep agent.*,_id | eval test_id=_id',
   name: 'ES|QL Rule',
   description: 'The new rule description.',
   severity: 'high',
@@ -477,7 +477,8 @@ export const getNewThreatIndicatorRule = (
   description: 'The threat indicator rule description.',
   query: '*:*',
   threat_query: '*:*',
-  index: ['suspicious-*'],
+  threat_language: 'kuery',
+  index: ['auditbeat-suspicious-*'],
   severity: 'critical',
   risk_score: 20,
   tags: ['test', 'threat'],
@@ -522,7 +523,63 @@ export const getEditedRule = (): QueryRuleCreateProps =>
     tags: [...(getExistingRule().tags || []), 'edited'],
   });
 
+export const expectedExportedRules = (responses: Array<Cypress.Response<RuleResponse>>): string => {
+  const rules = responses
+    .map((response) => JSON.stringify(getFormattedRuleResponse(response)))
+    .join('\n');
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const details = {
+    exported_count: responses.length,
+    exported_rules_count: responses.length,
+    missing_rules: [],
+    missing_rules_count: 0,
+    exported_exception_list_count: 0,
+    exported_exception_list_item_count: 0,
+    missing_exception_list_item_count: 0,
+    missing_exception_list_items: [],
+    missing_exception_lists: [],
+    missing_exception_lists_count: 0,
+    exported_action_connector_count: 0,
+    missing_action_connection_count: 0,
+    missing_action_connections: [],
+    excluded_action_connection_count: 0,
+    excluded_action_connections: [],
+  };
+
+  return `${rules}\n${JSON.stringify(details)}\n`;
+};
+
 export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse>): string => {
+  const rule = getFormattedRuleResponse(ruleResponse);
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const details = {
+    exported_count: 1,
+    exported_rules_count: 1,
+    missing_rules: [],
+    missing_rules_count: 0,
+    exported_exception_list_count: 0,
+    exported_exception_list_item_count: 0,
+    missing_exception_list_item_count: 0,
+    missing_exception_list_items: [],
+    missing_exception_lists: [],
+    missing_exception_lists_count: 0,
+    exported_action_connector_count: 0,
+    missing_action_connection_count: 0,
+    missing_action_connections: [],
+    excluded_action_connection_count: 0,
+    excluded_action_connections: [],
+  };
+
+  return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
+};
+
+// TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
+// without using Partial
+const getFormattedRuleResponse = (
+  ruleResponse: Cypress.Response<RuleResponse>
+): Partial<RuleResponse> => {
   const {
     id,
     updated_at: updatedAt,
@@ -550,9 +607,12 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     version,
     exceptions_list: exceptionsList,
     immutable,
+    rule_source: ruleSource,
     related_integrations: relatedIntegrations,
     setup,
     investigation_fields: investigationFields,
+    license,
+    revision,
   } = ruleResponse.body;
 
   let query: string | undefined;
@@ -561,9 +621,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
   }
 
   // NOTE: Order of the properties in this object matters for the tests to work.
-  // TODO: Follow up https://github.com/elastic/kibana/pull/137628 and add an explicit type to this object
-  // without using Partial
-  const rule: Partial<RuleResponse> = {
+  return {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,
@@ -573,11 +631,12 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     tags,
     interval,
     enabled,
-    revision: 0,
+    revision,
     description,
     risk_score: riskScore,
     severity,
     note,
+    license,
     output_index: '',
     investigation_fields: investigationFields,
     author,
@@ -593,6 +652,7 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     version,
     exceptions_list: exceptionsList,
     immutable,
+    rule_source: ruleSource,
     related_integrations: relatedIntegrations,
     required_fields: [],
     setup,
@@ -602,28 +662,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RuleResponse
     query,
     actions: [],
   };
-
-  // NOTE: Order of the properties in this object matters for the tests to work.
-  const details = {
-    exported_count: 1,
-    exported_rules_count: 1,
-    missing_rules: [],
-    missing_rules_count: 0,
-    exported_exception_list_count: 0,
-    exported_exception_list_item_count: 0,
-    missing_exception_list_item_count: 0,
-    missing_exception_list_items: [],
-    missing_exception_lists: [],
-    missing_exception_lists_count: 0,
-    exported_action_connector_count: 0,
-    missing_action_connection_count: 0,
-    missing_action_connections: [],
-    excluded_action_connection_count: 0,
-    excluded_action_connections: [],
-  };
-
-  return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
 };
+
 export const getEndpointRule = (): QueryRuleCreateProps => ({
   type: 'query',
   query: 'event.kind:alert and event.module:(endpoint and not endgame)',
@@ -632,7 +672,7 @@ export const getEndpointRule = (): QueryRuleCreateProps => ({
   description: 'The new rule description.',
   severity: 'high',
   risk_score: 17,
-  interval: '10s',
+  interval: '1m',
   from: 'now-50000h',
   max_signals: 100,
   exceptions_list: [

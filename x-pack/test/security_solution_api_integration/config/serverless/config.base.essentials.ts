@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 export interface CreateTestConfigOptions {
   testFiles: string[];
@@ -11,15 +13,16 @@ export interface CreateTestConfigOptions {
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
 }
-import { services } from '../../../../test_serverless/api_integration/services';
+import { services } from './services';
 
 export function createTestConfig(options: CreateTestConfigOptions) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../../../test_serverless/shared/config.base.ts')
+      require.resolve('@kbn/test-suites-serverless/shared/config.base')
     );
     return {
       ...svlSharedConfig.getAll(),
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         ...services,
       },
@@ -44,7 +47,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
 
       mochaOpts: {
         ...svlSharedConfig.get('mochaOpts'),
-        grep: '/^(?!.*@brokenInServerless).*@serverless.*/',
+        grep: '/^(?!.*@skipInServerless).*@serverless.*/',
       },
     };
   };

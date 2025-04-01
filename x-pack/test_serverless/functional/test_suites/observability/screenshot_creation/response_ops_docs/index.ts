@@ -27,5 +27,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./cases'));
     loadTestFile(require.resolve('./connectors'));
+    loadTestFile(require.resolve('./maintenance_windows'));
   });
 }

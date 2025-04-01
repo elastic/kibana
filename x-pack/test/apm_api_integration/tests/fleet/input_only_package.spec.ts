@@ -11,8 +11,8 @@ import expect from '@kbn/expect';
 import { createEsClientForFtrConfig } from '@kbn/test';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import pRetry from 'p-retry';
+import { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { getBettertest } from '../../common/bettertest';
 import {
@@ -33,7 +33,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const bettertest = getBettertest(supertest);
   const config = getService('config');
   const synthtraceKibanaClient = getService('synthtraceKibanaClient');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
+  const retry = getService('retry');
 
   const API_KEY_NAME = 'apm_api_key_testing';
   const APM_AGENT_POLICY_NAME = 'apm_agent_policy_testing';
@@ -58,11 +59,9 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     const esClientScoped = createEsClientWithToken(token.value);
     return esClientScoped.security.createApiKey({
-      body: {
-        name: API_KEY_NAME,
-        role_descriptors: {
-          apmFleetPermissions: permissions,
-        },
+      name: API_KEY_NAME,
+      role_descriptors: {
+        apmFleetPermissions: permissions,
       },
     });
   }
@@ -84,16 +83,17 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     });
   }
 
+  // FLAKY: https://github.com/elastic/kibana/issues/177384
   registry.when('APM package policy', { config: 'basic', archives: [] }, () => {
     async function getAgentPolicyPermissions(agentPolicyId: string, packagePolicyId: string) {
       const res = await bettertest<{
-        item: { output_permissions: { default: Record<string, SecurityRoleDescriptor> } };
+        item: { output_permissions: { [key: string]: Record<string, SecurityRoleDescriptor> } };
       }>({
         pathname: `/api/fleet/agent_policies/${agentPolicyId}/full`,
         method: 'get',
       });
 
-      return res.body.item.output_permissions.default[packagePolicyId];
+      return Object.values(res.body.item.output_permissions)[0][packagePolicyId];
     }
 
     describe('input only package', () => {
@@ -103,7 +103,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
       async function cleanAll() {
         try {
-          await synthtraceEsClient.clean();
+          await apmSynthtraceEsClient.clean();
           await es.security.invalidateApiKey({ name: API_KEY_NAME });
           await deleteAgentPolicyAndPackagePolicyByName({
             bettertest,
@@ -164,7 +164,12 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
         });
 
         it('the events can be seen on the Service Inventory Page', async () => {
-          const apmServices = await getApmServices(apmApiClient, scenario.start, scenario.end);
+          const apmServices = await getApmServices(
+            apmApiClient,
+            scenario.start,
+            scenario.end,
+            retry
+          );
           expect(apmServices[0].serviceName).to.be('opbeans-java');
           expect(apmServices[0].environments?.[0]).to.be('ingested-via-fleet');
           expect(apmServices[0].latency).to.be(2550000);
@@ -176,30 +181,41 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   });
 }
 
-function getApmServices(apmApiClient: ApmApiClient, start: string, end: string) {
-  return pRetry(async () => {
-    const res = await apmApiClient.readUser({
-      endpoint: 'GET /internal/apm/services',
-      params: {
-        query: {
-          start,
-          end,
-          probability: 1,
-          environment: 'ENVIRONMENT_ALL',
-          kuery: '',
-          documentType: ApmDocumentType.TransactionMetric,
-          rollupInterval: RollupInterval.OneMinute,
-          useDurationSummary: true,
+async function getApmServices(
+  apmApiClient: ApmApiClient,
+  start: string,
+  end: string,
+  retrySvc: RetryService
+) {
+  return await retrySvc.tryWithRetries(
+    'getApmServices',
+    async () => {
+      const res = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/services',
+        params: {
+          query: {
+            start,
+            end,
+            probability: 1,
+            environment: 'ENVIRONMENT_ALL',
+            kuery: '',
+            documentType: ApmDocumentType.TransactionMetric,
+            rollupInterval: RollupInterval.OneMinute,
+            useDurationSummary: true,
+          },
         },
-      },
-    });
+      });
 
-    if (res.body.items.length === 0 || !res.body.items[0].latency) {
-      throw new Error(`Timed-out: No APM Services were found`);
+      if (res.body.items.length === 0 || !res.body.items[0].latency)
+        throw new Error(`Timed-out: No APM Services were found`);
+
+      return res.body.items;
+    },
+    {
+      retryCount: 10,
+      timeout: 20_000,
     }
-
-    return res.body.items;
-  });
+  );
 }
 
 function getSynthtraceScenario() {

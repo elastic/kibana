@@ -8,7 +8,7 @@
 import datemath from '@kbn/datemath';
 import expect from '@kbn/expect';
 import { mockIndices } from './hybrid_index_helper';
-// import { FtrProviderContext } from '../../ftr_provider_context';
+import { MOCK_ROLLUP_INDEX_NAME, createMockRollupIndex } from './test_helpers';
 
 export default function ({ getService, getPageObjects }) {
   const config = getService('config');
@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const kibanaServer = getService('kibanaServer');
   const es = getService('es');
+  const testSubjects = getService('testSubjects');
   const isRunningCcs = config.get('esTestCluster.ccs') ? true : false;
   let remoteEs;
   if (isRunningCcs) {
@@ -47,6 +48,14 @@ export default function ({ getService, getPageObjects }) {
       // await security.testUser.setRoles(['manage_rollups_role', 'global_ccr_role']);
       await security.testUser.setRoles(['superuser']);
       await PageObjects.common.navigateToApp('rollupJob');
+
+      // From 8.15, Es only allows creating a new rollup job when there is existing rollup usage in the cluster
+      // We will simulate rollup usage by creating a mock-up rollup index
+      await createMockRollupIndex(es);
+    });
+
+    it('shows deprecation prompt when there are no existing rollup jobs', async () => {
+      expect(await testSubjects.exists('jobListDeprecatedPrompt')).to.be(true);
     });
 
     it('create new rollup job', async () => {
@@ -83,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       // Delete all data indices that were created.
-      await esDeleteAllIndices([targetIndexName], false);
+      await esDeleteAllIndices([targetIndexName, MOCK_ROLLUP_INDEX_NAME], false);
       if (isRunningCcs) {
         await esDeleteAllIndices([indexPatternToUse], true);
       } else {

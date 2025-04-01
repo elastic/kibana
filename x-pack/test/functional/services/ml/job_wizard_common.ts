@@ -26,6 +26,7 @@ export function MachineLearningJobWizardCommonProvider(
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const headerPage = getPageObject('header');
+  const browser = getService('browser');
 
   function advancedSectionSelector(subSelector?: string) {
     const subj = 'mlJobWizardAdvancedSection';
@@ -126,7 +127,10 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async selectAggAndField(identifier: string, isIdentifierKeptInField: boolean) {
-      await comboBox.set('mlJobWizardAggSelection > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlJobWizardAggSelection > comboBoxInput',
+        identifier
+      );
       await this.assertAggAndFieldSelection(isIdentifierKeptInField ? [identifier] : []);
     },
 
@@ -534,6 +538,15 @@ export function MachineLearningJobWizardCommonProvider(
       });
     },
 
+    async assertUseFullDataButtonVisible(shouldBeVisible: boolean) {
+      const selector = 'mlDatePickerButtonUseFullData';
+      if (shouldBeVisible === true) {
+        await testSubjects.existOrFail(selector);
+      } else {
+        await testSubjects.missingOrFail(selector);
+      }
+    },
+
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
       await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
@@ -618,6 +631,79 @@ export function MachineLearningJobWizardCommonProvider(
 
         await testSubjects.existOrFail(expectedSelector);
       });
+    },
+
+    async assertAnnotationRecommendationCalloutVisible(expectVisible: boolean = true) {
+      const callOutTestSubj = 'mlJobWizardAlsoEnableAnnotationsRecommendationCallout';
+      if (expectVisible)
+        await testSubjects.existOrFail(callOutTestSubj, {
+          timeout: 3_000,
+        });
+      else
+        await testSubjects.missingOrFail(callOutTestSubj, {
+          timeout: 3_000,
+        });
+    },
+
+    async goToTimeRangeStep() {
+      await retry.tryForTime(60_000, async () => {
+        await testSubjects.existOrFail('mlJobWizardTimeRangeStep');
+        await testSubjects.click('mlJobWizardTimeRangeStep');
+        await this.assertTimeRangeSectionExists();
+      });
+    },
+
+    async goToValidationStep() {
+      await retry.tryForTime(60_000, async () => {
+        await testSubjects.existOrFail('mlJobWizardValidationStep');
+        await testSubjects.click('mlJobWizardValidationStep');
+        await this.assertValidationSectionExists();
+      });
+    },
+
+    async setTimeRange({ startTime, endTime }: { startTime?: string; endTime?: string }) {
+      const opts = {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      };
+
+      if (startTime)
+        await testSubjects.setValue('mlJobWizardDatePickerRangeStartDate', startTime, opts);
+      if (endTime) await testSubjects.setValue('mlJobWizardDatePickerRangeEndDate', endTime, opts);
+
+      // escape popover
+      await browser.pressKeys(browser.keys.ESCAPE);
+    },
+
+    async goToJobDetailsStep() {
+      await testSubjects.existOrFail('mlJobWizardJobDetailsStep', {
+        timeout: 3_000,
+      });
+      await testSubjects.click('mlJobWizardJobDetailsStep');
+      await this.assertJobDetailsSectionExists();
+    },
+
+    async assertValidationCallouts(expectedCallOutSelectors: string[]) {
+      for await (const sel of expectedCallOutSelectors)
+        await testSubjects.existOrFail(sel, {
+          timeout: 3_000,
+        });
+    },
+
+    async assertCalloutText(calloutStatusTestSubj: string, expectedText: RegExp) {
+      const allCalloutStatusTexts = await testSubjects.getVisibleTextAll(calloutStatusTestSubj);
+
+      const oneCalloutMatches = allCalloutStatusTexts.some(
+        (visibleText) => !!visibleText.match(expectedText)
+      );
+      expect(oneCalloutMatches).to.eql(
+        true,
+        `Expect one of the callouts [${calloutStatusTestSubj}] to match [${expectedText}], instead found ${JSON.stringify(
+          allCalloutStatusTexts,
+          null,
+          2
+        )}`
+      );
     },
   };
 }

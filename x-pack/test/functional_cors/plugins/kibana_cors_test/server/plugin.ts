@@ -8,12 +8,11 @@
 import Hapi from '@hapi/hapi';
 import { kbnTestConfig } from '@kbn/test/kbn_test_config';
 import Url from 'url';
-import abab from 'abab';
 
 import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 import type { ConfigSchema } from './config';
 
-const apiToken = abab.btoa(kbnTestConfig.getUrlParts().auth!);
+const apiToken = Buffer.from(kbnTestConfig.getUrlParts().auth!).toString('base64');
 
 function renderBody(kibanaUrl: string) {
   const url = Url.resolve(kibanaUrl, '/cors-test');
@@ -51,8 +50,18 @@ export class CorsTestPlugin implements Plugin {
 
   setup(core: CoreSetup) {
     const router = core.http.createRouter();
-    router.post({ path: '/cors-test', validate: false }, (context, req, res) =>
-      res.ok({ body: 'content from kibana' })
+    router.post(
+      {
+        path: '/cors-test',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'content from kibana' })
     );
   }
 
@@ -75,12 +84,12 @@ export class CorsTestPlugin implements Plugin {
         return h.response(renderBody(kibanaUrl));
       },
     });
-    server.start();
+    void server.start();
   }
 
   public stop() {
     if (this.server) {
-      this.server.stop();
+      void this.server.stop();
     }
   }
 }

@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import { BaseFilesClient } from '@kbn/shared-ux-file-types';
-import { User } from '../../../cases_api_integration/common/lib/authentication/types';
+import type { BaseFilesClient } from '@kbn/shared-ux-file-types';
+import type { User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createFile,
   uploadFile,
@@ -19,7 +19,7 @@ import {
   deleteAllFilesForKind,
   deleteFileForFileKind,
 } from '../../../cases_api_integration/common/lib/api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   casesAllUser,
   casesReadUser,
@@ -310,7 +310,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 });
 
                 expect(header['content-type']).to.eql('image/png');
-                expect(header['content-disposition']).to.eql('attachment; filename="test.png"');
+                expect(header['content-disposition']).to.eql('attachment; filename=test.png');
                 expect(buffer.toString('utf8')).to.eql('abc');
               });
 

@@ -31,7 +31,7 @@
         "signature": [
           "(ts: number) => string"
         ],
-        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,7 +68,7 @@
         "signature": [
           "(ts: number) => string"
         ],
-        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,7 +84,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -105,7 +105,7 @@
         "signature": [
           "(ts: number) => string"
         ],
-        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -121,7 +121,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,7 +142,7 @@
         "signature": [
           "(value: number) => string"
         ],
-        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -158,7 +158,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -174,7 +174,7 @@
         "tags": [],
         "label": "validateTimeRange",
         "description": [
-          "\nValidate a time range of two string based dates.\nCopy of `src/plugins/data/public/query/timefilter/lib/validate_timerange.ts`\nfor the time being so it can be used in packages.\n"
+          "\nValidate a time range of two string based dates.\nCopy of `src/platform/plugins/shared/data/public/query/timefilter/lib/validate_timerange.ts`\nfor the time being so it can be used in packages.\n"
         ],
         "signature": [
           "(time: ",
@@ -187,7 +187,7 @@
           },
           " | undefined) => boolean"
         ],
-        "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+        "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,7 +210,7 @@
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/date_utils/src/date_utils.ts",
+            "path": "x-pack/platform/packages/private/ml/date_utils/src/date_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -235,7 +235,7 @@
         "signature": [
           "\"YYYY-MM-DD HH:mm:ss\""
         ],
-        "path": "x-pack/packages/ml/date_utils/src/time_format.ts",
+        "path": "x-pack/platform/packages/private/ml/date_utils/src/time_format.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

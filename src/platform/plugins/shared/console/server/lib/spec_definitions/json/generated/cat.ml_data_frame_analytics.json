@@ -1,0 +1,81 @@
+{
+  "cat.ml_data_frame_analytics": {
+    "url_params": {
+      "format": [
+        "text"
+      ],
+      "h": [
+        "assignment_explanation",
+        "create_time",
+        "description",
+        "dest_index",
+        "failure_reason",
+        "id",
+        "model_memory_limit",
+        "node.address",
+        "node.ephemeral_id",
+        "node.id",
+        "node.name",
+        "progress",
+        "source_index",
+        "state",
+        "type",
+        "version"
+      ],
+      "help": "__flag__",
+      "s": [
+        "assignment_explanation",
+        "create_time",
+        "description",
+        "dest_index",
+        "failure_reason",
+        "id",
+        "model_memory_limit",
+        "node.address",
+        "node.ephemeral_id",
+        "node.id",
+        "node.name",
+        "progress",
+        "source_index",
+        "state",
+        "type",
+        "version"
+      ],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "time": [
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/ml/data_frame/analytics",
+      "_cat/ml/data_frame/analytics/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-dfanalytics.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

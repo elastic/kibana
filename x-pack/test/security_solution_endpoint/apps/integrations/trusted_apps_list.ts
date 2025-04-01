@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -15,9 +15,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
+  const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171481
-  describe.skip('When on the Trusted Apps list', function () {
+  describe('When on the Trusted Apps list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -34,8 +34,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('header-page-title');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/171481
-    it.skip('should be able to add a new trusted app and remove it', async () => {
+    it('should be able to add a new trusted app and remove it', async () => {
       const SHA256 = 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476';
 
       // Add it
@@ -50,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).to.equal(
         'AND process.hash.*IS a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'
       );
-      await pageObjects.common.closeToast();
+      await toasts.dismiss();
 
       // Title is shown after adding an item
       expect(await testSubjects.getVisibleText('header-page-title')).to.equal(

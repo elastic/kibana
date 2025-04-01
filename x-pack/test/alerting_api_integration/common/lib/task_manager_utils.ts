@@ -6,7 +6,7 @@
  */
 import type { Client } from '@elastic/elasticsearch';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import type { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
 
 export interface TaskManagerDoc {
   type: string;
@@ -25,34 +25,32 @@ export class TaskManagerUtils {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: '.kibana_task_manager',
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    'task.id': `task:${id}`,
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'task.id': `task:${id}`,
+                },
+              },
+              {
+                terms: {
+                  'task.scope': ['actions', 'alerting'],
+                },
+              },
+              {
+                range: {
+                  'task.scheduledAt': {
+                    gte: taskRunAtFilter.getTime().toString(),
                   },
                 },
-                {
-                  terms: {
-                    'task.scope': ['actions', 'alerting'],
-                  },
+              },
+              {
+                term: {
+                  'task.enabled': true,
                 },
-                {
-                  range: {
-                    'task.scheduledAt': {
-                      gte: taskRunAtFilter.getTime().toString(),
-                    },
-                  },
-                },
-                {
-                  term: {
-                    'task.enabled': true,
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
         },
       });
@@ -67,24 +65,22 @@ export class TaskManagerUtils {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: '.kibana_task_manager',
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  terms: {
-                    'task.scope': ['actions', 'alerting'],
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  'task.scope': ['actions', 'alerting'],
+                },
+              },
+              {
+                range: {
+                  'task.scheduledAt': {
+                    gte: taskRunAtFilter.getTime().toString(),
                   },
                 },
-                {
-                  range: {
-                    'task.scheduledAt': {
-                      gte: taskRunAtFilter.getTime().toString(),
-                    },
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
         },
       });
@@ -100,31 +96,29 @@ export class TaskManagerUtils {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: '.kibana_task_manager',
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  terms: {
-                    'task.scope': ['actions', 'alerting'],
+        query: {
+          bool: {
+            must: [
+              {
+                terms: {
+                  'task.scope': ['actions', 'alerting'],
+                },
+              },
+              {
+                range: {
+                  'task.scheduledAt': {
+                    gte: taskRunAtFilter.getTime().toString(),
                   },
                 },
-                {
-                  range: {
-                    'task.scheduledAt': {
-                      gte: taskRunAtFilter.getTime().toString(),
-                    },
-                  },
+              },
+            ],
+            must_not: [
+              {
+                term: {
+                  'task.status': 'idle',
                 },
-              ],
-              must_not: [
-                {
-                  term: {
-                    'task.status': 'idle',
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
         },
       });
@@ -140,24 +134,22 @@ export class TaskManagerUtils {
     return await this.retry.try(async () => {
       const searchResult = await this.es.search({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-        body: {
-          query: {
-            bool: {
-              must: [
-                {
-                  term: {
-                    type: 'action_task_params',
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  type: 'action_task_params',
+                },
+              },
+              {
+                range: {
+                  updated_at: {
+                    gte: createdAtFilter.getTime().toString(),
                   },
                 },
-                {
-                  range: {
-                    updated_at: {
-                      gte: createdAtFilter.getTime().toString(),
-                    },
-                  },
-                },
-              ],
-            },
+              },
+            ],
           },
         },
       });

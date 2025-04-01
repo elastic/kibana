@@ -7,14 +7,22 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from '@kbn/apm-synthtrace';
+import {
+  ApmSynthtraceEsClient,
+  ApmSynthtraceKibanaClient,
+  LogsSynthtraceEsClient,
+  EntitiesSynthtraceEsClient,
+  createLogger,
+  LogLevel,
+} from '@kbn/apm-synthtrace';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
 import { MachineLearningAPIProvider } from '../../functional/services/ml/api';
 import { APMFtrConfigName } from '../configs';
 import { createApmApiClient } from './apm_api_supertest';
-import { bootstrapApmSynthtrace, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
+import { getApmSynthtraceEsClient, getApmSynthtraceKibanaClient } from './bootstrap_apm_synthtrace';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
@@ -45,7 +53,7 @@ async function getApmApiClient({
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
 
-type ApmApiClientKey =
+export type ApmApiClientKey =
   | 'noAccessUser'
   | 'readUser'
   | 'adminUser'
@@ -55,7 +63,13 @@ type ApmApiClientKey =
   | 'manageOwnAgentKeysUser'
   | 'createAndAllAgentKeysUser'
   | 'monitorClusterAndIndicesUser'
-  | 'manageServiceAccount';
+  | 'manageServiceAccount'
+  | 'apmAllPrivilegesWithoutWriteSettingsUser'
+  | 'apmReadPrivilegesWithWriteSettingsUser';
+
+export interface UserApiClient {
+  user: ApmApiClientKey;
+}
 
 export type ApmApiClient = Record<ApmApiClientKey, Awaited<ReturnType<typeof getApmApiClient>>>;
 
@@ -66,7 +80,14 @@ export interface CreateTest {
   services: InheritedServices & {
     apmFtrConfig: () => ApmFtrConfig;
     registry: ({ getService }: FtrProviderContext) => ReturnType<typeof RegistryProvider>;
+    logSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<LogsSynthtraceEsClient>;
     synthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
+    entitiesSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<EntitiesSynthtraceEsClient>;
+    apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<ApmSynthtraceEsClient>;
     synthtraceKibanaClient: (
       context: InheritedFtrProviderContext
     ) => Promise<ApmSynthtraceKibanaClient>;
@@ -96,6 +117,7 @@ export function createTestConfig(
     const synthtraceKibanaClient = getApmSynthtraceKibanaClient(kibanaServerUrl);
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve('../tests')],
       servers,
       servicesRequiredForTestAnalysis: ['apmFtrConfig', 'registry'],
@@ -103,9 +125,21 @@ export function createTestConfig(
         ...services,
         apmFtrConfig: () => config,
         registry: RegistryProvider,
-        synthtraceEsClient: (context: InheritedFtrProviderContext) => {
-          return bootstrapApmSynthtrace(context, synthtraceKibanaClient);
+        apmSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+          return getApmSynthtraceEsClient(context, synthtraceKibanaClient);
         },
+        logSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new LogsSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
+        entitiesSynthtraceEsClient: (context: InheritedFtrProviderContext) =>
+          new EntitiesSynthtraceEsClient({
+            client: context.getService('es'),
+            logger: createLogger(LogLevel.info),
+            refreshAfterIndex: true,
+          }),
         synthtraceKibanaClient: () => synthtraceKibanaClient,
         apmApiClient: async (context: InheritedFtrProviderContext) => {
           const { username, password } = servers.kibana;
@@ -157,6 +191,14 @@ export function createTestConfig(
             manageServiceAccount: await getApmApiClient({
               kibanaServer,
               username: ApmUsername.apmManageServiceAccount,
+            }),
+            apmAllPrivilegesWithoutWriteSettingsUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmAllPrivilegesWithoutWriteSettings,
+            }),
+            apmReadPrivilegesWithWriteSettingsUser: await getApmApiClient({
+              kibanaServer,
+              username: ApmUsername.apmReadPrivilegesWithWriteSettings,
             }),
           };
         },

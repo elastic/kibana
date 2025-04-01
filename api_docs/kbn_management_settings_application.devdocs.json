@@ -2,62 +2,46 @@
   "id": "@kbn/management-settings-application",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/management-settings-application",
-        "id": "def-common.KibanaSettingsApplication",
+        "id": "def-public.KibanaSettingsApplication",
         "type": "Function",
         "tags": [],
         "label": "KibanaSettingsApplication",
         "description": [],
         "signature": [
-          "({ docLinks, i18n, notifications, settings, theme, history, }: ",
+          "({ docLinks, i18n, notifications, settings, userProfile, theme, history, sectionRegistry, application, chrome, spaces, }: ",
           {
             "pluginId": "@kbn/management-settings-application",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsApplicationPluginApi",
-            "section": "def-common.SettingsApplicationKibanaDependencies",
+            "section": "def-public.SettingsApplicationKibanaDependencies",
             "text": "SettingsApplicationKibanaDependencies"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/index.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-application",
-            "id": "def-common.KibanaSettingsApplication.$1",
+            "id": "def-public.KibanaSettingsApplication.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  theme,\n  history,\n}",
+            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  userProfile,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n  spaces,\n}",
             "description": [],
             "signature": [
               {
                 "pluginId": "@kbn/management-settings-application",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsApplicationPluginApi",
-                "section": "def-common.SettingsApplicationKibanaDependencies",
+                "section": "def-public.SettingsApplicationKibanaDependencies",
                 "text": "SettingsApplicationKibanaDependencies"
               }
             ],
-            "path": "packages/kbn-management/settings/application/index.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -68,7 +52,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-application",
-        "id": "def-common.SettingsApplication",
+        "id": "def-public.SettingsApplication",
         "type": "Function",
         "tags": [],
         "label": "SettingsApplication",
@@ -76,9 +60,9 @@
           "\nComponent for displaying the {@link SettingsApplication} component."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/application.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/application.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -87,7 +71,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-application",
-        "id": "def-common.SettingsApplicationKibanaProvider",
+        "id": "def-public.SettingsApplicationKibanaProvider",
         "type": "Function",
         "tags": [],
         "label": "SettingsApplicationKibanaProvider",
@@ -98,36 +82,36 @@
           "({ children, ...dependencies }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-application",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsApplicationPluginApi",
-            "section": "def-common.SettingsApplicationKibanaDependencies",
+            "section": "def-public.SettingsApplicationKibanaDependencies",
             "text": "SettingsApplicationKibanaDependencies"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-application",
-            "id": "def-common.SettingsApplicationKibanaProvider.$1",
+            "id": "def-public.SettingsApplicationKibanaProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  ...dependencies\n}",
+            "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-application",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsApplicationPluginApi",
-                "section": "def-common.SettingsApplicationKibanaDependencies",
+                "section": "def-public.SettingsApplicationKibanaDependencies",
                 "text": "SettingsApplicationKibanaDependencies"
               },
               ">"
             ],
-            "path": "packages/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -138,7 +122,7 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-application",
-        "id": "def-common.SettingsApplicationProvider",
+        "id": "def-public.SettingsApplicationProvider",
         "type": "Function",
         "tags": [],
         "label": "SettingsApplicationProvider",
@@ -149,20 +133,20 @@
           "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-application",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsApplicationPluginApi",
-            "section": "def-common.SettingsApplicationServices",
+            "section": "def-public.SettingsApplicationServices",
             "text": "SettingsApplicationServices"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/management-settings-application",
-            "id": "def-common.SettingsApplicationProvider.$1",
+            "id": "def-public.SettingsApplicationProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  ...services\n}",
@@ -171,14 +155,14 @@
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-application",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnManagementSettingsApplicationPluginApi",
-                "section": "def-common.SettingsApplicationServices",
+                "section": "def-public.SettingsApplicationServices",
                 "text": "SettingsApplicationServices"
               },
               ">"
             ],
-            "path": "packages/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -193,7 +177,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/management-settings-application",
-        "id": "def-common.SettingsApplicationKibanaDependencies",
+        "id": "def-public.SettingsApplicationKibanaDependencies",
         "type": "Type",
         "tags": [],
         "label": "SettingsApplicationKibanaDependencies",
@@ -203,28 +187,28 @@
           " & KibanaDependencies & ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.KibanaDependencies",
+            "section": "def-public.KibanaDependencies",
             "text": "KibanaDependencies"
           },
           " & ",
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputKibanaDependencies",
+            "section": "def-public.FieldInputKibanaDependencies",
             "text": "FieldInputKibanaDependencies"
           }
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/management-settings-application",
-        "id": "def-common.SettingsApplicationServices",
+        "id": "def-public.SettingsApplicationServices",
         "type": "Type",
         "tags": [],
         "label": "SettingsApplicationServices",
@@ -234,28 +218,44 @@
           " & ",
           {
             "pluginId": "@kbn/management-settings-components-field-input",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldInputPluginApi",
-            "section": "def-common.FieldInputServices",
+            "section": "def-public.FieldInputServices",
             "text": "FieldInputServices"
           },
           " & ",
           {
             "pluginId": "@kbn/management-settings-components-field-row",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnManagementSettingsComponentsFieldRowPluginApi",
-            "section": "def-common.Services",
+            "section": "def-public.Services",
             "text": "Services"
           },
           " & ",
           "Services"
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

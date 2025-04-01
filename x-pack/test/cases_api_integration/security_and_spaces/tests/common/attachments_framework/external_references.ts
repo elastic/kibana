@@ -13,8 +13,8 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
 import { AttachmentType, UserActionTypes } from '@kbn/cases-plugin/common/types/domain';
-import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   defaultUser,
   postCaseReq,
@@ -31,7 +31,7 @@ import {
   updateComment,
   getSOFromKibanaIndex,
   getReferenceFromEsResponse,
-  getCaseUserActions,
+  findCaseUserActions,
 } from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postExternalReferenceSOReq,
       });
 
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+      const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
       const commentUserAction = userActions[1];
 
       expect(commentUserAction.type).to.eql('comment');
@@ -178,13 +178,13 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postExternalReferenceSOReq,
       });
 
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+      const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
       const createCommentUserAction = userActions[1];
 
       const esResponse = await getSOFromKibanaIndex({
         es,
         soType: CASE_USER_ACTION_SAVED_OBJECT,
-        soId: createCommentUserAction.action_id,
+        soId: createCommentUserAction.id,
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
@@ -242,7 +242,7 @@ export default ({ getService }: FtrProviderContext): void => {
         params: postExternalReferenceESReq,
       });
 
-      const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+      const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
       const createCommentUserAction = userActions.find(
         (userAction) => userAction.type === UserActionTypes.comment
       );
@@ -250,7 +250,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const esResponse = await getSOFromKibanaIndex({
         es,
         soType: CASE_USER_ACTION_SAVED_OBJECT,
-        soId: createCommentUserAction!.action_id,
+        soId: createCommentUserAction!.id,
       });
 
       const commentOnES = esResponse.body._source?.[CASE_USER_ACTION_SAVED_OBJECT]?.payload.comment;
@@ -501,6 +501,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(types).to.eql({
           '.files': '559a37324c84f1f2eadcc5bce43115d09501ffe4',
           '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
+          endpoint: 'e13fe41b5c330dd923da91992ed0cedb7e30960f',
           indicator: 'e1ea6f0518f2e0e4b0b5c0739efe805598cf2516',
           osquery: '99bee68fce8ee84e81d67c536e063d3e1a2cee96',
         });

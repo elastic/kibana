@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpApiTagOperation } from '@kbn/cases-plugin/common/constants/types';
+import { HttpApiPrivilegeOperation } from '@kbn/cases-plugin/common/constants/types';
 import type { FileKind } from '@kbn/files-plugin/common';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 
@@ -22,18 +22,16 @@ const buildFileKind = (): FileKind => {
 
 const fileKindHttpTags = (): FileKind['http'] => {
   return {
-    create: buildTag(HttpApiTagOperation.Create),
-    download: buildTag(HttpApiTagOperation.Read),
-    getById: buildTag(HttpApiTagOperation.Read),
-    list: buildTag(HttpApiTagOperation.Read),
+    create: buildPrivileges(HttpApiPrivilegeOperation.Create),
+    download: buildPrivileges(HttpApiPrivilegeOperation.Read),
+    getById: buildPrivileges(HttpApiPrivilegeOperation.Read),
+    list: buildPrivileges(HttpApiPrivilegeOperation.Read),
   };
 };
 
-const access = 'access:';
-
-const buildTag = (operation: HttpApiTagOperation) => {
+const buildPrivileges = (operation: HttpApiPrivilegeOperation) => {
   return {
-    tags: [`${access}${CASES_TEST_FIXTURE_OWNER}${operation}`],
+    requiredPrivileges: [`${CASES_TEST_FIXTURE_OWNER}${operation}`],
   };
 };
 

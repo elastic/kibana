@@ -444,7 +444,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setSortFieldValue(identificator: string, label: string) {
-      await comboBox.set('transformWizardSortFieldSelector > comboBoxInput', identificator);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        'transformWizardSortFieldSelector > comboBoxInput',
+        identificator
+      );
       await this.assertSortFieldInputValue(identificator);
     },
 
@@ -507,7 +510,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expectedLabel: string,
       expectedIntervalLabel?: string
     ) {
-      await comboBox.set('transformGroupBySelection > comboBoxInput', identifier);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        'transformGroupBySelection > comboBoxInput',
+        identifier
+      );
       await this.assertGroupByInputValue([]);
       await this.assertGroupByEntryExists(index, expectedLabel, expectedIntervalLabel);
     },
@@ -582,7 +588,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       formData?: Record<string, any>,
       parentSelector = ''
     ) {
-      await comboBox.set(this.getAggComboBoxInputSelector(parentSelector), identifier);
+      await ml.commonUI.setOptionsListWithFieldStatsValue(
+        this.getAggComboBoxInputSelector(parentSelector),
+        identifier
+      );
       await this.assertAggregationInputValue([], parentSelector);
       await this.assertAggregationEntryExists(index, expectedLabel, parentSelector);
 
@@ -596,6 +605,12 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       expectedLabel: string,
       formData: Record<string, any>
     ) {
+      const isPopoverFormVisible = await testSubjects.exists(
+        `transformAggPopoverForm_${expectedLabel}`
+      );
+      if (!isPopoverFormVisible) {
+        await this.openPopoverForm(expectedLabel);
+      }
       await testSubjects.existOrFail(`transformAggPopoverForm_${expectedLabel}`);
 
       for (const [testObj, value] of Object.entries(formData)) {
@@ -606,10 +621,17 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
           case 'transformFilterTermValueSelector':
             await this.fillFilterTermValue(value);
             break;
+          case 'transformPercentilesAggPercentsSelector':
+            await this.fillPercentilesAggPercents(value);
+            break;
         }
       }
       await testSubjects.clickWhenNotDisabled('transformApplyAggChanges');
       await testSubjects.missingOrFail(`transformAggPopoverForm_${expectedLabel}`);
+    },
+
+    async openPopoverForm(expectedLabel: string) {
+      await testSubjects.click(`transformAggregationEntryEditButton_${expectedLabel}`);
     },
 
     async selectFilerAggType(value: string) {
@@ -618,6 +640,14 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
 
     async fillFilterTermValue(value: string) {
       await comboBox.set('transformFilterTermValueSelector', value);
+    },
+
+    async fillPercentilesAggPercents(value: number[]) {
+      await comboBox.clear('transformPercentilesAggPercentsSelector');
+      for (const val of value) {
+        // Cast to string since Percentiles are usually passed as numbers
+        await comboBox.setCustom('transformPercentilesAggPercentsSelector', val.toString());
+      }
     },
 
     async assertAdvancedPivotEditorContent(expectedValue: string[]) {
@@ -1178,10 +1208,10 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertErrorToastsNotExist() {
-      const toastCount = await toasts.getToastCount();
+      const toastCount = await toasts.getCount();
       // Toast element index starts at 1, not 0
       for (let toastIdx = 1; toastIdx < toastCount + 1; toastIdx++) {
-        const toast = await toasts.getToastElement(toastIdx);
+        const toast = await toasts.getElementByIndex(toastIdx);
         const isErrorToast = await toast.elementHasClass('euiToast--danger');
         expect(isErrorToast).to.eql(false, `Expected toast message to be successful, got error.`);
       }

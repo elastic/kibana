@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function deleteMaintenanceWindowTests({ getService }: FtrProviderContext) {
@@ -55,7 +55,7 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Forbidden',
+                message: `API [DELETE /internal/alerting/rules/maintenance_window/${maintenanceWindowBody.id}] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
                 statusCode: 403,
               });
               objectRemover.add(

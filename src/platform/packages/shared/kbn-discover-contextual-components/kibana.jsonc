@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/discover-contextual-components",
+  "owner": [
+    "@elastic/obs-ux-logs-team",
+    "@elastic/kibana-data-discovery"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -8,7 +8,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import { SavedObjectReference } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 

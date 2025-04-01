@@ -10,15 +10,14 @@ import { format as formatUrl } from 'url';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 
 import expect from '@kbn/expect';
-
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
-const API_VERSIONS: ApiVersion[] = ['1', '2'];
+const API_VERSIONS: ApiVersion[] = ['3'];
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

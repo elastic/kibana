@@ -1,0 +1,8 @@
+{
+  "name": "no-native-modules-project",
+  "version": "1.0.0",
+  "dependencies": {
+    "package-a": "^1.0.0",
+    "package-b": "^2.0.0"
+  }
+}

@@ -17,15 +17,15 @@
     "objects": [],
     "start": {
       "parentPluginId": "notifications",
-      "id": "def-server.NotificationsPluginStart",
+      "id": "def-server.NotificationsServerStart",
       "type": "Type",
       "tags": [],
-      "label": "NotificationsPluginStart",
+      "label": "NotificationsServerStart",
       "description": [],
       "signature": [
         "EmailServiceStart"
       ],
-      "path": "x-pack/plugins/notifications/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/notifications/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -48,7 +48,7 @@
         "signature": [
           "\"notifications\""
         ],
-        "path": "x-pack/plugins/notifications/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/notifications/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

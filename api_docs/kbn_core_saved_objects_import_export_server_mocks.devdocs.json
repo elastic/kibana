@@ -14,45 +14,31 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-        "id": "def-common.savedObjectsExporterMock",
+        "id": "def-server.savedObjectsExporterMock",
         "type": "Object",
         "tags": [],
         "label": "savedObjectsExporterMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+        "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-            "id": "def-common.savedObjectsExporterMock.create",
+            "id": "def-server.savedObjectsExporterMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectsExporter",
-                "text": "ISavedObjectsExporter"
-              },
+              "ISavedObjectsExporter",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_exporter.mock.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_exporter.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -63,34 +49,28 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-        "id": "def-common.savedObjectsImporterMock",
+        "id": "def-server.savedObjectsImporterMock",
         "type": "Object",
         "tags": [],
         "label": "savedObjectsImporterMock",
         "description": [],
-        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_importer.mock.ts",
+        "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-            "id": "def-common.savedObjectsImporterMock.create",
+            "id": "def-server.savedObjectsImporterMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.ISavedObjectsImporter",
-                "text": "ISavedObjectsImporter"
-              },
+              "ISavedObjectsImporter",
               ">"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-import-export-server-mocks/src/saved_objects_importer.mock.ts",
+            "path": "src/core/packages/saved-objects/import-export-server-mocks/src/saved_objects_importer.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -100,5 +80,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

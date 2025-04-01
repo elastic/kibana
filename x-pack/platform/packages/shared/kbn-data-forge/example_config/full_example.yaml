@@ -1,0 +1,41 @@
+---
+# Define the connection to Elasticsearch
+elasticsearch:
+  host: "http://localhost:9200"
+  username: "elastic"
+  password: "changeme"
+  installKibanaUser: false
+
+# Define the connection to Kibana
+kibana:
+  host: "http://localhost:5601"
+  username: "elastic"
+  password: "changeme"
+  installAssets: true
+
+# Define the indexing options
+indexing:
+  dataset: "fake_stack"
+  interval: 6000
+  eventsPerCycle: 1
+  payloadSize: 10000
+  concurrency: 5
+
+# Define the schedule
+schedule:
+  - template: "good"
+    start: "now-1h"
+    end: "now-15m"
+  - template: "bad"
+    start: "now-15m"
+    end: "now"
+    # This schedule will run indefinitely
+  - template: "good"
+    start: "now"
+    end: false
+    # This will add a 2 minute delay to the indexing every 5 mintes.
+    # Once the 2 minutes is up, the queue will back fill the events it collected
+    # during the delay. This only makes sense if `end` is `false`
+    delayInMinutes: 2
+    delayEveryMinutes: 5
+

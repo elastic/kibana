@@ -1,0 +1,7 @@
+type: object
+properties:
+  environments:
+    type: array
+    description: Service environment list
+    items:
+      $ref: 'service_environment_object.yaml'

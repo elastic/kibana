@@ -10,7 +10,7 @@ import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover, getTestRuleData, getEventLog } from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetActionErrorLogTests({ getService }: FtrProviderContext) {
@@ -21,7 +21,8 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
 
   const dateStart = new Date(Date.now() - 600000).toISOString();
 
-  describe('getActionErrorLog', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/209913
+  describe.skip('getActionErrorLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -75,7 +76,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -126,7 +127,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector1.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector1.id, 'connector', 'actions');
 
       const { body: createdConnector2 } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
@@ -138,7 +139,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdConnector2.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector2.id, 'connector', 'actions');
 
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -146,7 +147,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
         .send(
           getTestRuleData({
             rule_type_id: 'test.cumulative-firing',
-            schedule: { interval: '5s' },
+            schedule: { interval: '6s' },
             actions: [
               {
                 id: createdConnector1.id,

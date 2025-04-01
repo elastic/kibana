@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services, pageObjects } from './services';
 
@@ -26,6 +27,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [require.resolve('./server')],
     servers,
     services,

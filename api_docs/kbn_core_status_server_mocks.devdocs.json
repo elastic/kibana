@@ -14,29 +14,21 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-status-server-mocks",
-        "id": "def-common.statusServiceMock",
+        "id": "def-server.statusServiceMock",
         "type": "Object",
         "tags": [],
         "label": "statusServiceMock",
         "description": [],
-        "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+        "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-common.statusServiceMock.create",
+            "id": "def-server.statusServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +36,7 @@
             "signature": [
               "() => jest.Mocked<StatusServiceContract>"
             ],
-            "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+            "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -52,23 +44,17 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-common.statusServiceMock.createSetupContract",
+            "id": "def-server.statusServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-status-server",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusServerPluginApi",
-                "section": "def-common.StatusServiceSetup",
-                "text": "StatusServiceSetup"
-              },
+              "StatusServiceSetup",
               ">"
             ],
-            "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+            "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -76,7 +62,7 @@
           },
           {
             "parentPluginId": "@kbn/core-status-server-mocks",
-            "id": "def-common.statusServiceMock.createInternalSetupContract",
+            "id": "def-server.statusServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -86,7 +72,7 @@
               "InternalStatusServiceSetup",
               ">"
             ],
-            "path": "packages/core/status/core-status-server-mocks/src/status_service.mock.ts",
+            "path": "src/core/packages/status/server-mocks/src/status_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -96,5 +82,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

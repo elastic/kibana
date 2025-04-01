@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for manage spaces page', async () => {
       await PageObjects.spaceSelector.clickManageSpaces();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await retry.waitFor(
         'Manage spaces page visible',
         async () => await testSubjects.exists('createSpace')
@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.clickCreateSpace();
       await PageObjects.spaceSelector.clickEnterSpaceName();
       await PageObjects.spaceSelector.addSpaceName('space_a');
+      await PageObjects.spaceSelector.changeSolutionView('classic');
       await a11y.testAppSnapshot();
     });
 
@@ -85,11 +86,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // creating space b and making it the current space so space selector page gets displayed when space b gets deleted
-    describe('Create Space B and Verify', async () => {
+    describe('Create Space B and Verify', () => {
       it('a11y test for delete space button', async () => {
         await PageObjects.spaceSelector.clickCreateSpace();
         await PageObjects.spaceSelector.clickEnterSpaceName();
         await PageObjects.spaceSelector.addSpaceName('space_b');
+        await PageObjects.spaceSelector.changeSolutionView('classic');
         await PageObjects.spaceSelector.clickSaveSpaceCreation();
         await PageObjects.common.navigateToApp('home');
         await PageObjects.spaceSelector.openSpacesNav();

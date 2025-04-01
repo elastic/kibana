@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { CreateChatCompletionResponse } from 'openai';
+import type OpenAI from 'openai';
 import { Readable } from 'stream';
 import { Plugin, CoreSetup } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
@@ -26,7 +26,9 @@ interface MessageBody {
   messages: Message[];
 }
 
-export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
+export class GenAiStreamingResponseExamplePlugin
+  implements Plugin<void, void, {}, GenAiStreamingResponseExamplePluginStart>
+{
   public setup({ http, getStartServices }: CoreSetup<GenAiStreamingResponseExamplePluginStart>) {
     const router = http.createRouter();
 
@@ -34,6 +36,13 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
       {
         path: `/internal/examples/get_gen_ai_connectors`,
         validate: {},
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'Authorization is handled by the actions plugin, which will check for the appropriate permissions',
+          },
+        },
       },
       async (_, request, response) => {
         const [, { actions }] = await getStartServices();
@@ -57,6 +66,13 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
             connector_id: schema.string(),
             prompt: schema.string(),
           }),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'Authorization is handled by the actions plugin, which will check for the appropriate permissions',
+          },
         },
       },
       async (_, request, response) => {
@@ -112,7 +128,7 @@ export class GenAiStreamingResponseExamplePlugin implements Plugin<void, void> {
         }
 
         return response.ok({
-          body: executeResult.data as CreateChatCompletionResponse | Readable,
+          body: executeResult.data as OpenAI.ChatCompletion | Readable,
         });
       }
     );

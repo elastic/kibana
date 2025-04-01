@@ -1,0 +1,38 @@
+{
+  "cat.fielddata": {
+    "url_params": {
+      "format": [
+        "text"
+      ],
+      "h": [],
+      "help": "__flag__",
+      "s": [],
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
+      "fields": []
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_cat/fielddata",
+      "_cat/fielddata/{fields}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-fielddata.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

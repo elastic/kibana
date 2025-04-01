@@ -1,30 +1,17 @@
 # Elastic License Functionality
 
-This directory tree contains files subject to the Elastic License 2.0. The files subject
-to the Elastic License 2.0 are grouped in this directory to clearly separate them
-from files dual-licensed under the Server Side Public License and the Elastic License 2.0.
+This directory tree contains files subject to the Elastic License 2.0.
+The files subject to the Elastic License 2.0 are grouped in this directory to clearly separate them from files licensed otherwise.
 
 ## Alert Details page feature flags (feature-flag-per-App)
 
 If you have:
 
 ```yaml
-xpack.observability.unsafe.alertDetails.metrics.enabled: true
-```
-
-**[For Infrastructure rule types]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
-
-```yaml
 xpack.observability.unsafe.alertDetails.uptime.enabled: true
 ```
 
 **[For Uptime rule type]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
-
-```yaml
-xpack.observability.unsafe.alertDetails.observability.enabled: true
-```
-
-**[For Observability Threshold rule type]** In Kibana configuration, will allow the user to navigate to the new Alert Details page, instead of the Alert Flyout when clicking on `View alert details` in the Alert table
 
 # Development
 
@@ -77,7 +64,7 @@ For both of the above commands, it's crucial that you pass in `--config` to spec
 
 Read more about how the scripts work [here](../scripts/README.md).
 
-For a deeper dive, read more about the way functional tests and servers work [here](../packages/kbn-test/README.md).
+For a deeper dive, read more about the way functional tests and servers work [here](../src/platform/packages/shared/kbn-test/README.mdx).
 
 #### Running API integration tests
 
@@ -109,8 +96,8 @@ yarn test:jest_integration
 
 #### Running Reporting functional tests
 
-See [here](./test/functional/apps/dashboard/reporting/README.md) for more information on running reporting tests.
+See [here](./test/functional/apps/dashboard/group3/reporting/README.mdx) for more information on running reporting tests.
 
 #### Running Security Solution Cypress E2E/integration tests
 
-See [here](./plugins/security_solution/cypress/README.md) for information on running this test suite.
+See [here](./solutions/security/plugins/security_solution//public/management/cypress/README.md) for information on running this test suite.

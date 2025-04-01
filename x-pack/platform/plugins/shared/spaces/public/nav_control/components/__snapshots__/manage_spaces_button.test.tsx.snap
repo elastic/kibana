@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ManageSpacesButton doesn't render if user profile forbids managing spaces 1`] = `""`;
+
+exports[`ManageSpacesButton renders as expected 1`] = `
+<EuiButton
+  css={
+    Object {
+      "map": undefined,
+      "name": "e9jljh",
+      "next": undefined,
+      "styles": "
+        margin: 12px;
+        width: calc(100% - 12px * 2);
+      ",
+      "toString": [Function],
+    }
+  }
+  data-test-subj="manageSpaces"
+  onClick={[Function]}
+  size="s"
+>
+  <MemoizedFormattedMessage
+    defaultMessage="Manage spaces"
+    id="xpack.spaces.manageSpacesButton.manageSpacesButtonLabel"
+  />
+</EuiButton>
+`;

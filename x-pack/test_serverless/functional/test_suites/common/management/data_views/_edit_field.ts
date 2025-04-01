@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['settings', 'common']);
   const testSubjects = getService('testSubjects');
 
   describe('edit field', function () {
     before(async function () {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     after(async function afterAll() {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     describe('field preview', function fieldPreview() {
@@ -32,29 +34,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show preview for fields in _source', async function () {
-        await PageObjects.settings.filterField('extension');
-        await testSubjects.click('editFieldFormat');
-        await testSubjects.find('value');
-        let previewText = '';
-        await retry.waitForWithTimeout('get preview value', 1000, async () => {
-          previewText = await testSubjects.getVisibleText('value');
-          return previewText !== 'Value not set';
+        await PageObjects.settings.changeAndValidateFieldFormat({
+          name: 'extension',
+          fieldType: 'text',
+          expectedPreviewText: 'css',
         });
-        expect(previewText).to.be('css');
-        await PageObjects.settings.closeIndexPatternFieldEditor();
       });
 
       it('should show preview for fields not in _source', async function () {
-        await PageObjects.settings.filterField('extension.raw');
-        await testSubjects.click('editFieldFormat');
-        await testSubjects.find('value');
-        let previewText = '';
-        await retry.waitForWithTimeout('get preview value', 1000, async () => {
-          previewText = await testSubjects.getVisibleText('value');
-          return previewText !== 'Value not set';
+        await PageObjects.settings.changeAndValidateFieldFormat({
+          name: 'extension.raw',
+          fieldType: 'keyword',
+          expectedPreviewText: 'css',
         });
-        expect(previewText).to.be('css');
-        await PageObjects.settings.closeIndexPatternFieldEditor();
       });
     });
   });

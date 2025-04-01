@@ -1,0 +1,16 @@
+---
+name: mongodb
+fields:
+  base:
+    fields: "*"
+  log:
+    fields:
+      level: {}
+      logger: {}
+  host:
+    fields:
+      name: {}
+  mongodb:
+    fields: "*"
+
+

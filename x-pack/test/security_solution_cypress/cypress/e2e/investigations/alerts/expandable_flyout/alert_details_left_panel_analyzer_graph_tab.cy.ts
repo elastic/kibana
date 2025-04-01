@@ -12,7 +12,7 @@ import {
 import { DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { openGraphAnalyzerTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_analyzer_graph_tab';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
-import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
+import { expandAlertAtIndexExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { ANALYZER_NODE } from '../../../../screens/alerts';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { login } from '../../../../tasks/login';
@@ -22,10 +22,9 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 
-// TODO enable once the visualize tabs are back
-describe.skip(
+describe(
   'Alert details expandable flyout left panel analyzer graph',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@skipInServerless'] },
   () => {
     beforeEach(() => {
       deleteAlertsAndRules();
@@ -33,7 +32,7 @@ describe.skip(
       createRule(getNewRule());
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
-      expandFirstAlertExpandableFlyout();
+      expandAlertAtIndexExpandableFlyout();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openGraphAnalyzerTab();
     });

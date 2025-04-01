@@ -13,14 +13,15 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
     const svlCommonPage = getPageObject('svlCommonPage');
 
     before(async () => {
-      // TODO: Serverless tests require login first
-      await svlCommonPage.login();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
+      await svlCommonPage.loginAsAdmin();
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
     loadTestFile(require.resolve('./serverless'));
@@ -30,5 +31,6 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
     loadTestFile(require.resolve('./_exclude_index_pattern'));
     loadTestFile(require.resolve('./_index_pattern_filter'));
     loadTestFile(require.resolve('./_edit_field'));
+    loadTestFile(require.resolve('./_cache'));
   });
 };

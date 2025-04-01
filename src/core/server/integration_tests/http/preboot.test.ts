@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -11,7 +12,7 @@ import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createHttpServer } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { HttpService } from '@kbn/core-http-server-internal';
 
 let server: HttpService;
@@ -24,7 +25,7 @@ const setupDeps = {
 };
 
 beforeEach(async () => {
-  server = createHttpServer({ logger: loggingSystemMock.create() });
+  server = createHttpService({ logger: loggingSystemMock.create() });
 });
 
 afterEach(async () => {
@@ -35,11 +36,21 @@ describe('Preboot HTTP server', () => {
   it('accepts requests before `setup`', async () => {
     const { server: innerPrebootServer, registerRoutes } = await server.preboot(prebootDeps);
     registerRoutes('', (router) => {
-      router.get({ path: '/preboot-get', validate: false }, (context, req, res) =>
-        res.ok({ body: 'hello-get' })
+      router.get(
+        {
+          path: '/preboot-get',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ body: 'hello-get' })
       );
-      router.post({ path: '/preboot-post', validate: false }, (context, req, res) =>
-        res.ok({ body: 'hello-post' })
+      router.post(
+        {
+          path: '/preboot-post',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ body: 'hello-post' })
       );
     });
 
@@ -59,21 +70,41 @@ describe('Preboot HTTP server', () => {
   it('accepts requests after `setup`, but before `start`', async () => {
     const { server: innerPrebootServer, registerRoutes } = await server.preboot(prebootDeps);
     registerRoutes('', (router) => {
-      router.get({ path: '/preboot-get', validate: false }, (context, req, res) =>
-        res.ok({ body: 'hello-get' })
+      router.get(
+        {
+          path: '/preboot-get',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ body: 'hello-get' })
       );
-      router.post({ path: '/preboot-post', validate: false }, (context, req, res) =>
-        res.ok({ body: 'hello-post' })
+      router.post(
+        {
+          path: '/preboot-post',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ body: 'hello-post' })
       );
     });
 
     const { createRouter, server: innerStandardServer } = await server.setup(setupDeps);
     const standardRouter = createRouter('');
-    standardRouter.get({ path: '/standard-get', validate: false }, (context, req, res) =>
-      res.ok({ body: 'hello-get' })
+    standardRouter.get(
+      {
+        path: '/standard-get',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'hello-get' })
     );
-    standardRouter.post({ path: '/standard-post', validate: false }, (context, req, res) =>
-      res.ok({ body: 'hello-post' })
+    standardRouter.post(
+      {
+        path: '/standard-post',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'hello-post' })
     );
 
     // Preboot routes should still work.
@@ -100,21 +131,41 @@ describe('Preboot HTTP server', () => {
   it('is not available after `start`', async () => {
     const { server: innerPrebootServer, registerRoutes } = await server.preboot(prebootDeps);
     registerRoutes('', (router) => {
-      router.get({ path: '/preboot-get', validate: false }, (context, req, res) =>
-        res.ok({ body: 'hello-get' })
+      router.get(
+        {
+          path: '/preboot-get',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ body: 'hello-get' })
       );
-      router.post({ path: '/preboot-post', validate: false }, (context, req, res) =>
-        res.ok({ body: 'hello-post' })
+      router.post(
+        {
+          path: '/preboot-post',
+          security: { authz: { enabled: false, reason: '' } },
+          validate: false,
+        },
+        (context, req, res) => res.ok({ body: 'hello-post' })
       );
     });
 
     const { createRouter, server: innerStandardServer } = await server.setup(setupDeps);
     const standardRouter = createRouter('');
-    standardRouter.get({ path: '/standard-get', validate: false }, (context, req, res) =>
-      res.ok({ body: 'hello-get' })
+    standardRouter.get(
+      {
+        path: '/standard-get',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'hello-get' })
     );
-    standardRouter.post({ path: '/standard-post', validate: false }, (context, req, res) =>
-      res.ok({ body: 'hello-post' })
+    standardRouter.post(
+      {
+        path: '/standard-post',
+        security: { authz: { enabled: false, reason: '' } },
+        validate: false,
+      },
+      (context, req, res) => res.ok({ body: 'hello-post' })
     );
 
     await server.start();

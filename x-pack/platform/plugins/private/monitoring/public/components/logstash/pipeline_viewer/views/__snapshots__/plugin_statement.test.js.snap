@@ -1,0 +1,327 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PluginStatement component adds warning highlight for cpu time 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  css={[Function]}
+  gutterSize="none"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          aria-label="mutate"
+          color="primary"
+          css={[Function]}
+          flush="left"
+          iconType="dot"
+          onClick={[Function]}
+          size="xs"
+        >
+          <span>
+            mutate
+          </span>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiBadge
+          onClick={[Function]}
+          onClickAriaLabel="View details"
+        >
+          mutatePlugin
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      gutterSize="s"
+    >
+      <Metric
+        key="cpuMetric"
+        type="cpuTime"
+        value="25%"
+        warning={true}
+      />
+      <Metric
+        key="eventMillis"
+        type="eventMillis"
+        value="100 ms/e"
+        warning={false}
+      />
+      <Metric
+        key="eventsReceived"
+        type="events"
+        value="120 e/s received"
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PluginStatement component adds warning highlight for event millis 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  css={[Function]}
+  gutterSize="none"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          aria-label="mutate"
+          color="primary"
+          css={[Function]}
+          flush="left"
+          iconType="dot"
+          onClick={[Function]}
+          size="xs"
+        >
+          <span>
+            mutate
+          </span>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiBadge
+          onClick={[Function]}
+          onClickAriaLabel="View details"
+        >
+          mutatePlugin
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      gutterSize="s"
+    >
+      <Metric
+        key="cpuMetric"
+        type="cpuTime"
+        value="25%"
+        warning={false}
+      />
+      <Metric
+        key="eventMillis"
+        type="eventMillis"
+        value="100 ms/e"
+        warning={true}
+      />
+      <Metric
+        key="eventsReceived"
+        type="events"
+        value="120 e/s received"
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PluginStatement component does not render explicit id field if no id is specified 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  css={[Function]}
+  gutterSize="none"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          aria-label="stdin"
+          color="primary"
+          css={[Function]}
+          flush="left"
+          iconType="dot"
+          onClick={[Function]}
+          size="xs"
+        >
+          <span>
+            stdin
+          </span>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      gutterSize="s"
+    >
+      <Metric
+        key="eventsEmitted"
+        type="eventsEmitted"
+        value="125 e/s emitted"
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PluginStatement component renders input metrics and explicit id fields 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  css={[Function]}
+  gutterSize="none"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          aria-label="stdin"
+          color="primary"
+          css={[Function]}
+          flush="left"
+          iconType="dot"
+          onClick={[Function]}
+          size="xs"
+        >
+          <span>
+            stdin
+          </span>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiBadge
+          onClick={[Function]}
+          onClickAriaLabel="View details"
+        >
+          standardInput
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      gutterSize="s"
+    >
+      <Metric
+        key="eventsEmitted"
+        type="eventsEmitted"
+        value="125 e/s emitted"
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
+
+exports[`PluginStatement component renders processor statement metrics 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  css={[Function]}
+  gutterSize="none"
+  justifyContent="spaceBetween"
+>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="xs"
+      responsive={false}
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiButtonEmpty
+          aria-label="mutate"
+          color="primary"
+          css={[Function]}
+          flush="left"
+          iconType="dot"
+          onClick={[Function]}
+          size="xs"
+        >
+          <span>
+            mutate
+          </span>
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiBadge
+          onClick={[Function]}
+          onClickAriaLabel="View details"
+        >
+          mutatePlugin
+        </EuiBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiFlexItem>
+  <EuiFlexItem
+    grow={false}
+  >
+    <EuiFlexGroup
+      gutterSize="s"
+    >
+      <Metric
+        key="cpuMetric"
+        type="cpuTime"
+        value="25%"
+        warning={false}
+      />
+      <Metric
+        key="eventMillis"
+        type="eventMillis"
+        value="100 ms/e"
+        warning={false}
+      />
+      <Metric
+        key="eventsReceived"
+        type="events"
+        value="120 e/s received"
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;

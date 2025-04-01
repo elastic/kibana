@@ -1,0 +1,37 @@
+{
+  "type": "plugin",
+  "id": "@kbn/unified-search-plugin",
+  "owner": [
+    "@elastic/kibana-presentation"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Contains all the key functionality of Kibana's unified search experience.Contains all the key functionality of Kibana's unified search experience.",
+  "serviceFolders": [
+    "autocomplete"
+  ],
+  "plugin": {
+    "id": "unifiedSearch",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "unifiedSearch"
+    ],
+    "requiredPlugins": [
+      "dataViews",
+      "data",
+      "uiActions",
+      "screenshotMode",
+      "savedObjectsManagement"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaUtils",
+      "kibanaReact",
+      "data",
+      "esql"
+    ]
+  }
+}

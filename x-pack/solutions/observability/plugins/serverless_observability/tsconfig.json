@@ -1,0 +1,32 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "common/**/*.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../../../typings/**/*"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/management-plugin",
+    "@kbn/serverless",
+    "@kbn/observability-shared-plugin",
+    "@kbn/i18n",
+    "@kbn/management-cards-navigation",
+    "@kbn/observability-plugin",
+    "@kbn/serverless-observability-settings",
+    "@kbn/core-chrome-browser",
+    "@kbn/discover-plugin",
+    "@kbn/security-plugin",
+    "@kbn/streams-plugin",
+  ]
+}

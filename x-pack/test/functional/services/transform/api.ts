@@ -7,14 +7,14 @@
 
 import expect from '@kbn/expect';
 
-import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
+import type { PutTransformsRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
 import { TransformState, TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 import type { TransformStats } from '@kbn/transform-plugin/common/types/transform_stats';
 
-import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/common/api_schemas/transforms';
-import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/common/api_schemas/update_transforms';
+import type { GetTransformsResponseSchema } from '@kbn/transform-plugin/server/routes/api_schemas/transforms';
+import type { PostTransformsUpdateRequestSchema } from '@kbn/transform-plugin/server/routes/api_schemas/update_transforms';
 import type { TransformPivotConfig } from '@kbn/transform-plugin/common/types/transform';
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export async function asyncForEach(array: any[], callback: Function) {
@@ -42,7 +42,9 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndices(
       indices: string,
-      params: IndicesCreateRequest['body'] = {} as NonNullable<IndicesCreateRequest['body']>
+      params: Omit<IndicesCreateRequest, 'index'> = {} as NonNullable<
+        Omit<IndicesCreateRequest, 'index'>
+      >
     ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
@@ -237,7 +239,7 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
         );
         const { body, status } = await esSupertest
           .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
-          .set(headers)
+          .set(headers as Record<string, string>)
           .send(transformConfig);
         this.assertResponseStatusCode(200, status, body);
       } else {
@@ -279,6 +281,15 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
     async startTransform(transformId: string, assertSuccess = true) {
       log.debug(`Starting transform '${transformId}' ...`);
       const { body, status } = await esSupertest.post(`/_transform/${transformId}/_start`);
+
+      if (assertSuccess) {
+        this.assertResponseStatusCode(200, status, body);
+      }
+    },
+
+    async scheduleTransform(transformId: string, assertSuccess = true) {
+      log.debug(`Scheduling now transform '${transformId}' ...`);
+      const { body, status } = await esSupertest.post(`/_transform/${transformId}/_schedule_now`);
 
       if (assertSuccess) {
         this.assertResponseStatusCode(200, status, body);

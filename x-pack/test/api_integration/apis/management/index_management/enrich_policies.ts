@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from 'expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { enrichPoliciesApi } from './lib/enrich_policies.api';
@@ -43,9 +43,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should list all policies', async () => {
-      const { body } = await getAllEnrichPolicies().expect(200);
+      const { status, body } = await getAllEnrichPolicies();
+      expect(status).to.eql(200);
 
-      expect(body).toStrictEqual([
+      expect(body).to.eql([
         {
           enrichFields: ['firstName'],
           matchField: 'email',
@@ -57,7 +58,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should be able to execute a policy', async () => {
-      await executeEnrichPolicy(POLICY_NAME).expect(200);
+      const { status } = await executeEnrichPolicy(POLICY_NAME);
+      expect(status).to.eql(200);
 
       // Wait for a little bit for the policy to be executed, so that it can
       // be deleted in the next test.
@@ -69,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       // In the odd case that the policy is somehow still being executed, the delete
       // method might return a 429 so we need to account for that.
-      expect([200, 429]).toContain(status);
+      expect([200, 429]).to.contain(status);
     });
   });
 }

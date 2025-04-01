@@ -6,7 +6,7 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 import { getPostCaseRequest, postCommentUserReq } from '../../../common/lib/mock';
 import {
@@ -24,6 +24,7 @@ import {
 } from '../../../common/lib/api';
 import {
   superUser,
+  secOnlyCreateComment,
   secOnlyDelete,
   secOnlyNoDelete,
 } from '../../../common/lib/authentication/users';
@@ -306,7 +307,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: caseInfo.id,
             params: postCommentUserReq,
-            auth: { user: secOnlyNoDelete, space: 'space1' },
+            auth: { user: secOnlyCreateComment, space: 'space1' },
           });
 
           await deleteComment({

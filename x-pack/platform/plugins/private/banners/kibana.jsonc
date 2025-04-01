@@ -1,0 +1,26 @@
+{
+  "type": "plugin",
+  "id": "@kbn/banners-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "banners",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "banners"
+    ],
+    "requiredPlugins": [
+      "licensing"
+    ],
+    "optionalPlugins": [
+      "screenshotMode"
+    ],
+    "requiredBundles": [],
+    "enabledOnAnonymousPages": true
+  }
+}

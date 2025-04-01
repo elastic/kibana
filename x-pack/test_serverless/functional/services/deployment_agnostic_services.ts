@@ -6,8 +6,8 @@
  */
 
 import _ from 'lodash';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services as functionalServices } from '../../../test/functional/services';
+
+import { services as functionalServices } from '@kbn/test-suites-xpack/functional/services';
 import { services as deploymentAgnosticSharedServices } from '../../shared/services/deployment_agnostic_services';
 
 /*
@@ -23,6 +23,7 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'canvasElement',
   'cases',
   'comboBox',
+  'selectable',
   'dashboardAddPanel',
   'dashboardBadgeActions',
   'dashboardCustomizePanel',
@@ -30,12 +31,11 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'dashboardDrilldownsManage',
   'dashboardExpect',
   'dashboardPanelActions',
-  'dashboardReplacePanel',
   'dashboardSettings',
   'dashboardVisualizations',
   'dataGrid',
   'dataStreams',
-  'docTable',
+  'dataViews',
   'elasticChart',
   'embedding',
   'failureDebugging',
@@ -50,6 +50,7 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'menuToggle',
   'ml',
   'monacoEditor',
+  'esql',
   'pieChart',
   'pipelineEditor',
   'pipelineList',

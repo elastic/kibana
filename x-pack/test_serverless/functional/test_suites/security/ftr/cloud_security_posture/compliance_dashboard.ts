@@ -11,7 +11,12 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
-  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cloudPostureDashboard']);
+  const pageObjects = getPageObjects([
+    'common',
+    'svlCommonPage',
+    'cloudPostureDashboard',
+    'header',
+  ]);
   const chance = new Chance();
 
   const data = [
@@ -28,6 +33,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         },
       },
       cluster_id: 'Upper case cluster id',
+      data_stream: {
+        dataset: 'cloud_security_posture.findings',
+      },
     },
   ];
 
@@ -38,10 +46,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let dashboard: typeof pageObjects.cloudPostureDashboard.dashboard;
 
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsViewer();
       cspDashboard = pageObjects.cloudPostureDashboard;
       dashboard = pageObjects.cloudPostureDashboard.dashboard;
       await cspDashboard.waitForPluginInitialized();
+      await cspDashboard.index.remove();
 
       await cspDashboard.index.add(data);
       await cspDashboard.navigateToComplianceDashboardPage();
@@ -53,14 +62,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await cspDashboard.index.remove();
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('Kubernetes Dashboard', () => {
       it('displays accurate summary compliance score', async () => {
-        const scoreElement = await dashboard.getKubernetesComplianceScore();
-
-        expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await retry.try(async () => {
+          const scoreElement = await dashboard.getKubernetesComplianceScore();
+          expect((await scoreElement.getVisibleText()) === '0%').to.be(true);
+        });
       });
     });
   });

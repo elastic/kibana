@@ -5,7 +5,7 @@
   "kibana": {
     "version": "kibana"
   },
-  "main": "target/test/functional_with_es_ssl/plugins/cases",
+  "main": "target/test/functional_with_es_ssl/platform/plugins/shared/cases",
   "scripts": {
     "kbn": "node ../../../../../../scripts/kbn.js",
     "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"

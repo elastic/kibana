@@ -1,0 +1,152 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<SimplePrivilegeForm> renders without crashing 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    direction="column"
+  >
+    <EuiFlexItem>
+      <EuiText
+        color="subdued"
+        size="s"
+      >
+        <p>
+          <MemoizedFormattedMessage
+            defaultMessage="Specifies the Kibana privilege for this role."
+            id="xpack.security.management.editRole.simplePrivilegeForm.specifyPrivilegeForRoleDescription"
+          />
+        </p>
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiFormRow
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Kibana privileges"
+            id="xpack.security.management.editRole.simplePrivilegeForm.kibanaPrivilegesTitle"
+          />
+        }
+      >
+        <EuiSuperSelect
+          compressed={false}
+          disabled={false}
+          fullWidth={false}
+          hasDividers={true}
+          isInvalid={false}
+          isLoading={false}
+          onChange={[Function]}
+          options={
+            Array [
+              Object {
+                "dropdownDisplay": <React.Fragment>
+                  <strong>
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="None"
+                      id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdown"
+                    />
+                  </strong>
+                  <EuiText
+                    color="subdued"
+                    size="s"
+                  >
+                    <p>
+                      <Memo(MemoizedFormattedMessage)
+                        defaultMessage="No access to Kibana"
+                        id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeDropdownDescription"
+                      />
+                    </p>
+                  </EuiText>
+                </React.Fragment>,
+                "inputDisplay": <Memo(MemoizedFormattedMessage)
+                  defaultMessage="None"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.noPrivilegeInput"
+                />,
+                "value": "none",
+              },
+              Object {
+                "dropdownDisplay": <React.Fragment>
+                  <strong>
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="Read"
+                      id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdown"
+                    />
+                  </strong>
+                  <EuiText
+                    color="subdued"
+                    size="s"
+                  >
+                    <p>
+                      <Memo(MemoizedFormattedMessage)
+                        defaultMessage="Grants read-only access to all of Kibana"
+                        id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeDropdownDescription"
+                      />
+                    </p>
+                  </EuiText>
+                </React.Fragment>,
+                "inputDisplay": <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Read"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.readPrivilegeInput"
+                />,
+                "value": "read",
+              },
+              Object {
+                "dropdownDisplay": <React.Fragment>
+                  <strong>
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="All"
+                      id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdown"
+                    />
+                  </strong>
+                  <EuiText
+                    color="subdued"
+                    size="s"
+                  >
+                    <p>
+                      <Memo(MemoizedFormattedMessage)
+                        defaultMessage="Grants full access to all of Kibana"
+                        id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeDropdownDescription"
+                      />
+                    </p>
+                  </EuiText>
+                </React.Fragment>,
+                "inputDisplay": <Memo(MemoizedFormattedMessage)
+                  defaultMessage="All"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.allPrivilegeInput"
+                />,
+                "value": "all",
+              },
+              Object {
+                "dropdownDisplay": <React.Fragment>
+                  <strong>
+                    <Memo(MemoizedFormattedMessage)
+                      defaultMessage="Custom"
+                      id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdown"
+                    />
+                  </strong>
+                  <EuiText
+                    color="subdued"
+                    size="s"
+                  >
+                    <p>
+                      <Memo(MemoizedFormattedMessage)
+                        defaultMessage="Customize access to Kibana"
+                        id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeDropdownDescription"
+                      />
+                    </p>
+                  </EuiText>
+                </React.Fragment>,
+                "inputDisplay": <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Custom"
+                  id="xpack.security.management.editRole.simplePrivilegeForm.customPrivilegeInput"
+                />,
+                "value": "custom",
+              },
+            ]
+          }
+          valueOfSelected="none"
+        />
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

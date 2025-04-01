@@ -1,0 +1,40 @@
+steps:
+  - command: .buildkite/scripts/steps/functional/defend_workflows.sh
+    label: 'Defend Workflows Cypress Tests'
+    agents:
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 20
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
+    label: 'Defend Workflows Cypress Tests on Serverless'
+    agents:
+      enableNestedVirtualization: true
+      machineType: n2-standard-4
+    depends_on:
+      - build
+      - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
+    timeout_in_minutes: 60
+    parallelism: 14
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 1

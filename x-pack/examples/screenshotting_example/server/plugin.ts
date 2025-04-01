@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { lastValueFrom } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import { lastValueFrom } from 'rxjs';
 import { API_ENDPOINT, ScreenshottingExpressionResponse } from '../common';
 
 interface StartDeps {
   screenshotting: ScreenshottingStart;
 }
 
-export class ScreenshottingExamplePlugin implements Plugin<void, void> {
+export class ScreenshottingExamplePlugin implements Plugin<void, void, {}, StartDeps> {
   setup({ http, getStartServices }: CoreSetup<StartDeps>) {
     const router = http.createRouter();
 
@@ -27,12 +27,14 @@ export class ScreenshottingExamplePlugin implements Plugin<void, void> {
             expression: schema.string(),
           }),
         },
+        security: { authz: { requiredPrivileges: ['screenshotting'] } },
       },
-      async (context, request, response) => {
+      async (_context, request, response) => {
         const [, { screenshotting }] = await getStartServices();
         const { metrics, results } = await lastValueFrom(
           screenshotting.getScreenshots({
             request,
+            taskInstanceFields: { startedAt: null, retryAt: null },
             expression: request.query.expression,
           })
         );

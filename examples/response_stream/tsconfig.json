@@ -22,5 +22,6 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/ml-response-stream",
+    "@kbn/react-kibana-context-render",
   ]
 }

@@ -7,42 +7,41 @@
 
 import expect from '@kbn/expect';
 import { join } from 'path';
-import { SavedObject } from '@kbn/core/server';
-import supertest from 'supertest';
+import type { SavedObject } from '@kbn/core/server';
+import type supertest from 'supertest';
 import {
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
 } from '@kbn/cases-plugin/common/constants';
-import {
+import type {
   UserCommentAttachmentAttributes,
   CaseAttributes,
-  CaseStatuses,
-  CaseSeverity,
 } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,
 } from '@kbn/cases-plugin/server/common/types/case';
-import {
+import type {
   CaseUserActionWithoutReferenceIds,
   CommentUserAction,
   ConnectorUserAction,
   CreateCaseUserAction,
   PushedUserAction,
 } from '@kbn/cases-plugin/common/types/domain';
-import { CasePostRequest } from '@kbn/cases-plugin/common';
+import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import {
   deleteAllCaseItems,
   createCase,
   createComment,
   findCases,
-  getCaseUserActions,
+  findCaseUserActions,
   findAttachments,
 } from '../../../../common/lib/api';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -113,7 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const comment = commentsResponse.comments[0] as unknown as UserCommentAttachmentAttributes;
       expect(comment.comment).to.eql('A comment for my case');
 
-      const userActions = await getCaseUserActions({
+      const { userActions } = await findCaseUserActions({
         supertest: supertestService,
         caseID: findResponse.cases[0].id,
       });
@@ -144,11 +143,11 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      actionsRemover.add('default', '51a4cbe0-5cea-11ec-a615-15461784e410', 'action', 'actions');
+      actionsRemover.add('default', '51a4cbe0-5cea-11ec-a615-15461784e410', 'connector', 'actions');
 
       await expectImportToHaveOneCase(supertestService);
 
-      const userActions = await getCaseUserActions({
+      const { userActions } = await findCaseUserActions({
         supertest: supertestService,
         caseID: 'afeefae0-5cea-11ec-a615-15461784e410',
       });
@@ -161,7 +160,7 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 };
 
-const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<supertest.Test>) => {
+const expectImportToHaveOneCase = async (supertestService: supertest.Agent) => {
   const findResponse = await findCases({ supertest: supertestService, query: {} });
   expect(findResponse.total).to.eql(1);
   expect(findResponse.cases[0].title).to.eql('A case with a connector');

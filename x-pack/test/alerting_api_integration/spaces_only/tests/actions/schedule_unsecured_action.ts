@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { Spaces } from '../../scenarios';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
@@ -48,54 +48,52 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       await retry.try(async () => {
         const searchResult = await es.search({
           index: '.kibana-event-log*',
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'event.provider': {
-                        value: 'actions',
-                      },
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'event.provider': {
+                      value: 'actions',
                     },
                   },
-                  {
-                    term: {
-                      'event.action': 'execute',
+                },
+                {
+                  term: {
+                    'event.action': 'execute',
+                  },
+                },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: testStart,
                     },
                   },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: testStart,
-                      },
-                    },
-                  },
-                  {
-                    nested: {
-                      path: 'kibana.saved_objects',
-                      query: {
-                        bool: {
-                          filter: [
-                            {
-                              term: {
-                                'kibana.saved_objects.id': {
-                                  value: 'my-test-email',
-                                },
+                },
+                {
+                  nested: {
+                    path: 'kibana.saved_objects',
+                    query: {
+                      bool: {
+                        filter: [
+                          {
+                            term: {
+                              'kibana.saved_objects.id': {
+                                value: 'my-test-email',
                               },
                             },
-                            {
-                              term: {
-                                'kibana.saved_objects.type': 'action',
-                              },
+                          },
+                          {
+                            term: {
+                              'kibana.saved_objects.type': 'action',
                             },
-                          ],
-                        },
+                          },
+                        ],
                       },
                     },
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         });
@@ -137,15 +135,16 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
         .set('kbn-xsrf', 'xxx')
         .send({
           requesterId: 'functional_tester',
-          id: 'my-slack1',
+          id: 'preconfigured-es-index-action',
           params: {
-            message: 'does this work??',
+            documents: [{ test: 'test' }],
+            indexOverride: null,
           },
         })
         .expect(200);
       expect(result.status).to.eql('error');
       expect(result.error).to.eql(
-        `Error: .slack actions cannot be scheduled for unsecured actions execution`
+        `Error: .index actions cannot be scheduled for unsecured actions execution`
       );
     });
 
@@ -168,7 +167,7 @@ export default function createUnsecuredActionTests({ getService }: FtrProviderCo
       expect(response.status).to.eql(200);
 
       const connectorId = response.body.id;
-      objectRemover.add(Spaces.space1.id, connectorId, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, connectorId, 'connector', 'actions');
       const { body: result } = await supertest
         .post(`/api/sample_unsecured_action`)
         .set('kbn-xsrf', 'xxx')

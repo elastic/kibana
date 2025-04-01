@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { hostsUrl, NETWORK_URL, USERS_URL } from '../urls/navigation';
+import { hostsUrl, networkUrl, usersUrl } from '../urls/navigation';
 import { EVENT_CONTAINER_TABLE_NOT_LOADING } from './alerts';
 import { ALL_HOSTS_TAB, ALL_HOSTS_TABLE, UNIQUE_IPS_VISUALIZATIONS } from './hosts/all_hosts';
-import { HOST_BY_RISK_TABLE, RISK_DETAILS_NAV } from './hosts/host_risk';
 import { UNCOMMON_PROCESSES_TAB } from './hosts/main';
 import { HOSTS_VISUALIZATION, UNCOMMON_PROCESSES_TABLE } from './hosts/uncommon_processes';
 import {
@@ -31,13 +30,18 @@ import {
   USERS_VISUALIZATION,
 } from './users/all_users';
 import { AUTHENTICATIONS_TAB, AUTHENTICATIONS_TABLE } from './users/user_authentications';
-import { EVENTS_HISTOGRAM, EVENTS_TAB } from './users/user_events';
+import { EVENTS_TAB } from './users/user_events';
 import { HTTP_TAB, HTTP_TABLE } from './network/http';
 import { TLS_TAB, TLS_TABLE } from './network/tls';
+import { getDataTestSubjectSelector } from '../helpers/common';
+import { HOST_BY_RISK_TABLE, RISK_DETAILS_NAV } from './hosts/host_risk';
 import { RISK_SCORE_TAB, RISK_SCORE_TAB_CONTENT } from './users/user_risk_score';
 
 export const INSPECT_BUTTON_ICON = '[data-test-subj="inspect-icon-button"]';
 export const INSPECT_MODAL = '[data-test-subj="modal-inspect-euiModal"]';
+export const INSPECT_MODAL_REQUEST_TAB = getDataTestSubjectSelector('modal-inspect-request-tab');
+export const INSPECT_MODAL_RESPONSE_TAB = getDataTestSubjectSelector('modal-inspect-response-tab');
+export const INSPECT_MODAL_STATS_TAB = getDataTestSubjectSelector('modal-inspect-statistics-tab');
 export const INSPECT_MODAL_INDEX_PATTERN = '[data-test-subj="index-pattern-description"]';
 export const EMBEDDABLE_PANEL_TOGGLE_ICON = '[data-test-subj="embeddablePanelToggleMenuIcon"]';
 export const EMBEDDABLE_PANEL_INSPECT = '[data-test-subj="embeddablePanelAction-inspect"]';
@@ -89,7 +93,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
       {
         title: 'Host risk',
         tab: RISK_DETAILS_NAV,
-        customIndexPattern: 'ml_host_risk_score_latest_default',
+        customIndexPattern: 'risk-score.risk-score-latest-default',
         id: HOST_BY_RISK_TABLE,
       },
     ],
@@ -134,7 +138,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   },
   {
     pageName: 'Network',
-    url: NETWORK_URL,
+    url: networkUrl('flows'),
     lensVisualizations: [
       {
         title: 'Network events',
@@ -221,7 +225,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
   },
   {
     pageName: 'Users',
-    url: USERS_URL,
+    url: usersUrl('allUsers'),
     lensVisualizations: [
       {
         title: 'Users',
@@ -238,33 +242,33 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-authenticationsSuccess-metric-embeddable',
+        embeddableId: 'usersKpiAuthentications-authenticationsSuccess-metric-embeddable',
         tab: ALL_USERS_TAB,
       },
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-authenticationsFailure-metric-embeddable',
+        embeddableId: 'usersKpiAuthentications-authenticationsFailure-metric-embeddable',
         tab: ALL_USERS_TAB,
       },
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-bar-embeddable',
+        embeddableId: 'usersKpiAuthentications-bar-embeddable',
         tab: ALL_USERS_TAB,
       },
       {
         title: 'User authentications',
         panelSelector: AUTHENTICATION_VISUALIZATION,
-        embeddableId: 'usersKpiAuthenticationsQuery-area-embeddable',
+        embeddableId: 'usersKpiAuthentications-area-embeddable',
         tab: ALL_USERS_TAB,
       },
-      {
-        title: 'Events',
-        panelSelector: EVENTS_HISTOGRAM,
-        embeddableId: 'alertsOrEventsHistogramQuery-embeddable',
-        tab: EVENTS_TAB,
-      },
+      // {
+      //   title: 'Events',
+      //   panelSelector: EVENTS_HISTOGRAM,
+      //   embeddableId: 'alertsOrEventsHistogramQuery-embeddable',
+      //   tab: EVENTS_TAB,
+      // },
     ],
     tables: [
       {
@@ -286,7 +290,7 @@ export const INSPECT_BUTTONS_IN_SECURITY: InspectButtonMetadata[] = [
         title: 'User risk',
         tab: RISK_SCORE_TAB,
         id: RISK_SCORE_TAB_CONTENT,
-        customIndexPattern: 'ml_user_risk_score_latest_default',
+        customIndexPattern: 'risk-score.risk-score-latest-default',
       },
     ],
   },

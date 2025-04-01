@@ -27,15 +27,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       try {
         await es.indices.create({
           index: INDEX_NAME,
-          body: {
-            mappings: {
-              properties: {
-                email: {
-                  type: 'text',
-                },
-                age: {
-                  type: 'long',
-                },
+          mappings: {
+            properties: {
+              email: {
+                type: 'text',
+              },
+              age: {
+                type: 'long',
               },
             },
           },
@@ -46,7 +44,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
 
       log.debug('Navigating to the enrich policies tab');
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
       await pageObjects.common.navigateToApp('indexManagement');
 
       // Navigate to the enrich policies tab
@@ -64,8 +62,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       } catch (e) {
         log.debug('[Teardown error] Error deleting test policy');
         throw e;
-      } finally {
-        await pageObjects.svlCommonPage.forceLogout();
       }
     });
 

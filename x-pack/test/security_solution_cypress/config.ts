@@ -11,7 +11,7 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaCommonTestsConfig = await readConfigFile(
-    require.resolve('../../../test/common/config.js')
+    require.resolve('@kbn/test-suites-src/common/config')
   );
   const xpackFunctionalTestsConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
@@ -45,8 +45,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.alerting.rules.minimumScheduleInterval.value=1s',
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'chartEmbeddablesEnabled',
-          'alertSuppressionForThresholdRuleEnabled',
+          'alertSuppressionForSequenceEqlRuleEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
@@ -58,6 +57,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // packages listed in fleet_packages.json
         // See: https://elastic.slack.com/archives/CNMNXV4RG/p1683033379063079
         `--xpack.fleet.developer.bundledPackageLocation=./inexistentDir`,
+        '--csp.strict=false',
+        '--csp.warnLegacyBrowsers=false',
       ],
     },
   };

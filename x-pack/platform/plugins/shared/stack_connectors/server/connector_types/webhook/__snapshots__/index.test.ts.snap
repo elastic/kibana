@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`execute() execute with username/password sends request with basic auth 1`] = `
+Object {
+  "axios": undefined,
+  "connectorUsageCollector": Object {
+    "connectorId": "test-connector-id",
+    "logger": Object {
+      "context": Array [],
+      "debug": [MockFunction] {
+        "calls": Array [
+          Array [
+            "response from webhook action \\"some-id\\": [HTTP 200] ",
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": undefined,
+          },
+        ],
+      },
+      "error": [MockFunction],
+      "fatal": [MockFunction],
+      "get": [MockFunction],
+      "info": [MockFunction],
+      "isLevelEnabled": [MockFunction],
+      "log": [MockFunction],
+      "trace": [MockFunction],
+      "warn": [MockFunction],
+    },
+    "usage": Object {
+      "requestBodyBytes": 0,
+    },
+  },
+  "data": "some data",
+  "headers": Object {
+    "Authorization": "Basic YWJjOjEyMw==",
+    "aheader": "a value",
+  },
+  "logger": Any<Object>,
+  "method": "post",
+  "sslOverrides": Object {},
+  "url": "https://abc.def/my-webhook",
+}
+`;

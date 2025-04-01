@@ -11,28 +11,30 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export function datastreamsHelpers(getService: FtrProviderContext['getService']) {
   const es = getService('es');
 
-  const createDataStream = async (name: string) => {
+  const createDataStream = async (name: string, indexMode?: string) => {
     // A data stream requires an index template before it can be created.
     await es.indices.putIndexTemplate({
       name,
-      body: {
-        // We need to match the names of backing indices with this template.
-        index_patterns: [name + '*'],
-        template: {
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-              },
+      // We need to match the names of backing indices with this template.
+      index_patterns: [name + '*'],
+      template: {
+        mappings: {
+          properties: {
+            '@timestamp': {
+              type: 'date',
             },
           },
-          lifecycle: {
-            // @ts-expect-error @elastic/elasticsearch enabled prop is not typed yet
-            enabled: true,
+        },
+        settings: {
+          index: {
+            mode: indexMode,
           },
         },
-        data_stream: {},
+        lifecycle: {
+          enabled: true,
+        },
       },
+      data_stream: {},
     });
 
     await es.indices.createDataStream({ name });
@@ -41,14 +43,12 @@ export function datastreamsHelpers(getService: FtrProviderContext['getService'])
   const updateIndexTemplateMappings = async (name: string, mappings: any) => {
     await es.indices.putIndexTemplate({
       name,
-      body: {
-        // We need to match the names of backing indices with this template.
-        index_patterns: [name + '*'],
-        template: {
-          mappings,
-        },
-        data_stream: {},
+      // We need to match the names of backing indices with this template.
+      index_patterns: [name + '*'],
+      template: {
+        mappings,
       },
+      data_stream: {},
     });
   };
 

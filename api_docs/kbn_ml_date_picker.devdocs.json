@@ -2,26 +2,10 @@
   "id": "@kbn/ml-date-picker",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.DatePickerContextProvider",
+        "id": "def-public.DatePickerContextProvider",
         "type": "Function",
         "tags": [
           "type"
@@ -34,20 +18,20 @@
           "(props: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/ml-date-picker",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnMlDatePickerPluginApi",
-            "section": "def-common.DatePickerDependencies",
+            "section": "def-public.DatePickerDependencies",
             "text": "DatePickerDependencies"
           },
-          ">) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerContextProvider.$1",
+            "id": "def-public.DatePickerContextProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -58,14 +42,14 @@
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.DatePickerDependencies",
+                "section": "def-public.DatePickerDependencies",
                 "text": "DatePickerDependencies"
               },
               ">"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -78,7 +62,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.DatePickerWrapper",
+        "id": "def-public.DatePickerWrapper",
         "type": "Function",
         "tags": [
           "type"
@@ -88,25 +72,25 @@
           "\nDatePickerWrapper React Component\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<DatePickerWrapperProps>) => JSX.Element | null"
+          "(props: DatePickerWrapperProps) => React.JSX.Element | null"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/components/date_picker_wrapper.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/components/date_picker_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerWrapper.$1",
-            "type": "CompoundType",
+            "id": "def-public.DatePickerWrapper.$1",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- `DatePickerWrapper` component props"
             ],
             "signature": [
-              "React.PropsWithChildren<DatePickerWrapperProps>"
+              "DatePickerWrapperProps"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/date_picker_wrapper.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/date_picker_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -119,7 +103,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.FullTimeRangeSelector",
+        "id": "def-public.FullTimeRangeSelector",
         "type": "Function",
         "tags": [
           "type"
@@ -129,41 +113,39 @@
           "\nComponent for rendering a button which automatically sets the range of the time filter\nto the time range of data in the index(es) mapped to the supplied Kibana data view or query.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/ml-date-picker",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnMlDatePickerPluginApi",
-            "section": "def-common.FullTimeRangeSelectorProps",
+            "section": "def-public.FullTimeRangeSelectorProps",
             "text": "FullTimeRangeSelectorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelector.$1",
-            "type": "CompoundType",
+            "id": "def-public.FullTimeRangeSelector.$1",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [
               "- `FullTimeRangeSelectorProps` component props"
             ],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.FullTimeRangeSelectorProps",
+                "section": "def-public.FullTimeRangeSelectorProps",
                 "text": "FullTimeRangeSelectorProps"
-              },
-              ">"
+              }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -176,7 +158,54 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.getTimeFilterRange",
+        "id": "def-public.getTimeFieldRange",
+        "type": "Function",
+        "tags": [],
+        "label": "getTimeFieldRange",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "(options: GetTimeFieldRangeOptions) => Promise<",
+          {
+            "pluginId": "@kbn/ml-date-picker",
+            "scope": "public",
+            "docId": "kibKbnMlDatePickerPluginApi",
+            "section": "def-public.GetTimeFieldRangeResponse",
+            "text": "GetTimeFieldRangeResponse"
+          },
+          ">"
+        ],
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/time_field_range.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-public.getTimeFieldRange.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "- GetTimeFieldRangeOptions"
+            ],
+            "signature": [
+              "GetTimeFieldRangeOptions"
+            ],
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/time_field_range.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "GetTimeFieldRangeResponse"
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-date-picker",
+        "id": "def-public.getTimeFilterRange",
         "type": "Function",
         "tags": [],
         "label": "getTimeFilterRange",
@@ -195,19 +224,19 @@
           ") => ",
           {
             "pluginId": "@kbn/ml-date-picker",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnMlDatePickerPluginApi",
-            "section": "def-common.TimeRange",
+            "section": "def-public.TimeRange",
             "text": "TimeRange"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.getTimeFilterRange.$1",
+            "id": "def-public.getTimeFilterRange.$1",
             "type": "Object",
             "tags": [],
             "label": "timefilter",
@@ -223,7 +252,7 @@
                 "text": "TimefilterContract"
               }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -236,7 +265,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.useRefresh",
+        "id": "def-public.useRefresh",
         "type": "Function",
         "tags": [],
         "label": "useRefresh",
@@ -247,14 +276,14 @@
           "() => ",
           {
             "pluginId": "@kbn/ml-date-picker",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnMlDatePickerPluginApi",
-            "section": "def-common.Refresh",
+            "section": "def-public.Refresh",
             "text": "Refresh"
           },
           " | undefined"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -263,7 +292,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.useRefreshIntervalUpdates",
+        "id": "def-public.useRefreshIntervalUpdates",
         "type": "Function",
         "tags": [],
         "label": "useRefreshIntervalUpdates",
@@ -280,7 +309,7 @@
             "text": "RefreshInterval"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -291,7 +320,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.useTimefilter",
+        "id": "def-public.useTimefilter",
         "type": "Function",
         "tags": [],
         "label": "useTimefilter",
@@ -308,13 +337,13 @@
             "text": "TimefilterContract"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.useTimefilter.$1",
+            "id": "def-public.useTimefilter.$1",
             "type": "Object",
             "tags": [],
             "label": "options",
@@ -324,7 +353,7 @@
             "signature": [
               "UseTimefilterOptions"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -337,7 +366,7 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.useTimeRangeUpdates",
+        "id": "def-public.useTimeRangeUpdates",
         "type": "Function",
         "tags": [],
         "label": "useTimeRangeUpdates",
@@ -354,13 +383,13 @@
             "text": "TimeRange"
           }
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.useTimeRangeUpdates.$1",
+            "id": "def-public.useTimeRangeUpdates.$1",
             "type": "boolean",
             "tags": [],
             "label": "absolute",
@@ -370,7 +399,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_timefilter.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_timefilter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -385,20 +414,20 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.DatePickerDependencies",
+        "id": "def-public.DatePickerDependencies",
         "type": "Interface",
         "tags": [],
         "label": "DatePickerDependencies",
         "description": [
           "\nDate Picker Dependencies to be passed on via `DatePickerContextProvider`."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.data",
+            "id": "def-public.DatePickerDependencies.data",
             "type": "Object",
             "tags": [],
             "label": "data",
@@ -414,13 +443,13 @@
                 "text": "DataPublicPluginStart"
               }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.http",
+            "id": "def-public.DatePickerDependencies.http",
             "type": "Object",
             "tags": [],
             "label": "http",
@@ -428,21 +457,15 @@
               "\nhttp service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-common.HttpSetup",
-                "text": "HttpSetup"
-              }
+              "HttpSetup"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.notifications",
+            "id": "def-public.DatePickerDependencies.notifications",
             "type": "Object",
             "tags": [],
             "label": "notifications",
@@ -450,21 +473,31 @@
               "\nnotifications service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-common.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.theme",
+            "id": "def-public.DatePickerDependencies.userProfile",
+            "type": "Object",
+            "tags": [],
+            "label": "userProfile",
+            "description": [
+              "\nKibana Security User Profile Service"
+            ],
+            "signature": [
+              "UserProfileService"
+            ],
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-date-picker",
+            "id": "def-public.DatePickerDependencies.theme",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -472,21 +505,15 @@
               "\nEUI theme"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceStart",
-                "text": "ThemeServiceStart"
-              }
+              "ThemeServiceSetup"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.uiSettings",
+            "id": "def-public.DatePickerDependencies.uiSettings",
             "type": "Object",
             "tags": [],
             "label": "uiSettings",
@@ -494,21 +521,15 @@
               "\nKibana UI advanced settings"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-common.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.uiSettingsKeys",
+            "id": "def-public.DatePickerDependencies.uiSettingsKeys",
             "type": "Object",
             "tags": [],
             "label": "uiSettingsKeys",
@@ -518,13 +539,13 @@
             "signature": [
               "{ readonly META_FIELDS: \"metaFields\"; readonly DOC_HIGHLIGHT: \"doc_table:highlight\"; readonly QUERY_STRING_OPTIONS: \"query:queryString:options\"; readonly QUERY_ALLOW_LEADING_WILDCARDS: \"query:allowLeadingWildcards\"; readonly SEARCH_QUERY_LANGUAGE: \"search:queryLanguage\"; readonly SORT_OPTIONS: \"sort:options\"; readonly COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: \"courier:ignoreFilterIfFieldNotInIndex\"; readonly COURIER_SET_REQUEST_PREFERENCE: \"courier:setRequestPreference\"; readonly COURIER_CUSTOM_REQUEST_PREFERENCE: \"courier:customRequestPreference\"; readonly COURIER_MAX_CONCURRENT_SHARD_REQUESTS: \"courier:maxConcurrentShardRequests\"; readonly SEARCH_INCLUDE_FROZEN: \"search:includeFrozen\"; readonly SEARCH_TIMEOUT: \"search:timeout\"; readonly HISTOGRAM_BAR_TARGET: \"histogram:barTarget\"; readonly HISTOGRAM_MAX_BARS: \"histogram:maxBars\"; readonly HISTORY_LIMIT: \"history:limit\"; readonly TIMEPICKER_REFRESH_INTERVAL_DEFAULTS: \"timepicker:refreshIntervalDefaults\"; readonly TIMEPICKER_QUICK_RANGES: \"timepicker:quickRanges\"; readonly TIMEPICKER_TIME_DEFAULTS: \"timepicker:timeDefaults\"; readonly FILTERS_PINNED_BY_DEFAULT: \"filters:pinnedByDefault\"; readonly FILTERS_EDITOR_SUGGEST_VALUES: \"filterEditor:suggestValues\"; readonly AUTOCOMPLETE_USE_TIMERANGE: \"autocomplete:useTimeRange\"; readonly AUTOCOMPLETE_VALUE_SUGGESTION_METHOD: \"autocomplete:valueSuggestionMethod\"; readonly DATE_FORMAT: \"dateFormat\"; readonly DATEFORMAT_TZ: \"dateFormat:tz\"; }"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.i18n",
+            "id": "def-public.DatePickerDependencies.i18n",
             "type": "Object",
             "tags": [],
             "label": "i18n",
@@ -532,21 +553,15 @@
               "\nInternationalisation service"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-common.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.showFrozenDataTierChoice",
+            "id": "def-public.DatePickerDependencies.showFrozenDataTierChoice",
             "type": "CompoundType",
             "tags": [],
             "label": "showFrozenDataTierChoice",
@@ -556,7 +571,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/hooks/use_date_picker_context.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/hooks/use_date_picker_context.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -565,20 +580,20 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.FullTimeRangeSelectorProps",
+        "id": "def-public.FullTimeRangeSelectorProps",
         "type": "Interface",
         "tags": [],
         "label": "FullTimeRangeSelectorProps",
         "description": [
           "\nFullTimeRangeSelectorProps React Component props interface"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.frozenDataPreference",
+            "id": "def-public.FullTimeRangeSelectorProps.frozenDataPreference",
             "type": "CompoundType",
             "tags": [],
             "label": "frozenDataPreference",
@@ -588,13 +603,13 @@
             "signature": [
               "\"exclude-frozen\" | \"include-frozen\""
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.setFrozenDataPreference",
+            "id": "def-public.FullTimeRangeSelectorProps.setFrozenDataPreference",
             "type": "Function",
             "tags": [],
             "label": "setFrozenDataPreference",
@@ -605,20 +620,20 @@
               "(value: ",
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.FrozenTierPreference",
+                "section": "def-public.FrozenTierPreference",
                 "text": "FrozenTierPreference"
               },
               " | undefined) => void"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-date-picker",
-                "id": "def-common.FullTimeRangeSelectorProps.setFrozenDataPreference.$1",
+                "id": "def-public.FullTimeRangeSelectorProps.setFrozenDataPreference.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "value",
@@ -628,14 +643,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-date-picker",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnMlDatePickerPluginApi",
-                    "section": "def-common.FrozenTierPreference",
+                    "section": "def-public.FrozenTierPreference",
                     "text": "FrozenTierPreference"
                   },
                   " | undefined"
                 ],
-                "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+                "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -645,7 +660,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.timefilter",
+            "id": "def-public.FullTimeRangeSelectorProps.timefilter",
             "type": "Object",
             "tags": [],
             "label": "timefilter",
@@ -653,7 +668,9 @@
               "\ntimefilter service."
             ],
             "signature": [
-              "{ isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
+              "{ readonly useTimefilter: () => ",
+              "TimefilterHook",
+              "; isTimeRangeSelectorEnabled: () => boolean; isAutoRefreshSelectorEnabled: () => boolean; isTimeTouched: () => boolean; isRefreshIntervalTouched: () => boolean; getEnabledUpdated$: () => ",
               "Observable",
               "<boolean>; getTimeUpdate$: () => ",
               "Observable",
@@ -697,7 +714,7 @@
                 "section": "def-common.RefreshInterval",
                 "text": "RefreshInterval"
               },
-              "; setRefreshInterval: (refreshInterval: Partial<",
+              "; getMinRefreshInterval: () => number; setRefreshInterval: (refreshInterval: Partial<",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -823,13 +840,13 @@
               },
               "; }"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.dataView",
+            "id": "def-public.FullTimeRangeSelectorProps.dataView",
             "type": "Object",
             "tags": [],
             "label": "dataView",
@@ -845,26 +862,26 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.disabled",
+            "id": "def-public.FullTimeRangeSelectorProps.disabled",
             "type": "boolean",
             "tags": [],
             "label": "disabled",
             "description": [
               "\nBoolean flag to enable/disable the full time range button."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.query",
+            "id": "def-public.FullTimeRangeSelectorProps.query",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -875,13 +892,13 @@
               "QueryDslQueryContainer",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.callback",
+            "id": "def-public.FullTimeRangeSelectorProps.callback",
             "type": "Function",
             "tags": [],
             "label": "callback",
@@ -892,20 +909,20 @@
               "((value: ",
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.GetTimeFieldRangeResponse",
+                "section": "def-public.GetTimeFieldRangeResponse",
                 "text": "GetTimeFieldRangeResponse"
               },
               ") => void) | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/ml-date-picker",
-                "id": "def-common.FullTimeRangeSelectorProps.callback.$1",
+                "id": "def-public.FullTimeRangeSelectorProps.callback.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "value",
@@ -915,13 +932,13 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/ml-date-picker",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnMlDatePickerPluginApi",
-                    "section": "def-common.GetTimeFieldRangeResponse",
+                    "section": "def-public.GetTimeFieldRangeResponse",
                     "text": "GetTimeFieldRangeResponse"
                   }
                 ],
-                "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+                "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -931,7 +948,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.apiPath",
+            "id": "def-public.FullTimeRangeSelectorProps.apiPath",
             "type": "CompoundType",
             "tags": [],
             "label": "apiPath",
@@ -941,14 +958,14 @@
             "signature": [
               {
                 "pluginId": "@kbn/ml-date-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnMlDatePickerPluginApi",
-                "section": "def-common.SetFullTimeRangeApiPath",
+                "section": "def-public.SetFullTimeRangeApiPath",
                 "text": "SetFullTimeRangeApiPath"
               },
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -957,33 +974,33 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.GetTimeFieldRangeResponse",
+        "id": "def-public.GetTimeFieldRangeResponse",
         "type": "Interface",
         "tags": [],
         "label": "GetTimeFieldRangeResponse",
         "description": [
           "\nResponse interface for the `setFullTimeRange` function."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.GetTimeFieldRangeResponse.success",
+            "id": "def-public.GetTimeFieldRangeResponse.success",
             "type": "boolean",
             "tags": [],
             "label": "success",
             "description": [
               "\nSuccess boolean flag."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.GetTimeFieldRangeResponse.start",
+            "id": "def-public.GetTimeFieldRangeResponse.start",
             "type": "Object",
             "tags": [],
             "label": "start",
@@ -993,13 +1010,13 @@
             "signature": [
               "GetTimeFieldRangeResponseTime"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.GetTimeFieldRangeResponse.end",
+            "id": "def-public.GetTimeFieldRangeResponse.end",
             "type": "Object",
             "tags": [],
             "label": "end",
@@ -1009,7 +1026,7 @@
             "signature": [
               "GetTimeFieldRangeResponseTime"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/types.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1018,33 +1035,33 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.Refresh",
+        "id": "def-public.Refresh",
         "type": "Interface",
         "tags": [],
         "label": "Refresh",
         "description": [
           "\nState definition of `mlTimefilterRefresh$` observable."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.Refresh.lastRefresh",
+            "id": "def-public.Refresh.lastRefresh",
             "type": "number",
             "tags": [],
             "label": "lastRefresh",
             "description": [
               "\nTimestamp of the last time a refresh got triggered."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.Refresh.timeRange",
+            "id": "def-public.Refresh.timeRange",
             "type": "Object",
             "tags": [],
             "label": "timeRange",
@@ -1054,7 +1071,7 @@
             "signature": [
               "{ start: string; end: string; } | undefined"
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1063,40 +1080,40 @@
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.TimeRange",
+        "id": "def-public.TimeRange",
         "type": "Interface",
         "tags": [],
         "label": "TimeRange",
         "description": [
           "\nReturn type for the `getTimeFilterRange` function."
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.TimeRange.from",
+            "id": "def-public.TimeRange.from",
             "type": "number",
             "tags": [],
             "label": "from",
             "description": [
               "\nFrom timestamp."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.TimeRange.to",
+            "id": "def-public.TimeRange.to",
             "type": "number",
             "tags": [],
             "label": "to",
             "description": [
               "\nTo timestamp."
             ],
-            "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+            "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1108,7 +1125,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.FrozenTierPreference",
+        "id": "def-public.FrozenTierPreference",
         "type": "Type",
         "tags": [],
         "label": "FrozenTierPreference",
@@ -1118,14 +1135,14 @@
         "signature": [
           "\"exclude-frozen\" | \"include-frozen\""
         ],
-        "path": "x-pack/packages/ml/date_picker/src/storage.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.SetFullTimeRangeApiPath",
+        "id": "def-public.SetFullTimeRangeApiPath",
         "type": "Type",
         "tags": [],
         "label": "SetFullTimeRangeApiPath",
@@ -1135,7 +1152,7 @@
         "signature": [
           "\"/internal/file_upload/time_field_range\" | \"/internal/ml/fields_service/time_field_range\""
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/full_time_range_selector_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/full_time_range_selector_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1144,7 +1161,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.FROZEN_TIER_PREFERENCE",
+        "id": "def-public.FROZEN_TIER_PREFERENCE",
         "type": "Object",
         "tags": [],
         "label": "FROZEN_TIER_PREFERENCE",
@@ -1154,14 +1171,14 @@
         "signature": [
           "{ readonly EXCLUDE: \"exclude-frozen\"; readonly INCLUDE: \"include-frozen\"; }"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/storage.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/storage.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/ml-date-picker",
-        "id": "def-common.mlTimefilterRefresh$",
+        "id": "def-public.mlTimefilterRefresh$",
         "type": "Object",
         "tags": [],
         "label": "mlTimefilterRefresh$",
@@ -1173,18 +1190,34 @@
           "<",
           {
             "pluginId": "@kbn/ml-date-picker",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnMlDatePickerPluginApi",
-            "section": "def-common.Refresh",
+            "section": "def-public.Refresh",
             "text": "Refresh"
           },
           ">"
         ],
-        "path": "x-pack/packages/ml/date_picker/src/services/timefilter_refresh_service.ts",
+        "path": "x-pack/platform/packages/private/ml/date_picker/src/services/timefilter_refresh_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

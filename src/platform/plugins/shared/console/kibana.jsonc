@@ -1,0 +1,30 @@
+{
+  "type": "plugin",
+  "id": "@kbn/console-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "console",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "console"
+    ],
+    "requiredPlugins": [
+      "devTools",
+      "share"
+    ],
+    "optionalPlugins": [
+      "usageCollection",
+      "home",
+      "cloud"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaUtils"
+    ]
+  }
+}

@@ -13,73 +13,29 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-resources-server-mocks",
-        "id": "def-common.HttpResourcesMock",
+        "id": "def-server.HttpResourcesMock",
         "type": "Type",
         "tags": [],
         "label": "HttpResourcesMock",
         "description": [],
         "signature": [
           "{ start: jest.MockInstance<void, [], unknown>; setup: jest.MockInstance<{ createRegistrar: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-common.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           ">) => ",
-          {
-            "pluginId": "@kbn/core-http-resources-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-            "section": "def-common.HttpResources",
-            "text": "HttpResources"
-          },
+          "HttpResources",
           "; }, [deps: ",
           "SetupDeps",
           "], unknown>; stop: jest.MockInstance<void, [], unknown>; preboot: jest.MockInstance<{ createRegistrar: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-common.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-request-handler-context-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
-            "section": "def-common.RequestHandlerContext",
-            "text": "RequestHandlerContext"
-          },
+          "RequestHandlerContext",
           ">) => ",
-          {
-            "pluginId": "@kbn/core-http-resources-server",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-            "section": "def-common.HttpResources",
-            "text": "HttpResources"
-          },
+          "HttpResources",
           "; }, [deps: ",
           "PrebootDeps",
           "], unknown>; } & ",
@@ -91,16 +47,10 @@
             "text": "PublicMethodsOf"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-http-resources-server-internal",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpResourcesServerInternalPluginApi",
-            "section": "def-common.HttpResourcesService",
-            "text": "HttpResourcesService"
-          },
+          "HttpResourcesService",
           ">"
         ],
-        "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+        "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -109,33 +59,27 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-http-resources-server-mocks",
-        "id": "def-common.httpResourcesMock",
+        "id": "def-server.httpResourcesMock",
         "type": "Object",
         "tags": [],
         "label": "httpResourcesMock",
         "description": [],
-        "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+        "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-http-resources-server-mocks",
-            "id": "def-common.httpResourcesMock.create",
+            "id": "def-server.httpResourcesMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-http-resources-server-mocks",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerMocksPluginApi",
-                "section": "def-common.HttpResourcesMock",
-                "text": "HttpResourcesMock"
-              }
+              "HttpResourcesMock"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -143,23 +87,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-mocks",
-            "id": "def-common.httpResourcesMock.createRegistrar",
+            "id": "def-server.httpResourcesMock.createRegistrar",
             "type": "Function",
             "tags": [],
             "label": "createRegistrar",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               ">"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -167,23 +105,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-mocks",
-            "id": "def-common.httpResourcesMock.createPrebootContract",
+            "id": "def-server.httpResourcesMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
             "description": [],
             "signature": [
               "() => { createRegistrar: jest.Mock<jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               ">, [], any>; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -191,23 +123,17 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-mocks",
-            "id": "def-common.httpResourcesMock.createSetupContract",
+            "id": "def-server.httpResourcesMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
             "description": [],
             "signature": [
               "() => { createRegistrar: jest.Mock<jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResources",
-                "text": "HttpResources"
-              },
+              "HttpResources",
               ">, [], any>; }"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -215,679 +141,239 @@
           },
           {
             "parentPluginId": "@kbn/core-http-resources-server-mocks",
-            "id": "def-common.httpResourcesMock.createResponseFactory",
+            "id": "def-server.httpResourcesMock.createResponseFactory",
             "type": "Function",
             "tags": [],
             "label": "createResponseFactory",
             "description": [],
             "signature": [
               "() => { renderCoreApp: jest.MockInstance<Promise<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>); renderAnonymousCoreApp: jest.MockInstance<Promise<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesRenderOptions",
-                "text": "HttpResourcesRenderOptions"
-              },
+              "HttpResourcesRenderOptions",
               " | undefined) => Promise<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>>); renderHtml: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               "], unknown> & ((options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); renderJs: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               "], unknown> & ((options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); renderCss: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               "], unknown> & ((options: ",
-              {
-                "pluginId": "@kbn/core-http-resources-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpResourcesServerPluginApi",
-                "section": "def-common.HttpResourcesResponseOptions",
-                "text": "HttpResourcesResponseOptions"
-              },
+              "HttpResourcesResponseOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); ok: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
+              "HttpResponseOptions",
               "<string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined> | undefined], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined = any>(options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
+              "HttpResponseOptions",
               "<T> | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
+              "<T>); created: jest.MockInstance<",
+              "IKibanaResponse",
+              "<string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined>, [options?: ",
+              "HttpResponseOptions",
+              "<string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined> | undefined], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
+              "ResponseErrorAttributes",
+              " | undefined; } | undefined = any>(options?: ",
+              "HttpResponseOptions",
+              "<T> | undefined) => ",
+              "IKibanaResponse",
               "<T>); accepted: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
+              "HttpResponseOptions",
               "<string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined> | undefined], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined = any>(options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
+              "HttpResponseOptions",
               "<T> | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<T>); noContent: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
+              "HttpResponseOptions",
               "<any> | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.HttpResponseOptions",
-                "text": "HttpResponseOptions"
-              },
+              "HttpResponseOptions",
               "<any> | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
+              "<any>); multiStatus: jest.MockInstance<",
+              "IKibanaResponse",
+              "<any>, [options?: ",
+              "HttpResponseOptions",
+              "<any> | undefined], unknown> & ((options?: ",
+              "HttpResponseOptions",
+              "<any> | undefined) => ",
+              "IKibanaResponse",
               "<any>); redirected: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RedirectResponseOptions",
-                "text": "RedirectResponseOptions"
-              },
+              "RedirectResponseOptions",
               "], unknown> & ((options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.RedirectResponseOptions",
-                "text": "RedirectResponseOptions"
-              },
+              "RedirectResponseOptions",
               ") => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
+              "<any>); notModified: jest.MockInstance<",
+              "IKibanaResponse",
+              "<any>, [options: ",
+              "HttpResponseOptions",
+              "<any>], unknown> & ((options: ",
+              "HttpResponseOptions",
+              "<any>) => ",
+              "IKibanaResponse",
               "<any>); badRequest: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); unauthorized: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); forbidden: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); notFound: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); conflict: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined], unknown> & ((options?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ErrorHttpResponseOptions",
-                "text": "ErrorHttpResponseOptions"
-              },
+              "ErrorHttpResponseOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
+              "<any>); unprocessableContent: jest.MockInstance<",
+              "IKibanaResponse",
+              "<any>, [options?: ",
+              "ErrorHttpResponseOptions",
+              " | undefined], unknown> & ((options?: ",
+              "ErrorHttpResponseOptions",
+              " | undefined) => ",
+              "IKibanaResponse",
               "<any>); customError: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
-              "<Buffer | ",
-              "Stream",
-              " | ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseError",
-                "text": "ResponseError"
-              },
+              "CustomHttpResponseOptions",
+              "<",
+              "ResponseError",
               ">], unknown> & ((options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
-              "<Buffer | ",
-              "Stream",
-              " | ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseError",
-                "text": "ResponseError"
-              },
+              "CustomHttpResponseOptions",
+              "<",
+              "ResponseError",
               ">) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); file: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.FileHttpResponseOptions",
-                "text": "FileHttpResponseOptions"
-              },
+              "FileHttpResponseOptions",
               "<string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined>], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined>(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.FileHttpResponseOptions",
-                "text": "FileHttpResponseOptions"
-              },
+              "FileHttpResponseOptions",
               "<T>) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); custom: jest.MockInstance<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>, [options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
+              "CustomHttpResponseOptions",
               "<string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined>], unknown> & (<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
               " | { message: string | Error; attributes?: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.ResponseErrorAttributes",
-                "text": "ResponseErrorAttributes"
-              },
+              "ResponseErrorAttributes",
               " | undefined; } | undefined>(options: ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.CustomHttpResponseOptions",
-                "text": "CustomHttpResponseOptions"
-              },
+              "CustomHttpResponseOptions",
               "<T>) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-common.IKibanaResponse",
-                "text": "IKibanaResponse"
-              },
+              "IKibanaResponse",
               "<any>); }"
             ],
-            "path": "packages/core/http/core-http-resources-server-mocks/src/http_resources_server.mock.ts",
+            "path": "src/core/packages/http/resources-server-mocks/src/http_resources_server.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -897,5 +383,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

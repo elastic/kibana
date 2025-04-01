@@ -2,26 +2,27 @@
   "id": "@kbn/xstate-utils",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.createNotificationChannel",
+        "id": "def-public.createConsoleInspector",
+        "type": "Function",
+        "tags": [],
+        "label": "createConsoleInspector",
+        "description": [],
+        "signature": [
+          "() => (inspectionEvent: InspectionEvent) => void"
+        ],
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/console_inspector.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/xstate-utils",
+        "id": "def-public.createNotificationChannel",
         "type": "Function",
         "tags": [],
         "label": "createNotificationChannel",
@@ -32,20 +33,20 @@
           ", TSentEvent>(shouldReplayLastEvent?: boolean) => ",
           {
             "pluginId": "@kbn/xstate-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnXstateUtilsPluginApi",
-            "section": "def-common.NotificationChannel",
+            "section": "def-public.NotificationChannel",
             "text": "NotificationChannel"
           },
           "<TContext, TEvent, TSentEvent>"
         ],
-        "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.createNotificationChannel.$1",
+            "id": "def-public.createNotificationChannel.$1",
             "type": "boolean",
             "tags": [],
             "label": "shouldReplayLastEvent",
@@ -53,7 +54,7 @@
             "signature": [
               "boolean"
             ],
-            "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,7 +65,7 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.getDevToolsOptions",
+        "id": "def-public.getDevToolsOptions",
         "type": "Function",
         "tags": [],
         "label": "getDevToolsOptions",
@@ -72,7 +73,7 @@
         "signature": [
           "() => boolean | object"
         ],
-        "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -81,7 +82,40 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.isDevMode",
+        "id": "def-public.getPlaceholderFor",
+        "type": "Function",
+        "tags": [],
+        "label": "getPlaceholderFor",
+        "description": [],
+        "signature": [
+          "<ImplementationFactory extends (...factoryArgs: any[]) => any>(_implementationFactory: ImplementationFactory) => ReturnType<ImplementationFactory>"
+        ],
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/xstate-utils",
+            "id": "def-public.getPlaceholderFor.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "_implementationFactory",
+            "description": [],
+            "signature": [
+              "ImplementationFactory"
+            ],
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/get_placeholder_for.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/xstate-utils",
+        "id": "def-public.isDevMode",
         "type": "Function",
         "tags": [],
         "label": "isDevMode",
@@ -89,7 +123,7 @@
         "signature": [
           "() => boolean"
         ],
-        "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/dev_tools.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -98,7 +132,7 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.sendIfDefined",
+        "id": "def-public.sendIfDefined",
         "type": "Function",
         "tags": [],
         "label": "sendIfDefined",
@@ -120,13 +154,13 @@
           "PureAction",
           "<TContext, TEvent, TEvent>"
         ],
-        "path": "packages/kbn-xstate-utils/src/actions.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.sendIfDefined.$1",
+            "id": "def-public.sendIfDefined.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "target",
@@ -136,7 +170,7 @@
               "ActorRef",
               "<TSentEvent, any>"
             ],
-            "path": "packages/kbn-xstate-utils/src/actions.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -149,7 +183,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.NotificationChannel",
+        "id": "def-public.NotificationChannel",
         "type": "Interface",
         "tags": [],
         "label": "NotificationChannel",
@@ -157,20 +191,20 @@
         "signature": [
           {
             "pluginId": "@kbn/xstate-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnXstateUtilsPluginApi",
-            "section": "def-common.NotificationChannel",
+            "section": "def-public.NotificationChannel",
             "text": "NotificationChannel"
           },
           "<TContext, TEvent, TSentEvent>"
         ],
-        "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.NotificationChannel.createService",
+            "id": "def-public.NotificationChannel.createService",
             "type": "Function",
             "tags": [],
             "label": "createService",
@@ -180,7 +214,7 @@
               "Subscribable",
               "<TSentEvent>"
             ],
-            "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -188,7 +222,7 @@
           },
           {
             "parentPluginId": "@kbn/xstate-utils",
-            "id": "def-common.NotificationChannel.notify",
+            "id": "def-public.NotificationChannel.notify",
             "type": "Function",
             "tags": [],
             "label": "notify",
@@ -202,13 +236,13 @@
               "BaseActionObject",
               ">) => void"
             ],
-            "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+            "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/xstate-utils",
-                "id": "def-common.NotificationChannel.notify.$1",
+                "id": "def-public.NotificationChannel.notify.$1",
                 "type": "Function",
                 "tags": [],
                 "label": "eventExpr",
@@ -217,7 +251,7 @@
                   "Expr",
                   "<TContext, TEvent, TSentEvent | undefined>"
                 ],
-                "path": "packages/kbn-xstate-utils/src/notification_channel.ts",
+                "path": "src/platform/packages/shared/kbn-xstate-utils/src/notification_channel.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -233,7 +267,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.MatchedState",
+        "id": "def-public.MatchedState",
         "type": "Type",
         "tags": [],
         "label": "MatchedState",
@@ -241,18 +275,24 @@
         "signature": [
           "TState extends ",
           "State",
-          "<any, infer TEvent, infer TStateSchema, infer TTypestate, infer TResolvedTypesMeta> ? ",
+          "<any, infer TEvent extends ",
+          "EventObject",
+          ", infer TStateSchema extends ",
+          "StateSchema",
+          "<any>, infer TTypestate extends ",
+          "Typestate",
+          "<any>, infer TResolvedTypesMeta> ? ",
           "State",
           "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
         ],
-        "path": "packages/kbn-xstate-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.MatchedStateFromActor",
+        "id": "def-public.MatchedStateFromActor",
         "type": "Type",
         "tags": [],
         "label": "MatchedStateFromActor",
@@ -261,18 +301,24 @@
           "EmittedFrom",
           "<TActorRef> extends ",
           "State",
-          "<any, infer TEvent, infer TStateSchema, infer TTypestate, infer TResolvedTypesMeta> ? ",
+          "<any, infer TEvent extends ",
+          "EventObject",
+          ", infer TStateSchema extends ",
+          "StateSchema",
+          "<any>, infer TTypestate extends ",
+          "Typestate",
+          "<any>, infer TResolvedTypesMeta> ? ",
           "State",
           "<(TTypestate extends any ? { value: TStateValue; context: any; } extends TTypestate ? TTypestate : never : never)[\"context\"], TEvent, TStateSchema, TTypestate, TResolvedTypesMeta> & { value: TStateValue; } : never"
         ],
-        "path": "packages/kbn-xstate-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
-        "id": "def-common.OmitDeprecatedState",
+        "id": "def-public.OmitDeprecatedState",
         "type": "Type",
         "tags": [],
         "label": "OmitDeprecatedState",
@@ -280,12 +326,28 @@
         "signature": [
           "{ [P in Exclude<keyof T, \"state\">]: T[P]; }"
         ],
-        "path": "packages/kbn-xstate-utils/src/types.ts",
+        "path": "src/platform/packages/shared/kbn-xstate-utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

@@ -1,0 +1,24 @@
+{
+  "watcher.execute_watch": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "debug": "__flag__"
+    },
+    "methods": [
+      "PUT",
+      "POST"
+    ],
+    "patterns": [
+      "_watcher/watch/{id}/_execute",
+      "_watcher/watch/_execute"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/watcher-api-execute-watch.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}
