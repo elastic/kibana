@@ -38,7 +38,6 @@ export const SplitCards: FC<PropsWithChildren<Props>> = memo(
     const panels: Panel[] = [];
 
     const splitCardStyle = {
-      border: euiTheme.border.thin,
       paddingTop: euiTheme.size.xs,
     };
 
