@@ -19,7 +19,7 @@ import { ExportContentPackFlyout } from './export_content_pack_flyout';
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
 }) {
   const [query, setQuery] = useState('');
 
