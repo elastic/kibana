@@ -12,11 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { AssetInventoryStatusResponse } from '../../../../common/api/asset_inventory/types';
 import { MissingPrivilegesCallout } from '../../../entity_analytics/components/entity_store/components/missing_privileges_callout';
 import illustration from '../../../common/images/lock_light.png';
-import { InventoryTitle } from '../inventory_title';
 import { CenteredWrapper } from './centered_wrapper';
 import { EmptyStateIllustrationContainer } from '../empty_state_illustration_container';
 import { TEST_SUBJ_ONBOARDING_PERMISSION_DENIED } from '../../constants';
 import { NeedHelp } from './need_help';
+import { AssetInventoryTitle } from '../asset_inventory_title';
 
 interface PermissionDeniedProps {
   privileges?: AssetInventoryStatusResponse['privileges'];
@@ -26,7 +26,7 @@ export const PermissionDenied = ({ privileges }: PermissionDeniedProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <InventoryTitle />
+        <AssetInventoryTitle />
         <CenteredWrapper>
           <EuiEmptyPrompt
             data-test-subj={TEST_SUBJ_ONBOARDING_PERMISSION_DENIED}
@@ -62,9 +62,7 @@ export const PermissionDenied = ({ privileges }: PermissionDeniedProps) => {
                     defaultMessage="You do not have the necessary permissions to enable or view the Asset Inventory. To access this feature, please contact your administrator to request the appropriate permissions."
                   />
                 </p>
-                {privileges ? (
-                  <MissingPrivilegesCallout privileges={privileges} showFullView />
-                ) : null}
+                {privileges ? <MissingPrivilegesCallout privileges={privileges} /> : null}
               </>
             }
             footer={<NeedHelp />}
