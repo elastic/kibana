@@ -89,7 +89,7 @@ export const ProcessorFieldSelector = () => {
               'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.p2',
               {
                 defaultMessage:
-                  'We are working to improve support for such cases. For accurate results, consider avoiding dotted field names or expanding them into nested objects until this feature is fully implemented.',
+                  'For accurate results, avoid dot-separated field names or expand them into nested objects.',
               }
             )}
           </p>
