@@ -161,7 +161,9 @@ const importContentRoute = createServerRoute({
             return acc;
           }, {} as Record<string, string>);
 
-        return patterns.length > 0 ? replaceIndexPatterns(object, replacements) : object.content;
+        return patterns.length > 0
+          ? replaceIndexPatterns(object, replacements).content
+          : object.content;
       });
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
