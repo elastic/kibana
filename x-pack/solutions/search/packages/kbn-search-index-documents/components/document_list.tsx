@@ -67,7 +67,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
     return size === docsPerPage ? 'check' : 'empty';
   };
 
-  const convertMsToSec = (ms: number) => (ms / 1000).toFixed(3);
+  const convertMillisecondToSec = (ms: number) => (ms / 1000).toFixed(3);
 
   const pageCount = meta?.pageSize ? Math.ceil(meta.totalItemCount / meta?.pageSize) : 0;
   return (
@@ -107,7 +107,7 @@ export const DocumentList: React.FC<DocumentListProps> = ({
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiBadge color="success">{convertMsToSec(executionTime)} Sec</EuiBadge>
+          <EuiBadge color="success">{convertMillisecondToSec(executionTime)} Sec</EuiBadge>
         </EuiFlexItem>
       </EuiFlexGroup>
       {isLoading && <EuiProgress size="xs" color="primary" />}
