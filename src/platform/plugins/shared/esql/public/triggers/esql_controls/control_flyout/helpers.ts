@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-types';
 import { timeUnits } from '@kbn/esql-validation-autocomplete';
+import { VariableNamePrefix } from '../types';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
@@ -146,4 +147,42 @@ export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariable
   }
 
   return variableType;
+};
+
+export const getVariableNamePrefix = (type: ESQLVariableType) => {
+  switch (type) {
+    case ESQLVariableType.FIELDS:
+    case ESQLVariableType.FUNCTIONS:
+      return VariableNamePrefix.IDENTIFIER;
+    case ESQLVariableType.VALUES:
+    case ESQLVariableType.TIME_LITERAL:
+    default:
+      return VariableNamePrefix.VALUE;
+  }
+};
+
+export const checkVariableExistence = (
+  esqlVariables: ESQLControlVariable[],
+  variableName: string
+): boolean => {
+  const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
+  const match = variableName.match(/^(\?*)/);
+  const leadingQuestionMarksCount = match ? match[0].length : 0;
+
+  return esqlVariables.some((variable) => {
+    const prefix = getVariableNamePrefix(variable.type);
+    if (leadingQuestionMarksCount === 2) {
+      if (prefix === VariableNamePrefix.IDENTIFIER) {
+        return variable.key === variableNameWithoutQuestionmark;
+      }
+      return false;
+    }
+    if (leadingQuestionMarksCount === 1) {
+      if (prefix === VariableNamePrefix.VALUE) {
+        return variable.key === variableNameWithoutQuestionmark;
+      }
+      return false;
+    }
+    return false;
+  });
 };

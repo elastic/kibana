@@ -14,7 +14,7 @@ import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { monaco } from '@kbn/monaco';
-import { type ESQLControlState, EsqlControlType } from '../types';
+import { type ESQLControlState, EsqlControlType, VariableNamePrefix } from '../types';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
@@ -26,6 +26,8 @@ import {
   validateVariableName,
   areValuesIntervalsValid,
   getVariableTypeFromQuery,
+  getVariableNamePrefix,
+  checkVariableExistence,
 } from './helpers';
 
 interface ESQLControlsFlyoutProps {
@@ -38,23 +40,6 @@ interface ESQLControlsFlyoutProps {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   closeFlyout: () => void;
-}
-
-export enum VariableNamePrefix {
-  IDENTIFIER = '??',
-  VALUE = '?',
-}
-
-function getVariableNamePrefix(type: ESQLVariableType) {
-  switch (type) {
-    case ESQLVariableType.FIELDS:
-    case ESQLVariableType.FUNCTIONS:
-      return VariableNamePrefix.IDENTIFIER;
-    case ESQLVariableType.VALUES:
-    case ESQLVariableType.TIME_LITERAL:
-    default:
-      return VariableNamePrefix.VALUE;
-  }
 }
 
 export function ESQLControlsFlyout({
@@ -134,9 +119,7 @@ export function ESQLControlsFlyout({
       setVariableNamePrefix(getVariableNamePrefix(newType));
 
       const variableNameWithoutQuestionmark = text.replace(/^\?+/, '');
-      const variableExists = esqlVariables.some(
-        (variable) => variable.key === variableNameWithoutQuestionmark
-      );
+      const variableExists = checkVariableExistence(esqlVariables, text);
       setFormIsInvalid(
         !variableNameWithoutQuestionmark ||
           variableExists ||

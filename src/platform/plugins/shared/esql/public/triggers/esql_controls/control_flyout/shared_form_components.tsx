@@ -36,6 +36,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { EsqlControlType } from '../types';
+import { checkVariableExistence } from './helpers';
 
 const controlTypeOptions = [
   {
@@ -171,11 +172,15 @@ export function VariableName({
       }}
     />
   );
-
+  const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
+    defaultMessage: 'You can’t edit a control name after it’s been created.',
+  });
   const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
+  // const variableExists =
+  //   esqlVariables.some((variable) => variable.key === variableNameWithoutQuestionmark) &&
+  //   !isControlInEditMode;
   const variableExists =
-    esqlVariables.some((variable) => variable.key === variableNameWithoutQuestionmark) &&
-    !isControlInEditMode;
+    checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
   const errorMessage = !variableNameWithoutQuestionmark
     ? i18n.translate('esql.flyout.variableName.error', {
         defaultMessage: 'Variable name is required',
@@ -197,7 +202,7 @@ export function VariableName({
       error={errorMessage}
     >
       <EuiToolTip
-        content={tooltipContent}
+        content={isControlInEditMode ? isDisabledTooltipText : tooltipContent}
         css={css`
           width: 100%;
         `}
@@ -207,6 +212,7 @@ export function VariableName({
           placeholder={i18n.translate('esql.flyout.variableName.placeholder', {
             defaultMessage: 'Set a variable name',
           })}
+          disabled={isControlInEditMode}
           value={variableName}
           onChange={onVariableNameChange}
           aria-label={i18n.translate('esql.flyout.variableName.placeholder', {
