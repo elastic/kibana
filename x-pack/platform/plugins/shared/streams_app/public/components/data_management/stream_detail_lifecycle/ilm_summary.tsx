@@ -55,8 +55,6 @@ export function IlmSummary({
 
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition) return;
-
       return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
         params: { path: { name: definition.stream.name } },
         signal,
