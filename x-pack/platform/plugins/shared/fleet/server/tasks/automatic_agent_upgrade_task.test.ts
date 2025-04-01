@@ -137,7 +137,7 @@ describe('AutomaticAgentUpgradeTask', () => {
     });
   });
 
-  describe.only('Task logic', () => {
+  describe('Task logic', () => {
     const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {
       const mockTaskManagerStart = tmStartMock();
       await mockTask.start({ taskManager: mockTaskManagerStart });
