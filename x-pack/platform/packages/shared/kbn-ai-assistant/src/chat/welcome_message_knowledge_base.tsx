@@ -71,24 +71,36 @@ export function WelcomeMessageKnowledgeBase({
   if (isLoading) {
     return (
       <>
-        <EuiText color="subdued" size="s">
-          {i18n.translate('xpack.aiAssistant.welcomeMessage.weAreSettingUpTextLabel', {
-            defaultMessage:
-              'We are setting up your knowledge base. This may take a few minutes. You can continue to use the Assistant while this process is underway.',
-          })}
-        </EuiText>
+        {!!knowledgeBase.status.value?.endpoint &&
+        !knowledgeBase.status.value?.ready &&
+        knowledgeBase.status.value?.model_stats?.deployment_stats?.state === 'failed' ? (
+          <EuiText color="subdued" size="s">
+            {i18n.translate('xpack.aiAssistant.welcomeMessage.SettingUpFailTextLabel', {
+              defaultMessage: `Knowledge Base setup failed. Check 'Inspect' for details.`,
+            })}
+          </EuiText>
+        ) : (
+          <>
+            <EuiText color="subdued" size="s">
+              {i18n.translate('xpack.aiAssistant.welcomeMessage.weAreSettingUpTextLabel', {
+                defaultMessage:
+                  'We are setting up your knowledge base. This may take a few minutes. You can continue to use the Assistant while this process is underway.',
+              })}
+            </EuiText>
 
-        <EuiSpacer size="m" />
+            <EuiSpacer size="m" />
 
-        <EuiButtonEmpty
-          data-test-subj="observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseButton"
-          isLoading
-          onClick={() => {}}
-        >
-          {i18n.translate('xpack.aiAssistant.welcomeMessage.div.settingUpKnowledgeBaseLabel', {
-            defaultMessage: 'Setting up Knowledge base',
-          })}
-        </EuiButtonEmpty>
+            <EuiButtonEmpty
+              data-test-subj="observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseButton"
+              isLoading
+              onClick={() => {}}
+            >
+              {i18n.translate('xpack.aiAssistant.welcomeMessage.div.settingUpKnowledgeBaseLabel', {
+                defaultMessage: 'Setting up Knowledge base',
+              })}
+            </EuiButtonEmpty>
+          </>
+        )}
 
         {knowledgeBase.status.value?.endpoint && knowledgeBase.status.value?.model_stats ? (
           <EuiFlexItem grow={false}>
