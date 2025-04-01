@@ -12,6 +12,7 @@ import { INDEX_DOCUMENTS_META_DEFAULT } from '../types';
 import { DocumentList } from './document_list';
 import '@testing-library/jest-dom';
 export const DEFAULT_VALUES = {
+  executionTime: 234,
   dataTelemetryIdPrefix: `entSearchContent-api`,
   docs: [],
   docsPerPage: 25,
@@ -91,5 +92,6 @@ describe('DocumentList', () => {
       </I18nProvider>
     );
     expect(screen.getByText('Results are limited to 10,000 documents')).toBeInTheDocument();
+    expect(screen.getByText('234 ms')).toBeInTheDocument();
   });
 });
