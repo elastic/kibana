@@ -59,20 +59,3 @@ The ability to create new scripted fields has been removed from the **Data Views
 
 View [#202250](https://github.com/elastic/kibana/pull/202250).
 ::::
-
-::::{dropdown} Removed ephemeral tasks from task manager, action, and alerting plugins.
-:name: deprecation-201313
-
-**Details**
-
-Deprecates the following configuration settings:
-
-- `xpack.task_manager.ephemeral_tasks.enabled`
-- `xpack.task_manager.ephemeral_tasks.request_capacity`
-- `xpack.alerting.maxEphemeralActionsPerAlert`
-
-No action is required on the user's end. These settings will no longer have any effect as ephemeral tasks are now removed.
-
-View [#201313]({{kib-pull}}201313).
-::::
-

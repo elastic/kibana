@@ -126,11 +126,30 @@ The following Cases APIs were removed:
 View [#208208]({{kib-pull}}208208), [#208086]({{kib-pull}}208086), and [#207926]({{kib-pull}}207926).
 ::::
 
+$$$kibana-197421$$$
+
+$$$kibana-201313$$$
+::::{dropdown} Removed ephemeral tasks from task manager, action, and alerting plugins.
+:name: breaking-201313
+
+**Details**
+
+Ephemeral tasks are now removed. The following settings will no longer have any effect and are now deprecated:
+
+- `xpack.task_manager.ephemeral_tasks.enabled`
+- `xpack.task_manager.ephemeral_tasks.request_capacity`
+- `xpack.alerting.maxEphemeralActionsPerAlert`
+
+No action is required on the user's end.
+
+View [#201313]({{kib-pull}}201313) and [#197421]({{kib-pull}}197421).
+::::
+
 **Discover and dashboards**
 
-$$$kibana-206998$$$
+$$$kibana-203927$$$
 ::::{dropdown} Search sessions disabled by default
-:name: breaking-206998
+:name: breaking-203927
 
 **Details**<br> Starting from version 9.0.0, search sessions are disabled by default. To view, manage, and restore search sessions, the feature needs to be explicitly re-enabled.
 
@@ -144,6 +163,7 @@ To re-enable search sessions, add the following in your config.yml:
 data.search.sessions.enabled: true
 ```
 
+View [#203927](https://github.com/elastic/kibana/pull/203927).
 ::::
 
 $$$kibana-202863$$$
@@ -349,6 +369,16 @@ $$$kibana-199033$$$
 
 The functionality that allowed to download a CSV export from a dashboard's saved search panel without creating a report has been removed. To export CSV data from a dashboard panel, you may use the action menu of a saved search panel in a dashboard to generate a CSV report, and download the report from a toast popup when the report has finished generating. View [#199033]({{kib-pull}}199033).
 ::::
+
+**Kibana management**
+
+$$$kibana-214051$$$
+:::{dropdown} Upgrade Assistant's reindexing and batch reindexing APIs are now internal
+
+Upgrade Assistant public APIs for reindexing and batch reindexing have been made internal. You should instead use Elasticsearch’s native reindexing APIs for programmatic reindexing.
+
+View [#214051]({{kibana-pull}}214051)
+:::
 
 **Kibana security**
 
