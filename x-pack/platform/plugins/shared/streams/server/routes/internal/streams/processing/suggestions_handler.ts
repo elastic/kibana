@@ -49,7 +49,7 @@ export const handleProcessingSuggestion = async (
   };
 };
 
-interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {
+export interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {
   pattern: string;
 }
 

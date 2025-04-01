@@ -148,7 +148,8 @@ function useAiEnabled() {
   };
 }
 
-type SuggestionsResponse = APIReturnType<'POST /internal/streams/{name}/processing/_suggestions'>;
+export type SuggestionsResponse =
+  APIReturnType<'POST /internal/streams/{name}/processing/_suggestions'>;
 
 function InnerGrokAiSuggestions({
   previewDocuments,
