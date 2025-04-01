@@ -3828,7 +3828,6 @@ const notInDefinition: FunctionDefinition = {
       'The `NOT IN` operator allows testing whether a field or expression does *not* equal any element in a list of literals, fields or expressions.',
   }),
   ignoreAsSuggestion: true,
-
   preview: false,
   alias: undefined,
   signatures: [
@@ -4070,6 +4069,7 @@ const notLikeDefinition: FunctionDefinition = {
     defaultMessage:
       'Use `LIKE` to filter data based on string patterns using wildcards. `LIKE`\nusually acts on a field placed on the left-hand side of the operator, but it can\nalso act on a constant (literal) expression. The right-hand side of the operator\nrepresents the pattern.\n\nThe following wildcard characters are supported:\n\n* `*` matches zero or more characters.\n* `?` matches one character.',
   }),
+  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
@@ -4119,6 +4119,7 @@ const notRlikeDefinition: FunctionDefinition = {
     defaultMessage:
       'Use `RLIKE` to filter data based on string patterns using using\nregular expressions. `RLIKE` usually acts on a field placed on\nthe left-hand side of the operator, but it can also act on a constant (literal)\nexpression. The right-hand side of the operator represents the pattern.',
   }),
+  ignoreAsSuggestion: true,
   preview: false,
   alias: undefined,
   signatures: [
