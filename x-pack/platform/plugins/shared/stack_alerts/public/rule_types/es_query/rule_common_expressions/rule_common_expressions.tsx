@@ -154,6 +154,7 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
       <EuiSpacer size="s" />
       <EuiFormRow
         fullWidth
+        data-test-subj="sizeValueExpression"
         label={[
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectSizePrompt"
@@ -174,7 +175,6 @@ export const RuleCommonExpressions: React.FC<RuleCommonExpressionsProps> = ({
           description={i18n.translate('xpack.stackAlerts.esQuery.ui.sizeExpression', {
             defaultMessage: 'Size',
           })}
-          data-test-subj="sizeValueExpression"
           value={size}
           errors={errors.size}
           display="fullWidth"

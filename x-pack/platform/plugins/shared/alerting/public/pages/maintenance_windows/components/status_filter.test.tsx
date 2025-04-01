@@ -8,7 +8,8 @@
 import React from 'react';
 import { fireEvent, screen } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
+import { createAppMockRenderer } from '../../../lib/test_utils';
 import { StatusFilter } from './status_filter';
 import { MaintenanceWindowStatus } from '../../../../common';
 

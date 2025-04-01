@@ -8,11 +8,12 @@ import type {
   AggregationsKeyedPercentiles,
   AggregationsPercentilesAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
-import { CoreSetup } from '@kbn/core/server';
-import { ActionsPluginsStart } from '../plugin';
-import { ClusterActionsMetric, EMPTY_CLUSTER_ACTIONS_METRICS } from './types';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ActionsPluginsStart } from '../plugin';
+import type { ClusterActionsMetric } from './types';
+import { EMPTY_CLUSTER_ACTIONS_METRICS } from './types';
 
 export function registerClusterCollector({
   monitoringCollection,

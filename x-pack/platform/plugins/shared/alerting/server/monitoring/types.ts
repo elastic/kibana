@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MetricResult } from '@kbn/monitoring-collection-plugin/server';
+import type { MetricResult } from '@kbn/monitoring-collection-plugin/server';
 
 export const EMPTY_CLUSTER_RULES_METRICS: ClusterRulesMetric = {
   overdue: {

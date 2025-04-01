@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateIndexTemplateItem,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Logger, ElasticsearchClient } from '@kbn/core/server';
+import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 

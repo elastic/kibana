@@ -23,18 +23,21 @@ export function createSamplesFetchActor({
   streamsRepositoryClient,
 }: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
   return fromPromise<FlattenRecord[], SamplesFetchInput>(async ({ input, signal }) => {
-    const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
-      signal,
-      params: {
-        path: { name: input.streamName },
-        body: {
-          if: input.condition,
-          start: input.absoluteTimeRange.start,
-          end: input.absoluteTimeRange.end,
-          size: 100,
+    const samplesBody = await streamsRepositoryClient.fetch(
+      'POST /internal/streams/{name}/_sample',
+      {
+        signal,
+        params: {
+          path: { name: input.streamName },
+          body: {
+            if: input.condition,
+            start: input.absoluteTimeRange.start,
+            end: input.absoluteTimeRange.end,
+            size: 100,
+          },
         },
-      },
-    });
+      }
+    );
 
     return samplesBody.documents.map(flattenObjectNestedLast) as FlattenRecord[];
   });

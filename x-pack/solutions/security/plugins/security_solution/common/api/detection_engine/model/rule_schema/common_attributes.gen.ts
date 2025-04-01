@@ -35,10 +35,27 @@ export type RuleDescription = z.infer<typeof RuleDescription>;
 export const RuleDescription = z.string().min(1);
 
 /**
- * The rule's version number.
- */
+  * The rule's version number.
+
+- For prebuilt rules it represents the version of the rule's content in the source [detection-rules](https://github.com/elastic/detection-rules) repository (and the corresponding `security_detection_engine` Fleet package that is used for distributing prebuilt rules). 
+- For custom rules it is set to `1` when the rule is created. 
+> info
+> It is not incremented on each update. Compare this to the `revision` field.
+
+  */
 export type RuleVersion = z.infer<typeof RuleVersion>;
 export const RuleVersion = z.number().int().min(1);
+
+/**
+  * The rule's revision number.
+
+It represents the version of rule's object in Kibana. It is set to `0` when the rule is installed or created and then gets incremented on each update.
+> info
+> Not all updates to any rule fields will increment the revision. Only those fields that are considered static `rule parameters` can trigger revision increments. For example, an update to a rule's query or index fields will increment the rule's revision by `1`. However, changes to dynamic or technical fields like enabled or execution_summary will not cause revision increments.
+
+  */
+export type RuleRevision = z.infer<typeof RuleRevision>;
+export const RuleRevision = z.number().int().min(0);
 
 export type QueryLanguage = z.infer<typeof QueryLanguage>;
 export const QueryLanguage = z.enum(['kuery', 'lucene', 'eql', 'esql']);

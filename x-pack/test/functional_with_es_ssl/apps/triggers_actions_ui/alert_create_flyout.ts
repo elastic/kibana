@@ -64,7 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector(
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
       );
-      await testSubjects.click('create-connector-flyout-save-btn');
     });
 
     const toastTitle = await toasts.getTitleAndDismiss();
@@ -119,15 +118,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await rules.common.cancelRuleCreation();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/196153
-  // Failing: See https://github.com/elastic/kibana/issues/196153
-  // Failing: See https://github.com/elastic/kibana/issues/202328
-  describe.skip('create alert', function () {
+  describe('create alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     const webhookConnectorName = 'webhook-test';
     before(async () => {
       await esArchiver.load(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
 
       await createWebhookConnector(webhookConnectorName);
@@ -170,7 +166,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     after(async () => {
       await apmSynthtraceEsClient?.clean();
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/constant_keyword'
       );
 
       await deleteConnectorByName(webhookConnectorName);
@@ -605,32 +601,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should add filter', async () => {
-      const ruleName = generateUniqueKey();
-      await defineAlwaysFiringAlert(ruleName);
-
-      await testSubjects.click('rulePageFooterSaveButton');
-      await testSubjects.existOrFail('confirmCreateRuleModal');
-      await testSubjects.click('confirmCreateRuleModal > confirmModalConfirmButton');
-      await testSubjects.missingOrFail('confirmCreateRuleModal');
-
-      const toastTitle = await toasts.getTitleAndDismiss();
-      expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
-
       await testSubjects.click('triggersActionsAlerts');
+
+      await pageObjects.header.waitUntilLoadingHasFinished();
 
       const filter = `{
         "bool": {
-          "filter": [{ "term": { "kibana.alert.rule.name": "${ruleName}" } }]
+          "filter": [{ "term": { "kibana.alert.status": "active" } }]
         }
       }`;
 
       await filterBar.addDslFilter(filter);
-
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await filterBar.hasFilter('query', filter, true);
-
-      // clean up created alert
-      const alertsToDelete = await getAlertsByName(ruleName);
-      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
     });
   });
 };

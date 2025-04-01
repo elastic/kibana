@@ -98,58 +98,59 @@ export const GroupGridItem = ({
         </EuiFlexGroup>
       }
       extraAction={
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          <EuiFlexItem>
-            <EuiButtonIcon
-              data-test-subj="syntheticsGroupGridItemButton"
-              isDisabled={groupMonitors.length === 0}
-              className="fullScreenButton"
-              iconType="fullScreen"
-              aria-label={i18n.translate(
-                'xpack.synthetics.groupGridItem.euiButtonIcon.fullScreenLabel',
-                { defaultMessage: 'Full screen' }
-              )}
-              onClick={() => {
-                if (fullScreenGroup) {
-                  setFullScreenGroup('');
-                  document.exitFullscreen();
-                } else {
-                  document.documentElement.requestFullscreen();
-                  setFullScreenGroup(groupLabel);
-                }
-              }}
-            />
-          </EuiFlexItem>
+        isLoading ? null : (
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem>
+              <EuiButtonIcon
+                data-test-subj="syntheticsGroupGridItemButton"
+                isDisabled={groupMonitors.length === 0}
+                className="fullScreenButton"
+                iconType="fullScreen"
+                aria-label={i18n.translate(
+                  'xpack.synthetics.groupGridItem.euiButtonIcon.fullScreenLabel',
+                  { defaultMessage: 'Full screen' }
+                )}
+                onClick={() => {
+                  if (fullScreenGroup) {
+                    setFullScreenGroup('');
+                    document.exitFullscreen();
+                  } else {
+                    document.documentElement.requestFullscreen();
+                    setFullScreenGroup(groupLabel);
+                  }
+                }}
+              />
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiBadge color="danger">
-              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.downCount', {
-                defaultMessage: '{downCount} Down',
-                values: { downCount: downMonitorsCount },
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiBadge color="danger">
+                {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.downCount', {
+                  defaultMessage: '{downCount} Down',
+                  values: { downCount: downMonitorsCount },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiBadge color="success">
-              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.upCount', {
-                defaultMessage: '{upCount} Up',
-                values: { upCount: groupMonitors.length - downMonitorsCount },
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiBadge color="success">
+                {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.upCount', {
+                  defaultMessage: '{upCount} Up',
+                  values: { upCount: groupMonitors.length - downMonitorsCount },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
 
-          <EuiFlexItem>
-            <EuiBadge color="subdued">
-              {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.count', {
-                defaultMessage: '{count, number} {count, plural, one {monitor} other {monitors}}',
-                values: { count: groupMonitors.length },
-              })}
-            </EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiBadge color="subdued">
+                {i18n.translate('xpack.synthetics.groupGridItem.monitorsBadgeLabel.count', {
+                  defaultMessage: '{count, number} {count, plural, one {monitor} other {monitors}}',
+                  values: { count: groupMonitors.length },
+                })}
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )
       }
-      isLoading={isLoading}
     >
       <EuiSpacer size="m" />
 
@@ -169,7 +170,7 @@ export const GroupGridItem = ({
           ))}
         </EuiFlexGrid>
       ) : (
-        <OverviewLoader rows={2} />
+        <OverviewLoader rows={rowSize} />
       )}
       <EuiSpacer size="m" />
       <EuiTablePagination

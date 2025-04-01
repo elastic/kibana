@@ -31,11 +31,15 @@ const settingFields = {
   options: ['option1', 'option2', 'option3'],
 };
 
-export default getStory('Select Input', 'An input with multiple values.');
+const Story = getStory('Select Input', 'An input with multiple values.');
 export const SelectInput = getInputStory('select' as const, { argTypes, settingFields });
 
 SelectInput.args = {
   isSavingEnabled: true,
   value: 'option1',
   userValue: 'option2',
+};
+
+export default {
+  ...Story,
 };

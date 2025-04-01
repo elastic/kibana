@@ -51,10 +51,7 @@ import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monit
 
 import type { ConfigType } from '../../../../../config';
 import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
-import type {
-  CreateRuleOptions,
-  CreateSecurityRuleTypeWrapperProps,
-} from '../../../rule_types/types';
+import type { CreateSecurityRuleTypeWrapperProps } from '../../../rule_types/types';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -79,7 +76,6 @@ export const previewRulesRoute = (
   config: ConfigType,
   ml: SetupPlugins['ml'],
   security: SetupPlugins['security'],
-  ruleOptions: CreateRuleOptions,
   securityRuleTypeOptions: CreateSecurityRuleTypeWrapperProps,
   previewRuleDataClient: IRuleDataClient,
   getStartServices: StartServicesAccessor<StartPlugins>,
@@ -357,7 +353,6 @@ export const previewRulesRoute = (
             case 'query':
               const queryAlertType = previewRuleTypeWrapper(
                 createQueryAlertType({
-                  ...ruleOptions,
                   id: QUERY_RULE_TYPE_ID,
                   name: 'Custom Query Rule',
                 })
@@ -381,7 +376,6 @@ export const previewRulesRoute = (
             case 'saved_query':
               const savedQueryAlertType = previewRuleTypeWrapper(
                 createQueryAlertType({
-                  ...ruleOptions,
                   id: SAVED_QUERY_RULE_TYPE_ID,
                   name: 'Saved Query Rule',
                 })
@@ -403,9 +397,7 @@ export const previewRulesRoute = (
               );
               break;
             case 'threshold':
-              const thresholdAlertType = previewRuleTypeWrapper(
-                createThresholdAlertType(ruleOptions)
-              );
+              const thresholdAlertType = previewRuleTypeWrapper(createThresholdAlertType());
               await runExecutors(
                 thresholdAlertType.executor,
                 thresholdAlertType.id,
@@ -423,9 +415,7 @@ export const previewRulesRoute = (
               );
               break;
             case 'threat_match':
-              const threatMatchAlertType = previewRuleTypeWrapper(
-                createIndicatorMatchAlertType(ruleOptions)
-              );
+              const threatMatchAlertType = previewRuleTypeWrapper(createIndicatorMatchAlertType());
               await runExecutors(
                 threatMatchAlertType.executor,
                 threatMatchAlertType.id,
@@ -443,7 +433,7 @@ export const previewRulesRoute = (
               );
               break;
             case 'eql':
-              const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType(ruleOptions));
+              const eqlAlertType = previewRuleTypeWrapper(createEqlAlertType());
               await runExecutors(
                 eqlAlertType.executor,
                 eqlAlertType.id,
@@ -464,7 +454,7 @@ export const previewRulesRoute = (
               if (config.experimentalFeatures.esqlRulesDisabled) {
                 throw Error('ES|QL rule type is not supported');
               }
-              const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType(ruleOptions));
+              const esqlAlertType = previewRuleTypeWrapper(createEsqlAlertType());
               await runExecutors(
                 esqlAlertType.executor,
                 esqlAlertType.id,
@@ -482,7 +472,7 @@ export const previewRulesRoute = (
               );
               break;
             case 'machine_learning':
-              const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ruleOptions));
+              const mlAlertType = previewRuleTypeWrapper(createMlAlertType(ml));
               await runExecutors(
                 mlAlertType.executor,
                 mlAlertType.id,
@@ -500,9 +490,7 @@ export const previewRulesRoute = (
               );
               break;
             case 'new_terms':
-              const newTermsAlertType = previewRuleTypeWrapper(
-                createNewTermsAlertType(ruleOptions)
-              );
+              const newTermsAlertType = previewRuleTypeWrapper(createNewTermsAlertType());
               await runExecutors(
                 newTermsAlertType.executor,
                 newTermsAlertType.id,

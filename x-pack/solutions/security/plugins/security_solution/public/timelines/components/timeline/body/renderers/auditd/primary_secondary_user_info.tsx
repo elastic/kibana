@@ -21,79 +21,87 @@ interface Props {
   eventId: string;
   primary: string | null | undefined;
   secondary: string | null | undefined;
+  scopeId: string;
 }
 
-export const PrimarySecondary = React.memo<Props>(({ contextId, eventId, primary, secondary }) => {
-  if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
-    return null;
-  } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
-    return (
-      <DraggableBadge
-        contextId={contextId}
-        eventId={eventId}
-        field="auditd.summary.actor.primary"
-        value={primary}
-        iconType="user"
-        isAggregatable={true}
-        fieldType="keyword"
-      />
-    );
-  } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
-    return (
-      <DraggableBadge
-        contextId={contextId}
-        eventId={eventId}
-        field="auditd.summary.actor.secondary"
-        value={secondary}
-        iconType="user"
-        isAggregatable={true}
-        fieldType="keyword"
-      />
-    );
-  } else if (primary === secondary) {
-    return (
-      <DraggableBadge
-        contextId={contextId}
-        eventId={eventId}
-        field="auditd.summary.actor.secondary"
-        value={secondary}
-        iconType="user"
-        isAggregatable={true}
-        fieldType="keyword"
-      />
-    );
-  } else {
-    return (
-      <EuiFlexGroup gutterSize="none">
-        <TokensFlexItem grow={false} component="span">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="auditd.summary.actor.primary"
-            value={primary}
-            iconType="user"
-            isAggregatable={true}
-            fieldType="keyword"
-          />
-        </TokensFlexItem>
-        <TokensFlexItem grow={false} component="span">
-          {i18n.AS}
-        </TokensFlexItem>
-        <TokensFlexItem grow={false} component="span">
-          <DraggableBadge
-            contextId={contextId}
-            eventId={eventId}
-            field="auditd.summary.actor.secondary"
-            value={secondary}
-            iconType="user"
-            isAggregatable={true}
-            fieldType="keyword"
-          />
-        </TokensFlexItem>
-      </EuiFlexGroup>
-    );
+export const PrimarySecondary = React.memo<Props>(
+  ({ contextId, eventId, primary, secondary, scopeId }) => {
+    if (nilOrUnSet(primary) && nilOrUnSet(secondary)) {
+      return null;
+    } else if (!nilOrUnSet(primary) && nilOrUnSet(secondary)) {
+      return (
+        <DraggableBadge
+          scopeId={scopeId}
+          contextId={contextId}
+          eventId={eventId}
+          field="auditd.summary.actor.primary"
+          value={primary}
+          iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
+        />
+      );
+    } else if (nilOrUnSet(primary) && !nilOrUnSet(secondary)) {
+      return (
+        <DraggableBadge
+          scopeId={scopeId}
+          contextId={contextId}
+          eventId={eventId}
+          field="auditd.summary.actor.secondary"
+          value={secondary}
+          iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
+        />
+      );
+    } else if (primary === secondary) {
+      return (
+        <DraggableBadge
+          scopeId={scopeId}
+          contextId={contextId}
+          eventId={eventId}
+          field="auditd.summary.actor.secondary"
+          value={secondary}
+          iconType="user"
+          isAggregatable={true}
+          fieldType="keyword"
+        />
+      );
+    } else {
+      return (
+        <EuiFlexGroup gutterSize="none">
+          <TokensFlexItem grow={false} component="span">
+            <DraggableBadge
+              scopeId={scopeId}
+              contextId={contextId}
+              eventId={eventId}
+              field="auditd.summary.actor.primary"
+              value={primary}
+              iconType="user"
+              isAggregatable={true}
+              fieldType="keyword"
+            />
+          </TokensFlexItem>
+          <TokensFlexItem grow={false} component="span">
+            {i18n.AS}
+          </TokensFlexItem>
+          <TokensFlexItem grow={false} component="span">
+            <DraggableBadge
+              scopeId={scopeId}
+              contextId={contextId}
+              eventId={eventId}
+              field="auditd.summary.actor.secondary"
+              value={secondary}
+              iconType="user"
+              isAggregatable={true}
+              fieldType="keyword"
+            />
+          </TokensFlexItem>
+        </EuiFlexGroup>
+      );
+    }
   }
-});
+);
 
 PrimarySecondary.displayName = 'PrimarySecondary';
 
@@ -103,10 +111,11 @@ interface PrimarySecondaryUserInfoProps {
   userName: string | null | undefined;
   primary: string | null | undefined;
   secondary: string | null | undefined;
+  scopeId: string;
 }
 
 export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps>(
-  ({ contextId, eventId, userName, primary, secondary }) => {
+  ({ contextId, eventId, userName, primary, secondary, scopeId }) => {
     if (nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return null;
     } else if (
@@ -118,6 +127,7 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
     ) {
       return (
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="user.name"
@@ -130,6 +140,7 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
     } else if (!nilOrUnSet(userName) && nilOrUnSet(primary) && nilOrUnSet(secondary)) {
       return (
         <DraggableBadge
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           field="user.name"
@@ -142,6 +153,7 @@ export const PrimarySecondaryUserInfo = React.memo<PrimarySecondaryUserInfoProps
     } else {
       return (
         <PrimarySecondary
+          scopeId={scopeId}
           contextId={contextId}
           eventId={eventId}
           primary={primary}

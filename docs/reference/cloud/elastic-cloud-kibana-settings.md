@@ -5,288 +5,7 @@ mapped_pages:
 
 # Elastic Cloud Kibana settings [ec-manage-kibana-settings]
 
-Elasticsearch Service supports most of the standard Kibana and X-Pack settings. Through a YAML editor in the console, you can append Kibana properties to the `kibana.yml` file. Your changes to the configuration file are read on startup.
-
-::::{important}
-Be aware that some settings that could break your cluster if set incorrectly and that the syntax might change between major versions. Before upgrading, be sure to review the full list of the [latest Kibana settings and syntax](/reference/configuration-reference/general-settings.md).
-::::
-
-
-To change Kibana settings:
-
-1. Log in to the [Elasticsearch Service Console](https://cloud.elastic.co?page=docs&placement=docs-body).
-2. Find your deployment on the home page in the Elasticsearch Service card and select **Manage** to access it directly. Or, select **Hosted deployments** to go to the deployments page to view all of your deployments.
-
-    On the deployments page you can narrow your deployments by name, ID, or choose from several other filters. To customize your view, use a combination of filters, or change the format from a grid to a list.
-
-3. From your deployment menu, go to the **Edit** page.
-4. In the **Kibana** section, select **Edit user settings**. (For deployments with existing user settings, you may have to expand the **Edit kibana.yml** caret instead.)
-5. Update the user settings.
-6. Select **Save changes**.
-
-Saving your changes initiates a configuration plan change that restarts Kibana automatically for you.
-
-::::{note}
-If a setting is not supported by Elasticsearch Service, you will get an error message when you try to save.
-::::
-
-
 ## Supported Kibana settings [ec-kibana-config]
-
-### Version 8.12.0+ [ec_version_8_12_0]
-
-`xpack.reporting.csv.maxConcurrentShardRequests`
-:   Sets the maximum number of concurrent shard requests that each sub-search request executes per node during Kibana CSV export. Defaults to `5`.
-
-
-### Version 8.11.0+ [ec_version_8_11_0]
-
-`xpack.action.queued.max`
-:   Specifies the maximum number of actions that can be queued. Defaults to `1000000`.
-
-
-### Version 8.9.0+ [ec_version_8_9_0]
-
-`xpack.fleet.createArtifactsBulkBatchSize`
-:   Allow to configure batch size for creating and updating Fleet user artifacts.  Examples include creation of Trusted Applications and Endpoint Exceptions in Security.  To learn more, check [Fleet settings in Kibana](/reference/configuration-reference/fleet-settings.md).
-
-`xpack.securitySolution.maxUploadResponseActionFileBytes`
-:   Allow to configure the max file upload size for use with the Upload File Repsonse action available with the Defend Integration.  To learn more, check [Endpoint Response actions](docs-content://solutions/security/endpoint-response-actions.md).
-
-
-### Version 8.7.0+ [ec_version_8_7_0]
-
-`xpack.security.session.concurrentSessions.maxSessions`
-:   Set the maximum number of sessions each user is allowed to have active in {{kib}}. By default, no limit is applied. If set, the value of this option should be an integer between 1 and 1000. When the limit is exceeded, the oldest session is automatically invalidated. To learn more, check [Session management](docs-content://deploy-manage/security/kibana-session-management.md#session-max-sessions).
-
-`server.securityResponseHeaders.crossOriginOpenerPolicy`
-:   Controls whether the [`Cross-Origin-Opener-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cross-Origin-Opener-Policy) header is used in all responses to the client from the Kibana server. To learn more, see [Configure Kibana](/reference/configuration-reference/general-settings.md#server-securityResponseHeaders-crossOriginOpenerPolicy).
-
-
-### Version 8.6.0+ [ec_version_8_6_0]
-
-`server.compression.brotli.enabled`
-:   Enable brotli compression format for browser-server communications. Default: false. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-`xpack.fleet.enableExperimental`
-:   Allow to configure experimental feature for Fleet. To learn more, check [Fleet settings in Kibana](/reference/configuration-reference/fleet-settings.md).
-
-
-### Version 8.4.0+ [ec_version_8_4_0]
-
-`migrations.discardUnknownObjects`
-:   Discard saved objects with unknown types during a migration. Must be set to the target version, e.g.: `8.4.0`. Default: undefined. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-`migrations.discardCorruptObjects`
-:   Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, e.g.: `8.4.0`. Default: undefined. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-
-### Version 8.3.0+ [ec_version_8_3_0]
-
-`elasticsearch.compression`
-:   Enable compression for communications with Elasticsearch. Default: false. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-
-### Version 8.2.0+ [ec_version_8_2_0]
-
-`elasticsearch.maxSockets`
-:   The maximum number of sockets that can be used for communications with Elasticsearch. Default: Infinity. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-
-### Version 8.1.0+ [ec_version_8_1_0]
-
-`execution_context.enabled`
-:   Propagate request-specific metadata to Elasticsearch server by way of the `x-opaque-id` header. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-
-### Supported versions before 8.x [ec_supported_versions_before_8_x]
-
-`vis_type_table.legacyVisEnabled`
-:   For 7.x versions version 7.11 and higher, a new version of the datatable visualization is used. Set to `true` to enable the legacy version. In version 8.0, the old implementation is removed and this setting is no longer supported.
-
-`vega.enableExternalUrls`
-:   Set to `true` to allow Vega vizualizations to use data from sources other than the linked Elasticsearch cluster. In stack version 8.0 and above, the `vega.enableExternalUrls` is not supported. Use `vis_type_vega.enableExternalUrls` instead.
-
-
-### All supported versions [ec_all_supported_versions_2]
-
-`migrations.maxBatchSizeBytes`
-:   Defines the maximum payload size for indexing batches of saved objects during upgrade migrations. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-`server.maxPayload`
-:   The maximum payload size in bytes for incoming server requests. Default: 1048576. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md#server-maxPayload).
-
-`server.securityResponseHeaders.strictTransportSecurity`
-:   Controls whether the [`Strict-Transport-Security`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security) header is used in all responses to the client from the Kibana server. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md#server-securityResponseHeaders-strictTransportSecurity).
-
-`server.securityResponseHeaders.xContentTypeOptions`
-:   Controls whether the [`X-Content-Type-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options) header is used in all responses to the client from the Kibana server. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md#server-securityResponseHeaders-xContentTypeOptions).
-
-`server.securityResponseHeaders.referrerPolicy`
-:   Controls whether the [`Referrer-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy) header is used in all responses to the client from the Kibana server. To learn more, see [Configure Kibana](/reference/configuration-reference/general-settings.md#server-securityResponseHeaders-referrerPolicy).
-
-`server.securityResponseHeaders.permissionsPolicy`
-:   Controls whether the `Permissions-Policy` header is used in all responses to the client from the Kibana server. To learn more, see [Configure Kibana](/reference/configuration-reference/general-settings.md#server-securityResponseHeaders-permissionsPolicy).
-
-`server.securityResponseHeaders.permissionsPolicyReportOnly`
-:   Controls whether the `Permissions-Policy-Report-Only` header is used in all responses to the client from the Kibana server. To learn more, see [Configure Kibana](/reference/configuration-reference/general-settings.md#server-securityResponseHeaders-permissionsPolicy).
-
-`server.securityResponseHeaders.disableEmbedding`
-:   Controls whether the [`Content-Security-Policy`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy) and [`X-Frame-Options`](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options) headers are configured to disable embedding Kibana in other webpages using iframes. To learn more, see [Configure Kibana](/reference/configuration-reference/general-settings.md#server-securityResponseHeaders-disableEmbedding).
-
-`data.autocomplete.valueSuggestions.timeout`
-:   Specifies the time in milliseconds to wait for autocomplete suggestions from Elasticsearch. The default is 1000. Allowed values are between 1 and 1200000. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-`data.autocomplete.valueSuggestions.terminateAfter`
-:   Specifies the max number of documents loaded by each shard to generate autocomplete suggestions. The default is 100000. Allowed values are between 1 and 10000000. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-`map.tilemap.options.attribution`
-:   Adds the map attribution string.
-
-`map.tilemap.options.maxZoom`
-:   Sets the maximum zoom level.
-
-`map.tilemap.options.minZoom`
-:   Sets the minimum zoom level.
-
-`map.tilemap.options.subdomains`
-:   Provides an array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{{s}}`.
-
-`map.tilemap.url`
-:   Lists the URL to the tileservice that Kibana uses to display map tiles in tilemap visualizations.
-
-`i18n.locale`
-:   Specifies the locale for all strings, dates, and number formats that can be localized. Defaults to `en` (English).
-
-`migrations.batchSize`
-:   Defines the number of documents migrated at a time during saved object upgrade migrations. To learn more, check [Configure Kibana](/reference/configuration-reference/general-settings.md).
-
-`server.defaultRoute`
-:   Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
-
-`server.customResponseHeaders`
-:   Specifies HTTP header names and values that the Kibana backend will return to the client.
-
-#### Map settings [ec_map_settings]
-
-`map.regionmap:`
-:   Specifies additional vector layers for use in [Region Map](docs-content://explore-analyze/visualize/maps/maps-getting-started.md) visualizations. Each layer object points to an external vector file that contains a geojson FeatureCollection. The file must use the [WGS84 coordinate reference system](https://en.wikipedia.org/wiki/World_Geodetic_System) and only include polygons. If the file is hosted on a separate domain from Kibana, the server needs to be CORS-enabled so Kibana can download the file. The following example shows a valid regionmap configuration.
-
-    ```yaml
-    map.regionmap:
-      includeElasticMapsService: false
-      layers:
-        - name: "Departments of France"
-          url: "http://my.cors.enabled.server.org/france_departements.geojson"
-          attribution:   "INRAP"
-          fields:
-            - name: "department"
-              description: "Full department name"
-            - name: "INSEE"
-              description: "INSEE numeric identifier"
-    ```
-
-
-`map.regionmap.includeElasticMapsService:`
-:   Turns on or off whether layers from the Elastic Maps Service should be included in the vector layer option list. Supported on Elastic Cloud Enterprise. By turning this off, only the layers that are configured here will be included. The default is `true`.
-
-`map.regionmap.layers[].attribution:`
-:   Optional. References the originating source of the geojson file.
-
-`map.regionmap.layers[].fields[]:`
-:   Mandatory. Each layer can contain multiple fields to indicate what properties from the geojson features you wish to expose. The previous example shows how to define multiple properties.
-
-`map.regionmap.layers[].fields[].description:`
-:   Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
-
-`map.regionmap.layers[].fields[].name:`
-:   Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. For example, if the field in the geojson is called `Location` and has city names, there must be a field in Elasticsearch that holds the same values that Kibana can then use to lookup for the geoshape data.
-
-`map.regionmap.layers[].name:`
-:   Mandatory. A description of the map being provided.
-
-`map.regionmap.layers[].url:`
-:   Mandatory. The location of the geojson file as provided by a webserver.
-
-`tilemap.options.attribution`
-:   Adds the map attribution string.
-
-`tilemap.options.maxZoom`
-:   Sets the maximum zoom level.
-
-`tilemap.options.minZoom`
-:   Sets the minimum zoom level.
-
-`tilemap.options.subdomains`
-:   Provides an array of subdomains used by the tile service. Specify the position of the subdomain the URL with the token `{{s}}`.
-
-`tilemap.url`
-:   Lists the URL to the tileservice that Kibana uses to display map tiles in tilemap visualizations.
-
-
-
-### SAML settings [ec_saml_settings]
-
-If you are using SAML to secure your clusters, these settings are supported in Elasticsearch Service.
-
-To learn more, refer to [configuring Kibana to use SAML](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/saml.md).
-
-#### Version 8.0.0+ [ec_version_8_0_0]
-
-The following additional setting is supported:
-
-`server.xsrf.allowlist`
-:   Allows the SAML authentication URL within Kibana, so that the Kibana server doesn’t reject external authentication messages that originate from your Identity Provider.
-
-
-#### All supported versions [ec_all_supported_versions_3]
-
-`xpack.security.authc.providers.saml.<provider-name>.useRelayStateDeepLink`
-:   Specifies if Kibana should treat the `RelayState` parameter as a deep link when Identity Provider Initiated login flow is used.
-
-`xpack.security.authc.providers.saml.<provider-name>.order`
-:   Specifies order of the SAML authentication provider in the authentication chain.
-
-`xpack.security.authc.providers.saml.<provider-name>.realm`
-:   Specifies which SAML realm in Elasticsearch should be used.
-
-`xpack.security.authc.providers.saml.<provider-name>.maxRedirectURLSize`
-:   Specifies the maximum size of the URL that Kibana is allowed to store during the SAML handshake.
-
-`xpack.security.authc.providers.saml.<provider-name>.description`
-:   Specifies how SAML login should be titled in the Login Selector UI.
-
-`xpack.security.authc.saml.maxRedirectURLSize`
-:   Specifies the maximum size of the URL that Kibana is allowed to store during the SAML handshake.
-
-`xpack.security.authc.saml.realm`
-:   Specifies which SAML realm in Elasticsearch should be used.
-
-`xpack.security.authc.providers`
-:   Specifies which providers are going to be used in Kibana.
-
-
-#### All supported versions before 8.x [ec_all_supported_versions_before_8_x]
-
-`xpack.security.authProviders`
-:   Set to `saml` to instruct Kibana to use SAML SSO as the authentication method.
-
-`xpack.security.public.protocol`
-:   Set to HTTP or HTTPS. To access Kibana, HTTPS protocol is recommended.
-
-`xpack.security.public.hostname`
-:   Set to a fully qualified hostname to connect your users to the proxy server.
-
-`xpack.security.public.port`
-:   The port number that connects your users to the proxy server (for example, 80 for HTTP or 443 for HTTPS).
-
-`xpack.security.authc.saml.useRelayStateDeepLink`
-:   Specifies if Kibana should treat the `RelayState` parameter as a deep link when Identity Provider Initiated login flow is used.
-
-`server.xsrf.whitelist`
-:   Explicitly allows the SAML authentication URL within Kibana, so that the Kibana server doesn’t reject external authentication messages that originate from your Identity Provider. This setting is renamed to `server.xsrf.allowlist` in version 8.0.0.
-
-
 
 ### OpenID Connect [ec_openid_connect]
 
@@ -309,7 +28,7 @@ To learn more, check [configuring Kibana to use OpenID Connect](docs-content://d
 
 ### Anonymous authentication [ec_anonymous_authentication]
 
-If you want to allow anonymous authentication in Kibana, these settings are supported in Elasticsearch Service. To learn more on how to enable anonymous access, check [Enabling anonymous access](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/anonymous-access.md) and [Configuring Kibana to use anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#anonymous-authentication).
+If you want to allow anonymous authentication in Kibana, these settings are supported in Elasticsearch Service. To learn more on how to enable anonymous access, check [Enabling anonymous access](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/anonymous-access.md) and [Configuring Kibana to use anonymous authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#anonymous-authentication).
 
 #### Supported versions before 8.0.0 [ec_supported_versions_before_8_0_0]
 
@@ -671,6 +390,9 @@ Banners are disabled by default. You need to manually configure them in order to
 `xpack.banners.textColor`
 :   The color for the banner text. Defaults to `#8A6A0A`.
 
+`xpack.banners.linkColor`
+:   The color for the banner link text. Defaults to `#0B64DD`.
+
 `xpack.banners.backgroundColor`
 :   The color of the banner background. Defaults to `#FFF9E8`.
 
@@ -789,7 +511,7 @@ If search latency in {{es}} is sufficiently high, such as if you are using cross
 ## Logging and audit settings [ec_logging_and_audit_settings]
 
 ::::{note}
-To change logging settings or to enable auditing you must first [enable deployment logging](docs-content://deploy-manage/monitor/stack-monitoring/elastic-cloud-stack-monitoring.md).
+To change logging settings or to enable auditing you must first [enable deployment logging](docs-content://deploy-manage/monitor/stack-monitoring/ece-ech-stack-monitoring.md).
 ::::
 
 

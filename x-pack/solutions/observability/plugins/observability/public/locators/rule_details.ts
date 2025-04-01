@@ -5,27 +5,28 @@
  * 2.0.
  */
 
+import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
+import { DEFAULT_CONTROLS } from '@kbn/alerts-ui-shared/src/alert_filter_controls/constants';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { ruleDetailsLocatorID } from '../../common';
 import { RULES_PATH } from '../../common/locators/paths';
-import { ALL_ALERTS } from '../components/alert_search_bar/constants';
 import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_EXECUTION_TAB,
   RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
 } from '../pages/rule_details/constants';
 import type { TabId } from '../pages/rule_details/rule_details';
-import type { AlertStatus } from '../../common/typings';
 
+type RuleDetailsControlConfigs = Array<Omit<FilterControlConfig, 'sort'>>;
 export interface RuleDetailsLocatorParams extends SerializableRecord {
   ruleId: string;
   tabId?: TabId;
   rangeFrom?: string;
   rangeTo?: string;
   kuery?: string;
-  status?: AlertStatus;
+  controlConfigs?: RuleDetailsControlConfigs;
 }
 
 export const getRuleDetailsPath = (ruleId: string) => {
@@ -36,19 +37,19 @@ export class RuleDetailsLocatorDefinition implements LocatorDefinition<RuleDetai
   public readonly id = ruleDetailsLocatorID;
 
   public readonly getLocation = async (params: RuleDetailsLocatorParams) => {
-    const { ruleId, kuery, rangeTo, tabId, rangeFrom, status } = params;
+    const { controlConfigs, ruleId, kuery, rangeTo, tabId, rangeFrom } = params;
     const appState: {
       tabId?: TabId;
       rangeFrom?: string;
       rangeTo?: string;
       kuery?: string;
-      status?: AlertStatus;
+      controlConfigs?: RuleDetailsControlConfigs;
     } = {};
 
     appState.rangeFrom = rangeFrom || 'now-15m';
     appState.rangeTo = rangeTo || 'now';
     appState.kuery = kuery || '';
-    appState.status = status || ALL_ALERTS.status;
+    appState.controlConfigs = controlConfigs ?? DEFAULT_CONTROLS;
 
     let path = getRuleDetailsPath(ruleId);
 

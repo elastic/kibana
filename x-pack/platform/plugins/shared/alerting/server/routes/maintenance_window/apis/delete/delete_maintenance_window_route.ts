@@ -5,19 +5,15 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import {
-  AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 
-import {
-  deleteParamsSchemaV1,
-  DeleteMaintenanceWindowRequestParamsV1,
-} from '../../../../../common/routes/maintenance_window/apis/delete';
+import type { DeleteMaintenanceWindowRequestParamsV1 } from '../../../../../common/routes/maintenance_window/apis/delete';
+import { deleteParamsSchemaV1 } from '../../../../../common/routes/maintenance_window/apis/delete';
 
 export const deleteMaintenanceWindowRoute = (
   router: IRouter<AlertingRequestHandlerContext>,

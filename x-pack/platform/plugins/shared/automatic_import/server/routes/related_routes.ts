@@ -35,19 +35,19 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
           idleSocket: ROUTE_HANDLER_TIMEOUT,
         },
       },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_ALL_ROLE,
+            INTEGRATIONS_ALL_ROLE,
+            ACTIONS_AND_CONNECTORS_ALL_ROLE,
+          ],
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            requiredPrivileges: [
-              FLEET_ALL_ROLE,
-              INTEGRATIONS_ALL_ROLE,
-              ACTIONS_AND_CONNECTORS_ALL_ROLE,
-            ],
-          },
-        },
         validate: {
           request: {
             body: buildRouteValidationWithZod(RelatedRequestBody),
@@ -87,6 +87,9 @@ export function registerRelatedRoutes(router: IRouter<AutomaticImportRouteHandle
             maxTokens: 4096,
             signal: abortSignal,
             streaming: false,
+            telemetryMetadata: {
+              pluginId: 'automatic_import',
+            },
           });
 
           const parameters = {

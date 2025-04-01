@@ -74,7 +74,6 @@ export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
 export const DEFAULT_RELATIVE_DATE_THRESHOLD = 24 as const;
-export const DEFAULT_MAX_UNASSOCIATED_NOTES = 1000 as const;
 
 // Document path where threat indicator fields are expected. Fields are used
 // to enrich signals, and are copied to threat.enrichments.
@@ -96,6 +95,7 @@ export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
+export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
 export const RULES_LANDING_PATH = `${RULES_PATH}/landing` as const;
 export const RULES_ADD_PATH = `${RULES_PATH}/add_rules` as const;
@@ -205,9 +205,6 @@ export const EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING =
 export const EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION =
   'securitySolution:excludedDataTiersForRuleExecution' as const;
 
-/** This Kibana Advances setting allows users to define the maximum amount of unassociated notes (notes without a `timelineId`) */
-export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as const;
-
 /** This Kibana Advanced Setting allows users to enable/disable the Visualizations in Flyout feature */
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
@@ -248,12 +245,6 @@ export const DETECTION_ENGINE_TAGS_URL = `${DETECTION_ENGINE_URL}/tags` as const
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
-export const DETECTION_ENGINE_RULES_BULK_DELETE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
-export const DETECTION_ENGINE_RULES_BULK_CREATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
-export const DETECTION_ENGINE_RULES_BULK_UPDATE =
-  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
@@ -291,6 +282,12 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
+
+/**
+ * This limit exists to maintain some kind of a safety net for how many events we are fetching in total,
+ * even though in theory we are only allowing up to 100 notes per document.
+ */
+export const NOTES_PER_PAGE_HARD_LIMIT = 10000;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -497,6 +494,11 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
  * Max length for the comments within security solution
  */
 export const MAX_COMMENT_LENGTH = 30000 as const;
+
+/**
+ * Max notes count per document in security solution
+ */
+export const MAX_NOTES_PER_DOCUMENT = 100;
 
 /**
  * Cases external attachment IDs

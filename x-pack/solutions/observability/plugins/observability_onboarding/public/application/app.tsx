@@ -8,6 +8,7 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { AppMountParameters, APP_WRAPPER_CLASS, CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -71,13 +72,15 @@ export function ObservabilityOnboardingAppRoot({
               }}
             >
               <Router history={history}>
-                <EuiErrorBoundary>
-                  <ObservabilityOnboardingHeaderActionMenu
-                    setHeaderActionMenu={setHeaderActionMenu}
-                    theme$={theme$}
-                  />
-                  <ObservabilityOnboardingFlow />
-                </EuiErrorBoundary>
+                <PerformanceContextProvider>
+                  <EuiErrorBoundary>
+                    <ObservabilityOnboardingHeaderActionMenu
+                      setHeaderActionMenu={setHeaderActionMenu}
+                      theme$={theme$}
+                    />
+                    <ObservabilityOnboardingFlow />
+                  </EuiErrorBoundary>
+                </PerformanceContextProvider>
               </Router>
             </KibanaThemeProvider>
           </KibanaContextProvider>
