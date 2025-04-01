@@ -345,8 +345,13 @@ export async function extractAndUpdateSecrets(opts: {
     // it may be that secrets were not enabled at the time of creation
     // in which case they are just stored as plain text
     if (secretPath.value.value?.isSecretRef) {
-      // TODO: needs to be fixed too
-      secretsToDelete.push({ id: secretPath.value.value.id });
+      if (secretPath.value.value.ids) {
+        secretPath.value.value.ids.forEach((id: string) => {
+          secretsToDelete.push({ id });
+        });
+      } else {
+        secretsToDelete.push({ id: secretPath.value.value.id });
+      }
     }
   });
 
