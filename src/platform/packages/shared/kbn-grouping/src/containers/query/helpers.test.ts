@@ -33,4 +33,25 @@ describe('createGroupFilter', () => {
     const result = createGroupFilter(selectedGroup, null);
     expect(result).toHaveLength(0);
   });
+
+  it('returns filter without script key when selectedGroup is included in multiValueFields', () => {
+    const multiValueFields = ['vulnerability.id'];
+    const selectedGroupMock = 'vulnerability.id';
+    const cveMockData = ['CVE-2021-12345', 'CVE-2021-56789'];
+    const result = createGroupFilter(selectedGroupMock, cveMockData, multiValueFields);
+    expect(result[0].query.script).toBeUndefined();
+  });
+
+  it('returns filter with script key when selectedGroup is not included in multiValueFields', () => {
+    const multiValueFields = ['vulnerability.id'];
+    const selectedGroupMock = 'vulnerability.title';
+    const cveMockData = ['CVE-2021-12345', 'CVE-2021-56789'];
+
+    const mockResponse = {
+      source: "doc[params['field']].size()==params['size']",
+      params: { field: 'vulnerability.title', size: 2 },
+    };
+    const result = createGroupFilter(selectedGroupMock, cveMockData, multiValueFields);
+    expect(result[0].query.script.script).toEqual(mockResponse);
+  });
 });

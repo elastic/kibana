@@ -24,6 +24,8 @@ import {
   VULNERABILITY_GROUPING_OPTIONS,
   VULNERABILITY_FIELDS,
   CDR_VULNERABILITY_GROUPING_RUNTIME_MAPPING_FIELDS,
+  EVENT_ID,
+  VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
 } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import {
@@ -210,6 +212,8 @@ export const useLatestVulnerabilitiesGrouping = ({
         }),
       },
     ],
+    multiValueFieldsToFlatten: VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS,
+    countByKeyForMultiValueFields: EVENT_ID,
   });
 
   const { data, isFetching } = useGroupedVulnerabilities({
