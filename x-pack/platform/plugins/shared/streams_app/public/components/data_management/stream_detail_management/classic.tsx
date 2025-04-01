@@ -46,7 +46,7 @@ export function ClassicStreamDetailManagement({
             {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
               defaultMessage:
                 'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
-            })}{' '}
+            })}
           </p>
         </EuiCallOut>
       </EuiFlexGroup>
