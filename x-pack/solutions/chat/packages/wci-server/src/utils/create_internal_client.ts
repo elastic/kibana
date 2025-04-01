@@ -16,9 +16,11 @@ import type { McpClient } from '../mcp';
  */
 export const getConnectToInternalServer = ({
   server,
+  clientId,
   clientName = 'unknown',
 }: {
   server: McpServer;
+  clientId: string;
   clientName?: string;
 }): (() => Promise<McpClient>) => {
   let connected = false;
@@ -45,6 +47,7 @@ export const getConnectToInternalServer = ({
 
     return Object.assign(client, {
       disconnect,
+      id: clientId,
     });
   };
 };

@@ -7,7 +7,6 @@
 
 import type { IntegrationClient } from './integration_client';
 import type { IntegrationsService } from './integrations_service';
-import type { IntegrationsSession } from './integrations_session';
 
 const createIntegrationClientMock = () => {
   const mocked: jest.Mocked<IntegrationClient> = {
@@ -20,19 +19,10 @@ const createIntegrationClientMock = () => {
   return mocked;
 };
 
-const createIntegrationsSessionMock = () => {
-  const mocked: jest.Mocked<IntegrationsSession> = {
-    listTools: jest.fn(),
-    executeTool: jest.fn(),
-    close: jest.fn(),
-  };
-  return mocked;
-};
-
 const createIntegrationsServiceMock = () => {
   const mocked: jest.Mocked<IntegrationsService> = {
     getScopedClient: jest.fn().mockReturnValue(createIntegrationClientMock()),
-    createSession: jest.fn().mockResolvedValue(createIntegrationsSessionMock()),
+    getIntegrationProviders: jest.fn(),
   };
   return mocked;
 };
@@ -40,5 +30,4 @@ const createIntegrationsServiceMock = () => {
 export const integrationMocks = {
   create: createIntegrationsServiceMock,
   createClient: createIntegrationClientMock,
-  createSession: createIntegrationsSessionMock,
 };

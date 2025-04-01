@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-// TODO: remove to use UserNameAndId from common instead
-export interface ClientUser {
-  id: string;
-  username: string;
-}
+export { listClientsTools } from './list_clients_tools';
+export { getLCTools } from './to_langchain_tool';

@@ -5,33 +5,31 @@
  * 2.0.
  */
 
-import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
-import { parseToolName, buildToolName } from '@kbn/wci-common';
+import { parseToolName } from '@kbn/wci-common';
 import type { McpProvider, McpClient } from '@kbn/wci-server';
 import type { Logger } from '@kbn/core/server';
-import { IntegrationToolInputSchema, IntegrationTool } from './types';
+import { IntegrationTool, IntegrationToolInputSchema } from './types';
+import { listClientsTools } from './utils';
 
 /**
- * Interface used to manage the integrations session.
- * It is responsible for connecting to the integrations (internal & external) and executing tools.
- * It also provides a way to get all the tools from all the integrations.
+ * A request-bound
  */
-export interface IntegrationsSession {
+export interface McpGatewaySession {
   /**
    * List all available tools from all connected integrations.
    */
   listTools(): Promise<IntegrationTool[]>;
   /**
-   * Execute a tool from a specific integration
+   * Execute a tool from a specific integration.
    */
   executeTool(serverToolName: string, params: IntegrationToolInputSchema): Promise<unknown>;
   /**
-   * Disconnect from all integrations
+   * Close the session and disconnect from all integrations.
    */
-  disconnect(): Promise<void>;
+  close(): Promise<void>;
 }
 
-export class IntegrationsSessionImpl implements IntegrationsSession {
+export class McpGatewaySessionImpl implements McpGatewaySession {
   private readonly providers: McpProvider[];
   private readonly logger: Logger;
 
@@ -63,28 +61,7 @@ export class IntegrationsSessionImpl implements IntegrationsSession {
 
   async listTools(): Promise<IntegrationTool[]> {
     await this.ensureConnected();
-
-    const toolCalls = await Promise.all(
-      Object.keys(this.sessionClients).map(async (clientId) => {
-        try {
-          const client = this.sessionClients[clientId];
-          const toolsResponse = await client.listTools();
-          if (toolsResponse && toolsResponse.tools && Array.isArray(toolsResponse.tools)) {
-            return toolsResponse.tools.map((tool) => ({
-              name: buildToolName({ integrationId: clientId, toolName: tool.name }),
-              description: tool.description || '',
-              inputSchema: (tool.inputSchema || {}) as JsonSchemaObject,
-            }));
-          }
-          return [];
-        } catch (err) {
-          this.logger.warn(`Error fetching tools for client: ${clientId}`);
-          return [];
-        }
-      })
-    );
-
-    return toolCalls.flat();
+    return listClientsTools({ clients: Object.values(this.sessionClients), logger: this.logger });
   }
 
   async executeTool(serverToolName: string, params: IntegrationToolInputSchema) {
@@ -101,7 +78,7 @@ export class IntegrationsSessionImpl implements IntegrationsSession {
     });
   }
 
-  async disconnect() {
+  async close() {
     if (!this.connected) {
       return;
     }

@@ -6,20 +6,25 @@
  */
 
 import { getConnectToInternalServer, createMcpServer, type McpProvider } from '@kbn/wci-server';
+import { baseToolsProviderId } from '../../../../common/constants';
 import { getCalculatorTool } from './calculator';
 
 export const getBaseToolProvider = async (): Promise<McpProvider> => {
   const tools = [getCalculatorTool()];
 
   const server = createMcpServer({
-    name: 'base_tools',
+    name: baseToolsProviderId,
     version: '1.0.0',
     tools,
   });
 
   return {
-    id: 'base_tools',
-    connect: getConnectToInternalServer({ server, clientName: 'baseToolsClient' }),
+    id: baseToolsProviderId,
+    connect: getConnectToInternalServer({
+      server,
+      clientId: baseToolsProviderId,
+      clientName: 'baseToolsClient',
+    }),
     meta: {
       builtin: true,
     },
