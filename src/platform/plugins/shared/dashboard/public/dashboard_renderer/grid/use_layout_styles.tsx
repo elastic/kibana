@@ -97,9 +97,10 @@ export const useLayoutStyles = () => {
       // styling for what the grid row header looks like when being dragged
       .kbnGridRowHeader--active {
         background-color: ${euiTheme.colors.backgroundBasePlain};
-        border: var(--dashboardActivePanelBorderStyle);
         border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
-        padding-left: 8px;
+        padding-left: ${euiTheme.size.m};
+        box-shadow: inset 0px 0px 0px ${euiTheme.border.width.thick}
+          ${euiTheme.colors.vis.euiColorVis0};
         // hide accordian arrow + panel count text when row is being dragged
         & .kbnGridRowTitle--button svg,
         & .kbnGridLayout--panelCount {
