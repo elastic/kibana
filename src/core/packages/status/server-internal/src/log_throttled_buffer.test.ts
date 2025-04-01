@@ -62,7 +62,7 @@ describe('createLogThrottledBuffer', () => {
     // not logged yet since the debounce time hasn't passed
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(1000); // Just a random to time to prove that it's not an async issue
+    await jest.advanceTimersByTimeAsync(1000); // Just a random time to prove that it's not an async issue
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
     await jest.advanceTimersByTimeAsync(throttleIntervalMillis);
