@@ -50,7 +50,7 @@ export class InterceptTelemetry {
     interactionType: string;
     interceptId: string;
   }) {
-    this.reportEvent?.(EventMetric.INTERCEPT_INTERACTION, {
+    this.reportEvent?.(EventMetric.INTERCEPT_TERMINATION_INTERACTION, {
       [EventFieldType.INTERACTION_TYPE]: interactionType,
       [EventFieldType.INTERCEPT_ID]: interceptId,
     });
