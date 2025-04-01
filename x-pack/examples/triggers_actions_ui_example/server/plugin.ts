@@ -47,13 +47,16 @@ export class TriggersActionsUiExamplePlugin
     router.get(
       {
         path: '/api/triggers_actions_ui_example/schedule_task_with_api_key/{id}',
-        options: {
-          access: 'public',
-        },
         validate: {
           params: schema.object({
             id: schema.string(),
           }),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization because it is an dev example',
+          },
         },
       },
       async (context, request, res) => {
@@ -86,6 +89,12 @@ export class TriggersActionsUiExamplePlugin
             id: schema.string(),
           }),
         },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization because it is an dev example',
+          },
+        },
       },
       async (context, request, res) => {
         const { taskManager: taskManagerStart } = (await core.getStartServices())[1];
@@ -107,6 +116,12 @@ export class TriggersActionsUiExamplePlugin
           body: schema.object({
             ids: schema.arrayOf(schema.string()),
           }),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization because it is an dev example',
+          },
         },
       },
       async (context, request, res) => {
