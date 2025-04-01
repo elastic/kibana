@@ -130,7 +130,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                 <>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="agentActivityFlyout.manageAutoUpgradesButton"
+                      data-test-subj="manageAutoUpgradesButton"
                       onClick={() => onClickManageAutoUpgradeAgents(action)}
                       size="m"
                       flush="left"

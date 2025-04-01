@@ -76,7 +76,7 @@ export const inProgressTitle = (action: ActionStatus, isAutomatic: boolean | und
   <EuiFlexGroup alignItems="center">
     <FormattedMessage
       id="xpack.fleet.agentActivity.inProgressTitle"
-      defaultMessage="{inProgressText} {nbAgents} {agents}{reassignText}{upgradeText}{failuresText} {automaticIcon}"
+      defaultMessage="{inProgressText} {nbAgents} {agents}{reassignText}{upgradeText}{failuresText}{automaticIcon}"
       values={{
         nbAgents:
           action.nbAgentsAck >= action.nbAgentsActioned

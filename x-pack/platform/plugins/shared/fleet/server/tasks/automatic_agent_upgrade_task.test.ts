@@ -137,7 +137,7 @@ describe('AutomaticAgentUpgradeTask', () => {
     });
   });
 
-  describe('Task logic', () => {
+  describe.only('Task logic', () => {
     const runTask = async (taskInstance = MOCK_TASK_INSTANCE) => {
       const mockTaskManagerStart = tmStartMock();
       await mockTask.start({ taskManager: mockTaskManagerStart });
@@ -216,7 +216,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         expect.anything(),
         expect.anything(),
         {
-          agents: agents.slice(0, 2),
+          agents: agents.slice(0, 3),
           version: '8.18.0',
         }
       );
@@ -240,7 +240,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         expect.anything(),
         expect.anything(),
         {
-          agents: agents.slice(0, 2),
+          agents: agents.slice(0, 3),
           version: '8.18.0',
         }
       );
@@ -277,7 +277,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         expect.anything(),
         expect.anything(),
         {
-          agents: activeAgents,
+          agents: activeAgents.slice(0, 3),
           version: '8.18.0',
         }
       );

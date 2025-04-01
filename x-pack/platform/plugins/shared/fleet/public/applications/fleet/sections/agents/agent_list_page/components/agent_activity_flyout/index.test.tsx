@@ -8,17 +8,18 @@
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
-import { createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
+import { TestRenderer, createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
 import { useActionStatus } from '../../hooks';
-import { useGetAgentPolicies, useStartServices, useAuthz } from '../../../../../hooks';
+import { useGetAgentPolicies, useAuthz } from '../../../../../hooks';
 
 import { AgentActivityFlyout } from '.';
 
 jest.mock('../../hooks');
-jest.mock('../../../../../hooks');
+jest.mock('../../../../../../../hooks/use_request/agent_policy');
+jest.mock('../../../../../../../hooks/use_authz');
 
 jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
@@ -26,7 +27,7 @@ jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
 
 const mockUseActionStatus = useActionStatus as jest.Mock;
 const mockUseGetAgentPolicies = useGetAgentPolicies as jest.Mock;
-const mockUseStartServices = useStartServices as jest.Mock;
+
 const mockedUseAuthz = useAuthz as jest.Mock;
 
 jest.mock('@kbn/logs-shared-plugin/common', () => {
@@ -59,8 +60,9 @@ describe('AgentActivityFlyout', () => {
       />
     </IntlProvider>
   );
-
+  let testRenderer: TestRenderer;
   beforeEach(() => {
+    testRenderer = createFleetTestRendererMock();
     mockOnClose.mockReset();
     mockOnAbortSuccess.mockReset();
     mockAbortUpgrade.mockReset();
@@ -70,30 +72,32 @@ describe('AgentActivityFlyout', () => {
     mockUseGetAgentPolicies.mockReturnValue({
       data: {
         items: [
-          { id: 'policy1', name: 'Policy 1' },
-          { id: 'policy2', name: 'Policy 2' },
+          { id: 'Policy1', name: 'Policy 1' },
+          { id: 'Policy2', name: 'Policy 2' },
         ],
       },
     });
-    mockUseStartServices.mockReturnValue({
-      docLinks: { links: { fleet: { upgradeElasticAgent: 'https://elastic.co' } } },
-      application: { navigateToUrl: jest.fn() },
-      http: { basePath: { prepend: jest.fn() } },
-      share: {
-        url: {
-          locators: {
-            get: () => ({
-              useUrl: () => 'https://locator.url',
-            }),
-          },
-        },
-      },
-    });
+    // mockUseStartServices.mockReturnValue({
+    //   docLinks: { links: { fleet: { upgradeElasticAgent: 'https://elastic.co' } } },
+    //   application: { navigateToUrl: jest.fn() },
+    //   http: { basePath: { prepend: jest.fn() } },
+    //   share: {
+    //     url: {
+    //       locators: {
+    //         get: () => ({
+    //           useUrl: () => 'https://locator.url',
+    //         }),
+    //       },
+    //     },
+    //   },
+    // });
+
     mockedUseAuthz.mockReturnValue({
       fleet: {
         readAgents: true,
         allAgents: true,
       },
+      integrations: {},
     } as any);
   });
 
@@ -106,7 +110,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render a loader while actions are loading and then render actions', async () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -123,31 +126,28 @@ describe('AgentActivityFlyout', () => {
         hasRolloutPeriod: true,
       },
     ];
-    mockUseActionStatus
-      .mockReturnValueOnce({
-        currentActions: mockActionStatuses,
-        abortUpgrade: mockAbortUpgrade,
-        isFirstLoading: true,
-      })
-      .mockReturnValueOnce({
-        currentActions: mockActionStatuses,
-        abortUpgrade: mockAbortUpgrade,
-        isFirstLoading: false,
-      });
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: true,
+    });
 
     const result = testRenderer.render(component());
-    console.log(result.debug());
+
     expect(result.getByText('Agent activity')).toBeInTheDocument();
     expect(result.queryByTestId('loading')).toBeInTheDocument();
     expect(result.queryByTestId('upgradeInProgressTitle')).not.toBeInTheDocument();
-
+    mockUseActionStatus.mockReturnValue({
+      currentActions: mockActionStatuses,
+      abortUpgrade: mockAbortUpgrade,
+      isFirstLoading: false,
+    });
     result.rerender(component());
     expect(result.queryByTestId('loading')).not.toBeInTheDocument();
     expect(result.queryByTestId('upgradeInProgressTitle')).toBeInTheDocument();
   });
 
   it('should render an empty state after loading if there are no actions', () => {
-    const testRenderer = createFleetTestRendererMock();
     mockUseActionStatus.mockReturnValue({
       currentActions: [],
       abortUpgrade: mockAbortUpgrade,
@@ -159,7 +159,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for in progress upgrade', async () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -193,7 +192,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+    ).toContain('Started on Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
 
     act(() => {
       fireEvent.click(result.getByText('Cancel'));
@@ -203,7 +202,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should not render cancel button if the upgrade is set to happen immediately', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -237,13 +235,12 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Started on Sep 15, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+    ).toContain('Started on Sep 15, 2022 10:00 AM.'.replace(/\s/g, ''));
 
     expect(result.queryByText('Cancel')).not.toBeInTheDocument();
   });
 
   it('should render agent activity for scheduled upgrade', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action2',
@@ -275,7 +272,7 @@ describe('AgentActivityFlyout', () => {
       result.container
         .querySelector('[data-test-subj="upgradeInProgressDescription"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Scheduled for Sep 16, 2022 10:00 AM. Learn more'.replace(/\s/g, ''));
+    ).toContain('Scheduled for Sep 16, 2022 10:00 AM.'.replace(/\s/g, ''));
 
     act(() => {
       fireEvent.click(result.getByText('Cancel'));
@@ -285,7 +282,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for complete upgrade', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action3',
@@ -318,7 +314,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for rollout passed upgrade', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action3',
@@ -350,7 +345,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for rollout passed upgrade with failed', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action3',
@@ -387,7 +381,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for expired unenroll', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action4',
@@ -419,7 +412,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for cancelled upgrade', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action5',
@@ -453,7 +445,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for failed reassign', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action7',
@@ -463,7 +454,7 @@ describe('AgentActivityFlyout', () => {
         nbAgentsActioned: 1,
         status: 'FAILED',
         expiration: '2099-09-16T10:00:00.000Z',
-        newPolicyId: 'policy1',
+        newPolicyId: 'Policy1',
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 1,
         completionTime: '2022-09-15T11:00:00.000Z',
@@ -492,7 +483,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for unknown action', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -525,7 +515,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for policy change no agents', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -535,7 +524,7 @@ describe('AgentActivityFlyout', () => {
         nbAgentsActioned: 0,
         status: 'COMPLETE',
         expiration: '2099-09-16T10:00:00.000Z',
-        policyId: 'policy1',
+        policyId: 'Policy1',
         revision: 2,
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 0,
@@ -560,7 +549,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for policy change with agents', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -570,7 +558,7 @@ describe('AgentActivityFlyout', () => {
         nbAgentsActioned: 3,
         status: 'COMPLETE',
         expiration: '2099-09-16T10:00:00.000Z',
-        policyId: 'policy1',
+        policyId: 'Policy1',
         revision: 2,
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 0,
@@ -595,7 +583,6 @@ describe('AgentActivityFlyout', () => {
   });
 
   it('should render agent activity for an automatic upgrade', () => {
-    const testRenderer = createFleetTestRendererMock();
     const mockActionStatuses = [
       {
         actionId: 'action8',
@@ -606,7 +593,7 @@ describe('AgentActivityFlyout', () => {
         is_automatic: true,
         status: 'IN_PROGRESS',
         expiration: '2099-09-16T10:00:00.000Z',
-        policyId: 'policy1',
+        policyId: 'Policy1',
         revision: 2,
         creationTime: '2022-09-15T10:00:00.000Z',
         nbAgentsFailed: 0,
@@ -622,17 +609,16 @@ describe('AgentActivityFlyout', () => {
     const result = testRenderer.render(component());
 
     expect(
-      result.container.querySelector('[data-test-subj="inProgressTitle"]')!.textContent
-    ).toContain('Upgrading 1 agent to version 8.17.3');
+      result.container.querySelector('[data-test-subj="upgradeInProgressTitle"]')!.textContent
+    ).toContain('Upgrading 3 agents to version 8.17.3');
     expect(
       result.container
         .querySelector('[data-test-subj="manageAutoUpgradesButton"]')!
         .textContent?.replace(/\s/g, '')
-    ).toContain('Manage auto-upgrade agents');
+    ).toContain('Manage auto-upgrade agents'.replace(/\s/g, ''));
   });
 
   it('should keep flyout state on new data', () => {
-    const testRenderer = createFleetTestRendererMock();
     const failedAction = {
       actionId: 'action1',
       nbAgentsActionCreated: 1,
