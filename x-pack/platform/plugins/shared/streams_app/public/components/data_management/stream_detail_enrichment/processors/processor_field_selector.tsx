@@ -67,7 +67,7 @@ export const ProcessorFieldSelector = () => {
           title={i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.fieldSelectorUnsupportedDottedFieldsWarning.title',
             {
-              defaultMessage: 'Dot-separated field names are not supported for processors.',
+              defaultMessage: 'Dot-separated field names are not supported.',
             }
           )}
           css={css`
