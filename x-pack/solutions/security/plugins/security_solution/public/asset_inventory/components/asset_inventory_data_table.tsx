@@ -127,9 +127,15 @@ const defaultColumns: AssetInventoryDefaultColumn[] = [
 
 export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
+  height?: number;
+  groupSelectorComponent?: JSX.Element;
 }
 
-export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps) => {
+export const AssetInventoryDataTable = ({
+  state,
+  height,
+  groupSelectorComponent,
+}: AssetInventoryDataTableProps) => {
   const {
     pageSize,
     sort,
@@ -217,7 +223,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
     };
   }, [persistedSettings]);
 
-  const { dataView } = useDataViewContext();
+  const { dataView, dataViewIsLoading } = useDataViewContext();
 
   const {
     uiActions,
@@ -267,6 +273,8 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
     const isVirtualizationEnabled = pageSize >= 100;
 
     const getWrapperHeight = () => {
+      if (height) return height;
+
       // If virtualization is not needed the table will render unconstrained.
       if (!isVirtualizationEnabled) return 'auto';
 
@@ -278,7 +286,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize]);
+  }, [pageSize, height]);
 
   const onAddFilter: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -325,6 +333,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
       onResetColumns={onResetColumns}
+      groupSelectorComponent={groupSelectorComponent}
     />
   );
 
@@ -344,8 +353,7 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
     },
   ];
 
-  const loadingState =
-    isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
+  const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
@@ -356,8 +364,13 @@ export const AssetInventoryDataTable = ({ state }: AssetInventoryDataTableProps)
           height: computeDataTableRendering.wrapperHeight,
         }}
       >
-        <EuiProgress size="xs" color="accent" style={{ opacity: isFetchingGridData ? 1 : 0 }} />
-        {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          className={styles.gridProgressBar}
+        />
+        {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
           <AssetInventoryEmptyState onResetFilters={onResetFilters} />
         ) : (
           <UnifiedDataTable
