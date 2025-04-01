@@ -295,6 +295,11 @@ export async function withLock<T>(
       ? await lockManager.acquireWithRetry({ metadata, ttl, ...retryOptions })
       : await lockManager.acquire({ metadata, ttl });
 
+  if (!acquired) {
+    logger.debug(`Lock "${lockId}" not acquired. Exiting.`);
+    throw new Error(`Lock "${lockId}" not acquired`);
+  }
+
   // extend the ttl periodically
   const extendInterval = Math.floor(ttl / 2);
   logger.debug(
@@ -309,15 +314,12 @@ export async function withLock<T>(
     extendPromises.push(p);
   }, extendInterval);
 
-  if (acquired) {
-    try {
-      return await callback();
-    } finally {
-      clearInterval(intervalId);
-      await lockManager.release();
-    }
+  try {
+    return await callback();
+  } finally {
+    clearInterval(intervalId);
+    await lockManager.release();
   }
-  return undefined;
 }
 
 export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClient): Promise<void> {

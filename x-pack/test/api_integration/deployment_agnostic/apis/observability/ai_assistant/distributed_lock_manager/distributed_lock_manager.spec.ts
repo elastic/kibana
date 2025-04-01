@@ -196,7 +196,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('withLock', () => {
       let executions: number;
       let runWithLock: () => Promise<string | undefined>;
-      let results: Array<string | undefined>;
+      let results: Array<PromiseSettledResult<string | undefined>>;
 
       before(async () => {
         executions = 0;
@@ -207,7 +207,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
         };
 
-        results = await Promise.all([runWithLock(), runWithLock(), runWithLock()]);
+        results = await Promise.allSettled([runWithLock(), runWithLock(), runWithLock()]);
       });
 
       it('executes the callback only once', async () => {
@@ -215,7 +215,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('returns the callback result for the successful call', async () => {
-        expect(results.sort()).to.eql(['was called', undefined, undefined]);
+        const successful = results.filter((r) => r.status === 'fulfilled') as Array<
+          PromiseFulfilledResult<string>
+        >;
+        expect(successful).to.have.length(1);
+        expect(successful[0].value).to.be('was called');
       });
 
       it('releases the lock after execution', async () => {
