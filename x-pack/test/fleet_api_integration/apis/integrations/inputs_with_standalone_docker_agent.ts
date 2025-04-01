@@ -82,7 +82,7 @@ ${inputsYaml}
             q: `agent.name:${agent.name}`,
             ignore_unavailable: true,
           });
-  
+
           // @ts-expect-error TotalHit
           if (searchRes.hits.total.value > 0) {
             foundMetrics = true;
