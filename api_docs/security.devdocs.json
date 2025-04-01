@@ -5918,12 +5918,12 @@
               "path": "x-pack/platform/plugins/shared/actions/server/plugin.ts"
             },
             {
-              "plugin": "ml",
-              "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
-            },
-            {
               "plugin": "savedObjectsTagging",
               "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/request_handler_context.ts"
+            },
+            {
+              "plugin": "ml",
+              "path": "x-pack/platform/plugins/shared/ml/server/saved_objects/initialization/initialization.ts"
             },
             {
               "plugin": "ml",
