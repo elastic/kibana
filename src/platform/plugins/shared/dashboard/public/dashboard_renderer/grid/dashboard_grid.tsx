@@ -188,15 +188,31 @@ export const DashboardGrid = ({
   ]);
 
   useEffect(() => {
+    /**
+     * ResizeObserver fires the callback on `.observe()` with the initial size of the observed
+     * element; we want to ignore this first call and scroll to the bottom on the **second**
+     * callback - i.e. after the row is actually added to the DOM
+     */
+    let first = false;
     const scrollToBottomOnResize = new ResizeObserver(() => {
-      setTimeout(dashboardApi.scrollToBottom, 1);
-      scrollToBottomOnResize.disconnect();
+      if (first) {
+        first = false;
+      } else {
+        dashboardApi.scrollToBottom();
+        scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
+      }
     });
 
+    /**
+     * When `scrollToBottom$` emits, wait for the `layoutRef` size to change then scroll
+     * to the bottom of the screen
+     */
     const scrollToBottomSubscription = dashboardApi.scrollToBottom$.subscribe(() => {
       if (!layoutRef.current) return;
+      first = true; // ensure that only the second resize callback actually triggers scrolling
       scrollToBottomOnResize.observe(layoutRef.current);
     });
+
     return () => {
       scrollToBottomOnResize.disconnect();
       scrollToBottomSubscription.unsubscribe();
