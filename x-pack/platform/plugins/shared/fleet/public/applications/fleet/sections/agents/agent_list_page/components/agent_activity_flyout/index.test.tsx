@@ -8,7 +8,8 @@
 import React from 'react';
 import { act, fireEvent } from '@testing-library/react';
 
-import { TestRenderer, createFleetTestRendererMock } from '@kbn/fleet-plugin/public/mock';
+import type { TestRenderer } from '../../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { IntlProvider } from 'react-intl';
 
