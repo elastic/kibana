@@ -230,10 +230,18 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('...WHERE expression...', () => {
-        it('suggests fields in empty expression', async () => {
+        it('suggests fields and functions in empty expression', async () => {
           await assertSuggestions('FROM a | STATS MIN(b) WHERE /', [
             ...getFieldNamesByType('any').map((name) => `${name} `),
             ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { scalar: true }),
+          ]);
+        });
+
+        it('suggests operators after a first operand', async () => {
+          await assertSuggestions('FROM a | STATS MIN(b) WHERE keywordField /', [
+            ...getFunctionSignaturesByReturnType(Location.STATS_WHERE, 'any', { operators: true }, [
+              'keyword',
+            ]),
           ]);
         });
 
@@ -258,6 +266,37 @@ describe('autocomplete.suggest', () => {
         it('does NOT suggest pipe after complete non-boolean expression', async () => {
           const suggestions = await suggest('FROM a | STATS MIN(b) WHERE doubleField + 1 /');
           expect(suggestions.map(({ text }) => text)).not.toContain('| ');
+        });
+
+        describe('Parity with WHERE command', () => {
+          it('matches WHERE suggestions after a keyword expression', async () => {
+            const expression = 'keywordField';
+
+            const suggestions = await suggest(`FROM a | WHERE ${expression} /`);
+
+            expect(suggestions).not.toHaveLength(0);
+
+            await assertSuggestions(
+              `FROM a | STATS AVG(longField) WHERE ${expression} /`,
+              suggestions
+                .map(({ text }) => text)
+                // match operator not yet supported, see https://github.com/elastic/elasticsearch/issues/116261
+                .filter((text) => text !== ': $0')
+            );
+          });
+
+          it('matches WHERE suggestions after a boolean expression', async () => {
+            const expression = 'longField > longField';
+
+            const suggestions = await suggest(`FROM a | WHERE ${expression} /`);
+
+            expect(suggestions).not.toHaveLength(0);
+
+            await assertSuggestions(
+              `FROM a | STATS AVG(longField) WHERE ${expression} /`,
+              suggestions.map(({ text }) => text)
+            );
+          });
         });
       });
     });

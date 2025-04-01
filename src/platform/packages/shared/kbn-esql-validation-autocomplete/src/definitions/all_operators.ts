@@ -72,6 +72,7 @@ function createComparisonDefinition(
       Location.ROW,
       Location.SORT,
       Location.STATS_BY,
+      Location.STATS_WHERE,
     ],
     validate,
     signatures: [
@@ -224,6 +225,7 @@ export const logicalOperators: FunctionDefinition[] = [
     Location.ROW,
     Location.SORT,
     Location.STATS_BY,
+    Location.STATS_WHERE,
   ],
   signatures: [
     {
@@ -253,7 +255,13 @@ const nullFunctions: FunctionDefinition[] = [
   type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
-  locationsAvailable: [Location.EVAL, Location.WHERE, Location.ROW, Location.SORT],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.ROW,
+    Location.SORT,
+    Location.STATS_WHERE,
+  ],
   signatures: [
     {
       params: [{ name: 'left', type: 'any' }],
@@ -275,6 +283,7 @@ const otherDefinitions: FunctionDefinition[] = [
       Location.ROW,
       Location.SORT,
       Location.STATS_BY,
+      Location.STATS_WHERE,
     ],
     signatures: [
       {
