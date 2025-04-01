@@ -177,6 +177,15 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     };
   }
 
+  let withinStatsWhereClause = false;
+  Walker.walk(ast, {
+    visitFunction: (fn) => {
+      if (fn.name === 'where' && fn.location.min <= offset) {
+        withinStatsWhereClause = true;
+      }
+    },
+  });
+
   const { command, option, node, containingFunction } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'literal' && node.literalType === 'keyword') {
@@ -189,7 +198,10 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, containingFunction };
       }
-      if (isNotEnrichClauseAssigment(node, command) && !isOperator(node)) {
+      if (
+        isNotEnrichClauseAssigment(node, command) &&
+        (!isOperator(node) || (command.name === 'stats' && !withinStatsWhereClause))
+      ) {
         // command ... fn( <here> )
         return { type: 'function' as const, command, node, option, containingFunction };
       }

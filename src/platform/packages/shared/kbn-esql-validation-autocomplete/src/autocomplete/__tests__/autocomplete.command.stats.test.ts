@@ -368,19 +368,16 @@ describe('autocomplete.suggest', () => {
       });
 
       test('on space before expression right hand side operand', async () => {
-        /**
-         * @todo re-enable when expression autocomplete is officially supported for STATS ... BY
-         */
-        // await assertSuggestions('from a | stats avg(b) by integerField % /', [
-        //   ...getFieldNamesByType('integer'),
-        //   ...getFieldNamesByType('double'),
-        //   ...getFieldNamesByType('long'),
-        //   ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'double', 'long'], {
-        //     scalar: true,
-        //   }),
-        //   // categorize is not compatible here
-        //   ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
-        // ]);
+        await assertSuggestions('from a | stats avg(b) by integerField % /', [
+          ...getFieldNamesByType('integer'),
+          ...getFieldNamesByType('double'),
+          ...getFieldNamesByType('long'),
+          ...getFunctionSignaturesByReturnType(Location.EVAL, ['integer', 'double', 'long'], {
+            scalar: true,
+          }),
+          // categorize is not compatible here
+          ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
+        ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
           getDateHistogramCompletionItem(),
           ...getFieldNamesByType('any').map((field) => `${field} `),
