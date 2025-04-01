@@ -13,7 +13,7 @@ import {
   UpdateUserRequestParams,
   UpdateUserRequestBody,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/update.gen';
-import { API_VERSIONS } from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
 export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
@@ -21,8 +21,10 @@ export const updateUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
     .put({
       access: 'public',
       path: '/api/entity_analytics/monitoring/users/{id}',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

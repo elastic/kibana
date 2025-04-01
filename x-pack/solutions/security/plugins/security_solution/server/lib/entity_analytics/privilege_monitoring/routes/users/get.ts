@@ -11,7 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { GetUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/get.gen';
 import type { GetUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/get.gen';
-import { API_VERSIONS } from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
 export const getUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
@@ -19,8 +19,10 @@ export const getUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger
     .get({
       access: 'public',
       path: '/api/entity_analytics/monitoring/users/{id}',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(

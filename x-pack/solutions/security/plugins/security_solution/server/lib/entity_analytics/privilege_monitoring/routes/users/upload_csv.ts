@@ -10,7 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { BulkUploadUsersCSVResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_csv.gen';
-import { API_VERSIONS } from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
 export const uploadUsersCSVRoute = (
@@ -21,19 +21,17 @@ export const uploadUsersCSVRoute = (
     .post({
       access: 'public',
       path: '/api/entity_analytics/monitoring/users/_csv',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: {
-            body: {
-              type: 'string', // CSV content is expected as a string
-            },
-          },
+          request: {},
         },
       },
       async (context, request, response): Promise<IKibanaResponse<BulkUploadUsersCSVResponse>> => {

@@ -10,7 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import type { BulkUploadUsersJSONResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/upload_json.gen';
-import { API_VERSIONS } from '../../../../../../common/constants';
+import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
 export const uploadUsersJSONRoute = (
@@ -21,28 +21,17 @@ export const uploadUsersJSONRoute = (
     .post({
       access: 'public',
       path: '/api/entity_analytics/monitoring/users/_json',
-      options: {
-        tags: ['access:securitySolution'],
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution', `${APP_ID}-entity-analytics`],
+        },
       },
     })
     .addVersion(
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: {
-            body: {
-              users: {
-                type: 'array',
-                items: {
-                  type: 'object',
-                  properties: {
-                    user_name: { type: 'string' },
-                    is_monitored: { type: 'boolean' },
-                  },
-                },
-              },
-            },
-          },
+          request: {},
         },
       },
       async (context, request, response): Promise<IKibanaResponse<BulkUploadUsersJSONResponse>> => {
