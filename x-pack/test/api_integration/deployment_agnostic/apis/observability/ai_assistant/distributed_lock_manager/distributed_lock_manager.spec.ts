@@ -17,6 +17,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
+import { ToolingLog } from '@kbn/tooling-log';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
 
@@ -319,13 +320,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe.only('Concurrency and race conditions', () => {
+    describe('Concurrency and race conditions', () => {
       it('should allow only one lock acquisition among many concurrent attempts', async () => {
         const results = await Promise.all(
           times(50).map(async () => {
             const lm = new LockManager(LockId.KnowledgeBaseReindex, es, logger);
             const hasLock = await lm.acquire();
             if (hasLock) {
+              await sleep(10); // ensure the lock is held for a bit
               await lm.release();
             }
             return hasLock;
@@ -459,24 +461,22 @@ async function getLocks(es: Client) {
   return res.hits.hits;
 }
 
-/* eslint-disable no-console */
 // @ts-ignore
-async function outputLocks(es: Client, name?: string) {
+async function outputLocks(es: Client, log: ToolingLog, name?: string) {
   const locks = await getLocks(es);
 
-  console.log(`${name ?? ''}: ${locks.length} locks found`);
+  log.debug(`${name ?? ''}: ${locks.length} locks found`);
 
   for (const lock of locks) {
     const { _id, _source } = lock;
     const { token, expiresAt, metadata } = _source!;
-    console.log(`Lock ID: ${_id}`);
-    console.log(`Token: ${token}`);
-    console.log(`Expires At: ${expiresAt}`);
-    console.log(`Metadata: ${JSON.stringify(metadata)}`);
-    console.log('--------------------------');
+    log.debug(`Lock ID: ${_id}`);
+    log.debug(`Token: ${token}`);
+    log.debug(`Expires At: ${expiresAt}`);
+    log.debug(`Metadata: ${JSON.stringify(metadata)}`);
+    log.debug('--------------------------');
   }
 }
-/* eslint-enable no-console */
 
 async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocument | undefined> {
   const res = await esClient.search<LockDocument>(

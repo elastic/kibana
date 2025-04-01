@@ -10,6 +10,7 @@ import { Logger } from '@kbn/logging';
 import { v4 as uuid } from 'uuid';
 import pRetry from 'p-retry';
 import prettyMilliseconds from 'pretty-ms';
+import { once } from 'lodash';
 
 export const LOCKS_INDEX_ALIAS = '.kibana_locks';
 export const LOCKS_CONCRETE_INDEX_NAME = `${LOCKS_INDEX_ALIAS}-000001`;
@@ -30,12 +31,13 @@ interface AcquireOptions {
   ttlMs?: number;
 }
 
+const createLocksWriteIndexOnce = once(createLocksWriteIndex);
+
 export class LockManager {
-  private token: string;
+  private token = uuid();
 
   constructor(private lockId: LockId, private esClient: Client, private logger: Logger) {
-    this.token = uuid();
-    logger.debug(`LockManager initialized with lockId: ${lockId}, token: ${this.token}`);
+    logger.debug(`LockManager initialized with lockId: ${lockId}`);
   }
 
   /**
@@ -43,9 +45,16 @@ export class LockManager {
    * If the lock exists and is expired, it will be released and acquisition retried.
    */
   public async acquire(options: AcquireOptions = {}): Promise<boolean> {
-    await createLocksWriteIndex(this.esClient);
+    await createLocksWriteIndexOnce(this.esClient);
 
+    this.token = uuid();
     const ttl = options.ttlMs ?? 6 * 5 * 1000; // Default TTL: 5 minutes
+
+    this.logger.debug(
+      `Acquiring lock "${this.lockId}" with ttl = ${prettyMilliseconds(ttl)} and token = ${
+        this.token
+      }`
+    );
 
     try {
       const response = await this.esClient.update<LockDocument>({
@@ -81,7 +90,7 @@ export class LockManager {
 
       if (response.result === 'created') {
         this.logger.debug(
-          ` Lock "${this.lockId}" acquired with ttl = ${prettyMilliseconds(ttl)} and token = ${
+          `Lock "${this.lockId}" acquired with ttl = ${prettyMilliseconds(ttl)} and token = ${
             this.token
           }`
         );
@@ -142,7 +151,7 @@ export class LockManager {
         return false;
       }
 
-      this.logger.debug(`Lock "${this.lockId}" released.`);
+      this.logger.debug(`Lock "${this.lockId}" with token = ${this.token} was released.`);
       return true;
     } catch (error) {
       this.logger.error(`Failed to release lock "${this.lockId}": ${error.message}`);
