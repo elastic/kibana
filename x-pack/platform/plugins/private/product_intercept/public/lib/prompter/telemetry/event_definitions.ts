@@ -10,6 +10,7 @@ import { type RootSchema, type EventTypeOpts } from '@elastic/ebt/client';
 export enum EventMetric {
   PRODUCT_INTERCEPT_TERMINATION_INTERACTION = 'product_intercept_termination_interaction',
   PRODUCT_INTERCEPT_PROGRESS_INTERACTION = 'product_intercept_interaction_progress',
+  PRODUCT_INTERCEPT_TRIGGER_FETCH_ERROR = 'product_intercept_trigger_fetch_error',
 }
 
 export enum EventFieldType {
@@ -17,6 +18,7 @@ export enum EventFieldType {
   INTERCEPT_RUN_ID = 'interaction_run_id',
   INTERACTION_METRIC = 'interaction_metric',
   INTERACTION_METRIC_VALUE = 'interaction_metric_value',
+  TRIGGER_FETCH_ERROR_MESSAGE = 'trigger_fetch_error_message',
 }
 
 const fields: Record<EventFieldType, RootSchema<unknown>> = {
@@ -56,6 +58,15 @@ const fields: Record<EventFieldType, RootSchema<unknown>> = {
       },
     },
   },
+  [EventFieldType.TRIGGER_FETCH_ERROR_MESSAGE]: {
+    [EventFieldType.TRIGGER_FETCH_ERROR_MESSAGE]: {
+      type: 'text',
+      _meta: {
+        description: 'The error message from the trigger fetch',
+        optional: false,
+      },
+    },
+  },
 };
 
 /**
@@ -76,6 +87,12 @@ export const eventTypes: Array<EventTypeOpts<Record<string, unknown>>> = [
       ...fields[EventFieldType.INTERACTION_METRIC],
       ...fields[EventFieldType.INTERACTION_METRIC_VALUE],
       ...fields[EventFieldType.INTERCEPT_RUN_ID],
+    },
+  },
+  {
+    eventType: EventMetric.PRODUCT_INTERCEPT_TRIGGER_FETCH_ERROR,
+    schema: {
+      ...fields[EventFieldType.TRIGGER_FETCH_ERROR_MESSAGE],
     },
   },
 ];

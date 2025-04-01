@@ -94,7 +94,7 @@ export class ProductInterceptPrompter {
         return;
       })
       .catch((error) => {
-        // log error
+        eventReporter.reportTriggerFetchError({ errorMessage: error.message });
       });
   }
 

@@ -25,6 +25,7 @@ export class PromptTelemetry {
     return {
       reportInterceptInteraction: this.reportInterceptTermination.bind(this),
       reportInterceptInteractionProgress: this.reportInterceptInteractionProgress.bind(this),
+      reportTriggerFetchError: this.reportTriggerFetchError.bind(this),
     };
   }
 
@@ -54,6 +55,12 @@ export class PromptTelemetry {
       [EventFieldType.INTERACTION_METRIC]: metricId,
       [EventFieldType.INTERACTION_METRIC_VALUE]: value,
       [EventFieldType.INTERCEPT_RUN_ID]: String(interceptId),
+    });
+  }
+
+  private reportTriggerFetchError({ errorMessage }: { errorMessage: string }) {
+    this.reportEvent?.(EventMetric.PRODUCT_INTERCEPT_TRIGGER_FETCH_ERROR, {
+      [EventFieldType.TRIGGER_FETCH_ERROR_MESSAGE]: errorMessage,
     });
   }
 }
