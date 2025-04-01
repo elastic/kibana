@@ -14,9 +14,7 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 import {
   deleteKnowledgeBaseModel,
   importTinyElserModel,
-  deleteInferenceEndpoint,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -37,8 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
 
       await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     beforeEach(async () => {
@@ -50,8 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     after(async () => {
       await deleteKbIndex();
       await createOrUpdateIndexAssets();
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
     });
 
     it('has an index created version earlier than 8.11', async () => {
