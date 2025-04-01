@@ -77,20 +77,6 @@ describe('AgentActivityFlyout', () => {
         ],
       },
     });
-    // mockUseStartServices.mockReturnValue({
-    //   docLinks: { links: { fleet: { upgradeElasticAgent: 'https://elastic.co' } } },
-    //   application: { navigateToUrl: jest.fn() },
-    //   http: { basePath: { prepend: jest.fn() } },
-    //   share: {
-    //     url: {
-    //       locators: {
-    //         get: () => ({
-    //           useUrl: () => 'https://locator.url',
-    //         }),
-    //       },
-    //     },
-    //   },
-    // });
 
     mockedUseAuthz.mockReturnValue({
       fleet: {
