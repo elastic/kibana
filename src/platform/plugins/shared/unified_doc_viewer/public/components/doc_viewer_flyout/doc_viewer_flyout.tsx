@@ -135,7 +135,11 @@ export function UnifiedDocViewerFlyout({
         return;
       }
 
-      if (ev.key === keys.ESCAPE) {
+      if (
+        ev.target instanceof Node &&
+        ev.currentTarget.contains(ev.target) &&
+        ev.key === keys.ESCAPE
+      ) {
         ev.preventDefault();
         ev.stopPropagation();
         onClose();
