@@ -40,19 +40,18 @@ export const handleProcessingSuggestion = async (
 
   const deduplicatedSimulations = uniqBy(
     results.flatMap((result) => result.simulations),
-    (simulation) => simulation!.pattern
+    (simulation) => simulation.pattern
   );
 
   return {
-    patterns: deduplicatedSimulations.map((simulation) => simulation!.pattern),
-    simulations: deduplicatedSimulations as SimulationWithPattern[],
+    patterns: deduplicatedSimulations.map((simulation) => simulation.pattern),
+    simulations: deduplicatedSimulations,
   };
 };
 
-type SimulationWithPattern = ReturnType<typeof simulateProcessing> & {
+interface SimulationWithPattern extends Awaited<ReturnType<typeof simulateProcessing>> {
   pattern: string;
-  success_rate: number;
-};
+}
 
 export function extractAndGroupPatterns(samples: FlattenRecord[], field: string) {
   const evalPattern = (sample: string) => {
@@ -207,7 +206,7 @@ async function processPattern(
         };
       })
     )
-  ).filter(Boolean) as Array<SimulationWithPattern | null>;
+  ).filter((simulation): simulation is SimulationWithPattern => simulation !== null);
 
   return {
     chatResponse,
