@@ -9,15 +9,15 @@ import React, { useState } from 'react';
 import { capitalize, uniq } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
   ContentPackObject,
   ContentPackSavedObject,
   INDEX_PLACEHOLDER,
-  IngestStreamGetResponse,
   findIndexPatterns,
   isIndexPlaceholder,
   replaceIndexPatterns,
-} from '@kbn/streams-schema';
+} from '@kbn/content-packs-schema';
 import {
   EuiBadge,
   EuiBasicTable,

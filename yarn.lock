@@ -4138,6 +4138,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-packs-schema@link:x-pack/platform/packages/shared/kbn-content-packs-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/controls-example-plugin@link:examples/controls_example":
   version "0.0.0"
   uid ""

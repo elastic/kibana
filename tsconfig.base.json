@@ -230,6 +230,8 @@
       "@kbn/content-management-user-profiles/*": ["src/platform/packages/shared/content-management/user_profiles/*"],
       "@kbn/content-management-utils": ["src/platform/packages/shared/kbn-content-management-utils"],
       "@kbn/content-management-utils/*": ["src/platform/packages/shared/kbn-content-management-utils/*"],
+      "@kbn/content-packs-schema": ["x-pack/platform/packages/shared/kbn-content-packs-schema"],
+      "@kbn/content-packs-schema/*": ["x-pack/platform/packages/shared/kbn-content-packs-schema/*"],
       "@kbn/controls-example-plugin": ["examples/controls_example"],
       "@kbn/controls-example-plugin/*": ["examples/controls_example/*"],
       "@kbn/controls-plugin": ["src/platform/plugins/shared/controls"],

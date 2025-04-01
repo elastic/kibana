@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-export * from './ingest';
-export * from './api';
-export * from './core';
-export * from './helpers';
-export * from './group';
-export * from './record_types';
+export * from './src/helpers';
+export * from './src/models';

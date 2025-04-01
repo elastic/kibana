@@ -15,7 +15,7 @@ import { ESQLSource, EsqlQuery } from '@kbn/esql-ast';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import type { IndexPatternRef } from '@kbn/lens-plugin/public/types';
-import type { ContentPackSavedObject } from '../../..';
+import type { ContentPackSavedObject } from '../models';
 
 export const INDEX_PLACEHOLDER = '<stream_name_placeholder>';
 

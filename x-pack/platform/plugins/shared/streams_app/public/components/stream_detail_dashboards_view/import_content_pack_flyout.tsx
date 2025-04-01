@@ -7,12 +7,8 @@
 
 import React, { useState } from 'react';
 import { capitalize, compact, uniqBy } from 'lodash';
-import {
-  ContentPack,
-  ContentPackObject,
-  ContentPackSavedObject,
-  IngestStreamGetResponse,
-} from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { ContentPack, ContentPackObject, ContentPackSavedObject } from '@kbn/content-packs-schema';
 import {
   EuiBadge,
   EuiBasicTable,

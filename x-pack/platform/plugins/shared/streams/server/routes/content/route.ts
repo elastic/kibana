@@ -21,7 +21,7 @@ import {
   contentPackSchema,
   findIndexPatterns,
   replaceIndexPatterns,
-} from '@kbn/streams-schema';
+} from '@kbn/content-packs-schema';
 import { SavedObject, SavedObjectsExportResultDetails } from '@kbn/core/server';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
