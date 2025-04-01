@@ -11,11 +11,7 @@ import AdmZip from 'adm-zip';
 import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  deleteKnowledgeBaseModel,
-  importTinyElserModel,
-  setupKnowledgeBase,
-} from '../utils/knowledge_base';
+import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');

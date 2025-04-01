@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Client, errors } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
