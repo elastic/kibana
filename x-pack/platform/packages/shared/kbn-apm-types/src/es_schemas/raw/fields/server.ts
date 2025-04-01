@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-export interface Url {
-  domain?: string;
-  full?: string;
-  original?: string;
-  scheme?: string;
-  path?: string;
+export interface Server {
+  address?: string;
+  port?: string;
 }

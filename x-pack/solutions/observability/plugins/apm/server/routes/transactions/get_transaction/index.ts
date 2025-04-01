@@ -30,6 +30,10 @@ import {
   HTTP_RESPONSE_STATUS_CODE,
   TRANSACTION_PAGE_URL,
   USER_AGENT_NAME,
+  URL_PATH,
+  URL_SCHEME,
+  SERVER_ADDRESS,
+  SERVER_PORT,
   USER_AGENT_VERSION,
 } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -72,6 +76,10 @@ export async function getTransaction({
     HTTP_RESPONSE_STATUS_CODE,
     HTTP_REQUEST_METHOD,
     USER_AGENT_NAME,
+    URL_PATH,
+    URL_SCHEME,
+    SERVER_ADDRESS,
+    SERVER_PORT,
     USER_AGENT_VERSION,
   ] as const);
 
