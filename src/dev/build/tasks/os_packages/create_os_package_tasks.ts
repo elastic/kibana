@@ -149,13 +149,18 @@ export const CreateDockerCloud: Task = {
   },
 };
 
+export const CreateDockerCloudFIPS: Task = {
+  description: 'v9.0 does not have a Cloud FIPS release, skipping Cloud FIPS image build.',
+  async run() {},
+};
+
 export const CreateDockerFIPS: Task = {
   description: 'Creating Docker FIPS image',
 
   async run(config, log, build) {
     await runDockerGenerator(config, log, build, {
       architecture: 'x64',
-      baseImage: 'ubi',
+      baseImage: 'wolfi',
       context: false,
       image: true,
       fips: true,
@@ -197,7 +202,7 @@ export const CreateDockerContexts: Task = {
       image: false,
     });
     await runDockerGenerator(config, log, build, {
-      baseImage: 'ubi',
+      baseImage: 'wolfi',
       context: true,
       image: false,
       fips: true,
