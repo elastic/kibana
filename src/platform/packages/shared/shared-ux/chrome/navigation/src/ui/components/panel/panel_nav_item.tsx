@@ -54,18 +54,17 @@ export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
           &.sideNavPanelLink:hover {
             background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
           }
-          ${!isElasticInternalLink &&
-          `& svg[class*='EuiExternalLinkIcon'] {
+          & svg[class*='EuiExternalLinkIcon'] {
             margin-left: auto;
-          }`}
+          }
         `
       )}
-      external={true}
       size="s"
       data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}
       iconType={icon}
       onClick={onClick}
+      external={isElasticInternalLink === false}
       target={openInNewTab ? '_blank' : undefined}
     />
   );
