@@ -76,17 +76,21 @@ ${inputsYaml}
       const MAX_ITERATIONS = 20;
       let foundMetrics = false;
       for (let i = 0; i < MAX_ITERATIONS; i++) {
-        const searchRes = await es.search({
-          index: 'metrics-system.cpu-default',
-          q: `agent.name:${agent.name}`,
-          ignore_unavailable: true,
-        });
-
-        // @ts-expect-error TotalHit
-        if (searchRes.hits.total.value > 0) {
-          foundMetrics = true;
-          break;
-        }
+        try {
+          const searchRes = await es.search({
+            index: 'metrics-system.cpu-default',
+            q: `agent.name:${agent.name}`,
+            ignore_unavailable: true,
+          });
+  
+          // @ts-expect-error TotalHit
+          if (searchRes.hits.total.value > 0) {
+            foundMetrics = true;
+            break;
+          }
+        } catch (err) {
+          log.error(err);
+        }  
         // await agent.log(); uncomment if you need to debug agent logs
         await new Promise((resolve) => setTimeout(resolve, 5 * 1000));
       }
