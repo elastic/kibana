@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MonacoEnvironment } from '@kbn/monaco';
+import '@kbn/monaco';
 import { Locator } from 'playwright/test';
 import { ScoutPage } from '..';
 
