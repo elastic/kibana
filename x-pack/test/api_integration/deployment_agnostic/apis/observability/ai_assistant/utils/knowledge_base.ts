@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
@@ -108,7 +108,12 @@ export async function deleteKnowledgeBaseModel(
       await deleteInferenceEndpoint({ es });
     }
   } catch (e) {
-    log.error(`Error deleting knowledge base model: ${e}`);
+    if (e.message.includes('resource_not_found_exception')) {
+      log.debug(`Knowledge base model was already deleted.`);
+      return;
+    }
+
+    log.error(`Could not delete knowledge base model: ${e}`);
   }
 }
 
