@@ -6,7 +6,7 @@
  */
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { notFound, forbidden } from '@hapi/boom';
-import { v4 as uuidv4 } from 'uuid';
+import objectHash from 'object-hash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
@@ -137,9 +137,9 @@ export class ObservabilityAIAssistantClient {
         const entities = await this.inferNER(chunks);
         message.message.sanitized = true;
         message.message.nerEntities = entities?.map((ent) => {
-          const redactedId = uuidv4();
+          const redactedId = objectHash({ entity: ent.entity, className: ent.class_name });
           return {
-            id: redactedId,
+            hash: redactedId,
             entity: ent.entity,
             class_name: ent.class_name,
             class_probability: ent.class_probability,

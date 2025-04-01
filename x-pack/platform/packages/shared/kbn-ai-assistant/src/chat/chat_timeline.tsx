@@ -180,7 +180,7 @@ export function ChatTimeline({
       if (item.message.message.role === 'user' && item.message.message.content) {
         if (item.message.message.sanitized && Array.isArray(item.message.message.nerEntities)) {
           item.message.message.nerEntities.forEach((entity) => {
-            redactedEntitiesMap[entity.id] = entity.entity;
+            redactedEntitiesMap[entity.hash] = entity.entity;
           });
           // transform user messages to react nodes to highlight the sensitive portions in the user message.
           displayContent = transformUserContent(

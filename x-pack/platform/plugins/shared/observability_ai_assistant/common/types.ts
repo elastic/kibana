@@ -35,7 +35,7 @@ export interface NerEntity {
   class_probability: number;
   start_pos: number;
   end_pos: number;
-  id: string;
+  hash: string;
 }
 export interface Message {
   '@timestamp': string;

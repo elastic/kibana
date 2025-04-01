@@ -21,7 +21,7 @@ export const entityRt = t.type({
   class_probability: t.number,
   start_pos: t.number,
   end_pos: t.number,
-  id: t.string,
+  hash: t.string,
 });
 
 export const messageRt: t.Type<Message> = t.type({

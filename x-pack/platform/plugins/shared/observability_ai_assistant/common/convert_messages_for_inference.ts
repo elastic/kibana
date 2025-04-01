@@ -36,7 +36,7 @@ function redactEntities(original: string, entities: NerEntity[]): string {
   let currentIndex = 0;
   for (const ent of sortedEntities) {
     redacted += original.substring(currentIndex, ent.start_pos);
-    redacted += `${ent.id}`;
+    redacted += `${ent.hash}`;
     currentIndex = ent.end_pos;
   }
   redacted += original.substring(currentIndex);
