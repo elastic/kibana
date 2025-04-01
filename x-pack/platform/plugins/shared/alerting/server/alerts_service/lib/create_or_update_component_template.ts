@@ -12,6 +12,7 @@ import type {
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
+import { updateIndexTemplateFiledsLimit } from './update_index_template_fileds_limit';
 
 interface CreateOrUpdateComponentTemplateOpts {
   logger: Logger;
@@ -48,19 +49,10 @@ const getIndexTemplatesUsingComponentTemplate = async (
     async (template: IndicesGetIndexTemplateIndexTemplateItem) => {
       await retryTransientEsErrors(
         () =>
-          esClient.indices.putIndexTemplate({
-            name: template.name,
-            body: {
-              ...template.index_template,
-              // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-              template: {
-                ...template.index_template.template,
-                settings: {
-                  ...template.index_template.template?.settings,
-                  'index.mapping.total_fields.limit': totalFieldsLimit,
-                },
-              },
-            },
+          updateIndexTemplateFiledsLimit({
+            esClient,
+            template,
+            limit: totalFieldsLimit,
           }),
         { logger }
       );

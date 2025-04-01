@@ -11,6 +11,7 @@ import { get, sortBy } from 'lodash';
 import type { IIndexPatternString } from '../resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import type { DataStreamAdapter } from './data_stream_adapter';
+import { updateIndexTemplateFiledsLimit } from './update_index_template_fileds_limit';
 
 export interface ConcreteIndexInfo {
   index: string;
@@ -31,6 +32,7 @@ interface UpdateIndexOpts {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   concreteIndexInfo: ConcreteIndexInfo;
+  attempt?: number;
 }
 
 const updateTotalFieldLimitSetting = async ({
@@ -66,6 +68,7 @@ const updateUnderlyingMapping = async ({
   logger,
   esClient,
   concreteIndexInfo,
+  attempt = 1,
 }: UpdateIndexOpts) => {
   const { index, alias } = concreteIndexInfo;
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
@@ -97,6 +100,34 @@ const updateUnderlyingMapping = async ({
 
     return;
   } catch (err) {
+    let newLimit;
+    try {
+      newLimit = await increaseFiledsLimit({
+        err,
+        esClient,
+        concreteIndexInfo,
+        logger,
+        attempt,
+      });
+      if (newLimit) {
+        await updateUnderlyingMapping({
+          logger,
+          esClient,
+          concreteIndexInfo,
+          totalFieldsLimit: newLimit,
+          attempt: attempt + 1,
+        });
+        return;
+      }
+    } catch (e) {
+      logger.error(
+        `An error occured while incresing total_fields.limit of ${alias} - ${e.message}`,
+        e
+      );
+      // Throw the original error
+      throw err;
+    }
+
     logger.error(`Failed to PUT mapping for ${alias}: ${err.message}`);
     throw err;
   }
@@ -206,3 +237,54 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     );
   }
 }
+
+const increaseFiledsLimit = async ({
+  err,
+  esClient,
+  concreteIndexInfo,
+  logger,
+  attempt,
+}: {
+  err: Error;
+  esClient: ElasticsearchClient;
+  concreteIndexInfo: ConcreteIndexInfo;
+  logger: Logger;
+  attempt: number;
+}): Promise<number | undefined> => {
+  const { alias } = concreteIndexInfo;
+  const match = err.message
+    ? err.message.match(/Limit of total fields \[(\d+)\] has been exceeded/)
+    : null;
+
+  if (match !== null) {
+    const exceededLimit = parseInt(match[1], 10);
+    const newLimit = exceededLimit + attempt;
+
+    const { index_templates: indexTemplates } = await retryTransientEsErrors(
+      () =>
+        esClient.indices.getIndexTemplate({
+          name: `${alias}-index-template`,
+        }),
+      { logger }
+    );
+    const template = indexTemplates[0];
+
+    // Update the limit in the index
+    await updateTotalFieldLimitSetting({
+      logger,
+      esClient,
+      totalFieldsLimit: newLimit,
+      concreteIndexInfo,
+    });
+    // Update the limit in the index template
+    await retryTransientEsErrors(
+      () => updateIndexTemplateFiledsLimit({ esClient, template, limit: newLimit }),
+      { logger }
+    );
+    logger.info(
+      `total_fields.limit of ${alias} has been increased form ${exceededLimit} to ${newLimit}`
+    );
+
+    return newLimit;
+  }
+};
