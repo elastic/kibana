@@ -3,5 +3,5 @@
 ## Disable plugins
 xpack.osquery.enabled: false
 
-## Agentless by default
+## Agentless deployment by default
 xpack.fleet.agentless.isDefault: true
