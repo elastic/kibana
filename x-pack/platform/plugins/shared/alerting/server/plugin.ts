@@ -53,7 +53,7 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 
-import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types';
+import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
 import { RuleTypeRegistry } from './rule_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { RulesClientFactory } from './rules_client_factory';
@@ -180,11 +180,11 @@ export interface AlertingServerStart {
   getFrameworkHealth: () => Promise<AlertsHealth>;
   scheduleAlertDeletion(
     req: KibanaRequest,
-    settings: RulesSettingsAlertDeletionProperties,
+    settings: RulesSettingsAlertDeleteProperties,
     spaceIds: string[]
   ): Promise<void>;
   previewAlertDeletion(
-    settings: RulesSettingsAlertDeletionProperties,
+    settings: RulesSettingsAlertDeleteProperties,
     spaceId: string
   ): Promise<number>;
   getLastRunAlertDeletion(req: KibanaRequest): Promise<string | undefined>;
@@ -681,13 +681,11 @@ export class AlertingPlugin {
       // remove when we have real routes
       scheduleAlertDeletion: async (
         req: KibanaRequest,
-        settings: RulesSettingsAlertDeletionProperties,
+        settings: RulesSettingsAlertDeleteProperties,
         spaceIds: string[]
       ) => await this.alertDeletionClient!.scheduleTask(req, settings, spaceIds),
-      previewAlertDeletion: async (
-        settings: RulesSettingsAlertDeletionProperties,
-        spaceId: string
-      ) => await this.alertDeletionClient!.previewTask(settings, spaceId),
+      previewAlertDeletion: async (settings: RulesSettingsAlertDeleteProperties, spaceId: string) =>
+        await this.alertDeletionClient!.previewTask(settings, spaceId),
       getLastRunAlertDeletion: async (req: KibanaRequest) =>
         await this.alertDeletionClient!.getLastRun(req),
     };

@@ -29,7 +29,7 @@ import type {
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types';
+import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
 import type { GetAlertIndicesAlias } from '../lib';
 import { AlertAuditAction, alertAuditEvent, alertAuditSystemEvent } from '../lib';
 import type { RuleTypeRegistry } from '../types';
@@ -138,7 +138,7 @@ export class AlertDeletionClient {
 
   public async scheduleTask(
     request: KibanaRequest,
-    settings: RulesSettingsAlertDeletionProperties,
+    settings: RulesSettingsAlertDeleteProperties,
     spaceIds: string[]
   ) {
     try {
@@ -176,7 +176,7 @@ export class AlertDeletionClient {
   }
 
   public async previewTask(
-    settings: RulesSettingsAlertDeletionProperties,
+    settings: RulesSettingsAlertDeleteProperties,
     spaceId: string
   ): Promise<number> {
     const esClient = await this.elasticsearchClientPromise;
@@ -274,7 +274,7 @@ export class AlertDeletionClient {
   };
 
   private async deleteAlertsForSpace(
-    settings: RulesSettingsAlertDeletionProperties,
+    settings: RulesSettingsAlertDeleteProperties,
     spaceId: string,
     abortController: AbortController
   ): Promise<{ numAlertsDeleted: number; errors?: string[] }> {
