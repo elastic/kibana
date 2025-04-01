@@ -29,9 +29,7 @@ export class OtelBaseSpan extends AbstractSpan<ApmOtelFields, OtelBaseSpan> {
 
   parent(span: OtelBaseSpan): this {
     this.fields.trace_id = span.fields.trace_id;
-    this.fields.parent_span_id = span.isSpan()
-      ? span.fields.span_id
-      : span.fields['attributes.transaction.id'];
+    this.fields.parent_span_id = span.fields.span_id;
 
     if (this.isSpan()) {
       this.fields['attributes.transaction.id'] = span.fields['attributes.transaction.id'];

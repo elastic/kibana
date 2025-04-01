@@ -26,6 +26,7 @@ export class Transaction extends OtelBaseSpan {
       'attributes.http.request.method': 'GET',
       'attributes.url.full': 'elastic.co',
       name: fields['attributes.transaction.name'],
+      // In Otel we have only spans (https://opentelemetry.io/docs/concepts/signals/traces/#spans)
       span_id: spanId,
       kind: 'Server',
     });
