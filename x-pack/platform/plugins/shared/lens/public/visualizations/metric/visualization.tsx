@@ -26,7 +26,11 @@ import {
   UserMessage,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
+import {
+  DimensionEditor,
+  DimensionEditorAdditionalSection,
+  DimensionEditorDataExtraComponent,
+} from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -574,6 +578,10 @@ export const getMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  DimensionEditorDataExtraComponent(props) {
+    return <DimensionEditorDataExtraComponent {...props} />;
   },
 
   DimensionEditorComponent(props) {

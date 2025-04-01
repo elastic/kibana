@@ -35,9 +35,10 @@ import { PalettePanelContainer, getAccessorType } from '../../shared_components'
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { MetricVisualizationState } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { GROUP_ID } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -82,7 +83,7 @@ export function DimensionEditor(props: Props) {
   }
 }
 
-function BreakdownByEditor({ setState, state, datasource }: SubProps) {
+function BreakdownByEditor({ setState, state }: SubProps) {
   const setMaxCols = useCallback(
     (columns: string) => {
       setState({ ...state, maxCols: parseInt(columns, 10) });
@@ -95,8 +96,6 @@ function BreakdownByEditor({ setState, state, datasource }: SubProps) {
       onChange: setMaxCols,
       value: String(state.maxCols ?? DEFAULT_MAX_COLUMNS),
     });
-
-  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
 
   return (
     <>
@@ -115,18 +114,6 @@ function BreakdownByEditor({ setState, state, datasource }: SubProps) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
-      {isMetricNumeric ? (
-        <CollapseSetting
-          display="columnCompressed"
-          value={state.collapseFn || ''}
-          onChange={(collapseFn) => {
-            setState({
-              ...state,
-              collapseFn,
-            });
-          }}
-        />
-      ) : null}
     </>
   );
 }
@@ -607,5 +594,28 @@ export function DimensionEditorAdditionalSection({
         )}
       </>
     </div>
+  );
+}
+
+export function DimensionEditorDataExtraComponent({
+  groupId,
+  datasource,
+  state,
+  setState,
+}: Omit<Props, 'paletteService'>) {
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+    return null;
+  }
+  return (
+    <CollapseSetting
+      value={state.collapseFn || ''}
+      onChange={(collapseFn) => {
+        setState({
+          ...state,
+          collapseFn,
+        });
+      }}
+    />
   );
 }
