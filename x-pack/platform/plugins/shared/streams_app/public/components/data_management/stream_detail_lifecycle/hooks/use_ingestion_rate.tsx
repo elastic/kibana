@@ -18,6 +18,30 @@ import { useIlmPhasesColorAndDescription } from './use_ilm_phases_color_and_desc
 const TIMESTAMP_FIELD = '@timestamp';
 const RANDOM_SAMPLER_PROBABILITY = 0.1;
 
+// some units are not supported for the fixed_interval of the date histogram
+// this function uses the calculateAutoTimeExpression function to determine
+// if the interval should be a calendar_interval or a fixed_interval
+const getIntervalAndType = (
+  timeRange: TimeRange,
+  core: { uiSettings: { get: (key: string) => any } }
+): { interval: string; intervalType: string } | undefined => {
+  const start = datemath.parse(timeRange.from);
+  const end = datemath.parse(timeRange.to);
+  const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
+
+  if (!start || !end || !interval) {
+    return undefined;
+  }
+
+  const calendarIntervalUnits = new Set(['w', 'M', 'q', 'y']);
+
+  const intervalType = calendarIntervalUnits.has(interval.replace(/^\d+/, ''))
+    ? 'calendar_interval'
+    : 'fixed_interval';
+
+  return { interval, intervalType };
+};
+
 export const useIngestionRate = ({
   definition,
   stats,
@@ -42,10 +66,11 @@ export const useIngestionRate = ({
 
       const start = datemath.parse(timeRange.from);
       const end = datemath.parse(timeRange.to);
-      const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
-      if (!start || !end || !interval) {
+      const intervalData = getIntervalAndType(timeRange, core);
+      if (!start || !end || !intervalData) {
         return;
       }
+      const { interval, intervalType } = intervalData;
 
       const {
         rawResponse: { aggregations },
@@ -73,13 +98,15 @@ export const useIngestionRate = ({
                   sampler: {
                     random_sampler: {
                       probability: RANDOM_SAMPLER_PROBABILITY,
+                      seed: 42,
                     },
                     aggs: {
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          fixed_interval: interval,
+                          [intervalType]: interval,
                           min_doc_count: 0,
+                          extended_bounds: { min: start, max: end },
                         },
                       },
                     },
@@ -102,7 +129,7 @@ export const useIngestionRate = ({
         })),
       };
     },
-    [data.search, definition, timeRange, stats]
+    [definition, stats, timeRange, core, data.search]
   );
 
   return {
@@ -143,10 +170,11 @@ export const useIngestionRatePerTier = ({
 
       const start = datemath.parse(timeRange.from);
       const end = datemath.parse(timeRange.to);
-      const interval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key))(timeRange);
-      if (!start || !end || !interval) {
+      const intervalData = getIntervalAndType(timeRange, core);
+      if (!start || !end || !intervalData) {
         return;
       }
+      const { interval, intervalType } = intervalData;
 
       const {
         rawResponse: { aggregations },
@@ -182,13 +210,15 @@ export const useIngestionRatePerTier = ({
                   sampler: {
                     random_sampler: {
                       probability: RANDOM_SAMPLER_PROBABILITY,
+                      seed: 42,
                     },
                     aggs: {
                       docs_count: {
                         date_histogram: {
                           field: TIMESTAMP_FIELD,
-                          fixed_interval: interval,
+                          [intervalType]: interval,
                           min_doc_count: 0,
+                          extended_bounds: { min: start, max: end },
                         },
                         aggs: {
                           indices: {
@@ -250,7 +280,7 @@ export const useIngestionRatePerTier = ({
 
       return { start, end, interval, buckets };
     },
-    [data.search, streamsRepositoryClient, definition, timeRange, stats]
+    [definition, stats, timeRange, core, data.search, streamsRepositoryClient, ilmPhases]
   );
 
   return {
