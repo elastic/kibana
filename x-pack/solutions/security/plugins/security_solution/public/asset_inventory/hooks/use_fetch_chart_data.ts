@@ -25,18 +25,18 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
   size: 0,
   index: ASSET_INVENTORY_INDEX_PATTERN,
   aggs: {
-    entityCategory: {
+    entityType: {
       terms: {
-        field: 'entity.category',
+        field: 'entity.type',
         order: {
           entityId: 'desc',
         },
         size: 10,
       },
       aggs: {
-        entityType: {
+        entitySubType: {
           terms: {
-            field: 'entity.type',
+            field: 'entity.sub_type',
             order: {
               entityId: 'desc',
             },
@@ -73,9 +73,17 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
 });
 
 export interface AggregationResult {
-  category: string;
-  source: string;
+  type: string;
+  subType: string;
   count: number;
+}
+
+interface SubTypeBucket {
+  key: string;
+  doc_count: number;
+  entityId: {
+    value: number;
+  };
 }
 
 interface TypeBucket {
@@ -84,16 +92,8 @@ interface TypeBucket {
   entityId: {
     value: number;
   };
-}
-
-interface CategoryBucket {
-  key: string;
-  doc_count: number;
-  entityId: {
-    value: number;
-  };
-  entityType: {
-    buckets: TypeBucket[];
+  entitySubType: {
+    buckets: SubTypeBucket[];
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
   };
@@ -102,8 +102,8 @@ interface CategoryBucket {
 }
 
 interface AssetAggs {
-  entityCategory: {
-    buckets: CategoryBucket[];
+  entityType: {
+    buckets: TypeBucket[];
   };
 }
 
@@ -117,30 +117,30 @@ const tooltipOtherLabel = i18n.translate(
 // Example output:
 //
 // [
-//   { category: 'cloud-compute', source: 'gcp-compute', count: 500, },
-//   { category: 'cloud-compute', source: 'aws-security', count: 300, },
-//   { category: 'cloud-storage', source: 'gcp-compute', count: 221, },
-//   { category: 'cloud-storage', source: 'aws-security', count: 117, },
+//   { type: 'cloud-compute', subType: 'gcp-compute', count: 500, },
+//   { type: 'cloud-compute', subType: 'aws-security', count: 300, },
+//   { type: 'cloud-storage', subType: 'gcp-compute', count: 221, },
+//   { type: 'cloud-storage', subType: 'aws-security', count: 117, },
 // ];
 function transformAggregation(agg: AssetAggs) {
   const result: AggregationResult[] = [];
 
-  for (const categoryBucket of agg.entityCategory.buckets) {
-    const typeBucket = categoryBucket.entityType;
+  for (const typeBucket of agg.entityType.buckets) {
+    const { entitySubType } = typeBucket;
 
-    for (const sourceBucket of typeBucket.buckets) {
+    for (const subtypeBucket of entitySubType.buckets) {
       result.push({
-        category: categoryBucket.key,
-        source: sourceBucket.key,
-        count: sourceBucket.doc_count,
+        type: typeBucket.key,
+        subType: subtypeBucket.key,
+        count: subtypeBucket.doc_count,
       });
     }
 
-    if (typeBucket.sum_other_doc_count > 0) {
+    if (entitySubType.sum_other_doc_count > 0) {
       result.push({
-        category: categoryBucket.key,
-        source: `${categoryBucket.key} - ${tooltipOtherLabel}`,
-        count: typeBucket.sum_other_doc_count,
+        type: typeBucket.key,
+        subType: `${typeBucket.key} - ${tooltipOtherLabel}`,
+        count: entitySubType.sum_other_doc_count,
       });
     }
   }

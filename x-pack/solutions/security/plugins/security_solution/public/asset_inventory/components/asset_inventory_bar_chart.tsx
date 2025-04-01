@@ -71,14 +71,14 @@ export const AssetInventoryBarChart = ({
             }}
           />
           <BarSeries
-            id="grouped-categories"
+            id="grouped-entity-types"
             xScaleType={ScaleType.Ordinal}
             yScaleType={ScaleType.Linear}
-            xAccessor="category"
+            xAccessor="type"
             yAccessors={['count']}
             yNice={true}
-            splitSeriesAccessors={['source']}
-            stackAccessors={['category']}
+            splitSeriesAccessors={['subType']}
+            stackAccessors={['type']}
             minBarHeight={1}
             data={entities}
           />
