@@ -363,7 +363,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const isSSLEditable = isDisabled('ssl');
   // Logstash inputs
-  const logstashEnableSSLInput = useSwitchInput(output ? Boolean(output?.ssl) : true);
+  const logstashEnableSSLInput = useSwitchInput(
+    output?.type === 'logstash' ? Boolean(output?.ssl) : true,
+    isSSLEditable
+  );
 
   const logstashHostsInput = useComboInput(
     'logstashHostsComboxBox',
