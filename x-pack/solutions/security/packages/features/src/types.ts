@@ -23,6 +23,7 @@ import type {
   ProductFeatureSiemMigrationsKey,
   ProductFeatureTimelineFeatureKey,
   ProductFeatureNotesFeatureKey,
+  ProductFeatureExceptionsFeatureKey,
 } from './product_features_keys';
 
 export type { ProductFeatureKeyType };
@@ -75,6 +76,11 @@ export type ProductFeaturesSiemMigrationsConfig = Map<
   ProductFeatureKibanaConfig
 >;
 
+export type ProductFeaturesExceptionsConfig = Map<
+  ProductFeatureExceptionsFeatureKey,
+  ProductFeatureKibanaConfig
+>;
+
 export type AppSubFeaturesMap<T extends string = string> = Map<T, SubFeatureConfig>;
 
 export interface ProductFeatureParams<T extends string = string> {
@@ -91,4 +97,5 @@ export interface ProductFeaturesConfigurator {
   timeline: () => ProductFeaturesConfig;
   notes: () => ProductFeaturesConfig;
   siemMigrations: () => ProductFeaturesConfig;
+  exceptions: () => ProductFeaturesConfig;
 }

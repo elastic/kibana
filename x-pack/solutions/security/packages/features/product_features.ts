@@ -12,3 +12,4 @@ export { getAttackDiscoveryFeature } from './src/attack_discovery';
 export { getTimelineFeature } from './src/timeline';
 export { getNotesFeature } from './src/notes';
 export { getSiemMigrationsFeature } from './src/siem_migrations';
+export { getExceptionsFeature } from './src/exceptions';

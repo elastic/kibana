@@ -12,6 +12,7 @@ import {
   timelineSavedObjectTypes,
   notesSavedObjectTypes,
   savedObjectTypes,
+  exceptionsSavedObjectTypes,
 } from '../../saved_objects';
 
 // Same as the saved-object type for rules defined by Cloud Security Posture
@@ -35,3 +36,5 @@ export const securityV1SavedObjects = [...securityDefaultSavedObjects, ...savedO
 export const securityTimelineSavedObjects = timelineSavedObjectTypes;
 
 export const securityNotesSavedObjects = notesSavedObjectTypes;
+
+export const securityExceptionsSavedObjects = exceptionsSavedObjectTypes;

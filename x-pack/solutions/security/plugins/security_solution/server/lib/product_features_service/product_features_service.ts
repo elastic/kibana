@@ -16,6 +16,7 @@ import {
   getAssistantFeature,
   getAttackDiscoveryFeature,
   getCasesFeature,
+  getExceptionsFeature,
   getSecurityFeature,
   getCasesV2Feature,
   getCasesV3Feature,
@@ -34,6 +35,7 @@ import {
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
   securityV1SavedObjects,
+  securityExceptionsSavedObjects,
 } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
@@ -46,6 +48,7 @@ export class ProductFeaturesService {
   private securityAssistantProductFeatures: ProductFeatures;
   private attackDiscoveryProductFeatures: ProductFeatures;
   private timelineProductFeatures: ProductFeatures;
+  private exceptionsProductFeatures: ProductFeatures;
   private notesProductFeatures: ProductFeatures;
   private siemMigrationsProductFeatures: ProductFeatures;
 
@@ -153,6 +156,17 @@ export class ProductFeaturesService {
       notesFeature.baseKibanaSubFeatureIds
     );
 
+    const exceptionsFeature = getExceptionsFeature({
+      savedObjects: securityExceptionsSavedObjects,
+      experimentalFeatures: {},
+    });
+    this.exceptionsProductFeatures = new ProductFeatures(
+      this.logger,
+      exceptionsFeature.subFeaturesMap,
+      exceptionsFeature.baseKibanaFeature,
+      exceptionsFeature.baseKibanaSubFeatureIds
+    );
+
     const siemMigrationsFeature = getSiemMigrationsFeature();
     this.siemMigrationsProductFeatures = new ProductFeatures(
       this.logger,
@@ -168,6 +182,7 @@ export class ProductFeaturesService {
     this.casesProductFeatures.init(featuresSetup);
     this.casesProductV2Features.init(featuresSetup);
     this.casesProductFeaturesV3.init(featuresSetup);
+    this.exceptionsProductFeatures.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
     this.attackDiscoveryProductFeatures.init(featuresSetup);
     this.timelineProductFeatures.init(featuresSetup);
@@ -197,6 +212,9 @@ export class ProductFeaturesService {
     const notesProductFeaturesConfig = configurator.notes();
     this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
 
+    const exceptionsProductFeaturesConfig = configurator.exceptions();
+    this.exceptionsProductFeatures.setConfig(exceptionsProductFeaturesConfig);
+
     let siemMigrationsProductFeaturesConfig = new Map();
     if (!this.experimentalFeatures.siemMigrationsDisabled) {
       siemMigrationsProductFeaturesConfig = configurator.siemMigrations();
@@ -212,6 +230,7 @@ export class ProductFeaturesService {
         ...timelineProductFeaturesConfig.keys(),
         ...notesProductFeaturesConfig.keys(),
         ...siemMigrationsProductFeaturesConfig.keys(),
+        ...exceptionsProductFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }
@@ -233,7 +252,8 @@ export class ProductFeaturesService {
       this.attackDiscoveryProductFeatures.isActionRegistered(action) ||
       this.timelineProductFeatures.isActionRegistered(action) ||
       this.notesProductFeatures.isActionRegistered(action) ||
-      this.siemMigrationsProductFeatures.isActionRegistered(action)
+      this.siemMigrationsProductFeatures.isActionRegistered(action) ||
+      this.exceptionsProductFeatures.isActionRegistered(action)
     );
   }
 
