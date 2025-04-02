@@ -14,10 +14,10 @@ import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import { buildRouteValidation } from './utils/route_validation';
 
-export const getAlertFieldsByRuleTypeId = (router: IRouter<RacRequestHandlerContext>) => {
+export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerContext>) => {
   router.get(
     {
-      path: `${BASE_RAC_ALERTS_API_PATH}/alert_fields`,
+      path: `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
       validate: {
         query: buildRouteValidation(
           t.exact(

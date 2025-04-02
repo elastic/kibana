@@ -29,7 +29,7 @@ export const fetchRuleTypeAlertFields = async ({
   ruleTypeId?: string;
 }): Promise<DataViewField[]> => {
   if (!ruleTypeId) return EMPTY_AAD_FIELDS;
-  const fields = await http.get<DataViewField[]>(`${BASE_RAC_ALERTS_API_PATH}/alert_fields`, {
+  const fields = await http.get<DataViewField[]>(`${BASE_RAC_ALERTS_API_PATH}/browser_fields`, {
     query: { ruleTypeIds: [ruleTypeId] },
   });
 

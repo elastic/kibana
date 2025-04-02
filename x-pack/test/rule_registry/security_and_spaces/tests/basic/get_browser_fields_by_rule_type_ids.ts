@@ -17,8 +17,9 @@ export default ({ getService }: FtrProviderContext) => {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const retry = getService('retry');
   const SPACE1 = 'space1';
-  const TEST_URL = '/internal/rac/alerts/alert_fields';
+  const TEST_URL = '/internal/rac/alerts/browser_fields';
 
   const esQueryRule = {
     tags: [],
@@ -39,7 +40,7 @@ export default ({ getService }: FtrProviderContext) => {
       timeField: 'updated_at',
     },
     schedule: {
-      interval: '30s',
+      interval: '1m',
     },
     consumer: 'stackAlerts',
     name: 'Elasticsearch query rule',
@@ -65,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
     return resp.body;
   };
 
-  describe('Alert - Get alert fields by rule type IDs', () => {
+  describe('Alert - Get browser fields by rule type IDs', () => {
     const ruleTypeIds = [
       ...OBSERVABILITY_RULE_TYPE_IDS,
       '.es-query',
@@ -90,17 +91,19 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Users:', () => {
-      it(`${obsOnlySpacesAll.username} should be able to get non empty alert fields for all o11y ruleTypeIds`, async () => {
-        const resp = await getBrowserFieldsByFeatureId(superUser, ruleTypeIds);
+      it(`${obsOnlySpacesAll.username} should be able to get non empty browser fields for all o11y ruleTypeIds`, async () => {
+        await retry.try(async () => {
+          const resp = await getBrowserFieldsByFeatureId(superUser, ruleTypeIds);
 
-        expect(Object.keys(resp.browserFields)).toEqual(['base', 'event', 'kibana']);
+          expect(Object.keys(resp.browserFields)).toEqual(['base', 'event', 'kibana']);
+        });
       });
 
-      it(`${superUser.username} should NOT be able to get alert fields for siem rule types`, async () => {
+      it(`${superUser.username} should NOT be able to get browser fields for siem rule types`, async () => {
         await getBrowserFieldsByFeatureId(superUser, ['siem.queryRule'], 404);
       });
 
-      it(`${secOnlyRead.username} should NOT be able to get alert fields for siem rule types`, async () => {
+      it(`${secOnlyRead.username} should NOT be able to get browser fields for siem rule types`, async () => {
         await getBrowserFieldsByFeatureId(secOnlyRead, ['siem.queryRule'], 404);
       });
     });

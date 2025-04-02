@@ -63,7 +63,7 @@ describe('useLoadRuleTypeAlertFields', () => {
       return expect(result.current.isInitialLoading).toEqual(false);
     });
 
-    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/alert_fields', {
+    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/browser_fields', {
       query: { ruleTypeIds: ['ruleTypeId'] },
     });
 

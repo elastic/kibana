@@ -25,7 +25,7 @@ describe('fetchRuleTypeAlertFields', () => {
     expect(result).toEqual(['mockData']);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/internal/rac/alerts/alert_fields",
+        "/internal/rac/alerts/browser_fields",
         Object {
           "query": Object {
             "ruleTypeIds": Array [
