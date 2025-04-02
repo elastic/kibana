@@ -199,7 +199,7 @@ const defaultGroupingOptions = [
   },
   {
     label: i18n.DESTINATION_ADDRESS,
-    key: 'destination.address,',
+    key: 'destination.address',
   },
 ];
 
