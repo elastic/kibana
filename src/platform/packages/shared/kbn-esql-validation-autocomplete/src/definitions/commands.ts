@@ -45,6 +45,7 @@ import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
+import { suggest as suggestForFork } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
@@ -683,6 +684,6 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     }),
     declaration: `TODO`,
     examples: [],
-    suggest: () => [],
+    suggest: suggestForFork,
   },
 ];
