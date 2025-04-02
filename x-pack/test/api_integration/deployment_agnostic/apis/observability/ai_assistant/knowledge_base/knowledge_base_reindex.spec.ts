@@ -16,7 +16,6 @@ import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const retry = getService('retry');
   const log = getService('log');
 
