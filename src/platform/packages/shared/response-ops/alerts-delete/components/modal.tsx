@@ -26,6 +26,7 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { HttpStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from '../translations';
 import { ModalThresholdSelector as ThresholdSelector } from './modal_threshold_selector';
 import {
@@ -256,7 +257,16 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
           </EuiPanel>
           <EuiHorizontalRule />
 
-          <p>{i18n.getPreviewMessage(previewAffectedAlertsCount)}</p>
+          <p>
+            <FormattedMessage
+              id="responseOpsAlertDelete.preview"
+              defaultMessage="This action will permanently delete a total of <strong>{count} {count, plural, one {alert} other {alerts}}</strong> and you won't be able to restore them."
+              values={{
+                strong: (chunks) => <strong>{chunks}</strong>,
+                count: previewAffectedAlertsCount,
+              }}
+            />
+          </p>
           <EuiSpacer size="m" />
 
           <EuiFormRow
