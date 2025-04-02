@@ -210,8 +210,24 @@ const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Positio
   return previousLines + '\n' + currentLine;
 };
 
+// @internal
+const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
+  if (typeof queryString !== 'string' || queryString.length === 0) {
+    return false;
+  }
+
+  const lastChar = queryString.slice(-1);
+  const secondLastChar = queryString.slice(-2, -1);
+
+  return lastChar === '?' || secondLastChar === '?';
+};
+
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
+
+  if (hasQuestionMarkAtEndOrSecondLastPosition(queryString)) {
+    return undefined;
+  }
 
   const validQuery = `${queryInCursorPosition} ""`;
   const { root } = parse(validQuery);

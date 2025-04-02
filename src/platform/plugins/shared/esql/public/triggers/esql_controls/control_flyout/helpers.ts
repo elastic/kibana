@@ -186,3 +186,38 @@ export const checkVariableExistence = (
     return false;
   });
 };
+
+export const adjustQueryStringForTrailingQuestionMark = (
+  queryString: string,
+  cursorPosition: monaco.Position
+): {
+  updatedQuery: string;
+  updatedPosition: monaco.Position;
+} => {
+  const lastChar = queryString.slice(-1);
+  const secondLastChar = queryString.slice(-2, -1);
+
+  if (lastChar === '?') {
+    return {
+      updatedQuery: queryString.slice(0, -1),
+      updatedPosition: {
+        ...cursorPosition,
+        column: cursorPosition.column - 1,
+      } as monaco.Position,
+    };
+  } else if (secondLastChar === '?') {
+    return {
+      updatedQuery: queryString.slice(0, -2) + queryString.slice(-1),
+      updatedPosition: {
+        ...cursorPosition,
+        column: cursorPosition.column - 1,
+      } as monaco.Position,
+    };
+  } else {
+    // Return original if no question mark at end or second-last
+    return {
+      updatedQuery: queryString,
+      updatedPosition: cursorPosition,
+    };
+  }
+};

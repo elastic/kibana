@@ -16,7 +16,7 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -49,6 +49,7 @@ import {
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
+  getControlSuggestionIfSupported,
 } from './factories';
 import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext } from '../shared/context';
@@ -107,12 +108,23 @@ export async function suggest(
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
-    resourceRetriever
+    resourceRetriever,
+    innerText
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
+
+  const lastCharacterTyped = innerText[innerText.length - 1];
+  let controlSuggestions: SuggestionRawDefinition[] = [];
+  if (lastCharacterTyped === '?') {
+    controlSuggestions = getControlSuggestionIfSupported(
+      Boolean(supportsControls),
+      ESQLVariableType.VALUES,
+      getVariables
+    );
+  }
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -131,7 +143,8 @@ export async function suggest(
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
-          resourceRetriever
+          resourceRetriever,
+          innerText
         );
         recommendedQueriesSuggestions.push(
           ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
@@ -145,7 +158,7 @@ export async function suggest(
   }
 
   if (astContext.type === 'expression') {
-    return getSuggestionsWithinCommandExpression(
+    const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -159,9 +172,10 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
+    return [...commandsSpecificSuggestions, ...controlSuggestions];
   }
   if (astContext.type === 'function') {
-    return getFunctionArgsSuggestions(
+    const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -172,6 +186,7 @@ export async function suggest(
       getVariables,
       supportsControls
     );
+    return [...functionsSpecificSuggestions, ...controlSuggestions];
   }
   if (astContext.type === 'list') {
     return getListArgsSuggestions(
@@ -183,16 +198,21 @@ export async function suggest(
       getPolicyMetadata
     );
   }
-  return [];
+  return [...controlSuggestions];
 }
 
 export function getFieldsByTypeRetriever(
-  queryString: string,
-  resourceRetriever?: ESQLCallbacks
+  queryForFields: string,
+  resourceRetriever?: ESQLCallbacks,
+  fullQuery?: string
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
-  const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
+  const helpers = getFieldsByTypeHelper(queryForFields, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
-  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+
+  const queryString = fullQuery ?? queryForFields;
+  const lastCharacterTyped = queryString[queryString.length - 1];
+  const lastCharIsQuestionMark = lastCharacterTyped === '?';
   return {
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
@@ -201,7 +221,7 @@ export function getFieldsByTypeRetriever(
     ) => {
       const updatedOptions = {
         ...options,
-        supportsControls,
+        supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);

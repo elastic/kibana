@@ -28,6 +28,7 @@ import {
   getVariableTypeFromQuery,
   getVariableNamePrefix,
   checkVariableExistence,
+  adjustQueryStringForTrailingQuestionMark,
 } from './helpers';
 
 interface ESQLControlsFlyoutProps {
@@ -151,7 +152,11 @@ export function ESQLControlsFlyout({
     if (controlState && controlState.availableOptions.length) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
-          const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
+          const { updatedQuery, updatedPosition } = adjustQueryStringForTrailingQuestionMark(
+            queryString,
+            cursorPosition
+          );
+          const query = updateQueryStringWithVariable(updatedQuery, variableName, updatedPosition);
           await onSaveControl?.(controlState, query);
         }
       } else {
