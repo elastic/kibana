@@ -85,7 +85,7 @@ describe('waitForPickupUpdatedMappingsTask', () => {
 
     const task = waitForPickupUpdatedMappingsTask({ client, taskId: '4273', timeout: '2m' });
     const result = await task();
-    expect(Either.isLeft(result));
+    expect(Either.isLeft(result)).toBe(true);
     expect((result as Either.Left<any>).left).toMatchInlineSnapshot(`
       Object {
         "message": "The task being waited on encountered a search_phase_execution_exception error",
