@@ -19,7 +19,11 @@ import { i18n } from '@kbn/i18n';
 import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-utils-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
+import {
+  convertPanelMapToPanelsArray,
+  convertSectionMapToSectionArray,
+  DashboardPanelMap,
+} from '../../../../common';
 import {
   getDashboardBackupService,
   PANELS_CONTROL_GROUP_KEY,
@@ -162,6 +166,9 @@ export function ShowShareModal({
         PANELS_CONTROL_GROUP_KEY
       ] as DashboardLocatorParams['controlGroupState'],
       panels: allUnsavedPanels as DashboardLocatorParams['panels'],
+      sections: convertSectionMapToSectionArray(
+        unsavedDashboardState.sections
+      ) as DashboardLocatorParams['sections'],
 
       // options
       useMargins: unsavedDashboardState?.useMargins,

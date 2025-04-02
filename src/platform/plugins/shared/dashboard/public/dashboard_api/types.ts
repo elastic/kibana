@@ -55,7 +55,7 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import { DashboardSectionMap } from '../../common/dashboard_container/types';
+import { DashboardSectionMap, DashboardSectionState } from '../../common/dashboard_container/types';
 import type {
   DashboardAttributes,
   DashboardOptions,
@@ -131,7 +131,7 @@ export interface DashboardState extends DashboardSettings {
 }
 
 export type DashboardLocatorParams = Partial<
-  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
+  Omit<DashboardState, 'panels' | 'sections' | 'controlGroupInput' | 'references'>
 > & {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
@@ -163,6 +163,11 @@ export type DashboardLocatorParams = Partial<
    * List of dashboard panels
    */
   panels?: Array<DashboardPanel & SerializableRecord>; // used SerializableRecord here to force the GridData type to be read as serializable
+
+  /**
+   * List of dashboard sections
+   */
+  sections?: Array<DashboardSectionState & SerializableRecord>; // used SerializableRecord here to force the DashboardSectionState type to be read as serializable
 
   /**
    * Control group changes
