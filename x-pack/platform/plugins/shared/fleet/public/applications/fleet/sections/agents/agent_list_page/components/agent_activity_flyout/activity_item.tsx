@@ -59,11 +59,11 @@ export const ActivityItem: React.FunctionComponent<{
                   offlineText:
                     action.status === 'ROLLOUT_PASSED' &&
                     action.nbAgentsActioned - action.nbAgentsAck > 0
-                      ? ` ${
+                      ? `, ${
                           action.nbAgentsActioned - action.nbAgentsAck
                         } agent(s) offline during the rollout period`
                       : '',
-                  versionText: action.version ? ` to version ${action.version}.` : '',
+                  versionText: action.version ? ` to version ${action.version}` : '',
                   automaticIcon: action.is_automatic ? (
                     <EuiIconTip
                       anchorProps={{

@@ -18,7 +18,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useGetAutoUpgradeAgentsStatusQuery, useLink } from '../../../../../../hooks';
-
 export const StatusColumn: React.FunctionComponent<{
   agentPolicyId: string;
   version: string;

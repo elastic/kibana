@@ -216,7 +216,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         expect.anything(),
         expect.anything(),
         {
-          agents: agents.slice(0, 3),
+          agents: agents.slice(0, 3), // As theres already one upgrading, and 30% of 11 is 3, we only want two items to be sent for upgrade
           version: '8.18.0',
         }
       );
@@ -240,7 +240,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         expect.anything(),
         expect.anything(),
         {
-          agents: agents.slice(0, 3),
+          agents: agents.slice(0, 2),
           version: '8.18.0',
         }
       );
