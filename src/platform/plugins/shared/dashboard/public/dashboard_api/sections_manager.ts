@@ -53,7 +53,7 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
         sections$,
         setSections,
         (a, b) => {
-          return fastIsEqual(a ?? [], b ?? []);
+          return fastIsEqual(a ?? {}, b ?? {});
         },
       ],
     } as StateComparators<Pick<DashboardState, 'sections'>>,
