@@ -48,7 +48,7 @@ Array [
     </div>
   </div>,
   <div
-    class="euiFlyoutBody emotion-EuiFlyoutBody"
+    class="euiFlyoutBody emotion-euiFlyoutBody-InspectorPanel"
   >
     <div
       class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"

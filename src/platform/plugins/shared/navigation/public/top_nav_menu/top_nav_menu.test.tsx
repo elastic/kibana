@@ -19,7 +19,7 @@ import type { TopNavMenuBadgeProps } from './top_nav_menu_badges';
 import { unifiedSearchMock } from '../mocks';
 
 describe('TopNavMenu', () => {
-  const WRAPPER_SELECTOR = '[data-test-subj="kbn-top-nav-menu-wrapper"]';
+  const WRAPPER_SELECTOR = 'TopNavMenuItems[data-test-subj="kbn-top-nav-menu-wrapper"]';
   const BADGES_GROUP_SELECTOR = '[data-test-subj="kbn-top-nav-menu-badge-group"]';
   const TOP_NAV_ITEM_SELECTOR = 'TopNavMenuItem';
   const SEARCH_BAR_SELECTOR = 'AggregateQuerySearchBar';
