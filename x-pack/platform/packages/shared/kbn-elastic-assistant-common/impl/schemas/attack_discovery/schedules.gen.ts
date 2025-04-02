@@ -125,6 +125,44 @@ export const AttackDiscoveryScheduleAction = z.object({
 });
 
 /**
+ * An attack discovery schedule execution status
+ */
+export type AttackDiscoveryScheduleExecutionStatus = z.infer<
+  typeof AttackDiscoveryScheduleExecutionStatus
+>;
+export const AttackDiscoveryScheduleExecutionStatus = z.enum([
+  'ok',
+  'active',
+  'error',
+  'unknown',
+  'warning',
+]);
+export type AttackDiscoveryScheduleExecutionStatusEnum =
+  typeof AttackDiscoveryScheduleExecutionStatus.enum;
+export const AttackDiscoveryScheduleExecutionStatusEnum =
+  AttackDiscoveryScheduleExecutionStatus.enum;
+
+/**
+ * An attack discovery schedule execution information
+ */
+export type AttackDiscoveryScheduleExecution = z.infer<typeof AttackDiscoveryScheduleExecution>;
+export const AttackDiscoveryScheduleExecution = z.object({
+  /**
+   * Date of the execution
+   */
+  date: z.string().datetime(),
+  /**
+   * Duration of the execution
+   */
+  duration: z.number().optional(),
+  /**
+   * Status of the execution
+   */
+  status: AttackDiscoveryScheduleExecutionStatus,
+  message: z.string().optional(),
+});
+
+/**
  * An attack discovery schedule
  */
 export type AttackDiscoverySchedule = z.infer<typeof AttackDiscoverySchedule>;
@@ -169,6 +207,10 @@ export const AttackDiscoverySchedule = z.object({
    * The attack discovery schedule actions
    */
   actions: z.array(AttackDiscoveryScheduleAction),
+  /**
+   * The attack discovery schedule last execution summary
+   */
+  lastExecution: AttackDiscoveryScheduleExecution.optional(),
 });
 
 /**

@@ -10,6 +10,7 @@ import {
   AttackDiscoverySchedule,
   AttackDiscoveryScheduleParams,
 } from '@kbn/elastic-assistant-common';
+import { createScheduleExecutionSummary } from './create_schedule_execution_summary';
 
 export const convertAlertingRuleToSchedule = (
   rule: SanitizedRule<AttackDiscoveryScheduleParams>
@@ -37,5 +38,6 @@ export const convertAlertingRuleToSchedule = (
     params,
     schedule,
     actions,
+    lastExecution: createScheduleExecutionSummary(rule),
   };
 };

@@ -55,6 +55,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/AttackDiscoveryScheduleAction'
+        lastExecution:
+          description: The attack discovery schedule last execution summary
+          $ref: '#/components/schemas/AttackDiscoveryScheduleExecution'
 
     AttackDiscoveryScheduleParams:
       type: object
@@ -160,6 +163,37 @@ components:
         - id
         - group
         - params
+
+    AttackDiscoveryScheduleExecutionStatus:
+      type: string
+      description: An attack discovery schedule execution status
+      enum:
+        - ok
+        - active
+        - error
+        - unknown
+        - warning
+
+    AttackDiscoveryScheduleExecution:
+      type: object
+      description: An attack discovery schedule execution information
+      required:
+        - date
+        - status
+        - lastDuration
+      properties:
+        date:
+          description: Date of the execution
+          type: string
+          format: date-time
+        duration:
+          description: Duration of the execution
+          type: number
+        status:
+          description: Status of the execution
+          $ref: '#/components/schemas/AttackDiscoveryScheduleExecutionStatus'
+        message:
+          type: string
 
     AttackDiscoveryScheduleCreateProps:
       type: object

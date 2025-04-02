@@ -54,7 +54,8 @@ export const getAttackDiscoveryUpdateScheduleMock = (
 };
 
 export const getInternalAttackDiscoveryScheduleMock = (
-  createParams: AttackDiscoveryScheduleCreateProps
+  createParams: AttackDiscoveryScheduleCreateProps,
+  overrides?: Partial<SanitizedRule<AttackDiscoveryScheduleParams>>
 ): SanitizedRule<AttackDiscoveryScheduleParams> => {
   const { actions = [], params, ...restAttributes } = createParams;
   return {
@@ -83,6 +84,7 @@ export const getInternalAttackDiscoveryScheduleMock = (
     revision: 0,
     running: false,
     ...restAttributes,
+    ...overrides,
   };
 };
 
