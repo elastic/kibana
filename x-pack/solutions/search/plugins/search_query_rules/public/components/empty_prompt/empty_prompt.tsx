@@ -75,7 +75,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                     <p>
                       <FormattedMessage
                         id="xpack.queryRules.emptyPrompt.subtitle"
-                        defaultMessage="Create and maintain business logic in your query rules to  provide targeted results based on query parameters."
+                        defaultMessage="Create and maintain business logic in your query rules to provide targeted results based on query parameters."
                       />
                     </p>
                   </EuiText>
@@ -208,7 +208,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                           <p>
                             <FormattedMessage
                               id="xpack.queryRules.emptyPrompt.collaborateMantain.description"
-                              defaultMessage="Update your query rules and export the updates to code for easy developer collaboration."
+                              defaultMessage="Update query rules and easily export as code for developers to use programmatically."
                             />
                           </p>
                         </EuiText>
