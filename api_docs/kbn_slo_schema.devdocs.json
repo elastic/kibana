@@ -820,7 +820,7 @@
         "label": "FindSLODefinitionsParams",
         "description": [],
         "signature": [
-          "{ search?: string | undefined; includeOutdatedOnly?: boolean | undefined; page?: string | undefined; perPage?: string | undefined; }"
+          "{ search?: string | undefined; includeOutdatedOnly?: boolean | undefined; tags?: string | undefined; page?: string | undefined; perPage?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_definition.ts",
         "deprecated": false,
@@ -3941,7 +3941,9 @@
           "StringC",
           "; includeOutdatedOnly: ",
           "Type",
-          "<boolean, boolean, unknown>; page: ",
+          "<boolean, boolean, unknown>; tags: ",
+          "StringC",
+          "; page: ",
           "StringC",
           "; perPage: ",
           "StringC",

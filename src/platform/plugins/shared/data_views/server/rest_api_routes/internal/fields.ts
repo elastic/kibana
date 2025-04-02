@@ -146,17 +146,23 @@ export const registerFields = (
   >,
   isRollupsEnabled: () => boolean
 ) => {
-  router.versioned.get({ path, access: 'internal', enableQueryVersion: true }).addVersion(
-    {
-      version: '1',
+  router.versioned
+    .get({
+      path,
+      access: 'internal',
+      enableQueryVersion: true,
       security: {
         authz: {
           enabled: false,
           reason: 'Authorization provided by Elasticsearch',
         },
       },
-      validate: { request: { query: querySchema }, response: validate.response },
-    },
-    handler(isRollupsEnabled)
-  );
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { query: querySchema }, response: validate.response },
+      },
+      handler(isRollupsEnabled)
+    );
 };
