@@ -375,6 +375,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
       logsDatastream: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/logs-data-stream.html`,
       usingLogsDbIndexModeWithESSecurity: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/detections-logsdb-index-mode-impact.html`,
+      dataStreamReindex: `${ELASTICSEARCH_DOCS}data-stream-reindex-api.html#reindex-data-stream-api-settings`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
     elasticsearch: {

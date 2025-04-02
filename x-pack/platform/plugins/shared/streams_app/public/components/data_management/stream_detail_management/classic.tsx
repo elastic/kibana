@@ -7,6 +7,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
+import { EuiCallOut, EuiFlexGroup } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
@@ -29,7 +30,28 @@ export function ClassicStreamDetailManagement({
 }) {
   const {
     path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+  } = useStreamsAppParams('/{key}/{tab}/{subtab}');
+
+  if (!definition.data_stream_exists) {
+    return (
+      <EuiFlexGroup direction="column">
+        <EuiCallOut
+          title={i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.title', {
+            defaultMessage: 'Data stream missing',
+          })}
+          color="danger"
+          iconType="error"
+        >
+          <p>
+            {i18n.translate('xpack.streams.unmanagedStreamOverview.missingDatastream.description', {
+              defaultMessage:
+                'The underlying Elasticsearch data stream for this classic stream is missing. Recreate the data stream to restore the stream by sending data before using the management features.',
+            })}
+          </p>
+        </EuiCallOut>
+      </EuiFlexGroup>
+    );
+  }
 
   const tabs: ManagementTabs = {};
 
@@ -64,7 +86,10 @@ export function ClassicStreamDetailManagement({
 
   if (!isValidManagementSubTab(subtab)) {
     return (
-      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'enrich' } }} />
+      <RedirectTo
+        path="/{key}/{tab}/{subtab}"
+        params={{ path: { key, tab: 'management', subtab: 'enrich' } }}
+      />
     );
   }
 
