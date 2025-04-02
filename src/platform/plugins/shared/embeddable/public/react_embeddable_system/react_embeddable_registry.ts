@@ -61,7 +61,7 @@ export const getReactEmbeddableFactory = async <
 };
 
 export async function preloadEmbeddableChunks(ids: string[]) {
-  await Promise.all(
+  Promise.all(
     ids
       .map(id => getReactEmbeddableFactory(id))
   );
