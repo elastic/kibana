@@ -70,15 +70,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({
   const pageCount = meta?.pageSize ? Math.ceil(meta.totalItemCount / meta?.pageSize) : 0;
   return (
     <>
-      <EuiPagination
-        aria-label={i18n.translate('searchIndexDocuments.documentList.paginationAriaLabel', {
-          defaultMessage: 'Pagination for document list',
-        })}
-        pageCount={pageCount}
-        activePage={meta.pageIndex}
-        onPageClick={onPaginate}
-      />
-      <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem>
           <EuiText size="xs">
