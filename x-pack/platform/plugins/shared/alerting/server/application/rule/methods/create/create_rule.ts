@@ -211,10 +211,7 @@ export async function createRule<Params extends RuleParams = never>(
   // Convert domain rule object to ES rule attributes
   const ruleAttributes = transformRuleDomainToRuleAttributes({
     actionsWithRefs,
-    artifactsWithRefs: {
-      investigation_guide: initialData.artifacts?.investigation_guide,
-      ...artifactsWithRefs,
-    },
+    artifactsWithRefs,
     rule: {
       ...restData,
       // TODO (http-versioning) create a rule domain version of this function
