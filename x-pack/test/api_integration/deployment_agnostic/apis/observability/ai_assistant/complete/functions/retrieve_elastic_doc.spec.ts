@@ -161,7 +161,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           );
         });
 
-        it('returns the retrieved doc in the final tool message', () => {
+        it('responds with the correct tool message', () => {
           expect(lastMessage?.role).to.be('tool');
           // @ts-expect-error
           expect(lastMessage?.tool_call_id).to.equal(
