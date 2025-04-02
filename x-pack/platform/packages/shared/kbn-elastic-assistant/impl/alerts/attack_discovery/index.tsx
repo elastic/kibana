@@ -67,6 +67,7 @@ export const AttackDiscoveryWidget: React.FC<Props> = ({ id }) => {
           <EuiTitle size="xs">
             <h3>{attackDiscovery.title}</h3>
           </EuiTitle>
+          <EuiSpacer size="xs" />
           <AttackDiscoveryDetails attackDiscovery={attackDiscovery} />
           <EuiButtonEmpty
             iconSide="right"
