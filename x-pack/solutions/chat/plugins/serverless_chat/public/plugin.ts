@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 
 import type {
@@ -13,6 +14,7 @@ import type {
   ChatServerlessPluginSetupDeps,
   ChatServerlessPluginStartDeps,
 } from './types';
+import { createNavigationTree } from './navigation_tree';
 
 export class ChatServerlessPlugin
   implements
@@ -34,8 +36,12 @@ export class ChatServerlessPlugin
 
   public start(
     core: CoreStart,
-    startDeps: ChatServerlessPluginStartDeps
+    { serverless }: ChatServerlessPluginStartDeps
   ): ChatServerlessPluginStart {
+    const navigationTree$ = of(createNavigationTree());
+
+    serverless.initNavigation('chat', navigationTree$);
+
     return {};
   }
 
