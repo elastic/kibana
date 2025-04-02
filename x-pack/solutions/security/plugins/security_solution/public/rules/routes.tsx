@@ -126,6 +126,7 @@ export const routes: SecuritySubPluginRoutes = [
     path: RULES_PATH,
     component: withSecurityRoutePageWrapper(Rules, SecurityPageName.rules, {
       redirectOnMissing: true,
+      renderSpyRoute: false,
     }),
   },
   {
