@@ -100,7 +100,7 @@ export function WelcomeMessageKnowledgeBase({
               {i18n.translate(
                 'xpack.aiAssistant.welcomeMessageKnowledgeBase.deployingModelSubLabel',
                 {
-                  defaultMessage: 'Deploying model, please wait...',
+                  defaultMessage: 'Deploying model...',
                 }
               )}
             </EuiText>
