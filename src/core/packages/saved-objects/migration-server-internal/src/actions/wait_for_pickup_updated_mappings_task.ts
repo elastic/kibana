@@ -39,11 +39,11 @@ export const waitForPickupUpdatedMappingsTask = flow(
         );
       } else if (Option.isSome(res.error)) {
         if (res.error.value.type === 'search_phase_execution_exception') {
-          // This error is normally fixed in the next try, so let's retry instead of throwing
+          // This error is normally fixed in the next try, so let's retry
+          // the update mappings task instead of throwing
           return TaskEither.left({
             type: 'wait_for_task_completed_with_error_retry_original' as const,
-            message:
-              'The task being waited on encountered a search_phase_execution_exception error',
+            message: `The task being waited on encountered a ${res.error.value.type} error`,
           });
         }
 
