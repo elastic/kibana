@@ -31,6 +31,6 @@
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
     "@kbn/projects-solutions-groups",
-    "@kbn/monaco"
+    "@kbn/painless-lab-plugin"
   ]
 }
