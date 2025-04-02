@@ -83,7 +83,6 @@ describe('getSerializedState', () => {
         },
         "panels": Array [],
         "refreshInterval": undefined,
-        "sections": undefined,
         "timeFrom": undefined,
         "timeRestore": false,
         "timeTo": undefined,
@@ -167,5 +166,60 @@ describe('getSerializedState', () => {
     });
 
     expect(result.references).toEqual(panelReferences);
+  });
+
+  it('should serialize sections as array', () => {
+    const dashboardState = {
+      ...getSampleDashboardState(),
+      panels: {
+        oldPanelId: {
+          type: 'visualization',
+          gridData: { sectionId: 'section1' },
+        } as unknown as DashboardPanelState,
+      },
+      sections: {
+        section1: { id: 'section1', title: 'Section One', collapsed: false, order: 1 },
+        section2: { id: 'section2', title: 'Section Two', collapsed: true, order: 2 },
+      },
+    };
+    const result = getSerializedState({
+      controlGroupReferences: [],
+      generateNewIds: true,
+      dashboardState,
+      panelReferences: [],
+      searchSourceReferences: [],
+    });
+
+    expect(result.attributes.panels).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "gridData": Object {
+            "i": "54321",
+            "sectionId": "section1",
+          },
+          "panelConfig": Object {},
+          "panelIndex": "54321",
+          "type": "visualization",
+          "version": undefined,
+        },
+      ]
+    `);
+
+    expect(result.attributes.sections).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "collapsed": false,
+          "id": "section1",
+          "order": 1,
+          "title": "Section One",
+        },
+        Object {
+          "collapsed": true,
+          "id": "section2",
+          "order": 2,
+          "title": "Section Two",
+        },
+      ]
+    `);
   });
 });
