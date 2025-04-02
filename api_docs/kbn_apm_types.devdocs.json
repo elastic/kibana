@@ -4784,6 +4784,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.TRANSACTION_MARKS_AGENT",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_MARKS_AGENT",
+        "description": [],
+        "signature": [
+          "\"transaction.marks.agent\""
+        ],
+        "path": "packages/kbn-apm-types/src/es_fields/apm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.TRANSACTION_DURATION",
         "type": "string",
         "tags": [],
