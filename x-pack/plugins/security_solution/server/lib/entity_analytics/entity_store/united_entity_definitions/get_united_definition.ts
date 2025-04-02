@@ -25,7 +25,7 @@ interface Options {
   namespace: string;
   fieldHistoryLength: number;
   indexPatterns: string[];
-  filter: string;
+  filter?: string;
   syncDelay: string;
   frequency: string;
 }
@@ -55,7 +55,7 @@ export const getUnitedEntityDefinition = memoize(
       indexPatterns,
       syncDelay,
       frequency,
-      filter,
+      filter: filter ?? '',
     });
   }
 );
