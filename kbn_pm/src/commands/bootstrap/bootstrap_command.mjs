@@ -88,7 +88,6 @@ export const command = {
         if (forceInstall) {
           await removeYarnIntegrityFileIfExists();
         }
-        log.info('installing dependencies with yarn');
         await yarnInstallDeps(log, { offline, quiet });
       });
     }

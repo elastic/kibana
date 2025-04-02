@@ -40,10 +40,11 @@ export async function areNodeModulesPresent() {
  * @returns {Promise<void>}
  */
 export async function yarnInstallDeps(log, { offline, quiet }) {
-  log.info('installing node dependencies with yarn');
   const args = ['install', '--non-interactive'];
   if (offline) args.push('--offline');
   if (quiet) args.push('--silent');
+
+  log.info('installing dependencies with yarn');
   await run('yarn', args, { cwd: process.cwd(), pipe: true });
   log.success('yarn dependencies installed');
 

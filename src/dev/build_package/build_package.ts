@@ -29,11 +29,9 @@ const getFullOutputPath = (packageFolder: string, commandName: string) => {
 const envOptions = {
   dist: {
     NODE_ENV: 'production',
-    NODE_OPTIONS: '--openssl-legacy-provider',
   },
   default: {
     NODE_ENV: 'development',
-    NODE_OPTIONS: '--openssl-legacy-provider',
   },
 };
 
