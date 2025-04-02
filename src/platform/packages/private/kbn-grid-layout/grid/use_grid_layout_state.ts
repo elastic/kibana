@@ -97,6 +97,7 @@ export const useGridLayoutState = ({
     const activeRowEvent$ = new BehaviorSubject<ActiveRowEvent | undefined>(undefined);
 
     return {
+      layoutRef,
       rowRefs,
       headerRefs,
       panelRefs,

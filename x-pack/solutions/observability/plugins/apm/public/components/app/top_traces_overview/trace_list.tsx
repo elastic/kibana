@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
+import { EuiIcon, EuiScreenReaderOnly, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { ApmRoutes } from '../../routing/apm_route_config';
-import { asMillisecondDuration, asTransactionRate } from '../../../../common/utils/formatters';
+import {
+  asMillisecondDuration,
+  asTransactionRate,
+  asTransactionValue,
+} from '../../../../common/utils/formatters';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import type { FetcherResult } from '../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
@@ -99,7 +103,22 @@ export function getTraceListColumns({
       }),
       sortable: true,
       dataType: 'number',
-      render: (_, { transactionsPerMinute }) => asTransactionRate(transactionsPerMinute),
+      render: (_, { transactionsPerMinute }) => (
+        <>
+          <span aria-hidden="true">{asTransactionRate(transactionsPerMinute)}</span>
+          <EuiScreenReaderOnly>
+            <span>
+              {asTransactionValue(transactionsPerMinute)}{' '}
+              {i18n.translate(
+                'xpack.apm.tracesTable.tracesPerMinuteColumn.screenReaderAbbreviation',
+                {
+                  defaultMessage: 'traces per minute',
+                }
+              )}
+            </span>
+          </EuiScreenReaderOnly>
+        </>
+      ),
     },
     {
       field: 'impact',
