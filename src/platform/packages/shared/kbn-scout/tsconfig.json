@@ -30,7 +30,6 @@
     "@kbn/scout-reporting",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
-    "@kbn/projects-solutions-groups",
-    "@kbn/painless-lab-plugin"
+    "@kbn/projects-solutions-groups"
   ]
 }
