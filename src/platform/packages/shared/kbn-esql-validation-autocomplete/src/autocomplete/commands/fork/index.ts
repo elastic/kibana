@@ -8,7 +8,11 @@
  */
 
 import { ESQLCommand } from '@kbn/esql-ast';
-import { getCommandDefinition, getCommandsByName } from '../../../shared/helpers';
+import {
+  getCommandDefinition,
+  getCommandsByName,
+  pipePrecedesCurrentWord,
+} from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
@@ -37,7 +41,7 @@ export async function suggest(
   }
 
   // within a branch
-  if (activeBranch?.commands.length === 0) {
+  if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(params.innerText)) {
     return getCommandAutocompleteDefinitions(getCommandsByName(['limit', 'sort', 'where']));
   }
 

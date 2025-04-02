@@ -197,7 +197,12 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       }
     }
   }
-  if (!command || (queryString.length <= offset && pipePrecedesCurrentWord(queryString))) {
+  if (
+    !command ||
+    (queryString.length <= offset &&
+      pipePrecedesCurrentWord(queryString) &&
+      command.location.max < queryString.length)
+  ) {
     //   // ... | <here>
     return { type: 'newCommand' as const, command: undefined, node, option, containingFunction };
   }
