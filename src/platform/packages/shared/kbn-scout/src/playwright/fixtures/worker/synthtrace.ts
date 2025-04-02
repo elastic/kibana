@@ -12,7 +12,7 @@ import type {
   ApmFields,
   Fields,
   InfraDocument,
-  OtelDocument,
+  ApmOtelFields,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
@@ -32,7 +32,7 @@ interface SynthtraceFixtureEsClient<TFields extends Fields> {
 export interface SynthtraceFixture {
   apmSynthtraceEsClient: SynthtraceFixtureEsClient<ApmFields>;
   infraSynthtraceEsClient: SynthtraceFixtureEsClient<InfraDocument>;
-  otelSynthtraceEsClient: SynthtraceFixtureEsClient<OtelDocument>;
+  otelSynthtraceEsClient: SynthtraceFixtureEsClient<ApmOtelFields>;
 }
 
 const useSynthtraceClient = async <TFields extends Fields>(
@@ -86,7 +86,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
     async ({ esClient, log }, use) => {
       const otelSynthtraceEsClient = await getOtelSynthtraceEsClient(esClient, log);
 
-      await useSynthtraceClient<OtelDocument>(otelSynthtraceEsClient, use);
+      await useSynthtraceClient<ApmOtelFields>(otelSynthtraceEsClient, use);
     },
     { scope: 'worker' },
   ],
