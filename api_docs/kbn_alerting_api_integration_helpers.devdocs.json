@@ -466,7 +466,7 @@
         "label": "ES_TEST_INDEX_NAME",
         "description": [],
         "signature": [
-          "\".kibana-alerting-test-data\""
+          "\"kibana-alerting-test-data\""
         ],
         "path": "x-pack/test/alerting_api_integration/packages/helpers/es_test_index_tool.ts",
         "deprecated": false,
