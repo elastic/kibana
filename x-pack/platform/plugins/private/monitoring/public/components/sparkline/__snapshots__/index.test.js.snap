@@ -3,11 +3,7 @@
 exports[`Sparkline component does not show tooltip initially 1`] = `
 <div>
   <div
-    css={
-      Object {
-        "height": "2em",
-      }
-    }
+    className="css-9ufo15-Sparkline"
   />
 </div>
 `;
