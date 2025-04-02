@@ -271,6 +271,9 @@ export const search = (specService: SpecDefinitionsService) => {
           ],
         ],
       },
+      retriever: {
+        // populated by a global rule
+      },
     },
   });
 

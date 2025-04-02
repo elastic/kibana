@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { SpecDefinitionsService } from '../../../services';
+
+export const retriever = (specService: SpecDefinitionsService) => {
+  specService.addGlobalAutocompleteRules('retriever', {
+    knn: {
+      __template: {
+        field: '',
+        query_vector_builder: {
+          text_embedding: {
+            model_id: '',
+            model_text: '',
+          },
+        },
+        k: 10,
+        num_candidates: 100,
+      },
+      filter: {
+        __scope_link: 'GLOBAL.query'
+      },
+      field: '{field}',
+      query_vector: [],
+      similarity: { __one_of: ['l2_norm', 'cosine', 'dot_product', 'max_inner_product'] },
+      rescore_vector: {
+        oversample: 1.5,
+      },
+    },
+    linear: {
+      __template: {
+        retrievers: [
+          {}
+        ]
+      },
+      rank_window_size: 100,
+      filter: {
+        __scope_link: 'GLOBAL.query'
+      },
+      retrievers: { 
+        __any_of: [
+          {
+            retriever: {
+              __scope_link: '.'
+            },
+            weight: 2,
+            normalizer: 'minmax'
+          }
+        ]
+      }
+    },
+    rescore: {
+      __template: {
+        rescore: {
+          query: {
+            rescore_query: {}
+          }
+        },
+        retriever: {}
+      },
+      filter: {
+        __scope_link: 'GLOBAL.query'
+      },
+      retriever: {
+        __scope_link: '.'
+      },
+      rescore: {
+        query: {
+          rescore_query: {
+            __scope_link: 'GLOBAL.query'
+          }
+        },
+        window_size: 50
+      },
+    },
+    rrf: {
+      __template: {
+        retrievers: [
+          {}
+        ]
+      },
+      retrievers: [
+        {
+          __scope_link: '.'
+        }
+      ],
+      filter: {
+        __scope_link: 'GLOBAL.query'
+      },
+      rank_constant: 60,
+      rank_window_size: 100,
+    },
+    standard: {
+      __template: {
+        query: {},
+      },
+      query: {
+        __scope_link: 'GLOBAL.query'
+      },
+      filter: {
+        __scope_link: 'GLOBAL.query'
+      },
+      collapse: {
+        __template: {
+          field: 'FIELD',
+        },
+      },
+      min_score: 0,
+      search_after: [],
+      sort: {},
+      terminate_after: 10000
+    }
+  })
+};
