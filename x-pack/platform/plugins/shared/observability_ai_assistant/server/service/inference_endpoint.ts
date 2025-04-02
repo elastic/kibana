@@ -135,6 +135,7 @@ export async function getElserModelStatus({
   }
   const deploymentState = elserModelStats?.deployment_stats?.state;
   const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
+  const deploymentReason = elserModelStats?.deployment_stats?.reason;
   const allocationCount =
     elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
   const ready =
@@ -148,6 +149,7 @@ export async function getElserModelStatus({
       allocation_count: allocationCount,
       deployment_state: deploymentState,
       allocation_state: allocationState,
+      deployment_reason: deploymentReason,
     },
   };
 }
