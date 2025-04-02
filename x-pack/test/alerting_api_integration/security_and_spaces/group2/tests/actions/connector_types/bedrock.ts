@@ -332,7 +332,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
             expect(simulator.requestData).to.eql(DEFAULT_BODY);
             expect(simulator.requestUrl).to.eql(
-              `${apiUrl}/model/${defaultConfig.defaultModel}/invoke`
+              `${apiUrl}/model/${encodeURIComponent(defaultConfig.defaultModel)}/invoke`
             );
             expect(body).to.eql({
               status: 'ok',
@@ -584,7 +584,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
             expect(simulator.requestData).to.eql(DEFAULT_BODY);
             expect(simulator.requestUrl).to.eql(
-              `${apiUrl}/model/${defaultConfig.defaultModel}/invoke`
+              `${apiUrl}/model/${encodeURIComponent(defaultConfig.defaultModel)}/invoke`
             );
             expect(body).to.eql({
               status: 'ok',
