@@ -190,7 +190,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
    * Requires `xpack.reporting.csv.enablePanelActionDownload: true` in kibana.yml
    * @deprecated
    */
-  private executeDownload = async (params: ExecutionParams) => {
+  private executeDownload = async (params: ExecutionParamsOld) => {
     // Deprecated and does not work for ES|QL mode
     const [startServices] = await firstValueFrom(this.startServices$);
     const { searchSource, columns, title } = params;
