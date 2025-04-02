@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useState, useEffect } from 'react';
 
-import { EuiText, EuiFlexItem, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -38,11 +38,10 @@ const FixIssuesStep: FunctionComponent<Props> = ({ setIsComplete }) => {
 
   return (
     <EuiFlexGroup>
-      <EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: 350 }}>
         <EsDeprecationIssuesPanel setIsFixed={setIsEsFixed} />
       </EuiFlexItem>
-
-      <EuiFlexItem>
+      <EuiFlexItem grow={false} style={{ width: 350 }}>
         <KibanaDeprecationIssuesPanel setIsFixed={setIsKibanaFixed} />
       </EuiFlexItem>
     </EuiFlexGroup>

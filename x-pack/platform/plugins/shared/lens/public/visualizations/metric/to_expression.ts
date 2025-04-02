@@ -128,7 +128,9 @@ export const toExpression = (
     };
   };
 
-  const collapseExpressionFunction = state.collapseFn
+  const canCollapseBy = state.collapseFn && isMetricNumeric;
+
+  const collapseExpressionFunction = canCollapseBy
     ? buildExpressionFunction<CollapseExpressionFunction>(
         'lens_collapse',
         getCollapseFnArguments()
@@ -143,7 +145,7 @@ export const toExpression = (
     secondaryPrefix: state.secondaryPrefix,
     max: state.maxAccessor,
     breakdownBy:
-      state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
+      state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,
     trendline: trendlineExpression ? [trendlineExpression] : [],
     subtitle: state.subtitle ?? undefined,
     progressDirection: showingBar(state)

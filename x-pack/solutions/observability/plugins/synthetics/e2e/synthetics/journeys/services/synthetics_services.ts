@@ -59,10 +59,11 @@ export class SyntheticsServices {
   async addTestMonitor(
     name: string,
     data: Record<string, any> = { type: 'browser' },
-    configId?: string
+    configId?: string,
+    options: { tls: { enabled: boolean } } = { tls: { enabled: false } }
   ) {
     const testData = {
-      alert: { status: { enabled: true } },
+      alert: { status: { enabled: true }, tls: options.tls },
       locations: [{ id: 'us_central', isServiceManaged: true }],
       ...(data?.type !== 'browser' ? {} : data),
       ...(data || {}),
@@ -125,6 +126,8 @@ export class SyntheticsServices {
     stepIndex = 1,
     locationName,
     configId,
+    tlsNotBefore,
+    tlsNotAfter,
   }: {
     monitorId?: string;
     docType?: 'summaryUp' | 'summaryDown' | 'journeyStart' | 'journeyEnd' | 'stepEnd';
@@ -134,6 +137,8 @@ export class SyntheticsServices {
     stepIndex?: number;
     locationName?: string;
     configId?: string;
+    tlsNotBefore?: string;
+    tlsNotAfter?: string;
   } = {}) {
     const getService = this.params.getService;
     const es: Client = getService('es');
@@ -154,6 +159,8 @@ export class SyntheticsServices {
       },
       configId,
       monitorId: monitorId ?? configId,
+      tlsNotAfter,
+      tlsNotBefore,
     };
 
     switch (docType) {
@@ -195,20 +202,20 @@ export class SyntheticsServices {
     });
   }
 
-  async cleaUp() {
+  async cleanUp() {
     try {
       const getService = this.params.getService;
       const server = getService('kibanaServer');
 
       await server.savedObjects.clean({ types: ['synthetics-monitor', 'alert'] });
-      await this.cleaUpAlerts();
+      await this.cleanUpAlerts();
     } catch (e) {
       // eslint-disable-next-line no-console
       console.log(e);
     }
   }
 
-  async cleaUpAlerts() {
+  async cleanUpAlerts() {
     try {
       const getService = this.params.getService;
       const es: Client = getService('es');
