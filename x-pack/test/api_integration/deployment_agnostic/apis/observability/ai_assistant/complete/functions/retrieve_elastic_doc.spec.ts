@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
+import { ChatCompletionMessageParam } from 'openai/resources';
 import { last } from 'lodash';
 import { MessageAddEvent, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import {
@@ -146,7 +147,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('The second request - Sending the user prompt', () => {
-        it('contains the tool call for retrieve_elastic_doc', () => {
+        let lastMessage: ChatCompletionMessageParam;
+        let parsedContent: { documents: Array<{ title: string; content: string; url: string }> };
+        before(() => {
+          lastMessage = last(secondRequestBody.messages) as ChatCompletionMessageParam;
+          parsedContent = JSON.parse(lastMessage.content as string);
+        });
+        it('includes a retrieve_elastic_doc function call', () => {
           expect(secondRequestBody.messages[4].role).to.be(MessageRole.Assistant);
           // @ts-expect-error
           expect(secondRequestBody.messages[4].tool_calls[0].function.name).to.be(
@@ -154,17 +161,28 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           );
         });
 
-        it('sends Elastic product docs to the LLM', () => {
-          const lastMessage = last(secondRequestBody.messages);
+        it('returns the retrieved doc in the final tool message', () => {
           expect(lastMessage?.role).to.be('tool');
           // @ts-expect-error
           expect(lastMessage?.tool_call_id).to.equal(
             // @ts-expect-error
             secondRequestBody.messages[4].tool_calls[0].id
           );
+        });
+        it('retrieve documents from Elastic docs are sent to the LLM', () => {
+          expect(lastMessage.content).to.be.a('string');
+        });
 
-          const parsedContent = JSON.parse(lastMessage?.content as string);
-          expect(parsedContent).to.have.property('documents');
+        it('send 3 documents to the llm', () => {
+          expect(parsedContent.documents.length).to.be(3);
+        });
+
+        it('document content must contain the "lens" word', () => {
+          const document = parsedContent.documents.find(
+            (doc) => doc.title === 'Enhancements and bug fixes'
+          );
+          expect(document).to.not.be(undefined);
+          expect(document?.content).to.contain('lens');
         });
       });
     });
