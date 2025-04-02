@@ -304,6 +304,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'create',
         id: 'test-package-policy',
+        name: 'Test Package Policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -447,12 +448,14 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'create',
         id: 'test-package-policy-1',
+        name: 'Test Package Policy 1',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'create',
         id: 'test-package-policy-2',
+        name: 'Test Package Policy 2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -463,7 +466,7 @@ describe('Package policy service', () => {
       const soClient = savedObjectsClientMock.create();
       soClient.get.mockResolvedValueOnce({
         id: 'test-package-policy',
-        attributes: {},
+        attributes: { name: 'Test' },
         references: [],
         type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -473,6 +476,7 @@ describe('Package policy service', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-package-policy',
+        name: 'Test',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -485,13 +489,13 @@ describe('Package policy service', () => {
         saved_objects: [
           {
             id: 'test-package-policy-1',
-            attributes: {},
+            attributes: { name: 'Test 1' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-package-policy-2',
-            attributes: {},
+            attributes: { name: 'Test 2' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
           },
@@ -505,12 +509,14 @@ describe('Package policy service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
+        name: 'Test 1',
         id: 'test-package-policy-1',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
+        name: 'Test 2',
         id: 'test-package-policy-2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -527,14 +533,14 @@ describe('Package policy service', () => {
         saved_objects: [
           {
             id: 'test-package-policy-1',
-            attributes: {},
+            attributes: { name: 'Test 1' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
           {
             id: 'test-package-policy-2',
-            attributes: {},
+            attributes: { name: 'Test 2' },
             references: [],
             type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
@@ -550,12 +556,14 @@ describe('Package policy service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
+        name: 'Test 1',
         id: 'test-package-policy-1',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
+        name: 'Test 2',
         id: 'test-package-policy-2',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -1781,6 +1789,7 @@ describe('Package policy service', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
+        name: 'endpoint-1',
         id: 'test-package-policy',
         savedObjectType: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
       });

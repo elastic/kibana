@@ -189,15 +189,17 @@ class AgentPolicyService {
     }
   ): Promise<AgentPolicy> {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    auditLoggingService.writeCustomSoAuditLog({
-      action: 'update',
-      id,
-      savedObjectType,
-    });
+
     const logger = appContextService.getLogger();
     logger.debug(`Starting update of agent policy ${id}`);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'update',
+      id,
+      name: existingAgentPolicy?.name,
+      savedObjectType,
+    });
 
     if (!existingAgentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
@@ -392,6 +394,7 @@ class AgentPolicyService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id: options.id,
+      name: agentPolicy.name,
       savedObjectType,
     });
     await this.runExternalCallbacks('agentPolicyCreate', agentPolicy);
@@ -515,6 +518,7 @@ class AgentPolicyService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id,
+      name: agentPolicy.name,
       savedObjectType,
     });
 
@@ -580,6 +584,7 @@ class AgentPolicyService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: agentPolicy.id,
+        name: agentPolicy.name,
         savedObjectType,
       });
     }
@@ -684,6 +689,7 @@ class AgentPolicyService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: agentPolicy.id,
+        name: agentPolicy.name,
         savedObjectType,
       });
     }
@@ -1203,13 +1209,14 @@ class AgentPolicyService {
     const logger = appContextService.getLogger();
     logger.debug(`Deleting agent policy ${id}`);
     const savedObjectType = await getAgentPolicySavedObjectType();
+
+    const agentPolicy = await this.get(soClient, id, false);
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id,
+      name: agentPolicy?.name,
       savedObjectType,
     });
-
-    const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new AgentPolicyNotFoundError('Agent policy not found');
     }
@@ -1787,14 +1794,14 @@ class AgentPolicyService {
     { perPage = 1000, kuery = undefined, spaceId = undefined }: FetchAllAgentPolicyIdsOptions = {}
   ): Promise<AsyncIterable<string[]>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
-    return createSoFindIterable<{}>({
+    return createSoFindIterable<{ name: string }>({
       soClient,
       findRequest: {
         type: savedObjectType,
         perPage,
         sortField: 'created_at',
         sortOrder: 'asc',
-        fields: ['id'],
+        fields: ['id', 'name'],
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
         namespaces: spaceId ? [spaceId] : undefined,
       },
@@ -1803,6 +1810,7 @@ class AgentPolicyService {
           auditLoggingService.writeCustomSoAuditLog({
             action: 'find',
             id: agentPolicySO.id,
+            name: agentPolicySO.attributes.name,
             savedObjectType,
           });
           return agentPolicySO.id;

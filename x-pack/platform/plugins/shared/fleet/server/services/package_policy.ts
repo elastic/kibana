@@ -261,6 +261,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id: packagePolicyId,
+      name: packagePolicy.name,
       savedObjectType,
     });
 
@@ -514,6 +515,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'create',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
 
@@ -772,6 +774,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id,
+      name: response.name,
       savedObjectType,
     });
 
@@ -800,6 +803,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
     }
@@ -842,6 +846,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
     }
@@ -879,6 +884,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType,
       });
     }
@@ -899,13 +905,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
   ): Promise<ListResult<string>> {
     const { page = 1, perPage = 20, sortField = 'updated_at', sortOrder = 'desc', kuery } = options;
     const savedObjectType = await getPackagePolicySavedObjectType();
-    const packagePolicies = await soClient.find<{}>({
+    const packagePolicies = await soClient.find<{ name: string }>({
       type: savedObjectType,
       sortField,
       sortOrder,
       page,
       perPage,
-      fields: [],
+      fields: ['name'],
       filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
     });
 
@@ -913,6 +919,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType,
       });
     }
@@ -936,6 +943,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id,
+      name: packagePolicyUpdate.name,
       savedObjectType,
     });
     const logger = appContextService.getLogger();
@@ -1191,6 +1199,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'update',
         id: packagePolicy.id,
+        name: packagePolicy.name,
         savedObjectType,
       });
     }
@@ -2126,6 +2135,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
           auditLoggingService.writeCustomSoAuditLog({
             action: 'find',
             id: packagePolicySO.id,
+            name: packagePolicySO.attributes.name,
             savedObjectType,
           });
 

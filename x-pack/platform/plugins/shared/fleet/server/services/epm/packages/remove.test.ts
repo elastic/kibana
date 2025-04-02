@@ -108,6 +108,7 @@ describe('removeInstallation', () => {
     expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
       action: 'delete',
       id: 'system',
+      name: 'system',
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   });

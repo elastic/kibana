@@ -32,6 +32,7 @@ export const updateLatestExecutedState = async (context: InstallContext) => {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: pkgName,
+      name: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
     return await withPackageSpan('Update latest executed state', () =>
@@ -55,6 +56,7 @@ export const cleanupLatestExecutedState = async (context: InstallContext) => {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: pkgName,
+      name: pkgName,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
     logger.debug(`Cleaning up latest executed state`);
