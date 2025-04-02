@@ -152,9 +152,13 @@ const callOut = (
 
 export interface EsDeprecationLogsFlyoutProps {
   closeFlyout: () => void;
+  handleToggleChange: () => void;
 }
 
-export const EsDeprecationLogsFlyout = ({ closeFlyout }: EsDeprecationLogsFlyoutProps) => {
+export const EsDeprecationLogsFlyout = ({
+  closeFlyout,
+  handleToggleChange,
+}: EsDeprecationLogsFlyoutProps) => {
   const {
     services: {
       core: { docLinks },
@@ -172,6 +176,10 @@ export const EsDeprecationLogsFlyout = ({ closeFlyout }: EsDeprecationLogsFlyout
     toggleLogging,
   } = useDeprecationLogging();
   const [checkpoint, setCheckpoint] = useState(loadLogsCheckpoint());
+
+  useEffect(() => {
+    handleToggleChange();
+  }, [handleToggleChange, toggleLogging]);
 
   useEffect(() => {
     saveLogsCheckpoint(checkpoint);

@@ -166,8 +166,11 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
   const closeFlyout = useCallback(() => {
     setShowFlyout(false);
     removeContentFromGlobalFlyout(FLYOUT_ID);
+  }, [removeContentFromGlobalFlyout]);
+
+  const handleToggleChange = useCallback(() => {
     refreshDeprecationLogging();
-  }, [removeContentFromGlobalFlyout, refreshDeprecationLogging]);
+  }, [refreshDeprecationLogging]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -176,13 +179,14 @@ const LogsStep = ({ setIsComplete, hasPrivileges, privilegesMissing }: LogStepPr
         Component: EsDeprecationLogsFlyout,
         props: {
           closeFlyout,
+          handleToggleChange,
         },
         flyoutProps: {
           onClose: closeFlyout,
         },
       });
     }
-  }, [addContentToGlobalFlyout, closeFlyout, showFlyout]);
+  }, [addContentToGlobalFlyout, closeFlyout, handleToggleChange, showFlyout]);
 
   if (hasPrivileges === false && isDeprecationLogIndexingEnabled) {
     return (
