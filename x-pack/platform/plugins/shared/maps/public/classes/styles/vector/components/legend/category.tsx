@@ -6,7 +6,8 @@
  */
 
 import React, { ReactElement } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
 import { VectorIcon } from './vector_icon';
 
@@ -29,6 +30,8 @@ export function Category({
   symbolId,
   svg,
 }: Props) {
+  const { euiTheme } = useEuiTheme();
+
   function renderIcon() {
     if (styleName === VECTOR_STYLES.LABEL_COLOR) {
       return (
@@ -52,7 +55,12 @@ export function Category({
 
   return (
     <EuiFlexGroup direction="row" gutterSize="none">
-      <EuiFlexItem className="mapLegendIconPreview" grow={false}>
+      <EuiFlexItem
+        css={css`
+          width: ${euiTheme.size.l};
+        `}
+        grow={false}
+      >
         {renderIcon()}
       </EuiFlexItem>
       <EuiFlexItem>
