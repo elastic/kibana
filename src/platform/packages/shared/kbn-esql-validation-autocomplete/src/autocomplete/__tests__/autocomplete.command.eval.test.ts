@@ -589,14 +589,7 @@ describe('autocomplete.suggest', () => {
         ],
         { triggerCharacter: ' ' }
       );
-      await assertSuggestions('from a | eval a = 1 year /', [
-        ', ',
-        '| ',
-        '+ $0',
-        '- $0',
-        'IS NOT NULL',
-        'IS NULL',
-      ]);
+      await assertSuggestions('from a | eval a = 1 year /', [', ', '| ', '+ $0', '- $0']);
       await assertSuggestions(
         'from a | eval var0=date_trunc(/)',
         [
