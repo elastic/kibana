@@ -24,7 +24,7 @@ export interface StreamEnrichmentInput {
   definition: IngestStreamGetResponse;
 }
 
-export interface StreamEnrichmentContext {
+export interface StreamEnrichmentContextType {
   definition: IngestStreamGetResponse;
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];

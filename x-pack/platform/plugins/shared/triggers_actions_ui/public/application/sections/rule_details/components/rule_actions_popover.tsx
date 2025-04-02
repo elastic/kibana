@@ -6,8 +6,9 @@
  */
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import './rule_actions_popopver.scss';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import { Rule } from '../../../..';
 
 export interface RuleActionsPopoverProps {
@@ -26,6 +27,12 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
   onRunRule,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const { euiTheme } = useEuiTheme();
+  const ruleActionsPopover = css`
+    .ruleActionsPopover__deleteButton {
+      color: ${euiTheme.colors.textDanger};
+    }
+  `;
 
   return (
     <EuiPopover
@@ -109,6 +116,7 @@ export const RuleActionsPopover: React.FunctionComponent<RuleActionsPopoverProps
         className="ruleActionsPopover"
         data-test-subj="ruleActionsPopover"
         data-testid="ruleActionsPopover"
+        css={ruleActionsPopover}
       />
     </EuiPopover>
   );

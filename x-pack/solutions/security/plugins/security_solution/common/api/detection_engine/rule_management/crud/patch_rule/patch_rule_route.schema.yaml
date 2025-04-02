@@ -9,15 +9,82 @@ paths:
       x-codegen-enabled: true
       operationId: PatchRule
       summary: Patch a detection rule
-      description: Update specific fields of an existing detection rule using the `rule_id` or `id` field.
+      description: |
+        Update specific fields of an existing detection rule using the `rule_id` or `id` field.
+
+        The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
+        > warn
+        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+
+        > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       tags:
         - Rules API
       requestBody:
         required: true
+        description: |
+          > info
+          > You cannot modify the `id` or `rule_id` values.
         content:
           application/json:
             schema:
               $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RulePatchProps'
+            examples:
+              example1:
+                summary: Patch query rule
+                value:
+                  id: '14b7b513-3d8d-4b22-b7da-a7ae632f7e76'
+                  name: 'New name'
+              example2:
+                summary: Patch EQL rule
+                value:
+                  rule_id: 'process_started_by_ms_office_program_possible_payload'
+                  threat:
+                    - framework: 'MITRE ATT&CK'
+                      tactic:
+                        id: 'TA0001'
+                        reference: 'https://attack.mitre.org/tactics/TA0001'
+                        name: 'Initial Access'
+                      technique:
+                        - id: 'T1193'
+                          name: 'Spearphishing Attachment'
+                          reference: 'https://attack.mitre.org/techniques/T1193'
+              example3:
+                summary: Patch threshold rule
+                value:
+                  id: '005d2c4f-51ca-493d-a2bd-20ef076339b1'
+                  query: 'agent.version : * and agent.id : "243d9b4f-ca01-4311-8e5c-9abbee91afd8"'
+                  threshold:
+                    field: []
+                    value: 600
+                    cardinality: []
+              example4:
+                summary: Patch new terms rule
+                value:
+                  id: '569aac91-40dc-4807-a8ae-a2c8698089c4'
+                  new_terms_fields:
+                    - 'Endpoint.policy.applied.artifacts.global.identifiers.name'
+                  history_window_start: 'now-3d'
+              example5:
+                summary: Patch esql rule
+                value:
+                  id: '0b15e8a2-49b6-47e0-a8e6-d63a6cc335bd'
+                  query: |
+                    FROM logs-abc*
+                    | STATS count = COUNT(*), min_timestamp = MIN(@timestamp)
+                    | EVAL event_rate = count / DATE_DIFF("seconds", min_timestamp, NOW()) 
+                    | KEEP event_rate
+              example6:
+                summary: Patch indicator match rule
+                value:
+                  id: '462f1986-10fe-40a3-a22c-2b1c9c4c48fd'
+                  threat_query: '@timestamp >= "now-30d/d" and event.module:(threatintel or ti_*) and threat.indicator.ip:* and not labels.is_ioc_transform_source:"false"'
+              example7:
+                summary: Patch machine learning rule
+                value:
+                  id: '60b13926-289b-41b1-a537-197ef1fa5059'
+                  anomaly_threshold: 50
+                  machine_learning_job_id:
+                    - 'auth_high_count_logon_events'
       responses:
         200:
           description: Indicates a successful call.
@@ -25,3 +92,41 @@ paths:
             application/json:
               schema:
                 $ref: '../../../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+              examples:
+                example1:
+                  summary: Example response for an updated rule
+                  value:
+                    created_at: '2020-04-07T14:51:09.755Z'
+                    updated_at: '2020-04-07T14:51:09.970Z'
+                    created_by: 'elastic'
+                    description: 'Updated description for the rule.'
+                    enabled: false
+                    false_positives: []
+                    from: 'now-70m'
+                    id: '6541b99a-dee9-4f6d-a86d-dbd1869d73b1'
+                    immutable: false
+                    interval: '1h'
+                    rule_id: 'process_started_by_ms_office_program'
+                    max_signals: 100
+                    risk_score: 50
+                    name: 'Updated Rule Name'
+                    references: []
+                    severity: 'low'
+                    updated_by: 'elastic'
+                    tags:
+                      - 'child process'
+                      - 'ms office'
+                    to: 'now'
+                    type: 'query'
+                    threat: []
+                    version: 2
+                    actions: []
+                    filters:
+                      - query:
+                    query: 'process.parent.name:EXCEL.EXE or process.parent.name:MSPUB.EXE or process.parent.name:OUTLOOK.EXE or process.parent.name:POWERPNT.EXE or process.parent.name:VISIO.EXE or process.parent.name:WINWORD.EXE'
+                    language: 'kuery'
+                    related_integrations:
+                      - package: 'o365'
+                    required_fields:
+                      - name: 'process.parent.name'
+                    setup: ''

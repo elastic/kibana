@@ -431,6 +431,25 @@
           "properties": {
             "detection_rules": {
               "properties": {
+                "spaces_usage": {
+                  "properties": {
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of spaces where detection rules added"
+                      }
+                    },
+                    "rules_in_spaces": {
+                      "type": "array",
+                      "items": {
+                        "type": "long",
+                        "_meta": {
+                          "description": "Number of rules is each space"
+                        }
+                      }
+                    }
+                  }
+                },
                 "detection_rule_usage": {
                   "properties": {
                     "query": {
