@@ -218,7 +218,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       return {
         api,
         Component: ({ className: controlPanelClassName }) => {
-          const [dataLoading, fieldFormatter, max, min, selectionHasNotResults, step, value] =
+          const [dataLoading, fieldFormatter, max, min, selectionHasNoResults, step, value] =
             useBatchedPublishingSubjects(
               dataLoading$,
               dataControl.api.fieldFormatter,
@@ -243,7 +243,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
             <RangeSliderControl
               controlPanelClassName={controlPanelClassName}
               fieldFormatter={fieldFormatter}
-              isInvalid={selectionHasNotResults}
+              isInvalid={Boolean(value) && selectionHasNoResults}
               isLoading={typeof dataLoading === 'boolean' ? dataLoading : false}
               max={max}
               min={min}
