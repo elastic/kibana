@@ -13,9 +13,20 @@ export const useStyles = () => {
 
   const gridContainer = css`
     min-height: 400px;
+    display: flex;
+    flex-direction: column;
+  `;
+
+  const gridProgressBar = css`
+    flex-shrink: 0;
+    width: 100%;
   `;
 
   const gridStyle = css`
+    & .euiDataGrid__loading {
+      margin-top: auto;
+      margin-bottom: auto;
+    }
     & .euiDataGridHeaderCell__icon {
       display: none;
     }
@@ -76,5 +87,6 @@ export const useStyles = () => {
     gridStyle,
     groupBySelector,
     gridContainer,
+    gridProgressBar,
   };
 };
