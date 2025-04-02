@@ -238,38 +238,6 @@ export const logicalOperators: FunctionDefinition[] = [
   ],
 }));
 
-const nullFunctions: FunctionDefinition[] = [
-  {
-    name: 'is null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
-    }),
-  },
-  {
-    name: 'is not null',
-    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.isNotNullDoc', {
-      defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
-    }),
-  },
-].map<FunctionDefinition>(({ name, description }) => ({
-  type: FunctionDefinitionTypes.OPERATOR,
-  name,
-  description,
-  locationsAvailable: [
-    Location.EVAL,
-    Location.WHERE,
-    Location.ROW,
-    Location.SORT,
-    Location.STATS_WHERE,
-  ],
-  signatures: [
-    {
-      params: [{ name: 'left', type: 'any' }],
-      returnType: 'boolean',
-    },
-  ],
-}));
-
 const otherDefinitions: FunctionDefinition[] = [
   {
     type: FunctionDefinitionTypes.OPERATOR,
@@ -372,6 +340,5 @@ const otherDefinitions: FunctionDefinition[] = [
 export const operatorsDefinitions: FunctionDefinition[] = [
   ...operatorFunctionDefinitions,
   ...logicalOperators,
-  ...nullFunctions,
   ...otherDefinitions,
 ];

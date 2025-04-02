@@ -314,17 +314,9 @@ describe('WHERE <expression>', () => {
     test('suggestions after IS (NOT) NULL', async () => {
       const { assertSuggestions } = await setup();
 
-      await assertSuggestions('FROM index | WHERE tags.keyword IS NULL /', [
-        'AND $0',
-        'OR $0',
-        '| ',
-      ]);
+      await assertSuggestions('FROM index | WHERE tags.keyword IS NULL /', ['AND $0', 'OR $0']);
 
-      await assertSuggestions('FROM index | WHERE tags.keyword IS NOT NULL /', [
-        'AND $0',
-        'OR $0',
-        '| ',
-      ]);
+      await assertSuggestions('FROM index | WHERE tags.keyword IS NOT NULL /', ['AND $0', 'OR $0']);
     });
 
     test('suggestions after an arithmetic expression', async () => {
