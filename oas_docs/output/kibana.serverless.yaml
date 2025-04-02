@@ -954,6 +954,14 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        properties:
+                          blob:
+                            type: string
+                        additionalProperties: false
+                        type: object
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -1787,6 +1795,14 @@ paths:
                         required:
                           - id
                       type: array
+                    investigation_guide:
+                      properties:
+                        blob:
+                          type: string
+                      additionalProperties: false
+                      type: object
+                      required:
+                        - blob
                 consumer:
                   description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                   type: string
@@ -2331,6 +2347,14 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        properties:
+                          blob:
+                            type: string
+                        additionalProperties: false
+                        type: object
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -3040,6 +3064,14 @@ paths:
                         required:
                           - id
                       type: array
+                    investigation_guide:
+                      properties:
+                        blob:
+                          type: string
+                      additionalProperties: false
+                      type: object
+                      required:
+                        - blob
                 flapping:
                   additionalProperties: false
                   description: When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.
@@ -3345,6 +3377,14 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        properties:
+                          blob:
+                            type: string
+                        additionalProperties: false
+                        type: object
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string
@@ -4748,6 +4788,14 @@ paths:
                           required:
                             - id
                         type: array
+                      investigation_guide:
+                        properties:
+                          blob:
+                            type: string
+                        additionalProperties: false
+                        type: object
+                        required:
+                          - blob
                   consumer:
                     description: 'The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.'
                     type: string

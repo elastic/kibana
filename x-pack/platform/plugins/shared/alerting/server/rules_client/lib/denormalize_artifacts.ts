@@ -13,8 +13,10 @@ export function denormalizeArtifacts(ruleArtifacts: Artifact | undefined): {
   references: SavedObjectReference[];
 } {
   const references: SavedObjectReference[] = [];
+
   const artifacts: DenormalizedArtifacts = {
     dashboards: [],
+    investigation_guide: ruleArtifacts?.investigation_guide,
   };
 
   if (ruleArtifacts && ruleArtifacts.dashboards) {
