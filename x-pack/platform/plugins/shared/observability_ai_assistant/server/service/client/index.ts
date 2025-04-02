@@ -70,7 +70,7 @@ import { getGeneratedTitle } from './operators/get_generated_title';
 import {
   reIndexKnowledgeBaseAndPopulateSemanticTextField,
   scheduleKbSemanticTextMigrationTask,
-} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+} from '../index_assets_and_migrations/update_index_assets_and_run_migrations';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';

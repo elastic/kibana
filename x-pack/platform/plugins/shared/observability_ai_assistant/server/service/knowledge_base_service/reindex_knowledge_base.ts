@@ -8,8 +8,35 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import { CoreSetup } from '@kbn/core/server';
 import { resourceNames } from '..';
-import { createKbConcreteIndex } from '../create_or_update_index_assets';
+import { createKbConcreteIndex } from '../index_assets_and_migrations/create_or_update_index_assets';
+import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
+
+export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant/kb_reindexing';
+
+export async function reIndexKnowledgeBaseWithLock({
+  core,
+  logger,
+  esClient,
+}: {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  logger: Logger;
+  esClient: {
+    asInternalUser: ElasticsearchClient;
+  };
+}): Promise<void> {
+  const lmService = new LockManagerService(core, logger);
+  await lmService
+    .withLock(KB_REINDEXING_LOCK_ID, () => reIndexKnowledgeBase({ logger, esClient }))
+    .catch((error) => {
+      if (!(error instanceof LockAcquisitionError)) {
+        throw error;
+      }
+    });
+}
 
 export async function reIndexKnowledgeBase({
   logger,
@@ -82,7 +109,7 @@ export async function reIndexKnowledgeBase({
       'Re-indexing knowledge base completed successfully. Semantic text field is now supported.'
     );
   } catch (error) {
-    throw new Error(`Failed to reindex knowledge base: ${error.message}`);
+    throw new Error(`Failed to re-index knowledge base: ${error.message}`);
   }
 }
 
