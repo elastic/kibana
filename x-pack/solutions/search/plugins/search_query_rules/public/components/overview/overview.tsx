@@ -24,6 +24,7 @@ import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
+import queryRulesBackground from '../../assets/query-rule-background.svg';
 
 export const QueryRulesOverview = () => {
   const {
@@ -35,6 +36,16 @@ export const QueryRulesOverview = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const backgroundProps = css({
+    backgroundImage: `url(${queryRulesBackground})`,
+    backgroundSize: 'contain',
+    backgroundRepeat: 'no-repeat',
+    height: '100%',
+    width: '100%',
+    justifyItems: 'center',
+    alignContent: 'center',
+    backgroundPosition: 'center center',
+  });
   return (
     <KibanaPageTemplate
       offset={0}
@@ -94,9 +105,7 @@ export const QueryRulesOverview = () => {
         restrictWidth
         alignment="center"
         contentProps={{
-          css: css({
-            height: '100%',
-          }),
+          css: backgroundProps,
         }}
       >
         {isInitialLoading && <EuiLoadingSpinner />}
@@ -104,14 +113,7 @@ export const QueryRulesOverview = () => {
           <ErrorPrompt errorType={isPermissionError(error) ? 'missingPermissions' : 'generic'} />
         )}
         {!isInitialLoading && queryRulesData && queryRulesData._meta.totalItemCount === 0 && (
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            direction="column"
-            css={css({
-              height: '75%',
-            })}
-          >
+          <EuiFlexGroup justifyContent="center" alignItems="center" direction="column">
             <EuiFlexItem>
               <EmptyPrompt
                 getStartedAction={() => {
