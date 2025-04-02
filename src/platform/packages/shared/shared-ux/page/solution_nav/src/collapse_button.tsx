@@ -96,25 +96,15 @@ export const SolutionNavCollapseButton = React.memo(
       [styles, isCollapsed]
     );
 
-    const buttonLabels = useMemo(
-      () => ({
-        ariaLabel: isCollapsed ? openLabel : collapseLabel,
-        title: isCollapsed ? openLabel : collapseLabel,
-      }),
-      [isCollapsed]
-    );
-
-    const iconType = useMemo(() => (isCollapsed ? 'menuRight' : 'menuLeft'), [isCollapsed]);
-
     return (
       <EuiButtonIcon
         className={className}
         css={computedStyles}
         size="s"
         color="text"
-        iconType={iconType}
-        aria-label={buttonLabels.ariaLabel}
-        title={buttonLabels.title}
+        iconType={isCollapsed ? 'menuRight' : 'menuLeft'}
+        aria-label={isCollapsed ? openLabel : collapseLabel}
+        title={isCollapsed ? openLabel : collapseLabel}
         {...rest}
       />
     );
