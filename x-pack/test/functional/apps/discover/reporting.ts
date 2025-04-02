@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .subtract(docCount - i, dateSubstractUnit ?? 'days')
         .format();
 
-      const commonFields: Partial<TestDoc> = {
+      const commonFields: Pick<TestDoc, 'timestamp' | 'name' | 'numberValue'> = {
         timestamp,
         name,
       };
