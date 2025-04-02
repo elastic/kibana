@@ -33,4 +33,4 @@ tasks:
     args:
       - build
     outputs:
-      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-src
+      - /target/build/src/platform/packages/private/kbn-ui-shared-deps-npm
