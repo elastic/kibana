@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RulesSettingsModal } from './rules_settings_modal';
+import { RulesSettingsFlyout } from './rules_settings_flyout';
 import { useKibana } from '../../../common/lib/kibana';
 
 export const RulesSettingsLink = () => {
@@ -37,7 +37,7 @@ export const RulesSettingsLink = () => {
           defaultMessage="Settings"
         />
       </EuiButtonEmpty>
-      <RulesSettingsModal isVisible={isVisible} onClose={() => setIsVisible(false)} />
+      <RulesSettingsFlyout isVisible={isVisible} onClose={() => setIsVisible(false)} />
     </>
   );
 };

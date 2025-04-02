@@ -3,6 +3,7 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.edr_workflows.ts
+  - x-pack/test/security_solution_api_integration/config/serverless/config.base.ai4dsoc.ts
   - x-pack/test/defend_workflows_cypress/serverless_config.base.ts
   - x-pack/test/osquery_cypress/serverless_config.base.ts
 
@@ -10,6 +11,7 @@ disabled:
   - x-pack/test/defend_workflows_cypress/serverless_config.ts
   - x-pack/test/osquery_cypress/serverless_cli_config.ts
   - x-pack/test/security_solution_cypress/serverless_config.ts
+  - x-pack/test/security_solution_cypress/ai4dsoc_serverless_config.ts
 
   # Playwright
   - x-pack/test/security_solution_playwright/serverless_config.ts
@@ -130,6 +132,7 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/siem_migrations/rules/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.endpoint.config.ts
   - x-pack/test/security_solution_endpoint/configs/serverless.integrations.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/ai4dsoc/cases/search_ai_lake_tier/configs/serverless.config.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/security.serverless.config.ts
   - x-pack/test/spaces_api_integration/deployment_agnostic/security_and_spaces/serverless.config.ts
