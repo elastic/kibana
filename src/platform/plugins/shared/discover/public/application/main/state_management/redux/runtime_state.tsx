@@ -12,12 +12,14 @@ import React, { type PropsWithChildren, createContext, useContext, useMemo } fro
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
 import { useCurrentTabContext } from './hooks';
+import type { DiscoverStateContainer } from '../discover_state';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
 }
 
 interface TabRuntimeState {
+  stateContainer: DiscoverStateContainer;
   currentDataView: DataView;
 }
 
@@ -27,7 +29,10 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
   >;
 };
 
-type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
+type ReactiveTabRuntimeState = ReactiveRuntimeState<
+  TabRuntimeState,
+  'stateContainer' | 'currentDataView'
+>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
@@ -39,6 +44,7 @@ export const createRuntimeStateManager = (): RuntimeStateManager => ({
 });
 
 export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
+  stateContainer$: new BehaviorSubject<DiscoverStateContainer | undefined>(undefined),
   currentDataView$: new BehaviorSubject<DataView | undefined>(undefined),
 });
 
@@ -56,7 +62,7 @@ export const useCurrentTabRuntimeState = <T,>(
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
-type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;
+type CombinedRuntimeState = DiscoverRuntimeState & Omit<TabRuntimeState, 'stateContainer'>;
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 

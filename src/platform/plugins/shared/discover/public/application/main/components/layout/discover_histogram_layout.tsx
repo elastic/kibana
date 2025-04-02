@@ -51,9 +51,9 @@ export const DiscoverHistogramLayout = ({
 
   // Initialized when the first search has been requested or
   // when in ES|QL mode since search sessions are not supported
-  if (!searchSessionId && !isEsqlMode) {
-    return null;
-  }
+  // if (!searchSessionId && !isEsqlMode) {
+  //   return null;
+  // }
 
   return (
     <UnifiedHistogramContainer

@@ -16,7 +16,7 @@ import {
   internalStateSlice,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
-import { createTabRuntimeState } from '../runtime_state';
+import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -41,12 +41,11 @@ export const setTabs: InternalStateThunkActionCreator<
 export interface UpdateTabsParams {
   currentTabId: string;
   updateState: TabbedContentState;
-  stopSyncing?: () => void;
 }
 
 export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
-  ({ currentTabId, updateState: { items, selectedItem }, stopSyncing }) =>
-  async (dispatch, getState, { urlStateStorage }) => {
+  ({ currentTabId, updateState: { items, selectedItem } }) =>
+  async (dispatch, getState, { runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentTabId);
     let updatedTabs = items.map<TabState>((item) => {
@@ -55,7 +54,9 @@ export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Pro
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      stopSyncing?.();
+      const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+
+      currentTabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
 
       updatedTabs = updatedTabs.map((tab) =>
         tab.id === currentTab.id

@@ -113,11 +113,10 @@ export const initializeSession: InternalStateThunkActionCreator<
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
+    const { currentDataView$, stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
-      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
-
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
@@ -239,6 +238,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     // Make sure app state container is completely reset
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
+    stateContainer$.next(stateContainer);
     discoverSessionLoadTracker.reportEvent();
 
     return { showNoDataPage: false };

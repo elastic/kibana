@@ -28,10 +28,10 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
+  isInitialized?: boolean;
 }
 
-export function DiscoverMainApp(props: DiscoverMainProps) {
-  const { stateContainer } = props;
+export function DiscoverMainApp({ stateContainer, isInitialized }: DiscoverMainProps) {
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
@@ -56,10 +56,12 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     stateContainer.actions.initializeAndSync();
-    addLog('[DiscoverMainApp] state container initialization triggers data fetching');
-    stateContainer.actions.fetchData(true);
+    if (!isInitialized) {
+      addLog('[DiscoverMainApp] state container initialization triggers data fetching');
+      stateContainer.actions.fetchData(true);
+    }
     return () => stateContainer.actions.stopSyncing();
-  }, [stateContainer]);
+  }, [isInitialized, stateContainer]);
 
   /**
    * SavedSearch dependent initializing

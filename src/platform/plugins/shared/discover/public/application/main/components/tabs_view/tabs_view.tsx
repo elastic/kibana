@@ -8,19 +8,21 @@
  */
 
 import { type TabItem, UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { pick } from 'lodash';
-import type { DiscoverSessionViewRef } from '../session_view';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   CurrentTabProvider,
   createTabItem,
   internalStateActions,
   selectAllTabs,
+  selectTabRuntimeState,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { FetchStatus } from '../../../types';
 
 export const TabsView = ({
   initialTabId,
@@ -32,34 +34,61 @@ export const TabsView = ({
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
-  const [currentTabId, setCurrentTabId] = useState(initialTabId);
+  const [currentTabId, setCurrentTabId] = useState<string | undefined>(initialTabId);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
-  const sessionViewRef = useRef<DiscoverSessionViewRef>(null);
 
   return (
     <UnifiedTabs
       services={services}
       initialItems={initialItems}
       onChanged={async (updateState) => {
+        setCurrentTabId(undefined);
         await dispatch(
           internalStateActions.updateTabs({
-            currentTabId,
+            currentTabId: currentTabId ?? initialTabId,
             updateState,
-            stopSyncing: sessionViewRef.current?.stopSyncing,
           })
         );
         setCurrentTabId(updateState.selectedItem?.id ?? currentTabId);
       }}
       createItem={() => createTabItem(allTabs)}
-      getPreviewData={() => ({
-        query: { language: 'kuery', query: 'sample query' },
-        status: TabStatus.SUCCESS,
-      })}
-      renderContent={() => (
-        <CurrentTabProvider currentTabId={currentTabId}>
-          <DiscoverSessionView key={currentTabId} ref={sessionViewRef} {...sessionViewProps} />
-        </CurrentTabProvider>
-      )}
+      getPreviewData={(item) => {
+        const defaultQuery = { language: 'kuery', query: '(Empty query)' };
+        const stateContainer = selectTabRuntimeState(
+          sessionViewProps.runtimeStateManager,
+          item.id
+        ).stateContainer$.getValue();
+
+        if (!stateContainer) {
+          return {
+            query: defaultQuery,
+            status: TabStatus.RUNNING,
+          };
+        }
+
+        const fetchStatus = stateContainer.dataState.data$.main$.getValue().fetchStatus;
+        const query = stateContainer.appState.getState().query;
+
+        return {
+          query: isOfAggregateQueryType(query)
+            ? { esql: query.esql.trim() || defaultQuery.query }
+            : query
+            ? { ...query, query: query.query.trim() || defaultQuery.query }
+            : defaultQuery,
+          status: [FetchStatus.UNINITIALIZED, FetchStatus.COMPLETE].includes(fetchStatus)
+            ? TabStatus.SUCCESS
+            : fetchStatus === FetchStatus.ERROR
+            ? TabStatus.ERROR
+            : TabStatus.RUNNING,
+        };
+      }}
+      renderContent={() =>
+        currentTabId && (
+          <CurrentTabProvider currentTabId={currentTabId}>
+            <DiscoverSessionView key={currentTabId} {...sessionViewProps} />
+          </CurrentTabProvider>
+        )
+      }
     />
   );
 };
