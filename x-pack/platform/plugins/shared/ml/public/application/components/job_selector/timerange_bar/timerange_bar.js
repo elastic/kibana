@@ -26,6 +26,7 @@ export function TimeRangeBar({ isRunning, timerange, ganttBarWidth }) {
         <div
           css={[styles.ganttBar, ...(isRunning ? [styles.ganttBarRunning] : [])]}
           style={style}
+          data-test-subj={`mlJobSelectorGanttBar${isRunning ? 'Running' : ''}`}
         />
       </Fragment>
     </EuiToolTip>
