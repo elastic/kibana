@@ -42,6 +42,7 @@ import {
   ESQLParamKinds,
   ESQLMap,
   ESQLMapEntry,
+  ESQLForkBranch,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -441,6 +442,22 @@ export namespace Builder {
         };
       };
     }
+
+    export const forkBranch = (
+      template: Omit<AstNodeTemplate<ESQLMap>, 'name' | 'entries'> &
+        Partial<Pick<ESQLForkBranch, 'commands'>> = {},
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLForkBranch => {
+      const commands = template.commands ?? [];
+
+      return {
+        ...template,
+        ...Builder.parserFields(fromParser),
+        name: '',
+        type: 'fork_branch',
+        commands,
+      };
+    };
 
     export const map = (
       template: Omit<AstNodeTemplate<ESQLMap>, 'name' | 'entries'> &

@@ -21,28 +21,28 @@ export async function suggest(
   params: CommandSuggestParams<'fork'>
 ): Promise<SuggestionRawDefinition[]> {
   if (/FORK\s+$/i.test(params.innerText)) {
-    return [newStreamSuggestion];
+    return [newBranchSuggestion];
   }
 
-  if (/\)\s+$/i.test(params.innerText)) {
-    return [newStreamSuggestion, pipeCompleteItem];
+  const activeBranch = getActiveBranch(params.command);
+  const withinActiveBranch =
+    activeBranch &&
+    activeBranch.location.min <= params.innerText.length &&
+    activeBranch.location.max >= params.innerText.length;
+  if (!withinActiveBranch) {
+    // not within a branch
+    if (/\)\s+$/i.test(params.innerText)) {
+      return [newBranchSuggestion, pipeCompleteItem];
+    }
   }
 
-  if (/\(\s*$/i.test(params.innerText)) {
+  // within a branch
+  if (activeBranch?.commands.length === 0) {
     return getCommandAutocompleteDefinitions(getCommandsByName(['limit', 'sort', 'where']));
   }
 
-  // You're in a subcommand, so delegate
-  const finalStream = params.command.args[params.command.args.length - 1];
-
-  if (!Array.isArray(finalStream)) {
-    // should never happen
-    return [];
-  }
-
-  const subCommand = finalStream[finalStream.length - 1] as ESQLCommand;
-
-  switch (subCommand.name) {
+  const subCommand = activeBranch?.commands[activeBranch.commands.length - 1];
+  switch (subCommand?.name) {
     case 'where':
       return suggestForWhere({
         ...params,
@@ -69,11 +69,22 @@ export async function suggest(
   }
 }
 
-const newStreamSuggestion: SuggestionRawDefinition = {
+const newBranchSuggestion: SuggestionRawDefinition = {
   kind: 'Issue',
-  label: 'New stream',
-  detail: 'Add a new stream to the fork',
+  label: 'New branch',
+  detail: 'Add a new branch to the fork',
   text: '($0)',
   asSnippet: true,
   command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+const getActiveBranch = (command: ESQLCommand<'fork'>) => {
+  const finalBranch = command.args[command.args.length - 1];
+
+  if (Array.isArray(finalBranch) || finalBranch.type !== 'fork_branch') {
+    // should never happen
+    return;
+  }
+
+  return finalBranch;
 };

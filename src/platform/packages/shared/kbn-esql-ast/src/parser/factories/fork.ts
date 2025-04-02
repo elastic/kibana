@@ -14,8 +14,9 @@ import {
   ForkSubQueryProcessingCommandContext,
   SingleForkSubQueryCommandContext,
 } from '../../antlr/esql_parser';
+import { Builder } from '../../builder';
 import { ESQLCommand } from '../../types';
-import { createCommand } from '../factories';
+import { createCommand, createParserFields } from '../factories';
 import { createLimitCommand } from './limit';
 import { createSortCommand } from './sort';
 import { createWhereCommand } from './where';
@@ -23,14 +24,17 @@ import { createWhereCommand } from './where';
 export const createForkCommand = (ctx: ForkCommandContext): ESQLCommand<'fork'> => {
   const command = createCommand<'fork'>('fork', ctx);
 
-  const subCommandContexts = ctx
-    .forkSubQueries()
-    .forkSubQuery_list()
-    .map((subQueryCtx) => subQueryCtx.forkSubQueryCommand());
+  const subQueryContexts = ctx.forkSubQueries().forkSubQuery_list();
 
-  for (const subCtx of subCommandContexts) {
-    const commands = visitForkSubQueryContext(subCtx);
-    command.args.push(commands);
+  for (const subCtx of subQueryContexts) {
+    const subCommands = visitForkSubQueryContext(subCtx.forkSubQueryCommand());
+    const branch = Builder.expression.forkBranch(
+      {
+        commands: subCommands,
+      },
+      createParserFields(subCtx)
+    );
+    command.args.push(branch);
   }
 
   return command;

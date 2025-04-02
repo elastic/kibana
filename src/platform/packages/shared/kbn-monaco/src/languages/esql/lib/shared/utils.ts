@@ -18,6 +18,7 @@ export function monacoPositionToOffset(expression: string, position: monaco.Posi
     offset += lines[i].length + 1; // +1 for the newline character
   }
 
+  // one-based to zero-based indexing
   offset += position.column - 1;
 
   return offset;
