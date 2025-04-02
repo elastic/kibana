@@ -45,10 +45,16 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
   if (quiet) args.push('--silent');
 
   log.info('installing dependencies with yarn');
-  await run('yarn', args, { cwd: process.cwd(), pipe: true });
+  await run('yarn', args, { cwd: process.cwd(), pipe: !quiet });
   log.success('yarn dependencies installed');
 
-  await run('yarn', ['playwright', 'install'], { cwd: process.cwd(), pipe: true });
+  await run('yarn', ['playwright', 'install'], {
+    cwd: process.cwd(),
+    pipe: !quiet,
+    env: {
+      PLAYWRIGHT_SKIP_BROWSER_GC: '1',
+    },
+  });
   log.success('Playwright browsers installed');
 }
 
