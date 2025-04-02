@@ -23,6 +23,7 @@ import {
   findReferenceLink,
 } from '@kbn/cloud-security-posture';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
+import { HttpSetup } from '@kbn/core/public';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
