@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -64,6 +64,11 @@ export function RuleDetailsTabs({
   const {
     triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
+  const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
+  const hasInitialControlLoadingFinished = useMemo(
+    () => Array.isArray(filterControls),
+    [filterControls]
+  );
 
   const ruleFilters = useRef<Filter[]>([
     {
@@ -93,13 +98,15 @@ export function RuleDetailsTabs({
             urlStorageKey={RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY}
             defaultFilters={ruleFilters.current}
             disableLocalStorageSync={true}
+            filterControls={filterControls}
+            onFilterControlsChange={setFilterControls}
             onControlApiAvailable={onControlApiAvailable}
           />
           <EuiSpacer size="s" />
 
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
-              {esQuery && ruleTypeIds && (
+              {esQuery && ruleTypeIds && hasInitialControlLoadingFinished && (
                 <ObservabilityAlertsTable
                   id={RULE_DETAILS_PAGE_ID}
                   ruleTypeIds={ruleTypeIds}
