@@ -186,27 +186,6 @@ export const groupAndBulkCreate = async ({
         missingBucket: suppressOnMissingFields,
       });
 
-      const eventsSearchParams = {
-        aggregations: groupingAggregation,
-        searchAfterSortIds: undefined,
-        index: sharedParams.inputIndex,
-        from: tuple.from.toISOString(),
-        to: tuple.to.toISOString(),
-        services,
-        ruleExecutionLogger: sharedParams.ruleExecutionLogger,
-        filter,
-        pageSize: 0,
-        primaryTimestamp: sharedParams.primaryTimestamp,
-        secondaryTimestamp: sharedParams.secondaryTimestamp,
-        runtimeMappings: sharedParams.runtimeMappings,
-        additionalFilters: bucketHistoryFilter,
-        loggedRequestsConfig: isLoggedRequestsEnabled
-          ? {
-              type: 'findDocuments',
-              description: i18n.FIND_EVENTS_DESCRIPTION,
-            }
-          : undefined,
-      };
       const searchRequest = buildEventsSearchQuery({
         aggregations: groupingAggregation,
         searchAfterSortIds: undefined,
