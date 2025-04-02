@@ -236,6 +236,7 @@ export class DashboardPlugin
         const [coreStart, { embeddable, presentationPanel }] = await core.getStartServices();
         const [{ mountApp }] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
+          import('./dashboard_renderer/dashboard_module'),
           presentationPanel.preloadPresentationPanelChunks(),
           embeddable.preloadEmbeddableChunks(['control_group', 'lens']),
           untilPluginStartServicesReady(),
