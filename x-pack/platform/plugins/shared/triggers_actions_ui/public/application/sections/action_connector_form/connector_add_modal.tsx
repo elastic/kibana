@@ -23,8 +23,8 @@ import {
   EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import './connector_add_modal.scss';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import {
@@ -220,6 +220,9 @@ const ConnectorAddModal = ({
   return (
     <EuiModal
       className="actConnectorModal"
+      css={css`
+        z-index: 9000;
+      `}
       data-test-subj="connectorAddModal"
       onClose={closeModal}
       style={{ width: actionTypeRegistry.get(actionType.id).modalWidth }}
