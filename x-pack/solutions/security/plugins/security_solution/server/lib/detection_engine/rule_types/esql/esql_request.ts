@@ -5,9 +5,21 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getKbnServerError } from '@kbn/kibana-utils-plugin/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import { logEsqlRequest } from '../utils/logged_requests';
+import * as i18n from '../translations';
+
+const logDuration = (startTime: number, loggedRequests: RulePreviewLoggedRequest[] | undefined) => {
+  const duration = performance.now() - startTime;
+  if (loggedRequests && loggedRequests?.[loggedRequests.length - 1]) {
+    loggedRequests[loggedRequests.length - 1].duration = Math.round(duration);
+  }
+};
 
 export interface EsqlResultColumn {
   name: string;
@@ -32,24 +44,35 @@ export const performEsqlRequest = async ({
   requestQueryParams,
   ruleExecutionLogger,
   shouldStopExecution,
+  loggedRequests,
 }: {
   ruleExecutionLogger?: IRuleExecutionLogForExecutors;
   esClient: ElasticsearchClient;
-  requestBody: Record<string, unknown>;
+  requestBody: {
+    query: string;
+    filter: QueryDslQueryContainer;
+  };
   requestQueryParams?: { drop_null_columns?: boolean };
   shouldStopExecution: () => boolean;
+  loggedRequests?: RulePreviewLoggedRequest[];
 }): Promise<EsqlTable> => {
   let pollInterval = 10 * 1000; // Poll every 10 seconds
   let pollCount = 0;
   let queryId: string = '';
 
   try {
+    loggedRequests?.push({
+      request: logEsqlRequest(requestBody, requestQueryParams),
+      description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
+    });
+    const asyncSearchStarted = performance.now();
     const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({
       method: 'POST',
       path: '/_query/async',
       body: requestBody,
       querystring: requestQueryParams,
     });
+    logDuration(asyncSearchStarted, loggedRequests);
 
     queryId = asyncEsqlResponse.id;
     const isRunning = asyncEsqlResponse.is_running;
@@ -60,10 +83,16 @@ export const performEsqlRequest = async ({
 
     // Poll for long-executing query
     while (true) {
+      loggedRequests?.push({
+        request: `GET /_query/async/${queryId}`,
+        description: i18n.ESQL_POLL_REQUEST_DESCRIPTION,
+      });
+      const pollStarted = performance.now();
       const pollResponse = await esClient.transport.request<AsyncEsqlResponse>({
         method: 'GET',
         path: `/_query/async/${queryId}`,
       });
+      logDuration(pollStarted, loggedRequests);
 
       if (!pollResponse.is_running) {
         return pollResponse;
@@ -92,10 +121,16 @@ export const performEsqlRequest = async ({
     throw getKbnServerError(error);
   } finally {
     if (queryId) {
+      loggedRequests?.push({
+        request: `DELETE /_query/async/${queryId}`,
+        description: i18n.ESQL_DELETE_REQUEST_DESCRIPTION,
+      });
+      const deleteStarted = performance.now();
       await esClient.transport.request({
         method: 'DELETE',
         path: `/_query/async/${queryId}`,
       });
+      logDuration(deleteStarted, loggedRequests);
     }
   }
 };

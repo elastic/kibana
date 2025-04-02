@@ -167,7 +167,7 @@ describe('performEsqlRequest', () => {
     await expect(
       performEsqlRequest({
         esClient,
-        requestBody: {},
+        requestBody,
         requestQueryParams: {},
         shouldStopExecution,
       })
