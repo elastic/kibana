@@ -45,7 +45,7 @@ const MultiValueCellPopoverComponent = <T, K = string>({
   const closePopover = () => setIsPopoverOpen(false);
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+    <EuiFlexGroup responsive={true} gutterSize="xs" alignItems="center">
       <EuiFlexItem grow={false}>
         {firstItemRenderer ? (
           firstItemRenderer(items[0])
@@ -72,6 +72,7 @@ const MultiValueCellPopoverComponent = <T, K = string>({
             closePopover={closePopover}
             panelPaddingSize="s"
             repositionOnScroll
+            panelStyle={{ minWidth: 'min-content' }}
           >
             <EuiFlexGroup
               direction="column"
@@ -85,6 +86,7 @@ const MultiValueCellPopoverComponent = <T, K = string>({
                 overflow-y: auto;
                 max-width: min-content;
                 width: min-content;
+                min-width: unset;
                 padding-right: ${euiTheme.size.s};
               `}
             >
