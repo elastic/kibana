@@ -560,6 +560,28 @@
           },
           {
             "parentPluginId": "@kbn/mapbox-gl",
+            "id": "def-common.GeoJSONSource.getBounds",
+            "type": "Function",
+            "tags": [],
+            "label": "getBounds",
+            "description": [
+              "\nAllows getting the source's boundaries.\nIf there's a problem with the source's data, it will return an empty {@link LngLatBounds}."
+            ],
+            "signature": [
+              "() => Promise<",
+              "LngLatBounds",
+              ">"
+            ],
+            "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "a promise which resolves to the source's boundaries"
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/mapbox-gl",
             "id": "def-common.GeoJSONSource.setClusterOptions",
             "type": "Function",
             "tags": [],
@@ -4768,7 +4790,9 @@
             "signature": [
               "(sourceId: string, parameters?: ",
               "QuerySourceFeatureOptions",
-              " | null | undefined) => GeoJSONFeature[]"
+              " | null | undefined) => ",
+              "GeoJSONFeature",
+              "[]"
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,
@@ -6870,7 +6894,7 @@
             ],
             "label": "setFeatureState",
             "description": [
-              "\nSets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nWhen using this method, the `state` object is merged with any existing key-value pairs in the feature's state.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\nThis method can only be used with sources that have a `feature.id` attribute. The `feature.id` attribute can be defined in three ways:\n\n- For vector or GeoJSON sources, including an `id` attribute in the original data file.\n- For vector or GeoJSON sources, using the [`promoteId`](https://maplibre.org/maplibre-style-spec/sources/#vector-promoteId) option at the time the source is defined.\n- For GeoJSON sources, using the [`generateId`](https://maplibre.org/maplibre-style-spec/sources/#geojson-generateId) option to auto-assign an `id` based on the feature's index in the source data. If you change feature data using `map.getSource('some id').setData(..)`, you may need to re-apply state taking into account updated `id` values.\n\n_Note: You can use the [`feature-state` expression](https://maplibre.org/maplibre-style-spec/expressions/#feature-state) to access the values in a feature's state object for the purposes of styling._\n"
+              "\nSets the `state` of a feature.\nA feature's `state` is a set of user-defined key-value pairs that are assigned to a feature at runtime.\nWhen using this method, the `state` object is merged with any existing key-value pairs in the feature's state.\nFeatures are identified by their `feature.id` attribute, which can be any number or string.\n\nThis method can only be used with sources that have a `feature.id` attribute. The `feature.id` attribute can be defined in three ways:\n\n- For vector or GeoJSON sources, including an `id` attribute in the original data file.\n- For vector or GeoJSON sources, using the [`promoteId`](https://maplibre.org/maplibre-style-spec/sources/#promoteid) option at the time the source is defined.\n- For GeoJSON sources, using the [`generateId`](https://maplibre.org/maplibre-style-spec/sources/#generateid) option to auto-assign an `id` based on the feature's index in the source data. If you change feature data using `map.getSource('some id').setData(..)`, you may need to re-apply state taking into account updated `id` values.\n\n_Note: You can use the [`feature-state` expression](https://maplibre.org/maplibre-style-spec/expressions/#feature-state) to access the values in a feature's state object for the purposes of styling._\n"
             ],
             "signature": [
               "(feature: ",
@@ -10149,7 +10173,8 @@
           "\nAn extended geojson feature used by the events to return data to the listener"
         ],
         "signature": [
-          "GeoJSONFeature & { layer: (Omit<",
+          "GeoJSONFeature",
+          " & { layer: (Omit<",
           "FillLayerSpecification",
           ", \"source\"> | Omit<",
           "LineLayerSpecification",
