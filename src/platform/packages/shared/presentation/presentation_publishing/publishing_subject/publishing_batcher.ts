@@ -26,7 +26,7 @@ const hasSubjectsArrayChanged = (
 
 /**
  * @deprecated use useBatchedPublishingSubjects instead.
- * 
+ *
  * Batches the latest values of multiple publishing subjects into a single object. Use this to avoid unnecessary re-renders.
  * Use when `subjects` may not be defined on initial component render.
  *
