@@ -161,6 +161,9 @@ describe('bulkEdit()', () => {
       throttle: null,
       notifyWhen: null,
       actions: [],
+      artifacts: {
+        dashboards: [],
+      },
       name: 'my rule name',
       revision: 0,
     },
@@ -652,7 +655,6 @@ describe('bulkEdit()', () => {
           },
         ],
       });
-
       expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledWith(
         [
           {
