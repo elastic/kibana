@@ -14,6 +14,11 @@ export interface EsqlResultColumn {
   type: 'date' | 'keyword';
 }
 
+type AsyncEsqlResponse = {
+  id: string;
+  is_running: boolean;
+} & EsqlTable;
+
 export type EsqlResultRow = Array<string | null>;
 
 export interface EsqlTable {
@@ -39,39 +44,32 @@ export const performEsqlRequest = async ({
   let queryId: string = '';
 
   try {
-    const submitResponse = await esClient.transport.request<
-      { id: string; is_running: boolean } & EsqlTable
-    >({
+    const asyncEsqlResponse = await esClient.transport.request<AsyncEsqlResponse>({
       method: 'POST',
       path: '/_query/async',
       body: requestBody,
       querystring: requestQueryParams,
     });
 
-    queryId = submitResponse.id;
-    const isRunning = submitResponse.is_running;
+    queryId = asyncEsqlResponse.id;
+    const isRunning = asyncEsqlResponse.is_running;
 
-    // If the query is not running, return results immediately
     if (!isRunning) {
-      return submitResponse;
+      return asyncEsqlResponse;
     }
 
     // Poll for long-executing query
     while (true) {
       try {
-        const pollResponse = await esClient.transport.request<
-          { id: string; is_running: boolean } & EsqlTable
-        >({
+        const pollResponse = await esClient.transport.request<AsyncEsqlResponse>({
           method: 'GET',
           path: `/_query/async/${queryId}`,
         });
 
-        // If the query is no longer running, return the results
         if (!pollResponse.is_running) {
           return pollResponse;
         }
 
-        // Log that the query is still running
         ruleExecutionLogger?.debug(`Query is still running for query ID: ${queryId}`);
       } catch (error) {
         ruleExecutionLogger?.error(
@@ -89,17 +87,15 @@ export const performEsqlRequest = async ({
         pollInterval = 10 * 60 * 1000; // Increase the poll interval further after ~ 1h
       }
 
-      const isCancelled = shouldStopExecution();
+      const isCancelled = shouldStopExecution(); // Execution will be cancelled if rule timeouts
       ruleExecutionLogger?.debug(`Polling for query ID: ${queryId}, isCancelled: ${isCancelled}`);
 
       if (isCancelled) {
-        throw new Error('Execution cancelled');
+        throw new Error('Rule execution cancelled');
       }
-      // Wait for the poll interval before the next attempt
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
     }
   } catch (e) {
-    // If the query is still running after cancellation, delete it
     if (queryId) {
       await esClient.transport.request({
         method: 'DELETE',
