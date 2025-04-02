@@ -1911,8 +1911,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Kibana Telemetry
 /.telemetryrc.json @elastic/kibana-core
 /x-pack/.telemetryrc.json @elastic/kibana-core
-/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-core @elastic/platform-analytics
-/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/platform-analytics
+/src/platform/plugins/shared/telemetry/schema/ @elastic/kibana-core @elastic/kibana-telemetry
+/x-pack/platform/plugins/private/telemetry_collection_xpack/schema/ @elastic/kibana-core @elastic/kibana-telemetry
 x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/config.ts @elastic/kibana-core @shahinakmal
 
 # Kibana Localization
