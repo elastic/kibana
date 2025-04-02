@@ -8,6 +8,7 @@
  */
 
 import { service } from './service';
+import { service as otelService } from './otel/service';
 import { mobileApp } from './mobile_app';
 import { browser } from './browser';
 import { serverlessFunction } from './serverless_function';
@@ -21,6 +22,10 @@ export const apm = {
   browser,
   getChromeUserAgentDefaults,
   serverlessFunction,
+};
+
+export const apmOtel = {
+  service: otelService,
 };
 
 export type { ApmException };

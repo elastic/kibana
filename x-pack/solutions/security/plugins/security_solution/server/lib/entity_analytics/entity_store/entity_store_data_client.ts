@@ -498,7 +498,6 @@ export class EntityStoreDataClient {
         status: ENGINE_STATUS.ERROR,
         error: {
           message: err.message,
-          stack: err.stack,
           action: 'init',
         },
       });
