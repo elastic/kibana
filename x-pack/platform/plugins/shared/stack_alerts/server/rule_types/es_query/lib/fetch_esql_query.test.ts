@@ -175,17 +175,20 @@ describe('fetchEsqlQuery', () => {
     it('should generate a link', () => {
       const { dateStart, dateEnd } = getTimeRange();
       const locatorMock = {
-        getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+        getRedirectUrl: jest.fn(() => 'space1/app/r?l=DISCOVER_APP_LOCATOR'),
       } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
 
       const link = generateLink(defaultParams, locatorMock, dateStart, dateEnd, 'space1');
 
       expect(link).toBe('space1/app/r?l=DISCOVER_APP_LOCATOR');
-      expect(locatorMock.getRedirectUrl).toHaveBeenCalledWith({
-        isAlertResults: true,
-        query: { esql: 'from test' },
-        timeRange: { from: '2020-02-09T23:10:41.941Z', to: '2020-02-09T23:15:41.941Z' },
-      });
+      expect(locatorMock.getRedirectUrl).toHaveBeenCalledWith(
+        {
+          isAlertResults: true,
+          query: { esql: 'from test' },
+          timeRange: { from: '2020-02-09T23:10:41.941Z', to: '2020-02-09T23:15:41.941Z' },
+        },
+        { spaceId: 'space1' }
+      );
     });
   });
 });

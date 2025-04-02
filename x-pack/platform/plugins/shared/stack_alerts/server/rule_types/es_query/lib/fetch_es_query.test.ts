@@ -618,7 +618,7 @@ describe('fetchEsQuery', () => {
   it('should generate a link', () => {
     const date = '2020-02-09T23:15:41.941Z';
     const locatorMock = {
-      getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+      getRedirectUrl: jest.fn(() => 'space1/app/r?l=DISCOVER_APP_LOCATOR'),
     } as unknown as LocatorPublic<DiscoverAppLocatorParams>;
     const filter = {
       bool: {
@@ -651,51 +651,54 @@ describe('fetchEsQuery', () => {
     const link = generateLink(defaultParams, filter, locatorMock, date, date, 'space1');
 
     expect(link).toBe('space1/app/r?l=DISCOVER_APP_LOCATOR');
-    expect(locatorMock.getRedirectUrl).toHaveBeenCalledWith({
-      dataViewSpec: {
-        id: 'es_query_rule_adhoc_data_view',
-        timeFieldName: '@timestamp',
-        title: 'test-index',
-      },
-      filters: [
-        {
-          $state: { store: 'appState' },
-          bool: {
-            filter: [
-              { match_all: {} },
-              {
-                bool: {
-                  must_not: [
-                    {
-                      bool: {
-                        filter: [
-                          {
-                            range: {
-                              '@timestamp': {
-                                format: 'strict_date_optional_time',
-                                lte: '2020-02-09T23:15:41.941Z',
+    expect(locatorMock.getRedirectUrl).toHaveBeenCalledWith(
+      {
+        dataViewSpec: {
+          id: 'es_query_rule_adhoc_data_view',
+          timeFieldName: '@timestamp',
+          title: 'test-index',
+        },
+        filters: [
+          {
+            $state: { store: 'appState' },
+            bool: {
+              filter: [
+                { match_all: {} },
+                {
+                  bool: {
+                    must_not: [
+                      {
+                        bool: {
+                          filter: [
+                            {
+                              range: {
+                                '@timestamp': {
+                                  format: 'strict_date_optional_time',
+                                  lte: '2020-02-09T23:15:41.941Z',
+                                },
                               },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-            ],
+              ],
+            },
+            meta: {
+              alias: 'Rule query DSL',
+              disabled: false,
+              index: 'es_query_rule_adhoc_data_view',
+              negate: false,
+              type: 'custom',
+            },
           },
-          meta: {
-            alias: 'Rule query DSL',
-            disabled: false,
-            index: 'es_query_rule_adhoc_data_view',
-            negate: false,
-            type: 'custom',
-          },
-        },
-      ],
-      isAlertResults: true,
-      timeRange: { from: '2020-02-09T23:15:41.941Z', to: '2020-02-09T23:15:41.941Z' },
-    });
+        ],
+        isAlertResults: true,
+        timeRange: { from: '2020-02-09T23:15:41.941Z', to: '2020-02-09T23:15:41.941Z' },
+      },
+      { spaceId: 'space1' }
+    );
   });
 });
