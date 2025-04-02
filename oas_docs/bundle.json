@@ -1111,6 +1111,19 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "description": "The investigation guide for the rule.",
+                          "additionalProperties": false,
+                          "properties": {
+                            "blob": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "blob"
+                          ],
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -2211,6 +2224,16 @@
                           "type": "object"
                         },
                         "type": "array"
+                      },
+                      "investigation_guide": {
+                        "properties": {
+                          "blob": {
+                            "description": "The content of the investigation guide.",
+                            "type": "string"
+                          }
+                        },
+                        "description": "Provides instructions for investigating alerts created by the rule.",
+                        "type": "object"
                       }
                     },
                     "type": "object"
@@ -2879,6 +2902,16 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "properties": {
+                            "blob": {
+                              "description": "The content of the investigation guide.",
+                              "type": "string"
+                            }
+                          },
+                          "description": "Provides instructions for investigating alerts created by the rule.",
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -3822,6 +3855,16 @@
                           "type": "object"
                         },
                         "type": "array"
+                      },
+                      "investigation_guide": {
+                        "properties": {
+                          "blob": {
+                            "description": "The content of the investigation guide.",
+                            "type": "string"
+                          }
+                        },
+                        "description": "Provides instructions for investigating alerts created by the rule.",
+                        "type": "object"
                       }
                     },
                     "type": "object"
@@ -4221,6 +4264,16 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "properties": {
+                            "blob": {
+                              "description": "The content of the investigation guide.",
+                              "type": "string"
+                            }
+                          },
+                          "description": "Provides instructions for investigating alerts created by the rule.",
+                          "type": "object"
                         }
                       },
                       "type": "object"
@@ -6158,6 +6211,16 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "investigation_guide": {
+                          "properties": {
+                            "blob": {
+                              "description": "The content of the investigation guide.",
+                              "type": "string"
+                            }
+                          },
+                          "description": "Provides instructions for investigating alerts created by the rule.",
+                          "type": "object"
                         }
                       },
                       "type": "object"
