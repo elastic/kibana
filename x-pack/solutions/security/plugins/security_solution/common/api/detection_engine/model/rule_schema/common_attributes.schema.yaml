@@ -600,9 +600,9 @@ components:
 
         For PagerDuty:
 
-          - `severity` (string, required): Severity of on the alert notification, can be: `Critical`, `Error`, `Warning` or `Info`.
-          - `eventAction` (string, required): Event [action type](https://v2.developer.pagerduty.com/docs/events-api-v2#event-action), which can be `trigger`, `resolve`, or `acknowledge`.
-          - `dedupKey` (string, optional): Groups alert notifications with the same PagerDuty alert.
+          - `severity` (string, required): Severity of on the alert notification, can be: `critical`, `error`, `warning` or `info`.
+          - `event_action` (string, required): Event [action type](https://v2.developer.pagerduty.com/docs/events-api-v2#event-action), which can be `trigger`, `resolve`, or `acknowledge`.
+          - `dedup_key` (string, optional): Groups alert notifications with the same PagerDuty alert.
           - `timestamp` (DateTime, optional): ISO-8601 format [timestamp](https://v2.developer.pagerduty.com/docs/types#datetime).
           - `component` (string, optional): Source machine component responsible for the event, for example `security-solution`.
           - `group` (string, optional): Enables logical grouping of service components.
