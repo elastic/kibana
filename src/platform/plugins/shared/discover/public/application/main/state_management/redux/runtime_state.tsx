@@ -11,8 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import React, { type PropsWithChildren, createContext, useContext, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
-import { useInternalStateSelector } from './hooks';
-import type { DiscoverInternalState } from './types';
+import { useCurrentTabContext } from './hooks';
 
 interface DiscoverRuntimeState {
   adHocDataViews: DataView[];
@@ -46,22 +45,15 @@ export const createTabRuntimeState = (): ReactiveTabRuntimeState => ({
 export const useRuntimeState = <T,>(stateSubject$: BehaviorSubject<T>) =>
   useObservable(stateSubject$, stateSubject$.getValue());
 
-export const selectCurrentTabRuntimeState = (
-  internalState: DiscoverInternalState,
-  runtimeStateManager: RuntimeStateManager
-) => {
-  const currentTabId = internalState.tabs.currentId;
-  return runtimeStateManager.tabs.byId[currentTabId];
-};
+export const selectTabRuntimeState = (runtimeStateManager: RuntimeStateManager, tabId: string) =>
+  runtimeStateManager.tabs.byId[tabId];
 
 export const useCurrentTabRuntimeState = <T,>(
   runtimeStateManager: RuntimeStateManager,
   selector: (tab: ReactiveTabRuntimeState) => BehaviorSubject<T>
 ) => {
-  const tab = useInternalStateSelector((state) =>
-    selectCurrentTabRuntimeState(state, runtimeStateManager)
-  );
-  return useRuntimeState(selector(tab));
+  const { currentTabId } = useCurrentTabContext();
+  return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
 type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;

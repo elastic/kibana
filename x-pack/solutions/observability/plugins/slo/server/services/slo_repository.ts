@@ -116,9 +116,9 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
     search: string,
     pagination: Pagination,
     options: {
-      includeOutdatedOnly: boolean;
+      includeOutdatedOnly?: boolean;
       tags: string[];
-    } = { includeOutdatedOnly: false, tags: [] }
+    } = { tags: [] }
   ): Promise<Paginated<SLODefinition>> {
     const { includeOutdatedOnly, tags } = options;
     const filter = [];
