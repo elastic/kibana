@@ -7,7 +7,17 @@ xpack.serverless.chat.enabled: true
 xpack.cloud.serverless.project_type: search
 
 ## Set the home route
-uiSettings.overrides.defaultRoute: /app/home
+uiSettings.overrides.defaultRoute: /app/workchat
+
+## Enable workchat plugins
+xpack.workchatApp.enabled: true
+xpack.wciSalesforce.enabled: true
+xpack.wciIndexSource.enabled: true
+xpack.wciExternalServer.enabled: true
+
+# Disable spaces
+xpack.spaces.maxSpaces: 1
+
 
 ## Disable plugins that belong to other solutions
 xpack.apm.enabled: false
