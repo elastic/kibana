@@ -26,7 +26,7 @@ describe('updateDefaultPipelineApiLogic', () => {
         reduce_whitespace: false,
         run_ml_inference: true,
       };
-      const result = updateDefaultPipeline(pipeline, http);
+      const result = updateDefaultPipeline({ ...pipeline, http });
       await nextTick();
       expect(http.put).toHaveBeenCalledWith(
         '/internal/search_connectors/connectors/default_pipeline',
