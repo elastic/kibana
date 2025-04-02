@@ -14,11 +14,11 @@ import {
   ALERT_RULE_EXECUTION_UUID,
 } from '@kbn/rule-data-utils';
 
+import type { BackendAlertWithSuppressionFields870 } from './create_persistence_rule_type_wrapper';
 import {
   suppressAlertsInMemory,
   isExistingDateGtEqThanAlert,
   getUpdatedSuppressionBoundaries,
-  BackendAlertWithSuppressionFields870,
 } from './create_persistence_rule_type_wrapper';
 
 describe('suppressAlertsInMemory', () => {
