@@ -1440,6 +1440,8 @@
       "@kbn/product-doc-base-plugin/*": ["x-pack/platform/plugins/shared/ai_infra/product_doc_base/*"],
       "@kbn/product-doc-common": ["x-pack/platform/packages/shared/ai-infra/product-doc-common"],
       "@kbn/product-doc-common/*": ["x-pack/platform/packages/shared/ai-infra/product-doc-common/*"],
+      "@kbn/profiler-cli": ["x-pack/platform/packages/shared/kbn-profiler-cli"],
+      "@kbn/profiler-cli/*": ["x-pack/platform/packages/shared/kbn-profiler-cli/*"],
       "@kbn/profiling-data-access-plugin": ["x-pack/solutions/observability/plugins/profiling_data_access"],
       "@kbn/profiling-data-access-plugin/*": ["x-pack/solutions/observability/plugins/profiling_data_access/*"],
       "@kbn/profiling-plugin": ["x-pack/solutions/observability/plugins/profiling"],
