@@ -37,15 +37,17 @@ import {
   isGrokProcessor,
   isDissectProcessor,
   getDefaultFormStateByType,
+  isDateProcessor,
 } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
   useStreamEnrichmentEvents,
   useStreamsEnrichmentSelector,
   useSimulatorSelector,
-  StreamEnrichmentContext,
+  StreamEnrichmentContextType,
 } from '../state_management/stream_enrichment_state_machine';
 import { ProcessorMetrics } from '../state_management/simulation_state_machine';
+import { DateProcessorForm } from './date';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -166,8 +168,9 @@ export function AddProcessorPanel() {
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
-            {type === 'grok' && <GrokProcessorForm />}
+            {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
+            {type === 'grok' && <GrokProcessorForm />}
           </EuiForm>
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
             <ProcessorErrors metrics={processorMetrics} />
@@ -191,7 +194,7 @@ const createDraftProcessorFromForm = (
 };
 
 export interface EditProcessorPanelProps {
-  processorRef: StreamEnrichmentContext['processorsRefs'][number];
+  processorRef: StreamEnrichmentContextType['processorsRefs'][number];
   processorMetrics?: ProcessorMetrics;
 }
 
@@ -351,6 +354,7 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
+            {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
           </EuiForm>
@@ -392,6 +396,8 @@ const getProcessorDescription = (processor: ProcessorDefinitionWithUIAttributes)
     return processor.grok.patterns.join(' • ');
   } else if (isDissectProcessor(processor)) {
     return processor.dissect.pattern;
+  } else if (isDateProcessor(processor)) {
+    return `${processor.date.field} • ${processor.date.formats.join(' - ')}`;
   }
 
   return '';

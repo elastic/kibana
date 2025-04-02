@@ -28,7 +28,7 @@ import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
-import { SSLFormSection } from './ssl_form_section';
+import { SSLFormSection, type FormType } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
@@ -189,13 +189,6 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
         </SecretFormRow>
       )}
       <EuiSpacer size="m" />
-      <SSLFormSection
-        inputs={inputs}
-        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
-        isConvertedToSecret={isConvertedToSecret.sslKey}
-        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
-      />
-      <EuiSpacer size="m" />
       <EuiCallOut
         title={
           <FormattedMessage
@@ -212,6 +205,14 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
 }`}
         </EuiCodeBlock>
       </EuiCallOut>
+      <EuiSpacer size="m" />
+      <SSLFormSection
+        type={inputs.typeInput.value as FormType}
+        inputs={inputs}
+        useSecretsStorage={enableSSLSecrets && useSecretsStorage}
+        isConvertedToSecret={isConvertedToSecret.sslKey}
+        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+      />
       <EuiSpacer size="m" />
       {enableSyncIntegrationsOnRemote ? (
         <>
@@ -303,7 +304,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
                       <li>
                         <FormattedMessage
                           id="xpack.fleet.settings.remoteClusterConfiguration.replicationStep"
-                          defaultMessage="Go to {appPath} and create a follower index using the cluster from Step 1. The leader index {leaderIndex} from this cluster and should be replicated to the follower index {followerIndex} on the remote cluster."
+                          defaultMessage="Go to {appPath} and create a follower index using the cluster from Step 1. The leader index is {leaderIndex} from this cluster and should be replicated to the follower index {followerIndex} on the remote cluster."
                           values={{
                             appPath: (
                               <strong>

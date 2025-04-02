@@ -16,6 +16,12 @@ export function disableElasticsearchInternalCollectionRoute(server: MonitoringCo
   server.route({
     method: 'post',
     path: '/api/monitoring/v1/setup/collection/{clusterUuid}/disable_internal_collection',
+    security: {
+      authz: {
+        enabled: false,
+        reason: 'This route delegates authorization to the scoped ES cluster client',
+      },
+    },
     validate: {
       params: createValidationFunction(postDisableInternalCollectionRequestParamsRT),
     },

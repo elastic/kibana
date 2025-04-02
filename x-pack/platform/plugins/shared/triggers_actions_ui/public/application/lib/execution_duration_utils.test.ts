@@ -6,7 +6,7 @@
  */
 
 import { formatMillisForDisplay, shouldShowDurationWarning } from './execution_duration_utils';
-import { RuleType } from '../../types';
+import type { RuleType } from '../../types';
 
 describe('formatMillisForDisplay', () => {
   it('should return 0 for undefined', () => {
@@ -64,6 +64,7 @@ function mockRuleType(overwrites: Partial<RuleType> = {}): RuleType {
     minimumLicenseRequired: 'basic',
     enabledInLicense: true,
     category: 'my-category',
+    isExportable: true,
     ...overwrites,
   };
 }

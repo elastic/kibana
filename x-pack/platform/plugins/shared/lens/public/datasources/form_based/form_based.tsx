@@ -934,7 +934,7 @@ function blankLayer(indexPatternId: string, linkToLayers?: string[]): FormBasedL
 function getLayerErrorMessages(
   state: FormBasedPrivateState,
   framePublicAPI: FramePublicAPI,
-  setState: StateSetter<FormBasedPrivateState, unknown>,
+  setState: StateSetter<FormBasedPrivateState, unknown> | undefined,
   core: CoreStart,
   data: DataPublicPluginStart
 ): UserMessage[] {
@@ -962,7 +962,7 @@ function getLayerErrorMessages(
             ) : (
               <>
                 {error.message}
-                {error.fixAction && (
+                {error.fixAction && setState && (
                   <EuiButton
                     data-test-subj="errorFixAction"
                     onClick={async () => {

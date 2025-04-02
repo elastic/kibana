@@ -6,6 +6,7 @@
  */
 
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -160,6 +161,7 @@ export const ActionTypeForm = ({
     unifiedSearch,
     data,
   } = useKibana().services;
+
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(true);
   const [availableActionVariables, setAvailableActionVariables] = useState<ActionVariable[]>([]);
@@ -205,6 +207,28 @@ export const ActionTypeForm = ({
     () => (useAadTemplateFields ? aadTemplateFields : availableActionVariables),
     [aadTemplateFields, availableActionVariables, useAadTemplateFields]
   );
+
+  const actAccordionActionFormCss = css`
+    .actAccordionActionForm {
+      background-color: ${euiTheme.colors.lightestShade};
+
+      .euiCard {
+        box-shador: none;
+      }
+      .actAccordionActionForm__button {
+        padding: ${euiTheme.size.m};
+        padding-left: ${euiTheme.size.l};
+      }
+
+      .euiAccordion__arrow {
+        transform: translateX(${euiTheme.size.m}) rotate(0deg) !important;
+      }
+
+      .euiAccordion__arrow[aria-expanded='true'] {
+        transform: translateX(${euiTheme.size.m}) rotate(90deg) !important;
+      }
+    }
+  `;
 
   let showMustacheAutocompleteSwitch;
   try {
@@ -590,7 +614,7 @@ export const ActionTypeForm = ({
 
   return (
     <>
-      <EuiSplitPanel.Outer hasShadow={isOpen}>
+      <EuiSplitPanel.Outer hasShadow={isOpen} css={actAccordionActionFormCss}>
         <EuiAccordion
           initialIsOpen={true}
           key={index}

@@ -21,15 +21,19 @@ export const SPLUNK_QUERY_TOOLTIP = i18n.translate(
   }
 );
 
-export const TRANSLATION_QUERY_TITLE = (queryLanguage: string) => {
-  return i18n.translate(
-    'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.title',
+export const CUSTOM_TRANSLATION_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.customTranslation.title',
+  { defaultMessage: 'ES|QL translation' }
+);
+
+export const PREBUILT_RULE_TITLE = (queryLanguage: string) =>
+  i18n.translate(
+    'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.prebuiltRule.title',
     {
-      defaultMessage: '{queryLanguage} query',
+      defaultMessage: 'Mapped to Elastic authored {queryLanguage} rule  ',
       values: { queryLanguage },
     }
   );
-};
 
 export const TRANSLATION_QUERY_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.translationQuery.queryPlaceholder',
@@ -49,7 +53,7 @@ export const TRANSLATION_QUERY_TOOLTIP = i18n.translate(
 export const MACHINE_LEARNING_RULE_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.machineLearningRule.title',
   {
-    defaultMessage: 'Machine learning rule',
+    defaultMessage: 'Mapped to Elastic authored machine learning rule',
   }
 );
 

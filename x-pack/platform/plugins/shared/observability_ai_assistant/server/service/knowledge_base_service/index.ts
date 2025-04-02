@@ -46,8 +46,9 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
+  title?: string;
   text: string;
-  score: number | null;
+  esScore: number | null;
   is_correction?: boolean;
   labels?: Record<string, string>;
 }
@@ -128,7 +129,7 @@ export class KnowledgeBaseService {
       is_correction: hit._source?.is_correction,
       labels: hit._source?.labels,
       title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
-      score: hit._score!,
+      esScore: hit._score!,
       id: hit._id!,
     }));
   }
@@ -192,7 +193,7 @@ export class KnowledgeBaseService {
 
     const sortedEntries = orderBy(
       documentsFromKb.concat(documentsFromConnectors),
-      'score',
+      'esScore',
       'desc'
     ).slice(0, limit.size ?? 20);
 

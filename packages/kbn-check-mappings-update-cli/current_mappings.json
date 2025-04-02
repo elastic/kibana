@@ -2105,6 +2105,7 @@
     }
   },
   "ingest-download-sources": {
+    "dynamic": false,
     "properties": {
       "host": {
         "type": "keyword"
@@ -3736,6 +3737,13 @@
       },
       "taskType": {
         "type": "keyword"
+      },
+      "userScope": {
+        "properties": {
+          "apiKeyId": {
+            "type": "keyword"
+          }
+        }
       }
     }
   },
@@ -3852,6 +3860,107 @@
       },
       "version": {
         "type": "integer"
+      }
+    }
+  },
+  "workchat_agent": {
+    "dynamic": "strict",
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "agent_name": {
+        "type": "text"
+      },
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "description": {
+        "type": "text"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_conversation": {
+    "dynamic": "strict",
+    "properties": {
+      "access_control": {
+        "properties": {
+          "public": {
+            "type": "boolean"
+          }
+        }
+      },
+      "agent_id": {
+        "type": "keyword"
+      },
+      "conversation_id": {
+        "type": "keyword"
+      },
+      "events": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "last_updated": {
+        "type": "date"
+      },
+      "title": {
+        "type": "text"
+      },
+      "user_id": {
+        "type": "keyword"
+      },
+      "user_name": {
+        "type": "keyword"
+      }
+    }
+  },
+  "workchat_integration": {
+    "dynamic": "strict",
+    "properties": {
+      "configuration": {
+        "dynamic": false,
+        "properties": {},
+        "type": "object"
+      },
+      "created_at": {
+        "type": "date"
+      },
+      "created_by": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "integration_id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "type": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "date"
       }
     }
   },

@@ -7,7 +7,7 @@
 
 import Mustache from 'mustache';
 import { isString, isPlainObject, cloneDeepWith, merge } from 'lodash';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { getMustacheLambdas } from './mustache_lambdas';
 
 export type Escape = 'markdown' | 'slack' | 'json' | 'none';

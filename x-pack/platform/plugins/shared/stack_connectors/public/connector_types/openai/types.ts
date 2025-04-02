@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
-import { RunActionParams } from '../../../common/openai/types';
+import type { ActionTypeModel as ConnectorTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
+import type { RunActionParams } from '../../../common/openai/types';
 
 export interface ActionParams {
   subAction: SUB_ACTION.RUN | SUB_ACTION.TEST;

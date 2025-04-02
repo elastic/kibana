@@ -32,6 +32,7 @@ import type { EntityCellFilter } from '../entity_cell';
 import { EntityCell } from '../entity_cell';
 import { formatValue } from '../../formatters/format_value';
 import { useMlKibana } from '../../contexts/kibana';
+import { AnomalyValueDisplay } from './anomaly_value_display';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -69,7 +70,7 @@ export function getInfluencersItems(
 
 export const DetailsItems: FC<{
   anomaly: MlAnomaliesTableRecord;
-  filter: EntityCellFilter;
+  filter?: EntityCellFilter;
   modelPlotEnabled: boolean;
 }> = ({ anomaly, filter, modelPlotEnabled }) => {
   const source = anomaly.source;
@@ -103,37 +104,39 @@ export const DetailsItems: FC<{
   }
 
   const items = [];
-  if (source.partition_field_value !== undefined && source.partition_field_name !== undefined) {
-    items.push({
-      title: source.partition_field_name,
-      description: getFilterEntity(
-        source.partition_field_name,
-        String(source.partition_field_value),
-        filter
-      ),
-    });
-  }
+  if (filter !== undefined) {
+    if (source.partition_field_value !== undefined && source.partition_field_name !== undefined) {
+      items.push({
+        title: source.partition_field_name,
+        description: getFilterEntity(
+          source.partition_field_name,
+          String(source.partition_field_value),
+          filter
+        ),
+      });
+    }
 
-  if (source.by_field_value !== undefined && source.by_field_name !== undefined) {
-    items.push({
-      title: source.by_field_name,
-      description: getFilterEntity(source.by_field_name, source.by_field_value, filter),
-    });
-  }
+    if (source.by_field_value !== undefined && source.by_field_name !== undefined) {
+      items.push({
+        title: source.by_field_name,
+        description: getFilterEntity(source.by_field_name, source.by_field_value, filter),
+      });
+    }
 
-  if (singleCauseByFieldName !== undefined && singleCauseByFieldValue !== undefined) {
-    // Display byField of single cause.
-    items.push({
-      title: singleCauseByFieldName,
-      description: getFilterEntity(singleCauseByFieldName, singleCauseByFieldValue, filter),
-    });
-  }
+    if (singleCauseByFieldName !== undefined && singleCauseByFieldValue !== undefined) {
+      // Display byField of single cause.
+      items.push({
+        title: singleCauseByFieldName,
+        description: getFilterEntity(singleCauseByFieldName, singleCauseByFieldValue, filter),
+      });
+    }
 
-  if (source.over_field_value !== undefined && source.over_field_name !== undefined) {
-    items.push({
-      title: source.over_field_name,
-      description: getFilterEntity(source.over_field_name, source.over_field_value, filter),
-    });
+    if (source.over_field_value !== undefined && source.over_field_name !== undefined) {
+      items.push({
+        title: source.over_field_name,
+        description: getFilterEntity(source.over_field_name, source.over_field_value, filter),
+      });
+    }
   }
 
   const anomalyTime = source[TIME_FIELD_NAME];
@@ -178,7 +181,9 @@ export const DetailsItems: FC<{
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.actualTitle', {
         defaultMessage: 'Actual',
       }),
-      description: formatValue(anomaly.actual, source.function, undefined, source),
+      description: (
+        <AnomalyValueDisplay value={anomaly.actual} function={source.function} record={source} />
+      ),
     });
   }
 
@@ -187,7 +192,9 @@ export const DetailsItems: FC<{
       title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.typicalTitle', {
         defaultMessage: 'Typical',
       }),
-      description: formatValue(anomaly.typical, source.function, undefined, source),
+      description: (
+        <AnomalyValueDisplay value={anomaly.typical} function={source.function} record={source} />
+      ),
     });
 
     if (
@@ -199,11 +206,12 @@ export const DetailsItems: FC<{
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.upperBoundsTitle', {
           defaultMessage: 'Upper bound',
         }),
-        description: formatValue(
-          anomaly.source.anomaly_score_explanation?.upper_confidence_bound,
-          source.function,
-          undefined,
-          source
+        description: (
+          <AnomalyValueDisplay
+            value={anomaly.source.anomaly_score_explanation?.upper_confidence_bound}
+            function={source.function}
+            record={source}
+          />
         ),
       });
 
@@ -211,11 +219,12 @@ export const DetailsItems: FC<{
         title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.lowerBoundsTitle', {
           defaultMessage: 'Lower bound',
         }),
-        description: formatValue(
-          anomaly.source.anomaly_score_explanation?.lower_confidence_bound,
-          source.function,
-          undefined,
-          source
+        description: (
+          <AnomalyValueDisplay
+            value={anomaly.source.anomaly_score_explanation?.lower_confidence_bound}
+            function={source.function}
+            record={source}
+          />
         ),
       });
     }

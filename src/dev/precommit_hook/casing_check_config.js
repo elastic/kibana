@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
+
 /**
  * These patterns are used to identify files that are not supposed
  * to be snake_case because their names are determined by other
@@ -43,7 +45,7 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   'src/platform/packages/shared/kbn-test/jest-preset.js',
   'src/platform/packages/shared/kbn-test/*/jest-preset.js',
-  'test/package/Vagrantfile',
+  'src/platform/test/package/Vagrantfile',
   'x-pack/solutions/security/plugins/security_solution/scripts/endpoint/common/vagrant/Vagrantfile',
   '**/test/**/fixtures/**/*',
   'src/platform/packages/shared/kbn-router-to-openapispec/openapi-types.d.ts',
@@ -108,9 +110,7 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = [
   'src/platform/packages/shared/*',
   'x-pack/platform/packages/private/*',
   'x-pack/platform/packages/shared/*',
-  'x-pack/solutions/observability/packages/*',
-  'x-pack/solutions/search/packages/*',
-  'x-pack/solutions/security/packages/*',
+  ...KIBANA_SOLUTIONS.map((solution) => `x-pack/solutions/${solution}/packages/*`),
 ];
 
 /**
@@ -174,7 +174,7 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/mstile-310x150.png',
   'src/core/server/core_app/assets/favicons/mstile-310x310.png',
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
-  'test/functional/apps/management/exports/_import_objects-conflicts.json',
+  'src/platform/test/functional/apps/management/exports/_import_objects-conflicts.json',
   'x-pack/legacy/platform/plugins/shared/index_management/public/lib/editSettings.js',
   'x-pack/legacy/platform/plugins/shared/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/platform/plugins/private/monitoring/public/icons/health-gray.svg',

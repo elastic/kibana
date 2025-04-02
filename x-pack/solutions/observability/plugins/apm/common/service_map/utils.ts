@@ -83,33 +83,37 @@ export const isExitSpan = (
 };
 
 // backward compatibility with scrited_metric versions
-export const getLegacyNodeId = (node: ConnectionNodeLegacy) => {
+export function getLegacyNodeId(node: ConnectionNodeLegacy) {
   if (isExitSpan(node)) {
-    return `>${node[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
+    return getExitSpanNodeId(node);
   }
   return `${node[SERVICE_NAME]}`;
-};
+}
 
-export const getServiceConnectionNode = (event: ServiceMapService): ServiceConnectionNode => {
+export function getServiceConnectionNode(event: ServiceMapService): ServiceConnectionNode {
   return {
     id: event.serviceName,
     [SERVICE_NAME]: event.serviceName,
     [SERVICE_ENVIRONMENT]: event.serviceEnvironment || null,
     [AGENT_NAME]: event.agentName,
   };
-};
+}
 
-export const getExternalConnectionNode = (event: ServiceMapExitSpan): ExternalConnectionNode => {
+export function getExternalConnectionNode(event: ServiceMapExitSpan): ExternalConnectionNode {
   return {
     id: `>${event.serviceName}|${event.spanDestinationServiceResource}`,
     [SPAN_DESTINATION_SERVICE_RESOURCE]: event.spanDestinationServiceResource,
     [SPAN_TYPE]: event.spanType,
     [SPAN_SUBTYPE]: event.spanSubtype,
   };
-};
+}
 
 export function getEdgeId(sourceId: string, destinationId: string) {
   return `${sourceId}~${destinationId}`;
+}
+
+export function getExitSpanNodeId(span: ExternalConnectionNode) {
+  return `>${span[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
 }
 
 export const SERVICE_MAP_TIMEOUT_ERROR = 'ServiceMapTimeoutError';

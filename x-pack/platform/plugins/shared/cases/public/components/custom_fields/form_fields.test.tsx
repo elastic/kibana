@@ -9,27 +9,20 @@ import React from 'react';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 import { FormTestComponent } from '../../common/test_utils';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { FormFields } from './form_fields';
+import { renderWithTestingProviders } from '../../common/mock';
 
 describe('FormFields ', () => {
-  let appMockRender: AppMockRenderer;
   const onSubmit = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  afterEach(async () => {
-    await appMockRender.clearQueryCache();
   });
 
   it('renders correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <FormFields />
       </FormTestComponent>
@@ -40,7 +33,7 @@ describe('FormFields ', () => {
   });
 
   it('disables field type selector on edit mode', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <FormFields isEditMode />
       </FormTestComponent>
@@ -50,7 +43,7 @@ describe('FormFields ', () => {
   });
 
   it('submit data correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <FormTestComponent onSubmit={onSubmit}>
         <FormFields />
       </FormTestComponent>

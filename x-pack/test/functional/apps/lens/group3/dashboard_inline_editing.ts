@@ -7,19 +7,44 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, visualize, lens, timeToVisualize } = getPageObjects([
+  const { dashboard, visualize, lens, timeToVisualize, security } = getPageObjects([
     'dashboard',
     'visualize',
     'lens',
     'timeToVisualize',
+    'security',
   ]);
   const find = getService('find');
   const log = getService('log');
+  const securityService = getService('security');
   const listingTable = getService('listingTable');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const elasticChart = getService('elasticChart');
   const toastsService = getService('toasts');
+
+  const loginWithReadOnlyUser = async () => {
+    await securityService.user.create('global_dashboard_read_privileges_user', {
+      password: 'global_dashboard_read_privileges_user-password',
+      roles: ['viewer'],
+      full_name: 'test user',
+    });
+
+    await security.forceLogout();
+
+    await security.login(
+      'global_dashboard_read_privileges_user',
+      'global_dashboard_read_privileges_user-password',
+      {
+        expectSpaceSelector: false,
+      }
+    );
+  };
+
+  const logoutAndDeleteReadOnlyUser = async () => {
+    await security.forceLogout();
+    await securityService.user.delete('global_dashboard_read_privileges_user');
+  };
 
   const createNewLens = async () => {
     await visualize.navigateToNewVisualization();
@@ -305,6 +330,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.existOrFail('xyVisAnnotationIcon');
 
       await timeToVisualize.resetNewDashboard();
+    });
+
+    it('should not allow the show config action for a user with write permissions', async () => {
+      // create a chart and save the dashboard
+      await createNewLens();
+      // save it and add to a new dashboard
+      await lens.save('New Lens from Modal', false, false, false, 'new');
+      // now save the dashboard
+      await dashboard.saveDashboard('My read only testing dashboard', { saveAsNew: true });
+
+      await dashboardPanelActions.expectMissingShowConfigPanelAction();
+      // switch to view and check again
+      await dashboard.switchToViewMode();
+      await dashboardPanelActions.expectMissingShowConfigPanelAction();
+    });
+
+    it('should allow the show config action for a user without write permissions', async () => {
+      // setup a read only user and login with it
+      await loginWithReadOnlyUser();
+
+      // open the previous dashboard
+      await dashboard.navigateToApp();
+      await dashboard.loadSavedDashboard('My read only testing dashboard');
+      // now check the action is there
+      await dashboardPanelActions.expectExistsShowConfigPanelAction();
+      // clean up
+      await logoutAndDeleteReadOnlyUser();
     });
   });
 }
