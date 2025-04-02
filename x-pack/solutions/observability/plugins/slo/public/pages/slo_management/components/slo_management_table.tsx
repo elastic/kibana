@@ -36,19 +36,11 @@ import { SloResetConfirmationModal } from '../../../components/slo/reset_confirm
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
-
-interface SearchFilters {
-  search: string;
-  tags: string[];
-}
+import { useUrlSearchState } from './hooks/use_url_search_state';
 
 export function SloManagementTable() {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
-  const [filters, setFilters] = useState<SearchFilters>({
-    search: '',
-    tags: [],
-  });
+  const { state, onStateChange } = useUrlSearchState();
+  const { search, page, perPage, tags, includeOutdatedOnly } = state;
   const { services } = useKibana();
 
   const {
@@ -57,10 +49,11 @@ export function SloManagementTable() {
   } = services;
 
   const { isLoading, isError, data, refetch } = useFetchSloDefinitions({
-    name: filters.search,
-    page: pageIndex + 1,
-    perPage: pageSize,
-    tags: filters.tags,
+    page: page + 1,
+    perPage,
+    name: search,
+    tags,
+    includeOutdatedOnly,
   });
 
   const { data: permissions } = usePermissions();
@@ -275,17 +268,21 @@ export function SloManagementTable() {
     },
   ];
 
-  const onTableChange = ({ page }: Criteria<SLODefinitionResponse>) => {
-    if (page) {
-      const { index, size } = page;
-      setPageIndex(index);
-      setPageSize(size);
+  const onTableChange = ({ page: newPage }: Criteria<SLODefinitionResponse>) => {
+    if (newPage) {
+      const { index, size } = newPage;
+      const newState = {
+        ...state,
+        page: index,
+        perPage: size,
+      };
+      onStateChange(newState);
     }
   };
 
   const pagination = {
-    pageIndex,
-    pageSize,
+    pageIndex: page,
+    pageSize: perPage,
     totalItemCount: data?.total ?? 0,
     pageSizeOptions: [10, 25, 50, 100],
     showPerPageOptions: true,
@@ -294,7 +291,7 @@ export function SloManagementTable() {
   return (
     <>
       <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar filters={filters} setFilters={setFilters} onRefresh={refetch} />
+        <SloManagementSearchBar onRefresh={refetch} />
         <EuiSpacer size="m" />
         <EuiBasicTable<SLODefinitionResponse>
           tableCaption={TABLE_CAPTION}
