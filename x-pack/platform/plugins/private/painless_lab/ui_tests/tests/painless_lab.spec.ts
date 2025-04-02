@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { expect, test, tags } from '@kbn/scout';
+import { expect, tags } from '@kbn/scout';
+import { test } from '../fixtures';
 
 const space = '  ';
 const TEST_SCRIPT_RESULT = '45';

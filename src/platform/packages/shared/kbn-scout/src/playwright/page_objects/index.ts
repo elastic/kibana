@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PainlessLab } from '@kbn/painless-lab-plugin/ui_tests/page_objects/painless_lab_page';
 import { ScoutPage } from '..';
 import { ScoutLogger } from '../../common';
 import { ScoutTestConfig } from '../../types';
@@ -34,7 +33,6 @@ export interface PageObjects {
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
-  painlessLab: PainlessLab;
 }
 
 /**
@@ -52,7 +50,6 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
-    painlessLab: createLazyPageObject(PainlessLab, fixtures.page),
     // Add new page objects here
   };
 }
