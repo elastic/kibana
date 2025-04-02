@@ -55,7 +55,6 @@ packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-eslint-config @elastic/kibana-operations
-packages/kbn-eslint-plugin-css @elastic/appex-sharedux
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
 packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
 packages/kbn-eslint-plugin-eui-a11y @elastic/obs-ux-infra_services-team
@@ -390,6 +389,7 @@ src/platform/packages/shared/content-management/table_list_view_common @elastic/
 src/platform/packages/shared/content-management/table_list_view_table @elastic/appex-sharedux
 src/platform/packages/shared/content-management/user_profiles @elastic/appex-sharedux
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
+src/platform/packages/shared/deeplinks/chat @elastic/search-kibana
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
 src/platform/packages/shared/deeplinks/fleet @elastic/fleet
 src/platform/packages/shared/deeplinks/management @elastic/kibana-management
@@ -835,6 +835,7 @@ x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/respon
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-kibana-api-cli @elastic/appex-ai-infra
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
+x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-program-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
@@ -938,7 +939,17 @@ x-pack/platform/plugins/shared/streams_app @elastic/streams-program-team
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
+x-pack/solutions/chat/packages/wc-genai-utils @elastic/search-kibana
+x-pack/solutions/chat/packages/wc-index-schema-builder @elastic/search-kibana
+x-pack/solutions/chat/packages/wc-integration-utils @elastic/search-kibana
+x-pack/solutions/chat/packages/wci-browser @elastic/search-kibana
+x-pack/solutions/chat/packages/wci-common @elastic/search-kibana
+x-pack/solutions/chat/packages/wci-server @elastic/search-kibana
 x-pack/solutions/chat/plugins/serverless_chat @elastic/search-kibana
+x-pack/solutions/chat/plugins/wci-external-server @elastic/search-kibana
+x-pack/solutions/chat/plugins/wci-index-source @elastic/search-kibana
+x-pack/solutions/chat/plugins/wci-salesforce @elastic/search-kibana
+x-pack/solutions/chat/plugins/workchat-app @elastic/search-kibana
 x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
@@ -2239,6 +2250,7 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 
 # AI4DSOC in Security Solution
 /x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc @elastic/security-engineering-productivity
+/x-pack/test/security_solution_cypress/cypress/e2e/ai4dsoc/privileges @elastic/security-generative-ai
 /x-pack/test/security_solution_api_integration/test_suites/ai4dsoc @elastic/security-engineering-productivity
 
 # Security Solution cross teams ownership

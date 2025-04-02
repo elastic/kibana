@@ -10,10 +10,10 @@ import { first, uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   addSampleDocsToInternalKb,
   addSampleDocsToCustomIndex,
+  setupKnowledgeBase,
 } from '../../utils/knowledge_base';
 
 const customSearchConnectorIndex = 'animals_kb';
@@ -67,10 +67,10 @@ const sampleDocsForCustomIndex = [
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
 
   describe('recall', function () {
     before(async () => {
+      await setupKnowledgeBase(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
       await addSampleDocsToCustomIndex(
         getService,
@@ -80,8 +80,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
       // clear custom index
       await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] });
@@ -166,26 +165,4 @@ function formatScore(score: number) {
   }
 
   return 'low';
-}
-
-// Clear data before running tests
-// this is useful for debugging purposes
-// @ts-ignore
-async function clearBefore(getService: DeploymentAgnosticFtrProviderContext['getService']) {
-  const log = getService('log');
-  const ml = getService('ml');
-  const es = getService('es');
-
-  await deleteKnowledgeBaseModel(ml).catch(() => {
-    log.error('Failed to delete knowledge base model');
-  });
-  await deleteInferenceEndpoint({ es }).catch(() => {
-    log.error('Failed to delete inference endpoint');
-  });
-  await clearKnowledgeBase(es).catch(() => {
-    log.error('Failed to clear knowledge base');
-  });
-  await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] }).catch(() => {
-    log.error('Failed to clear custom index');
-  });
 }
