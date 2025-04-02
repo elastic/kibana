@@ -337,7 +337,6 @@ const initNavNode = <
     path,
     title,
     deepLink,
-    isExternalLink,
     sideNavStatus,
   };
 
