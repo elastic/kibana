@@ -15,7 +15,9 @@ import type {
   DashboardAttributes,
   DashboardGetOut,
   DashboardItem,
+  ItemToSavedObjectParams,
   ItemToSavedObjectReturn,
+  ItemToSavedObjectWithTagsParams,
   PartialDashboardItem,
   SavedObjectToItemReturn,
 } from './types';
@@ -37,7 +39,8 @@ import {
 export function dashboardAttributesOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
   embeddable: EmbeddableStart,
-  references?: SavedObjectReference[]
+  references?: SavedObjectReference[],
+  getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[]
 ): DashboardAttributes | Partial<DashboardAttributes> {
   const {
     controlGroupInput,
@@ -52,6 +55,13 @@ export function dashboardAttributesOut(
     title,
     version,
   } = attributes;
+
+  // Inject any tag names from references into the attributes
+  let tags: string[] | undefined;
+  if (getTagNamesFromReferences && references && references.length) {
+    tags = getTagNamesFromReferences(references);
+  }
+
   // try to maintain a consistent (alphabetical) order of keys
   return {
     ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
@@ -64,6 +74,7 @@ export function dashboardAttributesOut(
     ...(refreshInterval && {
       refreshInterval: { pause: refreshInterval.pause, value: refreshInterval.value },
     }),
+    ...(tags && tags.length && { tags }),
     ...(timeFrom && { timeFrom }),
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
@@ -126,13 +137,13 @@ export const getResultV3ToV2 = (
   };
 };
 
-export const itemToSavedObject = (
-  attributes: DashboardAttributes,
-  embeddable: EmbeddableStart,
-  references: SavedObjectReference[] = []
-): ItemToSavedObjectReturn => {
+export const itemToSavedObject = ({
+  attributes,
+  embeddable,
+  references = [],
+}: ItemToSavedObjectParams): ItemToSavedObjectReturn => {
   try {
-    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, ...rest } = attributes;
+    const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
     const { panelsJSON, references: panelReferences } = transformPanelsIn(
       panels,
       embeddable,
@@ -161,11 +172,30 @@ export const itemToSavedObject = (
   }
 };
 
+export const itemToSavedObjectWithTags = async ({
+  attributes,
+  embeddable,
+  replaceTagReferencesByName,
+  references = [],
+}: ItemToSavedObjectWithTagsParams): Promise<ItemToSavedObjectReturn> => {
+  const { tags, ...restAttributes } = attributes;
+  // Tags can be specified as an attribute or in the references.
+  const soReferences =
+    replaceTagReferencesByName && tags && tags.length
+      ? await replaceTagReferencesByName({ references, newTagNames: tags })
+      : references;
+  return itemToSavedObject({
+    attributes: restAttributes,
+    embeddable,
+    references: soReferences,
+  });
+};
+
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
-export interface SavedObjectToItemOptions {
+interface SavedObjectToItemOptions {
   /**
    * attributes to include in the output item
    */
@@ -174,6 +204,7 @@ export interface SavedObjectToItemOptions {
    * references to include in the output item
    */
   allowedReferences?: string[];
+  getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[];
 }
 
 export function savedObjectToItem(
@@ -196,7 +227,7 @@ export function savedObjectToItem(
     | PartialSavedObject<DashboardSavedObjectAttributes>,
   embeddable: EmbeddableStart,
   partial: boolean /* partial arg is used to enforce the correct savedObject type */,
-  { allowedAttributes, allowedReferences }: SavedObjectToItemOptions = {}
+  { allowedAttributes, allowedReferences, getTagNamesFromReferences }: SavedObjectToItemOptions = {}
 ): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
@@ -215,8 +246,11 @@ export function savedObjectToItem(
 
   try {
     const attributesOut = allowedAttributes
-      ? pick(dashboardAttributesOut(attributes, embeddable, references), allowedAttributes)
-      : dashboardAttributesOut(attributes, embeddable, references);
+      ? pick(
+          dashboardAttributesOut(attributes, embeddable, references, getTagNamesFromReferences),
+          allowedAttributes
+        )
+      : dashboardAttributesOut(attributes, embeddable, references, getTagNamesFromReferences);
 
     // if includeReferences is provided, only include references of those types
     const referencesOut = allowedReferences

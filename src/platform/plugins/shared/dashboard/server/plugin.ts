@@ -11,12 +11,13 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
+import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import {
   initializeDashboardTelemetryTask,
   scheduleDashboardTelemetry,
@@ -40,8 +41,10 @@ interface SetupDeps {
 }
 
 interface StartDeps {
+  embeddable: EmbeddableStart;
   taskManager: TaskManagerStartContract;
   usageCollection?: UsageCollectionStart;
+  savedObjectsTagging?: SavedObjectTaggingStart;
 }
 
 export class DashboardPlugin
@@ -65,19 +68,21 @@ export class DashboardPlugin
       })
     );
 
-    const { contentClient } = plugins.contentManagement.register({
-      id: CONTENT_ID,
-      storage: new DashboardStorage({
-        throwOnResultValidationError: this.initializerContext.env.mode.dev,
-        logger: this.logger.get('storage'),
-        // TODO this should be EmbeddableStart from core.getStartServices
-        embeddable: plugins.embeddable,
-      }),
-      version: {
-        latest: LATEST_VERSION,
-      },
+    void core.getStartServices().then(([_, { embeddable, savedObjectsTagging }]) => {
+      const { contentClient } = plugins.contentManagement.register({
+        id: CONTENT_ID,
+        storage: new DashboardStorage({
+          throwOnResultValidationError: this.initializerContext.env.mode.dev,
+          logger: this.logger.get('storage'),
+          embeddable,
+          savedObjectsTagging,
+        }),
+        version: {
+          latest: LATEST_VERSION,
+        },
+      });
+      this.contentClient = contentClient;
     });
-    this.contentClient = contentClient;
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 

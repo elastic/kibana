@@ -50,7 +50,7 @@ export function createExtractPanelReferencesMigration(
       attributes,
       error: attributesError,
       references: newPanelReferences,
-    } = itemToSavedObject(item.attributes, deps.embeddable, []);
+    } = itemToSavedObject({ attributes: item.attributes, embeddable: deps.embeddable });
     if (attributesError) throw attributesError;
 
     return {

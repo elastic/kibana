@@ -56,10 +56,8 @@ function injectPanelEmbeddableReferences(
 ) {
   if (!panel.panelIndex) return panel;
   const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
-  const { type: embeddableType, ...injectedPanelConfig } = embeddable.inject(
-    { type: panel.type, ...panel.panelConfig },
-    filteredReferences
-  );
+  const state = embeddable.inject({ type: panel.type, ...panel.panelConfig }, filteredReferences);
+  const { type, ...injectedPanelConfig } = state;
   return {
     ...panel,
     panelConfig: injectedPanelConfig,

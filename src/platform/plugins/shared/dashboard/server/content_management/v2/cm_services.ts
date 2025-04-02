@@ -59,11 +59,4 @@ export const getServiceDefinition = (embeddable: EmbeddableStart): ServicesDefin
   search: {
     in: serviceDefinitionV1.search?.in,
   },
-  mSearch: {
-    out: {
-      result: {
-        schema: dashboardSavedObjectSchema,
-      },
-    },
-  },
 });

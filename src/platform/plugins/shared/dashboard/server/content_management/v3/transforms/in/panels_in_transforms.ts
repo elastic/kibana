@@ -55,6 +55,7 @@ function extractPanelReferences(
   references: SavedObjectReference[] = []
 ) {
   const extractedPanels: DashboardPanel[] = [];
+  const panelReferences: SavedObjectReference[] = [];
   panels.forEach((panel) => {
     const { panel: extractedPanel, references: embeddableReferences } =
       extractPanelEmbeddableReferences(panel, embeddable);
@@ -63,10 +64,10 @@ function extractPanelReferences(
       extractPanelSavedObjectId(extractedPanel);
 
     extractedPanels.push(finalPanel);
-    references = [...embeddableReferences, ...soReferences];
+    panelReferences.push(...embeddableReferences, ...soReferences);
   });
 
-  return { panels: extractedPanels, references };
+  return { panels: extractedPanels, references: panelReferences };
 }
 
 function extractPanelEmbeddableReferences(panel: DashboardPanel, embeddable: EmbeddableStart) {

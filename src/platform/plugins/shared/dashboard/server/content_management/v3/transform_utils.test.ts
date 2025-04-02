@@ -9,17 +9,6 @@
 
 import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type {
-  DashboardSavedObjectAttributes,
-  SavedDashboardPanel,
-} from '../../dashboard_saved_object';
-import type { DashboardAttributes, DashboardItem } from './types';
-import {
-  dashboardAttributesOut,
-  getResultV3ToV2,
-  itemToSavedObject,
-  savedObjectToItem,
-} from './transform_utils';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROL_CHAINING,
@@ -31,6 +20,18 @@ import {
   ControlGroupChainingSystem,
   ControlWidth,
 } from '@kbn/controls-plugin/common';
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../../dashboard_saved_object';
+import type { DashboardAttributes, DashboardItem } from './types';
+
+import {
+  dashboardAttributesOut,
+  getResultV3ToV2,
+  itemToSavedObject,
+  savedObjectToItem,
+} from './transform_utils';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../common/content_management';
 
 const embeddableStartMock = createEmbeddableStartMock();
@@ -328,6 +329,7 @@ describe('itemToSavedObject', () => {
           version: '2',
         },
       ],
+      tags: [],
       timeRestore: true,
       title: 'title',
       refreshInterval: { pause: true, value: 1000 },
@@ -343,7 +345,11 @@ describe('itemToSavedObject', () => {
       },
     ];
 
-    const output = itemToSavedObject(input, embeddableStartMock, references);
+    const output = itemToSavedObject({
+      attributes: input,
+      embeddable: embeddableStartMock,
+      references,
+    });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -391,7 +397,7 @@ describe('itemToSavedObject', () => {
       kibanaSavedObjectMeta: {},
     };
 
-    const output = itemToSavedObject(input, embeddableStartMock);
+    const output = itemToSavedObject({ attributes: input, embeddable: embeddableStartMock });
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -418,6 +424,8 @@ describe('savedObjectToItem', () => {
     type: 'dashboard',
     attributes: {},
   };
+
+  const getTagNamesFromReferences = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -497,6 +505,54 @@ describe('savedObjectToItem', () => {
         kibanaSavedObjectMeta: {
           searchSource: { query: { query: 'test', language: 'KQL' } },
         },
+      },
+    });
+  });
+
+  it('should pass references to getTagNamesFromReferences', () => {
+    getTagNamesFromReferences.mockReturnValue(['tag1', 'tag2']);
+    const input = {
+      ...commonSavedObject,
+      attributes: {
+        title: 'dashboard with tags',
+        description: 'I have some tags!',
+        timeRestore: true,
+        kibanaSavedObjectMeta: {},
+        panelsJSON: JSON.stringify([]),
+      },
+      references: [
+        {
+          type: 'tag',
+          id: 'tag1',
+          name: 'tag-ref-tag1',
+        },
+        {
+          type: 'tag',
+          id: 'tag2',
+          name: 'tag-ref-tag2',
+        },
+        {
+          type: 'index-pattern',
+          id: 'index-pattern1',
+          name: 'index-pattern-ref-index-pattern1',
+        },
+      ],
+    };
+    const { item, error } = savedObjectToItem(input, embeddableStartMock, false, {
+      getTagNamesFromReferences,
+    });
+    expect(getTagNamesFromReferences).toHaveBeenCalledWith(input.references);
+    expect(error).toBeNull();
+    expect(item).toEqual({
+      ...commonSavedObject,
+      references: [...input.references],
+      attributes: {
+        title: 'dashboard with tags',
+        description: 'I have some tags!',
+        panels: [],
+        timeRestore: true,
+        kibanaSavedObjectMeta: {},
+        tags: ['tag1', 'tag2'],
       },
     });
   });

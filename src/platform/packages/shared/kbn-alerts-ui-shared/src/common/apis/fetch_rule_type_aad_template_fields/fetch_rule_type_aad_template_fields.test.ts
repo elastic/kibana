@@ -12,7 +12,7 @@ import {
   fetchRuleTypeAadTemplateFields,
   getDescription,
 } from './fetch_rule_type_aad_template_fields';
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
+import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 const http = httpServiceMock.createStartContract();
 

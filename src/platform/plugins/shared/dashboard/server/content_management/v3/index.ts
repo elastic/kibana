@@ -25,6 +25,7 @@ export type {
   DashboardUpdateOut,
   DashboardUpdateOptions,
   DashboardOptions,
+  ReplaceTagReferencesByNameParams,
 } from './types';
 export {
   getServiceDefinition,
@@ -35,4 +36,9 @@ export {
   dashboardSearchResultsSchema,
   referenceSchema,
 } from './cm_services';
-export { dashboardAttributesOut, itemToSavedObject, savedObjectToItem } from './transform_utils';
+export {
+  dashboardAttributesOut,
+  itemToSavedObject,
+  itemToSavedObjectWithTags,
+  savedObjectToItem,
+} from './transform_utils';
