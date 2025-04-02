@@ -3385,10 +3385,6 @@
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
-                "plugin": "banners",
-                "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
-              },
-              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
               },
@@ -3407,6 +3403,10 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
+              },
+              {
+                "plugin": "banners",
+                "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
               {
                 "plugin": "indexManagement",
