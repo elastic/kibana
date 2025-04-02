@@ -76,7 +76,6 @@ export const DiscoverMainRoute = ({
       urlStateStorage,
     })
   );
-  const [initialTabId] = useState(() => internalState.getState().tabs.allIds[0]);
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
   const [mainRouteInitializationState, initializeMainRoute] = useAsyncFunction<InitializeMainRoute>(
     async (loadedRootProfileState) => {
@@ -139,9 +138,9 @@ export const DiscoverMainRoute = ({
     <InternalStateProvider store={internalState}>
       <rootProfileState.AppWrapper>
         {TABS_ENABLED ? (
-          <TabsView initialTabId={initialTabId} sessionViewProps={sessionViewProps} />
+          <TabsView {...sessionViewProps} />
         ) : (
-          <CurrentTabProvider currentTabId={initialTabId}>
+          <CurrentTabProvider currentTabId={internalState.getState().tabs.unsafeCurrentId}>
             <DiscoverSessionView {...sessionViewProps} />
           </CurrentTabProvider>
         )}

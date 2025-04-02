@@ -24,38 +24,23 @@ import {
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 
-export const TabsView = ({
-  initialTabId,
-  sessionViewProps,
-}: {
-  initialTabId: string;
-  sessionViewProps: DiscoverSessionViewProps;
-}) => {
+export const TabsView = (props: DiscoverSessionViewProps) => {
   const services = useDiscoverServices();
   const dispatch = useInternalStateDispatch();
   const allTabs = useInternalStateSelector(selectAllTabs);
-  const [currentTabId, setCurrentTabId] = useState<string | undefined>(initialTabId);
+  const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
 
   return (
     <UnifiedTabs
       services={services}
       initialItems={initialItems}
-      onChanged={async (updateState) => {
-        setCurrentTabId(undefined);
-        await dispatch(
-          internalStateActions.updateTabs({
-            currentTabId: currentTabId ?? initialTabId,
-            updateState,
-          })
-        );
-        setCurrentTabId(updateState.selectedItem?.id ?? currentTabId);
-      }}
+      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
       createItem={() => createTabItem(allTabs)}
       getPreviewData={(item) => {
         const defaultQuery = { language: 'kuery', query: '(Empty query)' };
         const stateContainer = selectTabRuntimeState(
-          sessionViewProps.runtimeStateManager,
+          props.runtimeStateManager,
           item.id
         ).stateContainer$.getValue();
 
@@ -82,13 +67,11 @@ export const TabsView = ({
             : TabStatus.RUNNING,
         };
       }}
-      renderContent={() =>
-        currentTabId && (
-          <CurrentTabProvider currentTabId={currentTabId}>
-            <DiscoverSessionView key={currentTabId} {...sessionViewProps} />
-          </CurrentTabProvider>
-        )
-      }
+      renderContent={() => (
+        <CurrentTabProvider currentTabId={currentTabId}>
+          <DiscoverSessionView key={currentTabId} {...props} />
+        </CurrentTabProvider>
+      )}
     />
   );
 };

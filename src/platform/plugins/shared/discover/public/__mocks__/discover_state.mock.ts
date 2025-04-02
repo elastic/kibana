@@ -62,7 +62,7 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
   });
   const container = getDiscoverStateContainer({
-    tabId: internalState.getState().tabs.allIds[0],
+    tabId: internalState.getState().tabs.unsafeCurrentId,
     services,
     customizationContext,
     stateStorageContainer,

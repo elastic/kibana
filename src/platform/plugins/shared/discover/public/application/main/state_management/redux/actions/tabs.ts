@@ -38,23 +38,18 @@ export const setTabs: InternalStateThunkActionCreator<
     dispatch(internalStateSlice.actions.setTabs(params));
   };
 
-export interface UpdateTabsParams {
-  currentTabId: string;
-  updateState: TabbedContentState;
-}
-
-export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Promise<void>> =
-  ({ currentTabId, updateState: { items, selectedItem } }) =>
+export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], Promise<void>> =
+  ({ items, selectedItem }) =>
   async (dispatch, getState, { runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
-    const currentTab = selectTab(currentState, currentTabId);
+    const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     let updatedTabs = items.map<TabState>((item) => {
-      const existingTab = currentState.tabs.byId[item.id];
+      const existingTab = selectTab(currentState, item.id);
       return existingTab ? { ...existingTab, ...item } : { ...defaultTabState, ...item };
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
+      const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
 
       currentTabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
 
@@ -68,7 +63,7 @@ export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Pro
           : tab
       );
 
-      const existingTab = selectedItem ? currentState.tabs.byId[selectedItem.id] : undefined;
+      const existingTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
 
       if (existingTab) {
         await urlStateStorage.set('_g', existingTab.globalState);
@@ -79,5 +74,10 @@ export const updateTabs: InternalStateThunkActionCreator<[UpdateTabsParams], Pro
       }
     }
 
-    dispatch(setTabs({ allTabs: updatedTabs }));
+    dispatch(
+      setTabs({
+        allTabs: updatedTabs,
+        selectedTabId: selectedItem?.id ?? currentTab.id,
+      })
+    );
   };
