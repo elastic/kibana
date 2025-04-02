@@ -28,7 +28,7 @@ interface SourceViewerProps {
   id: string;
   index: string | undefined;
   dataView: DataView;
-  textBasedHits?: DataTableRecord[];
+  esqlHit?: DataTableRecord;
   width?: number;
   decreaseAvailableHeightBy?: number;
   onRefresh: () => void;
@@ -44,7 +44,7 @@ export const DocViewerSource = ({
   id,
   index,
   dataView,
-  textBasedHits,
+  esqlHit,
   width,
   decreaseAvailableHeightBy,
   onRefresh,
@@ -63,7 +63,7 @@ export const DocViewerSource = ({
     index,
     dataView,
     requestSource: useNewFieldsApi,
-    textBasedHits,
+    esqlHit,
   });
 
   useEffect(() => {
