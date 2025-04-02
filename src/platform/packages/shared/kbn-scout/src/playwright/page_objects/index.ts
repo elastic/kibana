@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { PainlessLab } from '@kbn/painless-lab-plugin/ui_tests/page_objects/painless_lab_page';
 import { ScoutPage } from '..';
 import { ScoutLogger } from '../../common';
 import { ScoutTestConfig } from '../../types';
@@ -17,7 +18,6 @@ import { DiscoverApp } from './discover_app';
 import { FilterBar } from './fiter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
-import { PainlessLab } from './painless_lab_page';
 import { createLazyPageObject } from './utils';
 
 export interface PageObjectsFixtures {
