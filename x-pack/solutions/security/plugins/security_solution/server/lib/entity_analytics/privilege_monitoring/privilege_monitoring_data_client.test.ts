@@ -15,10 +15,17 @@ import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server/p
 import { PrivilegeMonitoringEngineActions } from './auditing/actions';
 import { EngineComponentResourceEnum } from '../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
 
+const startPrivilegeMonitoringTaskMock = jest.fn().mockResolvedValue(undefined);
+jest.mock('./tasks/privilege_monitoring_task', () => {
+  return {
+    startPrivilegeMonitoringTask: startPrivilegeMonitoringTaskMock,
+  };
+});
 describe('Privilege Monitoring Data Client', () => {
   const mockSavedObjectClient = savedObjectsClientMock.create();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const loggerMock = loggingSystemMock.createLogger();
+  const auditMock = { log: jest.fn().mockReturnValue };
   loggerMock.debug = jest.fn();
 
   const defaultOpts = {
@@ -28,6 +35,7 @@ describe('Privilege Monitoring Data Client', () => {
     soClient: mockSavedObjectClient,
     kibanaVersion: '8.0.0',
     taskManager: {} as TaskManagerStartContract,
+    auditMock,
   };
 
   let dataClient: PrivilegeMonitoringDataClient;
@@ -43,17 +51,19 @@ describe('Privilege Monitoring Data Client', () => {
   describe('init', () => {
     it('should initialize the privilege monitoring engine successfully', async () => {
       dataClient.createOrUpdateIndex = mockCreateOrUpdateIndex;
-      // Mock the private engineClient used internally in init()
-      Object.defineProperty(dataClient, 'engineClient', {
-        value: {
-          init: jest.fn().mockResolvedValue({ status: 'success' }),
-          update: jest.fn(),
-        },
-      });
+      // // Mock the private engineClient used internally in init()
+      // Object.defineProperty(dataClient, 'engineClient', {
+      //   value: {
+      //     init: jest.fn().mockResolvedValue({ status: 'success' }),
+      //     update: jest.fn(),
+      //   },
+      // });
       const result = await dataClient.init();
 
       expect(mockCreateOrUpdateIndex).toHaveBeenCalled();
+      expect(startPrivilegeMonitoringTaskMock).toHaveBeenCalled();
       expect(loggerMock.debug).toHaveBeenCalledTimes(1);
+      expect(auditMock.log).toHaveBeenCalled();
       expect(result).toEqual(mockDescriptor);
     });
 
