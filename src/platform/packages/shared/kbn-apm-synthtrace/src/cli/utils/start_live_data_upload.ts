@@ -35,10 +35,28 @@ export async function startLiveDataUpload({
     teardown: scenarioTearDown,
   } = await scenario({ ...runOptions, logger, from, to });
 
+  function startPeriodicPerfLogging() {
+    let cpuUsage = process.cpuUsage();
+
+    return setInterval(() => {
+      cpuUsage = process.cpuUsage(cpuUsage);
+      const mem = memoryUsage();
+      logger.debug(
+        `cpu time: (user: ${Math.round(cpuUsage.user / 1000)}mss, sys: ${Math.round(
+          cpuUsage.system / 1000
+        )}ms), memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`
+      );
+    }, 5000);
+  }
+
+  const intervalId = startPeriodicPerfLogging();
+
   const teardown = once(async () => {
     if (scenarioTearDown) {
       await scenarioTearDown(clients);
     }
+
+    clearInterval(intervalId);
   });
 
   const streamManager = new StreamManager(logger, teardown);
@@ -95,22 +113,6 @@ export async function startLiveDataUpload({
       requestedUntil = rangeEnd;
     }
   }
-
-  function startPeriodicPerfLogging() {
-    let cpuUsage = process.cpuUsage();
-
-    setInterval(() => {
-      cpuUsage = process.cpuUsage(cpuUsage);
-      const mem = memoryUsage();
-      logger.debug(
-        `cpu time: (user: ${Math.round(cpuUsage.user / 1000)}mss, sys: ${Math.round(
-          cpuUsage.system / 1000
-        )}ms), memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`
-      );
-    }, 5000);
-  }
-
-  startPeriodicPerfLogging();
 
   do {
     await uploadNextBatch();
