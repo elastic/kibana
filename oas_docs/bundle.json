@@ -1740,7 +1740,9 @@
           }
         },
         "summary": "Update a maintenance window.",
-        "tags": []
+        "tags": [
+          "alerting"
+        ]
       }
     },
     "/api/alerting/maintenance_window/{id}/_archive": {
