@@ -20,6 +20,7 @@ import {
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
+  isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { generateLayer } from '../../component_templates/generate_layer';
@@ -362,6 +363,10 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     }
 
     validateSystemFields(this.definition);
+
+    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifeCycle())) {
+      return { isValid: false, errors: ['Using ILM is not supported in Serverless'] };
+    }
 
     return { isValid: true, errors: [] };
   }
