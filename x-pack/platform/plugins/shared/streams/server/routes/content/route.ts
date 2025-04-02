@@ -152,7 +152,7 @@ const importContentRoute = createServerRoute({
       .split('\n')
       .map((object) => JSON.parse(object))
       .filter((object) => object.type === 'saved_object')
-      .map((object: ContentPackSavedObject) => {
+      .map((object: ContentPackSavedObject): ContentPackSavedObject['content'] => {
         const patterns = findIndexPatterns(object);
         const replacements = patterns
           .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
