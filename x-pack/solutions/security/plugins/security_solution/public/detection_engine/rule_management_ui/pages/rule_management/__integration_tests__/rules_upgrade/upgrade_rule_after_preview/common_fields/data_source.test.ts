@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DataSourceType } from '../../../../../../../../common/api/detection_engine';
-import { mockAvailableDataViews } from '../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { DataSourceType } from '../../../../../../../../../common/api/detection_engine';
+import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
 describe('Upgrade rule after preview - "data_source" field', () => {
   beforeAll(() => {

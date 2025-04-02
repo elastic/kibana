@@ -5,47 +5,53 @@
  * 2.0.
  */
 
-import { mockRelatedIntegrations } from '../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "related_integrations" field', () => {
-  beforeAll(() => {
-    mockRelatedIntegrations([
-      {
-        package: 'packageResolved',
-        version: '5.0.0',
-      },
-    ]);
-  });
-
+describe('Upgrade rule after preview - "threat" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'related_integrations',
-      humanizedFieldName: 'Related Integrations',
+      fieldName: 'threat',
+      humanizedFieldName: 'MITRE ATT&CK\u2122',
       initial: [
         {
-          package: 'packageA',
-          version: '^1.0.0',
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            name: 'tacticA',
+            id: 'tacticA',
+            reference: 'reference',
+          },
         },
       ],
       customized: [
         {
-          package: 'packageB',
-          version: '^1.0.0',
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            name: 'tacticB',
+            id: 'tacticB',
+            reference: 'reference',
+          },
         },
       ],
       upgrade: [
         {
-          package: 'packageC',
-          version: '^1.0.0',
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            name: 'tacticC',
+            id: 'tacticC',
+            reference: 'reference',
+          },
         },
       ],
       resolvedValue: [
         {
-          package: 'packageResolved',
-          version: '^9.0.0',
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            name: 'Credential Access',
+            id: 'TA0006',
+            reference: 'https://attack.mitre.org/tactics/TA0006/',
+          },
         },
       ],
     },

@@ -208,7 +208,7 @@ export function mockTimelines(timelines: Array<{ id: string; title: string }>): 
 /**
  * Mocks KibanaServices.get().http.fetch() responses. Works in combination with renderRuleUpgradeFlyout.
  */
-function mockKibanaFetchResponse(path: string, mockResponse: unknown): void {
+export function mockKibanaFetchResponse(path: string, mockResponse: unknown): void {
   mockedResponses.set(path, mockResponse);
 }
 

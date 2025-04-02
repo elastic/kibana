@@ -15,7 +15,18 @@ import {
   selectEuiComboBoxOption,
 } from '../../../../../../../common/test/eui/combobox';
 import { selectEuiSuperSelectOption } from '../../../../../../../common/test/eui/super_select';
-import type { AlertSuppression } from '../../../../../../../../common/api/detection_engine';
+import type {
+  AlertSuppression,
+  AnomalyThreshold,
+  HistoryWindowStart,
+  InlineKqlQuery,
+  MachineLearningJobId,
+  NewTermsFields,
+  RuleEqlQuery,
+  RuleKqlQuery,
+  ThreatIndex,
+  Threshold,
+} from '../../../../../../../../common/api/detection_engine';
 import {
   DataSourceType,
   type BuildingBlockObject,
@@ -30,6 +41,7 @@ import {
   type Threat,
   type TimelineTemplateReference,
   type TimestampOverrideObject,
+  KqlQueryType,
 } from '../../../../../../../../common/api/detection_engine';
 import type { RuleSchedule } from '../../../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
 
@@ -136,6 +148,52 @@ export async function inputFieldValue(
 
     case 'alert_suppression':
       await inputAlertSuppression(fieldFinalSide, params.value);
+      break;
+
+    case 'anomaly_threshold':
+      await inputAnomalyThreshold(fieldFinalSide, params.value);
+      break;
+
+    case 'kql_query':
+      await inputKqlQuery(fieldFinalSide, params.value);
+      break;
+
+    case 'eql_query':
+      await inputEqlQuery(fieldFinalSide, params.value);
+      break;
+
+    case 'esql_query':
+      throw new Error('Not implemented');
+
+    case 'history_window_start':
+      await inputHistoryWindowStart(fieldFinalSide, params.value);
+      break;
+
+    case 'machine_learning_job_id':
+      await inputMachineLearningJobId(fieldFinalSide, params.value);
+      break;
+
+    case 'new_terms_fields':
+      await inputNewTermsFields(fieldFinalSide, params.value);
+      break;
+
+    case 'threat_index':
+      await inputThreatIndex(fieldFinalSide, params.value);
+      break;
+
+    case 'threat_indicator_path':
+      await inputText(fieldFinalSide, params.value ?? '');
+      break;
+
+    case 'threat_mapping':
+      throw new Error('Not implemented');
+
+    case 'threat_query':
+      await inputThreatQuery(fieldFinalSide, params.value);
+      break;
+
+    case 'threshold':
+      await inputThreshold(fieldFinalSide, params.value);
       break;
   }
 }
@@ -624,6 +682,160 @@ async function inputAlertSuppression(
     await selectEuiComboBoxOption({
       comboBoxToggleButton: within(fieldFinalSide).getByTestId('comboBoxToggleListButton'),
       optionText: fieldName,
+    });
+  }
+}
+
+async function inputAnomalyThreshold(
+  fieldFinalSide: HTMLElement,
+  value: AnomalyThreshold
+): Promise<void> {
+  await act(async () => {
+    // EuiRange is used for anomaly threshold
+    const [riskScoreInput] = within(fieldFinalSide).getAllByTestId('anomalyThresholdRange');
+
+    fireEvent.change(riskScoreInput, {
+      target: { value },
+    });
+  });
+}
+
+/**
+ * Doesn't support filters and saved queries
+ */
+async function inputKqlQuery(fieldFinalSide: HTMLElement, value: RuleKqlQuery): Promise<void> {
+  if (value.type !== KqlQueryType.inline_query) {
+    return;
+  }
+
+  await waitFor(() => expect(within(fieldFinalSide).getByRole('textbox')).toBeVisible(), {
+    timeout: 500,
+  });
+
+  await inputText(fieldFinalSide, value.query);
+}
+
+/**
+ * Doesn't support filters and EQL options
+ */
+async function inputEqlQuery(fieldFinalSide: HTMLElement, value: RuleEqlQuery): Promise<void> {
+  await waitFor(() => expect(within(fieldFinalSide).getByRole('textbox')).toBeVisible(), {
+    timeout: 500,
+  });
+
+  await inputText(fieldFinalSide, value.query);
+}
+
+async function inputHistoryWindowStart(
+  fieldFinalSide: HTMLElement,
+  value: HistoryWindowStart
+): Promise<void> {
+  const valueInput = within(fieldFinalSide).getByTestId('interval');
+  const unitInput = within(fieldFinalSide).getByTestId('timeType');
+
+  invariant(value.startsWith('now-'), 'Unable to parse history window start value');
+
+  const parsed = TimeDuration.parse(value.substring(4));
+
+  invariant(parsed, 'Unable to parse history window start value');
+
+  await act(async () => {
+    fireEvent.change(valueInput, {
+      target: { value: parsed.value },
+    });
+  });
+
+  await act(async () => {
+    fireEvent.change(unitInput, {
+      target: { value: parsed.unit },
+    });
+  });
+}
+
+async function inputMachineLearningJobId(
+  fieldFinalSide: HTMLElement,
+  value: MachineLearningJobId
+): Promise<void> {
+  const jobIds = [value].flat();
+
+  await clearEuiComboBoxSelection({
+    clearButton: within(fieldFinalSide).getByTestId('comboBoxClearButton'),
+  });
+
+  for (const jobId of jobIds) {
+    await selectEuiComboBoxOption({
+      comboBoxToggleButton: within(fieldFinalSide).getByTestId('comboBoxToggleListButton'),
+      optionText: jobId,
+    });
+  }
+}
+
+async function inputNewTermsFields(
+  fieldFinalSide: HTMLElement,
+  value: NewTermsFields
+): Promise<void> {
+  await clearEuiComboBoxSelection({
+    clearButton: within(fieldFinalSide).getByTestId('comboBoxClearButton'),
+  });
+
+  for (const fieldName of value) {
+    await selectEuiComboBoxOption({
+      comboBoxToggleButton: within(fieldFinalSide).getByTestId('comboBoxToggleListButton'),
+      optionText: fieldName,
+    });
+  }
+}
+
+async function inputThreatIndex(fieldFinalSide: HTMLElement, value: ThreatIndex): Promise<void> {
+  await clearEuiComboBoxSelection({
+    clearButton: within(fieldFinalSide).getByTestId('comboBoxClearButton'),
+  });
+
+  for (const indexPattern of value) {
+    await addEuiComboBoxOption({
+      wrapper: fieldFinalSide,
+      optionText: indexPattern,
+    });
+  }
+}
+
+/**
+ * Doesn't support filters
+ */
+async function inputThreatQuery(fieldFinalSide: HTMLElement, value: InlineKqlQuery): Promise<void> {
+  await waitFor(() => expect(within(fieldFinalSide).getByRole('textbox')).toBeVisible(), {
+    timeout: 500,
+  });
+
+  await inputText(fieldFinalSide, value.query);
+}
+
+async function inputThreshold(fieldFinalSide: HTMLElement, value: Threshold): Promise<void> {
+  const groupByFieldsComboBox = within(fieldFinalSide).getByTestId(
+    'detectionEngineStepDefineRuleThresholdField'
+  );
+  const thresholdInput = within(fieldFinalSide).getByTestId(
+    'detectionEngineStepDefineRuleThresholdValue'
+  );
+
+  await act(async () => {
+    const input = within(thresholdInput).getByRole('spinbutton');
+
+    fireEvent.change(input, {
+      target: { value: value.value },
+    });
+  });
+
+  const fields = [value.field].flat();
+
+  await clearEuiComboBoxSelection({
+    clearButton: within(groupByFieldsComboBox).getByTestId('comboBoxClearButton'),
+  });
+
+  for (const field of fields) {
+    await selectEuiComboBoxOption({
+      comboBoxToggleButton: within(groupByFieldsComboBox).getByTestId('comboBoxToggleListButton'),
+      optionText: field,
     });
   }
 }

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "name" field', () => {
+describe('Upgrade rule after preview - "description" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'name',
-      humanizedFieldName: 'Name',
-      initial: 'Initial name',
-      customized: 'Custom name',
-      upgrade: 'Updated name',
-      resolvedValue: 'Resolved name',
+      fieldName: 'description',
+      humanizedFieldName: 'Description',
+      initial: 'Initial description',
+      customized: 'Custom description',
+      upgrade: 'Updated description',
+      resolvedValue: 'Resolved description',
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "false_positives" field', () => {
+describe('Upgrade rule after preview - "rule_name_override" field', () => {
+  beforeAll(() => {
+    mockAvailableDataViews([], {
+      resolvedString: {
+        name: 'resolvedStringField',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+      },
+    });
+  });
+
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'false_positives',
-      humanizedFieldName: 'False Positives',
-      initial: ['exampleA'],
-      customized: ['exampleB'],
-      upgrade: ['exampleC'],
-      resolvedValue: ['resolved'],
+      fieldName: 'rule_name_override',
+      humanizedFieldName: 'Rule name override',
+      initial: { field_name: 'fieldA' },
+      customized: { field_name: 'fieldB' },
+      upgrade: { field_name: 'fieldC' },
+      resolvedValue: { field_name: 'resolvedStringField' },
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

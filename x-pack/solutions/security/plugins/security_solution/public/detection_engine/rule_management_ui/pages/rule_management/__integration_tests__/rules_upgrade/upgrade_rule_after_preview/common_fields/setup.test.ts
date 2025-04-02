@@ -5,31 +5,19 @@
  * 2.0.
  */
 
-import { mockAvailableDataViews } from '../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "rule_name_override" field', () => {
-  beforeAll(() => {
-    mockAvailableDataViews([], {
-      resolvedString: {
-        name: 'resolvedStringField',
-        type: 'string',
-        searchable: true,
-        aggregatable: true,
-      },
-    });
-  });
-
+describe('Upgrade rule after preview - "setup" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'rule_name_override',
-      humanizedFieldName: 'Rule name override',
-      initial: { field_name: 'fieldA' },
-      customized: { field_name: 'fieldB' },
-      upgrade: { field_name: 'fieldC' },
-      resolvedValue: { field_name: 'resolvedStringField' },
+      fieldName: 'setup',
+      humanizedFieldName: 'Setup',
+      initial: 'Initial setup',
+      customized: 'Custom setup',
+      upgrade: 'Updated setup',
+      resolvedValue: 'resolved setup',
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

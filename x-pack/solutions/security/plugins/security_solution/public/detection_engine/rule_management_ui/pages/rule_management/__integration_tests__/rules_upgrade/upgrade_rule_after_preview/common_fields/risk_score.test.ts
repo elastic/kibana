@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "max_signals" field', () => {
+describe('Upgrade rule after preview - "risk_score" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'max_signals',
-      humanizedFieldName: 'Max Signals',
-      initial: 100,
-      customized: 150,
-      upgrade: 200,
-      resolvedValue: 300,
+      fieldName: 'risk_score',
+      humanizedFieldName: 'Risk Score',
+      initial: 10,
+      customized: 20,
+      upgrade: 30,
+      resolvedValue: 50,
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "references" field', () => {
+describe('Upgrade rule after preview - "severity" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'references',
-      humanizedFieldName: 'Reference URLs',
-      initial: ['http://url-1'],
-      customized: ['http://url-2'],
-      upgrade: ['http://url-3'],
-      resolvedValue: ['http://resolved'],
+      fieldName: 'severity',
+      humanizedFieldName: 'Severity',
+      initial: 'low',
+      customized: 'medium',
+      upgrade: 'high',
+      resolvedValue: 'critical',
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

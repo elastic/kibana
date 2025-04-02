@@ -5,35 +5,19 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "rule_schedule" field', () => {
+describe('Upgrade rule after preview - "threat_indicator_path" field', () => {
   describe.each([
     {
-      ruleType: 'query',
-      fieldName: 'rule_schedule',
-      humanizedFieldName: 'Rule Schedule',
-      initial: {
-        interval: '5m',
-        from: 'now-10m',
-        to: 'now',
-      },
-      customized: {
-        interval: '10m',
-        from: 'now-1h',
-        to: 'now',
-      },
-      upgrade: {
-        interval: '15m',
-        from: 'now-20m',
-        to: 'now',
-      },
-      resolvedValue: {
-        interval: '1h',
-        from: 'now-2h',
-        to: 'now',
-      },
+      ruleType: 'threat_match',
+      fieldName: 'threat_indicator_path',
+      humanizedFieldName: 'Indicator prefix override',
+      initial: 'fieldA',
+      customized: 'fieldB',
+      upgrade: 'fieldC',
+      resolvedValue: 'resolvedStringField',
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

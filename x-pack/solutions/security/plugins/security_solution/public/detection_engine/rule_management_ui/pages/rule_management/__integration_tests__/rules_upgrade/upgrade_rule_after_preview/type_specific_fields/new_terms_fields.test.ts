@@ -5,42 +5,31 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
+import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
 
-describe('Upgrade rule after preview - "required_fields" field', () => {
+describe('Upgrade rule after preview - "new_terms_fields" field', () => {
+  beforeAll(() => {
+    mockAvailableDataViews([], {
+      resolved: {
+        name: 'resolved',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+      },
+    });
+  });
+
   describe.each([
     {
-      ruleType: 'query',
-      fieldName: 'required_fields',
-      humanizedFieldName: 'Required fields',
-      initial: [
-        {
-          name: 'fieldA',
-          type: 'string',
-          ecs: false,
-        },
-      ],
-      customized: [
-        {
-          name: 'fieldB',
-          type: 'string',
-          ecs: false,
-        },
-      ],
-      upgrade: [
-        {
-          name: 'fieldC',
-          type: 'string',
-          ecs: false,
-        },
-      ],
-      resolvedValue: [
-        {
-          name: 'resolvedStringField',
-          type: 'string',
-        },
-      ],
+      ruleType: 'new_terms',
+      fieldName: 'new_terms_fields',
+      humanizedFieldName: 'New Terms Fields',
+      initial: ['fieldA'],
+      customized: ['fieldB'],
+      upgrade: ['fieldA', 'fieldC'],
+      resolvedValue: ['resolved'],
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

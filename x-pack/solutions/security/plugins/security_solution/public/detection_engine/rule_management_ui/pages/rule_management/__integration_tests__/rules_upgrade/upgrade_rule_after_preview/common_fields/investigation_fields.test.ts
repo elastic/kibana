@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import { mockTimelines } from '../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "timeline_template" field', () => {
+describe('Upgrade rule after preview - "investigation_fields" field', () => {
   beforeAll(() => {
-    mockTimelines([
-      {
-        id: 'resolved',
-        title: 'timelineResolved',
+    mockAvailableDataViews([], {
+      resolvedString: {
+        name: 'resolvedStringField',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
       },
-    ]);
+    });
   });
 
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'timeline_template',
-      humanizedFieldName: 'Timeline template',
-      initial: { timeline_id: 'A', timeline_title: 'timelineA' },
-      customized: { timeline_id: 'B', timeline_title: 'timelineB' },
-      upgrade: { timeline_id: 'C', timeline_title: 'timelineC' },
-      resolvedValue: { timeline_id: 'resolved', timeline_title: 'timelineResolved' },
+      fieldName: 'investigation_fields',
+      humanizedFieldName: 'Custom highlighted fields',
+      initial: { field_names: ['fieldA'] },
+      customized: { field_names: ['fieldB'] },
+      upgrade: { field_names: ['fieldC'] },
+      resolvedValue: { field_names: ['resolvedStringField'] },
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

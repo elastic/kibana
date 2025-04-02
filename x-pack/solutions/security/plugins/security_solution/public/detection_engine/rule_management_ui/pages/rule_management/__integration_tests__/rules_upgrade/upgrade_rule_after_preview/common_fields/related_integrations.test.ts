@@ -5,57 +5,47 @@
  * 2.0.
  */
 
-import { mockAvailableDataViews } from '../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { mockRelatedIntegrations } from '../../mock/rule_upgrade_flyout';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "severity_mapping" field', () => {
+describe('Upgrade rule after preview - "related_integrations" field', () => {
   beforeAll(() => {
-    mockAvailableDataViews([], {
-      resolvedString: {
-        name: 'resolvedStringField',
-        type: 'string',
-        searchable: true,
-        aggregatable: true,
+    mockRelatedIntegrations([
+      {
+        package: 'packageResolved',
+        version: '5.0.0',
       },
-    });
+    ]);
   });
 
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'severity_mapping',
-      humanizedFieldName: 'Severity override',
+      fieldName: 'related_integrations',
+      humanizedFieldName: 'Related Integrations',
       initial: [
         {
-          field: 'fieldA',
-          operator: 'equals',
-          severity: 'low',
-          value: '10',
+          package: 'packageA',
+          version: '^1.0.0',
         },
       ],
       customized: [
         {
-          field: 'fieldB',
-          operator: 'equals',
-          severity: 'medium',
-          value: '30',
+          package: 'packageB',
+          version: '^1.0.0',
         },
       ],
       upgrade: [
         {
-          field: 'fieldC',
-          operator: 'equals',
-          severity: 'high',
-          value: '50',
+          package: 'packageC',
+          version: '^1.0.0',
         },
       ],
       resolvedValue: [
         {
-          field: 'resolvedStringField',
-          value: '70',
-          operator: 'equals',
-          severity: 'critical',
+          package: 'packageResolved',
+          version: '^9.0.0',
         },
       ],
     },

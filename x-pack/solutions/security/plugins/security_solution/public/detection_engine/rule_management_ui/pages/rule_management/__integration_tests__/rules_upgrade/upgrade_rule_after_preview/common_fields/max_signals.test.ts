@@ -5,31 +5,19 @@
  * 2.0.
  */
 
-import { mockAvailableDataViews } from '../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "investigation_fields" field', () => {
-  beforeAll(() => {
-    mockAvailableDataViews([], {
-      resolvedString: {
-        name: 'resolvedStringField',
-        type: 'string',
-        searchable: true,
-        aggregatable: true,
-      },
-    });
-  });
-
+describe('Upgrade rule after preview - "max_signals" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'investigation_fields',
-      humanizedFieldName: 'Custom highlighted fields',
-      initial: { field_names: ['fieldA'] },
-      customized: { field_names: ['fieldB'] },
-      upgrade: { field_names: ['fieldC'] },
-      resolvedValue: { field_names: ['resolvedStringField'] },
+      fieldName: 'max_signals',
+      humanizedFieldName: 'Max Signals',
+      initial: 100,
+      customized: 150,
+      upgrade: 200,
+      resolvedValue: 300,
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

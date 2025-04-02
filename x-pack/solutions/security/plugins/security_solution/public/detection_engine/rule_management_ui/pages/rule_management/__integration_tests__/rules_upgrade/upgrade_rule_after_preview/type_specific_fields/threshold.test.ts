@@ -5,19 +5,31 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
+import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
 
-describe('Upgrade rule after preview - "setup" field', () => {
+describe('Upgrade rule after preview - "threshold" field', () => {
+  beforeAll(() => {
+    mockAvailableDataViews([], {
+      resolved: {
+        name: 'resolved',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+      },
+    });
+  });
+
   describe.each([
     {
-      ruleType: 'query',
-      fieldName: 'setup',
-      humanizedFieldName: 'Setup',
-      initial: 'Initial setup',
-      customized: 'Custom setup',
-      upgrade: 'Updated setup',
-      resolvedValue: 'resolved setup',
+      ruleType: 'threshold',
+      fieldName: 'threshold',
+      humanizedFieldName: 'Threshold',
+      initial: { value: 10, field: ['fieldA'] },
+      customized: { value: 20, field: ['fieldB'] },
+      upgrade: { value: 30, field: ['fieldC'] },
+      resolvedValue: { value: 50, field: ['resolved'] },
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

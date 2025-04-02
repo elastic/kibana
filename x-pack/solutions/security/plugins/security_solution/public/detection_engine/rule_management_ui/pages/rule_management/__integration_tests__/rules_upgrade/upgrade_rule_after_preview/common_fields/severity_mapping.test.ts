@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { mockAvailableDataViews } from '../mock/rule_upgrade_flyout';
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "alert_suppression" field', () => {
+describe('Upgrade rule after preview - "severity_mapping" field', () => {
   beforeAll(() => {
     mockAvailableDataViews([], {
       resolvedString: {
@@ -24,12 +24,40 @@ describe('Upgrade rule after preview - "alert_suppression" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'alert_suppression',
-      humanizedFieldName: 'Alert suppression',
-      initial: { group_by: ['fieldA'] },
-      customized: { group_by: ['fieldB'] },
-      upgrade: { group_by: ['fieldC'] },
-      resolvedValue: { group_by: ['resolvedStringField'] },
+      fieldName: 'severity_mapping',
+      humanizedFieldName: 'Severity override',
+      initial: [
+        {
+          field: 'fieldA',
+          operator: 'equals',
+          severity: 'low',
+          value: '10',
+        },
+      ],
+      customized: [
+        {
+          field: 'fieldB',
+          operator: 'equals',
+          severity: 'medium',
+          value: '30',
+        },
+      ],
+      upgrade: [
+        {
+          field: 'fieldC',
+          operator: 'equals',
+          severity: 'high',
+          value: '50',
+        },
+      ],
+      resolvedValue: [
+        {
+          field: 'resolvedStringField',
+          value: '70',
+          operator: 'equals',
+          severity: 'critical',
+        },
+      ],
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

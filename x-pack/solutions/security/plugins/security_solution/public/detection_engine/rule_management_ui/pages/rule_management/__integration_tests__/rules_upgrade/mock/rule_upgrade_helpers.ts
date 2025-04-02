@@ -46,6 +46,7 @@ async function clickFieldSaveButton(wrapper: HTMLElement, buttonName: string): P
 
   expect(saveButton).toBeVisible();
 
+  // Wait for async validation to finish
   await waitFor(() => expect(saveButton).toBeEnabled(), {
     timeout: 500,
   });
@@ -54,6 +55,7 @@ async function clickFieldSaveButton(wrapper: HTMLElement, buttonName: string): P
     fireEvent.click(saveButton);
   });
 
+  // After saving the form "Save" button should be removed from the DOM
   await waitFor(() => expect(saveButton).not.toBeInTheDocument(), {
     timeout: 500,
   });

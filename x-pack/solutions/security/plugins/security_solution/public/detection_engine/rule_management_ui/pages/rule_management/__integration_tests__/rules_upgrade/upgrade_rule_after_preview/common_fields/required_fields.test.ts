@@ -5,19 +5,42 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "severity" field', () => {
+describe('Upgrade rule after preview - "required_fields" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'severity',
-      humanizedFieldName: 'Severity',
-      initial: 'low',
-      customized: 'medium',
-      upgrade: 'high',
-      resolvedValue: 'critical',
+      fieldName: 'required_fields',
+      humanizedFieldName: 'Required fields',
+      initial: [
+        {
+          name: 'fieldA',
+          type: 'string',
+          ecs: false,
+        },
+      ],
+      customized: [
+        {
+          name: 'fieldB',
+          type: 'string',
+          ecs: false,
+        },
+      ],
+      upgrade: [
+        {
+          name: 'fieldC',
+          type: 'string',
+          ecs: false,
+        },
+      ],
+      resolvedValue: [
+        {
+          name: 'resolvedStringField',
+          type: 'string',
+        },
+      ],
     },
   ] as const)(
     '$fieldName ($ruleType rule)',

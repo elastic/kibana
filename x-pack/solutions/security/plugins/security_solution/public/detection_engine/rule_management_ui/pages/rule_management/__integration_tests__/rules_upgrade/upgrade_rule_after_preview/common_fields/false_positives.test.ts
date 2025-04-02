@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import { assertRuleUpgradePreview } from '../mock/assert_rule_upgrade_preview';
-import { assertRuleUpgradeAfterReview } from '../mock/assert_rule_upgrade_after_review';
+import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
+import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "risk_score" field', () => {
+describe('Upgrade rule after preview - "false_positives" field', () => {
   describe.each([
     {
       ruleType: 'query',
-      fieldName: 'risk_score',
-      humanizedFieldName: 'Risk Score',
-      initial: 10,
-      customized: 20,
-      upgrade: 30,
-      resolvedValue: 50,
+      fieldName: 'false_positives',
+      humanizedFieldName: 'False Positives',
+      initial: ['exampleA'],
+      customized: ['exampleB'],
+      upgrade: ['exampleC'],
+      resolvedValue: ['resolved'],
     },
   ] as const)(
     '$fieldName ($ruleType rule)',
