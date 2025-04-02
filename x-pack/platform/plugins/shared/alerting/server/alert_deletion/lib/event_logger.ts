@@ -9,7 +9,7 @@ import { millisToNanos } from '@kbn/event-log-plugin/server';
 import type { AlertDeletionContext } from '../alert_deletion_client';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 
-export const logSuccessfulDeletion = async (
+export const logSuccessfulDeletion = (
   context: AlertDeletionContext,
   runDate: Date,
   numDeleted: number,
@@ -37,7 +37,7 @@ export const logSuccessfulDeletion = async (
   });
 };
 
-export const logFailedDeletion = async (
+export const logFailedDeletion = (
   context: AlertDeletionContext,
   runDate: Date,
   numDeleted: number,
