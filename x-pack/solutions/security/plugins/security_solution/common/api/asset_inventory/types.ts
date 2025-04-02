@@ -13,12 +13,12 @@ export type AssetInventoryStatus =
   | 'disabled'
   | 'initializing'
   | 'empty'
-  | 'permission_denied'
+  | 'insufficient_privileges'
   | 'ready';
 
 export interface AssetInventoryStatusResponse {
   status: AssetInventoryStatus;
-  privileges?: EntityAnalyticsPrivileges['privileges'];
+  privileges?: EntityAnalyticsPrivileges;
 }
 
 export type AssetInventoryEnableResponse = InitEntityStoreResponse;
