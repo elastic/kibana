@@ -116,7 +116,7 @@ describe('Stage: updateIndexMappings', () => {
 
   it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL in case of  wait_for_task_completed_with_error_retry_original when exceeding retry count', () => {
     const state = createWaitState({
-      retryCount: context.maxRetryAttempts + 1,
+      retryCount: context.maxRetryAttempts,
     });
     const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
       type: 'wait_for_task_completed_with_error_retry_original' as const,
