@@ -58,7 +58,12 @@ export const EngineDescriptor = z.object({
     .optional()
     .default('1m'),
   docsPerSecond: z.number().int().optional(),
-  error: z.object({}).optional(),
+  error: z
+    .object({
+      message: z.string(),
+      action: z.literal('init'),
+    })
+    .optional(),
 });
 
 export type EngineComponentResource = z.infer<typeof EngineComponentResource>;
