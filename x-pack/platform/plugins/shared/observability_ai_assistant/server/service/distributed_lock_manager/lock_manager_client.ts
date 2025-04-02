@@ -140,6 +140,7 @@ export class LockManager {
       const response = await this.esClient.update<LockDocument>({
         index: LOCKS_CONCRETE_INDEX_NAME,
         id: this.lockId,
+        retry_on_conflict: 3, // Retry on version conflict. This can necessary if `extendTtl` is called at the same time.
         scripted_upsert: false,
         script: {
           lang: 'painless',
