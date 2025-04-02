@@ -8,7 +8,6 @@
 import {
   DateProcessorConfig,
   DissectProcessorConfig,
-  FieldDefinitionType,
   GrokProcessorConfig,
   ProcessorDefinition,
   ProcessorTypeOf,
@@ -22,11 +21,6 @@ export type WithUIAttributes<T extends ProcessorDefinition> = T & {
 };
 
 export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
-
-export interface DetectedField {
-  name: string;
-  type?: FieldDefinitionType | 'system';
-}
 
 export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
   type: 'grok';
