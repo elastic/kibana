@@ -66,6 +66,7 @@ export const updateMaintenanceWindowRoute = (
       options: {
         access: 'public',
         summary: 'Update a maintenance window.',
+        tags: ['oas-tag:alerting'],
       },
     },
     router.handleLegacyErrors(
