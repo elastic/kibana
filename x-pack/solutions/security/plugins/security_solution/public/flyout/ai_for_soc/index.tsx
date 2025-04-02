@@ -29,7 +29,7 @@ import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../shared/components/flyout_header';
 import { DEFAULT_AI_CONNECTOR } from '../../../common/constants';
 import { UserAssetTableType } from '../../explore/users/store/model';
-import { AlertHeaderTitle } from '../document_details/right/components/alert_header_title';
+import { AlertHeaderTitle } from '../document_details/right/components/alert_header_title_ai_for_soc';
 import { useAlertsContext } from '../../detections/components/alerts_table/alerts_context';
 
 /**
@@ -71,7 +71,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
       >
         <FlyoutNavigation flyoutIsExpandable={false} />
         <FlyoutHeader>
-          <AlertHeaderTitle hideAlertSummaryPanel />
+          <AlertHeaderTitle />
         </FlyoutHeader>
         <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
           <EuiFlexGroup direction="column">

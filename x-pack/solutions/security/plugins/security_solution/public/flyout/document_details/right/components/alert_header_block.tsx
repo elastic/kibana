@@ -22,14 +22,18 @@ export interface AlertHeaderBlockProps {
    * data-test-subj to use for the title
    */
   ['data-test-subj']?: string;
+  /**
+   * Optionally hide border
+   */
+  hasBorder?: boolean;
 }
 
 /**
  * Reusable component for rendering a block with rounded edges, show a title and value below one another
  */
 export const AlertHeaderBlock: VFC<AlertHeaderBlockProps> = memo(
-  ({ title, children, 'data-test-subj': dataTestSubj }) => (
-    <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+  ({ title, children, 'data-test-subj': dataTestSubj, hasBorder = true }) => (
+    <EuiPanel hasShadow={false} hasBorder={hasBorder} paddingSize="s">
       <EuiFlexGroup direction="column" gutterSize="xs" responsive={false} alignItems="flexStart">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs" data-test-subj={dataTestSubj}>

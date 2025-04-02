@@ -15,7 +15,7 @@ import { useDocumentDetailsContext } from '../../shared/context';
 /**
  * Document details risk score displayed in flyout right section header
  */
-export const RiskScore = memo(() => {
+export const RiskScore = memo(({ hasBorder = true }: { hasBorder?: boolean }) => {
   const { getFieldsData } = useDocumentDetailsContext();
   const fieldsData = getFieldsData(ALERT_RISK_SCORE);
 
@@ -34,6 +34,7 @@ export const RiskScore = memo(() => {
 
   return (
     <AlertHeaderBlock
+      hasBorder={hasBorder}
       title={
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.header.riskScoreTitle"
