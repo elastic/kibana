@@ -7,9 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { coreMock } from '@kbn/core/public/mocks';
 import { render } from '@testing-library/react';
 import React from 'react';
+
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
+import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
+import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
+
 import { RenderContextService } from './render_context_service';
 
 jest.mock('@elastic/eui', () => ({
@@ -31,9 +37,15 @@ describe('RenderContextService', () => {
     expect(getByText('Loading...')).toBeTruthy();
   });
 
-  it('renders the provided ReactNode within KibanaRenderContextProvider', () => {
+  it('renders the React element when dependencies are provideed', () => {
     const service = new RenderContextService();
-    const deps = coreMock.createStart();
+    const deps = {
+      analytics: analyticsServiceMock.createAnalyticsServiceStart(),
+      executionContext: executionContextServiceMock.createStartContract(),
+      i18n: i18nServiceMock.createStartContract(),
+      theme: themeServiceMock.createStartContract(),
+      userProfile: userProfileServiceMock.createStart(),
+    };
     service.start(deps);
 
     const TestComponent = service.addContext(<div>Test Element</div>);
