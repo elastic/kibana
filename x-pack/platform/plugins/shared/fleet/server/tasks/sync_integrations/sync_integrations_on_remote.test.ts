@@ -12,8 +12,7 @@ import { outputService } from '../../services';
 
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 
-import { installCustomAsset } from './custom_assets';
-
+import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
   syncIntegrationsOnRemote,
   getFollowerIndexInfo,
@@ -21,7 +20,9 @@ import {
 } from './sync_integrations_on_remote';
 
 jest.mock('../../services');
-jest.mock('./custom_assets');
+jest.mock('./custom_assets', () => {
+  return { getPipeline: jest.fn(), getComponentTemplate: jest.fn(), installCustomAsset: jest.fn() };
+});
 jest.mock('../../services/epm/packages/get', () => {
   return {
     ...jest.requireActual('../../services/epm/packages/get'),
@@ -30,6 +31,8 @@ jest.mock('../../services/epm/packages/get', () => {
 });
 
 const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
+const getPipelineMock = getPipeline as jest.Mocked<typeof getPipeline>;
+const getComponentTemplateMock = getComponentTemplate as jest.Mocked<typeof getComponentTemplate>;
 
 describe('syncIntegrationsOnRemote', () => {
   const abortController = new AbortController();
@@ -760,7 +763,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
       page: 1,
       per_page: 10000,
-      total: 1,
+      total: 2,
       saved_objects: [
         {
           type: 'epm-packages',
@@ -812,6 +815,366 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           updated_at: expect.any(String),
         },
       ],
+    });
+  });
+
+  describe('compare custom integrations', () => {
+    let searchMockWithCustomAssets: any;
+
+    afterEach(() => {
+      jest.resetAllMocks();
+    });
+    beforeEach(() => {
+      searchMockWithCustomAssets = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                integrations: [
+                  {
+                    package_name: 'system',
+                    package_version: '1.67.3',
+                    updated_at: '2025-03-20T14:18:40.076Z',
+                  },
+                ],
+                custom_assets: {
+                  'component_template:logs-system.auth@custom': {
+                    type: 'component_template',
+                    name: 'logs-system.auth@custom',
+                    package_name: 'system',
+                    package_version: '1.67.3',
+                    is_deleted: false,
+                    template: {
+                      mappings: {
+                        dynamic_templates: [],
+                        properties: {
+                          'Test-mapping': {
+                            type: 'text',
+                          },
+                        },
+                      },
+                    },
+                  },
+                  'ingest_pipeline:logs-system.auth@custom': {
+                    type: 'ingest_pipeline',
+                    name: 'logs-system.auth@custom',
+                    package_name: 'system',
+                    package_version: '1.67.3',
+                    is_deleted: false,
+                    pipeline: {
+                      processors: [
+                        {
+                          set: {
+                            field: 'test',
+                            value: 'test-value',
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          ],
+        },
+      });
+    });
+
+    it('should return synchronizing state if the assets are different', async () => {
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+        'logs-system.auth@custom': {
+          processors: [
+            {
+              user_agent: {
+                field: 'user_agent',
+              },
+            },
+          ],
+        },
+      });
+      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+        component_templates: [
+          {
+            name: 'logs-system.auth@custom',
+            component_template: {
+              template: {
+                mappings: {
+                  properties: {
+                    new_field: {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      esClientMock = {
+        search: searchMockWithCustomAssets,
+      };
+      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'system',
+            attributes: {
+              version: '1.67.3',
+              install_status: 'installed',
+            },
+            updated_at: '2025-03-26T14:06:27.611Z',
+          },
+        ],
+      });
+
+      const res = await fetchAndCompareSyncedIntegrations(
+        esClientMock,
+        soClientMock,
+        'fleet-synced-integrations-ccr-*',
+        loggerMock
+      );
+
+      expect(res).toEqual({
+        integrations: [
+          {
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            updated_at: expect.any(String),
+          },
+        ],
+        custom_assets: {
+          'component_template:logs-system.auth@custom': {
+            is_deleted: false,
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'synchronizing',
+            template: {
+              mappings: {
+                dynamic_templates: [],
+                properties: {
+                  'Test-mapping': {
+                    type: 'text',
+                  },
+                },
+              },
+            },
+            type: 'component_template',
+          },
+          'ingest_pipeline:logs-system.auth@custom': {
+            is_deleted: false,
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            pipeline: {
+              processors: [
+                {
+                  set: {
+                    field: 'test',
+                    value: 'test-value',
+                  },
+                },
+              ],
+            },
+            sync_status: 'synchronizing',
+            type: 'ingest_pipeline',
+          },
+        },
+      });
+    });
+
+    it('should return completed if custom assets are equal', async () => {
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+        'logs-system.auth@custom': {
+          processors: [
+            {
+              set: {
+                field: 'test',
+                value: 'test-value',
+              },
+            },
+          ],
+        },
+      });
+      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+        component_templates: [
+          {
+            name: 'logs-system.auth@custom',
+            component_template: {
+              template: {
+                mappings: {
+                  dynamic_templates: [],
+                  properties: {
+                    'Test-mapping': {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      });
+
+      esClientMock = {
+        search: searchMockWithCustomAssets,
+      };
+      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'system',
+            attributes: {
+              version: '1.67.3',
+              install_status: 'installed',
+            },
+            updated_at: '2025-03-26T14:06:27.611Z',
+          },
+        ],
+      });
+
+      const res = await fetchAndCompareSyncedIntegrations(
+        esClientMock,
+        soClientMock,
+        'fleet-synced-integrations-ccr-*',
+        loggerMock
+      );
+
+      expect(res).toEqual({
+        integrations: [
+          {
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            updated_at: expect.any(String),
+          },
+        ],
+        custom_assets: {
+          'component_template:logs-system.auth@custom': {
+            is_deleted: false,
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            template: {
+              mappings: {
+                dynamic_templates: [],
+                properties: {
+                  'Test-mapping': {
+                    type: 'text',
+                  },
+                },
+              },
+            },
+            type: 'component_template',
+          },
+          'ingest_pipeline:logs-system.auth@custom': {
+            is_deleted: false,
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            pipeline: {
+              processors: [
+                {
+                  set: {
+                    field: 'test',
+                    value: 'test-value',
+                  },
+                },
+              ],
+            },
+            sync_status: 'completed',
+            type: 'ingest_pipeline',
+          },
+        },
+      });
+    });
+
+    it('should return error if no custom assets are installed', async () => {
+      esClientMock = {
+        search: searchMockWithCustomAssets,
+      };
+      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'system',
+            attributes: {
+              version: '1.67.3',
+              install_status: 'installed',
+            },
+            updated_at: '2025-03-26T14:06:27.611Z',
+          },
+        ],
+      });
+
+      const res = await fetchAndCompareSyncedIntegrations(
+        esClientMock,
+        soClientMock,
+        'fleet-synced-integrations-ccr-*',
+        loggerMock
+      );
+      expect(res).toEqual({
+        custom_assets: {
+          'component_template:logs-system.auth@custom': {
+            is_deleted: false,
+            error: 'No component templates found on remote index',
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'failed',
+            template: {
+              mappings: {
+                dynamic_templates: [],
+                properties: {
+                  'Test-mapping': {
+                    type: 'text',
+                  },
+                },
+              },
+            },
+            type: 'component_template',
+          },
+          'ingest_pipeline:logs-system.auth@custom': {
+            error: 'No custom pipelines found on remote index',
+            is_deleted: false,
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            pipeline: {
+              processors: [
+                {
+                  set: {
+                    field: 'test',
+                    value: 'test-value',
+                  },
+                },
+              ],
+            },
+            sync_status: 'failed',
+            type: 'ingest_pipeline',
+          },
+        },
+        integrations: [
+          {
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            updated_at: expect.any(String),
+          },
+        ],
+      });
     });
   });
 });

@@ -18,6 +18,7 @@ import semverGte from 'semver/functions/gte';
 import type {
   CcrFollowInfoFollowerIndex,
   ClusterComponentTemplateSummary,
+  IngestGetPipelineResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
 import type { PackageClient } from '../../services';
@@ -295,7 +296,7 @@ export const fetchAndCompareSyncedIntegrations = async (
       },
       {} as Record<string, SavedObjectsFindResult<Installation>>
     );
-    const customAssetsStatus = await compareCustomAssets(esClient, logger, ccrCustomAssets);
+    const customAssetsStatus = await fetchAndCompareCustomAssets(esClient, logger, ccrCustomAssets);
     const integrationsStatus = compareIntegrations(ccrIntegrations, installedIntegrationsByName);
     const result = {
       ...integrationsStatus,
@@ -303,9 +304,12 @@ export const fetchAndCompareSyncedIntegrations = async (
     };
 
     return result;
-  } catch (err) {
-    logger.error('error', err.message);
-    throw err;
+  } catch (error) {
+    logger.error('error', error.message);
+    return {
+      integrations: [],
+      error,
+    };
   }
 };
 
@@ -347,7 +351,7 @@ const compareIntegrations = (
   return { integrations: integrationsStatus };
 };
 
-const compareCustomAssets = async (
+const fetchAndCompareCustomAssets = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   ccrCustomAssets: { [key: string]: CustomAssetsData }
@@ -372,46 +376,81 @@ const compareCustomAssets = async (
       }
       return acc;
     }, {} as Record<string, ClusterComponentTemplateSummary>);
+    const componentTemplates = installedComponentTemplates?.component_templates
+      ? componentTemplatesByName
+      : undefined;
     const result: RemoteSyncedCustomAssetsRecord = {};
 
     // compare custom pipelines and custom component templates
     Object.entries(ccrCustomAssets).forEach(([ccrCustomName, ccrCustomAsset]) => {
-      if (ccrCustomAsset.type === 'ingest_pipeline') {
-        const installedAsset = installedPipelines[ccrCustomAsset?.name];
-
-        if (isEqual(installedAsset, ccrCustomAsset?.pipeline)) {
-          result[ccrCustomName] = {
-            ...ccrCustomAsset,
-            sync_status: 'completed' as SyncStatus.COMPLETED,
-          } as RemoteSyncedCustomAssetsStatus;
-        } else {
-          result[ccrCustomName] = {
-            ...ccrCustomAsset,
-            sync_status: 'failed' as SyncStatus.FAILED,
-          } as RemoteSyncedCustomAssetsStatus;
-        }
-      }
-      if (ccrCustomAsset.type === 'component_template') {
-        const installedAsset = componentTemplatesByName[ccrCustomAsset?.name];
-
-        if (isEqual(installedAsset, ccrCustomAsset?.template)) {
-          result[ccrCustomName] = {
-            ...ccrCustomAsset,
-            sync_status: 'completed' as SyncStatus.COMPLETED,
-          } as RemoteSyncedCustomAssetsStatus;
-        } else {
-          result[ccrCustomName] = {
-            ...ccrCustomAsset,
-            sync_status: 'failed' as SyncStatus.FAILED,
-          } as RemoteSyncedCustomAssetsStatus;
-        }
-      }
+      const res = compareCustomAssets({
+        ccrCustomAsset,
+        ingestPipelines: installedPipelines,
+        componentTemplates,
+      });
+      result[ccrCustomName] = res;
     });
     return result;
-  } catch (err) {
-    logger.error('error', err.message);
-    throw err;
+  } catch (error) {
+    logger.error('error', error.message);
+    return { error };
   }
+};
+
+const compareCustomAssets = ({
+  ccrCustomAsset,
+  ingestPipelines,
+  componentTemplates,
+}: {
+  ccrCustomAsset: CustomAssetsData;
+  ingestPipelines?: IngestGetPipelineResponse;
+  componentTemplates?: Record<string, ClusterComponentTemplateSummary>;
+}): RemoteSyncedCustomAssetsStatus => {
+  if (ccrCustomAsset.type === 'ingest_pipeline') {
+    if (!ingestPipelines) {
+      return {
+        ...ccrCustomAsset,
+        sync_status: 'failed' as SyncStatus.FAILED,
+        error: `No custom pipelines found on remote index`,
+      };
+    }
+
+    const installedAsset = ingestPipelines[ccrCustomAsset?.name];
+
+    if (isEqual(installedAsset, ccrCustomAsset?.pipeline)) {
+      return {
+        ...ccrCustomAsset,
+        sync_status: 'completed' as SyncStatus.COMPLETED,
+      };
+    } else {
+      return {
+        ...ccrCustomAsset,
+        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+      };
+    }
+  } else if (ccrCustomAsset.type === 'component_template') {
+    if (!componentTemplates) {
+      return {
+        ...ccrCustomAsset,
+        sync_status: 'failed' as SyncStatus.FAILED,
+        error: `No component templates found on remote index`,
+      };
+    }
+
+    const installedAsset = componentTemplates[ccrCustomAsset?.name];
+    if (isEqual(installedAsset, ccrCustomAsset?.template)) {
+      return {
+        ...ccrCustomAsset,
+        sync_status: 'completed' as SyncStatus.COMPLETED,
+      };
+    } else {
+      return {
+        ...ccrCustomAsset,
+        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
+      };
+    }
+  }
+  return {} as RemoteSyncedCustomAssetsStatus;
 };
 
 export const getRemoteSyncedIntegrationsStatus = async (
