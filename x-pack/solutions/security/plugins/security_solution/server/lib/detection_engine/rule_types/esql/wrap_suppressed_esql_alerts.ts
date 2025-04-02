@@ -34,9 +34,16 @@ export const wrapSuppressedEsqlAlerts = ({
   expandedFields: string[] | undefined;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   const { spaceId, completeRule, tuple, primaryTimestamp, secondaryTimestamp } = sharedParams;
+
   const wrapped = events.map<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>(
     (event, i) => {
-      const combinedFields = { ...event?.fields, ...event._source };
+      const combinedFields = {
+        ...event._source,
+        ...event?.fields,
+        _id: event._id ?? null,
+        _index: event._index ?? null,
+        _version: event._version ?? null,
+      };
 
       const suppressionTerms = getSuppressionTerms({
         alertSuppression: completeRule?.ruleParams?.alertSuppression,
