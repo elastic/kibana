@@ -22,5 +22,10 @@
     "@kbn/core-user-profile-browser",
     "@kbn/react-kibana-context-common",
     "@kbn/react-kibana-context-render",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-execution-context-browser-mocks",
+    "@kbn/core-i18n-browser-mocks",
+    "@kbn/core-theme-browser-mocks",
+    "@kbn/core-user-profile-browser-mocks",
   ]
 }
