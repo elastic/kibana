@@ -1,0 +1,120 @@
+$schema: https://moonrepo.dev/schemas/project.json
+
+fileGroups:
+  sharedGlobals: [ ]
+  default:
+    - '**/*'
+  production: [ ]
+  src:
+    - 'src/**/*'
+
+tasks:
+  jest:
+    description: Run jest tests
+    command: node
+    options:
+      runFromWorkspaceRoot: true
+      mergeArgs: append
+    args:
+      - scripts/jest.js
+      - '--cache'
+      - '--passWithNoTests'
+
+  jestCI:
+    description: Run jest tests (in band)
+    command: node
+    options:
+      runFromWorkspaceRoot: true
+      mergeArgs: append
+    args:
+      - scripts/jest.js
+      - '--passWithNoTests'
+      - '--runInBand'
+
+  lint:
+    command: node
+    args:
+      - scripts/eslint.js
+      - '$projectSource'
+      - '--no-error-on-unmatched-pattern'
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      # Source and test files
+      - 'src/**/*'
+      - 'tests/**/*'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+    outputs:
+      - "lint.log"
+
+  lint-fix:
+    command: node
+    args:
+      - scripts/eslint.js
+      - '$projectSource'
+      - '--no-error-on-unmatched-pattern'
+      - '--fix'
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      # Source and test files
+      - 'src/**/*'
+      - 'tests/**/*'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+    outputs:
+      - "lint.log"
+
+  lint_with_types:
+    command: node
+    args:
+      - scripts/eslint_with_types.js
+      - '--project'
+      - '$projectSource/tsconfig.json'
+    outputs:
+      - "lint_with_types.log"
+    env:
+      NODE_OPTIONS: '--max-old-space-size=8192'
+    options:
+      runFromWorkspaceRoot: true
+
+  genTypecheckConfig:
+    script: "node scripts/type_check.js --project $projectSource/tsconfig.json --config-only"
+    inputs:
+      - "tsconfig.json"
+    outputs:
+      - "tsconfig.moon.json"
+    options:
+      runFromWorkspaceRoot: true
+
+  typecheck:
+    command:
+      - 'tsc'
+      - '--build'
+      - '$projectSource/tsconfig.moon.json'
+      - '--pretty'
+    inputs:
+      - '@group(src)'
+      - 'tsconfig.json'
+      - 'tsconfig.*.json'
+    outputs:
+      - 'target'
+    deps:
+      - 'kibana:generateAllTypecheckConfigs'
+      - '^:typecheck'
+    options:
+      runFromWorkspaceRoot: true
+      mergeOutputs: replace
+    env:
+      NODE_OPTIONS: '--max-old-space-size=8192'
