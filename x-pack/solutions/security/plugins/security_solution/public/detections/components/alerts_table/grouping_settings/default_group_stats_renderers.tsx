@@ -8,7 +8,7 @@
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
 import type { GroupStatsItem, RawBucket } from '@kbn/grouping';
-import { DEFAULT_GROUP_STATS } from '../alerts_grouping';
+import { DEFAULT_GROUP_STATS_RENDERER } from '../alerts_grouping';
 import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 
@@ -66,16 +66,17 @@ const multiSeverity = (
 );
 
 /**
- * Returns stats to be used in the`extraAction` property of the EuiAccordion component used within the kbn-grouping package.
+ * Returns statistics to be used in the`extraAction` property of the EuiAccordion component used within the kbn-grouping package.
  * It handles custom renders for the following fields:
  * - kibana.alert.rule.name
  * - host.name
  * - user.name
  * - source.ip
  * And returns a default view for all the other fields.
- * These go hand in hand with defaultGroupingOptions and defaultGroupPanelRenderers.
+ *
+ * This go hand in hand with defaultGroupingOptions, defaultGroupTitleRenderers and defaultGroupStatsAggregations.
  */
-export const defaultGroupStats = (
+export const defaultGroupStatsRenderer = (
   selectedGroup: string,
   bucket: RawBucket<AlertsGroupingAggregation>
 ): GroupStatsItem[] => {
@@ -97,7 +98,7 @@ export const defaultGroupStats = (
         },
       ];
 
-  const defaultBadges: GroupStatsItem[] = DEFAULT_GROUP_STATS(selectedGroup, bucket);
+  const defaultBadges: GroupStatsItem[] = DEFAULT_GROUP_STATS_RENDERER(selectedGroup, bucket);
 
   switch (selectedGroup) {
     case 'kibana.alert.rule.name':

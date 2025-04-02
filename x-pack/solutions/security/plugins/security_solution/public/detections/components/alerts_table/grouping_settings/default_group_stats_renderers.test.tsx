@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { defaultGroupStats } from '.';
+import { defaultGroupStatsRenderer } from '.';
 
 describe('getStats', () => {
   it('returns array of badges which corresponds to the field name', () => {
-    const badgesRuleName = defaultGroupStats('kibana.alert.rule.name', {
+    const badgesRuleName = defaultGroupStatsRenderer('kibana.alert.rule.name', {
       key: [],
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
       countSeveritySubAggregation: { value: 1 },
@@ -52,7 +52,7 @@ describe('getStats', () => {
       )
     ).toBeTruthy();
 
-    const badgesHostName = defaultGroupStats('host.name', {
+    const badgesHostName = defaultGroupStatsRenderer('host.name', {
       key: 'Host',
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
       countSeveritySubAggregation: { value: 1 },
@@ -95,7 +95,7 @@ describe('getStats', () => {
       )
     ).toBeTruthy();
 
-    const badgesUserName = defaultGroupStats('user.name', {
+    const badgesUserName = defaultGroupStatsRenderer('user.name', {
       key: 'User test',
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
       countSeveritySubAggregation: { value: 1 },
@@ -183,7 +183,7 @@ describe('getStats', () => {
   });
 
   it('should return default badges if the field specific does not exist', () => {
-    const badges = defaultGroupStats('process.name', {
+    const badges = defaultGroupStatsRenderer('process.name', {
       key: 'process',
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
       countSeveritySubAggregation: { value: 1 },

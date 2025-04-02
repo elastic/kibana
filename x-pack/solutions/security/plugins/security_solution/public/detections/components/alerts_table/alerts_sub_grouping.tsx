@@ -9,15 +9,15 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { GroupingAggregation } from '@kbn/grouping';
+import type { GroupingAggregation, NamedAggregation } from '@kbn/grouping';
 import { isNoneGroup } from '@kbn/grouping';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { combineQueries } from '../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import type { Status } from '../../../../common/api/detection_engine';
 import { InspectButton } from '../../../common/components/inspect';
@@ -46,6 +46,11 @@ interface OwnProps {
   globalFilters: Filter[];
   globalQuery: Query;
   groupingLevel?: number;
+  /**
+   * Function that returns the group aggregations by field.
+   * This is then used to render values in the EuiAccordion `extraAction` section.
+   */
+  groupStatsAggregations: (field: string) => NamedAggregation[];
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
@@ -73,6 +78,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   globalFilters,
   globalQuery,
   groupingLevel,
+  groupStatsAggregations,
   hasIndexMaintenance,
   hasIndexWrite,
   loading,
@@ -147,6 +153,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
 
   const queryGroups = useMemo(() => {
     return getAlertsGroupingQuery({
+      groupStatsAggregations,
       additionalFilters,
       selectedGroup,
       uniqueValue,
@@ -159,6 +166,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   }, [
     additionalFilters,
     from,
+    groupStatsAggregations,
     pageIndex,
     pageSize,
     runtimeMappings,

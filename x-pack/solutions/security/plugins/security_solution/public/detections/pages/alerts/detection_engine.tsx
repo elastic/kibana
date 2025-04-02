@@ -36,8 +36,9 @@ import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   defaultGroupingOptions,
-  defaultGroupPanelRenderers,
-  defaultGroupStats,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
 } from '../../components/alerts_table/grouping_settings';
 import { DetectionEngineFilters } from '../../components/detection_engine_filters/detection_engine_filters';
 import { FilterByAssigneesPopover } from '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover';
@@ -326,6 +327,14 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
     [alertsTableDefaultFilters, isAlertTableLoading]
   );
 
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
+  );
+
   if (loading) {
     return (
       <SecuritySolutionPageWrapper>
@@ -425,8 +434,8 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
               <EuiSpacer size="l" />
             </Display>
             <GroupedAlertsTable
-              accordionButtonContent={defaultGroupPanelRenderers}
-              accordionExtraActionGroupStats={defaultGroupStats}
+              accordionButtonContent={defaultGroupTitleRenderers}
+              accordionExtraActionGroupStats={accordionExtraActionGroupStats}
               currentAlertStatusFilterValue={statusFilter}
               defaultFilters={alertsTableDefaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}

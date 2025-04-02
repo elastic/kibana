@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { defaultGroupPanelRenderers } from './default_group_panel_renderers';
+import { defaultGroupTitleRenderers } from '.';
 import { render } from '@testing-library/react';
 
-describe('renderGroupPanel', () => {
+describe('defaultGroupTitleRenderers', () => {
   it('renders correctly when the field renderer exists', () => {
     let { getByTestId } = render(
-      defaultGroupPanelRenderers(
+      defaultGroupTitleRenderers(
         'kibana.alert.rule.name',
         {
           key: ['Rule name test', 'Some description'],
@@ -23,7 +23,7 @@ describe('renderGroupPanel', () => {
 
     expect(getByTestId('rule-name-group-renderer')).toBeInTheDocument();
     const result1 = render(
-      defaultGroupPanelRenderers(
+      defaultGroupTitleRenderers(
         'host.name',
         {
           key: 'Host',
@@ -37,7 +37,7 @@ describe('renderGroupPanel', () => {
     expect(getByTestId('host-name-group-renderer')).toBeInTheDocument();
 
     const result2 = render(
-      defaultGroupPanelRenderers(
+      defaultGroupTitleRenderers(
         'user.name',
         {
           key: 'User test',
@@ -50,7 +50,7 @@ describe('renderGroupPanel', () => {
 
     expect(getByTestId('host-name-group-renderer')).toBeInTheDocument();
     const result3 = render(
-      defaultGroupPanelRenderers(
+      defaultGroupTitleRenderers(
         'source.ip',
         {
           key: 'sourceIp',
@@ -65,7 +65,7 @@ describe('renderGroupPanel', () => {
   });
 
   it('returns undefined when the renderer does not exist', () => {
-    const wrapper = defaultGroupPanelRenderers(
+    const wrapper = defaultGroupTitleRenderers(
       'process.name',
       {
         key: 'process',

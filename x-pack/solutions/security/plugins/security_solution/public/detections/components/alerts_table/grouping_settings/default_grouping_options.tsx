@@ -26,7 +26,8 @@ const SOURCE_IP = i18n.translate('xpack.securitySolution.alertsTable.groups.sour
 
 /**
  * Returns a list of fields for the default grouping options. These are displayed in the `Group alerts by` dropdown button.
- * These go hand in hand with defaultGroupPanelRenderers and defaultGroupStats.
+ *
+ * These go hand in hand with defaultGroupTitleRenderers, defaultGroupStats and defaultGroupStatsAggregations.
  */
 export const defaultGroupingOptions: GroupOption[] = [
   {

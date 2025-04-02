@@ -40,8 +40,9 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
-  defaultGroupPanelRenderers,
-  defaultGroupStats,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
 } from '../../../../detections/components/alerts_table/grouping_settings';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
 import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
@@ -558,6 +559,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     confirmManualRuleRun,
   } = useManualRuleRunConfirmation();
 
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
+  );
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -785,8 +794,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        accordionButtonContent={defaultGroupPanelRenderers}
-                        accordionExtraActionGroupStats={defaultGroupStats}
+                        accordionButtonContent={defaultGroupTitleRenderers}
+                        accordionExtraActionGroupStats={accordionExtraActionGroupStats}
                         currentAlertStatusFilterValue={currentAlertStatusFilterValue}
                         defaultFilters={alertMergedFilters}
                         defaultGroupingOptions={defaultGroupingOptions}

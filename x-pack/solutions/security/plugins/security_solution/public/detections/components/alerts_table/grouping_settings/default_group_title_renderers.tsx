@@ -32,9 +32,10 @@ import { COLUMN_TAGS } from '../../../../detection_engine/common/translations';
  * - user.name
  * - source.ip
  * For all the other fields the default renderer managed within the kbn-grouping package will be used.
- * These go hand in hand with defaultGroupingOptions and defaultGroupStats.
+ *
+ * This go hand in hand with defaultGroupingOptions and defaultGroupStatsRenderer and defaultGroupStatsAggregations.
  */
-export const defaultGroupPanelRenderers: GroupPanelRenderer<AlertsGroupingAggregation> = (
+export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> = (
   selectedGroup,
   bucket,
   nullGroupMessage

@@ -12,6 +12,7 @@ import {
   type GroupOption,
   type GroupStatsItem,
   isNoneGroup,
+  type NamedAggregation,
   type RawBucket,
   useGrouping,
 } from '@kbn/grouping';
@@ -45,7 +46,16 @@ export interface AlertsTableComponentProps {
    * It basically renders the statistics to right side of the title and the left side of the Take actions button.
    * If none provided, we display the number of alerts for the group.
    */
-  accordionExtraActionGroupStats?: GetGroupStats<AlertsGroupingAggregation>;
+  accordionExtraActionGroupStats?: {
+    /**
+     * Responsible to fetch the aggregation data to populate the UI values
+     */
+    aggregations: (field: string) => NamedAggregation[];
+    /**
+     * Responsible for rendering the aggregation data
+     */
+    renderer: GetGroupStats<AlertsGroupingAggregation>;
+  };
   currentAlertStatusFilterValue?: Status[];
   defaultFilters?: Filter[];
   /**
@@ -70,7 +80,13 @@ const DEFAULT_PAGE_SIZE = 25;
 const DEFAULT_PAGE_INDEX = 0;
 const MAX_GROUPING_LEVELS = 3;
 export const DEFAULT_GROUPING_OPTIONS: GroupOption[] = [];
-export const DEFAULT_GROUP_STATS: GetGroupStats<AlertsGroupingAggregation> = (
+
+/**
+ * This is used as default behavior if no group renderer is passed via props.
+ * This will render the number of alerts.
+ * It's paired with the DEFAULT_GROUP_STATS_AGGREGATION which retrieves the aggregation data.
+ */
+export const DEFAULT_GROUP_STATS_RENDERER: GetGroupStats<AlertsGroupingAggregation> = (
   _: string,
   bucket: RawBucket<AlertsGroupingAggregation>
 ): GroupStatsItem[] => [
@@ -80,6 +96,19 @@ export const DEFAULT_GROUP_STATS: GetGroupStats<AlertsGroupingAggregation> = (
       value: bucket.doc_count,
       width: 50,
       color: '#a83632',
+    },
+  },
+];
+/**
+ * This is used as default behavior if no group aggregations is passed via props.
+ * This will render retrieve the values to render the DEFAULT_GROUP_STATS_RENDERER above.
+ */
+export const DEFAULT_GROUP_STATS_AGGREGATION: (field: string) => NamedAggregation[] = () => [
+  {
+    unitsCount: {
+      cardinality: {
+        field: 'kibana.alert.uuid',
+      },
     },
   },
 ];
@@ -152,15 +181,20 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [props.defaultGroupingOptions]
   );
 
-  const groupStats = useMemo(
-    () => props.accordionExtraActionGroupStats || DEFAULT_GROUP_STATS,
-    [props.accordionExtraActionGroupStats]
+  const groupStatsRenderer = useMemo(
+    () => props.accordionExtraActionGroupStats?.renderer || DEFAULT_GROUP_STATS_RENDERER,
+    [props.accordionExtraActionGroupStats?.renderer]
+  );
+
+  const groupStatusAggregations = useMemo(
+    () => props.accordionExtraActionGroupStats?.aggregations || DEFAULT_GROUP_STATS_AGGREGATION,
+    [props.accordionExtraActionGroupStats?.aggregations]
   );
 
   const { getGrouping, selectedGroups, setSelectedGroups } = useGrouping({
     componentProps: {
       groupPanelRenderer: props.accordionButtonContent,
-      getGroupStats: groupStats,
+      getGroupStats: groupStatsRenderer,
       onGroupToggle,
       unit: defaultUnit,
     },
@@ -293,6 +327,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           {...props}
           getGrouping={getGrouping}
           groupingLevel={level}
+          groupStatsAggregations={groupStatusAggregations}
           onGroupClose={() => resetGroupChildrenPagination(level)}
           pageIndex={pageIndex[level] ?? DEFAULT_PAGE_INDEX}
           pageSize={pageSize[level] ?? DEFAULT_PAGE_SIZE}
@@ -304,7 +339,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
         />
       );
     },
-    [getGrouping, pageIndex, pageSize, props, selectedGroups, setPageVar]
+    [getGrouping, groupStatusAggregations, pageIndex, pageSize, props, selectedGroups, setPageVar]
   );
 
   if (isEmpty(selectedPatterns)) {

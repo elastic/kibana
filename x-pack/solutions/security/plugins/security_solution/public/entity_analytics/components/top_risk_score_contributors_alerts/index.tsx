@@ -12,8 +12,9 @@ import type { Filter } from '@kbn/es-query';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import {
   defaultGroupingOptions,
-  defaultGroupPanelRenderers,
-  defaultGroupStats,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
 } from '../../../detections/components/alerts_table/grouping_settings';
 import { HeaderSection } from '../../../common/components/header_section';
 import * as i18n from './translations';
@@ -100,6 +101,14 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
 
   const defaultFilters = useMemo(() => [...inputFilters, ...filters], [filters, inputFilters]);
 
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
+  );
+
   return (
     <EuiPanel hasBorder data-test-subj="topRiskScoreContributorsAlerts">
       <EuiFlexGroup gutterSize={'none'}>
@@ -122,8 +131,8 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
         >
           <EuiFlexItem grow={1}>
             <GroupedAlertsTable
-              accordionButtonContent={defaultGroupPanelRenderers}
-              accordionExtraActionGroupStats={defaultGroupStats}
+              accordionButtonContent={defaultGroupTitleRenderers}
+              accordionExtraActionGroupStats={accordionExtraActionGroupStats}
               defaultFilters={defaultFilters}
               defaultGroupingOptions={defaultGroupingOptions}
               from={from}

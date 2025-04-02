@@ -23,8 +23,9 @@ import { getQuery, groupingSearchResponse } from './grouping_settings/mock';
 import { AlertsEventTypes } from '../../../common/lib/telemetry';
 import {
   defaultGroupingOptions,
-  defaultGroupPanelRenderers,
-  defaultGroupStats,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
 } from './grouping_settings';
 
 jest.mock('../../containers/detection_engine/alerts/use_query');
@@ -118,8 +119,11 @@ const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="a
 
 const testProps: AlertsTableComponentProps = {
   ...mockDate,
-  accordionButtonContent: defaultGroupPanelRenderers,
-  accordionExtraActionGroupStats: defaultGroupStats,
+  accordionButtonContent: defaultGroupTitleRenderers,
+  accordionExtraActionGroupStats: {
+    aggregations: defaultGroupStatsAggregations,
+    renderer: defaultGroupStatsRenderer,
+  },
   defaultFilters: [],
   defaultGroupingOptions,
   globalFilters: [],

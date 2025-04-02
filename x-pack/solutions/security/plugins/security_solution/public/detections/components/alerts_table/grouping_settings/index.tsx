@@ -6,7 +6,8 @@
  */
 
 export * from './default_grouping_options';
-export * from './default_group_panel_renderers';
-export * from './default_group_stats';
+export * from './default_group_stats_aggregations';
+export * from './default_group_stats_renderers';
+export * from './default_group_title_renderers';
 export * from './group_take_action_items';
 export * from './query_builder';
