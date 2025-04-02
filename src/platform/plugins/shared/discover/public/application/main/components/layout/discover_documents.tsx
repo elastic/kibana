@@ -76,10 +76,10 @@ import {
 } from '../../../../context_awareness';
 import {
   internalStateActions,
+  useCurrentTabSelector,
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { useCurrentTabSelector } from '../../state_management/redux/hooks';
 
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
