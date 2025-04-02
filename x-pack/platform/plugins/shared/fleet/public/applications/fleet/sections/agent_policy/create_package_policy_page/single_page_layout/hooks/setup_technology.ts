@@ -193,9 +193,7 @@ const isAgentlessSetupDefault = (
 ) => {
   if (
     isAgentlessDefault ||
-    (packageInfo &&
-      packageInfo.policy_templates &&
-      packageInfo.policy_templates.length > 0 &&
+    ((packageInfo?.policy_templates ?? []).length > 0 &&
       ((integrationToEnable &&
         packageInfo?.policy_templates?.find((p) => p.name === integrationToEnable)?.deployment_modes
           ?.agentless.is_default) ||
