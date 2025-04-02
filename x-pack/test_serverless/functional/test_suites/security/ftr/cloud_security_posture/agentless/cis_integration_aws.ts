@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import * as http from 'http';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       await supertest
         .delete(
-          `/api/fleet/epm/packages/cloud_security_posture/${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`
+          `/api/fleet/epm/packages/cloud_security_posture/${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`
         )
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
@@ -49,9 +49,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Serverless - Agentless CIS_AWS Single Account Launch Cloud formation', () => {
-      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
+      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -73,9 +73,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Serverless - Agentless CIS_AWS ORG Account Launch Cloud formation', () => {
-      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
+      it(`should show CIS_AWS Launch Cloud formation button when credentials selector is direct access keys and package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
         await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
+          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
         );
         await pageObjects.header.waitUntilLoadingHasFinished();
 

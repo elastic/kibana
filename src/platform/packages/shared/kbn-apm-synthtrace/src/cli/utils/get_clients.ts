@@ -15,7 +15,7 @@ import { EntitiesSynthtraceEsClient } from '../../lib/entities/entities_synthtra
 import { EntitiesSynthtraceKibanaClient } from '../../lib/entities/entities_synthtrace_kibana_client';
 import { InfraSynthtraceEsClient } from '../../lib/infra/infra_synthtrace_es_client';
 import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
-import { OtelSynthtraceEsClient } from '../../lib/otel/otel_synthtrace_es_client';
+import { OtelSynthtraceEsClient } from '../../lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client';
 import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
 import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
