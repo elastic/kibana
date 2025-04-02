@@ -11,10 +11,4 @@ module.exports = {
   preset: '@kbn/test/jest_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-test'],
-  globals: {
-    /** @type {import('@kbn/scout-info').ScoutJestGlobals} */
-    scout: {
-      testRunConfigCategory: 'unit-test',
-    },
-  },
 };

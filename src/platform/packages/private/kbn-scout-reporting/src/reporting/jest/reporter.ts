@@ -18,7 +18,7 @@ import {
   getCodeOwnersEntries,
   getOwningTeamsForPath,
 } from '@kbn/code-owners';
-import { SCOUT_REPORT_OUTPUT_ROOT, ScoutJestMetadata } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import stripAnsi from 'strip-ansi';
@@ -42,7 +42,7 @@ export class ScoutJestReporter extends BaseReporter {
   readonly scoutLog: ToolingLog;
   readonly runId: string;
   private report: ScoutEventsReport;
-  private baseTestRunInfo: ScoutTestRunInfo;
+  readonly baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(
@@ -63,12 +63,15 @@ export class ScoutJestReporter extends BaseReporter {
     this.baseTestRunInfo = {
       id: this.runId,
       config: {
+        file:
+          process.env.JEST_CONFIG_PATH !== undefined
+            ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, process.env.JEST_CONFIG_PATH))
+            : undefined,
         category: reporterOptions.configCategory,
       },
     };
-    this.codeOwnersEntries = getCodeOwnersEntries();
 
-    this.loadConfigFileInfo();
+    this.codeOwnersEntries = getCodeOwnersEntries();
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -97,62 +100,6 @@ export class ScoutJestReporter extends BaseReporter {
   public get reportRootPath(): string {
     const outputPath = this.reporterOptions.outputPath || SCOUT_REPORT_OUTPUT_ROOT;
     return path.join(outputPath, `scout-jest-${this.runId}`);
-  }
-
-  /**
-   * Look for Jest config path in environment variables and update this reporter if necessary
-   */
-  loadConfigFileInfo() {
-    if (process.env.JEST_CONFIG_PATH === undefined) {
-      // Jest config path not set in the environment
-      return;
-    }
-
-    this.baseTestRunInfo = {
-      ...this.baseTestRunInfo,
-      config: {
-        ...this.baseTestRunInfo.config,
-        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, process.env.JEST_CONFIG_PATH)),
-      },
-    };
-  }
-
-  /**
-   * Look for Scout metadata in Jest globals and update this reporter instance if necessary
-   *
-   * @param jestGlobals Jest globals
-   */
-  loadMetadataFromJestGlobals(jestGlobals: Config.ConfigGlobals): void {
-    if (!Object.hasOwn(jestGlobals, 'scout')) {
-      // No Scout metadata in Jest globals
-      return;
-    }
-
-    const metadata = jestGlobals.scout as ScoutJestMetadata;
-
-    if (metadata.reporter?.name !== undefined) {
-      // A reporter name override has been set
-      this.name = metadata.reporter.name;
-    }
-
-    let configFileInfo = this.baseTestRunInfo.config?.file;
-
-    if (metadata.configFilePath !== undefined) {
-      // Jest config file path from globals was set,
-      // and it should override what we've inferred from environment variables (if anything)
-      configFileInfo = this.getScoutFileInfoForPath(
-        path.relative(REPO_ROOT, metadata.configFilePath)
-      );
-    }
-
-    this.baseTestRunInfo = {
-      ...this.baseTestRunInfo,
-      config: {
-        ...this.baseTestRunInfo.config,
-        file: configFileInfo,
-        category: metadata.testRunConfigCategory,
-      },
-    };
   }
 
   /**
@@ -229,17 +176,10 @@ export class ScoutJestReporter extends BaseReporter {
     });
   }
 
-  async onRunComplete(testContexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
+  async onRunComplete(_testContexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
     /**
      * Test execution ended
      */
-    // Load Scout metadata from Jest globals if a test context is found
-    const testContext = Array.from(testContexts.values()).find((context) => context !== undefined);
-
-    if (testContext !== undefined) {
-      this.loadMetadataFromJestGlobals(testContext.config.globals);
-    }
-
     // Log "run start" event
     this.report.logEvent({
       ...datasources.environmentMetadata,

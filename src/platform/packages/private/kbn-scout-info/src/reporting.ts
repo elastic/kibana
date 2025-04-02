@@ -34,14 +34,3 @@ export enum ScoutTestRunConfigCategory {
   UNIT_INTEGRATION_TEST = 'unit-integration-test',
   UNKNOWN = 'unknown',
 }
-
-/**
- * Scout metadata to be passed via Jest globals
- */
-export interface ScoutJestMetadata {
-  configFilePath?: string;
-  testRunConfigCategory: ScoutTestRunConfigCategory;
-  reporter?: {
-    name?: string;
-  };
-}
