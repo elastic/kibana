@@ -88,7 +88,9 @@ describe('translateUnwiredStreamPipelineActions', () => {
               ignore_missing_component_templates: [],
               template: {
                 settings: {
-                  default_pipeline: 'my-template-pipeline',
+                  index: {
+                    default_pipeline: 'my-template-pipeline',
+                  },
                 },
               },
             },
@@ -203,7 +205,9 @@ describe('translateUnwiredStreamPipelineActions', () => {
               ignore_missing_component_templates: [],
               template: {
                 settings: {
-                  default_pipeline: 'my-template-pipeline',
+                  index: {
+                    default_pipeline: 'my-template-pipeline',
+                  },
                 },
               },
             },
@@ -352,7 +356,9 @@ describe('translateUnwiredStreamPipelineActions', () => {
               ignore_missing_component_templates: [],
               template: {
                 settings: {
-                  default_pipeline: 'my-template-pipeline',
+                  index: {
+                    default_pipeline: 'my-template-pipeline',
+                  },
                 },
               },
             },
@@ -366,7 +372,9 @@ describe('translateUnwiredStreamPipelineActions', () => {
               ignore_missing_component_templates: [],
               template: {
                 settings: {
-                  default_pipeline: 'my-other-template-pipeline',
+                  index: {
+                    default_pipeline: 'my-other-template-pipeline',
+                  },
                 },
               },
             },
@@ -456,7 +464,9 @@ describe('translateUnwiredStreamPipelineActions', () => {
               ignore_missing_component_templates: [],
               template: {
                 settings: {
-                  default_pipeline: undefined,
+                  index: {
+                    default_pipeline: undefined,
+                  },
                 },
               },
             },

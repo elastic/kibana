@@ -119,7 +119,10 @@ async function createStreamsManagedPipeline({
         ...(indexTemplate.index_template.template ?? {}),
         settings: {
           ...(indexTemplate.index_template.template?.settings ?? {}),
-          default_pipeline: pipelineName,
+          index: {
+            ...(indexTemplate.index_template.template?.settings?.index ?? {}),
+            default_pipeline: pipelineName,
+          },
         },
       },
     },
@@ -206,7 +209,10 @@ async function updateExistingStreamsManagedPipeline({
           ...(indexTemplate.index_template.template ?? {}),
           settings: {
             ...(indexTemplate.index_template.template?.settings ?? {}),
-            default_pipeline: undefined,
+            index: {
+              ...(indexTemplate.index_template.template?.settings?.index ?? {}),
+              default_pipeline: undefined,
+            },
           },
         },
       },
