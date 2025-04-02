@@ -44,9 +44,17 @@ async function getRootTransaction({
             fields: [TRANSACTION_DURATION_FIELD],
             query: {
               bool: {
-                must_not: {
-                  exists: { field: PARENT_ID_FIELD },
-                },
+                should: [
+                  {
+                    constant_score: {
+                      filter: {
+                        bool: {
+                          must_not: { exists: { field: PARENT_ID_FIELD } },
+                        },
+                      },
+                    },
+                  },
+                ],
                 filter: [{ term: { [TRACE_ID_FIELD]: traceId } }],
               },
             },
