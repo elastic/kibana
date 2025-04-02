@@ -34,8 +34,7 @@ function AlertSearchbarWithUrlSync(props: AlertSearchBarWithUrlSyncProps) {
       timefilter: { timefilter: timeFilterService },
     },
   } = data;
-  // TODO: remove
-  console.log('filterControls:', searchBarProps.filterControls);
+
   return (
     <ObservabilityAlertSearchBar
       {...stateProps}

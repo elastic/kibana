@@ -182,7 +182,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   const handleOutputFilterUpdates = useCallback(
     (newFilters: Filter[]) => {
       if (isEqual(currentFiltersRef.current, newFilters)) return;
-      if (onFiltersChange) onFiltersChange(newFilters);
+      if (onFiltersChange) onFiltersChange(newFilters ?? []);
       currentFiltersRef.current = newFilters ?? [];
     },
     [onFiltersChange]
