@@ -61,7 +61,7 @@ export function ESQLControlsFlyout({
     if (initialVariableType === ESQLVariableType.VALUES) {
       return getValuesFromQueryField(queryString);
     }
-    return null;
+    return undefined;
   }, [initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
@@ -123,11 +123,6 @@ export function ESQLControlsFlyout({
       ) {
         setControlFlyoutType(EsqlControlType.STATIC_VALUES);
       }
-      // setControlFlyoutType(
-      //   newType === ESQLVariableType.VALUES
-      //     ? EsqlControlType.VALUES_FROM_QUERY
-      //     : EsqlControlType.STATIC_VALUES
-      // );
 
       const variableNameWithoutQuestionmark = text.replace(/^\?+/, '');
       const variableExists = checkVariableExistence(esqlVariables, text);
@@ -184,7 +179,7 @@ export function ESQLControlsFlyout({
         initialState={initialState}
         setControlState={setControlState}
         search={search}
-        cursorPosition={cursorPosition}
+        valuesRetrieval={valuesField}
       />
     ) : (
       <IdentifierControlForm

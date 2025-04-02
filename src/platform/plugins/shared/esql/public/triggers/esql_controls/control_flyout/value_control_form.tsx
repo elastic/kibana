@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
@@ -23,12 +23,10 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { monaco } from '@kbn/monaco';
 import {
   getIndexPatternFromESQLQuery,
   getESQLResults,
   appendStatsByToQuery,
-  getValuesFromQueryField,
 } from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
@@ -44,7 +42,7 @@ interface ValueControlFormProps {
   queryString: string;
   setControlState: (state: ESQLControlState) => void;
   initialState?: ESQLControlState;
-  cursorPosition?: monaco.Position;
+  valuesRetrieval?: string;
 }
 
 const SUGGESTED_INTERVAL_VALUES = ['5 minutes', '1 hour', '1 day', '1 week', '1 month'];
@@ -57,15 +55,9 @@ export function ValueControlForm({
   controlFlyoutType,
   search,
   setControlState,
-  cursorPosition,
+  valuesRetrieval,
 }: ValueControlFormProps) {
   const isMounted = useMountedState();
-  const valuesField = useMemo(() => {
-    if (variableType === ESQLVariableType.VALUES) {
-      return getValuesFromQueryField(queryString, cursorPosition);
-    }
-    return null;
-  }, [variableType, queryString, cursorPosition]);
 
   const [availableValuesOptions, setAvailableValuesOptions] = useState<EuiComboBoxOptionOption[]>(
     variableType === ESQLVariableType.TIME_LITERAL
@@ -95,7 +87,9 @@ export function ValueControlForm({
     variableType === ESQLVariableType.VALUES ? initialState?.esqlQuery ?? '' : ''
   );
   const [esqlQueryErrors, setEsqlQueryErrors] = useState<Error[] | undefined>();
-  const [queryColumns, setQueryColumns] = useState<string[]>(valuesField ? [valuesField] : []);
+  const [queryColumns, setQueryColumns] = useState<string[]>(
+    valuesRetrieval ? [valuesRetrieval] : []
+  );
   const [label, setLabel] = useState(initialState?.title ?? '');
   const [minimumWidth, setMinimumWidth] = useState(initialState?.width ?? 'medium');
   const [grow, setGrow] = useState(initialState?.grow ?? false);
@@ -189,11 +183,11 @@ export function ValueControlForm({
     if (
       !selectedValues?.length &&
       controlFlyoutType === EsqlControlType.VALUES_FROM_QUERY &&
-      valuesField
+      valuesRetrieval
     ) {
       const queryForValues =
         variableName !== ''
-          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesField}`
+          ? `FROM ${getIndexPatternFromESQLQuery(queryString)} | STATS BY ${valuesRetrieval}`
           : '';
       onValuesQuerySubmit(queryForValues);
     }
@@ -202,7 +196,7 @@ export function ValueControlForm({
     onValuesQuerySubmit,
     queryString,
     selectedValues?.length,
-    valuesField,
+    valuesRetrieval,
     variableName,
   ]);
 
