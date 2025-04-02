@@ -28,6 +28,7 @@ import {
   isFunctionItem,
   isOptionItem,
   isParametrized,
+  isSingleItem,
   isSourceItem,
   isTimeIntervalItem,
   sourceExists,
@@ -224,6 +225,14 @@ function validateCommand(
       const joinCommandErrors = validateJoinCommand(join, references);
       messages.push(...joinCommandErrors);
       break;
+    }
+    case 'fork': {
+      for (const arg of command.args.flat()) {
+        if (isSingleItem(arg) && arg.type === 'command') {
+          // all the args should be commands
+          messages.push(...validateCommand(arg, references, ast, currentCommandIndex));
+        }
+      }
     }
     default: {
       // Now validate arguments

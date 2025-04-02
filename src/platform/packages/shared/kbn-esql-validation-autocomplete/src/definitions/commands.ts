@@ -674,4 +674,15 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     },
     suggest: suggestForChangePoint,
   },
+  {
+    hidden: true,
+    name: 'fork',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
+      defaultMessage: 'Forks the stream.',
+    }),
+    declaration: `TODO`,
+    examples: [],
+    suggest: () => [],
+  },
 ];
