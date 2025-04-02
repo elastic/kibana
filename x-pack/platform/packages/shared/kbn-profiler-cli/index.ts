@@ -63,7 +63,6 @@ export function cli() {
 
         stop()
           .then(() => {
-            log.warning('STOPPING');
             exit(0);
           })
           .catch((error) => {
