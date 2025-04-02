@@ -100,14 +100,13 @@ const updateUnderlyingMapping = async ({
 
     return;
   } catch (err) {
-    let newLimit;
     try {
-      newLimit = await increaseFiledsLimit({
+      const newLimit = await increaseFiledsLimit({
         err,
         esClient,
         concreteIndexInfo,
         logger,
-        attempt,
+        increment: attempt,
       });
       if (newLimit) {
         await updateUnderlyingMapping({
@@ -243,13 +242,13 @@ const increaseFiledsLimit = async ({
   esClient,
   concreteIndexInfo,
   logger,
-  attempt,
+  increment,
 }: {
   err: Error;
   esClient: ElasticsearchClient;
   concreteIndexInfo: ConcreteIndexInfo;
   logger: Logger;
-  attempt: number;
+  increment: number;
 }): Promise<number | undefined> => {
   const { alias } = concreteIndexInfo;
   const match = err.message
@@ -258,7 +257,7 @@ const increaseFiledsLimit = async ({
 
   if (match !== null) {
     const exceededLimit = parseInt(match[1], 10);
-    const newLimit = exceededLimit + attempt;
+    const newLimit = exceededLimit + increment;
 
     const { index_templates: indexTemplates } = await retryTransientEsErrors(
       () =>
