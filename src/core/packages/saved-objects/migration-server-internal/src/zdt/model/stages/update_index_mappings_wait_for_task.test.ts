@@ -114,7 +114,7 @@ describe('Stage: updateIndexMappings', () => {
     });
   });
 
-  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL after 20 retries', () => {
+  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL after 15 retries', () => {
     const state = createWaitState({
       retryCount: 15,
     });
