@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { MouseEvent, useEffect, useState } from 'react';
+import React, { MouseEvent, useEffect, useMemo, useState } from 'react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConfirmModal, useConversationsByDate, useConversationContextMenu } from '../hooks';
@@ -84,12 +84,24 @@ export function ConversationList({
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
-  const allConversations = conversations.value?.conversations ?? [];
-  const activeConversations = allConversations.filter((c) => !c.archived);
-  const archivedConversations = allConversations.filter((c) => c.archived);
+  const allConversations = useMemo(
+    () => conversations.value?.conversations ?? [],
+    [conversations.value?.conversations]
+  );
 
-  const selectedConversation = allConversations.find(
-    (c) => c.conversation.id === selectedConversationId
+  const activeConversations = useMemo(
+    () => allConversations.filter((c) => !c.archived),
+    [allConversations]
+  );
+
+  const archivedConversations = useMemo(
+    () => allConversations.filter((c) => c.archived),
+    [allConversations]
+  );
+
+  const selectedConversation = useMemo(
+    () => allConversations.find((c) => c.conversation.id === selectedConversationId),
+    [allConversations, selectedConversationId]
   );
 
   const categorizedActiveConversations = useConversationsByDate(
