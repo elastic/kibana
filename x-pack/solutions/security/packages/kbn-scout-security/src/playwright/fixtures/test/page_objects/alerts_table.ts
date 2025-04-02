@@ -27,7 +27,7 @@ export class AlertsTablePage {
     await this.alertsTable.waitFor({ state: 'visible' });
     // Filter alert by unique rule name
     const row = this.alertRow.filter({ hasText: ruleName });
-    await expect(row, `Alert with rule '${ruleName}' is not displayed`).toBeVisible();
+    await expect(row, `Alert with rule '${ruleName}' is not displayed in the alerts table`).toBeVisible();
 
     return row.locator(`[data-test-subj='expand-event']`).click();
   }
