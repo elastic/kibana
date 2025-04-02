@@ -190,5 +190,6 @@
     "@kbn/scout-info",
     "@kbn/inference-common",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/es-errors",
   ]
 }
