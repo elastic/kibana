@@ -6,15 +6,15 @@
  */
 
 import { test as base } from '@kbn/scout';
-import type { WorkerFixtures } from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
 
-import { extendPageObjects } from './page_objects';
+import { extendPageObjects, PainlessLabPageObjects } from './page_objects';
 
 export interface PainlessLabTestFixtures extends ScoutTestFixtures {
   pageObjects: PainlessLabPageObjects;
 }
 
-export const test = base.extend<PainlessLabTestFixtures, WorkerFixtures>({
+export const test = base.extend<PainlessLabTestFixtures, ScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
