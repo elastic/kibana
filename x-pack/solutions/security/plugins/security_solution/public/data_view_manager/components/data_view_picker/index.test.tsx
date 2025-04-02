@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { DataViewPicker } from '.';
-import { useDataView } from '../../hooks/use_data_view';
+import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useDispatch } from 'react-redux';
@@ -18,8 +18,8 @@ import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 
-jest.mock('../../hooks/use_data_view', () => ({
-  useDataView: jest.fn(),
+jest.mock('../../hooks/use_data_view_spec', () => ({
+  useDataViewSpec: jest.fn(),
 }));
 
 jest.mock('../../hooks/use_select_data_view', () => ({
@@ -66,8 +66,8 @@ describe('DataViewPicker', () => {
   let mockDispatch = jest.fn();
 
   beforeEach(() => {
-    jest.mocked(useDataView).mockReturnValue({
-      dataView: {
+    jest.mocked(useDataViewSpec).mockReturnValue({
+      dataViewSpec: {
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         name: 'Default Security Data View',
       },
