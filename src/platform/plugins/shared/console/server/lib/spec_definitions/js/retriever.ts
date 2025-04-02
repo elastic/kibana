@@ -24,7 +24,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
         num_candidates: 100,
       },
       filter: {
-        __scope_link: 'GLOBAL.query'
+        __scope_link: 'GLOBAL.query',
       },
       field: '{field}',
       query_vector: [],
@@ -35,63 +35,59 @@ export const retriever = (specService: SpecDefinitionsService) => {
     },
     linear: {
       __template: {
-        retrievers: [
-          {}
-        ]
+        retrievers: [{}],
       },
       rank_window_size: 100,
       filter: {
-        __scope_link: 'GLOBAL.query'
+        __scope_link: 'GLOBAL.query',
       },
-      retrievers: { 
+      retrievers: {
         __any_of: [
           {
             retriever: {
-              __scope_link: '.'
+              __scope_link: '.',
             },
             weight: 2,
-            normalizer: 'minmax'
-          }
-        ]
-      }
+            normalizer: 'minmax',
+          },
+        ],
+      },
     },
     rescore: {
       __template: {
         rescore: {
           query: {
-            rescore_query: {}
-          }
+            rescore_query: {},
+          },
         },
-        retriever: {}
+        retriever: {},
       },
       filter: {
-        __scope_link: 'GLOBAL.query'
+        __scope_link: 'GLOBAL.query',
       },
       retriever: {
-        __scope_link: '.'
+        __scope_link: '.',
       },
       rescore: {
         query: {
           rescore_query: {
-            __scope_link: 'GLOBAL.query'
-          }
+            __scope_link: 'GLOBAL.query',
+          },
         },
-        window_size: 50
+        window_size: 50,
       },
     },
     rrf: {
       __template: {
-        retrievers: [
-          {}
-        ]
+        retrievers: [{}],
       },
       retrievers: [
         {
-          __scope_link: '.'
-        }
+          __scope_link: '.',
+        },
       ],
       filter: {
-        __scope_link: 'GLOBAL.query'
+        __scope_link: 'GLOBAL.query',
       },
       rank_constant: 60,
       rank_window_size: 100,
@@ -101,10 +97,10 @@ export const retriever = (specService: SpecDefinitionsService) => {
         query: {},
       },
       query: {
-        __scope_link: 'GLOBAL.query'
+        __scope_link: 'GLOBAL.query',
       },
       filter: {
-        __scope_link: 'GLOBAL.query'
+        __scope_link: 'GLOBAL.query',
       },
       collapse: {
         __template: {
@@ -114,7 +110,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
       min_score: 0,
       search_after: [],
       sort: {},
-      terminate_after: 10000
-    }
-  })
+      terminate_after: 10000,
+    },
+  });
 };
