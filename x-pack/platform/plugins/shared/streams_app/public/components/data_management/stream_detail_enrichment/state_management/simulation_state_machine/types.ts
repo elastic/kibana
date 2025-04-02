@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Condition, FlattenRecord } from '@kbn/streams-schema';
+import { Condition, FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { APIReturnType, StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -51,7 +51,7 @@ export interface SimulationContext {
   previewDocsFilter: PreviewDocsFilterOption;
   previewDocuments: FlattenRecord[];
   processors: ProcessorDefinitionWithUIAttributes[];
-  samples: FlattenRecord[];
+  samples: SampleDocument[];
   samplingCondition?: Condition;
   simulation?: Simulation;
   streamName: string;

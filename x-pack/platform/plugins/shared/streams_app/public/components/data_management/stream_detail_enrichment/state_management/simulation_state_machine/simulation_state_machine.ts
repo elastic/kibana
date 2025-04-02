@@ -6,8 +6,14 @@
  */
 import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { FlattenRecord, isSchema, processorDefinitionSchema } from '@kbn/streams-schema';
+import {
+  FlattenRecord,
+  SampleDocument,
+  isSchema,
+  processorDefinitionSchema,
+} from '@kbn/streams-schema';
 import { isEmpty, isEqual } from 'lodash';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
   dateRangeMachine,
   createDateRangeMachineImplementations,
@@ -44,7 +50,7 @@ export interface ProcessorEventParams {
   processors: ProcessorDefinitionWithUIAttributes[];
 }
 
-const hasSamples = (samples: FlattenRecord[]) => !isEmpty(samples);
+const hasSamples = (samples: SampleDocument[]) => !isEmpty(samples);
 
 const isValidProcessor = (processor: ProcessorDefinitionWithUIAttributes) =>
   isSchema(processorDefinitionSchema, processorConverter.toAPIDefinition(processor));
@@ -72,7 +78,7 @@ export const simulationMachine = setup({
     storeProcessors: assign((_, params: ProcessorEventParams) => ({
       processors: params.processors,
     })),
-    storeSamples: assign((_, params: { samples: FlattenRecord[] }) => ({
+    storeSamples: assign((_, params: { samples: SampleDocument[] }) => ({
       samples: params.samples,
     })),
     storeSimulation: assign((_, params: { simulation: Simulation | undefined }) => ({
@@ -264,7 +270,7 @@ export const simulationMachine = setup({
         src: 'runSimulation',
         input: ({ context }) => ({
           streamName: context.streamName,
-          documents: context.samples,
+          documents: context.samples.map(flattenObjectNestedLast) as FlattenRecord[],
           processors: context.processors,
           detectedFields: context.detectedSchemaFields,
         }),
