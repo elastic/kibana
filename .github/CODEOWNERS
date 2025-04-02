@@ -2101,9 +2101,11 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test_serverless/functional/page_objects/svl_search_* @elastic/search-kibana
 /x-pack/test/functional_search/ @elastic/search-kibana
 
-# TODO: add workchat solution team once it exists in GH
-/x-pack/test_serverless/functional/test_suites/chat/ @elastic/TEAM_HANDLE
-/x-pack/test_serverless/functional/test_suites/chat/config.ts @elastic/TEAM_HANDLE  @elastic/appex-qa
+# workchat
+/x-pack/test_serverless/api_integration/test_suites/chat @elastic/search-kibana
+/x-pack/test_serverless/api_integration/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/chat/ @elastic/search-kibana
+/x-pack/test_serverless/functional/test_suites/chat/config.ts @elastic/search-kibana @elastic/appex-qa
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts

@@ -22,6 +22,7 @@ export const tags = {
 export const tagsByMode = {
   stateful: '@ess',
   serverless: {
+    chat: '@svlChat',
     es: '@svlSearch',
     oblt: '@svlOblt',
     security: '@svlSecurity',
