@@ -23,7 +23,7 @@ interface SecurityRoutePageWrapperProps {
    */
   redirectIfUnauthorized?: boolean;
   // Used to disable the SpyRoute for the page if page's children have their own specified.
-  renderSpyRoute?: boolean;
+  omitSpyRoute?: boolean;
 }
 
 /**
@@ -48,7 +48,7 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
   pageName,
   redirectIfUnauthorized,
   redirectOnMissing,
-  renderSpyRoute = true,
+  omitSpyRoute,
 }) => {
   const link = useLinkInfo(pageName);
 
@@ -56,8 +56,6 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
   // When it is defined it must be rendered, no need to check anything else.
   const UpsellingPage = useUpsellingPage(pageName);
   if (UpsellingPage) {
-    console.log('0');
-
     return (
       <>
         <SpyRoute pageName={pageName} />
@@ -68,7 +66,6 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
 
   // Allows a redirect to the home page.
   if (redirectOnMissing && link == null) {
-    console.log('1');
     return <Redirect to="" />;
   }
 
@@ -77,15 +74,11 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
   // Allows a redirect to the home page if the link is undefined or unauthorized.
   // This is used in the AI for SOC tier (for the Alert Summary page for example), as it does not make sense to show the NoPrivilegesPage.
   if (redirectIfUnauthorized && !isAuthorized) {
-    console.log('2');
-
     return <Redirect to="" />;
   }
 
   // Show the no privileges page if the link is undefined or unauthorized.
   if (!isAuthorized) {
-    console.log('3');
-
     return (
       <>
         <SpyRoute pageName={pageName} />
@@ -96,13 +89,12 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
       </>
     );
   }
-  console.log('poszlo', pageName);
 
   // Show the actual application page.
   return (
     <TrackApplicationView viewId={pageName}>
       {children}
-      {renderSpyRoute && <SpyRoute pageName={pageName} />}
+      {!omitSpyRoute && <SpyRoute pageName={pageName} />}
     </TrackApplicationView>
   );
 };
@@ -116,11 +108,11 @@ export const withSecurityRoutePageWrapper = <T extends {}>(
   {
     redirectOnMissing,
     redirectIfUnauthorized,
-    renderSpyRoute,
+    omitSpyRoute,
   }: {
     redirectOnMissing?: boolean;
     redirectIfUnauthorized?: boolean;
-    renderSpyRoute?: boolean;
+    omitSpyRoute?: boolean;
   } = {}
 ) => {
   return function WithSecurityRoutePageWrapper(props: T) {
@@ -129,7 +121,7 @@ export const withSecurityRoutePageWrapper = <T extends {}>(
         pageName={pageName}
         redirectOnMissing={redirectOnMissing}
         redirectIfUnauthorized={redirectIfUnauthorized}
-        renderSpyRoute={renderSpyRoute}
+        omitSpyRoute={omitSpyRoute}
       >
         <Component {...props} />
       </SecurityRoutePageWrapper>
