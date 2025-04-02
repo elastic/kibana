@@ -13,19 +13,19 @@ import path from 'path';
 
 /**
  * Builds a single package using its npm build script
- * @param {string} packageName
+ * @param {string} packagePath
  * @param {{quiet: boolean, dist:boolean, log: import('@kbn/some-dev-log/src/some_dev_log').SomeDevLog}} options
  * @returns {Promise<void>}
  */
-export async function buildPackage(packageName, { log, quiet, dist }) {
-  log.info('build package @ ' + packageName);
+export async function buildPackage(packagePath, { log, quiet, dist }) {
+  log.info('build package @ ' + packagePath);
 
-  await run('yarn', ['build'].concat(dist ? ['--dist'] : []), {
+  await run('moon', ['build'].concat(dist ? ['--dist'] : []), {
     env: {
       ...process.env,
       REPO_ROOT,
     },
-    cwd: path.resolve(REPO_ROOT, packageName),
+    cwd: path.resolve(REPO_ROOT, packagePath),
     pipe: !quiet,
   });
 }
