@@ -91,7 +91,7 @@ export const performEsqlRequest = async ({
       ruleExecutionLogger?.debug(`Polling for query ID: ${queryId}, isCancelled: ${isCancelled}`);
 
       if (isCancelled) {
-        throw new Error('Rule execution cancelled');
+        throw new Error('Rule execution cancelled due to timeout');
       }
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
     }

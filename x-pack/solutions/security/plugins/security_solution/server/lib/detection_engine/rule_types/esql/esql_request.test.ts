@@ -139,7 +139,7 @@ describe('performEsqlRequest', () => {
         requestQueryParams,
         shouldStopExecution,
       })
-    ).rejects.toThrow('Execution cancelled');
+    ).rejects.toThrow('Rule execution cancelled due to timeout');
   });
 
   it('deletes query if error happens during polling', async () => {
