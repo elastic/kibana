@@ -40,8 +40,6 @@
     "@kbn/management-settings-ids",
     "@kbn/apm-types",
     "@kbn/event-stacktrace",
-    "@kbn/elastic-agent-utils",
-    "@kbn/data-view-utils",
     "@kbn/react-hooks"
   ],
   "exclude": [
