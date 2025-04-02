@@ -32,6 +32,7 @@ describe('TimestampTooltip', () => {
       <EuiToolTip
         content="Oct 10, 2019, 08:06:40.123 (UTC-7)"
         delay="regular"
+        disableScreenReaderOutput={false}
         display="inlineBlock"
         position="top"
       >

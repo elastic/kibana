@@ -35,6 +35,7 @@ exports[`Table should render normally 1`] = `
         <EuiToolTip
           data-test-subj="deleteSOToolTip"
           delay="regular"
+          disableScreenReaderOutput={false}
           display="inlineBlock"
           position="top"
         >
