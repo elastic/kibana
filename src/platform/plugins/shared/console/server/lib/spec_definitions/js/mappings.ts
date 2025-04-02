@@ -79,7 +79,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
               'text',
               'token_count',
               'version',
-              'wildcard'
+              'wildcard',
             ],
           },
 
