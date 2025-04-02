@@ -21,6 +21,7 @@ export const runPanelPlacementStrategy = (
     case PanelPlacementStrategy.placeAtTop:
       const otherPanels = { ...currentPanels };
       for (const [id, panel] of Object.entries(currentPanels)) {
+        // only consider collisions with panels in the same section
         if (panel.gridData.sectionId === sectionId) {
           const { gridData, ...currentPanel } = cloneDeep(panel);
           const newGridData = { ...gridData, y: gridData.y + height };
@@ -37,6 +38,7 @@ export const runPanelPlacementStrategy = (
 
       const currentPanelsArray = Object.values(currentPanels);
       currentPanelsArray.forEach((panel) => {
+        // only consider panels in the same section when calculating maxY
         if (panel.gridData.sectionId === sectionId) {
           maxY = Math.max(panel.gridData.y + panel.gridData.h, maxY);
         }

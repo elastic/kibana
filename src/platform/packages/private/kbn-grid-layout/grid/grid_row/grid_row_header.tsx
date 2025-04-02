@@ -150,7 +150,6 @@ export const GridRowHeader = React.memo(
           css={styles.headerStyles}
           className={classNames('kbnGridRowHeader', { 'kbnGridRowHeader--active': isActive })}
           data-test-subj={`kbnGridRowHeader-${rowId}`}
-          id={`kbnGridRowHeader-${rowId}`}
           ref={(element: HTMLDivElement | null) =>
             (gridLayoutStateManager.headerRefs.current[rowId] = element)
           }

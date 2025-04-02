@@ -355,7 +355,6 @@ export function initializePanelsManager(
       },
       setPanels,
       setRuntimeStateForChild,
-
       untilEmbeddableLoaded,
     },
     comparators: {
@@ -369,8 +368,8 @@ export function initializePanelsManager(
         });
       },
       reset: (lastSavedState: DashboardState) => {
-        restoredRuntimeState = {};
         setPanels(lastSavedState.panels);
+        restoredRuntimeState = {};
 
         let resetChangedPanelCount = false;
         const currentChildren = children$.value;
@@ -404,7 +403,6 @@ export function initializePanelsManager(
 
         const panels = Object.keys(panels$.value).reduce((acc, id) => {
           const childApi = children$.value[id];
-
           const panel = panels$.value[id];
           const serializeResult = apiHasSerializableState(childApi)
             ? childApi.serializeState()

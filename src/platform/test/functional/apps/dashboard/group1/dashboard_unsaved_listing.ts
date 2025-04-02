@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const unsavedDashboardTitle = 'New Dashboard';
   const newDashboartTitle = 'A Wild Dashboard';
 
-  describe('dashboard unsaved listing', () => {
+  describe.only('dashboard unsaved listing', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -131,6 +131,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('does not list unsaved changes when unsaved version of the dashboard is the same', async () => {
+      debugger;
       await dashboard.loadSavedDashboard(newDashboartTitle);
       await dashboard.switchToEditMode();
 

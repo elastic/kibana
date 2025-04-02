@@ -21,7 +21,7 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
   const scrollToBottom$ = new Subject<void>();
   const sections$ = new BehaviorSubject<DashboardSectionMap | undefined>(initialSections);
   function setSections(sections?: DashboardSectionMap) {
-    if (!fastIsEqual(sections ?? [], sections$.value ?? [])) sections$.next(sections);
+    if (!fastIsEqual(sections ?? {}, sections$.value ?? {})) sections$.next(sections);
   }
 
   return {

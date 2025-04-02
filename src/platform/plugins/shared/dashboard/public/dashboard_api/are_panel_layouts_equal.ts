@@ -52,6 +52,7 @@ export const arePanelLayoutsEqual = (
       panelRefName: panelRefB,
       ...commonPanelDiffNew
     } = newPanels[embeddableId];
+
     if (!isEmpty(commonPanelDiff(commonPanelDiffOriginal, commonPanelDiffNew))) return false;
   }
   return true;
