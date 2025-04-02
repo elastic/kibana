@@ -14,7 +14,6 @@ module.exports = {
   globals: {
     /** @type {import('@kbn/scout-info').ScoutJestGlobals} */
     scout: {
-      configFilePath: __filename,
       testRunConfigCategory: 'unit-test',
     },
   },

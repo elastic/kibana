@@ -39,7 +39,7 @@ export enum ScoutTestRunConfigCategory {
  * Scout metadata to be passed via Jest globals
  */
 export interface ScoutJestMetadata {
-  configFilePath: string;
+  configFilePath?: string;
   testRunConfigCategory: ScoutTestRunConfigCategory;
   reporter?: {
     name?: string;
