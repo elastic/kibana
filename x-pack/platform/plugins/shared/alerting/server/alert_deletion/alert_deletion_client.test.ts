@@ -26,30 +26,28 @@ const taskManagerSetup = taskManagerMock.createSetup();
 const taskManagerStart = taskManagerMock.createStart();
 
 describe('AlertDeletionClient', () => {
-  let alertDeletionClient: AlertDeletionClient;
-
   beforeEach(() => {
     jest.resetAllMocks();
     logger.get.mockImplementation(() => logger);
     getAlertIndicesAliasMock.mockReturnValue(['index1', 'index2']);
     // @ts-ignore - incomplete return type
     securityServiceStart.authc.getCurrentUser.mockReturnValue({ username: 'test_user' });
-    alertDeletionClient = new AlertDeletionClient({
-      auditService,
-      elasticsearchClientPromise: Promise.resolve(esClient),
-      eventLogger,
-      getAlertIndicesAlias: getAlertIndicesAliasMock,
-      logger,
-      ruleTypeRegistry,
-      securityService: Promise.resolve(securityServiceStart),
-      spacesService: Promise.resolve(spacesService),
-      taskManagerSetup,
-      taskManagerStartPromise: Promise.resolve(taskManagerStart),
-    });
   });
 
   describe('constructor', () => {
     test('should register alert deletion task type', async () => {
+      new AlertDeletionClient({
+        auditService,
+        elasticsearchClientPromise: Promise.resolve(esClient),
+        eventLogger,
+        getAlertIndicesAlias: getAlertIndicesAliasMock,
+        logger,
+        ruleTypeRegistry,
+        securityService: Promise.resolve(securityServiceStart),
+        spacesService: Promise.resolve(spacesService),
+        taskManagerSetup,
+        taskManagerStartPromise: Promise.resolve(taskManagerStart),
+      });
       expect(taskManagerSetup.registerTaskDefinitions).toHaveBeenCalledWith({
         'alert-deletion': {
           title: 'Alert deletion task',
