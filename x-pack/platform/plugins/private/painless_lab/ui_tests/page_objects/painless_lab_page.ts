@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Locator } from 'playwright/test';
+import { Locator } from '@kbn/scout';
 import { ScoutPage } from '@kbn/scout/src/playwright';
 
 export class PainlessLab {
