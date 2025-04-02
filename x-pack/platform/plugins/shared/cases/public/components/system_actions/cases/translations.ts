@@ -54,6 +54,18 @@ export const WEEKS = (timeValue: string) =>
     values: { timeValue },
   });
 
+export const HOURS = (timeValue: string) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.hoursLabel', {
+    defaultMessage: '{timeValue, plural, one {hour} other {hours}}',
+    values: { timeValue },
+  });
+
+export const MINUTES = (timeValue: string) =>
+  i18n.translate('xpack.cases.systemActions.casesConnector.minutesLabel', {
+    defaultMessage: '{timeValue, plural, one {minute} other {minutes}}',
+    values: { timeValue },
+  });
+
 export const DEFAULT_EMPTY_TEMPLATE_NAME = i18n.translate(
   'xpack.cases.systemActions.casesConnector.defaultEmptyTemplateName',
   {
