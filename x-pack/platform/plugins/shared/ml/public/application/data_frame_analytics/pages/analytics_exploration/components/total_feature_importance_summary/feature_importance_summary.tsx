@@ -14,7 +14,6 @@ import { Chart, Settings, Axis, ScaleType, Position, BarSeries } from '@elastic/
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   getAnalysisType,
   isClassificationAnalysis,
@@ -66,7 +65,6 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
     },
   } = useMlKibana();
 
-
   interface Datum {
     featureName: string;
     meanImportance: number;
@@ -113,7 +111,6 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
       },
     };
   }, [euiTheme]);
-
 
   const [plotData, barSeriesSpec, showLegend, chartHeight] = useMemo<
     [plotData: PlotData, barSeriesSpec: SeriesProps, showLegend?: boolean, chartHeight?: number]
