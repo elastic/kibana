@@ -4,7 +4,11 @@
       "columnar": false,
       "locale": "",
       "params": [],
-      "query": ""
+      "query": "",
+      "profile": true,
+      "filter":  {
+        "__scope_link": "GLOBAL.query"
+      }
     }
   }
 }

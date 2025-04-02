@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Asset Inventory - This file is a placeholder for the ECS schema that will be used in the Asset Inventory app
 export interface EntityEcs {
   id: string;
   name: string;
+  source: string;
   type: 'container' | 'user' | 'host' | 'service';
-  tags: string[];
-  labels: Record<string, string>;
-  criticality: 'low_impact' | 'medium_impact' | 'high_impact' | 'extreme_impact' | 'unassigned';
-  category: string;
+  sub_type: string;
+  url: string;
 }

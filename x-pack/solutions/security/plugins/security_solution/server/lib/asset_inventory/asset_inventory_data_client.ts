@@ -111,7 +111,7 @@ export class AssetInventoryDataClient {
     if (!entityStorePrivileges.has_all_required) {
       return {
         status: ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES,
-        privileges: entityStorePrivileges.privileges,
+        privileges: entityStorePrivileges,
       };
     }
 
