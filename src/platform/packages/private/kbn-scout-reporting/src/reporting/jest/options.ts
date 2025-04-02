@@ -7,11 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+
 /**
  * Configuration options for the Scout Jest reporter
  */
 export interface ScoutJestReporterOptions {
   name?: string;
   runId?: string;
+  configCategory?: ScoutTestRunConfigCategory;
   outputPath?: string;
 }

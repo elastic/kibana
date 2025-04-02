@@ -59,7 +59,12 @@ export class ScoutJestReporter extends BaseReporter {
     this.scoutLog.info(`Scout test run ID: ${this.runId}`);
 
     this.report = new ScoutEventsReport(this.scoutLog);
-    this.baseTestRunInfo = { id: this.runId };
+    this.baseTestRunInfo = {
+      id: this.runId,
+      config: {
+        category: reporterOptions.configCategory,
+      },
+    };
     this.codeOwnersEntries = getCodeOwnersEntries();
   }
 

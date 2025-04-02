@@ -50,7 +50,7 @@ module.exports = {
       ? [
           [
             '<rootDir>/src/platform/packages/private/kbn-scout-reporting/src/reporting/jest',
-            { name: 'Jest tests (backend API)' },
+            { name: 'Jest tests (integration, node)', configCategory: 'unit-integration-test' },
           ],
         ]
       : []),
