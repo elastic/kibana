@@ -888,8 +888,8 @@ export function defineRoutes(
         body: schema.object({
           isActiveAlertDeleteEnabled: schema.boolean(),
           isInactiveAlertDeleteEnabled: schema.boolean(),
-          activeAlertDeleteThreshold: schema.number(),
-          inactiveAlertDeleteThreshold: schema.number(),
+          activeAlertDeleteThreshold: schema.number({ min: 1 }),
+          inactiveAlertDeleteThreshold: schema.number({ min: 1 }),
           categoryIds: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
@@ -956,8 +956,8 @@ export function defineRoutes(
         body: schema.object({
           isActiveAlertDeleteEnabled: schema.boolean(),
           isInactiveAlertDeleteEnabled: schema.boolean(),
-          activeAlertDeleteThreshold: schema.number(),
-          inactiveAlertDeleteThreshold: schema.number(),
+          activeAlertDeleteThreshold: schema.number({ min: 1 }),
+          inactiveAlertDeleteThreshold: schema.number({ min: 1 }),
           categoryIds: schema.maybe(schema.arrayOf(schema.string())),
           spaceIds: schema.maybe(schema.arrayOf(schema.string())),
         }),
