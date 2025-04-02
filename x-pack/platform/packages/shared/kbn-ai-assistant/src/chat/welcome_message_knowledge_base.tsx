@@ -46,7 +46,6 @@ export function WelcomeMessageKnowledgeBase({
     setIsPopoverOpen(false);
     await knowledgeBase.install();
   };
-
   // Use the computed kbState to decide which UI to render
   switch (knowledgeBase.kbState) {
     case 'NOT_INSTALLED':
@@ -126,7 +125,6 @@ export function WelcomeMessageKnowledgeBase({
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {/* Additional UI for when the knowledge base is ready can go here */}
         </div>
       );
 
@@ -135,45 +133,39 @@ export function WelcomeMessageKnowledgeBase({
         <div>
           <EuiText color="danger" size="s">
             {i18n.translate('xpack.aiAssistant.welcomeMessageKnowledgeBase.errorLabel', {
-              defaultMessage: 'An error occurred during installation. Please try again.',
+              defaultMessage:
+                'Your knowledge base is not available.  Please check the issues below.',
             })}
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiButton onClick={handleInstall} fill>
-            {i18n.translate('xpack.aiAssistant.welcomeMessageKnowledgeBase.retryButtonLabel', {
-              defaultMessage: 'Retry Install',
-            })}
-          </EuiButton>
-          {knowledgeBase.installError && (
-            <EuiFlexGroup justifyContent="center">
-              <EuiFlexItem grow={false}>
-                <EuiPopover
-                  button={
-                    <EuiButtonEmpty
-                      data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
-                      iconType="inspect"
-                      onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                    >
-                      {i18n.translate(
-                        'xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel',
-                        {
-                          defaultMessage: 'Inspect issues',
-                        }
-                      )}
-                    </EuiButtonEmpty>
-                  }
-                  isOpen={isPopoverOpen}
-                  panelPaddingSize="none"
-                  closePopover={() => setIsPopoverOpen(false)}
-                >
-                  <WelcomeMessageKnowledgeBaseSetupErrorPanel
-                    knowledgeBase={knowledgeBase}
-                    onRetryInstall={handleInstall}
-                  />
-                </EuiPopover>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                button={
+                  <EuiButtonEmpty
+                    data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
+                    iconType="inspect"
+                    onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+                  >
+                    {i18n.translate(
+                      'xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel',
+                      {
+                        defaultMessage: 'Inspect issues',
+                      }
+                    )}
+                  </EuiButtonEmpty>
+                }
+                isOpen={isPopoverOpen}
+                panelPaddingSize="none"
+                closePopover={() => setIsPopoverOpen(false)}
+              >
+                <WelcomeMessageKnowledgeBaseSetupErrorPanel
+                  knowledgeBase={knowledgeBase}
+                  onRetryInstall={handleInstall}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </div>
       );
 

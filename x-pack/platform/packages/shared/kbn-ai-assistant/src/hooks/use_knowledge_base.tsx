@@ -155,9 +155,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   // Compute the overall knowledge base state by combining isInstalling, installError and the API status
   const kbState: KnowledgeBaseState = useMemo(() => {
-    // If there was an error during installation, mark as ERROR
-    if (installError) return 'ERROR';
-
     // If installation was triggered but we haven't received a status yet
     if (isInstalling) {
       // If no status or no endpoint, then we're still creating the endpoint
@@ -188,6 +185,14 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       ) {
         return 'DEPLOYING_MODEL';
       }
+    }
+
+    // If there was an error creating endpoint, mark as ERROR
+    if (installError) return 'ERROR';
+    // the endpoint exists but there are no deployment stats, model is not deployed for some reason
+    if (statusRequest?.value?.endpoint && !statusRequest.value?.model_stats) {
+      setInstallError(new Error('MODEL_NOT_DEPLOYED'));
+      return 'ERROR';
     }
 
     // Fallback
