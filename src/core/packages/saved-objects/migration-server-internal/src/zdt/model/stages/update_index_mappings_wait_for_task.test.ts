@@ -114,24 +114,6 @@ describe('Stage: updateIndexMappings', () => {
     });
   });
 
-  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL after 15 retries', () => {
-    const state = createWaitState({
-      retryCount: 15,
-    });
-    const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
-      type: 'wait_for_task_completed_with_error_retry_original' as const,
-      message: 'persistent_error',
-    });
-
-    const newState = updateIndexMappingsWaitForTask(state, res, context);
-
-    expect(newState).toEqual({
-      ...state,
-      controlState: 'FATAL',
-      reason: `Migration was retried ${state.retryCount} times but failed with: persistent_error.`,
-    });
-  });
-
   it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL in case of  wait_for_task_completed_with_error_retry_original when exceeding retry count', () => {
     const state = createWaitState({
       retryCount: context.maxRetryAttempts + 1,
