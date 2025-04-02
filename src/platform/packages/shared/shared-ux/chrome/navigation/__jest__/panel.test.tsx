@@ -554,7 +554,7 @@ describe('Panel', () => {
         navTreeDef: of(navTree),
       });
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(queryByTestId(/panelGroupId-foo/)).toBeVisible(); // no crash
     });
@@ -611,7 +611,7 @@ describe('Panel', () => {
 
       expect(componentSpy).not.toHaveBeenCalled();
 
-      queryByTestId(/panelOpener-root.group1/)?.click(); // open the panel
+      queryByTestId(/nav-item-root.group1/)?.click(); // open the panel
 
       expect(componentSpy).toHaveBeenCalled();
     });
