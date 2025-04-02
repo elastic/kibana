@@ -143,6 +143,6 @@ export const retriever = (specService: SpecDefinitionsService) => {
       filter: {
         __scope_link: 'GLOBAL.query',
       },
-    }
+    },
   });
 };
