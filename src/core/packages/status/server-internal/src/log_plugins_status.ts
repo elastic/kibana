@@ -7,12 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { uniq } from 'lodash';
-import { merge, type Observable, Subject, type Subscription } from 'rxjs';
-import { pairwise, takeUntil, map, startWith, bufferTime, filter, concatAll } from 'rxjs';
+import {
+  merge,
+  type Observable,
+  Subject,
+  type Subscription,
+  pairwise,
+  takeUntil,
+  map,
+  startWith,
+  filter,
+  concatAll,
+} from 'rxjs';
 import { Logger } from '@kbn/logging';
 import type { PluginName } from '@kbn/core-base-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
+import { createLogThrottledBuffer } from './log_throttled_buffer';
 import type { LoggablePluginStatus, PluginStatus } from './types';
 
 // let plugins log up to 3 status changes every 30s (extra messages will be throttled / aggregated)
@@ -37,46 +47,13 @@ export const logPluginsStatusChanges = ({
   throttleIntervalMillis = THROTTLE_INTERVAL_MILLIS,
   maxThrottledMessages = MAX_THROTTLED_MESSAGES,
 }: LogPluginsStatusChangesParams): Subscription => {
-  const buffer = new Subject<LoggablePluginStatus>();
-  const throttled$: Observable<LoggablePluginStatus | string> = buffer.asObservable().pipe(
-    takeUntil(stop$),
-    bufferTime(maxMessagesPerPluginPerInterval),
-    map((statuses) => {
-      const aggregated = // aggregate repeated messages, and count nbr. of repetitions
-        statuses.filter((candidateStatus, index) => {
-          const firstMessageIndex = statuses.findIndex(
-            (status) =>
-              candidateStatus.name === status.name &&
-              candidateStatus.level === status.level &&
-              candidateStatus.summary === status.summary
-          );
-          if (index !== firstMessageIndex) {
-            // this is not the first time this message is logged, increase 'repeats' counter for the first occurrence
-            statuses[firstMessageIndex].repeats = (statuses[firstMessageIndex].repeats ?? 1) + 1;
-            return false;
-          } else {
-            // this is the first time this message is logged, let it through
-            return true;
-          }
-        });
+  const buffer$ = new Subject<LoggablePluginStatus>();
 
-      if (aggregated.length > maxThrottledMessages) {
-        const list: string = uniq(
-          aggregated.slice(maxThrottledMessages).map(({ name }) => name)
-        ).join(', ');
-
-        return [
-          ...aggregated.slice(0, maxThrottledMessages),
-          `${
-            aggregated.length - maxThrottledMessages
-          } other status updates from [${list}] have been truncated to avoid flooding the logs`,
-        ];
-      } else {
-        return aggregated;
-      }
-    }),
-    concatAll()
-  );
+  const throttled$ = createLogThrottledBuffer({
+    buffer$,
+    stop$,
+    maxThrottledMessages,
+  });
 
   const lastMessagesTimestamps: Record<string, number[]> = {};
 
@@ -98,7 +75,7 @@ export const logPluginsStatusChanges = ({
 
       if (pluginQuota.length >= maxMessagesPerPluginPerInterval) {
         // we're still over quota, throttle the message
-        buffer.next(pluginStatus);
+        buffer$.next(pluginStatus);
         return false;
       } else {
         // let the message pass through

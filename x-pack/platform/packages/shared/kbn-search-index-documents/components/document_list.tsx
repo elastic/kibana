@@ -22,6 +22,7 @@ import {
   EuiText,
   EuiSpacer,
   Pagination,
+  EuiBadge,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,7 @@ import { Result } from '..';
 import { type ResultProps } from './result/result';
 
 interface DocumentListProps {
+  executionTime?: number;
   dataTelemetryIdPrefix: string;
   docs: SearchHit[];
   docsPerPage: number;
@@ -47,6 +49,7 @@ interface DocumentListProps {
 }
 
 export const DocumentList: React.FC<DocumentListProps> = ({
+  executionTime,
   dataTelemetryIdPrefix,
   docs,
   docsPerPage,
@@ -76,28 +79,39 @@ export const DocumentList: React.FC<DocumentListProps> = ({
         onPageClick={onPaginate}
       />
       <EuiSpacer size="m" />
-      <EuiText size="xs">
-        <p>
-          <FormattedMessage
-            id="xpack.searchIndexDocuments.documentList.description"
-            defaultMessage="Showing {results} of {total}.
-            Search results maxed at {maximum} documents."
-            values={{
-              maximum: <FormattedNumber value={10000} />,
-              results: (
-                <strong>
-                  <FormattedNumber value={docs.length} />
-                </strong>
-              ),
-              total: (
-                <strong>
-                  <FormattedNumber value={meta.totalItemCount} />
-                </strong>
-              ),
-            }}
-          />
-        </p>
-      </EuiText>
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiText size="xs">
+            <p>
+              <FormattedMessage
+                id="xpack.searchIndexDocuments.documentList.description"
+                defaultMessage="Showing {results} of {total}.
+          Search results maxed at {maximum} documents."
+                values={{
+                  maximum: <FormattedNumber value={10000} />,
+                  results: (
+                    <strong>
+                      <FormattedNumber value={docs.length} />
+                    </strong>
+                  ),
+                  total: (
+                    <strong>
+                      <FormattedNumber value={meta.totalItemCount} />
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        {executionTime !== undefined && (
+          <EuiFlexItem grow={false}>
+            <EuiBadge data-test-subj="executionTimeBadge" color="default">
+              {executionTime} ms
+            </EuiBadge>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {isLoading && <EuiProgress size="xs" color="primary" />}
       <EuiSpacer size="m" />
       {docs.map((doc) => {

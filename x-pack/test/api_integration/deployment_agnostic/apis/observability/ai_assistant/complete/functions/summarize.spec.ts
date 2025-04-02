@@ -15,18 +15,13 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_pr
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {
   clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
 } from '../../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('summarize', function () {
@@ -36,9 +31,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let connectorId: string;
 
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
 
       proxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
@@ -73,9 +66,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteKnowledgeBaseModel(ml);
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
-      await deleteInferenceEndpoint({ es });
     });
 
     it('persists entry in knowledge base', async () => {

@@ -31,6 +31,7 @@ import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_STRING_TYPES } from '../shared/esql_types';
 import { getRecommendedQueries } from './recommended_queries/templates';
 import { getDateHistogramCompletionItem } from './commands/stats/util';
+import { Location } from '../definitions/types';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 
@@ -282,7 +283,7 @@ describe('autocomplete', () => {
       testSuggestions('FROM kibana_sample_data_logs | EVAL TRIM(e/)', [
         ...getFieldNamesByType(['text', 'keyword']),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ['text', 'keyword'],
           { scalar: true },
           undefined,
@@ -295,12 +296,12 @@ describe('autocomplete', () => {
         TIME_PICKER_SUGGESTION,
         ...TIME_SYSTEM_PARAMS.map((t) => `${t}, `),
         ...getFieldNamesByType(['date', 'date_nanos']).map((name) => `${name}, `),
-        ...getFunctionSignaturesByReturnType('eval', ['date', 'date_nanos'], { scalar: true }).map(
-          (s) => ({
-            ...s,
-            text: `${s.text},`,
-          })
-        ),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ['date', 'date_nanos'], {
+          scalar: true,
+        }).map((s) => ({
+          ...s,
+          text: `${s.text},`,
+        })),
       ];
       testSuggestions('FROM a | EVAL DATE_DIFF("day", /)', expectedDateDiff2ndArgSuggestions);
 
@@ -328,12 +329,12 @@ describe('autocomplete', () => {
     testSuggestions('FROM index1 | EVAL b/', [
       'var0 = ',
       ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
 
     testSuggestions('FROM index1 | EVAL var0 = f/', [
       ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
 
     // DISSECT field
@@ -411,7 +412,7 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
-      ...getFunctionSignaturesByReturnType('stats', 'any', {
+      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
         scalar: true,
         agg: true,
         grouping: true,
@@ -419,27 +420,27 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['BY ', ', ', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['WHERE ', 'BY ', ', ', '| ']);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
       'var0 = ',
       getDateHistogramCompletionItem(),
-      ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
     ]);
 
     // WHERE argument
     testSuggestions('FROM index1 | WHERE f/', [
       ...getFieldNamesByType('any').map((field) => `${field} `),
-      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
     ]);
 
     // WHERE argument comparison
     testSuggestions(
       'FROM index1 | WHERE keywordField i/',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'boolean',
         {
           operators: true,
@@ -453,7 +454,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM index1 | WHERE ABS(integerField) i/',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'any',
         {
           operators: true,
@@ -520,7 +521,7 @@ describe('autocomplete', () => {
           .map((field) => `${field}, `)
           .map(attachTriggerCommand),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ESQL_STRING_TYPES,
           { scalar: true },
           undefined,
@@ -546,7 +547,7 @@ describe('autocomplete', () => {
           command: undefined,
         })),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ESQL_STRING_TYPES,
           { scalar: true },
           undefined,
@@ -766,7 +767,7 @@ describe('autocomplete', () => {
       'FROM a | STATS /',
       [
         'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', {
+        ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
           scalar: true,
           agg: true,
           grouping: true,
@@ -777,13 +778,14 @@ describe('autocomplete', () => {
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(numberField) /', [
       ', ',
+      attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
       attachTriggerCommand('| '),
     ]);
 
     // STATS argument BY field
     const allByCompatibleFunctions = getFunctionSignaturesByReturnType(
-      'stats',
+      Location.STATS,
       'any',
       {
         scalar: true,
@@ -816,14 +818,16 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
-      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }).map(attachAsSnippet),
+      ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }).map(
+        attachAsSnippet
+      ),
     ]);
 
     // WHERE argument comparison
     testSuggestions(
       'FROM a | WHERE keywordField /',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'boolean',
         {
           operators: true,
