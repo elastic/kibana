@@ -259,6 +259,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
+  const onChangeGroupsItemsPerPage = useCallback(
+    (size: number) => setPageSize(size),
+    [setPageSize]
+  );
+
+  const onChangeGroupsPage = useCallback((index: number) => setPageIndex(index), [setPageIndex]);
+
   return useMemo(
     () =>
       getGrouping({
@@ -268,8 +275,8 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
         inspectButton: inspect,
         isLoading: loading || isLoadingGroups,
         itemsPerPage: pageSize,
-        onChangeGroupsItemsPerPage: (size: number) => setPageSize(size),
-        onChangeGroupsPage: (index) => setPageIndex(index),
+        onChangeGroupsItemsPerPage,
+        onChangeGroupsPage,
         onGroupClose,
         renderChildComponent,
         selectedGroup,
@@ -283,13 +290,13 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       inspect,
       isLoadingGroups,
       loading,
+      onChangeGroupsItemsPerPage,
+      onChangeGroupsPage,
       onGroupClose,
       pageIndex,
       pageSize,
       renderChildComponent,
       selectedGroup,
-      setPageIndex,
-      setPageSize,
     ]
   );
 };

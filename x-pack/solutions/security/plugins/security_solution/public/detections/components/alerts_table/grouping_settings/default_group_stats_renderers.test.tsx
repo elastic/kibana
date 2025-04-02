@@ -138,7 +138,7 @@ describe('getStats', () => {
       )
     ).toBeTruthy();
 
-    const badgesSourceIp = getStats('source.ip', {
+    const badgesSourceIp = defaultGroupStatsRenderer('source.ip', {
       key: 'User test',
       severitiesSubAggregation: { buckets: [{ key: 'medium', doc_count: 10 }] },
       countSeveritySubAggregation: { value: 1 },
