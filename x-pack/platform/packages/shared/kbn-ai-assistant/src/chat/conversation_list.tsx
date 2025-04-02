@@ -31,6 +31,11 @@ import { NewChatButton } from '../buttons/new_chat_button';
 import { ConversationListItemLabel } from './conversation_list_item_label';
 import { isConversationOwnedByUser } from '../utils/is_conversation_owned_by_current_user';
 
+enum ListSections {
+  CONVERSATIONS = 'conversations',
+  ARCHIVED = 'archived',
+}
+
 const panelClassName = css`
   height: 100%;
   display: flex;
@@ -114,8 +119,7 @@ export function ConversationList({
     getConversationHref
   );
 
-  const [isConversationsOpen, setIsConversationsOpen] = useState(true);
-  const [isArchivedOpen, setIsArchivedOpen] = useState(false);
+  const [openSection, setOpenSection] = useState<ListSections>(ListSections.CONVERSATIONS);
 
   const { element: confirmDeleteElement, confirm: confirmDeleteCallback } = useConfirmModal({
     title: i18n.translate('xpack.aiAssistant.flyout.confirmDeleteConversationTitle', {
@@ -210,21 +214,11 @@ export function ConversationList({
     );
   };
 
-  const toggleConversationsSection = (isOpen: boolean) => {
-    setIsConversationsOpen(isOpen);
-    setIsArchivedOpen(!isOpen);
-  };
-
-  const toggleArchivedSection = (isOpen: boolean) => {
-    setIsArchivedOpen(isOpen);
-    setIsConversationsOpen(!isOpen);
-  };
-
   useEffect(() => {
     if (selectedConversation?.archived) {
-      toggleArchivedSection(true);
+      setOpenSection(ListSections.ARCHIVED);
     } else {
-      toggleConversationsSection(true);
+      setOpenSection(ListSections.CONVERSATIONS);
     }
   }, [selectedConversation]);
 
@@ -287,7 +281,7 @@ export function ConversationList({
             <>
               <EuiFlexItem grow>
                 <EuiFlexGroup direction="column" gutterSize="none">
-                  <EuiFlexItem grow={isConversationsOpen}>
+                  <EuiFlexItem grow={openSection === ListSections.CONVERSATIONS}>
                     <EuiCollapsibleNavGroup
                       isCollapsible
                       title={i18n.translate(
@@ -299,8 +293,10 @@ export function ConversationList({
                       titleSize="xs"
                       iconType="list"
                       iconSize="m"
-                      onToggle={(isOpen) => toggleConversationsSection(isOpen)}
-                      forceState={isConversationsOpen ? 'open' : 'closed'}
+                      onToggle={(isOpen) =>
+                        setOpenSection(isOpen ? ListSections.CONVERSATIONS : ListSections.ARCHIVED)
+                      }
+                      forceState={openSection === ListSections.CONVERSATIONS ? 'open' : 'closed'}
                     >
                       <div className={scrollSectionClass(scrollBarStyles)}>
                         {isLoading ? loader : null}
@@ -311,7 +307,7 @@ export function ConversationList({
                     </EuiCollapsibleNavGroup>
                   </EuiFlexItem>
 
-                  <EuiFlexItem grow={isArchivedOpen}>
+                  <EuiFlexItem grow={openSection === ListSections.ARCHIVED}>
                     <EuiCollapsibleNavGroup
                       isCollapsible
                       title={i18n.translate('xpack.aiAssistant.conversationList.archivedTitle', {
@@ -320,8 +316,10 @@ export function ConversationList({
                       titleSize="xs"
                       iconType="folderOpen"
                       iconSize="m"
-                      onToggle={(isOpen) => toggleArchivedSection(isOpen)}
-                      forceState={isArchivedOpen ? 'open' : 'closed'}
+                      onToggle={(isOpen) =>
+                        setOpenSection(isOpen ? ListSections.ARCHIVED : ListSections.CONVERSATIONS)
+                      }
+                      forceState={openSection === ListSections.ARCHIVED ? 'open' : 'closed'}
                       borders="horizontal"
                     >
                       <div className={scrollSectionClass(scrollBarStyles)}>
