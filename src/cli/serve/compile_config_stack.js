@@ -56,6 +56,7 @@ export function compileConfigStack({ configOverrides, devConfig, dev, serverless
     }
   }
 
+  // Security specific configs
   if (serverlessMode === 'security') {
     // Security specific tier configs
     const serverlessSecurityTier = getSecurityTierFromCfg(configs);
@@ -90,6 +91,8 @@ function getServerlessModeFromCfg(configs) {
 function getSecurityTierFromCfg(configs) {
   const config = getConfigFromFiles(configs.filter(isNotNull));
 
+  // A product type is always present and for multiple addons in the config the product type/tier is always the same for all of them,
+  // and is the only element in the array, which is why we can access the first element for product type/tier
   const productType = _.get(config, 'xpack.securitySolutionServerless.productTypes', [])[0];
   return productType?.product_tier;
 }
