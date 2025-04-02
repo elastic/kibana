@@ -324,6 +324,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             },
             body: {
               dashboards: [],
+              queries: [],
               stream: {
                 ingest: {
                   lifecycle: { inherit: {} },
