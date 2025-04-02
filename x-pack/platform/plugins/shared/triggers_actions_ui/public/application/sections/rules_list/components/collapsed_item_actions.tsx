@@ -364,6 +364,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
             className="actCollapsedItemActions"
             data-test-subj="collapsedActionPanel"
             data-testid="collapsedActionPanel"
+            css={collapsedItemActionsCss}
           />
         </EuiPopover>
         {isUntrackAlertsModalOpen && (
