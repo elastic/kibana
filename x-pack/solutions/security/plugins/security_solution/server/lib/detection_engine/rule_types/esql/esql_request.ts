@@ -60,22 +60,13 @@ export const performEsqlRequest = async ({
 
     // Poll for long-executing query
     while (true) {
-      try {
-        const pollResponse = await esClient.transport.request<AsyncEsqlResponse>({
-          method: 'GET',
-          path: `/_query/async/${queryId}`,
-        });
+      const pollResponse = await esClient.transport.request<AsyncEsqlResponse>({
+        method: 'GET',
+        path: `/_query/async/${queryId}`,
+      });
 
-        if (!pollResponse.is_running) {
-          return pollResponse;
-        }
-
-        ruleExecutionLogger?.debug(`Query is still running for query ID: ${queryId}`);
-      } catch (error) {
-        ruleExecutionLogger?.error(
-          `Error while polling for query ID: ${queryId}, error: ${error.message}`
-        );
-        throw error;
+      if (!pollResponse.is_running) {
+        return pollResponse;
       }
 
       pollCount++;
@@ -94,15 +85,17 @@ export const performEsqlRequest = async ({
         throw new Error('Rule execution cancelled due to timeout');
       }
       await new Promise((resolve) => setTimeout(resolve, pollInterval));
+      ruleExecutionLogger?.debug(`Query is still running for query ID: ${queryId}`);
     }
-  } catch (e) {
+  } catch (error) {
+    ruleExecutionLogger?.error(`Error while performing ES|QL search: ${error?.message}`);
+    throw getKbnServerError(error);
+  } finally {
     if (queryId) {
       await esClient.transport.request({
         method: 'DELETE',
         path: `/_query/async/${queryId}`,
       });
     }
-
-    throw getKbnServerError(e);
   }
 };

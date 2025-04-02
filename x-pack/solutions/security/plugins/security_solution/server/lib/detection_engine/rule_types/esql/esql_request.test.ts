@@ -72,12 +72,16 @@ describe('performEsqlRequest', () => {
     });
 
     expect(result).toEqual(mockResponse);
-    expect(esClient.transport.request).toHaveBeenCalledTimes(1);
+    expect(esClient.transport.request).toHaveBeenCalledTimes(2);
     expect(esClient.transport.request).toHaveBeenCalledWith({
       method: 'POST',
       path: '/_query/async',
       body: requestBody,
       querystring: requestQueryParams,
+    });
+    expect(esClient.transport.request).toHaveBeenCalledWith({
+      method: 'DELETE',
+      path: '/_query/async/QUERY-ID',
     });
   });
 
@@ -108,7 +112,7 @@ describe('performEsqlRequest', () => {
     });
 
     expect(result).toEqual(mockPollResponse);
-    expect(esClient.transport.request).toHaveBeenCalledTimes(2);
+    expect(esClient.transport.request).toHaveBeenCalledTimes(3);
     expect(esClient.transport.request).toHaveBeenNthCalledWith(1, {
       method: 'POST',
       path: '/_query/async',
@@ -117,6 +121,10 @@ describe('performEsqlRequest', () => {
     });
     expect(esClient.transport.request).toHaveBeenNthCalledWith(2, {
       method: 'GET',
+      path: '/_query/async/QUERY-ID',
+    });
+    expect(esClient.transport.request).toHaveBeenCalledWith({
+      method: 'DELETE',
       path: '/_query/async/QUERY-ID',
     });
   });
