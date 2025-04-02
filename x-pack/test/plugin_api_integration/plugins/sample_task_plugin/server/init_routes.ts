@@ -100,6 +100,12 @@ export function initRoutes(
       validate: {
         body: taskSchema,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     },
     async function (
       context: RequestHandlerContext,
