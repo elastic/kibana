@@ -50,22 +50,29 @@ export const ProcessorOutcomePreview = () => {
     </>
   );
 };
+const formatter = new Intl.NumberFormat('en-US', {
+  style: 'percent',
+  maximumFractionDigits: 0,
+});
+
+const formatRateToPercentage = (rate?: number) =>
+  (rate ? formatter.format(rate) : undefined) as any;
 
 const OutcomeControls = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
 
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const simulationFailedRate = useSimulatorSelector(
-    (state) => state.context.simulation?.documents_metrics.failed_rate
+  const simulationFailedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.failed_rate)
   );
-  const simulationSkippedRate = useSimulatorSelector(
-    (state) => state.context.simulation?.documents_metrics.skipped_rate
+  const simulationSkippedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.skipped_rate)
   );
-  const simulationPartiallyParsedRate = useSimulatorSelector(
-    (state) => state.context.simulation?.documents_metrics.partially_parsed_rate
+  const simulationPartiallyParsedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.partially_parsed_rate)
   );
-  const simulationParsedRate = useSimulatorSelector(
-    (state) => state.context.simulation?.documents_metrics.parsed_rate
+  const simulationParsedRate = useSimulatorSelector((state) =>
+    formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
 
   const dateRangeRef = useSimulatorSelector((state) => state.context.dateRangeRef);
@@ -106,38 +113,32 @@ const OutcomeControls = () => {
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_parsed.id)}
           badgeColor="success"
-          numActiveFilters={
-            simulationParsedRate ? parseFloat((simulationParsedRate * 100).toFixed(2)) : undefined
-          }
+          numFilters={simulationParsedRate}
+          numActiveFilters={simulationParsedRate}
         >
           {previewDocsFilterOptions.outcome_filter_parsed.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_partially_parsed.id)}
           badgeColor="accent"
-          numActiveFilters={
-            simulationPartiallyParsedRate
-              ? parseFloat((simulationPartiallyParsedRate * 100).toFixed(2))
-              : undefined
-          }
+          numFilters={simulationPartiallyParsedRate}
+          numActiveFilters={simulationPartiallyParsedRate}
         >
           {previewDocsFilterOptions.outcome_filter_partially_parsed.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_skipped.id)}
           badgeColor="accent"
-          numActiveFilters={
-            simulationSkippedRate ? parseFloat((simulationSkippedRate * 100).toFixed(2)) : undefined
-          }
+          numFilters={simulationSkippedRate}
+          numActiveFilters={simulationSkippedRate}
         >
           {previewDocsFilterOptions.outcome_filter_skipped.label}
         </EuiFilterButton>
         <EuiFilterButton
           {...getFilterButtonPropsFor(previewDocsFilterOptions.outcome_filter_failed.id)}
           badgeColor="accent"
-          numActiveFilters={
-            simulationFailedRate ? parseFloat((simulationFailedRate * 100).toFixed(2)) : undefined
-          }
+          numFilters={simulationFailedRate}
+          numActiveFilters={simulationFailedRate}
         >
           {previewDocsFilterOptions.outcome_filter_failed.label}
         </EuiFilterButton>
