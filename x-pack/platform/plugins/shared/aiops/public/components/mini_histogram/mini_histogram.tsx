@@ -79,7 +79,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
   if (isLoading) {
     return (
       <div css={[cssChartSize, cssCenter]}>
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }
