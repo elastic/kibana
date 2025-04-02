@@ -2306,8 +2306,8 @@ export function getInputsWithStreamIds(
         ...stream,
         enabled: !!allEnabled ? true : stream.enabled,
         id: packagePolicyId
-          ? `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}`
-          : `${input.type}-${stream.data_stream.dataset}`,
+          ? `${stream.data_stream.type}-${stream.data_stream.dataset}-${packagePolicyId}`
+          : `${stream.data_stream.type}-${stream.data_stream.dataset}`,
       })),
     };
   });
