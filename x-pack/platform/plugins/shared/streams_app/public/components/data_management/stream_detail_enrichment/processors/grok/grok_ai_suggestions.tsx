@@ -55,7 +55,7 @@ const RefreshButton = ({
   isLoading: boolean;
   hasValidField: boolean;
 }) => {
-  const isManagedAIConnector = !INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
+  const isManagedAIConnector = INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
 
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
