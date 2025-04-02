@@ -197,7 +197,7 @@ The `discover:searchFieldsFromSource` advanced setting has been removed.
 
 **Details**
 
-Users can no longer configure Discover to load fields from `_source`. This is an internal optimization and should have little impact on users. [View more](https://github.com/elastic/kibana/pull/202679).
+Users can no longer configure Discover to load fields from `_source`. This is an internal optimization and should have little impact on users. View [#202679](https://github.com/elastic/kibana/pull/202679).
 ::::
 
 $$$kibana-201254$$$
