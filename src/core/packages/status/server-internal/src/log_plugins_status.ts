@@ -52,7 +52,6 @@ export const logPluginsStatusChanges = ({
   const throttled$ = createLogThrottledBuffer({
     buffer$,
     stop$,
-    throttleIntervalMillis,
     maxThrottledMessages,
   });
 

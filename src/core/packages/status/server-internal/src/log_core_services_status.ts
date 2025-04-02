@@ -51,7 +51,6 @@ export const logCoreStatusChanges = ({
   const throttled$ = createLogThrottledBuffer({
     buffer$,
     stop$,
-    throttleIntervalMillis,
     maxThrottledMessages,
   });
 
