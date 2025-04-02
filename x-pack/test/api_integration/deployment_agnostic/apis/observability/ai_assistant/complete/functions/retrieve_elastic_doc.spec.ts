@@ -134,7 +134,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       describe('The first request', () => {
-        it('contain retrieve_elastic_doc function', () => {
+        it('contains the retrieve_elastic_doc function', () => {
           expect(firstRequestBody.tools?.map((t) => t.function.name)).to.contain(
             'retrieve_elastic_doc'
           );
@@ -153,7 +153,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           lastMessage = last(secondRequestBody.messages) as ChatCompletionMessageParam;
           parsedContent = JSON.parse(lastMessage.content as string);
         });
-        it('includes a retrieve_elastic_doc function call', () => {
+        it('includes the retrieve_elastic_doc function call', () => {
           expect(secondRequestBody.messages[4].role).to.be(MessageRole.Assistant);
           // @ts-expect-error
           expect(secondRequestBody.messages[4].tool_calls[0].function.name).to.be(
@@ -169,15 +169,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             secondRequestBody.messages[4].tool_calls[0].id
           );
         });
-        it('retrieve documents from Elastic docs are sent to the LLM', () => {
+        it('sends the retrieved documents from Elastic docs to the LLM', () => {
           expect(lastMessage.content).to.be.a('string');
         });
 
-        it('send 3 documents to the llm', () => {
+        it('should send 3 documents to the llm', () => {
           expect(parsedContent.documents.length).to.be(3);
         });
 
-        it('document content must contain the "lens" word', () => {
+        it('should contain the word "lens" in the document content', () => {
           const document = parsedContent.documents.find(
             (doc) => doc.title === 'Enhancements and bug fixes'
           );
