@@ -178,10 +178,12 @@ describe('test getDataStateContainer', () => {
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+        },
       })
     );
 
@@ -194,9 +196,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -215,10 +215,12 @@ describe('test getDataStateContainer', () => {
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+        },
       })
     );
     dataState.data$.totalHits$.next({
@@ -229,9 +231,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(stateContainer.internalState.getState().resetDefaultProfileState, 'resetId')
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
