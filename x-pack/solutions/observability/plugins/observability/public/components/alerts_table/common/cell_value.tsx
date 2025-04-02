@@ -26,6 +26,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
+import type { JsonValue } from '@kbn/utility-types';
 import {
   RELATED_ACTIONS_COL,
   RELATED_ALERT_REASON,
@@ -44,7 +45,7 @@ import AlertActions from '../../alert_actions/alert_actions';
 
 export const getAlertFieldValue = (alert: Alert, fieldName: string) => {
   // can be updated when working on https://github.com/elastic/kibana/issues/140819
-  const rawValue = alert[fieldName];
+  const rawValue = alert[fieldName] as JsonValue[];
   const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
 
   if (!isEmpty(value)) {
