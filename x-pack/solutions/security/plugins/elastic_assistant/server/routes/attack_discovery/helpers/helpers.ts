@@ -133,7 +133,7 @@ export const updateAttackDiscoveries = async ({
   anonymizedAlerts,
   apiConfig,
   attackDiscoveries,
-  attackDiscoveryId,
+  executionUuid,
   authenticatedUser,
   dataClient,
   hasFilter,
@@ -148,7 +148,7 @@ export const updateAttackDiscoveries = async ({
   anonymizedAlerts: Document[];
   apiConfig: ApiConfig;
   attackDiscoveries: AttackDiscovery[] | null;
-  attackDiscoveryId: string;
+  executionUuid: string;
   authenticatedUser: AuthenticatedUser;
   dataClient: AttackDiscoveryDataClient;
   end?: string;
@@ -164,7 +164,7 @@ export const updateAttackDiscoveries = async ({
 }) => {
   try {
     const currentAd = await dataClient.getAttackDiscovery({
-      id: attackDiscoveryId,
+      id: executionUuid,
       authenticatedUser,
     });
     if (currentAd === null || currentAd?.status === 'canceled') {
@@ -185,7 +185,7 @@ export const updateAttackDiscoveries = async ({
               date: new Date().toISOString(),
             }),
           }),
-      id: attackDiscoveryId,
+      id: executionUuid,
       replacements: latestReplacements,
       backingIndex: currentAd.backingIndex,
     };
