@@ -23,6 +23,7 @@ export interface FetchSearchResultsArgs {
 }
 
 interface UseSearchPreviewData {
+  executionTime: number;
   results: SearchHit[];
   pagination: Pagination;
 }
@@ -33,6 +34,7 @@ export interface UseSearchPreviewResponse {
 }
 
 export const DEFAULT_SEARCH_PREVIEW_DATA: UseSearchPreviewData = {
+  executionTime: 0,
   results: [],
   pagination: DEFAULT_PAGINATION,
 };
@@ -45,6 +47,7 @@ export const fetchSearchResults = async ({
   http,
 }: FetchSearchResultsArgs): Promise<UseSearchPreviewData> => {
   return http.post<{
+    executionTime: number;
     results: SearchHit[];
     pagination: Pagination;
   }>(APIRoutes.POST_SEARCH_QUERY, {
@@ -98,6 +101,7 @@ export const useSearchPreview = ({
   });
 
   return {
+    executionTime: data.executionTime,
     pagination: data.pagination,
     results: data.results,
   };
