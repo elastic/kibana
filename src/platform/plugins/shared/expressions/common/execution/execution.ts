@@ -59,6 +59,7 @@ type UnwrapReturnType<Function extends (...args: any[]) => unknown> =
 export interface FunctionCacheItem {
   value: unknown;
   time: number;
+  sideEffectFn?: () => void;
 }
 /**
  * The result returned after an expression function execution.
@@ -259,8 +260,7 @@ export class Execution<
   constructor(
     public readonly execution: ExecutionParams,
     private readonly logger?: Logger,
-    private readonly functionCache: Map<string, FunctionCacheItem> = new Map(),
-    private readonly sideEffectsCache: Map<string, () => void> = new Map()
+    private readonly functionCache: Map<string, FunctionCacheItem> = new Map()
   ) {
     const { executor } = execution;
 
@@ -483,10 +483,7 @@ export class Execution<
           } = this.#canUseCachedResult(fn, normalizedInput, args);
           hash = fnHash;
           if (cacheValid) {
-            const seFn = this.sideEffectsCache.get(fnHash);
-            if (seFn) {
-              seFn();
-            }
+            cachedValue.sideEffectFn?.();
             return of(cachedValue.value);
           }
           const output = fn.fn(normalizedInput, args, this.context);
@@ -529,12 +526,12 @@ export class Execution<
             const sideEffectResult = fn.sideEffects?.(args, this.context);
             while (this.functionCache.size >= maxCacheSize) {
               this.functionCache.delete(this.functionCache.keys().next().value);
-              this.sideEffectsCache.delete(this.sideEffectsCache.keys().next().value);
             }
-            this.functionCache.set(hash, { value: lastValue, time: Date.now() });
-            if (sideEffectResult) {
-              this.sideEffectsCache.set(hash, sideEffectResult);
-            }
+            this.functionCache.set(hash, {
+              value: lastValue,
+              time: Date.now(),
+              sideEffectFn: sideEffectResult,
+            });
           }
         })
       )
