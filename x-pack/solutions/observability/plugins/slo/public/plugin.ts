@@ -44,7 +44,7 @@ export class SLOPlugin
 {
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private experimentalFeatures: ExperimentalFeatures = {
-    management: { enabled: false },
+    management: { enabled: true },
     ruleFormV2: { enabled: false },
   };
 

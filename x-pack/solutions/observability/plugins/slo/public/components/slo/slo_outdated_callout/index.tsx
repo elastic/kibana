@@ -12,12 +12,15 @@ import { encode } from '@kbn/rison';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchSloDefinitions } from '../../../hooks/use_fetch_slo_definitions';
 import { paths } from '../../../../common/locators/paths';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 export function SloOutdatedCallout() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+
+  const { experimentalFeatures } = usePluginContext();
 
   const handleClick = () => {
     navigateToUrl(
@@ -48,19 +51,21 @@ export function SloOutdatedCallout() {
               values={{ total: data.total }}
             />
           </p>
-          <p>
-            <EuiButton
-              color="warning"
-              data-test-subj="o11ySloOutdatedCalloutViewOutdatedSloDefinitionsButton"
-              fill
-              onClick={handleClick}
-            >
-              <FormattedMessage
-                id="xpack.slo.outdatedSloCallout.buttonLabel"
-                defaultMessage="Review Outdated SLO Definitions"
-              />
-            </EuiButton>
-          </p>
+          {!!experimentalFeatures?.management.enabled && (
+            <p>
+              <EuiButton
+                color="warning"
+                data-test-subj="o11ySloOutdatedCalloutViewOutdatedSloDefinitionsButton"
+                fill
+                onClick={handleClick}
+              >
+                <FormattedMessage
+                  id="xpack.slo.outdatedSloCallout.buttonLabel"
+                  defaultMessage="Review Outdated SLO Definitions"
+                />
+              </EuiButton>
+            </p>
+          )}
         </EuiCallOut>
         <EuiSpacer size="m" />
       </>
