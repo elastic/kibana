@@ -57,7 +57,7 @@ describe('Notes Flyout', () => {
     jest.clearAllMocks();
 
     (NoteCards as unknown as jest.Mock).mockImplementation(
-      jest.fn().mockReturnValue(<div>{`NoteCards`}</div>)
+      jest.fn(() => <div>{`NoteCards`}</div>)
     );
   });
 

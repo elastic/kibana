@@ -20,7 +20,7 @@ describe('EditingColumn', () => {
     name: 'foo',
     field: 'foo',
     render: jest.fn(),
-    editingRender: jest.fn().mockReturnValue(<div data-test-subj="editing-view" />),
+    editingRender: jest.fn(() => <div data-test-subj="editing-view" />),
   };
 
   const requiredProps = {

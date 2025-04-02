@@ -22,7 +22,7 @@ jest.mock('../../../containers/api');
 // Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
 // correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
 jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn().mockReturnValue(<div data-test-subj="alerts-table" />),
+  AlertsTable: jest.fn(() => <div data-test-subj="alerts-table" />),
 }));
 const mockAlertsTable = jest.mocked(AlertsTable);
 

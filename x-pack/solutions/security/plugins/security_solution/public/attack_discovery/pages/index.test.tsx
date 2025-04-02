@@ -161,7 +161,7 @@ jest.mock('../../common/lib/kibana', () => {
           remove: jest.fn(),
         }),
         sessionView: {
-          getSessionView: jest.fn().mockReturnValue(<div />),
+          getSessionView: jest.fn(() => <div />),
         },
         storage: {
           get: jest.fn(),
