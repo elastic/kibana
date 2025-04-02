@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-/** @type {import('@jest/types').Config.InitialOptions} */
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/chat/plugins/serverless_chat/server/'],
-};
+import type { IndexSourceDefinition } from '@kbn/wci-common';
+
+export interface GenerateConfigurationResponse {
+  definition: IndexSourceDefinition;
+}
