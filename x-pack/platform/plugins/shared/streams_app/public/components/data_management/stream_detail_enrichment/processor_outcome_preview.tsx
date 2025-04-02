@@ -30,6 +30,7 @@ import {
   getTableColumns,
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
+import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -165,7 +166,9 @@ const OutcomePreviewTable = () => {
   const processors = useSimulatorSelector((state) => state.context.processors);
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const previewDocsFilter = useSimulatorSelector((state) => state.context.previewDocsFilter);
-  const previewDocuments = useSimulatorSelector((state) => state.context.previewDocuments);
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
 
   const previewColumns = useMemo(
     () => getTableColumns(processors, detectedFields ?? [], previewDocsFilter),
