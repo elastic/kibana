@@ -27,6 +27,7 @@ import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { map } from 'lodash';
 import getopts from 'getopts';
+import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 import jestFlags from './jest_flags.json';
 
 // yarn test:jest src/core/server/saved_objects
@@ -141,6 +142,11 @@ export function runJest(configName = 'jest.config.js') {
     if (!testFilesProvided) {
       log.verbose(`no test files provided, setting to current directory`);
       process.argv.push(relative(wd, cwd));
+    }
+
+    if (SCOUT_REPORTER_ENABLED) {
+      // Expose Jest config file path via environment variables
+      process.env.JEST_CONFIG_PATH = configPath;
     }
 
     log.info('yarn jest', process.argv.slice(2).join(' '));

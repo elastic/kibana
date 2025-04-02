@@ -66,6 +66,8 @@ export class ScoutJestReporter extends BaseReporter {
       },
     };
     this.codeOwnersEntries = getCodeOwnersEntries();
+
+    this.loadConfigFileInfo();
   }
 
   private getFileOwners(filePath: string): string[] {
@@ -97,6 +99,24 @@ export class ScoutJestReporter extends BaseReporter {
   }
 
   /**
+   * Look for Jest config path in environment variables and update this reporter if necessary
+   */
+  loadConfigFileInfo() {
+    if (process.env.JEST_CONFIG_PATH === undefined) {
+      // Jest config path not set in the environment
+      return;
+    }
+
+    this.baseTestRunInfo = {
+      ...this.baseTestRunInfo,
+      config: {
+        ...this.baseTestRunInfo.config,
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, process.env.JEST_CONFIG_PATH)),
+      },
+    };
+  }
+
+  /**
    * Look for Scout metadata in Jest globals and update this reporter instance if necessary
    *
    * @param jestGlobals Jest globals
@@ -114,11 +134,21 @@ export class ScoutJestReporter extends BaseReporter {
       this.name = metadata.reporter.name;
     }
 
+    let configFileInfo = this.baseTestRunInfo.config?.file;
+
+    if (metadata.configFilePath !== undefined) {
+      // Jest config file path from globals was set,
+      // and it should override what we've inferred from environment variables (if anything)
+      configFileInfo = this.getScoutFileInfoForPath(
+        path.relative(REPO_ROOT, metadata.configFilePath)
+      );
+    }
+
     this.baseTestRunInfo = {
       ...this.baseTestRunInfo,
       config: {
         ...this.baseTestRunInfo.config,
-        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, metadata.configFilePath)),
+        file: configFileInfo,
         category: metadata.testRunConfigCategory,
       },
     };
