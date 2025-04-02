@@ -61,6 +61,7 @@ import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/servi
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
 import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/helper';
 import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
+import { FindingsMisconfigurationPanelTrial } from './csp_details/findings_flyout/findings_right';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -193,11 +194,19 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: MisconfigurationFindingsPanelKey,
     component: (props) => (
-      <FindingsMisconfigurationPanel
+      <FindingsMisconfigurationPanelTrial
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
       />
     ),
   },
+  // {
+  //   key: MisconfigurationFindingsPanelKey,
+  //   component: (props) => (
+  //     <FindingsMisconfigurationPanel
+  //       {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+  //     />
+  //   ),
+  // },
 ];
 
 export const SECURITY_SOLUTION_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.securitySolution}`;

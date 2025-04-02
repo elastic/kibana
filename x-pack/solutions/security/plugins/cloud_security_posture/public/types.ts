@@ -40,6 +40,7 @@ export interface CspClientPluginStart {
     ruleId,
     resourceId,
   }: FindingMisconfigurationFlyoutProps) => React.JSX.Element;
+  getCloudSecurityPostureMisconfigurationFlyoutFull: () => { Header: React.JSX.Element };
 }
 
 export interface CspClientPluginSetupDeps {

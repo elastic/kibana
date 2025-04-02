@@ -28,6 +28,8 @@ import {
   EuiLink,
   EuiPanel,
   EuiIconProps,
+  EuiBasicTableColumn,
+  EuiBasicTable,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { assertNever } from '@kbn/std';
@@ -239,6 +241,29 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
   });
   const finding = data?.result.hits[0]._source;
 
+  const convertObjectToArray = (obj: { [key: string]: any }) => {
+    if (obj === undefined) return null;
+    return Object.keys(obj)
+      .filter((key) => key !== 'raw')
+      .map((key) => ({
+        field: key,
+        value: obj[key],
+      }));
+  };
+
+  const columns: Array<EuiBasicTableColumn<any>> = [
+    {
+      field: 'field',
+      name: 'Field',
+      'data-test-subj': 'firstNameCell',
+    },
+    {
+      field: 'value',
+      name: 'Value',
+      truncateText: true,
+    },
+  ];
+
   const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
@@ -306,6 +331,17 @@ export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurati
             </EuiFlyoutBody>
           </EuiPanel>
         )}
+        <EuiPanel>
+          <EuiPanel>
+            <EuiBasicTable
+              tableCaption="Demo of EuiBasicTable"
+              items={convertObjectToArray(finding?.resource) || []}
+              rowHeader="Field"
+              columns={columns}
+            />
+          </EuiPanel>
+        </EuiPanel>
+
         <EuiFlyoutFooter>
           <EuiPanel color="transparent">
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">

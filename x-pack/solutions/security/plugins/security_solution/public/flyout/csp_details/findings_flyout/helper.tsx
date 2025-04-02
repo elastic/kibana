@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { FindingMisconfigurationFlyoutProps } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../../common/lib/kibana';
 
@@ -14,4 +15,9 @@ export const FindingsMisconfigurationPanel = ({
 }: FindingMisconfigurationFlyoutProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   return cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout({ ruleId, resourceId });
+};
+
+export const FindingsMisconfigurationFull = (props) => {
+  const { cloudSecurityPosture } = useKibana().services;
+  return cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyoutFull().Header(props);
 };

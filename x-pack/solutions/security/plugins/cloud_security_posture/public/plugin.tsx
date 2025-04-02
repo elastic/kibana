@@ -25,6 +25,7 @@ import {
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
+import FindingsMisconfigurationFlyoutHeader from './pages/configurations/findings_flyout/findings_right/header';
 
 const LazyCspPolicyTemplateForm = lazy(
   () => import('./components/fleet_extensions/policy_template_form')
@@ -36,6 +37,15 @@ const LazyCspCustomAssets = lazy(
 
 const LazyCspFindingsMisconfigurationFlyout = lazy(
   () => import('./pages/configurations/findings_flyout/findings_flyout')
+);
+
+const LazyCspFindingsMisconfigurationFlyoutFull = lazy(
+  () =>
+    import('./pages/configurations/findings_flyout/findings_right/misconfiguration_finding_flyout')
+);
+
+const LazyCspFindingsMisconfigurationFlyoutHeader = lazy(
+  () => import('./pages/configurations/findings_flyout/findings_right/header')
 );
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));
@@ -114,6 +124,16 @@ export class CspPlugin
       }: FindingMisconfigurationFlyoutProps) => (
         <LazyCspFindingsMisconfigurationFlyout ruleId={ruleId} resourceId={resourceId} />
       ),
+      // getCloudSecurityPostureMisconfigurationFlyoutFull: () => {
+      //   return { Header: FindingsMisconfigurationFlyoutHeader };
+      // },
+      getCloudSecurityPostureMisconfigurationFlyoutFull: () => {
+        return {
+          Header: lazy(
+            (props) => import('./pages/configurations/findings_flyout/findings_right/header')
+          ),
+        };
+      },
     };
   }
 
