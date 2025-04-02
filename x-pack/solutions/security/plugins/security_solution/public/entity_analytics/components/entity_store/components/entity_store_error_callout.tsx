@@ -18,8 +18,7 @@ export const EntityStoreErrorCallout: React.FC<{ engine?: EngineDescriptor; size
   }
 
   let title;
-  // we only have one action now but this wiill cause a type error if we add more
-  // to remind us to update this
+  // Please update the following code when adding a new action type
   switch (engine.error.action) {
     case 'init':
       title = (
