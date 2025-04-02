@@ -35,6 +35,7 @@ import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
+import { RenderContextService } from '@kbn/core-render-context-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
@@ -101,6 +102,7 @@ export class CoreSystem {
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
+  private readonly renderContextService: RenderContextService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
@@ -161,6 +163,7 @@ export class CoreSystem {
     });
     this.docLinks = new DocLinksService(this.coreContext);
     this.rendering = new RenderingService();
+    this.renderContextService = new RenderContextService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
@@ -316,6 +319,7 @@ export class CoreSystem {
       const i18n = this.i18n.start();
       const fatalErrors = this.fatalErrors.start();
       const theme = this.theme.start();
+      const customBranding = this.customBranding.start();
       await this.integrations.start({ uiSettings });
 
       const coreUiTargetDomElement = document.createElement('div');
@@ -332,15 +336,7 @@ export class CoreSystem {
         userProfile,
         targetDomElement: overlayTargetDomElement,
       });
-      const notifications = this.notifications.start({
-        analytics,
-        i18n,
-        overlays,
-        theme,
-        userProfile,
-        targetDomElement: notificationsTargetDomElement,
-      });
-      const customBranding = this.customBranding.start();
+
       const application = await this.application.start({
         http,
         theme,
@@ -348,9 +344,23 @@ export class CoreSystem {
         customBranding,
         analytics,
       });
-
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
+      });
+
+      const rendering = this.renderContextService.start({
+        analytics,
+        executionContext,
+        i18n,
+        theme,
+        userProfile,
+      });
+
+      const notifications = this.notifications.start({
+        analytics,
+        overlays,
+        rendering,
+        targetDomElement: notificationsTargetDomElement,
       });
 
       const chrome = await this.chrome.start({
@@ -402,6 +412,7 @@ export class CoreSystem {
         customBranding,
         security,
         userProfile,
+        rendering,
       };
 
       await this.plugins.start(core);
