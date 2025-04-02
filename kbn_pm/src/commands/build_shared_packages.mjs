@@ -29,9 +29,13 @@ export const command = {
     const cache = args.getBooleanValue('cache') ?? true;
 
     log.info('building shared packages with webpack');
-    await run('moon', [':build-webpack'].concat(dist ? ['--dist'] : []).concat(!cache ? ['-u'] : []), {
-      pipe: !quiet,
-    });
+    await run(
+      'moon',
+      [':build-webpack'].concat(!cache ? ['-u'] : []).concat(dist ? ['--', '--dist'] : []),
+      {
+        pipe: !quiet,
+      }
+    );
 
     log.success('shared packages built');
   },
