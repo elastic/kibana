@@ -805,7 +805,7 @@ describe('Error count alert', () => {
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
-        environment: 'Not defined',
+        environment: 'Unset',
         errorGroupingKey: undefined,
         grouping: {
           service: {
@@ -814,8 +814,7 @@ describe('Error count alert', () => {
           },
         },
         interval: '5 mins',
-        reason:
-          'Error count is 5 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
+        reason: 'Error count is 5 in the last 5 mins for service: foo, env: Unset. Alert when > 2.',
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 5,
@@ -828,7 +827,7 @@ describe('Error count alert', () => {
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 5,
         'kibana.alert.reason':
-          'Error count is 5 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
+          'Error count is 5 in the last 5 mins for service: foo, env: Unset. Alert when > 2.',
         'processor.event': 'error',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'foo',
@@ -837,7 +836,7 @@ describe('Error count alert', () => {
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
-        environment: 'Not defined',
+        environment: 'Unset',
         errorGroupingKey: undefined,
         grouping: {
           service: {
@@ -846,8 +845,7 @@ describe('Error count alert', () => {
           },
         },
         interval: '5 mins',
-        reason:
-          'Error count is 4 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
+        reason: 'Error count is 4 in the last 5 mins for service: foo, env: Unset. Alert when > 2.',
         serviceName: 'foo',
         threshold: 2,
         triggerValue: 4,
@@ -860,7 +858,7 @@ describe('Error count alert', () => {
         'kibana.alert.evaluation.threshold': 2,
         'kibana.alert.evaluation.value': 4,
         'kibana.alert.reason':
-          'Error count is 4 in the last 5 mins for service: foo, env: Not defined. Alert when > 2.',
+          'Error count is 4 in the last 5 mins for service: foo, env: Unset. Alert when > 2.',
         'processor.event': 'error',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'foo',

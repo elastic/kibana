@@ -29,7 +29,7 @@ describe('getGroupByActionVariables', () => {
     `);
   });
 
-  it('environment action variable should have value "Not defined"', () => {
+  it('environment action variable should have value "Unset"', () => {
     const result = getGroupByActionVariables({
       'service.name': 'opbeans-java',
       'service.environment': 'ENVIRONMENT_NOT_DEFINED',
@@ -38,7 +38,7 @@ describe('getGroupByActionVariables', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "environment": "Not defined",
+        "environment": "Unset",
         "serviceName": "opbeans-java",
         "transactionName": "tx-java",
         "transactionType": "request",
