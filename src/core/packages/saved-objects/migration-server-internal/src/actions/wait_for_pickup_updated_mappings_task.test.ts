@@ -88,7 +88,7 @@ describe('waitForPickupUpdatedMappingsTask', () => {
     expect(Either.isLeft(result));
     expect((result as Either.Left<any>).left).toMatchInlineSnapshot(`
       Object {
-        "message": "search_phase_execution_exception",
+        "message": "The task being waited on encountered a search_phase_execution_exception error",
         "type": "wait_for_task_completed_with_error_retry_original",
       }
     `);

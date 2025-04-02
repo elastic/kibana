@@ -1576,7 +1576,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ],
           };
         } else {
-          const reason = `Migration was retried ${stateP.retryCount} times but failed with ${left.message}.`;
+          const reason = `Migration was retried ${stateP.retryCount} times but failed with: ${left.message}.`;
           return {
             ...stateP,
             controlState: 'FATAL',

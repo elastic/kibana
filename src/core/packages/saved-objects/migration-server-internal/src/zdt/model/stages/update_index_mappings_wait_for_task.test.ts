@@ -95,7 +95,7 @@ describe('Stage: updateIndexMappings', () => {
     expect(newState).toEqual({
       ...state,
       controlState: 'FATAL',
-      reason: `Migration was retried ${state.retryCount} times but failed with search_phase_execution_exception.`,
+      reason: `Migration was retried ${state.retryCount} times but failed with: search_phase_execution_exception.`,
     });
   });
 });

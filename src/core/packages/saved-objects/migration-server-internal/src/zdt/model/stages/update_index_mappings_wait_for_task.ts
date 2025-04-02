@@ -33,7 +33,6 @@ export const updateIndexMappingsWaitForTask: ModelStage<
         return {
           ...state,
           controlState: 'UPDATE_INDEX_MAPPINGS',
-          additiveMappingChanges: state.additiveMappingChanges,
           retryCount,
           retryDelay,
           logs: [
@@ -45,7 +44,7 @@ export const updateIndexMappingsWaitForTask: ModelStage<
           ],
         };
       } else {
-        const reason = `Migration was retried ${state.retryCount} times but failed with ${left.message}.`;
+        const reason = `Migration was retried ${state.retryCount} times but failed with: ${left.message}.`;
         return {
           ...state,
           controlState: 'FATAL',

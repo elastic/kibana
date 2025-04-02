@@ -42,7 +42,8 @@ export const waitForPickupUpdatedMappingsTask = flow(
           // This error is normally fixed in the next try, so let's retry instead of throwing
           return TaskEither.left({
             type: 'wait_for_task_completed_with_error_retry_original' as const,
-            message: 'search_phase_execution_exception',
+            message:
+              'The task being waited on encountered a search_phase_execution_exception error',
           });
         }
 

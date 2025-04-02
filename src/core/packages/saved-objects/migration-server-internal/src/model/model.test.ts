@@ -2973,6 +2973,9 @@ describe('migrations v2 model', () => {
         expect(newState.updateTargetMappingsTaskId).toEqual('update target mappings task');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
+        // make sure the updated types query is still in the new state since
+        // we might want to come back if the wait for task state fails
+        expect(newState.updatedTypesQuery).toEqual(updateTargetMappingsState.updatedTypesQuery);
       });
     });
 
@@ -2989,7 +2992,7 @@ describe('migrations v2 model', () => {
             should: [
               {
                 term: {
-                  type: 'type1',
+                  type: 'type123',
                 },
               },
             ],
@@ -3032,6 +3035,52 @@ describe('migrations v2 model', () => {
         expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(2);
         expect(newState.retryDelay).toEqual(4000);
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES when there is an error that makes us want to retry the original task', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'Some error happened that makes us want to retry the original task',
+          type: 'wait_for_task_completed_with_error_retry_original',
+        });
+        const newState = model(
+          updateTargetMappingsWaitForTaskState,
+          res
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.updatedTypesQuery).toEqual(
+          updateTargetMappingsWaitForTaskState.updatedTypesQuery
+        );
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES updates correcly the retry number', () => {
+        const state = Object.assign({}, updateTargetMappingsWaitForTaskState, { retryCount: 3 });
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'Some error happened that makes us want to retry the original task',
+          type: 'wait_for_task_completed_with_error_retry_original',
+        });
+        const newState = model(state, res) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+        expect(newState.retryCount).toEqual(4);
+        expect(newState.updatedTypesQuery).toEqual(
+          updateTargetMappingsWaitForTaskState.updatedTypesQuery
+        );
+      });
+
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> FATAL if wait_for_task_completed_with_error_retry_original has no more retry attemps', () => {
+        const state = Object.assign({}, updateTargetMappingsWaitForTaskState, {
+          retryCount: 8,
+          retryAttempts: 8,
+        });
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
+          message: 'some_retryable_error_during_update',
+          type: 'wait_for_task_completed_with_error_retry_original',
+        });
+        const newState = model(state, res) as FatalState;
+        expect(newState.controlState).toEqual('FATAL');
+        expect(newState.reason).toMatchInlineSnapshot(
+          `"Migration was retried 8 times but failed with: Some error happened that makes us want to retry the original task."`
+        );
       });
     });
 
