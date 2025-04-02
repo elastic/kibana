@@ -22,8 +22,7 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       },
       security: {
         authz: {
-          enabled: false,
-          reason: 'Waiting for licensing requirements',
+          requiredPrivileges: ['manage_search_query_rules'],
         },
       },
       validate: {
@@ -43,6 +42,14 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         return response.customError({
           statusCode: 502,
           body: 'Could not retrieve current user, security plugin is not ready',
+        });
+      }
+      const hasSearchQueryRulesPrivilege = await asCurrentUser.security.hasPrivileges({
+        cluster: ['manage_search_query_rules'],
+      });
+      if (!hasSearchQueryRulesPrivilege.has_all_requested) {
+        return response.forbidden({
+          body: "Your user doesn't have manage_search_query_rules privileges",
         });
       }
       const result = await fetchQueryRulesSets(asCurrentUser, {

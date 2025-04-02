@@ -105,7 +105,10 @@ export const QueryRulesOverview = () => {
         restrictWidth
         alignment="center"
         contentProps={{
-          css: backgroundProps,
+          css:
+            !isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0
+              ? undefined
+              : backgroundProps,
         }}
       >
         {isInitialLoading && <EuiLoadingSpinner />}
