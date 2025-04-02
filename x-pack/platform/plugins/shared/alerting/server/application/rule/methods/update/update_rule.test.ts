@@ -411,6 +411,9 @@ describe('update()', () => {
         "alertDelay": Object {
           "active": 5,
         },
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -481,6 +484,9 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -746,6 +752,9 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -800,6 +809,9 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -993,6 +1005,9 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -1029,6 +1044,9 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -1204,6 +1222,9 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -1250,6 +1271,9 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -1352,6 +1376,9 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -1400,6 +1427,9 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": undefined,
         "apiKeyOwner": "elastic",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -1532,6 +1562,9 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": false,
         "executionStatus": Object {
@@ -1572,6 +1605,9 @@ describe('update()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -2757,6 +2793,9 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -2793,6 +2832,9 @@ describe('update()', () => {
             "uuid": undefined,
           },
         ],
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -3350,6 +3392,9 @@ describe('update()', () => {
         alertTypeId: 'myType',
         apiKey: null,
         apiKeyOwner: null,
+        artifacts: {
+          dashboards: [],
+        },
         apiKeyCreatedByUser: null,
         consumer: 'myApp',
         enabled: true,
@@ -3526,6 +3571,9 @@ describe('update()', () => {
           },
         ],
         "apiKeyCreatedByUser": true,
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "executionStatus": Object {
@@ -3568,6 +3616,9 @@ describe('update()', () => {
         "apiKey": "MTIzOmFiYw==",
         "apiKeyCreatedByUser": true,
         "apiKeyOwner": "elastic",
+        "artifacts": Object {
+          "dashboards": Array [],
+        },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
@@ -3825,6 +3876,9 @@ describe('update()', () => {
           alertTypeId: 'myType',
           apiKey: null,
           apiKeyOwner: null,
+          artifacts: {
+            dashboards: [],
+          },
           apiKeyCreatedByUser: null,
           consumer: 'myApp',
           enabled: true,
@@ -3861,6 +3915,9 @@ describe('update()', () => {
               "uuid": undefined,
             },
           ],
+          "artifacts": Object {
+            "dashboards": Array [],
+          },
           "createdAt": 2019-02-12T21:01:22.479Z,
           "enabled": true,
           "executionStatus": Object {

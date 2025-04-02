@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import { useGridLayoutPanelEvents } from '../use_grid_layout_events';
 
 export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; panelId: string }) => {
-  const startInteraction = useGridLayoutPanelEvents({
+  const { startDrag } = useGridLayoutPanelEvents({
     interactionType: 'resize',
     panelId,
     rowId,
@@ -25,8 +25,9 @@ export const ResizeHandle = React.memo(({ rowId, panelId }: { rowId: string; pan
   return (
     <button
       css={styles}
-      onMouseDown={startInteraction}
-      onTouchStart={startInteraction}
+      onMouseDown={startDrag}
+      onTouchStart={startDrag}
+      onKeyDown={startDrag}
       className="kbnGridPanel--resizeHandle"
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
@@ -46,7 +47,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     maxHeight: '100%',
     height: euiTheme.size.l,
     zIndex: euiTheme.levels.toast,
-    touchAction: 'none',
+    scrollMarginBottom: euiTheme.size.s,
     '&:hover, &:focus': {
       cursor: 'se-resize',
     },

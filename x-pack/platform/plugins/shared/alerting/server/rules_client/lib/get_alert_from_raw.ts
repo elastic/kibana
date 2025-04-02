@@ -24,7 +24,7 @@ import {
 } from '../../lib';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { getActiveScheduledSnoozes } from '../../lib/is_rule_snoozed';
-import { injectReferencesIntoParams } from '../common';
+import { injectReferencesIntoArtifacts, injectReferencesIntoParams } from '../common';
 import {
   transformRawActionsToDomainActions,
   transformRawActionsToDomainSystemActions,
@@ -169,6 +169,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           omitGeneratedValues,
         })
       : [],
+    artifacts: injectReferencesIntoArtifacts(opts.id, rawRule.artifacts, opts.references || []),
     params: injectReferencesIntoParams(
       opts.id,
       opts.ruleType,

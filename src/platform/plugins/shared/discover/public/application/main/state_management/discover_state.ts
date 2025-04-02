@@ -43,12 +43,21 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import type { InternalStateStore, RuntimeStateManager } from './redux';
-import { internalStateActions } from './redux';
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
+import {
+  createTabActionInjector,
+  internalStateActions,
+  selectTab,
+  selectTabRuntimeState,
+} from './redux';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { getSavedSearchContainer } from './discover_saved_search_container';
 
 export interface DiscoverStateContainerParams {
+  /**
+   * The ID of the tab associated with this state container
+   */
+  tabId: string;
   /**
    * The current savedSearch
    */
@@ -112,6 +121,14 @@ export interface DiscoverStateContainer {
    */
   internalState: InternalStateStore;
   /**
+   * Injects the current tab into a given internalState action
+   */
+  injectCurrentTab: TabActionInjector;
+  /**
+   * Gets the state of the current tab
+   */
+  getCurrentTab: () => TabState;
+  /**
    * State manager for runtime state that can't be stored in Redux
    */
   runtimeStateManager: RuntimeStateManager;
@@ -144,7 +161,11 @@ export interface DiscoverStateContainer {
     /**
      * Initializing state containers and start subscribing to changes triggering e.g. data fetching
      */
-    initializeAndSync: () => () => void;
+    initializeAndSync: () => void;
+    /**
+     * Stop syncing the state containers started by initializeAndSync
+     */
+    stopSyncing: () => void;
     /**
      * Create and select a temporary/adhoc data view by a given index pattern
      * Used by the Data View Picker
@@ -216,6 +237,7 @@ export interface DiscoverStateContainer {
  * Used to sync URL with UI state
  */
 export function getDiscoverStateContainer({
+  tabId,
   services,
   customizationContext,
   stateStorageContainer,
@@ -224,6 +246,8 @@ export function getDiscoverStateContainer({
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
+  const injectCurrentTab = createTabActionInjector(tabId);
+  const getCurrentTab = () => selectTab(internalState.getState(), tabId);
 
   /**
    * state storage for state in the URL
@@ -267,6 +291,7 @@ export function getDiscoverStateContainer({
     internalState,
     savedSearchContainer,
     services,
+    injectCurrentTab,
   });
 
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
@@ -282,7 +307,7 @@ export function getDiscoverStateContainer({
   };
 
   const setDataView = (dataView: DataView) => {
-    internalState.dispatch(internalStateActions.setDataView(dataView));
+    internalState.dispatch(injectCurrentTab(internalStateActions.setDataView)({ dataView }));
     pauseAutoRefreshInterval(dataView);
     savedSearchContainer.getState().searchSource.setField('index', dataView);
   };
@@ -295,6 +320,8 @@ export function getDiscoverStateContainer({
     runtimeStateManager,
     getSavedSearch: savedSearchContainer.getState,
     setDataView,
+    injectCurrentTab,
+    getCurrentTab,
   });
 
   /**
@@ -302,7 +329,8 @@ export function getDiscoverStateContainer({
    * This is to prevent duplicate ids messing with our system
    */
   const updateAdHocDataViewId = async () => {
-    const prevDataView = runtimeStateManager.currentDataView$.getValue();
+    const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const prevDataView = currentDataView$.getValue();
     if (!prevDataView || prevDataView.isPersisted()) return;
 
     const nextDataView = await services.dataViews.create({
@@ -408,6 +436,13 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
+  let internalStopSyncing = () => {};
+
+  const stopSyncing = () => {
+    internalStopSyncing();
+    internalStopSyncing = () => {};
+  };
+
   /**
    * state containers initializing and subscribing to changes triggering e.g. data fetching
    */
@@ -442,8 +477,9 @@ export function getDiscoverStateContainer({
 
     // updates saved search when query or filters change, triggers data fetching
     const filterUnsubscribe = merge(services.filterManager.getFetches$()).subscribe(() => {
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       savedSearchContainer.update({
-        nextDataView: runtimeStateManager.currentDataView$.getValue(),
+        nextDataView: currentDataView$.getValue(),
         nextState: appStateContainer.getState(),
         useFilterAndQueryServices: true,
       });
@@ -468,7 +504,7 @@ export function getDiscoverStateContainer({
       }
     );
 
-    return () => {
+    internalStopSyncing = () => {
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
@@ -512,6 +548,8 @@ export function getDiscoverStateContainer({
       internalState,
       runtimeStateManager,
       appState: appStateContainer,
+      injectCurrentTab,
+      getCurrentTab,
     });
   };
 
@@ -541,7 +579,7 @@ export function getDiscoverStateContainer({
       });
     }
 
-    internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
+    internalState.dispatch(injectCurrentTab(internalStateActions.resetOnSavedSearchChange)());
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
@@ -573,6 +611,8 @@ export function getDiscoverStateContainer({
     globalState: globalStateContainer,
     appState: appStateContainer,
     internalState,
+    injectCurrentTab,
+    getCurrentTab,
     runtimeStateManager,
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
@@ -581,6 +621,7 @@ export function getDiscoverStateContainer({
     customizationContext,
     actions: {
       initializeAndSync,
+      stopSyncing,
       fetchData,
       onChangeDataView,
       createAndAppendAdHocDataView,

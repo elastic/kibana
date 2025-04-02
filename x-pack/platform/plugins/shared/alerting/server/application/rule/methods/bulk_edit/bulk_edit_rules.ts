@@ -545,6 +545,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
       references,
       params: updatedParams,
       actions: actionsWithRefs,
+      artifacts: artifactsWithRefs,
     } = await extractReferences(
       context,
       ruleType,
@@ -559,6 +560,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
         legacyId: rule.attributes.legacyId,
         paramsWithRefs: updatedParams,
       },
+      artifactsWithRefs,
     });
 
     const { apiKeyAttributes } = await prepareApiKeys(
