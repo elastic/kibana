@@ -8,25 +8,24 @@
  */
 
 import { concatAll, map, type Observable, type Subject, takeUntil, bufferTime } from 'rxjs';
-import { uniq } from 'lodash';
 import type { LoggableServiceStatus } from './types';
 
 export interface CreateLogThrottledBufferOptions<LoggableStatus extends LoggableServiceStatus> {
   buffer$: Subject<LoggableStatus>;
   stop$: Observable<void>;
-  throttleIntervalMillis: number;
+  bufferTimeMillis?: number;
   maxThrottledMessages: number;
 }
 
 export function createLogThrottledBuffer<LoggableStatus extends LoggableServiceStatus>({
   buffer$,
   stop$,
-  throttleIntervalMillis,
   maxThrottledMessages,
+  bufferTimeMillis = 1_000,
 }: CreateLogThrottledBufferOptions<LoggableStatus>): Observable<LoggableStatus | string> {
   const throttled$: Observable<LoggableStatus | string> = buffer$.asObservable().pipe(
     takeUntil(stop$),
-    bufferTime(throttleIntervalMillis),
+    bufferTime(bufferTimeMillis),
     map((statuses) => {
       const aggregated = // aggregate repeated messages, and count nbr. of repetitions
         statuses.filter((candidateStatus, index) => {
@@ -47,9 +46,9 @@ export function createLogThrottledBuffer<LoggableStatus extends LoggableServiceS
         });
 
       if (aggregated.length > maxThrottledMessages) {
-        const list: string = uniq(
-          aggregated.slice(maxThrottledMessages).map(({ name }) => name)
-        ).join(', ');
+        const list: string = [
+          ...new Set(aggregated.slice(maxThrottledMessages).map(({ name }) => name)),
+        ].join(', ');
 
         return [
           ...aggregated.slice(0, maxThrottledMessages),

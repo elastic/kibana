@@ -18,7 +18,7 @@ describe('createLogThrottledBuffer', () => {
   let loggedMessages: Array<LoggableServiceStatus | string>;
 
   const stop$ = new Subject<void>();
-  const throttleIntervalMillis = 30000;
+  const bufferTimeMillis = 1000;
   const maxThrottledMessages = 10;
 
   const baseStatus: LoggableServiceStatus = {
@@ -34,7 +34,7 @@ describe('createLogThrottledBuffer', () => {
     throttled$ = createLogThrottledBuffer({
       buffer$,
       stop$,
-      throttleIntervalMillis,
+      bufferTimeMillis,
       maxThrottledMessages,
     });
     throttled$.subscribe((message) => {
@@ -62,10 +62,10 @@ describe('createLogThrottledBuffer', () => {
     // not logged yet since the debounce time hasn't passed
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(1000); // Just a random time to prove that it's not an async issue
+    await jest.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(throttleIntervalMillis);
+    await jest.advanceTimersByTimeAsync(bufferTimeMillis);
     expect(loggedMessages).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -85,10 +85,10 @@ describe('createLogThrottledBuffer', () => {
     // not logged yet since the debounce time hasn't passed
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(1000); // Just a random to time to prove that it's not an async issue
+    await jest.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(throttleIntervalMillis);
+    await jest.advanceTimersByTimeAsync(bufferTimeMillis);
     expect(loggedMessages).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -109,7 +109,7 @@ describe('createLogThrottledBuffer', () => {
     // not logged yet since the debounce time hasn't passed
     expect(loggedMessages).toMatchInlineSnapshot(`Array []`);
 
-    await jest.advanceTimersByTimeAsync(1000); // Just a random to time to prove that it's not an async issue
+    await jest.advanceTimersByTimeAsync(bufferTimeMillis / 2); // Half the buffer time
     buffer$.next({ ...baseStatus });
     buffer$.next({ ...baseStatus });
     buffer$.next({ ...baseStatus });
@@ -119,7 +119,7 @@ describe('createLogThrottledBuffer', () => {
     buffer$.next({ ...baseStatus });
     buffer$.next({ ...baseStatus });
 
-    await jest.advanceTimersByTimeAsync(throttleIntervalMillis);
+    await jest.advanceTimersByTimeAsync(bufferTimeMillis);
     expect(loggedMessages).toMatchInlineSnapshot(`
       Array [
         Object {
