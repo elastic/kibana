@@ -233,9 +233,11 @@ export class DashboardPlugin
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
         const start = performance.now();
-        const [{ mountApp }, [coreStart]] = await Promise.all([
+        const [coreStart, { embeddable, presentationPanel }] = await core.getStartServices();
+        const [{ mountApp }] = await Promise.all([
           import('./dashboard_app/dashboard_router'),
-          core.getStartServices(),
+          presentationPanel.preloadPresentationPanelChunks(),
+          embeddable.preloadEmbeddableChunks(['control_group', 'lens']),
           untilPluginStartServicesReady(),
         ]);
         const stop = performance.now();

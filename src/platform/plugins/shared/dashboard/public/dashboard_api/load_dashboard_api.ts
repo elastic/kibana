@@ -8,13 +8,12 @@
  */
 
 import { ContentInsightsClient } from '@kbn/content-management-content-insights-public';
-import { uniq } from 'lodash';
 import { DashboardPanelMap } from '../../common';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { DashboardCreationOptions, DashboardState, UnsavedPanelState } from './types';
 import { getDashboardApi } from './get_dashboard_api';
 import { startQueryPerformanceTracking } from './performance/query_performance_tracking';
-import { coreServices, embeddableService, presentationPanelService } from '../services/kibana_services';
+import { coreServices } from '../services/kibana_services';
 import { logger } from '../services/logger';
 import {
   PANELS_CONTROL_GROUP_KEY,
@@ -32,13 +31,9 @@ export async function loadDashboardApi({
   const creationStartTime = performance.now();
   const creationOptions = await getCreationOptions?.();
   const incomingEmbeddable = creationOptions?.getIncomingEmbeddable?.();
-  const [savedObjectResult] = await Promise.all([
-    getDashboardContentManagementService().loadDashboardState({
-      id: savedObjectId,
-    }),
-    presentationPanelService.preloadPresentationPanelChunks(),
-    embeddableService.preloadEmbeddableChunks(['control_group', 'lens']),
-  ])
+  const savedObjectResult = await getDashboardContentManagementService().loadDashboardState({
+    id: savedObjectId,
+  });
 
   // --------------------------------------------------------------------------------------
   // Run validation.

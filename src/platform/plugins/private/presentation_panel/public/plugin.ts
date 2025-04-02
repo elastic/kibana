@@ -63,9 +63,9 @@ export class PresentationPanelPlugin
       preloadPresentationPanelChunks: async () => {
         await Promise.all([
           import('./panel_component/panel_module'),
-          startPlugins.uiActions.getTriggerActions(CONTEXT_MENU_TRIGGER),
-          startPlugins.uiActions.getTriggerActions(PANEL_BADGE_TRIGGER),
-          startPlugins.uiActions.getTriggerActions(PANEL_NOTIFICATION_TRIGGER)
+          // startPlugins.uiActions.getTriggerActions(CONTEXT_MENU_TRIGGER),
+          // startPlugins.uiActions.getTriggerActions(PANEL_BADGE_TRIGGER),
+          // startPlugins.uiActions.getTriggerActions(PANEL_NOTIFICATION_TRIGGER)
         ]);
       }
     };
