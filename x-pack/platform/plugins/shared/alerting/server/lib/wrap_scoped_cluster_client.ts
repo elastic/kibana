@@ -161,8 +161,9 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     params: TransportRequestParams,
     options?: TransportRequestOptions
   ): Promise<TResponse | TransportResult<TResponse, TContext>> {
+    const esqlAPIs = ['/_query', '/_query/async'];
     // Wrap ES|QL requests with an abort signal
-    if (params.method === 'POST' && params.path.startsWith('/_query')) {
+    if (params.method === 'POST' && esqlAPIs.includes(params.path)) {
       let requestOptions: TransportRequestOptions = {};
       try {
         requestOptions = options ?? {};
