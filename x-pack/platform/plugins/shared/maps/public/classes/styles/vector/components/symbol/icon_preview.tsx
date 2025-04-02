@@ -16,6 +16,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { maplibregl, Map as MapboxMap } from '@kbn/mapbox-gl';
 import { i18n } from '@kbn/i18n';
 import { CUSTOM_ICON_PIXEL_RATIO, createSdfIcon } from '../../symbol_utils';
@@ -189,7 +190,7 @@ export class IconPreview extends Component<Props, State> {
                 id="mapsCustomIconPreview__mapContainer"
                 ref={this._setContainerRef}
                 data-test-subj="mapsCustomIconPreview"
-                className="mapsCustomIconPreview__mapContainer"
+                css={css({ height: '150px' })}
               />
             </EuiPanel>
             <EuiSpacer size="m" />
