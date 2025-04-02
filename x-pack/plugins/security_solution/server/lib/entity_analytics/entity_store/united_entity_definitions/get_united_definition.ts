@@ -25,6 +25,7 @@ interface Options {
   namespace: string;
   fieldHistoryLength: number;
   indexPatterns: string[];
+  filter: string;
   syncDelay: string;
   frequency: string;
 }
@@ -37,6 +38,7 @@ export const getUnitedEntityDefinition = memoize(
     indexPatterns,
     syncDelay,
     frequency,
+    filter,
   }: Options): UnitedEntityDefinition => {
     const unitedDefinition = unitedDefinitionBuilders[entityType](fieldHistoryLength);
 
@@ -53,6 +55,7 @@ export const getUnitedEntityDefinition = memoize(
       indexPatterns,
       syncDelay,
       frequency,
+      filter,
     });
   }
 );

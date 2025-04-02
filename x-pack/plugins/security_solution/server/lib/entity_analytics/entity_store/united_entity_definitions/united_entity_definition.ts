@@ -66,7 +66,7 @@ export class UnitedEntityDefinition {
       indexPatterns,
       identityFields: [identityField],
       displayNameTemplate: `{{${identityField}}}`,
-      filter: filter,
+      filter,
       metadata,
       latest: {
         timestampField: '@timestamp',
