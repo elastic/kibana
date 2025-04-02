@@ -10115,7 +10115,6 @@ const termDefinition: FunctionDefinition = {
       'Performs a Term query on the specified field. Returns true if the provided term matches the row.',
   }),
   ignoreAsSuggestion: true,
-
   preview: true,
   alias: undefined,
   signatures: [
