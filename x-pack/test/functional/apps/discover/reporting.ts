@@ -68,17 +68,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         .subtract(docCount - i, dateSubstractUnit ?? 'days')
         .format();
 
+      const commonFields: Partial<TestDoc> = {
+        timestamp,
+        name,
+      };
+
+      if (addNumberField) {
+        commonFields.numberValue = i;
+      }
+
       if (i === 0) {
         // only the oldest document has a value for updated_at
         docs[i] = {
-          timestamp,
-          name,
-          numberValue: i,
+          ...commonFields,
           updated_at: moment.utc(endDate).format(),
         };
       } else {
         // updated_at field does not exist in first 500 documents
-        docs[i] = { timestamp, name, numberValue: i };
+        docs[i] = commonFields;
       }
     }
 
@@ -269,6 +276,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           endDate: RECENT_DOC_END_DATE,
           docCount: RECENT_DOC_COUNT,
           dateSubstractUnit: 'minutes',
+          addNumberField: true,
         });
 
         await timePicker.setCommonlyUsedTime('Last_15 minutes');
