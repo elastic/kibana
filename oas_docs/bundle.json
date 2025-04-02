@@ -1094,6 +1094,27 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
                       "type": "string"
@@ -2173,6 +2194,27 @@
                     ],
                     "type": "object"
                   },
+                  "artifacts": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "dashboards": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "consumer": {
                     "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
                     "type": "string"
@@ -2819,6 +2861,27 @@
                       "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
                       "nullable": true,
                       "type": "string"
+                    },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -3742,6 +3805,27 @@
                     ],
                     "type": "object"
                   },
+                  "artifacts": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "dashboards": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "flapping": {
                     "additionalProperties": false,
                     "description": "When flapping detection is turned on, alerts that switch quickly between active and recovered states are identified as “flapping” and notifications are reduced.",
@@ -4119,6 +4203,27 @@
                       "description": "The owner of the API key that is associated with the rule and used to run background tasks.",
                       "nullable": true,
                       "type": "string"
+                    },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
                     },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
@@ -6036,6 +6141,27 @@
                       "nullable": true,
                       "type": "string"
                     },
+                    "artifacts": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "dashboards": {
+                          "items": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "id"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    },
                     "consumer": {
                       "description": "The name of the application or feature that owns the rule. For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`, `ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.",
                       "type": "string"
@@ -6738,6 +6864,13 @@
                                 "description": "A short description.",
                                 "type": "string"
                               },
+                              "tags": {
+                                "items": {
+                                  "description": "An array of tags applied to this dashboard",
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              },
                               "timeRestore": {
                                 "default": false,
                                 "description": "Whether to restore time upon viewing this dashboard",
@@ -7383,6 +7516,13 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "tags": {
+                              "items": {
+                                "description": "An array of tags applied to this dashboard",
+                                "type": "string"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",
@@ -8038,6 +8178,13 @@
                         ],
                         "type": "object"
                       },
+                      "tags": {
+                        "items": {
+                          "description": "An array of tags applied to this dashboard",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "timeFrom": {
                         "description": "An ISO string indicating when to restore time from",
                         "type": "string"
@@ -8575,6 +8722,13 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "tags": {
+                              "items": {
+                                "description": "An array of tags applied to this dashboard",
+                                "type": "string"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",
@@ -9202,6 +9356,13 @@
                         ],
                         "type": "object"
                       },
+                      "tags": {
+                        "items": {
+                          "description": "An array of tags applied to this dashboard",
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
                       "timeFrom": {
                         "description": "An ISO string indicating when to restore time from",
                         "type": "string"
@@ -9733,6 +9894,13 @@
                                 "value"
                               ],
                               "type": "object"
+                            },
+                            "tags": {
+                              "items": {
+                                "description": "An array of tags applied to this dashboard",
+                                "type": "string"
+                              },
+                              "type": "array"
                             },
                             "timeFrom": {
                               "description": "An ISO string indicating when to restore time from",

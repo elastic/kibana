@@ -313,11 +313,13 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     references: extractedReferences,
     params: updatedParams,
     actions: actionsWithRefs,
+    artifacts: artifactsWithRefs,
   } = await extractReferences(
     context,
     ruleType,
     allActions as NormalizedAlertActionWithGeneratedValues[],
-    validatedRuleTypeParams
+    validatedRuleTypeParams,
+    updateRuleData.artifacts
   );
 
   // Increment revision if applicable field has changed
@@ -368,6 +370,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
     revision,
     updatedBy: username,
     updatedAt: new Date().toISOString(),
+    artifacts: artifactsWithRefs,
   });
 
   const mappedParams = getMappedParams(updatedParams);
