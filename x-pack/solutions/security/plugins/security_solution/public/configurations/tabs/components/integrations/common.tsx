@@ -4,14 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { lazy } from 'react';
 
-export enum ConfigurationTabs {
-  integrations = 'integrations',
-  basicRules = 'basic_rules',
-  aiSettings = 'ai_settings',
-}
-
-export enum IntegrationsFacets {
-  available = 'browse',
-  installed = 'installed',
-}
+export const PackageListGrid = lazy(async () => ({
+  default: await import('@kbn/fleet-plugin/public')
+    .then((module) => module.PackageList())
+    .then((pkg) => pkg.PackageListGrid),
+}));

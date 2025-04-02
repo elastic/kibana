@@ -17,7 +17,7 @@ const ConfigurationsPage = React.memo(function ConfigurationsPage() {
 
 export const routes: SecuritySubPluginRoutes = [
   {
-    path: `${CONFIGURATIONS_PATH}/:tab?`,
+    path: `${CONFIGURATIONS_PATH}/:tab?/:view?`,
     component: withSecurityRoutePageWrapper(ConfigurationsPage, SecurityPageName.configurations, {
       redirectIfUnauthorized: true,
       redirectOnMissing: true,
