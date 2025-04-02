@@ -234,6 +234,7 @@ export function registerAPIRoutes({
                 max: 1000,
               })
             ),
+            spaces: schema.maybe(schema.oneOf([schema.literal('*'), schema.string()])),
           }),
         },
         response: {
@@ -248,7 +249,7 @@ export function registerAPIRoutes({
       },
     },
     async (ctx, req, res) => {
-      const { page, perPage: limit } = req.query;
+      const { page, perPage: limit, spaces } = req.query;
       const client = contentManagement.contentClient
         .getForRequest({ request: req, requestHandlerContext: ctx })
         .for(CONTENT_ID, PUBLIC_API_CONTENT_MANAGEMENT_VERSION);
@@ -262,6 +263,7 @@ export function registerAPIRoutes({
           },
           {
             fields: ['title', 'description', 'timeRestore'],
+            spaces: spaces?.split(','),
           }
         ));
       } catch (e) {
