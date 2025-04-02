@@ -30,6 +30,7 @@ import {
   DimensionEditor,
   DimensionEditorAdditionalSection,
   getDefaultTrendConfig,
+  DimensionEditorDataExtraComponent,
 } from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
@@ -129,6 +130,7 @@ const getMetricLayerConfiguration = (
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
+  const canCollapseBy = isPrimaryMetricNumeric && props.state.collapseFn;
 
   return {
     groups: [
@@ -220,7 +222,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: canCollapseBy ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -611,6 +613,10 @@ export const getMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  DimensionEditorDataExtraComponent(props) {
+    return <DimensionEditorDataExtraComponent {...props} />;
   },
 
   DimensionEditorComponent(props) {

@@ -351,7 +351,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
 
       await lens.switchToVisualization('lnsLegacyMetric');
-      // await lens.clickLegacyMetric();
+
       await lens.configureDimension({
         dimension: 'lns-empty-dimension',
         operation: 'average',
@@ -438,6 +438,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           `[data-test-subj^="expressionMetricVis-secondaryMetric-badge-"]`
         )
       ).to.be(true);
+    });
+
+    it('should disable collapse by when the primary metric is not numeric', async () => {
+      await visualize.navigateToNewVisualization();
+      await visualize.clickVisType('lens');
+
+      const N_TILES = 39;
+
+      await lens.switchToVisualization('lnsMetric', 'Metric');
+      await lens.configureDimension({
+        dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+        keepOpen: true,
+      });
+
+      // test that there are 39 tiles now
+      expect(await lens.getMetricTiles()).to.have.length(N_TILES);
+
+      await find.clickByCssSelector(
+        'select[data-test-subj="indexPattern-collapse-by"] > option[value="sum"]'
+      );
+      // change the collapse by fn
+      await lens.closeDimensionEditor();
+
+      // check that the collapse by is applied to the chart
+      expect(await lens.getMetricTiles()).to.have.length(1);
+
+      // now change the metric to Last value of a string field
+      await lens.configureDimension({
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-dimensionTrigger',
+        operation: 'last_value',
+        field: 'ip',
+      });
+
+      // test that there are 39 tiles now
+      expect(await lens.getMetricTiles()).to.have.length(N_TILES);
     });
   });
 }

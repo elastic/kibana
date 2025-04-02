@@ -41,7 +41,7 @@ import { EuiColorPalettePickerPaletteFixedProps, MetricVisualizationState } from
 import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorFromEUI, getColorMode } from './helpers';
 import { nonNullable } from '../../utils';
-import { SECONDARY_DEFAULT_STATIC_COLOR } from './constants';
+import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -117,15 +117,6 @@ function BreakdownByEditor({ setState, state }: SubProps) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
-      <CollapseSetting
-        value={state.collapseFn || ''}
-        onChange={(collapseFn) => {
-          setState({
-            ...state,
-            collapseFn,
-          });
-        }}
-      />
     </>
   );
 }
@@ -987,5 +978,28 @@ export function DimensionEditorAdditionalSection({
         )}
       </>
     </div>
+  );
+}
+
+export function DimensionEditorDataExtraComponent({
+  groupId,
+  datasource,
+  state,
+  setState,
+}: Omit<Props, 'paletteService'>) {
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+    return null;
+  }
+  return (
+    <CollapseSetting
+      value={state.collapseFn || ''}
+      onChange={(collapseFn) => {
+        setState({
+          ...state,
+          collapseFn,
+        });
+      }}
+    />
   );
 }
