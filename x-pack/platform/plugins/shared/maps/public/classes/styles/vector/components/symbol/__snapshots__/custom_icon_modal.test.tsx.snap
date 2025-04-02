@@ -21,7 +21,17 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
       justifyContent="spaceBetween"
     >
       <EuiFlexItem
-        className="mapsCustomIconForm"
+        css={
+          Object {
+            "map": undefined,
+            "name": "n41y60",
+            "next": undefined,
+            "styles": "
+                min-width: 400px;
+              ",
+            "toString": [Function],
+          }
+        }
         grow={2}
       >
         <EuiFormRow
@@ -224,7 +234,17 @@ exports[`should render an empty custom icon modal 1`] = `
       justifyContent="spaceBetween"
     >
       <EuiFlexItem
-        className="mapsCustomIconForm"
+        css={
+          Object {
+            "map": undefined,
+            "name": "n41y60",
+            "next": undefined,
+            "styles": "
+                min-width: 400px;
+              ",
+            "toString": [Function],
+          }
+        }
         grow={2}
       >
         <EuiFormRow

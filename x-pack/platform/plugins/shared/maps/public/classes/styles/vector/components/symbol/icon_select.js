@@ -15,7 +15,9 @@ import {
   EuiFocusTrap,
   keys,
   EuiSelectable,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -116,15 +118,7 @@ export class IconSelect extends Component {
         compressed
         readOnly
         fullWidth
-        prepend={
-          <SymbolIcon
-            key={value}
-            className="mapIconSelectSymbol__inputButton"
-            symbolId={value}
-            svg={svg}
-            fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-          />
-        }
+        prepend={<PrependButton value={value} svg={svg} />}
         append={this.props.append}
       />
     );
@@ -227,3 +221,19 @@ export class IconSelect extends Component {
     );
   }
 }
+
+const PrependButton = ({ value, svg }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <SymbolIcon
+      key={value}
+      css={css({
+        margin: `0 ${euiTheme.size.xs}`,
+      })}
+      symbolId={value}
+      svg={svg}
+      fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
+    />
+  );
+};

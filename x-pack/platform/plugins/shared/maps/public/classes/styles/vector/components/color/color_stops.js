@@ -11,6 +11,7 @@ import { EuiSpacer, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFormRow } from 
 import { removeRow, isColorInvalid } from './color_stops_utils';
 import { i18n } from '@kbn/i18n';
 import { MbValidatedColorPicker } from './mb_validated_color_picker';
+import { mapColorStopsStyles } from '../map_color_stops.styles';
 
 export const ColorStops = ({
   onChange,
@@ -112,7 +113,7 @@ export const ColorStops = ({
     return (
       <EuiFormRow
         key={index}
-        className="mapColorStop"
+        css={mapColorStopsStyles}
         isInvalid={errors.length !== 0}
         error={errors}
         display="rowCompressed"
