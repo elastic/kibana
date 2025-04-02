@@ -19,7 +19,7 @@ interface DiscoverRuntimeState {
 }
 
 interface TabRuntimeState {
-  stateContainer: DiscoverStateContainer;
+  stateContainer?: DiscoverStateContainer;
   currentDataView: DataView;
 }
 
@@ -29,10 +29,7 @@ type ReactiveRuntimeState<TState, TNullable extends keyof TState = never> = {
   >;
 };
 
-type ReactiveTabRuntimeState = ReactiveRuntimeState<
-  TabRuntimeState,
-  'stateContainer' | 'currentDataView'
->;
+type ReactiveTabRuntimeState = ReactiveRuntimeState<TabRuntimeState, 'currentDataView'>;
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
@@ -62,7 +59,7 @@ export const useCurrentTabRuntimeState = <T,>(
   return useRuntimeState(selector(selectTabRuntimeState(runtimeStateManager, currentTabId)));
 };
 
-type CombinedRuntimeState = DiscoverRuntimeState & Omit<TabRuntimeState, 'stateContainer'>;
+type CombinedRuntimeState = DiscoverRuntimeState & TabRuntimeState;
 
 const runtimeStateContext = createContext<CombinedRuntimeState | undefined>(undefined);
 
