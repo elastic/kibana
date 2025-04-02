@@ -92,6 +92,19 @@ export const retriever = (specService: SpecDefinitionsService) => {
       rank_constant: 60,
       rank_window_size: 100,
     },
+    rule: {
+      __template: {
+        retriever: {},
+        ruleset_ids: [],
+        match_criteria: {},
+      },
+      retriever: {
+        __scope_link: '.',
+      },
+      ruleset_ids: [],
+      match_criteria: {},
+      rank_window_size: 10,
+    },
     standard: {
       __template: {
         query: {},
@@ -112,5 +125,24 @@ export const retriever = (specService: SpecDefinitionsService) => {
       sort: {},
       terminate_after: 10000,
     },
+    text_similarity_reranker: {
+      __template: {
+        retriever: {},
+        inference_id: '',
+        inference_text: '',
+        field: '',
+      },
+      retriever: {
+        __scope_link: '.',
+      },
+      inference_id: '',
+      inference_text: '',
+      field: '{field}',
+      window_size: 10,
+      min_score: 0,
+      filter: {
+        __scope_link: 'GLOBAL.query',
+      },
+    }
   });
 };
