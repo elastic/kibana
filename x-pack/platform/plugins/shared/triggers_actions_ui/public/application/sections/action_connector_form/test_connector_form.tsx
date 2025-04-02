@@ -17,6 +17,7 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiCodeBlock,
 } from '@elastic/eui';
 import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -157,7 +158,7 @@ export const TestConnectorForm = ({
         executionResult,
         map((result) =>
           result?.status === 'ok' ? (
-            <SuccessfulExecution />
+            <SuccessfulExecution executionResult={result} />
           ) : (
             <FailedExecussion executionResult={result} />
           )
@@ -181,7 +182,12 @@ const AwaitingExecution = () => (
   </EuiCallOut>
 );
 
-const SuccessfulExecution = () => (
+const SuccessfulExecution = ({
+  executionResult,
+}: {
+  executionResult: ActionTypeExecutorResult<unknown> | undefined;
+}) => (
+  <>
   <EuiCallOut
     title={i18n.translate(
       'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
@@ -200,6 +206,33 @@ const SuccessfulExecution = () => (
       />
     </p>
   </EuiCallOut>
+  <p>
+    {executionResult && (
+      <>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <h4>
+        {i18n.translate(
+          'xpack.triggersActionsUI.sections.testConnectorForm.executionResultDetails',
+          {
+            defaultMessage: 'Result Details:',
+          }
+        )}
+          </h4>
+        </EuiText>
+        <EuiSpacer size="xs" />
+        <EuiCodeBlock 
+          language="json"
+          paddingSize="m"
+          overflowHeight={300}
+          isCopyable
+        >
+          {JSON.stringify(executionResult, null, 2)}
+        </EuiCodeBlock>
+      </>
+    )}
+  </p>
+  </>
 );
 
 const FailedExecussion = ({
