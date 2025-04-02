@@ -23,7 +23,6 @@ import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_cl
 export type Stored<T extends object> = T & { id: string };
 
 export interface SiemMigration {
-  id: string;
   /** The moment the migration was created */
   created_at: string;
   /** The profile id of the user who created the migration */

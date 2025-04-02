@@ -17,7 +17,7 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
     const createdAt = new Date().toISOString();
 
     await this.esClient
-      .index({
+      .create({
         refresh: 'wait_for',
         id: migrationId,
         index,
@@ -25,7 +25,6 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
           created_by: profileUid,
           created_at: createdAt,
         },
-        op_type: 'create',
       })
       .catch((error) => {
         this.logger.error(`Error creating migration ${migrationId}: ${error}`);
