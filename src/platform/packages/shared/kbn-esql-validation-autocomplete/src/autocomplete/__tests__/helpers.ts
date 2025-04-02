@@ -326,6 +326,11 @@ export interface SuggestOptions {
   callbacks?: ESQLCallbacks;
 }
 
+export type SuggestFn = (
+  query: string,
+  opts?: SuggestOptions
+) => Promise<SuggestionRawDefinition[]>;
+
 export type AssertSuggestionsFn = (
   query: string,
   expected: Array<string | PartialSuggestionWithText>,
@@ -339,7 +344,7 @@ export const setup = async (caret = '/') => {
 
   const callbacks = createCustomCallbackMocks();
 
-  const suggest = async (query: string, opts: SuggestOptions = {}) => {
+  const suggest: SuggestFn = async (query, opts = {}) => {
     const pos = query.indexOf(caret);
     if (pos < 0) throw new Error(`User cursor/caret "${caret}" not found in query: ${query}`);
     const querySansCaret = query.slice(0, pos) + query.slice(pos + 1);
@@ -356,11 +361,7 @@ export const setup = async (caret = '/') => {
     );
   };
 
-  const assertSuggestions = async (
-    query: string,
-    expected: Array<string | PartialSuggestionWithText>,
-    opts?: SuggestOptions
-  ) => {
+  const assertSuggestions: AssertSuggestionsFn = async (query, expected, opts) => {
     try {
       const result = await suggest(query, opts);
       const resultTexts = [...result.map((suggestion) => suggestion.text)].sort();

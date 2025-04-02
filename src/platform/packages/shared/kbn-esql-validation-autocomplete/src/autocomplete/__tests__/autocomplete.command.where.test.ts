@@ -20,19 +20,22 @@ import {
 } from './helpers';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../shared/constants';
 
+const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
+  scalar: true,
+});
+
+export const EMPTY_WHERE_SUGGESTIONS = [
+  ...getFieldNamesByType('any')
+    .map((field) => `${field} `)
+    .map(attachTriggerCommand),
+  ...allEvalFns,
+];
+
 describe('WHERE <expression>', () => {
-  const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
-    scalar: true,
-  });
   test('beginning an expression', async () => {
     const { assertSuggestions } = await setup();
 
-    await assertSuggestions('from a | where /', [
-      ...getFieldNamesByType('any')
-        .map((field) => `${field} `)
-        .map(attachTriggerCommand),
-      ...allEvalFns,
-    ]);
+    await assertSuggestions('from a | where /', EMPTY_WHERE_SUGGESTIONS);
     await assertSuggestions(
       'from a | eval var0 = 1 | where /',
       [
