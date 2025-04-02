@@ -3,8 +3,7 @@
 exports[`KibanaPageTemplate render basic template 1`] = `
 <div
   class="euiPageTemplate kbnPageTemplate emotion-euiPageOuter-row-grow"
-  solutionnav="[object Object]"
-  style="min-block-size:calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));padding-block-start:0"
+  style="min-block-size:calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));padding-block-start:var(--euiFixedHeadersOffset, 0)"
 >
   <main
     class="emotion-euiPageInner"
@@ -120,16 +119,11 @@ exports[`KibanaPageTemplate render noDataConfig 1`] = `
       "solution": "Elastic",
     }
   }
-  solutionNav={
-    Object {
-      "name": "Observability",
-    }
-  }
 />
 `;
 
 exports[`KibanaPageTemplate render solutionNav 1`] = `
-<WithSolutionNavBar(UnnamedComponent)
+<WithSolutionNavBar(KibanaPageTemplateInner)
   pageHeader={
     Object {
       "description": "test",
@@ -188,5 +182,5 @@ exports[`KibanaPageTemplate render solutionNav 1`] = `
   <div>
     Child element
   </div>
-</WithSolutionNavBar(UnnamedComponent)>
+</WithSolutionNavBar(KibanaPageTemplateInner)>
 `;

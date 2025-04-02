@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useMemo, memo } from 'react';
+import React, { useMemo, FC, memo } from 'react';
 import classNames from 'classnames';
 import { EuiPageTemplate } from '@elastic/eui';
 
@@ -79,22 +79,15 @@ export const KibanaPageTemplateInner: FC<Props> = memo(
     }, [children, emptyPageBody, isEmptyState, pageHeader]);
 
     return (
-      <EuiPageTemplate
-        className={classes}
-        // Note: Once all pages have been converted to this new component,
-        // the following props can be removed to allow the template to auto-handle
-        // the fixed header and banner heights.
-        offset={0}
-        minHeight={minHeight}
-        grow={grow}
-        {...rest}
-      >
-        {sideBar}
+      <EuiPageTemplate className={classes} minHeight={minHeight} grow={grow} {...rest}>
         {header}
+        {sideBar}
         {content}
       </EuiPageTemplate>
     );
   }
 );
+
+KibanaPageTemplateInner.displayName = 'KibanaPageTemplateInner';
 
 export const KibanaPageTemplateWithSolutionNav = withSolutionNav(KibanaPageTemplateInner);
