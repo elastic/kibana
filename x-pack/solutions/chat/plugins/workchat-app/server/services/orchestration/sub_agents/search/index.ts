@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { listClientsTools } from './list_clients_tools';
-export { getLCTools, toLangchainTool } from './to_langchain_tool';
+export { createSearchAgentTool } from './create_search_agent_tool';

@@ -9,19 +9,23 @@ import { StateGraph, Annotation } from '@langchain/langgraph';
 import { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
-import { StructuredTool } from '@langchain/core/tools';
+import type { Logger } from '@kbn/core/server';
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { type McpGatewaySession, ToolsProvider } from './mcp_gateway';
 import type { Agent } from '../../../common/agents';
 import { withSystemPrompt } from './prompts';
+import { createSearchAgentTool } from './sub_agents';
 
 export const createAgentGraph = async ({
   agent,
   chatModel,
-  integrationTools,
+  session,
+  logger,
 }: {
   agent: Agent;
   chatModel: InferenceChatModel;
-  integrationTools: StructuredTool[];
+  session: McpGatewaySession;
+  logger: Logger;
 }) => {
   const StateAnnotation = Annotation.Root({
     initialMessages: Annotation<BaseMessage[]>({
@@ -34,8 +38,16 @@ export const createAgentGraph = async ({
     }),
   });
 
-  const tools = [...integrationTools];
+  const toolsProvider = new ToolsProvider({ session, logger });
 
+  const searchTool = createSearchAgentTool({
+    toolsProvider,
+    chatModel,
+    logger,
+  });
+  const builtInTools = await toolsProvider.getBuiltInTools();
+
+  const tools = [...builtInTools, searchTool];
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
   const model = chatModel.bindTools(tools).withConfig({

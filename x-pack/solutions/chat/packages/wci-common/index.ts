@@ -18,3 +18,4 @@ export type {
   IndexSourceFilter,
   IndexSourceQueryFields,
 } from './src/index_source';
+export { ContentRefSourceType, contentRefBuilder, type ContentRef } from './src/content';

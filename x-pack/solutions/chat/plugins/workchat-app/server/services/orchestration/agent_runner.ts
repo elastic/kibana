@@ -10,7 +10,6 @@ import { StreamEvent } from '@langchain/core/tracers/log_stream';
 import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Agent } from '../../../common/agents';
-import { getLCTools } from './mcp_gateway/utils';
 import { createAgentGraph } from './agent_graph';
 import { langchainToChatEvents, conversationEventsToMessages } from './utils';
 import type { AgentRunner, AgentRunResult } from './types';
@@ -35,9 +34,7 @@ export const createAgentRunner = async ({
     });
   };
 
-  const integrationTools = await getLCTools({ session, logger });
-
-  const agentGraph = await createAgentGraph({ agent, chatModel, integrationTools });
+  const agentGraph = await createAgentGraph({ agent, chatModel, session, logger });
 
   return {
     run: async ({ previousEvents }): Promise<AgentRunResult> => {

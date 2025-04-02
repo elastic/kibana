@@ -10,9 +10,9 @@ import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
 import { buildToolName } from '@kbn/wci-common';
 import { getConnectToInternalServer } from '@kbn/wci-server';
-import { IntegrationToolInputSchema } from './types';
+import { GatewayToolInputSchema } from './types';
 import { McpGatewaySessionImpl } from './session';
-import type { McpProvider } from '@kbn/wci-server';
+import type { McpClientProvider } from '@kbn/wci-server';
 
 describe('McpGatewaySession', () => {
   describe('MCP servers with tools', () => {
@@ -47,7 +47,7 @@ describe('McpGatewaySession', () => {
     };
 
     const getProviders = async () => {
-      const provider1: McpProvider = {
+      const provider1: McpClientProvider = {
         id: 'test-client-1',
         connect: () =>
           getConnectToInternalServer({
@@ -56,7 +56,7 @@ describe('McpGatewaySession', () => {
           })(),
       };
 
-      const provider2: McpProvider = {
+      const provider2: McpClientProvider = {
         id: 'test-client-2',
         connect: () =>
           getConnectToInternalServer({
@@ -93,7 +93,7 @@ describe('McpGatewaySession', () => {
         {
           a: 1,
           b: 2,
-        } as unknown as IntegrationToolInputSchema
+        } as unknown as GatewayToolInputSchema
       );
       expect(result).toEqual({ content: [{ type: 'text', text: '3' }] });
     });
