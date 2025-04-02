@@ -1499,7 +1499,8 @@ paths:
         '409':
           description: Indicates that the maintenance window has already been updated by another user.
       summary: Update a maintenance window.
-      tags: []
+      tags:
+        - alerting
   /api/alerting/maintenance_window/{id}/_archive:
     post:
       description: '[Required authorization] Route required privileges: ALL of [write-maintenance-window].'
