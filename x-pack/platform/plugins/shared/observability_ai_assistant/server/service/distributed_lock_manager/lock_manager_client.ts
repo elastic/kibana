@@ -140,7 +140,6 @@ export class LockManager {
       const response = await this.esClient.update<LockDocument>({
         index: LOCKS_CONCRETE_INDEX_NAME,
         id: this.lockId,
-        retry_on_conflict: 3, // Retry on version conflict. This can necessary if `extendTtl` is called at the same time.
         scripted_upsert: false,
         script: {
           lang: 'painless',
@@ -286,20 +285,26 @@ export async function withLock<T>(
     `Lock "${lockId}" acquired. Extending TTL every ${prettyMilliseconds(extendInterval)}`
   );
 
+  let extendTTlPromise = Promise.resolve(true);
   const intervalId = setInterval(() => {
-    lockManager.extendTtl().catch((err) => {
-      logger.error(`Failed to extend lock "${lockId}":`, err);
-    });
+    // wait for the previous extendTtl request to finish before sending the next one. This is to avoid flooding ES with extendTtl requests in cases where ES is slow to respond.
+    extendTTlPromise = extendTTlPromise
+      .then(() => lockManager.extendTtl())
+      .catch((err) => {
+        logger.error(`Failed to extend lock "${lockId}":`, err);
+        return false;
+      });
   }, extendInterval);
 
   try {
     return await callback();
   } finally {
-    clearInterval(intervalId);
     try {
+      clearInterval(intervalId);
+      await extendTTlPromise;
       await lockManager.release();
     } catch (error) {
-      logger.error(`Failed to release lock "${lockId}": ${error.message}`);
+      logger.error(`Failed to release lock "${lockId}" in withLock: ${error.message}`);
     }
   }
 }
