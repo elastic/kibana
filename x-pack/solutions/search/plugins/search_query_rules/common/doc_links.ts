@@ -13,7 +13,7 @@ class QueryRulesDocLinks {
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
-    this.queryRulesApi = newDocLinks.synonyms.synonymsAPIDocumentation;
+    this.queryRulesApi = newDocLinks.queryRules.queryRulesAPIDocumentation;
   }
 }
 
