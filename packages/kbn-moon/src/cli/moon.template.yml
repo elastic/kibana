@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+type: unknown
+toolchain:
+  default: node
+language: typescript
+
+tasks:
+  jest:
+    description: Run jest tests for the project
+#  lint: {}
+#  typecheck:
+#    deps:
+#      - '^:typecheck'
+#      - 'genTypecheckConfig'
+#    command: tsc
+#    args:
+#      - --project
+#      - ./tsconfig.type_check.json
+#      - --pretty
+#      - --noEmit
+#      - --skipLibCheck
+#      - --incremental
+#      - --tsBuildInfoFile
+#      - target/types/tsconfig.type_check.tsbuildinfo
+#    inputs:
+#      - '@group(src)'
+#      - '@group(globalTsConfigs)'
+#    outputs:
+#      - target
