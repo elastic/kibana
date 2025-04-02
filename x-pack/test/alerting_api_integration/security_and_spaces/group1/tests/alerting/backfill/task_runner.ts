@@ -143,7 +143,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId, start, end }])
+        .send([{ rule_id: ruleId, ranges: [{ start, end }] }])
         .expect(200);
 
       const scheduleResult = response2.body;
@@ -372,11 +372,12 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
 
       // schedule backfill for this rule
       const start = moment().utc().startOf('day').subtract(13, 'days').toISOString();
+      const end = moment(start).add(12, 'hours').toISOString();
       const response2 = await supertestWithoutAuth
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId, start }])
+        .send([{ rule_id: ruleId, ranges: [{ start, end }] }])
         .expect(200);
 
       const scheduleResult = response2.body;
@@ -519,7 +520,7 @@ export default function createBackfillTaskRunnerTests({ getService }: FtrProvide
         .post(`${getUrlPrefix(spaceId)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
         .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
-        .send([{ rule_id: ruleId, start, end }])
+        .send([{ rule_id: ruleId, ranges: [{ start, end }] }])
         .expect(200);
 
       const scheduleResult = response2.body;
