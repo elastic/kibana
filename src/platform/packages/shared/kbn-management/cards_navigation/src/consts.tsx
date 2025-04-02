@@ -12,6 +12,8 @@ import { AppIds, AppId, AppDefinition, appCategories } from './types';
 
 export { AppIds, appCategories } from './types';
 
+import connectorLogo from './assets/connector_logo.svg';
+
 export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.INDEX_MANAGEMENT]: {
     category: appCategories.DATA,
@@ -88,7 +90,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
         defaultMessage: 'Manage Search Connectors.',
       }
     ),
-    icon: 'search',
+    icon: connectorLogo,
   },
 
   [AppIds.RULES]: {

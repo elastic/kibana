@@ -25,6 +25,7 @@ import { registerStatsRoutes } from './routes/stats';
 import { registerMappingRoute } from './routes/mapping';
 import { registerSearchRoute } from './routes/search';
 import { PLUGIN_ID } from '../common/constants';
+import { registerApiKeysRoutes } from './routes/api_keys';
 
 export class SearchConnectorsPlugin
   implements
@@ -80,6 +81,7 @@ export class SearchConnectorsPlugin
     registerStatsRoutes({ ...plugins, router, log: this.logger.get() });
     registerMappingRoute({ ...plugins, router, log: this.logger.get() });
     registerSearchRoute({ ...plugins, router, log: this.logger.get() });
+    registerApiKeysRoutes({ ...plugins, router });
     return {
       getConnectorTypes: () => this.connectors,
     };

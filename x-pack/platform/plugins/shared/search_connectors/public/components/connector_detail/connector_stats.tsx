@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiIcon,
+  EuiLink,
   EuiSplitPanel,
   EuiText,
   EuiTitle,
@@ -357,16 +358,15 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
           footer={
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmptyTo
-                  isDisabled={!connector.index_name}
-                  size="s"
-                  to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
-                    connectorId: connector.id,
-                    tabId: ConnectorDetailTabId.PIPELINES,
-                  })}
+                <EuiLink
+                  target={'_blank'}
+                  external={false}
+                  href={http?.basePath.prepend(
+                    `/app/management/ingest/ingest_pipelines?pipeline=${connector.pipeline?.name}`
+                  )}
                 >
                   {pipelinesLabel}
-                </EuiButtonEmptyTo>
+                </EuiLink>
               </EuiFlexItem>
             </EuiFlexGroup>
           }

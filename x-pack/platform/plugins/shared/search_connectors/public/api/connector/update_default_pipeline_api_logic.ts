@@ -15,13 +15,17 @@ export type PostDefaultPipelineResponse = IngestPipelineParams;
 export type PostDefaultPipelineArgs = IngestPipelineParams & { http?: HttpSetup };
 
 export const updateDefaultPipeline = async (
-  pipeline: IngestPipelineParams,
-  http?: HttpSetup
+  args: PostDefaultPipelineArgs
 ): Promise<PostDefaultPipelineResponse> => {
   const route = '/internal/search_connectors/connectors/default_pipeline';
+  const pipeline = {
+    extract_binary_content: args.extract_binary_content,
+    name: args.name,
+    reduce_whitespace: args.reduce_whitespace,
+    run_ml_inference: args.run_ml_inference,
+  };
 
-  await http?.put(route, { body: JSON.stringify(pipeline) });
-
+  await args.http?.put(route, { body: JSON.stringify(pipeline) });
   return pipeline;
 };
 

@@ -42,7 +42,7 @@ interface PipelinesValues {
   fetchStatus: Status;
   hasNoChanges: boolean;
   isLoading: boolean;
-  pipelineState: IngestPipelineParams;
+  pipelineState: IngestPipelineParams & { http?: HttpSetup };
   status: Status;
 }
 
@@ -72,7 +72,7 @@ export const SettingsLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions
       UpdateDefaultPipelineApiLogic,
       ['status'],
     ],
-    keys: [UpdateDefaultPipelineApiLogic, 'http'],
+    keys: [UpdateDefaultPipelineApiLogic, ['http']],
   },
   events: ({ actions, props }) => ({
     afterMount: () => {
