@@ -39,7 +39,7 @@ export const updateIndexMappingsWaitForTask: ModelStage<
             ...state.logs,
             {
               level: 'warning',
-              message: `Errors occurred whilst deleting unwanted documents. Retrying attempt ${retryCount}.`,
+              message: `Errors occurred while trying to update index mappings. Retrying attempt ${retryCount}.`,
             },
           ],
         };

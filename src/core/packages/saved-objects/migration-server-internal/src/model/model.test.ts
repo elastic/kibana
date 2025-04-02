@@ -3079,7 +3079,7 @@ describe('migrations v2 model', () => {
         const newState = model(state, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"Migration was retried 8 times but failed with: Some error happened that makes us want to retry the original task."`
+          `"Migration was retried 8 times but failed with: some_retryable_error_during_update."`
         );
       });
     });

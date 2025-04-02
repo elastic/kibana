@@ -1571,7 +1571,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
               ...stateP.logs,
               {
                 level: 'warning',
-                message: `Errors occurred whilst deleting unwanted documents. Retrying attempt ${retryCount}.`,
+                message: `Errors occurred while trying to update index mapping. Retrying attempt ${retryCount}.`,
               },
             ],
           };
