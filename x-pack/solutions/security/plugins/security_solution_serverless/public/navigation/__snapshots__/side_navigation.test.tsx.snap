@@ -675,6 +675,12 @@ Object {
           "spaceBefore": null,
           "title": "Stack Management",
         },
+        Object {
+          "link": "integrations",
+        },
+        Object {
+          "cloudLink": "billingAndSub",
+        },
       ],
       "icon": "gear",
       "id": "category-management",
@@ -1043,7 +1049,6 @@ Object {
         },
         Object {
           "cloudLink": "billingAndSub",
-          "openInNewTab": true,
         },
       ],
       "icon": "gear",

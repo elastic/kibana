@@ -11,20 +11,23 @@ import * as Rx from 'rxjs';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+
 import {
   ExternalPageName,
   NavigationProvider,
   SecurityPageName,
 } from '@kbn/security-solution-navigation';
 import { LinkButton, i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+
 import { type Services } from '../common/services';
+import { createStackManagementNavigationTree } from './stack_management_navigation';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectType.title',
   { defaultMessage: 'Security' }
 );
 
-export const createServerlessSecurityNavigationTree$ = (
+export const createSecurityNavigationTree$ = (
   services: Services
 ): Rx.Observable<NavigationTreeDefinition> => {
   return Rx.of({
@@ -583,151 +586,7 @@ export const createServerlessSecurityNavigationTree$ = (
         title: i18nStrings.devTools,
         icon: 'editorCodeBlock',
       },
-      {
-        type: 'navGroup',
-        id: 'category-management',
-        title: i18nStrings.projectSettings.title,
-        icon: 'gear',
-        breadcrumbStatus: 'hidden',
-        children: [
-          {
-            id: 'stack_management',
-            title: i18nStrings.stackManagement.title,
-            renderAs: 'panelOpener',
-            spaceBefore: null,
-            children: [
-              {
-                title: i18nStrings.stackManagement.data.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'management:index_management',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:transform',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:ingest_pipelines',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:dataViews',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:jobsListLink',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:pipelines',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:data_quality',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:data_usage',
-                    breadcrumbStatus: 'hidden',
-                  },
-                ],
-              },
-              {
-                title: i18nStrings.stackManagement.access.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'management:api_keys',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:roles',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    cloudLink: 'userAndRoles',
-                    title: i18nStrings.stackManagement.access.usersAndRoles,
-                  },
-                ],
-              },
-              {
-                title: i18nStrings.stackManagement.alertsAndInsights.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'management:triggersActions',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:triggersActionsConnectors',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:maintenanceWindows',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: securityLink(SecurityPageName.entityAnalyticsManagement),
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-                    breadcrumbStatus: 'hidden',
-                  },
-                ],
-              },
-              {
-                title: i18nStrings.stackManagement.content.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'management:spaces',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:objects',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:filesManagement',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:reporting',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:tags',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'maps',
-                  },
-                  {
-                    link: 'visualize',
-                  },
-                ],
-              },
-              {
-                title: i18nStrings.stackManagement.other.title,
-                breadcrumbStatus: 'hidden',
-                children: [
-                  {
-                    link: 'management:settings',
-                    breadcrumbStatus: 'hidden',
-                  },
-                  {
-                    link: 'management:securityAiAssistantManagement',
-                    breadcrumbStatus: 'hidden',
-                  },
-                ],
-              },
-            ],
-          },
-        ],
-      },
+      createStackManagementNavigationTree(),
     ],
   });
 };

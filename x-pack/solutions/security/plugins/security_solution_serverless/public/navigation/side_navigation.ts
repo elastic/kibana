@@ -8,7 +8,7 @@
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
 import { createAiSocNavigationTree$, shouldUseAINavigation } from './ai_soc/ai_soc_navigation';
-import { createServerlessSecurityNavigationTree$ } from './serverless_security_side_navigation';
+import { createSecurityNavigationTree$ } from './security_side_navigation';
 
 export const initSideNavigation = async (
   services: Services,
@@ -18,7 +18,7 @@ export const initSideNavigation = async (
 
   const navigationTree$ = shouldUseAINavigation(productTypes)
     ? createAiSocNavigationTree$()
-    : createServerlessSecurityNavigationTree$(services);
+    : createSecurityNavigationTree$(services);
 
   services.serverless.initNavigation('security', navigationTree$, {
     dataTestSubj: 'securitySolutionSideNav',
