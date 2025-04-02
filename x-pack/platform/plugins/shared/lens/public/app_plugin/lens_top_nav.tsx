@@ -17,8 +17,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SerializedStyles, css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { LENS_APP_NAME } from '../../common/constants';
 import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
@@ -102,6 +103,23 @@ function getSaveButtonMeta({
   }
 }
 
+const navItemWithDividerStyles = (euiThemeContext: UseEuiTheme) => css`
+  ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
+    margin-right: ${euiThemeContext.euiTheme.size.m};
+    position: relative;
+    &:after {
+      border-right: ${euiThemeContext.euiTheme.border.thin};
+      bottom: 0;
+      content: '';
+      display: block;
+      pointer-events: none;
+      position: absolute;
+      right: -${euiThemeContext.euiTheme.size.s};
+      top: 0;
+    }
+  }
+`;
+
 function getLensTopNavConfig(options: {
   isByValueMode: boolean;
   actions: LensTopNavActions;
@@ -123,7 +141,10 @@ function getLensTopNavConfig(options: {
     contextFromEmbeddable,
     isByValueMode,
   } = options;
-  const topNavMenu: TopNavMenuData[] = [];
+
+  const topNavMenu: Array<
+    TopNavMenuData | ({ css: ({ euiTheme }: UseEuiTheme) => SerializedStyles } & TopNavMenuData)
+  > = [];
 
   const showSaveAndReturn = actions.saveAndReturn.visible;
 
@@ -150,13 +171,13 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       run: actions.goBack.execute,
-      className: 'lnsNavItem__withDivider',
       testId: 'lnsApp_goBackToAppButton',
       description: i18n.translate('xpack.lens.app.goBackLabel', {
         defaultMessage: `Go back to {contextOriginatingApp}`,
         values: { contextOriginatingApp },
       }),
       disableButton: !actions.goBack.enabled,
+      css: navItemWithDividerStyles,
     });
   }
 
@@ -169,12 +190,12 @@ function getLensTopNavConfig(options: {
       label: exploreDataInDiscoverLabel,
       run: actions.getUnderlyingDataUrl.execute,
       testId: 'lnsApp_openInDiscover',
-      className: 'lnsNavItem__withDivider',
       description: exploreDataInDiscoverLabel,
       disableButton: !actions.getUnderlyingDataUrl.enabled,
       tooltip: actions.getUnderlyingDataUrl.tooltip,
       target: '_blank',
       href: actions.getUnderlyingDataUrl.getLink?.(),
+      css: navItemWithDividerStyles,
     });
   }
 
@@ -210,11 +231,11 @@ function getLensTopNavConfig(options: {
       defaultMessage: 'Settings',
     }),
     run: actions.openSettings.execute,
-    className: 'lnsNavItem__withDivider',
     testId: 'lnsApp_settingsButton',
     description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
       defaultMessage: 'Open the Lens settings menu',
     }),
+    css: navItemWithDividerStyles,
   });
 
   if (actions.cancel.visible) {
