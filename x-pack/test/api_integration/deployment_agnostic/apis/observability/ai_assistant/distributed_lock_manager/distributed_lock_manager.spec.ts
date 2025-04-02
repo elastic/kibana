@@ -28,6 +28,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const logger = getLoggerMock(log);
 
   describe('LockManager', function () {
+    this.tags(['failsOnMKI']);
     before(async () => {
       await clearAllLocks(es);
       await ensureTemplatesAndIndexCreated(es);
