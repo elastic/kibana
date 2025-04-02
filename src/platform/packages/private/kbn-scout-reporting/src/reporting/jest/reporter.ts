@@ -21,6 +21,7 @@ import {
 import { SCOUT_REPORT_OUTPUT_ROOT, ScoutJestMetadata } from '@kbn/scout-info';
 import path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
+import stripAnsi from 'strip-ansi';
 import { ScoutJestReporterOptions } from './options';
 import {
   datasources,
@@ -183,7 +184,7 @@ export class ScoutJestReporter extends BaseReporter {
     const parsedStackTraces: string[] = [];
 
     test.result.failureMessages
-      .map((message) => this.parseJestFailureMessage(message))
+      .map((message) => this.parseJestFailureMessage(stripAnsi(message)))
       .forEach((parsed) => {
         if (parsed.message) {
           parsedErrorMessages.push(parsed.message);
