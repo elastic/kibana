@@ -61,7 +61,7 @@ export class PresentationPanelPlugin
     registerActions();
     return {
       preloadPresentationPanelChunks: async () => {
-        import('./panel_component/panel_module'),
+        import('./panel_component/panel_module');
       }
     };
   }
