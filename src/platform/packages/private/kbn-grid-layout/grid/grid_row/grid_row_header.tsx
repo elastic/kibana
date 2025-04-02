@@ -198,6 +198,7 @@ export const GridRowHeader = React.memo(
                           aria-label={i18n.translate('kbnGridLayout.row.deleteRow', {
                             defaultMessage: 'Delete section',
                           })}
+                          data-test-subj={`kbnGridRowHeader-${rowId}--delete`}
                         />
                       </EuiFlexItem>
                     )}

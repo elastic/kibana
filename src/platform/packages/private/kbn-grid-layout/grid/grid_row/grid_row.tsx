@@ -130,6 +130,7 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
   return (
     <div
       css={styles.fullHeight}
+      data-test-subj={`kbnGridRowContainer-${rowId}`}
       className={classNames('kbnGridRowContainer', {
         'kbnGridRowContainer--collapsed': isCollapsed,
       })}
