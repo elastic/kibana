@@ -7,6 +7,7 @@
 
 import kbnRison from '@kbn/rison';
 import expect from '@kbn/expect';
+import { Alert } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -20,6 +21,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
   const browser = getService('browser');
+  const retry = getService('retry');
+
+  const checkAlert = async (text: string) => {
+    let alert: Alert | undefined;
+    try {
+      await retry.waitFor('alert to be present', async () => {
+        alert = (await browser.getAlert()) ?? undefined;
+        return Boolean(alert);
+      });
+      expect(await alert?.getText()).to.be(text);
+    } finally {
+      await alert?.dismiss();
+    }
+  };
 
   describe('extension getAdditionalCellActions', () => {
     before(async () => {
@@ -39,20 +54,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
-        let alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Example data source action executed');
         await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Another example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Another example data source action executed');
       });
 
       it('should not render incompatible cell action for message column', async () => {
@@ -104,20 +109,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
-        let alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Example data source action executed');
         await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Another example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Another example data source action executed');
         // check Surrounding docs page
         await dataGrid.clickRowToggle();
         const [, surroundingActionEl] = await dataGrid.getRowActions();
@@ -128,20 +123,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.waitUntilSearchingHasFinished();
         await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
         await dataGrid.clickCellExpandPopoverAction('example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Example data source action executed');
         await dataGrid.clickCellExpandButtonExcludingControlColumns(0, 0);
         await dataGrid.clickCellExpandPopoverAction('another-example-data-source-action');
-        alert = await browser.getAlert();
-        try {
-          expect(await alert?.getText()).to.be('Another example data source action executed');
-        } finally {
-          await alert?.dismiss();
-        }
+        await checkAlert('Another example data source action executed');
       });
 
       it('should not render incompatible cell action for message column', async () => {
