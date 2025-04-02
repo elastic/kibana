@@ -486,6 +486,7 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": undefined,
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -1429,6 +1430,7 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": undefined,
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -1607,6 +1609,7 @@ describe('update()', () => {
         "apiKeyOwner": null,
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": undefined,
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
@@ -3618,6 +3621,7 @@ describe('update()', () => {
         "apiKeyOwner": "elastic",
         "artifacts": Object {
           "dashboards": Array [],
+          "investigation_guide": undefined,
         },
         "consumer": "myApp",
         "createdAt": "2019-02-12T21:01:22.479Z",
