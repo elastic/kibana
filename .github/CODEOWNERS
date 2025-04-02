@@ -262,7 +262,13 @@ src/core/packages/saved-objects/server @elastic/kibana-core
 src/core/packages/saved-objects/server-internal @elastic/kibana-core
 src/core/packages/saved-objects/server-mocks @elastic/kibana-core
 src/core/packages/saved-objects/utils-server @elastic/kibana-core
-src/core/packages/security @elastic/kibana-security
+src/core/packages/security/browser @elastic/kibana-core
+src/core/packages/security/browser-internal @elastic/kibana-core
+src/core/packages/security/browser-mocks @elastic/kibana-core
+src/core/packages/security/common @elastic/kibana-core @elastic/kibana-security
+src/core/packages/security/server @elastic/kibana-core
+src/core/packages/security/server-internal @elastic/kibana-core
+src/core/packages/security/server-mocks @elastic/kibana-core
 src/core/packages/status/common @elastic/kibana-core
 src/core/packages/status/server @elastic/kibana-core
 src/core/packages/status/server-internal @elastic/kibana-core
