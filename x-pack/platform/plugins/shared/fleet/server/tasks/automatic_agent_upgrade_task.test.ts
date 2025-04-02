@@ -294,42 +294,42 @@ describe('AutomaticAgentUpgradeTask', () => {
       // this tests that the adjustment to ensure we dont go over or under the total amount of agents is working as intended
       const MOCK_VERSIONS_AND_COUNTS = [
         [
-          { version: '8.17.3', count: 1, targetPercentage: 33 }, // 3 way split of 4 agents
-          { version: '8.17.2', count: 1, targetPercentage: 33 },
+          { version: '8.17.3', count: 1, targetPercentage: 33, alreadyUpgrading: 0 }, // 3 way split of 4 agents
+          { version: '8.17.2', count: 1, targetPercentage: 33, alreadyUpgrading: 0 },
 
-          { version: '8.17.1', count: 1, targetPercentage: 34 },
+          { version: '8.17.1', count: 1, targetPercentage: 34, alreadyUpgrading: 0 },
         ],
         [
-          { version: '8.17.3', count: 33, targetPercentage: 33 }, // 3 way split of 99 agents
-          { version: '8.17.2', count: 33, targetPercentage: 33 },
+          { version: '8.17.3', count: 33, targetPercentage: 33, alreadyUpgrading: 0 }, // 3 way split of 99 agents
+          { version: '8.17.2', count: 33, targetPercentage: 33, alreadyUpgrading: 0 },
 
-          { version: '8.17.1', count: 34, targetPercentage: 34 },
+          { version: '8.17.1', count: 34, targetPercentage: 34, alreadyUpgrading: 0 },
         ],
-        [{ version: '8.17.3', count: 60, targetPercentage: 60 }], // 60% with 99 agents
+        [{ version: '8.17.3', count: 60, targetPercentage: 60, alreadyUpgrading: 0 }], // 60% with 99 agents
         [
-          { version: '8.17.3', count: 13, targetPercentage: 50 },
-          { version: '8.17.2', count: 13, targetPercentage: 50 }, // 50% each with 25 agents
+          { version: '8.17.3', count: 13, targetPercentage: 50, alreadyUpgrading: 0 },
+          { version: '8.17.2', count: 13, targetPercentage: 50, alreadyUpgrading: 0 }, // 50% each with 25 agents
         ],
       ];
       const TOTAL_AGENTS_MOCKS = [4, 99, 99, 25]; // how many total agents each array should be using to recalculate the values
 
       const MOCK_VERSIONS_AND_COUNTS_EXPECTED = [
         [
-          { version: '8.17.3', count: 2, targetPercentage: 33 }, // since we were missing one
-          { version: '8.17.2', count: 1, targetPercentage: 33 },
+          { version: '8.17.3', count: 2, targetPercentage: 33, alreadyUpgrading: 0 }, // since we were missing one
+          { version: '8.17.2', count: 1, targetPercentage: 33, alreadyUpgrading: 0 }, // we should add one to the lowest
 
-          { version: '8.17.1', count: 1, targetPercentage: 34 },
+          { version: '8.17.1', count: 1, targetPercentage: 34, alreadyUpgrading: 0 },
         ],
         [
-          { version: '8.17.3', count: 32, targetPercentage: 33 },
-          { version: '8.17.2', count: 33, targetPercentage: 33 },
+          { version: '8.17.3', count: 32, targetPercentage: 33, alreadyUpgrading: 0 },
+          { version: '8.17.2', count: 33, targetPercentage: 33, alreadyUpgrading: 0 },
 
-          { version: '8.17.1', count: 34, targetPercentage: 34 },
+          { version: '8.17.1', count: 34, targetPercentage: 34, alreadyUpgrading: 0 },
         ],
-        [{ version: '8.17.3', count: 59, targetPercentage: 60 }], // since the 60 above was over, this should come out to 59
+        [{ version: '8.17.3', count: 59, targetPercentage: 60, alreadyUpgrading: 0 }], // since the 60 above was over, this should come out to 59
         [
-          { version: '8.17.3', count: 12, targetPercentage: 50 }, // as theres too many above, it should get reduced by 1
-          { version: '8.17.2', count: 13, targetPercentage: 50 },
+          { version: '8.17.3', count: 12, targetPercentage: 50, alreadyUpgrading: 0 }, // as theres too many above, it should get reduced by 1
+          { version: '8.17.2', count: 13, targetPercentage: 50, alreadyUpgrading: 0 },
         ],
       ];
       // now assert on each item using the above mocks
