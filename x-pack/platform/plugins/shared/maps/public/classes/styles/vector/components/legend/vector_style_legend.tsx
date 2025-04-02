@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { StyleError } from './style_error';
 import {
   DynamicStyleProperty,
@@ -56,7 +57,7 @@ export function VectorStyleLegend({
     );
 
     legendRows.push(
-      <div key={i} className="vectorStyleLegendSpacer">
+      <div key={i} css={css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } })}>
         {row}
       </div>
     );
