@@ -188,50 +188,45 @@ const SuccessfulExecution = ({
   executionResult: ActionTypeExecutorResult<unknown> | undefined;
 }) => (
   <>
-  <EuiCallOut
-    title={i18n.translate(
-      'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
-      {
-        defaultMessage: 'Test was successful',
-      }
-    )}
-    color="success"
-    data-test-subj="executionSuccessfulResult"
-    iconType="check"
-  >
+    <EuiCallOut
+      title={i18n.translate(
+        'xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulTitle',
+        {
+          defaultMessage: 'Test was successful',
+        }
+      )}
+      color="success"
+      data-test-subj="executionSuccessfulResult"
+      iconType="check"
+    >
+      <p>
+        <FormattedMessage
+          defaultMessage="Ensure the results are what you expect."
+          id="xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulDescription"
+        />
+      </p>
+    </EuiCallOut>
     <p>
-      <FormattedMessage
-        defaultMessage="Ensure the results are what you expect."
-        id="xpack.triggersActionsUI.sections.testConnectorForm.executionSuccessfulDescription"
-      />
+      {executionResult && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <h4>
+              {i18n.translate(
+                'xpack.triggersActionsUI.sections.testConnectorForm.executionResultDetails',
+                {
+                  defaultMessage: 'Result Details:',
+                }
+              )}
+            </h4>
+          </EuiText>
+          <EuiSpacer size="xs" />
+          <EuiCodeBlock language="json" paddingSize="m" overflowHeight={300} isCopyable>
+            {JSON.stringify(executionResult, null, 2)}
+          </EuiCodeBlock>
+        </>
+      )}
     </p>
-  </EuiCallOut>
-  <p>
-    {executionResult && (
-      <>
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <h4>
-        {i18n.translate(
-          'xpack.triggersActionsUI.sections.testConnectorForm.executionResultDetails',
-          {
-            defaultMessage: 'Result Details:',
-          }
-        )}
-          </h4>
-        </EuiText>
-        <EuiSpacer size="xs" />
-        <EuiCodeBlock 
-          language="json"
-          paddingSize="m"
-          overflowHeight={300}
-          isCopyable
-        >
-          {JSON.stringify(executionResult, null, 2)}
-        </EuiCodeBlock>
-      </>
-    )}
-  </p>
   </>
 );
 
