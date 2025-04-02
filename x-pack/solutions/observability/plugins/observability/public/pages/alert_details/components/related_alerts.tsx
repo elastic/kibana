@@ -80,6 +80,7 @@ export function InternalRelatedAlerts({ alert }: Props) {
     replace: false,
   });
 
+  const [filterControls, setFilterControls] = useState<Filter[] | undefined>();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const alertStart = alert?.fields[ALERT_START];
   const alertEnd = alert?.fields[ALERT_END];
@@ -124,6 +125,8 @@ export function InternalRelatedAlerts({ alert }: Props) {
           urlStorageKey={SEARCH_BAR_URL_STORAGE_KEY}
           defaultFilters={defaultFilters.current}
           disableLocalStorageSync={true}
+          filterControls={filterControls}
+          onFilterControlsChange={setFilterControls}
           defaultState={{
             ...defaultState,
             kuery,

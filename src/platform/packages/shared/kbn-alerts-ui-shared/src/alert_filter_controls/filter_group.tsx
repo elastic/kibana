@@ -180,7 +180,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
   );
 
   const handleOutputFilterUpdates = useCallback(
-    (newFilters: Filter[]) => {
+    (newFilters: Filter[] | undefined) => {
       if (isEqual(currentFiltersRef.current, newFilters)) return;
       if (onFiltersChange) onFiltersChange(newFilters ?? []);
       currentFiltersRef.current = newFilters ?? [];
