@@ -14,8 +14,8 @@ const ENVIRONMENT_NOT_DEFINED_VALUE = 'ENVIRONMENT_NOT_DEFINED' as const;
 
 export function getEnvironmentLabel(environment: string) {
   if (!environment || environment === ENVIRONMENT_NOT_DEFINED_VALUE) {
-    return i18n.translate('xpack.ux.filter.environment.notDefinedLabel', {
-      defaultMessage: 'Not defined',
+    return i18n.translate('xpack.ux.filter.environment.unsetLabel', {
+      defaultMessage: 'Unset',
     });
   }
 
