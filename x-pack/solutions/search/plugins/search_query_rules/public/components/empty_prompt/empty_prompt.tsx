@@ -28,7 +28,7 @@ import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
-import queryRulesBackground from '../../assets/quer-rule-background.svg';
+import queryRulesBackground from '../../assets/query-rule-background.svg';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
@@ -95,7 +95,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                   <EuiFlexGroup direction="row" gutterSize="m">
                     <EuiFlexItem grow={false}>
                       <EuiButton
-                        data-test-subj="searchSynonymsEmptyPromptGetStartedButton"
+                        data-test-subj="searchQueryRulesEmptyPromptGetStartedButton"
                         color="primary"
                         fill
                         onClick={getStartedAction}
@@ -108,7 +108,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        data-test-subj="searchSynonymsEmptyPromptImportQueryRulesButton"
+                        data-test-subj="searchQueryRulesEmptyPromptImportQueryRulesButton"
                         onClick={() => {}}
                       >
                         <FormattedMessage
@@ -242,7 +242,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 </EuiTitle>
                 &nbsp;
                 <EuiLink
-                  data-test-subj="searchSynonymsEmptyPromptFooterLink"
+                  data-test-subj="searchQueryRulesEmptyPromptFooterLink"
                   href={docLinks.queryRulesApi}
                   target="_blank"
                   external

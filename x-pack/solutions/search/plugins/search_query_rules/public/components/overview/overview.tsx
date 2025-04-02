@@ -20,10 +20,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
-// import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
-// import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
 import { isPermissionError } from '../../utils/query_rules_utils';
 
@@ -31,8 +29,7 @@ export const QueryRulesOverview = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
-  const { data: synonymsData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
-  //   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+  const { data: queryRulesData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -47,7 +44,7 @@ export const QueryRulesOverview = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
     >
-      {!isInitialLoading && !isError && synonymsData?._meta.totalItemCount !== 0 && (
+      {!isInitialLoading && !isError && queryRulesData?._meta.totalItemCount !== 0 && (
         <KibanaPageTemplate.Header
           pageTitle="Query Rules"
           restrictWidth
@@ -72,9 +69,9 @@ export const QueryRulesOverview = () => {
                   data-test-subj="queryRulesOverviewCreateButton"
                   fill
                   iconType="plusInCircle"
-                  //   onClick={() => {
-                  //     setIsCreateModalVisible(true);
-                  //   }}
+                  onClick={() => {
+                    // Logic to create a new query rule set
+                  }}
                 >
                   <FormattedMessage
                     id="xpack.queryRules.queryRulesSetDetail.createButton"
@@ -88,7 +85,7 @@ export const QueryRulesOverview = () => {
           <EuiText>
             <FormattedMessage
               id="xpack.queryRules.queryRulesSetDetail.description"
-              defaultMessage="Create and manage synonym sets and synonym rules."
+              defaultMessage="Create and manage query rules sets."
             />
           </EuiText>
         </KibanaPageTemplate.Header>
@@ -102,22 +99,11 @@ export const QueryRulesOverview = () => {
           }),
         }}
       >
-        {/* {isCreateModalVisible && (
-          <CreateSynonymsSetModal
-            onClose={() => {
-              setIsCreateModalVisible(false);
-            }}
-          />
-        )} */}
         {isInitialLoading && <EuiLoadingSpinner />}
         {isError && (
           <ErrorPrompt errorType={isPermissionError(error) ? 'missingPermissions' : 'generic'} />
         )}
-
-        {/* {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount > 0 && (
-          <SynonymSets />
-        )} */}
-        {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount === 0 && (
+        {!isInitialLoading && queryRulesData && queryRulesData._meta.totalItemCount === 0 && (
           <EuiFlexGroup
             justifyContent="center"
             alignItems="center"
@@ -129,7 +115,7 @@ export const QueryRulesOverview = () => {
             <EuiFlexItem>
               <EmptyPrompt
                 getStartedAction={() => {
-                  //   setIsCreateModalVisible(true);
+                  // Logic to create a new query rule set
                 }}
               />
             </EuiFlexItem>
