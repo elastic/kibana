@@ -20,6 +20,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.assistant,
       ProductFeatureKey.alertsSummary,
+      ProductFeatureKey.configurations,
     ],
     essentials: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
     complete: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
