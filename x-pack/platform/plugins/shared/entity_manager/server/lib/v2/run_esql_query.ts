@@ -34,11 +34,10 @@ export async function runESQLQuery<T>(
   return withSpan(
     { name: operationName, labels: { plugin: '@kbn/entityManager-plugin' } },
     async () =>
-      esClient.esql.query(
+      esClient.esql.queryInWorker(
         {
           query,
           filter,
-          format: 'json',
         },
         { querystring: { drop_null_columns: true } }
       )

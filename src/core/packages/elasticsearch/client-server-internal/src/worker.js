@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@kbn/core-elasticsearch-client-server-internal';
-/**
- * Client used to query the elasticsearch cluster.
- *
- * @public
- */
-export type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
->;
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+require('../../../../../setup_node_env');
+
+// Now load the worker logic
+const { parseResponse } = require('./query_response_worker');
+module.exports = {
+  parseResponse,
+};
