@@ -10,7 +10,6 @@ import { maxSuggestions } from '@kbn/observability-plugin/common';
 import type { Environment } from '../../../common/environment_rt';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { getEnvironments } from './get_environments';
-import { hasUnsetEnvironments } from './has_unset_environments';
 import { rangeRt } from '../default_api_types';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
@@ -56,40 +55,6 @@ const environmentsRoute = createApmServerRoute({
   },
 });
 
-const unsetEnvironmentsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/environments/unset',
-  params: t.type({
-    query: rangeRt,
-  }),
-  security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (
-    resources
-  ): Promise<{
-    hasUnsetEnvironment: boolean;
-  }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params, config } = resources;
-    const { start, end } = params.query;
-
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery: '',
-    });
-
-    const hasUnsetEnvironment = await hasUnsetEnvironments({
-      apmEventClient,
-      searchAggregatedTransactions,
-      start,
-      end,
-    });
-    return { hasUnsetEnvironment };
-  },
-});
-
 export const environmentsRouteRepository = {
   ...environmentsRoute,
-  ...unsetEnvironmentsRoute,
 };
