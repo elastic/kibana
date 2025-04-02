@@ -222,11 +222,9 @@ export function ConversationList({
 
   useEffect(() => {
     if (selectedConversation?.archived) {
-      setIsArchivedOpen(true);
-      setIsConversationsOpen(false);
+      toggleArchivedSection(true);
     } else {
-      setIsConversationsOpen(true);
-      setIsArchivedOpen(false);
+      toggleConversationsSection(true);
     }
   }, [selectedConversation]);
 
