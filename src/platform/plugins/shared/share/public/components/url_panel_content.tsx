@@ -618,3 +618,4 @@ class UrlPanelContentComponent extends Component<UrlPanelContentProps, State, Wi
 }
 
 export const UrlPanelContent = withEuiTheme(UrlPanelContentComponent);
+UrlPanelContent.displayName = 'UrlPanelContent';
