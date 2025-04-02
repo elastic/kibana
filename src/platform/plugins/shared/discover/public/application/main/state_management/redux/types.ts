@@ -70,6 +70,5 @@ export interface DiscoverInternalState {
   tabs: {
     byId: Record<string, TabState>;
     allIds: string[];
-    currentId: string;
   };
 }
