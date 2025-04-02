@@ -25,6 +25,7 @@ import {
   EuiSpacer,
   EuiToolTip,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
@@ -308,7 +309,14 @@ export class CustomIconModal extends Component<Props, State> {
   private _renderIconPreview() {
     const { svg, isFileInvalid, cutoff, radius } = this.state;
     return svg !== '' ? (
-      <EuiFlexItem className="mapsIconPreview__wrapper mapsCustomIconForm__preview" grow={false}>
+      <EuiFlexItem
+        className="mapsIconPreview__wrapper"
+        css={css({
+          maxWidth: '210px',
+          minHeight: '210px',
+        })}
+        grow={false}
+      >
         <IconPreview svg={svg} isSvgInvalid={isFileInvalid} cutoff={cutoff} radius={radius} />
       </EuiFlexItem>
     ) : null;
@@ -332,7 +340,12 @@ export class CustomIconModal extends Component<Props, State> {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="m">
-            <EuiFlexItem className="mapsCustomIconForm" grow={2}>
+            <EuiFlexItem
+              css={css`
+                min-width: 400px;
+              `}
+              grow={2}
+            >
               <EuiFormRow
                 className="mapsCustomIconForm__image"
                 display="rowCompressed"

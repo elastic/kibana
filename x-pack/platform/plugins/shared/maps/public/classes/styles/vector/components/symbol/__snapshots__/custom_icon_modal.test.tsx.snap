@@ -150,7 +150,7 @@ exports[`should render a custom icon modal with an existing icon 1`] = `
         </EuiAccordionClass>
       </EuiFlexItem>
       <EuiFlexItem
-        className="mapsIconPreview__wrapper mapsCustomIconForm__preview"
+        className="mapsIconPreview__wrapper"
         grow={false}
       >
         <IconPreview
