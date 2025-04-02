@@ -155,6 +155,8 @@ const styles = {
       border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
       max-width: calc(${euiThemeContext.euiTheme.size.xl} * 10);
       overflow: hidden;
+      border: ${euiThemeContext.euiTheme.border.width.thin} solid
+        ${euiThemeContext.euiTheme.components.tooltipBorderFloating};
 
       ${euiFontSize(euiThemeContext, 's')}
       color: ${euiThemeContext.euiTheme.colors.textParagraph};
