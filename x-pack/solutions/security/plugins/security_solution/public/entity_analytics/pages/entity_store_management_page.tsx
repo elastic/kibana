@@ -50,6 +50,7 @@ import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
 import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { EntityStoreErrorCallout } from '../components/entity_store/components/entity_store_error_callout';
 
 enum TabId {
   Import = 'import',
@@ -130,26 +131,7 @@ export const EntityStoreManagementPage = () => {
 
   const callouts = (entityStoreStatus.data?.engines || [])
     .filter((engine) => engine.status === 'error')
-    .map((engine) => {
-      const err = engine.error as {
-        message: string;
-      };
-
-      return (
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.entityStoreManagementPage.errors.title"
-              defaultMessage={'An error occurred during entity store resource initialization'}
-            />
-          }
-          color="danger"
-          iconType="alert"
-        >
-          <p>{err?.message}</p>
-        </EuiCallOut>
-      );
-    });
+    .map((engine) => <EntityStoreErrorCallout engine={engine} />);
 
   return (
     <>
@@ -266,7 +248,7 @@ export const EntityStoreManagementPage = () => {
                 </p>
               </EuiCallOut>
             )}
-            {callouts}
+            {selectedTabId === TabId.Import && callouts}
             {selectedTabId === TabId.Import && <WhatIsAssetCriticalityPanel />}
           </EuiFlexGroup>
         </EuiFlexItem>
