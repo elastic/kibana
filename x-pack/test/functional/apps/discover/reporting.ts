@@ -249,7 +249,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectSnapshot(csvFile.slice(-5000)).toMatch();
       });
 
-      it('generate a report using ES|QL zoom', async () => {
+      it('generate a report using ES|QL', async () => {
         await discover.selectTextBaseLang();
         const testQuery = `from ecommerce | STATS total_sales = SUM(taxful_total_price) BY day_of_week |  SORT total_sales DESC`;
 
