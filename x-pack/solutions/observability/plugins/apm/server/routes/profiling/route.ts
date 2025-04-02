@@ -15,6 +15,7 @@ import { environmentRt, kueryRt } from '../default_api_types';
 import { fetchFlamegraph } from './fetch_flamegraph';
 import { fetchFunctions } from './fetch_functions';
 import { TRANSACTION_PROFILER_STACK_TRACE_IDS } from '../../../common/es_fields/apm';
+import { ELASTIC_PROFILER_STACK_TRACE_IDS } from '../../../common/es_fields/apm';
 
 const servicesFlamegraphRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
@@ -47,6 +48,9 @@ const servicesFlamegraphRoute = createApmServerRoute({
       const { start, end, kuery, transactionName, transactionType, environment } = params.query;
 
       const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
+      const stacktraceIdsField = indices.includes(TRANSACTION_PROFILER_STACK_TRACE_IDS)
+        ? TRANSACTION_PROFILER_STACK_TRACE_IDS
+        : ELASTIC_PROFILER_STACK_TRACE_IDS;
 
       return fetchFlamegraph({
         profilingDataAccessStart,
@@ -60,7 +64,7 @@ const servicesFlamegraphRoute = createApmServerRoute({
         environment,
         transactionType,
         indices,
-        stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
+        stacktraceIdsField: stacktraceIdsField
       });
     }
 
@@ -112,6 +116,10 @@ const servicesFunctionsRoute = createApmServerRoute({
 
       const indices = apmEventClient.getIndicesFromProcessorEvent(ProcessorEvent.transaction);
 
+      const stacktraceIdsField = indices.includes(TRANSACTION_PROFILER_STACK_TRACE_IDS)
+        ? TRANSACTION_PROFILER_STACK_TRACE_IDS
+        : ELASTIC_PROFILER_STACK_TRACE_IDS;
+
       return fetchFunctions({
         profilingDataAccessStart,
         core,
@@ -119,7 +127,7 @@ const servicesFunctionsRoute = createApmServerRoute({
         startIndex,
         endIndex,
         indices,
-        stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
+        stacktraceIdsField: stacktraceIdsField,
         start,
         end,
         kuery,
