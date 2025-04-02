@@ -4,25 +4,39 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { generateShortId, otelEdot, timerange } from '@kbn/apm-synthtrace-client';
-import { times } from 'lodash';
+import { apmOtel, timerange } from '@kbn/apm-synthtrace-client';
 
 export function adserviceEdot({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
-  const traceId = generateShortId();
-  const spanId = generateShortId();
+  const transactionName = 'oteldemo.AdServiceEdotSynth/GetAds';
 
-  const otelAdserviceEdot = times(2).map((index) => otelEdot.create(traceId));
+  const edotInstance = apmOtel
+    .service({
+      name: 'adservice-edot-synth',
+      namespace: 'opentelemetry-demo',
+      sdkLanguage: 'java',
+      sdkName: 'opentelemetry',
+      distro: 'elastic',
+    })
+    .instance('da7a8507-53be-421c-8d77-984f12397213');
 
   return range
     .interval('1s')
     .rate(1)
-    .generator((timestamp) =>
-      otelAdserviceEdot.flatMap((otelDoc) => {
-        return [
-          otelDoc.metric().timestamp(timestamp),
-          otelDoc.transaction(spanId).timestamp(timestamp),
-        ];
-      })
-    );
+    .generator((timestamp) => [
+      edotInstance
+        .transaction({
+          transactionName,
+        })
+        .overrides({
+          'attributes.server.address': 'otel-demo-blue-adservice-edot-synth',
+          'attributes.server.port': 8080,
+          'attributes.url.path': '/some/path',
+          'attributes.url.scheme': 'https',
+          'attributes.url.full': undefined,
+        })
+        .timestamp(timestamp)
+        .duration(551)
+        .success(),
+    ]);
 }
