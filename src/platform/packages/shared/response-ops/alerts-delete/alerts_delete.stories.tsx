@@ -11,8 +11,20 @@ import React, { useState } from 'react';
 import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { HttpStart } from '@kbn/core/public';
 import { AlertDeleteRuleSettingsSection } from './components/rule_settings_section';
 import { AlertDeleteModal } from './components/modal';
+
+const http = {
+  get: async (path: string) => {
+    if (path.includes('_alert_delete_preview')) {
+      return {
+        affected_alert_count: Math.floor(Math.random() * 100),
+      };
+    }
+    throw new Error('Not implemented');
+  },
+} as unknown as HttpStart;
 
 const meta = {
   title: 'alertDelete',
@@ -28,7 +40,7 @@ const DefaultStory = () => {
   return isFlyoutVisible ? (
     <EuiFlyout type="push" onClose={closeFlyout} maxWidth={440}>
       <EuiFlyoutBody>
-        <AlertDeleteRuleSettingsSection />
+        <AlertDeleteRuleSettingsSection http={http} />
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : (
@@ -46,7 +58,7 @@ const ModalOnlyStory = () => {
   const showFlyout = () => setIsModalVisible(true);
 
   return isModalVisible ? (
-    <AlertDeleteModal isVisible={isModalVisible} onCloseModal={hideModal} />
+    <AlertDeleteModal http={http} isVisible={isModalVisible} onCloseModal={hideModal} />
   ) : (
     <EuiButton onClick={showFlyout}>Open Modal</EuiButton>
   );

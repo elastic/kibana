@@ -25,6 +25,7 @@ import {
   EuiFieldText,
   EuiPanel,
 } from '@elastic/eui';
+import { HttpStart } from '@kbn/core/public';
 import * as i18n from '../translations';
 import { ModalThresholdSelector as ThresholdSelector } from './modal_threshold_selector';
 import {
@@ -35,6 +36,7 @@ import {
   MIN_THRESHOLD_DAYS,
   THRESHOLD_UNITS,
 } from '../constants';
+import { useAlertDeletePreview } from '../api/useAlertDeletePreview';
 
 const FORM_ID = 'alert-delete-settings';
 const MODAL_ID = 'alert-delete-modal';
@@ -65,10 +67,11 @@ const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOp
 };
 
 export interface AlertDeleteProps {
+  http: HttpStart;
   onCloseModal: () => void;
   isVisible: boolean;
 }
-export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) => {
+export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteProps) => {
   const [activeState, setActiveState] = useState({
     checked: DEFAULT_THRESHOLD_ENABLED,
     threshold: DEFAULT_THRESHOLD,
@@ -82,6 +85,20 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
   });
 
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
+
+  const { affectedAlertsCount: previewAffectedAlertsCount } = useAlertDeletePreview({
+    http,
+    isActiveAlertDeleteEnabled: activeState.checked,
+    isInactiveAlertDeleteEnabled: inactiveState.checked,
+    activeAlertDeleteThreshold: getThresholdInDays(
+      activeState.threshold,
+      activeState.thresholdUnit
+    ),
+    inactiveAlertDeleteThreshold: getThresholdInDays(
+      inactiveState.threshold,
+      inactiveState.thresholdUnit
+    ),
+  });
 
   const errorMessages = {
     activeThreshold: getThresholdErrorMessages(activeState.threshold, activeState.thresholdUnit),
@@ -239,7 +256,7 @@ export const AlertDeleteModal = ({ onCloseModal, isVisible }: AlertDeleteProps) 
           </EuiPanel>
           <EuiHorizontalRule />
 
-          <p>{i18n.PREVIEW}</p>
+          <p>{i18n.getPreviewMessage(previewAffectedAlertsCount)}</p>
           <EuiSpacer size="m" />
 
           <EuiFormRow

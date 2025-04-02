@@ -9,6 +9,26 @@
 
 import React from 'react';
 import { Title, Subtitle, Description, Primary, Stories } from '@storybook/blocks';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import type { Decorator } from '@storybook/react';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
+export const decorators: Decorator[] = [
+  (Story) => (
+    <QueryClientProvider client={queryClient}>
+      <Story />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  ),
+];
 
 export const parameters = {
   docs: {
@@ -18,7 +38,9 @@ export const parameters = {
         <Subtitle />
         <Description />
         <Primary />
-        <Stories />
+        <QueryClientProvider client={queryClient}>
+          <Stories />
+        </QueryClientProvider>
       </>;
     },
   },

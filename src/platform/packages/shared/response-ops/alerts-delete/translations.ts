@@ -64,10 +64,13 @@ export const YEARS = i18n.translate('responseOpsAlertDelete.years', {
   defaultMessage: 'years',
 });
 
-export const PREVIEW = i18n.translate('responseOpsAlertDelete.preview', {
-  defaultMessage:
-    "This action will permanently delete a total of 4000 alerts and you won't be able to restore them.",
-});
+export const getPreviewMessage = (amount: number) => {
+  return i18n.translate('responseOpsAlertDelete.preview', {
+    defaultMessage:
+      "This action will permanently delete a total of {amount, number} {amount, plural, one {alert} other {alerts}} and you won't be able to restore them.",
+    values: { amount },
+  });
+};
 
 export const DELETE_PASSKEY = i18n.translate('responseOpsAlertDelete.deletePasskey', {
   defaultMessage: 'Delete',

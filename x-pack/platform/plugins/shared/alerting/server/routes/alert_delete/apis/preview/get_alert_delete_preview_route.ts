@@ -6,8 +6,8 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/rules_settings/apis/alert_delete';
-import { alertDeletePreviewQuerySchemaV1 } from '../../../../../common/routes/rules_settings/apis/alert_delete';
+import type { AlertDeletePreviewResponseV1 } from '../../../../../common/routes/alert_delete';
+import { alertDeletePreviewQuerySchemaV1 } from '../../../../../common/routes/alert_delete';
 import type { ILicenseState } from '../../../../lib';
 import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
@@ -17,13 +17,6 @@ import {
   transformAlertDeletePreviewToResponse,
   transformRequestToAlertDeletePreviewV1,
 } from '../../transforms';
-
-// TODO: Remove this when the alert deletion client is available
-class FakeAlertDeleteClient {
-  previewTask = async (settings: unknown, spaceId: string) => {
-    return 5;
-  };
-}
 
 export const alertDeletePreviewRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -37,7 +30,7 @@ export const alertDeletePreviewRoute = (
       },
       security: {
         authz: {
-          requiredPrivileges: [`${API_PRIVILEGES.READ_ALERT_DELETION_SETTINGS}`],
+          requiredPrivileges: [`${API_PRIVILEGES.READ_ALERT_DELETE_SETTINGS}`],
         },
       },
       options: {
@@ -47,21 +40,19 @@ export const alertDeletePreviewRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
-        // TODO: Use this when the alert deletion client is available
-        // const alertDeletionClient = alertingContext.getAlertDeletionClient();
-        const alertDeletionClient = new FakeAlertDeleteClient();
+        const alertDeletionClient = alertingContext.getAlertDeletionClient();
         const rulesClient = await alertingContext.getRulesClient();
         const spaceId = rulesClient.getSpaceId();
         const settings = transformRequestToAlertDeletePreviewV1(req.query);
 
-        const affectedAlertCount = await alertDeletionClient.previewTask(
+        const { affectedAlertCount } = await alertDeletionClient.previewTask(
           settings,
           spaceId || 'default'
         );
         const response: AlertDeletePreviewResponseV1 = transformAlertDeletePreviewToResponse({
           affectedAlertCount,
         });
-        return res.ok(response);
+        return res.ok({ body: response });
       })
     )
   );

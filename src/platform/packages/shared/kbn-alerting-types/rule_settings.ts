@@ -35,7 +35,7 @@ export interface RulesSettingsQueryDelayProperties {
 export type RulesSettingsQueryDelay = RulesSettingsQueryDelayProperties &
   RulesSettingsModificationMetadata;
 
-export interface RulesSettingsAlertDeletionProperties {
+export interface RulesSettingsAlertDeleteProperties {
   isActiveAlertDeleteEnabled: boolean;
   isInactiveAlertDeleteEnabled: boolean;
   activeAlertDeleteThreshold: number;

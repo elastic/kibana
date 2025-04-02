@@ -68,6 +68,9 @@ export interface AlertingApiRequestHandlerContext {
   listTypes: RuleTypeRegistry['list'];
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
+  getAlertDeletionClient: () => {
+    previewTask: (settings: unknown, spaceId: string) => Promise<{ affectedAlertCount: number }>;
+  };
 }
 
 /**

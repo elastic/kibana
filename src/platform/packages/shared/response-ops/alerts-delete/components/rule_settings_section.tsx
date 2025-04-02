@@ -11,11 +11,12 @@ import React, { lazy, Suspense, useState } from 'react';
 import { EuiButton, EuiDescribedFormGroup } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { HttpStart } from '@kbn/core/public';
 import * as i18n from '../translations';
 
 const ModalComponent = lazy(() => import('./modal'));
 
-export const AlertDeleteRuleSettingsSection = () => {
+export const AlertDeleteRuleSettingsSection = ({ http }: { http: HttpStart }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const onCloseModal = () => setIsModalOpen(false);
@@ -48,7 +49,7 @@ export const AlertDeleteRuleSettingsSection = () => {
         </EuiButton>
       </EuiDescribedFormGroup>
       <Suspense fallback={<></>}>
-        <ModalComponent onCloseModal={onCloseModal} isVisible={isModalOpen} />
+        <ModalComponent http={http} onCloseModal={onCloseModal} isVisible={isModalOpen} />
       </Suspense>
     </>
   );

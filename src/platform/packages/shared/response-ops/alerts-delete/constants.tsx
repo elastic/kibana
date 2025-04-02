@@ -22,3 +22,5 @@ export const MAX_THRESHOLD_DAYS = 1000;
 export const DEFAULT_THRESHOLD_ENABLED = false;
 export const DEFAULT_THRESHOLD = 3;
 export const DEFAULT_THRESHOLD_UNIT: EuiSelectOption = THRESHOLD_UNITS[1];
+
+export const BASE_ALERTING_API_PATH = '/api/alerting';

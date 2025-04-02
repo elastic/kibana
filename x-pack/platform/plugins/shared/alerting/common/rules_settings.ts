@@ -42,8 +42,8 @@ export const API_PRIVILEGES = {
   WRITE_FLAPPING_SETTINGS: 'write-flapping-settings',
   READ_QUERY_DELAY_SETTINGS: 'read-query-delay-settings',
   WRITE_QUERY_DELAY_SETTINGS: 'write-query-delay-settings',
-  READ_ALERT_DELETION_SETTINGS: 'read-alert-deletion-settings',
-  WRITE_ALERT_DELETION_SETTINGS: 'write-alert-deletion-settings',
+  READ_ALERT_DELETE_SETTINGS: 'read-alert-delete-settings',
+  WRITE_ALERT_DELETE_SETTINGS: 'write-alert-deletion-settings',
 };
 
 export const RULES_SETTINGS_SAVED_OBJECT_TYPE = 'rules-settings';

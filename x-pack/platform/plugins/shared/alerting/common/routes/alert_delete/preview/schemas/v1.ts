@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertDeleteCategoryIdTypes } from '../../../../../constants';
+import { alertDeleteCategoryIdTypes } from '../../../../constants';
 
 export const alertDeletePreviewQuerySchema = schema.object({
   is_active_alert_delete_enabled: schema.boolean({
@@ -50,7 +50,5 @@ export const alertDeletePreviewQuerySchema = schema.object({
 });
 
 export const alertDeletePreviewResponseSchema = schema.object({
-  body: schema.object({
-    affected_alert_count: schema.number(),
-  }),
+  affected_alert_count: schema.number(),
 });
