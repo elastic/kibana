@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiSwitch, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -76,7 +76,37 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         </>
       )}
       <EuiSpacer size="m" />
-      <LogstashInstructions />
+      <EuiSwitch
+        label={i18n.translate('xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchLabel', {
+          defaultMessage: 'Enable SSL',
+        })}
+        {...inputs.logstashEnableSSLInput.props}
+      />
+      {!inputs.logstashEnableSSLInput.value && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutTitle',
+              { defaultMessage: 'Proceed with caution!' }
+            )}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutMessage',
+                {
+                  defaultMessage:
+                    'Using SSL/TLS ensures that your Elastic Agents send encrypted data to trusted Logstash servers, and that your Logstash servers receive data from trusted Elastic Agent clients.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+      <EuiSpacer size="m" />
+      <LogstashInstructions isSSLEnabled={inputs.logstashEnableSSLInput.value} />
       <EuiSpacer size="m" />
       <MultiRowInput
         placeholder={i18n.translate(
@@ -108,13 +138,15 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         {...inputs.logstashHostsInput.props}
       />
       <EuiSpacer size="m" />
-      <SSLFormSection
-        inputs={inputs}
-        useSecretsStorage={useSecretsStorage}
-        isConvertedToSecret={isConvertedToSecret.sslKey}
-        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
-        type={inputs.typeInput.value as FormType}
-      />
+      {inputs.logstashEnableSSLInput.value && (
+        <SSLFormSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          isConvertedToSecret={isConvertedToSecret.sslKey}
+          onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+          type={inputs.typeInput.value as FormType}
+        />
+      )}
     </>
   );
 };
