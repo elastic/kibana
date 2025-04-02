@@ -9,7 +9,7 @@ import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/s
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdBucket } from './types';
+import type { ThresholdCompositeBucket } from './types';
 import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import type { ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
@@ -20,7 +20,7 @@ import { transformBulkCreatedItemsToHits } from './utils';
 
 interface BulkCreateSuppressedThresholdAlertsParams {
   sharedParams: SecuritySharedParams<ThresholdRuleParams>;
-  buckets: ThresholdBucket[];
+  buckets: ThresholdCompositeBucket[];
   services: SecurityRuleServices;
   startedAt: Date;
 }
