@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 // import { SynonymSets } from '../synonym_sets/synonym_sets';
-import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
+import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 // import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
@@ -31,7 +31,7 @@ export const QueryRulesOverview = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
-  const { data: synonymsData, isInitialLoading, isError, error } = useFetchSynonymsSets();
+  const { data: synonymsData, isInitialLoading, isError, error } = useFetchQueryRulesSets();
   //   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 
   const embeddableConsole = useMemo(

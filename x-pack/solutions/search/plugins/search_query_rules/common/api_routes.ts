@@ -8,9 +8,5 @@
 export const PLUGIN_ROUTE_ROOT = '/app/elasticsearch/query_rules';
 
 export enum APIRoutes {
-  SYNONYM_SETS = '/internal/search_synonyms/synonyms',
-  SYNONYM_SET_ID = '/internal/search_synonyms/synonyms/{synonymsSetId}',
-  SYNONYM_SET_ID_RULE_ID = '/internal/search_synonyms/synonyms/{synonymsSetId}/{ruleId}',
-  GENERATE_SYNONYM_RULE_ID = '/internal/search_synonyms/synonyms/{synonymsSetId}/generate',
-  SYNONYM_SET_EXISTS = '/internal/search_synonyms/synonyms/{synonymsSetId}/exists',
+  QUERY_RULES_SETS = '/internal/search_query_rules/query_rules',
 }

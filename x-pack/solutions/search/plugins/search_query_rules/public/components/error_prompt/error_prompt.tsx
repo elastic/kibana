@@ -13,26 +13,29 @@ import { FormattedMessage } from '@kbn/i18n-react';
 const ERROR_MESSAGES = {
   generic: {
     title: (
-      <FormattedMessage id="xpack.search.synonyms.errorTitle" defaultMessage="An error occurred" />
+      <FormattedMessage
+        id="xpack.search.queryRules.errorTitle"
+        defaultMessage="An error occurred"
+      />
     ),
     body: (
       <FormattedMessage
-        id="xpack.search.synonyms.errorDescription"
-        defaultMessage="An error occured while fetching synonyms. Check Kibana logs for more information."
+        id="xpack.search.queryRules.errorDescription"
+        defaultMessage="An error occurred while fetching query rules. Check Kibana logs for more information."
       />
     ),
   },
   missingPermissions: {
     title: (
       <FormattedMessage
-        id="xpack.search.synonyms.missingPermissionsTitle"
+        id="xpack.search.queryRules.missingPermissionsTitle"
         defaultMessage="Missing permissions"
       />
     ),
     body: (
       <FormattedMessage
-        id="xpack.search.synonyms.missingPermissionsDescription"
-        defaultMessage="You do not have the necessary permissions to manage synonyms. Contact your system administrator."
+        id="xpack.search.queryRules.missingPermissionsDescription"
+        defaultMessage="You do not have the necessary permissions to manage query rules. Contact your system administrator."
       />
     ),
   },
@@ -43,7 +46,7 @@ export const ErrorPrompt: React.FC<{ errorType: 'missingPermissions' | 'generic'
 }) => {
   return (
     <EuiEmptyPrompt
-      iconType="logoEnterpriseSearch"
+      iconType="logoElasticsearch"
       title={<h2>{ERROR_MESSAGES[errorType].title}</h2>}
       body={<p>{ERROR_MESSAGES[errorType].body}</p>}
     />

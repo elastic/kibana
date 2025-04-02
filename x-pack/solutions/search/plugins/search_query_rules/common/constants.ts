@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const SYNONYMS_RULE_FETCH_QUERY_KEY = 'synonyms-rule-fetch';
-export const SYNONYMS_SETS_QUERY_KEY = 'synonyms-sets-fetch';
+export const QUERY_RULES_SETS_QUERY_KEY = 'query-rules-sets-fetch';
