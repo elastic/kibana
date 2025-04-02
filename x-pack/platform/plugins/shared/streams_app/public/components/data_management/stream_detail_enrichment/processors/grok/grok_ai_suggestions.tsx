@@ -16,6 +16,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLink,
   EuiPopover,
   EuiText,
@@ -37,6 +38,8 @@ import { GrokFormState, ProcessorFormState } from '../../types';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 
+const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-LLM'];
+
 const RefreshButton = ({
   generatePatterns,
   connectors,
@@ -52,6 +55,8 @@ const RefreshButton = ({
   isLoading: boolean;
   hasValidField: boolean;
 }) => {
+  const isManagedAIConnector = !INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
+
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
@@ -124,6 +129,19 @@ const RefreshButton = ({
             />
           </EuiPopover>
         </EuiFlexItem>
+      )}
+      {isManagedAIConnector && (
+        <EuiIconTip
+          content={i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip',
+            {
+              defaultMessage:
+                'Your AI connector is managed by Elastic. This means that standard usage fees apply. For more information, please refer to your subscription details.',
+            }
+          )}
+          position="top"
+          type="iInCircle"
+        />
       )}
     </EuiFlexGroup>
   );
