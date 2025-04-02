@@ -4858,7 +4858,13 @@ const isNullDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
+  ],
   validate: undefined,
   examples: [
     'FROM employees\n| WHERE birth_date IS NULL\n| KEEP first_name, last_name\n| SORT first_name\n| LIMIT 3',
@@ -5027,7 +5033,13 @@ const isNotNullDefinition: FunctionDefinition = {
       returnType: 'boolean',
     },
   ],
-  locationsAvailable: [Location.EVAL, Location.WHERE, Location.SORT, Location.ROW],
+  locationsAvailable: [
+    Location.EVAL,
+    Location.WHERE,
+    Location.SORT,
+    Location.ROW,
+    Location.STATS_WHERE,
+  ],
   validate: undefined,
   examples: [
     'FROM employees\n| WHERE birth_date IS NULL\n| KEEP first_name, last_name\n| SORT first_name\n| LIMIT 3',
