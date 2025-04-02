@@ -12,8 +12,17 @@ import type { DataPublicPluginSetup } from '@kbn/data-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import type { FleetSetup } from '@kbn/fleet-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { FindingMisconfigurationFlyoutProps } from '@kbn/cloud-security-posture';
 import type { CspRouterProps } from './application/csp_router';
 import type { CloudSecurityPosturePageId } from './common/navigation/types';
+
+export interface UseOnCloseParams {
+  /**
+   * Function to call when the event is dispatched
+   */
+  callback: (id: string) => void;
+}
 
 /**
  * The cloud security posture's public plugin setup interface.
@@ -27,6 +36,10 @@ export interface CspClientPluginSetup {}
 export interface CspClientPluginStart {
   /** Gets the cloud security posture router component for embedding in the security solution. */
   getCloudSecurityPostureRouter(): ComponentType<CspRouterProps>;
+  getCloudSecurityPostureMisconfigurationFlyout: ({
+    ruleId,
+    resourceId,
+  }: FindingMisconfigurationFlyoutProps) => React.JSX.Element;
 }
 
 export interface CspClientPluginSetupDeps {
@@ -50,6 +63,8 @@ export interface CspSecuritySolutionContext {
     pageName: CloudSecurityPosturePageId;
     state?: Record<string, string | undefined>;
   }>;
+  useExpandableFlyoutApi?: () => ExpandableFlyoutApi;
+  useOnExpandableFlyoutClose?: ({ callback }: UseOnCloseParams) => void;
 }
 
 export type CloudSecurityPostureStartServices = Pick<
