@@ -30,10 +30,7 @@ describe('useEnvronmentsFetcher', () => {
     const apisMockData = {
       'GET /internal/apm/suggestions': {
         terms: [],
-        status: fetcherHook.FETCH_STATUS.SUCCESS,
-      },
-      'GET /internal/apm/environments/unset': {
-        hasUnsetEnvironment: true,
+        hasUnset: true,
         status: fetcherHook.FETCH_STATUS.SUCCESS,
       },
     };
@@ -93,10 +90,7 @@ describe('useEnvronmentsFetcher', () => {
     const apisMockData = {
       'GET /internal/apm/suggestions': {
         terms: ['test', 'dev'],
-        status: fetcherHook.FETCH_STATUS.SUCCESS,
-      },
-      'GET /internal/apm/environments/unset': {
-        hasUnsetEnvironment: false,
+        hasUnset: false,
         status: fetcherHook.FETCH_STATUS.SUCCESS,
       },
     };
@@ -154,10 +148,7 @@ describe('useEnvronmentsFetcher', () => {
     const apisMockData = {
       'GET /internal/apm/suggestions': {
         terms: ['test', 'dev'],
-        status: fetcherHook.FETCH_STATUS.SUCCESS,
-      },
-      'GET /internal/apm/environments/unset': {
-        hasUnsetEnvironment: true,
+        hasUnset: true,
         status: fetcherHook.FETCH_STATUS.SUCCESS,
       },
     };

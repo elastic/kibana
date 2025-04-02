@@ -39,7 +39,7 @@ export function useEnvironmentsFetcher({
           },
         });
       }
-      const suggestions = callApmApi('GET /internal/apm/suggestions', {
+      return callApmApi('GET /internal/apm/suggestions', {
         params: {
           query: {
             start,
@@ -49,25 +49,8 @@ export function useEnvironmentsFetcher({
           },
         },
       }).then((response) => {
-        return { environments: response.terms };
-      });
-
-      const unsetEnvironments = callApmApi('GET /internal/apm/environments/unset', {
-        params: {
-          query: {
-            start,
-            end,
-          },
-        },
-      }).then((response) => {
-        return response.hasUnsetEnvironment
-          ? { environments: [ENVIRONMENT_NOT_DEFINED_VALUE] }
-          : { environments: [] };
-      });
-      return Promise.all([suggestions, unsetEnvironments]).then((results) => {
-        return {
-          environments: results.map((result) => result.environments).flat(),
-        };
+        const unset = response.hasUnset ? [ENVIRONMENT_NOT_DEFINED_VALUE] : [];
+        return { environments: response.terms.concat(unset) };
       });
     },
     [start, end, serviceName]

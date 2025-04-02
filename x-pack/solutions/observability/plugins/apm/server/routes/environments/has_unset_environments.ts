@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { SERVICE_ENVIRONMENT } from '../../../common/es_fields/apm';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -16,14 +16,18 @@ import type { APMEventClient } from '../../lib/helpers/create_es_client/create_a
  * filtered by range.
  */
 
-export async function hasUnsetEnvironments({
+export async function hasUnsetValueForField({
   searchAggregatedTransactions,
   apmEventClient,
+  serviceName,
+  fieldName,
   start,
   end,
 }: {
   apmEventClient: APMEventClient;
   searchAggregatedTransactions: boolean;
+  serviceName: string | undefined;
+  fieldName: string;
   start: number;
   end: number;
 }): Promise<boolean> {
@@ -41,11 +45,11 @@ export async function hasUnsetEnvironments({
     size: 0,
     query: {
       bool: {
-        filter: [...rangeQuery(start, end)],
+        filter: [...rangeQuery(start, end), ...termQuery(SERVICE_NAME, serviceName)],
         must_not: [
           {
             exists: {
-              field: SERVICE_ENVIRONMENT,
+              field: fieldName,
             },
           },
         ],
