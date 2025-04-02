@@ -346,7 +346,10 @@ export class DashboardContainer
     this.hasOverlays$ = dashboardApi.hasOverlays$;
     this.openOverlay = dashboardApi.openOverlay;
     this.hasRunMigrations$ = dashboardApi.hasRunMigrations$;
-    this.setLastSavedInput = dashboardApi.setLastSavedInput;
+    this.setLastSavedInput = (lastSavedInput: DashboardContainerInput) => {
+      dashboardApi.setLastSavedInput(lastSavedInput);
+      this.setPanels(lastSavedInput.panels);
+    };
     this.lastSavedInput$ = dashboardApi.lastSavedInput$;
     this.savedObjectId = dashboardApi.savedObjectId;
     this.setSavedObjectId = dashboardApi.setSavedObjectId;
