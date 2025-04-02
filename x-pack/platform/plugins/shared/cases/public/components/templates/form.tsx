@@ -45,7 +45,7 @@ const FormComponent: React.FC<Props> = ({
     },
     options: { stripEmptyFields: false },
     schema,
-    deserializer: templateDeserializer,
+    deserializer: (data: TemplateConfiguration) => templateDeserializer(currentConfiguration, data),
     serializer: (data: TemplateFormProps) =>
       templateSerializer(connectors, currentConfiguration, data),
   });
