@@ -143,7 +143,7 @@ export default function ({ getService }: FtrProviderContext) {
         actionTypeId: 'test.failing',
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdConnector.id}: failing connector`,
-        errorMessage: `an error occurred while running the action: expected failure for .kibana-alerting-test-data actions-failure-1:space1; retry: true`,
+        errorMessage: `an error occurred while running the action: expected failure for kibana-alerting-test-data actions-failure-1:space1; retry: true`,
         source: ActionExecutionSourceType.HTTP_REQUEST,
       });
     });
