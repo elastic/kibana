@@ -74,8 +74,8 @@ describe('useGroupTakeActionsItems', () => {
     await waitFor(() => {
       const currentParams = result.current(getActionItemsParams);
       expect(currentParams.length).toEqual(2);
-      expect(currentParams[0].key).toEqual('acknowledge');
-      expect(currentParams[1].key).toEqual('close');
+      expect(currentParams[0].key).toEqual('acknowledged');
+      expect(currentParams[1].key).toEqual('closed');
     });
   });
 
@@ -94,7 +94,7 @@ describe('useGroupTakeActionsItems', () => {
       const currentParams = result.current(getActionItemsParams);
       expect(currentParams.length).toEqual(2);
       expect(currentParams[0].key).toEqual('open');
-      expect(currentParams[1].key).toEqual('acknowledge');
+      expect(currentParams[1].key).toEqual('acknowledged');
     });
   });
 
@@ -113,7 +113,7 @@ describe('useGroupTakeActionsItems', () => {
       const currentParams = result.current(getActionItemsParams);
       expect(currentParams.length).toEqual(2);
       expect(currentParams[0].key).toEqual('open');
-      expect(currentParams[1].key).toEqual('close');
+      expect(currentParams[1].key).toEqual('closed');
     });
   });
 

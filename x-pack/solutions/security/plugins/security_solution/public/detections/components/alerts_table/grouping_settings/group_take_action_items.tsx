@@ -54,12 +54,18 @@ const STATUS_ACTIONS = {
   [FILTER_CLOSED]: BULK_ACTION_CLOSE_SELECTED,
 } as const;
 
-const StatusMenuItem = React.memo(
-  ({ status, onClick, label }: { status: string; onClick: () => void; label: string }) => (
-    <EuiContextMenuItem key={status} data-test-subj={`${status}-alert-status`} onClick={onClick}>
-      {label}
-    </EuiContextMenuItem>
-  )
+const StatusMenuItem = ({
+  status,
+  onClick,
+  label,
+}: {
+  status: string;
+  onClick: () => void;
+  label: string;
+}) => (
+  <EuiContextMenuItem data-test-subj={`${status}-alert-status`} onClick={onClick}>
+    {label}
+  </EuiContextMenuItem>
 );
 
 StatusMenuItem.displayName = 'StatusMenuItem';
@@ -205,17 +211,7 @@ export const useGroupTakeActionsItems = ({
     ]
   );
 
-  const getActionItems: ({
-    query,
-    tableId,
-    groupNumber,
-    selectedGroup,
-  }: {
-    query?: string | undefined;
-    tableId: string;
-    groupNumber: number;
-    selectedGroup: string;
-  }) => React.JSX.Element[] = useCallback(
+  const getActionItems = useCallback(
     ({
       query,
       tableId,
@@ -231,40 +227,30 @@ export const useGroupTakeActionsItems = ({
 
       if (currentStatus?.length === 1) {
         const singleStatus = currentStatus[0];
-        const statusConfig = [
-          { status: FILTER_OPEN, show: singleStatus !== FILTER_OPEN },
-          { status: FILTER_ACKNOWLEDGED, show: singleStatus !== FILTER_ACKNOWLEDGED },
-          { status: FILTER_CLOSED, show: singleStatus !== FILTER_CLOSED },
-        ];
-
-        return statusConfig
-          .map(({ status, show }) => {
-            if (show) {
-              return (
-                <StatusMenuItem
-                  status={status}
-                  onClick={() =>
-                    onClickUpdate({
-                      groupNumber,
-                      query,
-                      selectedGroup,
-                      status: status as AlertWorkflowStatus,
-                      tableId,
-                    })
-                  }
-                  label={STATUS_ACTIONS[status]}
-                />
-              );
-            } else {
-              return null;
-            }
-          })
-          .filter(Boolean) as React.JSX.Element[];
+        return Object.entries(STATUS_ACTIONS)
+          .filter(([status]) => status !== singleStatus)
+          .map(([status, label]) => (
+            <StatusMenuItem
+              status={status}
+              key={status}
+              onClick={() =>
+                onClickUpdate({
+                  groupNumber,
+                  query,
+                  selectedGroup,
+                  status: status as AlertWorkflowStatus,
+                  tableId,
+                })
+              }
+              label={label}
+            />
+          ));
       }
 
       return Object.entries(STATUS_ACTIONS).map(([status, label]) => (
         <StatusMenuItem
           status={status}
+          key={status}
           onClick={() =>
             onClickUpdate({
               groupNumber,
