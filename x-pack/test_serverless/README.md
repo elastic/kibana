@@ -2,8 +2,7 @@
 
 The tests and helper methods (services, page objects) defined here in
 `x-pack/test_serverless` cover the serverless functionality introduced by the
- `serverless`, `serverless_observability`, `serverless_search` and
- `serverless_security` plugins.
+ `serverless`, `serverless_observability`, `serverless_search`, `security_solution_serverless` and `serverless_chat` plugins.
 
  For how to set up Docker for serverless ES images, please refer to
  [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
@@ -19,6 +18,7 @@ set of helper methods and sub-directories for
 - `observability` project specific functionality
 - `search` project specific functionality
 - `security` project specific functionality
+- `chat` project specific functionality
 
 The `shared` directory contains fixtures, services, ... that are shared across
 `api_integration` abd `functional` tests.
@@ -28,6 +28,7 @@ x-pack/test_serverless/
 ├─ api_integration
 │  ├─ services
 │  ├─ test_suites
+│  │  ├─ chat
 │  │  ├─ common
 │  │  ├─ observability
 │  │  ├─ search
@@ -36,6 +37,7 @@ x-pack/test_serverless/
 │  ├─ page_objects
 │  ├─ services
 │  ├─ test_suites
+│  │  ├─ chat
 │  │  ├─ common
 │  │  ├─ observability
 │  │  ├─ search
@@ -57,11 +59,11 @@ configurations.
 In case a common test needs to be skipped for one of the projects 
 (in both regular pipelines that start KBN in serverless mode [against serverless ES] & pipelines creating serverless projects in MKI [Cloud]),
 there are the following suite tags available to do so: 
-`skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
+`skipSvlChat`, `skipSvlOblt`, `skipSvlSearch`, `skipSvlSec`, which can be added like this to a test suite:
 
 ```
 describe('my test suite', function () {
-  this.tags(['skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
+  this.tags(['skipSvlChat', 'skipSvlOblt', 'skipSvlSearch', 'skipSvlSec']);
   // or for a single tag: this.tags('skipSvlSec');
   [...]
 });
@@ -93,6 +95,7 @@ following namespaces:
 | observability | svlOblt                      |
 | search        | svlSearch                    |
 | security      | svlSec                       |
+| chat          | svlChat                      |
 
 ### Adding Serverless Tests
 

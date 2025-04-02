@@ -5,6 +5,7 @@ xpack.serverless.chat.enabled: true
 
 ## Cloud settings
 xpack.cloud.serverless.project_type: search
+# TODO: Update to 'chat'?
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/workchat
