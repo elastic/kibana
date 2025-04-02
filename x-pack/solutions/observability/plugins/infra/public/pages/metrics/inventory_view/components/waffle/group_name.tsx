@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonEmpty, EuiScreenReaderOnly, EuiToolTip, useEuiFontSize } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
 import type {
@@ -24,30 +24,33 @@ interface Props {
 export const GroupName: React.FC<Props> = ({ onDrilldown, group, isChild, options }) => {
   const [a11yAnnouncement, setA11yAnnouncement] = useState('');
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
+  const handleClick = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
 
-    if (options.groupBy.length === 0) {
+      if (options.groupBy.length === 0) {
+        setA11yAnnouncement(
+          i18n.translate('xpack.infra.inventory.groupBy.noChangeMessage', {
+            defaultMessage: 'No changes were made when selecting {group}.',
+            values: { group: group.name },
+          })
+        );
+        return;
+      }
+
       setA11yAnnouncement(
-        i18n.translate('xpack.infra.inventory.groupBy.noChangeMessage', {
-          defaultMessage: 'No changes were made when selecting {group}.',
+        i18n.translate('xpack.infra.inventory.groupBy.groupingByMessage', {
+          defaultMessage: 'Grouping by {group}...',
           values: { group: group.name },
         })
       );
-      return;
-    }
 
-    setA11yAnnouncement(
-      i18n.translate('xpack.infra.inventory.groupBy.grouppingByMessage', {
-        defaultMessage: 'Grouping by {group}...',
-        values: { group: group.name },
-      })
-    );
-
-    const currentPath =
-      isChild && options.groupBy.length > 1 ? options.groupBy[1] : options.groupBy[0];
-    onDrilldown(`${currentPath.field}: "${group.name}"`);
-  };
+      const currentPath =
+        isChild && options.groupBy.length > 1 ? options.groupBy[1] : options.groupBy[0];
+      onDrilldown(`${currentPath.field}: "${group.name}"`);
+    },
+    [group.name, isChild, onDrilldown, options.groupBy]
+  );
 
   const buttonStyle = {
     fontSize: isChild ? '0.85em' : '1em',
