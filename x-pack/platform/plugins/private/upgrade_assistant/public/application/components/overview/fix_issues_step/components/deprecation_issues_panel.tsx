@@ -60,7 +60,6 @@ export const DeprecationIssuesPanel = (props: Props) => {
       title={deprecationSource}
       titleSize="xs"
       {...(!hasNoIssues && reactRouterNavigate(history, linkUrl))}
-      style={{ maxWidth: 342 }}
     >
       <EuiSpacer size="s" />
 

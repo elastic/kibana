@@ -73,11 +73,12 @@ describe('Overview - Fix deprecation issues step - Kibana deprecations', () => {
         await setup(mockedCriticalKibanaDeprecations);
       });
 
-      test('renders a count for critical issues and success state for warning issues', () => {
+      test('renders a count for critical issues', () => {
         const { exists, find } = testBed;
 
         expect(exists('kibanaStatsPanel')).toBe(true);
         expect(find('kibanaStatsPanel.criticalDeprecations').text()).toContain('1');
+        expect(exists('kibanaStatsPanel.warningDeprecations')).toBe(false);
       });
 
       test('panel links to Kibana deprecations page', () => {
