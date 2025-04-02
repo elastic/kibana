@@ -1199,7 +1199,7 @@ export class AlertsClient {
     }
   }
 
-  public async getAlertFields({
+  public async getBrowserFields({
     ruleTypeIds,
     indices,
     metaFields,

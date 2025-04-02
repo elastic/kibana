@@ -24,7 +24,7 @@ describe('getBrowserFieldsByFeatureId', () => {
       '.alerts-observability.logs.alerts-default',
     ]);
 
-    clients.rac.getAlertFields.mockResolvedValue({ browserFields: {}, fields: [] });
+    clients.rac.getBrowserFields.mockResolvedValue({ browserFields: {}, fields: [] });
 
     getBrowserFieldsByFeatureId(server.router);
   });

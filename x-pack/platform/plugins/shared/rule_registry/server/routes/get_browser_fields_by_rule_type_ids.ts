@@ -60,6 +60,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           });
         }
 
+        // Limiting the search to fetch browser fields from the last 90 days
         const indexFilter = {
           range: {
             '@timestamp': {
@@ -68,7 +69,7 @@ export const getBrowserFieldsByFeatureId = (router: IRouter<RacRequestHandlerCon
           },
         };
 
-        const fields = await alertsClient.getAlertFields({
+        const fields = await alertsClient.getBrowserFields({
           indices: o11yIndices,
           ruleTypeIds: onlyO11yRuleTypeIds,
           metaFields: ['_id', '_index'],
