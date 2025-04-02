@@ -19,6 +19,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -38,6 +39,7 @@ export const createMockPluginSetup = (
   setupMock: Partial<Record<keyof ReportingInternalSetup, any>>
 ): ReportingInternalSetup => {
   return {
+    encryptedSavedObjects: encryptedSavedObjectsMock.createSetup(),
     features: featuresPluginMock.createSetup(),
     basePath: { set: jest.fn() },
     router: { get: jest.fn(), post: jest.fn(), put: jest.fn(), delete: jest.fn() },

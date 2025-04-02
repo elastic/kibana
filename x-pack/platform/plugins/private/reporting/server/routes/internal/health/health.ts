@@ -11,7 +11,7 @@ import type { ReportingCore } from '../../..';
 import { authorizedUserPreRouting } from '../../common';
 
 const path = INTERNAL_ROUTES.HEALTH;
-export const registerHealthRoute = async (reporting: ReportingCore, logger: Logger) => {
+export const registerHealthRoute = (reporting: ReportingCore, logger: Logger) => {
   const { router } = reporting.getPluginSetupDeps();
 
   router.get(
