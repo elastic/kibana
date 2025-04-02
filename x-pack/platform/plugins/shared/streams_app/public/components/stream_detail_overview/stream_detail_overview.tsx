@@ -166,6 +166,7 @@ export function StreamDetailOverview({ definition }: { definition: IngestStreamG
             <EuiFlexItem grow>
               <StreamsAppSearchBar
                 onQuerySubmit={({ dateRange }, isUpdate) => {
+                  dataStreamStats.refresh();
                   if (!isUpdate) {
                     if (!refreshAbsoluteTimeRange()) {
                       // if absolute time range didn't change, we need to manually refresh the histogram
