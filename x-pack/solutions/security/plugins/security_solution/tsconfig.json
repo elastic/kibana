@@ -243,5 +243,6 @@
     "@kbn/security-ai-prompts",
     "@kbn/scout-security",
     "@kbn/custom-icons",
+    "@kbn/management-settings-ids"
   ]
 }
