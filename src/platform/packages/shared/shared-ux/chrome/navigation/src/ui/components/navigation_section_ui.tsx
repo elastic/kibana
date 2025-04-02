@@ -257,7 +257,7 @@ const getEuiProps = (
   // if it is the highest match in the URL, not if one of its children is also active.
   const onlyIfHighestMatch = isAccordion && !isCollapsible;
   const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
-  const isExternal = Boolean(href) && !navNode.isExternalLink && isAbsoluteLink(href!);
+  const isExternal = Boolean(href) && navNode.isExternalLink && isAbsoluteLink(href!);
   const isAccordionExpanded = !getIsCollapsed(path);
 
   let isSelected = isActive;
