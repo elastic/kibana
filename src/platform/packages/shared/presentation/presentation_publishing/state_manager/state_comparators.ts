@@ -28,6 +28,30 @@ export const runComparator = <StateType extends object = object>(
   throw new Error(`Comparator ${comparator} is not a valid comparator.`);
 };
 
+/**
+ * Run all comparators, and return an object containing only the keys that are not equal, set to the value of the latest state
+ */
+export const diffComparators = <StateType extends object = object>(
+  comparators: StateComparators<StateType>,
+  lastSavedState?: StateType,
+  latestState?: StateType
+): Partial<StateType> => {
+  return Object.keys(comparators).reduce((acc, key) => {
+    const comparator = comparators[key as keyof StateType];
+    const lastSavedValue = lastSavedState?.[key as keyof StateType];
+    const currentValue = latestState?.[key as keyof StateType];
+
+    if (!runComparator(comparator, lastSavedState, latestState, lastSavedValue, currentValue)) {
+      acc[key as keyof StateType] = currentValue;
+    }
+
+    return acc;
+  }, {} as Partial<StateType>);
+};
+
+/**
+ * Run comparators until at least one returns false
+ */
 export const areComparatorsEqual = <StateType extends object = object>(
   comparators: StateComparators<StateType>,
   lastSavedState?: StateType,

@@ -8,3 +8,4 @@
  */
 
 export type { ComparatorFunction, StateComparators } from './types';
+export { runComparator, areComparatorsEqual, diffComparators } from './state_comparators';

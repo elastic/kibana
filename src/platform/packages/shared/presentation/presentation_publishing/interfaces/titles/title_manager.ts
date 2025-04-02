@@ -36,6 +36,7 @@ export const stateHasTitles = (state: unknown): state is SerializedTitles => {
 
 export interface TitlesApi extends PublishesWritableTitle, PublishesWritableDescription {}
 
+// SERIALIZED STATE ONLY TODO: Convert this to an instance of src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export const initializeTitleManager = (
   rawState: SerializedTitles
 ): {

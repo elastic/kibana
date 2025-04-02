@@ -25,7 +25,7 @@ import {
   isFilterPinned,
 } from '@kbn/es-query';
 import { ESQLControlVariable } from '@kbn/esql-types';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { PublishingSubject, StateComparators, diffComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import moment, { Moment } from 'moment';
@@ -35,6 +35,7 @@ import {
   Subject,
   Subscription,
   combineLatest,
+  combineLatestWith,
   debounceTime,
   distinctUntilChanged,
   finalize,
@@ -274,6 +275,52 @@ export function initializeUnifiedSearchManager(
     );
   }
 
+  const comparators = {
+    filters: (a, b) =>
+      compareFilters(
+        (a ?? []).filter((f) => !isFilterPinned(f)),
+        (b ?? []).filter((f) => !isFilterPinned(f)),
+        COMPARE_ALL_OPTIONS
+      ),
+    query: 'deepEquality',
+    refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
+      timeRestore$.value ? fastIsEqual(a, b) : true,
+    timeRange: (a: TimeRange | undefined, b: TimeRange | undefined) => {
+      if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
+      if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
+        return false;
+      }
+      return true;
+    },
+  } as StateComparators<
+    Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
+  >;
+
+  const getState = (): {
+    state: Pick<
+      DashboardState,
+      'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
+    >;
+    references: SavedObjectReference[];
+  } => {
+    // pinned filters are not serialized when saving the dashboard
+    const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
+    const [{ filter, query }, references] = extractSearchSourceReferences({
+      filter: serializableFilters,
+      query: query$.value,
+    });
+    return {
+      state: {
+        filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
+        query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
+        refreshInterval: refreshInterval$.value,
+        timeRange: timeRange$.value,
+        timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
+      },
+      references,
+    };
+  };
+
   return {
     api: {
       filters$,
@@ -291,45 +338,20 @@ export function initializeUnifiedSearchManager(
       timeslice$,
       unifiedSearchFilters$,
     },
-    comparators: {
-      filters: [
-        unifiedSearchFilters$,
-        setUnifiedSearchFilters,
-        // exclude pinned filters from comparision because pinned filters are not part of application state
-        (a, b) =>
-          compareFilters(
-            (a ?? []).filter((f) => !isFilterPinned(f)),
-            (b ?? []).filter((f) => !isFilterPinned(f)),
-            COMPARE_ALL_OPTIONS
-          ),
-      ],
-      query: [query$, setQuery, fastIsEqual],
-      refreshInterval: [
-        refreshInterval$,
-        (refreshInterval: RefreshInterval | undefined) => {
-          if (timeRestore$.value) setAndSyncRefreshInterval(refreshInterval);
-        },
-        (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
-          timeRestore$.value ? fastIsEqual(a, b) : true,
-      ],
-      timeRange: [
-        timeRange$,
-        (timeRange: TimeRange | undefined) => {
-          if (timeRestore$.value) setAndSyncTimeRange(timeRange);
-        },
-        (a: TimeRange | undefined, b: TimeRange | undefined) => {
-          if (!timeRestore$.value) return true; // if time restore is set to false, time range doesn't count as a change.
-          if (!areTimesEqual(a?.from, b?.from) || !areTimesEqual(a?.to, b?.to)) {
-            return false;
-          }
-          return true;
-        },
-      ],
-    } as StateComparators<
-      Pick<DashboardState, 'filters' | 'query' | 'refreshInterval' | 'timeRange'>
-    >,
     internalApi: {
       controlGroupReload$,
+      anyStateChange$: () =>
+        combineLatest([filters$, query$, refreshInterval$, timeRange$]).pipe(map(() => {})),
+      startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
+        return combineLatest([filters$, query$, refreshInterval$, timeRange$]).pipe(
+          debounceTime(100),
+          map(() => getState()),
+          combineLatestWith(lastSavedState$),
+          map(([{ state: latestState }, lastSavedState]) =>
+            diffComparators(comparators, lastSavedState, latestState)
+          )
+        );
+      },
       panelsReload$,
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
@@ -342,30 +364,7 @@ export function initializeUnifiedSearchManager(
           setAndSyncTimeRange(lastSavedState.timeRange);
         }
       },
-      getState: (): {
-        state: Pick<
-          DashboardState,
-          'filters' | 'query' | 'refreshInterval' | 'timeRange' | 'timeRestore'
-        >;
-        references: SavedObjectReference[];
-      } => {
-        // pinned filters are not serialized when saving the dashboard
-        const serializableFilters = unifiedSearchFilters$.value?.filter((f) => !isFilterPinned(f));
-        const [{ filter, query }, references] = extractSearchSourceReferences({
-          filter: serializableFilters,
-          query: query$.value,
-        });
-        return {
-          state: {
-            filters: filter ?? DEFAULT_DASHBOARD_STATE.filters,
-            query: (query as Query) ?? DEFAULT_DASHBOARD_STATE.query,
-            refreshInterval: refreshInterval$.value,
-            timeRange: timeRange$.value,
-            timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
-          },
-          references,
-        };
-      },
+      getState,
     },
     cleanup: () => {
       controlGroupSubscriptions.unsubscribe();

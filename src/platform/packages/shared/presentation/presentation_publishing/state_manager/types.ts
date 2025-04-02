@@ -31,11 +31,15 @@ export type CustomComparators<StateType> = {
 };
 
 type SubjectsOf<T extends object> = {
-  [KeyType in keyof T as `${Capitalize<string & KeyType>}$`]: PublishingSubject<T[KeyType]>;
+  [KeyType in keyof Required<T> as `${Capitalize<string & KeyType>}$`]: PublishingSubject<
+    T[KeyType]
+  >;
 };
 
 type SettersOf<T extends object> = {
-  [KeyType in keyof T as `set${Capitalize<string & KeyType>}`]: PublishingSubject<T[KeyType]>;
+  [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: PublishingSubject<
+    T[KeyType]
+  >;
 };
 
 export interface StateManager<StateType extends object> {

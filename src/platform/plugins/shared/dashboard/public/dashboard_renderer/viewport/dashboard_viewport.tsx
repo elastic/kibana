@@ -35,7 +35,7 @@ export const DashboardViewport = ({
     dashboardTitle,
     description,
     expandedPanelId,
-    panels,
+    layout,
     viewMode,
     useMargins,
     fullScreenMode,
@@ -44,7 +44,7 @@ export const DashboardViewport = ({
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
-    dashboardApi.panels$,
+    dashboardInternalApi.layout$,
     dashboardApi.viewMode$,
     dashboardApi.settings.useMargins$,
     dashboardApi.fullScreenMode$
@@ -54,8 +54,8 @@ export const DashboardViewport = ({
   }, [dashboardApi]);
 
   const panelCount = useMemo(() => {
-    return Object.keys(panels).length;
-  }, [panels]);
+    return Object.keys(layout).length;
+  }, [layout]);
 
   const classes = classNames({
     dshDashboardViewport: true,
@@ -112,8 +112,7 @@ export const DashboardViewport = ({
               return {
                 ...dashboardApi,
                 reload$: dashboardInternalApi.controlGroupReload$,
-                getSerializedStateForChild: dashboardInternalApi.getSerializedStateForControlGroup,
-                getRuntimeStateForChild: dashboardInternalApi.getRuntimeStateForControlGroup,
+                getSerializedStateForChild: dashboardInternalApi.getStateForControlGroup,
               };
             }}
             onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
