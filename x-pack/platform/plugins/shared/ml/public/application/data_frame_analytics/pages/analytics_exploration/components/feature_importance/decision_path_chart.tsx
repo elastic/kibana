@@ -1,4 +1,4 @@
-  /*
+/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
@@ -26,7 +26,6 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   type FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
@@ -34,41 +33,6 @@ import {
 import { useMlKibana } from '../../../../../contexts/kibana';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
-
-const { euiColorFullShade, euiColorMediumShade } = euiVars;
-const axisColor = euiColorMediumShade;
-
-const baselineStyle: LineAnnotationStyle = {
-  line: {
-    strokeWidth: 1,
-    stroke: euiColorFullShade,
-    opacity: 0.75,
-  },
-};
-
-const axes: RecursivePartial<AxisStyle> = {
-  axisLine: {
-    stroke: axisColor,
-  },
-  tickLabel: {
-    fontSize: 10,
-    fill: axisColor,
-  },
-  tickLine: {
-    stroke: axisColor,
-  },
-  gridLine: {
-    horizontal: {
-      dash: [1, 2],
-    },
-    vertical: {
-      strokeWidth: 0,
-    },
-  },
-};
-const theme: PartialTheme = {
-  axes,
-};
 
 interface DecisionPathChartProps {
   decisionPathData: DecisionPathPlotData;
@@ -89,7 +53,6 @@ export const DecisionPathChart = ({
   maxDomain,
   baseline,
 }: DecisionPathChartProps) => {
-
   const {
     services: {
       charts: {
@@ -156,7 +119,6 @@ export const DecisionPathChart = ({
       },
     };
   }, [euiTheme]);
-
 
   const regressionBaselineData: LineAnnotationDatum[] | undefined = useMemo(
     () =>
