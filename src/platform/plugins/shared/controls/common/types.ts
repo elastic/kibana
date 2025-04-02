@@ -31,7 +31,7 @@ export interface DefaultControlState {
 export interface SerializedControlState<ControlStateType extends object = object>
   extends DefaultControlState {
   type: string;
-  explicitInput: { id: string } & ControlStateType;
+  explicitInput: ControlStateType;
 }
 
 export interface DefaultDataControlState extends DefaultControlState {
