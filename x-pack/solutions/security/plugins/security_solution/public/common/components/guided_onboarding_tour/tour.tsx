@@ -56,26 +56,29 @@ export const RealTourContextProvider: FC<{ children: ReactNode }> = memo(({ chil
     setHidden(h);
   }, []);
 
-  const isRulesTourActive = useObservable(
-    guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$(siemGuideId, SecurityStepId.rules)
-      .pipe(
-        // if no result after 30s the observable will error, but the error handler will just emit false
-        timeout(30000),
-        catchError((error) => of(false))
-      ) ?? of(false),
-    false
+  const rulesTourObservable = useMemo(
+    () =>
+      guidedOnboarding?.guidedOnboardingApi
+        ?.isGuideStepActive$(siemGuideId, SecurityStepId.rules)
+        .pipe(
+          timeout(30000),
+          catchError(() => of(false))
+        ) ?? of(false),
+    [guidedOnboarding]
   );
-  const isAlertsCasesTourActive = useObservable(
-    guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$(siemGuideId, SecurityStepId.alertsCases)
-      .pipe(
-        // if no result after 30s the observable will error, but the error handler will just emit false
-        timeout(30000),
-        catchError((error) => of(false))
-      ) ?? of(false),
-    false
+  const isRulesTourActive = useObservable(rulesTourObservable, false);
+
+  const alertsCasesTourObservable = useMemo(
+    () =>
+      guidedOnboarding?.guidedOnboardingApi
+        ?.isGuideStepActive$(siemGuideId, SecurityStepId.alertsCases)
+        .pipe(
+          timeout(30000),
+          catchError(() => of(false))
+        ) ?? of(false),
+    [guidedOnboarding]
   );
+  const isAlertsCasesTourActive = useObservable(alertsCasesTourObservable, false);
 
   const tourStatus = useMemo(
     () => ({
@@ -102,9 +105,10 @@ export const RealTourContextProvider: FC<{ children: ReactNode }> = memo(({ chil
   }, []);
 
   const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
+  const onTourPath = useMemo(() => isTourPath(pathname), [pathname]);
 
   useEffect(() => {
-    if (!completeStep || !guidedOnboarding?.guidedOnboardingApi || !isTourPath(pathname)) {
+    if (!completeStep || !guidedOnboarding?.guidedOnboardingApi || !onTourPath) {
       return;
     }
     let ignore = false;
@@ -119,7 +123,7 @@ export const RealTourContextProvider: FC<{ children: ReactNode }> = memo(({ chil
     return () => {
       ignore = true;
     };
-  }, [completeStep, guidedOnboarding, pathname]);
+  }, [completeStep, guidedOnboarding, onTourPath]);
 
   const endTourStep = useCallback((tourId: SecurityStepId) => {
     setCompleteStep(tourId);

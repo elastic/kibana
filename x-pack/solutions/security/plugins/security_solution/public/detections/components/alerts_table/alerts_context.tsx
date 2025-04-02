@@ -37,10 +37,15 @@ export const AlertsContextProvider = memo(AlertsContextProviderComponent);
 export const useAlertsContext = () => {
   const fallbackRef = useRef<AlertsTableImperativeApi>(null);
   const value = useContext(AlertsContext);
-  if (!value) {
-    return {
+  const fallbackValue = useMemo(
+    () => ({
       alertsTableRef: fallbackRef,
-    };
+    }),
+    [fallbackRef]
+  );
+
+  if (!value) {
+    return fallbackValue;
   }
   return value;
 };

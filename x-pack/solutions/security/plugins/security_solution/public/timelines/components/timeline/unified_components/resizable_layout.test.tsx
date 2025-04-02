@@ -73,7 +73,6 @@ const TestComponent = () => {
       }
       columnIds={[]}
       dataView={mockDataView}
-      hasTimelineBeenOpenedOnce={false}
       onAddFieldToWorkspace={() => {}}
       onRemoveFieldFromWorkspace={() => {}}
       wrappedOnFieldEdited={() => Promise.resolve()}
