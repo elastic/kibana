@@ -327,7 +327,7 @@ describe('registerTransactionDurationRuleType', () => {
         alertDetailsUrl: expect.stringContaining(
           'http://localhost:5601/eyr/app/observability/alerts/'
         ),
-        environment: 'Not defined',
+        environment: 'Unset',
         grouping: {
           service: {
             environment: 'ENVIRONMENT_NOT_DEFINED',
@@ -340,7 +340,7 @@ describe('registerTransactionDurationRuleType', () => {
         },
         interval: '5 mins',
         reason:
-          'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: Not defined, type: request, name: tx-java. Alert when > 3.0 s.',
+          'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: Unset, type: request, name: tx-java. Alert when > 3.0 s.',
         serviceName: 'opbeans-java',
         threshold: 3000,
         transactionName: 'tx-java',
@@ -354,7 +354,7 @@ describe('registerTransactionDurationRuleType', () => {
         'kibana.alert.evaluation.threshold': 3000000,
         'kibana.alert.evaluation.value': 5500000,
         'kibana.alert.reason':
-          'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: Not defined, type: request, name: tx-java. Alert when > 3.0 s.',
+          'Avg. latency is 5.5 s in the last 5 mins for service: opbeans-java, env: Unset, type: request, name: tx-java. Alert when > 3.0 s.',
         'processor.event': 'transaction',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'opbeans-java',

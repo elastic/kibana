@@ -497,7 +497,7 @@ describe('Transaction error rate alert', () => {
     expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
       context: {
         alertDetailsUrl: 'http://localhost:5601/eyr/app/observability/alerts/test-uuid',
-        environment: 'Not defined',
+        environment: 'Unset',
         grouping: {
           service: {
             environment: 'ENVIRONMENT_NOT_DEFINED',
@@ -509,7 +509,7 @@ describe('Transaction error rate alert', () => {
         },
         interval: '5 mins',
         reason:
-          'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: Unset, type: type-foo. Alert when > 10%.',
         serviceName: 'foo',
         threshold: 10,
         transactionName: undefined,
@@ -523,7 +523,7 @@ describe('Transaction error rate alert', () => {
         'kibana.alert.evaluation.threshold': 10,
         'kibana.alert.evaluation.value': 10,
         'kibana.alert.reason':
-          'Failed transactions is 10% in the last 5 mins for service: foo, env: Not defined, type: type-foo. Alert when > 10%.',
+          'Failed transactions is 10% in the last 5 mins for service: foo, env: Unset, type: type-foo. Alert when > 10%.',
         'processor.event': 'transaction',
         'service.environment': 'ENVIRONMENT_NOT_DEFINED',
         'service.name': 'foo',
