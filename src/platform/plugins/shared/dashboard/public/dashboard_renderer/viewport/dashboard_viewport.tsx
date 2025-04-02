@@ -59,9 +59,12 @@ export const DashboardViewport = ({
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
 
-  const panelCount = useMemo(() => {
-    return Object.keys(panels).length;
-  }, [panels]);
+  const { panelCount, sectionCount } = useMemo(() => {
+    return {
+      panelCount: Object.keys(panels).length,
+      sectionCount: Object.keys(sections ?? {}).length,
+    };
+  }, [panels, sections]);
 
   const classes = classNames({
     dshDashboardViewport: true,
@@ -142,7 +145,7 @@ export const DashboardViewport = ({
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        {panelCount === 0 && (sections ?? []).length === 0 ? (
+        {panelCount === 0 && sectionCount === 0 ? (
           <DashboardEmptyScreen />
         ) : (
           <DashboardGrid dashboardContainerRef={dashboardContainerRef} />

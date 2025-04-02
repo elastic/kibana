@@ -49,7 +49,7 @@ export const registerActions = async ({
   uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, BADGE_FILTERS_NOTIFICATION);
 
   uiActions.registerActionAsync(ACTION_ADD_SECTION, async () => {
-    const { AddSectionAction } = await import('./actions_module');
+    const { AddSectionAction } = await import('../dashboard_renderer/dashboard_module');
     return new AddSectionAction();
   });
   uiActions.attachAction(ADD_PANEL_TRIGGER, ACTION_ADD_SECTION);

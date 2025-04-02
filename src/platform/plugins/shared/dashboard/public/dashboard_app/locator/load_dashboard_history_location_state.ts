@@ -10,7 +10,7 @@
 import { ScopedHistory } from '@kbn/core-application-browser';
 
 import { ForwardedDashboardState } from './locator';
-import { convertPanelsArrayToPanelMap } from '../../../common';
+import { convertPanelsArrayToPanelMap, convertSectionArrayToSectionMap } from '../../../common';
 import { DashboardState } from '../../dashboard_api/types';
 
 export const loadDashboardHistoryLocationState = (
@@ -22,13 +22,10 @@ export const loadDashboardHistoryLocationState = (
     return {};
   }
 
-  const { panels, ...restOfState } = state;
-  if (!panels?.length) {
-    return restOfState;
-  }
-
+  const { panels, sections, ...restOfState } = state;
   return {
     ...restOfState,
-    ...{ panels: convertPanelsArrayToPanelMap(panels) },
+    ...(panels?.length && { panels: convertPanelsArrayToPanelMap(panels) }),
+    ...(sections?.length && { sections: convertSectionArrayToSectionMap(sections) }),
   };
 };
