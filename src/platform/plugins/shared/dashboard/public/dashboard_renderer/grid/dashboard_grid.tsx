@@ -9,7 +9,6 @@
 
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { omit } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
