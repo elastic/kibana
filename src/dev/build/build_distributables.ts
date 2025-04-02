@@ -33,6 +33,7 @@ export interface BuildOptions {
   createDockerUBI: boolean;
   createDockerWolfi: boolean;
   createDockerCloud: boolean;
+  createDockerCloudFIPS: boolean;
   createDockerServerless: boolean;
   createDockerContexts: boolean;
   createDockerFIPS: boolean;
@@ -166,6 +167,15 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerFIPS) {
     // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
     await run(Tasks.CreateDockerFIPS);
+  }
+
+  if (options.createDockerCloudFIPS) {
+    // control w/ --docker-images and --skip-docker-cloud-fips
+    if (options.downloadCloudDependencies) {
+      // control w/ --skip-cloud-dependencies-download
+      await run(Tasks.DownloadCloudDependencies);
+    }
+    await run(Tasks.CreateDockerCloudFIPS);
   }
 
   if (options.createDockerContexts) {

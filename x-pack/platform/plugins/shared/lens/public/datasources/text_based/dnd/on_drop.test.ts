@@ -138,7 +138,7 @@ describe('onDrop', () => {
         field: 'field',
         id: 'field',
         humanData: {
-          label: '?field',
+          label: '??field',
         },
       },
       target: {
@@ -151,7 +151,7 @@ describe('onDrop', () => {
           layerNumber: 1,
           position: 1,
           label: 'Empty dimension',
-          nextLabel: '?field',
+          nextLabel: '??field',
           canDuplicate: false,
         },
         columnId: 'empty',
@@ -163,7 +163,7 @@ describe('onDrop', () => {
       column1,
       column2,
       column3,
-      { columnId: 'empty', fieldName: '?field', meta: { type: 'number' }, variable: 'field' },
+      { columnId: 'empty', fieldName: '??field', meta: { type: 'number' }, variable: 'field' },
     ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({
@@ -209,7 +209,7 @@ describe('onDrop', () => {
         field: 'field',
         id: 'field',
         humanData: {
-          label: '?field',
+          label: '??field',
         },
       },
       dropType: 'field_replace' as DropType,
@@ -217,7 +217,7 @@ describe('onDrop', () => {
     const expectedColumns = [
       column1,
       column2,
-      { columnId: 'columnId3', fieldName: '?field', meta: { type: 'number' }, variable: 'field' },
+      { columnId: 'columnId3', fieldName: '??field', meta: { type: 'number' }, variable: 'field' },
     ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({

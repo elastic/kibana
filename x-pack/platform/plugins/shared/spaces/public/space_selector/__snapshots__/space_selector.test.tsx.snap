@@ -2,7 +2,17 @@
 
 exports[`it renders with custom logo 1`] = `
 <_KibanaPageTemplate
-  className="spcSpaceSelector"
+  css={
+    Object {
+      "map": undefined,
+      "name": "1si5isr",
+      "next": undefined,
+      "styles": "
+          background-color: transparent;
+        ",
+      "toString": [Function],
+    }
+  }
   data-test-subj="kibanaSpaceSelector"
 >
   <EuiPortal>
@@ -34,8 +44,21 @@ exports[`it renders with custom logo 1`] = `
         color="subdued"
       >
         <h1
-          className="eui spcSpaceSelector__pageHeader"
-          tabIndex={0}
+          css={
+            Object {
+              "map": undefined,
+              "name": "1tq4o89",
+              "next": undefined,
+              "styles": "
+                  &:focus {
+                    outline: none;
+                    text-decoration: underline;
+                  }
+                ",
+              "toString": [Function],
+            }
+          }
+          tabIndex={-1}
         >
           <MemoizedFormattedMessage
             defaultMessage="Select your space"
@@ -62,7 +85,17 @@ exports[`it renders with custom logo 1`] = `
 
 exports[`it renders without crashing 1`] = `
 <_KibanaPageTemplate
-  className="spcSpaceSelector"
+  css={
+    Object {
+      "map": undefined,
+      "name": "1si5isr",
+      "next": undefined,
+      "styles": "
+          background-color: transparent;
+        ",
+      "toString": [Function],
+    }
+  }
   data-test-subj="kibanaSpaceSelector"
 >
   <EuiPortal>
@@ -93,8 +126,21 @@ exports[`it renders without crashing 1`] = `
         color="subdued"
       >
         <h1
-          className="eui spcSpaceSelector__pageHeader"
-          tabIndex={0}
+          css={
+            Object {
+              "map": undefined,
+              "name": "1tq4o89",
+              "next": undefined,
+              "styles": "
+                  &:focus {
+                    outline: none;
+                    text-decoration: underline;
+                  }
+                ",
+              "toString": [Function],
+            }
+          }
+          tabIndex={-1}
         >
           <MemoizedFormattedMessage
             defaultMessage="Select your space"
