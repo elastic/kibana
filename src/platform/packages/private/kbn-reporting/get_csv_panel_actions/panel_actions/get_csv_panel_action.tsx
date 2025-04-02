@@ -190,7 +190,7 @@ export class ReportingCsvPanelAction implements ActionDefinition<EmbeddableApiCo
    * @deprecated
    */
   private executeDownload = async (params: ExecutionParamsOld) => {
-    // TODO: fix for ES|QL
+    // Deprecated and does not support ES|QL mode
     const [startServices] = await firstValueFrom(this.startServices$);
     const { searchSource, columns, title } = params;
     const immediateJobParams = this.apiClient.getDecoratedJobParams({
