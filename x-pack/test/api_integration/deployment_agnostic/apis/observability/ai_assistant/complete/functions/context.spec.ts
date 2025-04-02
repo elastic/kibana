@@ -25,8 +25,8 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_pr
 import {
   addSampleDocsToInternalKb,
   clearKnowledgeBase,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
 } from '../../utils/knowledge_base';
 import { chatComplete } from '../../utils/conversation';
 
@@ -70,7 +70,6 @@ const userPrompt = `What's my favourite color?`;
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
 
   describe('context', function () {
@@ -85,7 +84,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
         port: llmProxy.getPort(),
       });
-
+      await setupKnowledgeBase(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
 
       ({ getDocuments } = llmProxy.interceptScoreToolChoice(log));
@@ -108,8 +107,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         actionId: connectorId,
       });
 
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
     });
 
