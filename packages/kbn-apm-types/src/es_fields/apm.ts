@@ -197,6 +197,12 @@ export const TELEMETRY_SDK_NAME = 'telemetry.sdk.name';
 export const TELEMETRY_SDK_LANGUAGE = 'telemetry.sdk.language';
 export const TELEMETRY_SDK_VERSION = 'telemetry.sdk.version';
 
+// OpenTelemetry semconv fields for HTTP server https://opentelemetry.io/docs/specs/semconv/http/http-spans/#http-server-semantic-conventions
+export const URL_PATH = 'url.path';
+export const URL_SCHEME = 'url.scheme';
+export const SERVER_ADDRESS = 'server.address';
+export const SERVER_PORT = 'server.port';
+
 // OpenTelemetry span links
 export const LINKS_SPAN_ID = 'links.span_id';
 export const LINKS_TRACE_ID = 'links.trace_id';
