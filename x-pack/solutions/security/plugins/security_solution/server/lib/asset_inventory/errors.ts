@@ -9,6 +9,6 @@ import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/managemen
 import type { KibanaResponseFactory } from '@kbn/core-http-server';
 
 export const errorInactiveFeature = (response: KibanaResponseFactory) =>
-  response.conflict({
+  response.forbidden({
     body: `${SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING} feature must be activated first`,
   });
