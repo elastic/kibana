@@ -251,7 +251,7 @@ export const markdownStyles = (isReversed: boolean) => {
       borderRadius: `${kbnMarkdownSizeXXS}`,
       '&::before, &::after': {
         letterSpacing: '-.2em',
-        content: '\xa0',
+        content: '"\xa0"',
       },
       ...(isReversed && {
         backgroundColor: `${kbnMarkdownAlphaLightestShadeReversed}`,

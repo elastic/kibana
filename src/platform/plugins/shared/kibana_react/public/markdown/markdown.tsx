@@ -80,7 +80,7 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   openLinksInNewTab?: boolean;
   whiteListedRules?: string[];
   onRender?: () => void;
-  isReversed: boolean;
+  isReversed?: boolean;
 }
 
 export const Markdown = (props: MarkdownProps) => {
@@ -93,7 +93,7 @@ export const Markdown = (props: MarkdownProps) => {
     markdown = '',
     openLinksInNewTab,
     whiteListedRules,
-    isReversed,
+    isReversed = false,
     ...rest
   } = props;
   const classes = classNames('kbnMarkdown__body', className);
