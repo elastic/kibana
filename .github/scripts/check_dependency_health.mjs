@@ -12,6 +12,9 @@
 import axios from 'axios';
 import semver from 'semver';
 
+import core from '@actions/core';
+import github from '@actions/github';
+
 const SNYK_REST_API_BASE = 'https://api.snyk.io/rest';
 const SNYK_API_VERSION = '2025-01-22';
 const NPM_REGISTRY_URL = 'https://registry.npmjs.org/{packageName}';
@@ -32,11 +35,17 @@ const WEIGHT_LOW      =  0.5; // 'Cost' weight per low vulnerability
 const INTERNAL_PACKAGE_PREFIX = '@kbn/';
 const TARGET_FILE = 'package.json';
 
-const run = async ({ github, context, core, snykToken, snykOrgId }) => {
+const run = async () => {
+  const context = github.context;
+  const snykToken = process.env.SNYK_TOKEN;
+  const snykOrgId = process.env.SNYK_ORG_ID;
+  const githubToken = process.env.GITHUB_TOKEN;
+  const octokit = github.getOctokit(githubToken);
+
   async function getFileContent(owner, repo, path, ref) {
     core.info(`Workspaceing content for ${path} at ref ${ref}`);
     try {
-      const response = await github.rest.repos.getContent({
+      const response = await octokit.rest.repos.getContent({
         owner,
         repo,
         path,
@@ -313,16 +322,23 @@ const run = async ({ github, context, core, snykToken, snykOrgId }) => {
   }
 
   try {
-    const pr = context.payload.pull_request;
-    if (!pr) {
-      core.warning('Not a pull request context. Skipping analysis.');
-      return { commentBody: '', analysisPerformed: false };
-    }
+    // const pr = context.payload.pull_request;
+    // if (!pr) {
+    //   core.warning('Not a pull request context. Skipping analysis.');
+    //   return { commentBody: '', analysisPerformed: false };
+    // }
 
     const owner = context.repo.owner;
     const repo = context.repo.repo;
-    const baseSha = pr.base.sha;
-    const headSha = pr.head.sha;
+    // const baseSha = pr.base.sha;
+    // const headSha = pr.head.sha;
+    const { data: mainBranch } = await octokit.rest.repos.getBranch({
+      owner,
+      repo,
+      branch: 'main',
+    });
+    const baseSha = mainBranch.commit.sha;
+    const headSha = context.sha;
 
     const packageJsonPath = TARGET_FILE;
 
@@ -380,15 +396,22 @@ const run = async ({ github, context, core, snykToken, snykOrgId }) => {
 
     await Promise.all(promises);
 
-    const comment = formatReport(analysisResults);
+    const report = formatReport(analysisResults);
     core.info('Analysis complete.');
-    core.setOutput('comment_body', comment);
+    core.setOutput('comment_body', report);
 
-    return { commentBody: comment, analysisPerformed: true };
+    await octokit.rest.repos.createCommitComment({
+      owner,
+      repo,
+      commit_sha: headSha, // Comment on the commit that triggered the workflow
+      body: report,
+  });
+
+    return { commentBody: report, analysisPerformed: false };
   } catch (error) {
     core.setFailed(`Action failed with error: ${error.message}\n${error.stack}`);
     return { commentBody: '', analysisPerformed: false };
   }
 };
 
-export default run;
+run();

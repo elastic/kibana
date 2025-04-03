@@ -5,7 +5,7 @@ on:
       - '**/package.json'
   push:
     branches:
-      - elena-shostak:health-score-test
+      - health-score-test
 
 permissions:
   contents: read
@@ -30,25 +30,10 @@ jobs:
         working-directory: ./.github/scripts
 
       - name: Run Dependency Analysis Script
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
         id: analysis
-        with:
-          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-          script: |
-            const scriptModule = await import('./.github/scripts/check_dependency_health.mjs');
-            const analyzeDependencies = scriptModule.default;
-
-            const result = await analyzeDependencies({
-              github,
-              context,
-              core,
-              snykToken: process.env.SNYK_TOKEN,
-              snykOrgId: process.env.SNYK_ORG_ID
-            });
-
-            core.setOutput('comment_body', result.commentBody);
-            core.setOutput('analysis_performed', result.analysisPerformed);
+        run: node .github/scripts/check_dependency_health.mjs
         env:
+          GITHUB_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
 
