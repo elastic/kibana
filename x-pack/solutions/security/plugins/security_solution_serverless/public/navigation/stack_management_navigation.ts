@@ -105,7 +105,7 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
           ],
         },
         {
-          title: 'Machine Learning XOXO',
+          title: i18nStrings.ml.title,
           children: [
             { link: 'management:overview' },
             { link: 'management:anomaly_detection' },

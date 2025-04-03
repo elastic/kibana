@@ -455,14 +455,9 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                         title: i18nStrings.ml.overview,
                       },
                       {
-                        id: 'ml:notifications',
-                        link: 'ml:notifications',
-                        title: i18nStrings.ml.notifications,
-                      },
-                      {
-                        id: 'ml:memoryUsage',
-                        link: 'ml:memoryUsage',
-                        title: i18nStrings.ml.memoryUsage,
+                        id: 'ml:data_visualizer',
+                        link: 'ml:dataVisualizer',
+                        title: i18nStrings.ml.dataVisualizer,
                       },
                     ],
                   },
@@ -471,11 +466,6 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                     title: i18nStrings.ml.anomalyDetection.title,
                     breadcrumbStatus: 'hidden',
                     children: [
-                      {
-                        id: 'ml:anomalyDetection',
-                        link: 'ml:anomalyDetection',
-                        title: i18nStrings.ml.anomalyDetection.jobs,
-                      },
                       {
                         id: 'ml:anomalyExplorer',
                         link: 'ml:anomalyExplorer',
@@ -486,16 +476,6 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                         link: 'ml:singleMetricViewer',
                         title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
                       },
-                      {
-                        id: 'ml:suppliedConfigurations',
-                        link: 'ml:suppliedConfigurations',
-                        title: i18nStrings.ml.anomalyDetection.suppliedConfigurations,
-                      },
-                      {
-                        id: 'ml:settings',
-                        link: 'ml:settings',
-                        title: i18nStrings.ml.anomalyDetection.settings,
-                      },
                     ],
                   },
                   {
@@ -503,11 +483,6 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                     title: i18nStrings.ml.dataFrameAnalytics.title,
                     breadcrumbStatus: 'hidden',
                     children: [
-                      {
-                        id: 'ml:dataFrameAnalytics',
-                        link: 'ml:dataFrameAnalytics',
-                        title: i18nStrings.ml.dataFrameAnalytics.jobs,
-                      },
                       {
                         id: 'ml:resultExplorer',
                         link: 'ml:resultExplorer',
@@ -517,45 +492,6 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                         id: 'ml:analyticsMap',
                         link: 'ml:analyticsMap',
                         title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
-                      },
-                    ],
-                  },
-                  {
-                    id: 'category-model_management',
-                    title: i18nStrings.ml.modelManagement.title,
-                    breadcrumbStatus: 'hidden',
-                    children: [
-                      {
-                        id: 'ml:nodesOverview',
-                        link: 'ml:nodesOverview',
-                        title: i18nStrings.ml.modelManagement.trainedModels,
-                      },
-                    ],
-                  },
-                  {
-                    id: 'category-data_visualizer',
-                    title: i18nStrings.ml.dataVisualizer.title,
-                    breadcrumbStatus: 'hidden',
-                    children: [
-                      {
-                        id: 'ml:fileUpload',
-                        link: 'ml:fileUpload',
-                        title: i18nStrings.ml.dataVisualizer.fileDataVisualizer,
-                      },
-                      {
-                        id: 'ml:indexDataVisualizer',
-                        link: 'ml:indexDataVisualizer',
-                        title: i18nStrings.ml.dataVisualizer.dataViewDataVisualizer,
-                      },
-                      {
-                        id: 'ml:esqlDataVisualizer',
-                        link: 'ml:esqlDataVisualizer',
-                        title: i18nStrings.ml.dataVisualizer.esqlDataVisualizer,
-                      },
-                      {
-                        id: 'ml:dataDrift',
-                        link: 'ml:dataDrift',
-                        title: i18nStrings.ml.dataVisualizer.dataDrift,
                       },
                     ],
                   },
@@ -601,16 +537,6 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                 title: i18nStrings.entityStore,
                 sideNavStatus: 'hidden',
               },
-            ],
-          },
-          {
-            title: 'Machine Learning XOXO',
-            children: [
-              { link: 'management:overview' },
-              { link: 'management:anomaly_detection' },
-              { link: 'management:analytics' },
-              { link: 'management:trained_models' },
-              { link: 'management:supplied_configurations' },
             ],
           },
         ],
@@ -712,6 +638,16 @@ const createNavigationTree$ = (services: Services): Rx.Observable<NavigationTree
                   {
                     link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
                   },
+                ],
+              },
+              {
+                title: i18nStrings.ml.title,
+                children: [
+                  { link: 'management:overview' },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
+                  { link: 'management:trained_models' },
+                  { link: 'management:supplied_configurations' },
                 ],
               },
               {
