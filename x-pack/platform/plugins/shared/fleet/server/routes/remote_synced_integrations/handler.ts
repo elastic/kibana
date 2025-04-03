@@ -8,8 +8,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
-
-import { getRemoteSyncedIntegrationsStatus } from '../../tasks/sync_integrations/sync_integrations_on_remote';
+import { getRemoteSyncedIntegrationsStatus } from '../../tasks/sync_integrations/compare_synced_integrations';
 
 export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<undefined> = async (
   context,

@@ -9,18 +9,10 @@ import { PackageNotFoundError } from '../../errors';
 import { outputService } from '../../services';
 
 import { installCustomAsset } from './custom_assets';
+
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
 jest.mock('../../services');
-jest.mock('./custom_assets', () => {
-  return { getPipeline: jest.fn(), getComponentTemplate: jest.fn(), installCustomAsset: jest.fn() };
-});
-jest.mock('../../services/epm/packages/get', () => {
-  return {
-    ...jest.requireActual('../../services/epm/packages/get'),
-    getPackageSavedObjects: jest.fn(),
-  };
-});
 
 const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
 

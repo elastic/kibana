@@ -32,7 +32,6 @@ export const getFollowerIndex = async (
   );
 
   const indexNames = Object.keys(indices);
-
   if (indexNames.length > 1) {
     throw new Error(
       `Not supported to sync multiple indices with prefix ${FLEET_SYNCED_INTEGRATIONS_CCR_INDEX_PREFIX}`
