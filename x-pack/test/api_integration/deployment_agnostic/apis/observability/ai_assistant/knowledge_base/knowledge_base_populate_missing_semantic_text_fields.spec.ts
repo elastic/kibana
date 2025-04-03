@@ -65,7 +65,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return res.hits.hits;
   }
 
-  describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
+  describe('when the knowledge base index was created before 8.15', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);

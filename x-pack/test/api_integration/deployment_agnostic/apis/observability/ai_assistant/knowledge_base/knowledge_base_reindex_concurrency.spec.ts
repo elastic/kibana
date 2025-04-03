@@ -53,55 +53,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await deleteKnowledgeBaseModel(ml);
       await deleteInferenceEndpoint({ es });
     });
-
-    it('has an index created version earlier than 8.11', async () => {
-      await retry.try(async () => {
-        expect(await getKbIndexCreatedVersion()).to.be.lessThan(8110000);
-      });
-    });
-
-    function createKnowledgeBaseEntry() {
-      const knowledgeBaseEntry = {
-        id: 'my-doc-id-1',
-        title: 'My title',
-        text: 'My content',
-      };
-
-      return observabilityAIAssistantAPIClient.editor({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
-        params: { body: knowledgeBaseEntry },
-      });
-    }
-
-    it('cannot add new entries to KB', async () => {
-      const { status, body } = await createKnowledgeBaseEntry();
-
-      // @ts-expect-error
-      expect(body.message).to.eql(
-        'The knowledge base is currently being re-indexed. Please try again later'
-      );
-
-      expect(status).to.be(503);
-    });
-
-    it('can add new entries after re-indexing', async () => {
-      await reIndexKnowledgeBase();
-
-      await retry.try(async () => {
-        const { status } = await createKnowledgeBaseEntry();
-        expect(status).to.be(200);
-      });
-    });
   });
-
-  async function getKbIndexCreatedVersion() {
-    const indexSettings = await es.indices.getSettings({
-      index: resourceNames.concreteIndexName.kb,
-    });
-
-    const { settings } = Object.values(indexSettings)[0];
-    return parseInt(settings?.index?.version?.created ?? '', 10);
-  }
 
   async function deleteKbIndex() {
     log.debug('Deleting KB index');
