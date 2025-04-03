@@ -172,7 +172,11 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
-    return [...commandsSpecificSuggestions, ...controlSuggestions];
+    // if the last character is a question mark, I want to suggest only the control variables
+    if (controlSuggestions.length) {
+      return controlSuggestions;
+    }
+    return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
     const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
@@ -186,7 +190,11 @@ export async function suggest(
       getVariables,
       supportsControls
     );
-    return [...functionsSpecificSuggestions, ...controlSuggestions];
+    // if the last character is a question mark, I want to suggest only the control variables
+    if (controlSuggestions.length) {
+      return controlSuggestions;
+    }
+    return functionsSpecificSuggestions;
   }
   if (astContext.type === 'list') {
     return getListArgsSuggestions(
