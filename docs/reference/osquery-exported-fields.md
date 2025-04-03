@@ -14,6 +14,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 
 ## Fields [osquery-fields]
+
 **UUID** - keyword, text.text
 
 * *system_extensions.UUID* - Extension unique id
@@ -6598,5 +6599,3 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *azure_instance_metadata.zone* - Availability zone of the VM
 * *ycloud_instance_metadata.zone* - Availability zone of the VM
-
-
