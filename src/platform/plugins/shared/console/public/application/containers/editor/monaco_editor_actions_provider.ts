@@ -38,7 +38,6 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
-  isInsideTripleQuote,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';

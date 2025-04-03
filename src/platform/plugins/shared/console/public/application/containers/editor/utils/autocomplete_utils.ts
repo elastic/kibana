@@ -485,4 +485,4 @@ export const isInsideTripleQuote = (text: string) => {
   }
 
   return insideTripleQuote;
-}
+};
