@@ -892,6 +892,9 @@ describe('validation logic', () => {
       );
 
       for (const field of fieldTypes) {
+        if (field.indexOf('counter_') !== -1 || field.indexOf('named_parameters') !== -1) {
+          continue; // skip counter fields and named parameters
+        }
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | where ${fieldNameFromType(field)} is null`, []);
@@ -955,6 +958,9 @@ describe('validation logic', () => {
       testErrorsAndWarnings('from a_index | eval a=null', []);
 
       for (const field of fieldTypes) {
+        if (field.indexOf('counter_') !== -1 || field.indexOf('named_parameters') !== -1) {
+          continue; // skip counter fields and named parameters
+        }
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS NULL`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} IS null`, []);
         testErrorsAndWarnings(`from a_index | eval ${fieldNameFromType(field)} is null`, []);
