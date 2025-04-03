@@ -166,19 +166,15 @@ export class AssetInventoryDataClient {
   private async checkUISettingEnabled() {
     const { uiSettingsClient, logger } = this.options;
 
-    logger.debug(
-      `Checking if ${SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING} advanced setting is enabled`
-    );
-
     const isAssetInventoryEnabled = await uiSettingsClient.get<boolean>(
       SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
     );
 
-    logger.debug(
-      `Checked ${SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING} advanced setting is ${
-        isAssetInventoryEnabled ? 'enabled' : 'disabled'
-      }`
-    );
+    if (!isAssetInventoryEnabled) {
+      logger.debug(
+        `${SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING} advanced setting is disabled`
+      );
+    }
 
     return isAssetInventoryEnabled;
   }
