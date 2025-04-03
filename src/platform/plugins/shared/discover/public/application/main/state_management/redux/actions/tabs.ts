@@ -28,6 +28,11 @@ export const setTabs: InternalStateThunkActionCreator<
     const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
 
     for (const tab of removedTabs) {
+      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
+
+      tabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
+      tabRuntimeState.customizationService$.getValue()?.cleanup();
+
       delete runtimeStateManager.tabs.byId[tab.id];
     }
 

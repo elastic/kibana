@@ -11,16 +11,17 @@ import { renderHook, act } from '@testing-library/react';
 import React from 'react';
 import { getDiscoverStateMock } from '../__mocks__/discover_state.mock';
 import {
+  type ConnectedCustomizationService,
   DiscoverCustomizationProvider,
+  getConnectedCustomizationService,
   useDiscoverCustomization,
   useDiscoverCustomization$,
-  useDiscoverCustomizationService,
 } from './customization_provider';
 import type { DiscoverCustomization, DiscoverCustomizationId } from './customization_service';
 import { createCustomizationService } from './customization_service';
 import type { CustomizationCallback } from './types';
 
-describe('useDiscoverCustomizationService', () => {
+describe('getConnectedCustomizationService', () => {
   it('should provide customization service', async () => {
     let resolveCallback = (_: () => void) => {};
     const promise = new Promise<() => void>((resolve) => {
@@ -31,21 +32,21 @@ describe('useDiscoverCustomizationService', () => {
     });
     const customizationCallbacks: CustomizationCallback[] = [callback];
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    const wrapper = renderHook(() => useDiscoverCustomizationService());
-    const servicePromise = wrapper.result.current({
+    const servicePromise = getConnectedCustomizationService({
       stateContainer,
       customizationCallbacks,
     });
-    expect(callback).toHaveBeenCalledTimes(0);
+    let service: ConnectedCustomizationService | undefined;
+    expect(callback).toHaveBeenCalledTimes(1);
     const cleanup = jest.fn();
     await act(async () => {
       resolveCallback(cleanup);
       await promise;
-      await servicePromise;
+      service = await servicePromise;
     });
     expect(callback).toHaveBeenCalledTimes(1);
     expect(cleanup).not.toHaveBeenCalled();
-    wrapper.unmount();
+    await service?.cleanup();
     await act(async () => {
       await promise;
     });

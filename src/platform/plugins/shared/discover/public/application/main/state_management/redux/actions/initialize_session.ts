@@ -35,9 +35,11 @@ import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
+import type { ConnectedCustomizationService } from '../../../../../customizations';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
+  customizationService: ConnectedCustomizationService;
   discoverSessionId: string | undefined;
   dataViewSpec: DataViewSpec | undefined;
   defaultUrlState: DiscoverAppState | undefined;
@@ -49,7 +51,13 @@ export const initializeSession: InternalStateThunkActionCreator<
 > =
   ({
     tabId,
-    initializeSessionParams: { stateContainer, discoverSessionId, dataViewSpec, defaultUrlState },
+    initializeSessionParams: {
+      stateContainer,
+      customizationService,
+      discoverSessionId,
+      dataViewSpec,
+      defaultUrlState,
+    },
   }) =>
   async (
     dispatch,
@@ -113,7 +121,10 @@ export const initializeSession: InternalStateThunkActionCreator<
       setBreadcrumbs({ services, titleBreadcrumbText: persistedDiscoverSession.title });
     }
 
-    const { currentDataView$, stateContainer$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+    const { currentDataView$, stateContainer$, customizationService$ } = selectTabRuntimeState(
+      runtimeStateManager,
+      tabId
+    );
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
@@ -239,6 +250,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     stateContainer.appState.resetToState(initialState);
     stateContainer.appState.resetInitialState();
     stateContainer$.next(stateContainer);
+    customizationService$.next(customizationService);
     discoverSessionLoadTracker.reportEvent();
 
     return { showNoDataPage: false };

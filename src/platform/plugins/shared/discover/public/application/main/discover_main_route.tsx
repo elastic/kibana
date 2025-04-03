@@ -12,6 +12,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { useEffect, useState } from 'react';
 import React from 'react';
+import useUnmount from 'react-use/lib/useUnmount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -103,6 +104,13 @@ export const DiscoverMainRoute = ({
       initializeMainRoute(rootProfileState);
     }
   }, [initializeMainRoute, rootProfileState]);
+
+  useUnmount(() => {
+    for (const tabRuntimeState of Object.values(runtimeStateManager.tabs.byId)) {
+      tabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
+      tabRuntimeState.customizationService$.getValue()?.cleanup();
+    }
+  });
 
   if (rootProfileState.rootProfileLoading || mainRouteInitializationState.loading) {
     return <BrandedLoadingIndicator />;
