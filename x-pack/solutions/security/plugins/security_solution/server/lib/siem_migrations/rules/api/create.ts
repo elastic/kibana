@@ -57,12 +57,11 @@ export const registerSiemRuleMigrationsCreateRoute = (
 
             if (!providedMigrationId) {
               /** if new migration */
+              await siemMigrationAuditLogger.logCreateMigration({});
               migrationId = await ruleMigrationsClient.data.migrations.create();
-              await siemMigrationAuditLogger.logCreateMigration({ migrationId });
             } else {
               /** if updating existing migration */
               migrationId = providedMigrationId;
-              await siemMigrationAuditLogger.logUpdateMigration({ migrationId });
             }
 
             const ruleMigrations = originalRules.map<CreateRuleMigrationInput>((originalRule) => ({

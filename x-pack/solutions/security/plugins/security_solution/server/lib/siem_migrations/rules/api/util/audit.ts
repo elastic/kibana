@@ -118,16 +118,6 @@ export class SiemMigrationAuditLogger {
     });
   }
 
-  public async logUpdateMigration(params: { migrationId: string; error?: Error }): Promise<void> {
-    const { migrationId, error } = params;
-    const message = `User updated the SIEM migration with [id=${migrationId}]`;
-    return this.log({
-      action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED,
-      message,
-      error,
-    });
-  }
-
   public async logGetMigration(params: { migrationId: string; error?: Error }): Promise<void> {
     const { migrationId, error } = params;
     const message = `User retrieved the SIEM migration with [id=${migrationId}]`;
