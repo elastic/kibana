@@ -10,6 +10,7 @@ import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import type { AggregationResult } from '../hooks/use_fetch_chart_data';
+import { ASSET_FIELDS } from '../constants';
 
 const chartTitle = i18n.translate(
   'xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle',
@@ -74,11 +75,11 @@ export const AssetInventoryBarChart = ({
             id="grouped-entity-types"
             xScaleType={ScaleType.Ordinal}
             yScaleType={ScaleType.Linear}
-            xAccessor="type"
+            xAccessor={ASSET_FIELDS.ENTITY_TYPE}
             yAccessors={['count']}
             yNice={true}
-            splitSeriesAccessors={['subType']}
-            stackAccessors={['type']}
+            splitSeriesAccessors={[ASSET_FIELDS.ENTITY_SUB_TYPE]}
+            stackAccessors={[ASSET_FIELDS.ENTITY_TYPE]}
             minBarHeight={1}
             data={entities}
           />

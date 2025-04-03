@@ -73,8 +73,8 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
 });
 
 export interface AggregationResult {
-  type: string;
-  subType: string;
+  [ASSET_FIELDS.ENTITY_TYPE]: string;
+  [ASSET_FIELDS.ENTITY_SUB_TYPE]: string;
   count: number;
 }
 
@@ -122,16 +122,16 @@ function transformAggregation(agg: AssetAggs) {
 
     for (const subtypeBucket of entitySubType.buckets) {
       result.push({
-        type: typeBucket.key,
-        subType: subtypeBucket.key,
+        [ASSET_FIELDS.ENTITY_TYPE]: typeBucket.key,
+        [ASSET_FIELDS.ENTITY_SUB_TYPE]: subtypeBucket.key,
         count: subtypeBucket.doc_count,
       });
     }
 
     if (entitySubType.sum_other_doc_count > 0) {
       result.push({
-        type: typeBucket.key,
-        subType: `${typeBucket.key} - ${tooltipOtherLabel}`,
+        [ASSET_FIELDS.ENTITY_TYPE]: typeBucket.key,
+        [ASSET_FIELDS.ENTITY_SUB_TYPE]: `${typeBucket.key} - ${tooltipOtherLabel}`,
         count: entitySubType.sum_other_doc_count,
       });
     }
