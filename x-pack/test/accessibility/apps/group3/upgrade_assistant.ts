@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with logs collection disabled', async () => {
-        await PageObjects.upgradeAssistant.clickEnableLoggingButton();
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with logs collection enabled', async () => {
-        await PageObjects.upgradeAssistant.clickVerifyLoggingButton();
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (!loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();

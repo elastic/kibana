@@ -42,6 +42,18 @@ export class UpgradeAssistantFlyoutObject extends FtrService {
     });
   }
 
+  async clickOpenEsDeprecationsFlyoutButton() {
+    return await this.retry.try(async () => {
+      if (await this.testSubjects.exists('enableLogsLink')) {
+        await this.clickEnableLoggingButton();
+      } else if (await this.testSubjects.exists('viewDetailsLink')) {
+        await this.clickVerifyLoggingButton();
+      } else {
+        this.log.debug('No relevant button found to open ES Deprecations Flyout');
+      }
+    });
+  }
+
   async clickEsDeprecationsPanel() {
     return await this.retry.try(async () => {
       await this.testSubjects.click('esStatsPanel');
