@@ -53,17 +53,36 @@ export interface SimulateProcessingDeps {
   streamsClient: StreamsClient;
 }
 
-export interface SimulationError {
+export interface BaseSimulationError {
   message: string;
-  processor_id?: string;
-  type:
-    | 'field_mapping_failure'
-    | 'generic_processor_failure'
-    | 'generic_simulation_failure'
-    | 'ignored_fields_failure'
-    | 'non_additive_processor_failure'
-    | 'reserved_field_failure';
 }
+
+export type SimulationError = BaseSimulationError &
+  (
+    | {
+        type: 'field_mapping_failure';
+      }
+    | {
+        type: 'generic_processor_failure';
+        processor_id: string;
+      }
+    | {
+        type: 'generic_simulation_failure';
+        processor_id?: string;
+      }
+    | {
+        type: 'ignored_fields_failure';
+        ignored_fields: Array<Record<string, string>>;
+      }
+    | {
+        type: 'non_additive_processor_failure';
+        processor_id: string;
+      }
+    | {
+        type: 'reserved_field_failure';
+        processor_id: string;
+      }
+  );
 
 export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed';
 
@@ -431,7 +450,7 @@ const computePipelineSimulationResult = (
     errors.push(...diff.errors); // Add diffing errors to the document errors list, such as reserved fields or non-additive changes
     errors.push(...ingestDocErrors); // Add ingestion errors to the document errors list, such as ignored_fields or mapping errors
     errors.forEach((error) => {
-      const procId = error.processor_id;
+      const procId = 'processor_id' in error && error.processor_id;
 
       if (procId && processorsMap[procId]) {
         processorsMap[procId].errors.push(error);
@@ -632,10 +651,10 @@ const collectIngestDocumentErrors = (docResult: SuccessfulIngestSimulateDocument
   }
 
   if (docResult.doc?.ignored_fields) {
-    const ignoredFields = docResult.doc.ignored_fields.map((ignored) => ignored.field).join(', ');
     errors.push({
       type: 'ignored_fields_failure',
-      message: `Some field were ignored for this document ingestion: [${ignoredFields}]`,
+      message: 'Some fields were ignored while simulating this document ingestion.',
+      ignored_fields: docResult.doc.ignored_fields,
     });
   }
 
@@ -670,15 +689,16 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
     detected_fields: [],
     documents: [],
     processors_metrics: {
-      ...(error.processor_id && {
-        [error.processor_id]: {
-          detected_fields: [],
-          errors: [error],
-          failure_rate: 1,
-          skipped_rate: 0,
-          success_rate: 0,
-        },
-      }),
+      ...('processor_id' in error &&
+        error.processor_id && {
+          [error.processor_id]: {
+            detected_fields: [],
+            errors: [error],
+            failure_rate: 1,
+            skipped_rate: 0,
+            success_rate: 0,
+          },
+        }),
     },
     failure_rate: 1,
     skipped_rate: 0,
