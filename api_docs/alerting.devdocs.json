@@ -3498,6 +3498,37 @@
           },
           {
             "parentPluginId": "alerting",
+            "id": "def-server.RuleExecutorServices.actionsClient",
+            "type": "Object",
+            "tags": [],
+            "label": "actionsClient",
+            "description": [
+              "\nOnly available for Attack Discovery"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.PublicMethodsOf",
+                "text": "PublicMethodsOf"
+              },
+              "<",
+              {
+                "pluginId": "actions",
+                "scope": "server",
+                "docId": "kibActionsPluginApi",
+                "section": "def-server.ActionsClient",
+                "text": "ActionsClient"
+              },
+              "> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/alerting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
             "id": "def-server.RuleExecutorServices.getDataViews",
             "type": "Function",
             "tags": [],
