@@ -15,10 +15,10 @@ import { IntegrationsFacets } from '../../constants';
 
 export const FEATURED_INTEGRATION_SORT_ORDER = [
   // 'splunk',
-  'google_secops',
-  'microsoft_sentinel',
-  'sentinel_one',
-  'crowdstrike',
+  'epr:google_secops',
+  'epr:microsoft_sentinel',
+  'epr:sentinel_one',
+  'epr:crowdstrike',
 ];
 
 const addPathParamToUrl = (url: string, path: string) => {
@@ -66,8 +66,7 @@ const applyCategoryBadgeAndStyling = (
 const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
   return integrationsList.sort(
     (a, b) =>
-      FEATURED_INTEGRATION_SORT_ORDER.indexOf(a.name) -
-      FEATURED_INTEGRATION_SORT_ORDER.indexOf(b.name)
+      FEATURED_INTEGRATION_SORT_ORDER.indexOf(a.id) - FEATURED_INTEGRATION_SORT_ORDER.indexOf(b.id)
   );
 };
 
