@@ -38,7 +38,7 @@ describe('AssetInventoryDataClient', () => {
       jest.clearAllMocks();
     });
 
-    it('returns INSUFFICIENT_PRIVILEGES when user lacks required privileges', async () => {
+    it('returns INSUFFICIENT_PRIVILEGES with missing privileges when user lacks required privileges', async () => {
       const noPrivileges = {
         ...mockEntityStorePrivileges,
         has_all_required: false,
@@ -48,7 +48,7 @@ describe('AssetInventoryDataClient', () => {
 
       expect(result).toEqual({
         status: 'insufficient_privileges',
-        privileges: noPrivileges.privileges,
+        privileges: noPrivileges,
       });
     });
 

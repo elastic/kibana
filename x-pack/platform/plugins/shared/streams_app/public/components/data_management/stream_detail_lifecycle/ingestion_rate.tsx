@@ -42,7 +42,7 @@ export function IngestionRate({
   isLoadingStats,
   refreshStats,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
   refreshStats: () => void;
@@ -100,7 +100,7 @@ export function IngestionRate({
         direction="column"
         gutterSize="xs"
       >
-        {!definition ? null : isIlmLifecycle(definition?.effective_lifecycle) ? (
+        {isIlmLifecycle(definition.effective_lifecycle) ? (
           <ChartBarSeries
             definition={definition}
             stats={stats}
@@ -126,7 +126,7 @@ function ChartAreaSeries({
   timeRange,
   isLoadingStats,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
   isLoadingStats: boolean;
@@ -140,7 +140,7 @@ function ChartAreaSeries({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : !definition || isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
     <EuiLoadingChart />
   ) : (
     <>
@@ -191,7 +191,7 @@ function ChartBarSeries({
   timeRange,
   isLoadingStats,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
   isLoadingStats: boolean;
@@ -206,7 +206,7 @@ function ChartBarSeries({
 
   return ingestionRateError ? (
     'Failed to load ingestion rate'
-  ) : !definition || isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
+  ) : isLoadingStats || isLoadingIngestionRate || !ingestionRate ? (
     <EuiLoadingChart />
   ) : (
     <>
