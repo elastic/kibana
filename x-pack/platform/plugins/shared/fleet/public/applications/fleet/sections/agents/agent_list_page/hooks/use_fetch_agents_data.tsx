@@ -293,7 +293,7 @@ export function useFetchAgentsData() {
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
-            setAllTags(newAllTags);
+            setAllTags([...newAllTags, 'No Tags']);
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);

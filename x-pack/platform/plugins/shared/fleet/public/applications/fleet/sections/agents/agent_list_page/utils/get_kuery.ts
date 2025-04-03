@@ -39,9 +39,15 @@ export const getKuery = ({
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
-    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
-      .map((tag) => `"${tag}"`)
-      .join(' or ')})`;
+    if (selectedTags.includes('No Tags')) {
+      kueryBuilder = `${kueryBuilder} ((NOT ${AGENTS_PREFIX}.tags : (*)) or ${AGENTS_PREFIX}.tags : (${selectedTags
+        .map((tag) => `"${tag}"`)
+        .join(' or ')}))`;
+    } else {
+      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
+        .map((tag) => `"${tag}"`)
+        .join(' or ')})`;
+    }
   }
 
   if (selectedAgentIds?.length) {
