@@ -255,7 +255,7 @@ export const fetchAndCompareSyncedIntegrations = async (
   savedObjectsClient: SavedObjectsClientContract,
   index: string,
   logger: Logger
-) => {
+): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
   try {
     // find integrations on ccr index
     const searchRes = await esClient.search<SyncIntegrationsData>({
@@ -305,10 +305,10 @@ export const fetchAndCompareSyncedIntegrations = async (
 
     return result;
   } catch (error) {
-    logger.error('error', error.message);
+    logger.error('error', error?.message);
     return {
       integrations: [],
-      error,
+      error: error?.message,
     };
   }
 };
@@ -316,7 +316,7 @@ export const fetchAndCompareSyncedIntegrations = async (
 const compareIntegrations = (
   ccrIntegrations: IntegrationsData[],
   installedIntegrationsByName: Record<string, SavedObjectsFindResult<Installation>>
-) => {
+): { integrations: RemoteSyncedIntegrationsStatus[] } => {
   const integrationsStatus: RemoteSyncedIntegrationsStatus[] | undefined = ccrIntegrations?.map(
     (ccrIntegration) => {
       const localIntegrationSO = installedIntegrationsByName[ccrIntegration.package_name];
@@ -355,8 +355,8 @@ const fetchAndCompareCustomAssets = async (
   esClient: ElasticsearchClient,
   logger: Logger,
   ccrCustomAssets: { [key: string]: CustomAssetsData }
-) => {
-  if (!ccrCustomAssets) return;
+): Promise<RemoteSyncedCustomAssetsRecord> => {
+  if (!ccrCustomAssets) return {};
 
   const abortController = new AbortController();
 
@@ -392,8 +392,8 @@ const fetchAndCompareCustomAssets = async (
     });
     return result;
   } catch (error) {
-    logger.error('error', error.message);
-    return { error };
+    logger.error('error', error?.message);
+    return { error: error?.message };
   }
 };
 
@@ -410,8 +410,7 @@ const compareCustomAssets = ({
     if (!ingestPipelines) {
       return {
         ...ccrCustomAsset,
-        sync_status: 'failed' as SyncStatus.FAILED,
-        error: `No custom pipelines found on remote index`,
+        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     }
 
@@ -432,8 +431,7 @@ const compareCustomAssets = ({
     if (!componentTemplates) {
       return {
         ...ccrCustomAsset,
-        sync_status: 'failed' as SyncStatus.FAILED,
-        error: `No component templates found on remote index`,
+        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     }
 

@@ -28,5 +28,5 @@ export interface RemoteSyncedCustomAssetsStatus extends CustomAssetsData {
 }
 
 export interface RemoteSyncedCustomAssetsRecord {
-  [key: string]: RemoteSyncedCustomAssetsStatus;
+  [key: string]: RemoteSyncedCustomAssetsStatus | string;
 }
