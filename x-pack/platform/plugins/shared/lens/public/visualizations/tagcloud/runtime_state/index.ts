@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { FormBasedPersistedState } from '../../../datasources/form_based/types';
 import { TagcloudState } from '../types';
 import { getRuntimeConverters } from './converters';
@@ -14,6 +13,5 @@ export function convertToRuntimeState(
   state: TagcloudState,
   datasourceState?: FormBasedPersistedState
 ): TagcloudState {
-  const clonedState = cloneDeep(state) as TagcloudState;
-  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), clonedState);
+  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), state);
 }

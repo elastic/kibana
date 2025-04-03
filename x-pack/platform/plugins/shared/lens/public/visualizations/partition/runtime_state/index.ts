@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { PieVisualizationState } from '../../../../common/types';
 import { FormBasedPersistedState } from '../../../datasources/form_based/types';
 
@@ -15,6 +14,5 @@ export function convertToRuntimeState(
   state: PieVisualizationState,
   datasourceState?: FormBasedPersistedState
 ): PieVisualizationState {
-  const clonedState = cloneDeep(state) as PieVisualizationState;
-  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), clonedState);
+  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), state);
 }

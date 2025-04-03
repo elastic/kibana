@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash';
 import { FormBasedPersistedState } from '../../../datasources/form_based/types';
 import { DatatableVisualizationState } from '../datatable_visualization';
 import { getRuntimeConverters } from './converters';
@@ -14,6 +13,5 @@ export function convertToRuntimeState(
   state: DatatableVisualizationState,
   datasourceState?: FormBasedPersistedState
 ): DatatableVisualizationState {
-  const clonedState = cloneDeep(state) as DatatableVisualizationState;
-  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), clonedState);
+  return getRuntimeConverters(datasourceState).reduce((newState, fn) => fn(newState), state);
 }
