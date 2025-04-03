@@ -8,6 +8,7 @@
  */
 
 import { ESQLCommand } from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
 import {
   getCommandDefinition,
   getCommandsByName,
@@ -75,8 +76,12 @@ export async function suggest(
 
 const newBranchSuggestion: SuggestionRawDefinition = {
   kind: 'Issue',
-  label: 'New branch',
-  detail: 'Add a new branch to the fork',
+  label: i18n.translate('kbn-esql-validation-autocomplete.esql.suggestions.newBranchLabel', {
+    defaultMessage: 'New branch',
+  }),
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.suggestions.newBranchDetail', {
+    defaultMessage: 'Add a new branch to the fork',
+  }),
   text: '($0)',
   asSnippet: true,
   command: TRIGGER_SUGGESTION_COMMAND,
