@@ -25,6 +25,10 @@ const SolutionOptions: Record<
       />
     ),
   },
+  chat: {
+    iconType: 'logoElasticsearch',
+    label: <FormattedMessage id="xpack.spaces.spaceSolutionBadge.chat" defaultMessage="Workchat" />,
+  },
   security: {
     iconType: 'logoSecurity',
     label: (
