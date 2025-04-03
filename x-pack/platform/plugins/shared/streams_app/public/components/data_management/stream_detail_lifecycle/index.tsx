@@ -36,15 +36,13 @@ function useLifecycleState({
   definition,
   isServerless,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   isServerless: boolean;
 }) {
   const [updateInProgress, setUpdateInProgress] = useState(false);
   const [openEditModal, setOpenEditModal] = useState<LifecycleEditAction>('none');
 
   const lifecycleActions = useMemo(() => {
-    if (!definition) return [];
-
     const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
     const isWired = isWiredStreamGetResponse(definition);
     const isUnwired = isUnwiredStreamGetResponse(definition);
@@ -93,7 +91,7 @@ export function StreamDetailLifecycle({
   definition,
   refreshDefinition,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -124,10 +122,6 @@ export function StreamDetailLifecycle({
 
   const { signal } = useAbortController();
 
-  if (!definition) {
-    return null;
-  }
-
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   const getIlmPolicies = () =>
@@ -146,7 +140,7 @@ export function StreamDetailLifecycle({
         },
       } as IngestUpsertRequest;
 
-      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest', {
+      await streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
         params: {
           path: { name: definition.stream.name },
           body: request,

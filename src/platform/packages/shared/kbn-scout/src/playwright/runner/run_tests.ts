@@ -32,7 +32,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const playwrightConfigPath = options.configPath;
 
   const cmd = resolve(REPO_ROOT, './node_modules/.bin/playwright');
-  const cmdArgs = ['test', `--config=${playwrightConfigPath}`, `--grep=${playwrightGrepTag}`];
+  const cmdArgs = [
+    'test',
+    `--config=${playwrightConfigPath}`,
+    `--grep=${playwrightGrepTag}`,
+    `--project=${options.testTarget}`,
+  ];
 
   await withProcRunner(log, async (procs) => {
     log.info(`scout: Validate Playwright config has tests`);
@@ -78,7 +83,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       // wait for 5 seconds
       await silence(log, 5000);
 
-      // Running 'npx playwright test --config=${playwrightConfigPath}'
+      // Running 'npx playwright test --config=${playwrightConfigPath} --project local'
       await procs.run(`playwright`, {
         cmd,
         args: [...cmdArgs, ...(options.headed ? ['--headed'] : [])],

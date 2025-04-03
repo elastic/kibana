@@ -6,9 +6,9 @@
  */
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
+import type { CustomComponentProps } from '@kbn/home-plugin/public';
 import type { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { AgentConfigInstructions } from './agent_config_instructions';
 import type { PolicyOption } from './get_policy_options';
@@ -32,14 +32,6 @@ const GET_STARTED_WITH_FLEET_LABEL = i18n.translate(
   'xpack.apm.tutorial.agent_config.getStartedWithFleet',
   { defaultMessage: 'Get started with fleet' }
 );
-
-interface Props {
-  variantId: string;
-  http: HttpStart;
-  basePath: string;
-  isCloudEnabled: boolean;
-  kibanaVersion: string;
-}
 
 const INITIAL_STATE = {
   fleetAgents: [],
@@ -73,7 +65,16 @@ function getFleetLink({
       };
 }
 
-function TutorialConfigAgent({ variantId, http, basePath, isCloudEnabled, kibanaVersion }: Props) {
+export function TutorialConfigAgent({
+  variantId,
+  http,
+  basePath,
+  isCloudEnabled,
+  kibanaVersion,
+}: Pick<
+  CustomComponentProps,
+  'variantId' | 'http' | 'basePath' | 'isCloudEnabled' | 'kibanaVersion'
+>) {
   const [data, setData] = useState<APIResponseType>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOption, setSelectedOption] = useState<PolicyOption>();
@@ -136,6 +137,3 @@ function TutorialConfigAgent({ variantId, http, basePath, isCloudEnabled, kibana
     </>
   );
 }
-
-// eslint-disable-next-line import/no-default-export
-export default TutorialConfigAgent;

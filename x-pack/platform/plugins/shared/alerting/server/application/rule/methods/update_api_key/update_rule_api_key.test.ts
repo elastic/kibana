@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
+import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,
   loggingSystemMock,
@@ -17,8 +18,8 @@ import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
+import type { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from '../../../../rules_client/tests/lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';

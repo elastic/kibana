@@ -21,7 +21,6 @@ export const allowedExperimentalValues = Object.freeze({
   ruleKqlBar: false,
   isMustacheAutocompleteOn: false,
   showMustacheAutocompleteSwitch: false,
-  isUsingRuleCreateFlyout: false,
   alertDeletionSettingsEnabled: false,
 });
 

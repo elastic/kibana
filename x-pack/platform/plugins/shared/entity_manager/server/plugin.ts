@@ -184,7 +184,7 @@ export class EntityManagerServerPlugin
     // which is lazily loaded. we ensure it gets loaded before the update
     firstValueFrom(plugins.licensing.license$)
       .then(() => disableManagedEntityDiscovery({ server: this.server! }))
-      .then(() => this.logger.info(`Disabled managed entity discovery`))
+      .then(() => this.logger.debug(`Disabled managed entity discovery`))
       .catch((err) => this.logger.error(`Failed to disable managed entity discovery: ${err}`));
 
     // Setup v2 definitions index

@@ -302,9 +302,6 @@ exports[`LoginPage page renders as expected 1`] = `
     <div
       className="loginWelcome__content eui-textCenter"
     >
-      <EuiSpacer
-        size="xxl"
-      />
       <span
         className="loginWelcome__logo"
         style={Object {}}
@@ -326,9 +323,6 @@ exports[`LoginPage page renders as expected 1`] = `
           />
         </h1>
       </EuiTitle>
-      <EuiSpacer
-        size="xl"
-      />
     </div>
   </header>
   <div
@@ -390,9 +384,6 @@ exports[`LoginPage page renders with custom branding 1`] = `
     <div
       className="loginWelcome__content eui-textCenter"
     >
-      <EuiSpacer
-        size="xxl"
-      />
       <span
         className="loginWelcome__logo"
         style={
@@ -419,9 +410,6 @@ exports[`LoginPage page renders with custom branding 1`] = `
           />
         </h1>
       </EuiTitle>
-      <EuiSpacer
-        size="xl"
-      />
     </div>
   </header>
   <div

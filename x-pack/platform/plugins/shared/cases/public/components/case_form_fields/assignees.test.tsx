@@ -8,8 +8,6 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer } from '../../common/mock';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -18,15 +16,15 @@ import { Assignees } from './assignees';
 import { act, waitFor, screen } from '@testing-library/react';
 import * as api from '../../containers/user_profiles/api';
 import type { UserProfile } from '@kbn/user-profile-components';
+import { renderWithTestingProviders } from '../../common/mock';
 
 jest.mock('../../containers/user_profiles/api');
 
 const currentUserProfile = userProfiles[0];
 
 // Failing: See https://github.com/elastic/kibana/issues/189719
-describe.skip('Assignees', () => {
+describe('Assignees', () => {
   let globalForm: FormHook;
-  let appMockRender: AppMockRenderer;
 
   const MockHookWrapperComponent: FC<PropsWithChildren<unknown>> = ({ children }) => {
     const { form } = useForm();
@@ -37,11 +35,10 @@ describe.skip('Assignees', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
   });
 
   it('renders', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
@@ -58,7 +55,7 @@ describe.skip('Assignees', () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(undefined as unknown as UserProfile);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
@@ -76,7 +73,7 @@ describe.skip('Assignees', () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
@@ -95,7 +92,7 @@ describe.skip('Assignees', () => {
     const spyOnGetCurrentUserProfile = jest.spyOn(api, 'getCurrentUserProfile');
     spyOnGetCurrentUserProfile.mockResolvedValue(currentUserProfile);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
@@ -115,7 +112,7 @@ describe.skip('Assignees', () => {
   });
 
   it('assignees users correctly', async () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
@@ -165,7 +162,7 @@ describe.skip('Assignees', () => {
     const spyOnSuggestUserProfiles = jest.spyOn(api, 'suggestUserProfiles');
     spyOnSuggestUserProfiles.mockResolvedValue(similarProfiles);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
@@ -202,7 +199,7 @@ describe.skip('Assignees', () => {
     const spyOnBulkGetUserProfiles = jest.spyOn(api, 'bulkGetUserProfiles');
     spyOnBulkGetUserProfiles.mockResolvedValue([userProfile]);
 
-    appMockRender.render(
+    renderWithTestingProviders(
       <MockHookWrapperComponent>
         <Assignees isLoading={false} />
       </MockHookWrapperComponent>
@@ -222,10 +219,11 @@ describe.skip('Assignees', () => {
 
     await waitFor(() => {
       expect(spyOnBulkGetUserProfiles).toBeCalledTimes(1);
-      expect(spyOnBulkGetUserProfiles).toHaveBeenCalledWith({
-        security: expect.anything(),
-        uids: [userProfile.uid],
-      });
+    });
+
+    expect(spyOnBulkGetUserProfiles).toHaveBeenCalledWith({
+      security: expect.anything(),
+      uids: [userProfile.uid],
     });
 
     expect(await screen.findByText(userProfile.user.full_name)).toBeInTheDocument();

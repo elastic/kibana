@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { omit } from 'lodash';
-import { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
-import { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import { RawRule, RuleTypeParams } from '../../types';
+import type { SavedObjectReference, SavedObjectAttributes } from '@kbn/core/server';
+import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
+import type { RawRule, RuleTypeParams } from '../../types';
 import {
   preconfiguredConnectorActionRefPrefix,
   extractedSavedObjectParamReferenceNamePrefix,

@@ -33,7 +33,7 @@ export class Storage implements IStorageWrapper {
     }
   };
 
-  public set = (key: string, value: any, includeUndefined: boolean = false) => {
+  public set = (key: string, value: any, includeUndefined = false) => {
     const replacer = includeUndefined
       ? (_: string, currentValue: any) =>
           typeof currentValue === 'undefined' ? null : currentValue

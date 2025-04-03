@@ -23,10 +23,14 @@ export const FIELD_DEFINITION_TYPES = [
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 
 // We redefine "first class" parameters
-export type FieldDefinitionConfig = MappingProperty & {
-  type: FieldDefinitionType;
-  format?: string;
-};
+export type FieldDefinitionConfig =
+  | (MappingProperty & {
+      type: FieldDefinitionType;
+      format?: string;
+    })
+  | {
+      type: 'system';
+    };
 
 // Parameters that we provide a generic (JSON blob) experience for
 export type FieldDefinitionConfigAdvancedParameters = Omit<
@@ -36,10 +40,15 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
 
 export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
   recursiveRecord,
-  z.object({
-    type: z.enum(FIELD_DEFINITION_TYPES),
-    format: z.optional(NonEmptyString),
-  })
+  z.union([
+    z.object({
+      type: z.enum(FIELD_DEFINITION_TYPES),
+      format: z.optional(NonEmptyString),
+    }),
+    z.object({
+      type: z.literal('system'),
+    }),
+  ])
 );
 
 export interface FieldDefinition {

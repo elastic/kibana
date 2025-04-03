@@ -9,7 +9,8 @@
     "@kbn/i18n",
     "@kbn/repo-info",
     "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete"
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-types"
   ],
   "exclude": ["target/**/*"]
 }

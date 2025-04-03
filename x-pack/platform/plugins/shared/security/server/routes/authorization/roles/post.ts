@@ -48,16 +48,16 @@ export function defineBulkCreateOrUpdateRolesRoutes({
       options: {
         tags: ['oas-tag:roles'],
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Core's scoped ES cluster client`,
-          },
-        },
         validate: {
           request: {
             body: getBulkCreateOrUpdatePayloadSchema(() => {

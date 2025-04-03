@@ -24,7 +24,7 @@ In general this plugin provides:
 
 To get started, first you need to know a trigger you will attach your actions to. You can either pick an existing one, or register your own one:
 
-```typescript jsx
+```typescript
 plugins.uiActions.registerTrigger({
   id: 'MY_APP_PIE_CHART_CLICK',
   title: 'Pie chart click',
@@ -34,7 +34,7 @@ plugins.uiActions.registerTrigger({
 
 Now, when user clicks on a pie slice you need to "trigger" your trigger and provide some context data:
 
-```typescript jsx
+```typescript
 plugins.uiActions.getTrigger('MY_APP_PIE_CHART_CLICK').exec({
   /* Custom context data. */
 });
@@ -42,7 +42,7 @@ plugins.uiActions.getTrigger('MY_APP_PIE_CHART_CLICK').exec({
 
 Finally, your code or developers from other plugins can register UI actions that listen for the above trigger and execute some code when the trigger is triggered.
 
-```typescript jsx
+```typescript
 plugins.uiActions.registerAction({
   id: 'DO_SOMETHING',
   isCompatible: async (context) => true,

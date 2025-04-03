@@ -8,12 +8,12 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import {
+import type {
   InspectorSession,
   RequestAdapter,
   Start as InspectorPublicPluginStart,
 } from '@kbn/inspector-plugin/public';
-import { DiscoverStateContainer } from '../state_management/discover_state';
+import type { DiscoverStateContainer } from '../state_management/discover_state';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';
 import { internalStateActions, useInternalStateDispatch } from '../state_management/redux';
 

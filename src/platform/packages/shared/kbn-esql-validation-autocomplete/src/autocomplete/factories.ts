@@ -18,15 +18,14 @@ import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
-  CommandOptionsDefinition,
   FunctionParameterType,
   FunctionDefinitionTypes,
+  Location,
 } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
 import { buildFunctionDocumentation } from './documentation_util';
 import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
-import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 
@@ -36,6 +35,11 @@ const techPreviewLabel = i18n.translate(
     defaultMessage: `Technical Preview`,
   }
 );
+
+const getVariablePrefix = (variableType: ESQLVariableType) =>
+  variableType === ESQLVariableType.FIELDS || variableType === ESQLVariableType.FUNCTIONS
+    ? '??'
+    : '?';
 
 const allFunctions = memoize(
   () =>
@@ -110,8 +114,7 @@ export function getOperatorSuggestion(fn: FunctionDefinition): SuggestionRawDefi
 }
 
 interface FunctionFilterPredicates {
-  command?: string;
-  option?: string | undefined;
+  location: Location;
   returnTypes?: string[];
   ignored?: string[];
 }
@@ -123,32 +126,27 @@ export const filterFunctionDefinitions = (
   if (!predicates) {
     return functions;
   }
-  const { command, option, returnTypes, ignored = [] } = predicates;
-  return functions.filter(
-    ({ name, supportedCommands, supportedOptions, ignoreAsSuggestion, signatures }) => {
-      if (ignoreAsSuggestion) {
-        return false;
-      }
+  const { location, returnTypes, ignored = [] } = predicates;
 
-      if (ignored.includes(name)) {
-        return false;
-      }
-
-      if (option && !supportedOptions?.includes(option)) {
-        return false;
-      }
-
-      if (command && !supportedCommands.includes(command)) {
-        return false;
-      }
-
-      if (returnTypes && !returnTypes.includes('any')) {
-        return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
-      }
-
-      return true;
+  return functions.filter(({ name, locationsAvailable, ignoreAsSuggestion, signatures }) => {
+    if (ignoreAsSuggestion) {
+      return false;
     }
-  );
+
+    if (ignored.includes(name)) {
+      return false;
+    }
+
+    if (location && !locationsAvailable.includes(location)) {
+      return false;
+    }
+
+    if (returnTypes && !returnTypes.includes('any')) {
+      return signatures.some((signature) => returnTypes.includes(signature.returnType as string));
+    }
+
+    return true;
+  });
 };
 
 /**
@@ -209,7 +207,7 @@ export const buildFieldsDefinitionsWithMetadata = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
@@ -230,12 +228,12 @@ export const buildFieldsDefinitionsWithMetadata = (
   const suggestions = [...fieldsSuggestions];
   if (options?.supportsControls) {
     const variableType = options?.variableType ?? ESQLVariableType.FIELDS;
-    const variables = getVariablesByType?.(variableType) ?? [];
+    const variables = getVariables?.()?.filter((variable) => variable.type === variableType) ?? [];
 
     const controlSuggestions = fields.length
       ? getControlSuggestion(
           variableType,
-          variables?.map((v) => `?${v.key}`)
+          variables?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];
     suggestions.push(...controlSuggestions);
@@ -367,28 +365,6 @@ export const buildPoliciesDefinitions = (
     command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
-/** @deprecated — options will be removed */
-export const buildOptionDefinition = (
-  option: CommandOptionsDefinition,
-  isAssignType: boolean = false
-) => {
-  const completeItem: SuggestionRawDefinition = {
-    label: option.name.toUpperCase(),
-    text: option.name.toUpperCase(),
-    kind: 'Reference',
-    detail: option.description,
-    sortText: '1',
-  };
-  if (isAssignType || option.signature.params.length) {
-    completeItem.text = isAssignType
-      ? `${option.name.toUpperCase()} = $0`
-      : `${option.name.toUpperCase()} $0`;
-    completeItem.asSnippet = true;
-    completeItem.command = TRIGGER_SUGGESTION_COMMAND;
-  }
-  return completeItem;
-};
-
 export function getUnitDuration(unit: number = 1) {
   const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {
     const result = /s$/.test(name);
@@ -411,32 +387,23 @@ export function getUnitDuration(unit: number = 1) {
  * definition property...
  */
 export function getCompatibleLiterals(
-  commandName: string,
   types: string[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   const suggestions: SuggestionRawDefinition[] = [];
-  if (types.some(isNumericType)) {
-    if (commandName === 'limit') {
-      // suggest 10/100/1000 for limit
-      suggestions.push(
-        ...buildConstantsDefinitions(['10', '100', '1000'], '', undefined, {
-          advanceCursorAndOpenSuggestions: true,
-        })
-      );
-    }
-  }
   if (types.includes('time_literal')) {
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
     if (options?.supportsControls) {
-      const variables = getVariablesByType?.(ESQLVariableType.TIME_LITERAL) ?? [];
+      const variables =
+        getVariables?.()?.filter((variable) => variable.type === ESQLVariableType.TIME_LITERAL) ??
+        [];
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
@@ -520,16 +487,15 @@ export function getDateLiterals(options?: {
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariables?: () => ESQLControlVariable[] | undefined
 ) {
   if (!supportsControls) {
     return [];
   }
-  const variableType = type;
-  const variables = getVariablesByType?.(variableType) ?? [];
+  const variables = getVariables?.()?.filter((variable) => variable.type === type) ?? [];
   const controlSuggestion = getControlSuggestion(
-    variableType,
-    variables?.map((v) => `?${v.key}`)
+    type,
+    variables?.map((v) => `${getVariablePrefix(type)}${v.key}`)
   );
   return controlSuggestion;
 }

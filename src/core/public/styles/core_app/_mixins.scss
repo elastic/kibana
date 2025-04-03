@@ -8,19 +8,8 @@
   }
 }
 
-// EUITODO: Add this
 @mixin kibanaCircleLogo() {
   display: inline-block;
-  @include size($euiSizeXXL * 2);
-  line-height: $euiSizeXXL * 2;
-  text-align: center;
-  background-color: $euiColorEmptyShade;
-  border-radius: 100%;
-  padding: $euiSize;
-
-  .euiIcon {
-    vertical-align: baseline;
-  }
 }
 
 // Standardizes the look and layout of resizable area handles
@@ -93,8 +82,8 @@
     top: 0;
     left: 0;
     z-index: 1;
-    width: 310px;
-    height: 477px;
+    width: 400px;
+    height: 400px;
     content: url(lightOrDarkTheme('~core_app_image_assets/bg_top_branded.svg', '~core_app_image_assets/bg_top_branded_dark.svg'));
   }
 
@@ -103,8 +92,8 @@
     bottom: 0;
     right: 0;
     z-index: 1;
-    width: 313px;
-    height: 461px;
+    width: 400px;
+    height: 400px;
     content: url(lightOrDarkTheme('~core_app_image_assets/bg_bottom_branded.svg', '~core_app_image_assets/bg_bottom_branded_dark.svg'));
   }
 
@@ -115,6 +104,12 @@
 
     to {
       opacity: 1;
+    }
+  }
+
+  @media only screen and (max-width: map-get($euiBreakpoints, 'l')) {
+    &::before, &::after {
+      content: none;
     }
   }
 }

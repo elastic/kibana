@@ -326,7 +326,9 @@ async function getHostNames(esClient: ElasticsearchClient, agentIds: string[]) {
     _source: ['local_metadata.host.name'],
   });
   const hostNames = agentsRes.hits.hits.reduce((acc: { [key: string]: string }, curr) => {
-    acc[curr._id!] = (curr._source as any).local_metadata.host.name;
+    if ((curr._source as any).local_metadata?.host?.name) {
+      acc[curr._id!] = (curr._source as any).local_metadata.host.name;
+    }
     return acc;
   }, {});
 

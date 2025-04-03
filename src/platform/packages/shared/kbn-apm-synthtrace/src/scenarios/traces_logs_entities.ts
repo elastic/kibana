@@ -14,7 +14,6 @@ import {
   Instance,
   log,
   entities,
-  EntityFields,
 } from '@kbn/apm-synthtrace-client';
 import { Readable } from 'stream';
 import { Scenario } from '../cli/scenario';
@@ -35,7 +34,7 @@ const SYNTH_JAVA_TRACE_ENTITY_ID = generateShortId();
 const SYNTH_NODE_TRACES_LOGS_ENTITY_ID = generateShortId();
 const SYNTH_GO_LOGS_ENTITY_ID = generateShortId();
 
-const scenario: Scenario<Partial<EntityFields>> = async (runOptions) => {
+const scenario: Scenario = async (runOptions) => {
   const { logger } = runOptions;
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
 

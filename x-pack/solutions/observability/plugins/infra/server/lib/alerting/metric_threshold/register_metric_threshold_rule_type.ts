@@ -11,7 +11,7 @@ import type {
   GetViewInAppRelativeUrlFnOpts,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import { metricThresholdRuleParamsSchema } from '@kbn/response-ops-rule-params/metric_threshold';
 
 import type { InfraConfig } from '../../../../common/plugin_config_types';
@@ -121,6 +121,7 @@ export function registerMetricThresholdRuleType(
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
+    solution: observabilityFeatureId,
     alerts: MetricsRulesTypeAlertDefinition,
     getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
       observabilityPaths.ruleDetails(rule.id),

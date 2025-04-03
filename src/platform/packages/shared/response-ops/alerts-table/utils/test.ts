@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
 import MaybeMockedDeep = jest.MaybeMockedDeep;
 
 /**

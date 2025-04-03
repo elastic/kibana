@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { policiesSavedObjects } from '../constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
@@ -21,6 +22,11 @@ export default function (providerContext: FtrProviderContext) {
     const RETRY_COUNT = 5;
     const RETRY_DELAY = 1000;
     const retryOptions = { retryCount: RETRY_COUNT, retryDelay: RETRY_DELAY };
+    const kibanaServer = getService('kibanaServer');
+
+    before(async () => {
+      await kibanaServer.savedObjects.clean({ types: policiesSavedObjects });
+    });
 
     beforeEach(async () => {
       cisIntegration = pageObjects.cisAddIntegration;
@@ -37,7 +43,7 @@ export default function (providerContext: FtrProviderContext) {
             await cisIntegration.inputUniqueIntegrationName();
             await pageObjects.header.waitUntilLoadingHasFinished();
             await cisIntegration.clickSaveButton();
-            await pageObjects.header.waitUntilLoadingHasFinished();
+            await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
             expect(
               (await cisIntegration.getUrlOnPostInstallModal()) ===
                 'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'

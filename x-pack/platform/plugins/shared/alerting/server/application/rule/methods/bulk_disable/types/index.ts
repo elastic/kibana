@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { TypeOf } from '@kbn/config-schema';
-import { bulkDisableRulesRequestBodySchema } from '../schemas';
+import type { bulkDisableRulesRequestBodySchema } from '../schemas';
 import type { SanitizedRule } from '../../../../../types';
 import type { RuleParams } from '../../../types';
 

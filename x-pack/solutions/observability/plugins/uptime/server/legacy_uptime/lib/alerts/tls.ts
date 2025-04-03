@@ -13,6 +13,7 @@ import {
   alertsLocatorID,
   AlertsLocatorParams,
   getAlertUrl,
+  observabilityFeatureId,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
@@ -122,6 +123,7 @@ export const tlsAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   id: CLIENT_ALERT_TYPES.TLS,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
+  solution: observabilityFeatureId,
   name: tlsTranslations.alertFactoryName,
   validate: {
     params: uptimeTLSRuleParamsSchema,

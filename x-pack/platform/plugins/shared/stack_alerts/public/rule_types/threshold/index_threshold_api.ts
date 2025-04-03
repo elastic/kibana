@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import { TimeSeriesResult } from '@kbn/triggers-actions-ui-plugin/common';
-import { IndexThresholdRuleParams } from './types';
+import type { HttpSetup } from '@kbn/core/public';
+import type { TimeSeriesResult } from '@kbn/triggers-actions-ui-plugin/common';
+import type { IndexThresholdRuleParams } from './types';
 
 const INDEX_THRESHOLD_DATA_API_ROOT = '/internal/triggers_actions_ui/data';
 

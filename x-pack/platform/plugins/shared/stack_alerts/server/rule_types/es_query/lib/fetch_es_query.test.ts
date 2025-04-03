@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { OnlyEsQueryRuleParams } from '../types';
+import type { OnlyEsQueryRuleParams } from '../types';
 import { Comparator } from '../../../../common/comparator_types';
 import { fetchEsQuery } from './fetch_es_query';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

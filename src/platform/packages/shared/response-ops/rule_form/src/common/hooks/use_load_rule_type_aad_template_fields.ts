@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ActionVariable } from '@kbn/alerting-types';
 import { useRef } from 'react';
 import { isEmpty } from 'lodash';
-import { ActionVariable } from '@kbn/alerting-types';
 import type { HttpStart } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
 import {
   fetchRuleTypeAadTemplateFields,
   getDescription,
 } from '@kbn/alerts-ui-shared/src/common/apis';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;

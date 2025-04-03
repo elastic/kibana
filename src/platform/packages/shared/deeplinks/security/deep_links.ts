@@ -27,9 +27,9 @@ export enum SecurityPageName {
    */
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureVulnerabilityDashboard = 'cloud_security_posture-vulnerability_dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
-  cloudDefendPolicies = 'cloud_defend-policies',
   dashboards = 'dashboards',
   dataQuality = 'data_quality',
   detections = 'detections',
@@ -86,4 +86,9 @@ export enum SecurityPageName {
   entityAnalyticsEntityStoreManagement = 'entity_analytics-entity_store_management',
   coverageOverview = 'coverage-overview',
   notes = 'notes',
+  alertSummary = 'alert_summary',
+  configurations = 'configurations',
+  configurationsIntegrations = 'configurations-integrations',
+  configurationsAiSettings = 'configurations-ai_settings',
+  configurationsBasicRules = 'configurations-basic_rules',
 }

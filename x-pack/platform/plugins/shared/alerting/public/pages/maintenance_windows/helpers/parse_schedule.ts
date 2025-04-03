@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RecurringScheduleFormProps } from '../components/schema';
+import type { RecurringScheduleFormProps } from '../components/schema';
 
 export const parseSchedule = (
   schedule: RecurringScheduleFormProps | undefined

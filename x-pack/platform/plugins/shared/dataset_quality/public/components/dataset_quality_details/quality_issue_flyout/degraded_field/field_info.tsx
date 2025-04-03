@@ -12,10 +12,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiTextColor,
   EuiTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { useQualityIssues } from '../../../../hooks';
 import {
@@ -24,9 +22,9 @@ import {
   degradedFieldPotentialCauseColumnName,
   degradedFieldValuesColumnName,
 } from '../../../../../common/translations';
+import { ExpandableTruncatedText } from '../expandable_truncated_text';
 
 export const DegradedFieldInfo = () => {
-  const { euiTheme } = useEuiTheme();
   const {
     degradedFieldValues,
     isAnalysisInProgress,
@@ -115,13 +113,13 @@ export const DegradedFieldInfo = () => {
                 grow={2}
               >
                 <EuiBadgeGroup gutterSize="s">
-                  {degradedFieldValues?.values.map((value, idx) => (
-                    <EuiBadge color="hollow" key={idx}>
-                      <EuiTextColor color={euiTheme.colors.vis.euiColorVis3}>
-                        <strong>{value}</strong>
-                      </EuiTextColor>
-                    </EuiBadge>
-                  ))}
+                  {degradedFieldValues?.values.map((value, idx) => {
+                    return (
+                      <div key={idx} css={{ lineHeight: '1.6', width: '100%' }}>
+                        <ExpandableTruncatedText text={value} />
+                      </div>
+                    );
+                  })}
                 </EuiBadgeGroup>
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -8,7 +8,6 @@ import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
 import { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { getMonitors, isMonitorsQueryFiltered, QuerySchema } from '../common';
-import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 
 export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'GET',
@@ -20,11 +19,10 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     },
   },
   handler: async (routeContext): Promise<any> => {
-    const { request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
+    const { request, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
     const totalCountQuery = async () => {
       if (isMonitorsQueryFiltered(request.query)) {
-        return savedObjectsClient.find({
-          type: syntheticsMonitorType,
+        return monitorConfigRepository.find({
           perPage: 0,
           page: 1,
         });

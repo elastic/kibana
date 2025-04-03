@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EditorError } from '@kbn/esql-ast';
-import {
-  type ESQLCallbacks,
-  getActions,
-  suggest,
-  validateQuery,
-} from '@kbn/esql-validation-autocomplete';
+import { type ESQLCallbacks, suggest, validateQuery } from '@kbn/esql-validation-autocomplete';
 import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../worker/esql_worker';
 import { wrapAsMonacoMessages } from './converters/positions';
@@ -80,21 +74,5 @@ export class ESQLAstAdapter {
         : undefined;
     }
     return suggestions;
-  }
-
-  async codeAction(
-    model: monaco.editor.ITextModel,
-    range: monaco.Range,
-    context: monaco.languages.CodeActionContext
-  ) {
-    const getAstFn = await this.getAstWorker(model);
-    const codeActions = await getActions(
-      model.getValue(),
-      context.markers as EditorError[],
-      getAstFn,
-      undefined,
-      this.callbacks
-    );
-    return codeActions;
   }
 }

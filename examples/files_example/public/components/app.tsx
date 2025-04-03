@@ -133,7 +133,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   ];
 
   return (
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <EuiPageTemplate restrictWidth>
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>

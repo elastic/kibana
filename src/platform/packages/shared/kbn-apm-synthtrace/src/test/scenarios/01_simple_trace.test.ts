@@ -8,6 +8,7 @@
  */
 
 import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
+import { ToolingLog } from '@kbn/tooling-log';
 
 describe('simple trace', () => {
   let iterable: SynthtraceGenerator<ApmFields>;
@@ -23,7 +24,8 @@ describe('simple trace', () => {
 
     const range = timerange(
       new Date('2021-01-01T00:00:00.000Z'),
-      new Date('2021-01-01T00:15:00.000Z')
+      new Date('2021-01-01T00:15:00.000Z'),
+      {} as ToolingLog
     );
 
     iterable = range

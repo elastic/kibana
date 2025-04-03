@@ -8,17 +8,20 @@
  */
 
 import { useEffect } from 'react';
-import { History } from 'history';
+import type { History } from 'history';
+import useLatest from 'react-use/lib/useLatest';
 
 export function useUrl({
   history,
   savedSearchId,
-  onNewUrl,
+  onNewUrl: currentOnNewUrl,
 }: {
   history: History;
   savedSearchId: string | undefined;
   onNewUrl: () => void;
 }) {
+  const onNewUrl = useLatest(currentOnNewUrl);
+
   /**
    * Url / Routing logic
    */
@@ -28,9 +31,10 @@ export function useUrl({
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(({ pathname, search, hash }) => {
       if (pathname === '/' && !search && !hash && !savedSearchId) {
-        onNewUrl();
+        onNewUrl.current();
       }
     });
+
     return () => unlistenHistoryBasePath();
   }, [history, savedSearchId, onNewUrl]);
 }

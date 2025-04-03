@@ -8,156 +8,109 @@
  */
 
 import { timerange } from '@kbn/apm-synthtrace-client';
-import { castArray } from 'lodash';
-import { PassThrough, Readable, Writable } from 'stream';
-import { isGeneratorObject } from 'util/types';
-import { SynthtraceEsClient } from '../../lib/shared/base_client';
-import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
+import { castArray, once } from 'lodash';
+import { memoryUsage } from 'process';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
+import { StreamManager } from './stream_manager';
 
 export async function startLiveDataUpload({
   runOptions,
-  start,
+  from,
+  to,
 }: {
   runOptions: RunOptions;
-  start: Date;
+  from: number;
+  to: number;
 }) {
   const file = runOptions.file;
 
-  const {
-    logger,
-    apmEsClient,
-    logsEsClient,
-    infraEsClient,
-    syntheticsEsClient,
-    otelEsClient,
-    entitiesEsClient,
-    entitiesKibanaClient,
-  } = await bootstrap(runOptions);
+  const { logger, clients } = await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
   const {
     generate,
-    bootstrap: scenarioBootsrap,
+    bootstrap: scenarioBootstrap,
     teardown: scenarioTearDown,
-  } = await scenario({ ...runOptions, logger });
+  } = await scenario({ ...runOptions, logger, from, to });
 
-  if (scenarioBootsrap) {
-    await scenarioBootsrap({
-      apmEsClient,
-      logsEsClient,
-      infraEsClient,
-      otelEsClient,
-      syntheticsEsClient,
-      entitiesEsClient,
-      entitiesKibanaClient,
-    });
+  function startPeriodicPerfLogging() {
+    let cpuUsage = process.cpuUsage();
+
+    return setInterval(() => {
+      cpuUsage = process.cpuUsage(cpuUsage);
+      const mem = memoryUsage();
+      logger.debug(
+        `cpu time: (user: ${Math.round(cpuUsage.user / 1000)}mss, sys: ${Math.round(
+          cpuUsage.system / 1000
+        )}ms), memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`
+      );
+    }, 5000);
+  }
+
+  const intervalId = startPeriodicPerfLogging();
+
+  const teardown = once(async () => {
+    if (scenarioTearDown) {
+      await scenarioTearDown(clients);
+    }
+
+    clearInterval(intervalId);
+  });
+
+  const streamManager = new StreamManager(logger, teardown);
+
+  if (scenarioBootstrap) {
+    await scenarioBootstrap(clients);
   }
 
   const bucketSizeInMs = runOptions.liveBucketSize;
-  let requestedUntil = start;
+  let requestedUntil = from;
 
-  let currentStreams: PassThrough[] = [];
-  // @ts-expect-error upgrade typescript v4.9.5
-  const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
-
-  process.on('SIGINT', () => closeStreamsAndTeardown());
-  process.on('SIGTERM', () => closeStreamsAndTeardown());
-  process.on('SIGQUIT', () => closeStreamsAndTeardown());
-
-  async function closeStreamsAndTeardown() {
-    if (scenarioTearDown) {
-      try {
-        await scenarioTearDown({
-          apmEsClient,
-          logsEsClient,
-          infraEsClient,
-          otelEsClient,
-          syntheticsEsClient,
-          entitiesEsClient,
-          entitiesKibanaClient,
-        });
-      } catch (error) {
-        logger.error('Error during scenario teardown', error);
-      }
-    }
-
-    currentStreams.forEach((stream) => {
-      stream.end(() => {
-        process.exit(0);
-      });
-    });
-    currentStreams = []; // Reset the stream array
+  function mb(value: number): string {
+    return Math.round(value / 1024 ** 2).toString() + 'mb';
   }
 
   async function uploadNextBatch() {
     const now = Date.now();
 
-    if (now > requestedUntil.getTime()) {
-      const bucketFrom = requestedUntil;
-      const bucketTo = new Date(requestedUntil.getTime() + bucketSizeInMs);
+    if (now > requestedUntil) {
+      const bucketCount = Math.floor((now - requestedUntil) / bucketSizeInMs);
+
+      const rangeStart = requestedUntil;
+      const rangeEnd = rangeStart + bucketCount * bucketSizeInMs;
 
       logger.info(
-        `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(bucketTo).toISOString()}`
+        `Requesting ${new Date(rangeStart).toISOString()} to ${new Date(
+          rangeEnd
+        ).toISOString()} in ${bucketCount} bucket(s)`
       );
 
-      const generatorsAndClients = generate({
-        range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
-        clients: {
-          logsEsClient,
-          apmEsClient,
-          infraEsClient,
-          entitiesEsClient,
-          syntheticsEsClient,
-          otelEsClient,
-        },
-      });
+      const generatorsAndClients = castArray(
+        generate({
+          range: timerange(rangeStart, rangeEnd, logger),
+          clients,
+        })
+      );
 
-      const generatorsAndClientsArray = castArray(generatorsAndClients);
+      await Promise.all(
+        generatorsAndClients.map(async ({ generator, client }) => {
+          await streamManager.index(client, generator);
+        })
+      );
 
-      const streams = generatorsAndClientsArray.map(({ client }) => {
-        let stream: PassThrough;
+      logger.debug('Indexing completed');
 
-        if (cachedStreams.has(client)) {
-          stream = cachedStreams.get(client)!;
-        } else {
-          stream = new PassThrough({ objectMode: true });
-          cachedStreams.set(client, stream);
-          client.index(stream);
-        }
-
-        return stream;
-      });
-
-      currentStreams = streams;
-
-      const promises = generatorsAndClientsArray.map(({ generator }, i) => {
-        const concatenatedStream = castArray(generator)
-          .reverse()
-          .reduce<Writable>((prev, current) => {
-            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-            return currentStream.pipe(prev);
-          }, new PassThrough({ objectMode: true }));
-
-        concatenatedStream.pipe(streams[i], { end: false });
-
-        return awaitStream(concatenatedStream);
-      });
-
-      await Promise.all(promises);
-
-      logger.info('Indexing completed');
-
-      const refreshPromise = generatorsAndClientsArray.map(async ({ client }) => {
+      const refreshPromise = generatorsAndClients.map(async ({ client }) => {
         await client.refresh();
       });
 
       await Promise.all(refreshPromise);
-      logger.info('Refreshing completed');
 
-      requestedUntil = bucketTo;
+      logger.debug('Refreshing completed');
+
+      requestedUntil = rangeEnd;
     }
   }
 

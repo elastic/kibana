@@ -9,7 +9,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { v4 as uuidv4 } from 'uuid';
 import http, { type Server } from 'http';
-import { isString, once, pull, isFunction } from 'lodash';
+import { isString, once, pull, isFunction, last } from 'lodash';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
 import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
@@ -36,6 +36,17 @@ export interface ToolMessage {
   content?: string;
   tool_calls?: ChatCompletionChunkToolCall[];
 }
+
+export interface RelevantField {
+  id: string;
+  name: string;
+}
+
+export interface KnowledgeBaseDocument {
+  id: string;
+  text: string;
+}
+
 export interface LlmResponseSimulator {
   requestBody: ChatCompletionStreamParams;
   status: (code: number) => void;
@@ -79,11 +90,11 @@ export class LlmProxy {
 
         const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
         const availableInterceptorNames = this.interceptors.map(({ name }) => name);
-        this.log.error(
+        this.log.warning(
           `Available interceptors: ${JSON.stringify(availableInterceptorNames, null, 2)}`
         );
 
-        this.log.error(
+        this.log.warning(
           `${errorMessage}. Messages: ${JSON.stringify(requestBody.messages, null, 2)}`
         );
         response.writeHead(500, {
@@ -111,6 +122,7 @@ export class LlmProxy {
     this.log.debug(`Closing LLM Proxy on port ${this.port}`);
     clearInterval(this.interval);
     this.server.close();
+    this.clear();
   }
 
   waitForAllInterceptorsToHaveBeenCalled() {
@@ -138,7 +150,7 @@ export class LlmProxy {
   }
 
   interceptConversation(
-    msg: LLMMessage,
+    msg: string | string[],
     {
       name,
     }: {
@@ -146,7 +158,7 @@ export class LlmProxy {
     } = {}
   ) {
     return this.intercept(
-      `Conversation interceptor: "${name ?? 'Unnamed'}"`,
+      `Conversation: "${name ?? isString(msg) ? msg.slice(0, 80) : `${msg.length} chunks`}"`,
       // @ts-expect-error
       (body) => body.tool_choice?.function?.name === undefined,
       msg
@@ -154,16 +166,18 @@ export class LlmProxy {
   }
 
   interceptWithFunctionRequest({
-    name: name,
+    name,
     arguments: argumentsCallback,
-    when,
+    when = () => true,
+    interceptorName,
   }: {
     name: string;
     arguments: (body: ChatCompletionStreamParams) => string;
-    when: RequestInterceptor['when'];
+    when?: RequestInterceptor['when'];
+    interceptorName?: string;
   }) {
     // @ts-expect-error
-    return this.intercept(`Function request interceptor: "${name}"`, when, (body) => {
+    return this.intercept(interceptorName ?? `Function request: "${name}"`, when, (body) => {
       return {
         content: '',
         tool_calls: [
@@ -180,9 +194,63 @@ export class LlmProxy {
     }).completeAfterIntercept();
   }
 
+  interceptSelectRelevantFieldsToolChoice({
+    from = 0,
+    to = 5,
+  }: { from?: number; to?: number } = {}) {
+    let relevantFields: RelevantField[] = [];
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'select_relevant_fields',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'select_relevant_fields',
+      arguments: (requestBody) => {
+        const messageWithFieldIds = last(requestBody.messages);
+        const matches = (messageWithFieldIds?.content as string).match(/\{[\s\S]*?\}/g)!;
+        relevantFields = matches
+          .slice(from, to)
+          .map((jsonStr) => JSON.parse(jsonStr) as RelevantField);
+
+        return JSON.stringify({ fieldIds: relevantFields.map(({ id }) => id) });
+      },
+    });
+
+    return {
+      simulator,
+      getRelevantFields: async () => {
+        await simulator;
+        return relevantFields;
+      },
+    };
+  }
+
+  interceptScoreToolChoice(log: ToolingLog) {
+    let documents: KnowledgeBaseDocument[] = [];
+
+    const simulator = this.interceptWithFunctionRequest({
+      name: 'score',
+      // @ts-expect-error
+      when: (requestBody) => requestBody.tool_choice?.function?.name === 'score',
+      arguments: (requestBody) => {
+        documents = extractDocumentsFromMessage(last(requestBody.messages)?.content as string, log);
+        const scores = documents.map((doc: KnowledgeBaseDocument) => `${doc.id},7`).join(';');
+
+        return JSON.stringify({ scores });
+      },
+    });
+
+    return {
+      simulator,
+      getDocuments: async () => {
+        await simulator;
+        return documents;
+      },
+    };
+  }
+
   interceptTitle(title: string) {
     return this.interceptWithFunctionRequest({
       name: TITLE_CONVERSATION_FUNCTION_NAME,
+      interceptorName: `Title: "${title}"`,
       arguments: () => JSON.stringify({ title }),
       // @ts-expect-error
       when: (body) => body.tool_choice?.function?.name === TITLE_CONVERSATION_FUNCTION_NAME,
@@ -214,7 +282,7 @@ export class LlmProxy {
               requestBody,
               status: once((status: number) => {
                 response.writeHead(status, {
-                  'Elastic-Interceptor': name,
+                  'Elastic-Interceptor': name.replace(/[^\x20-\x7E]/g, ' '), // Keeps only alphanumeric characters and spaces
                   'Content-Type': 'text/event-stream',
                   'Cache-Control': 'no-cache',
                   Connection: 'keep-alive',
@@ -315,4 +383,9 @@ async function getRequestBody(request: http.IncomingMessage): Promise<ChatComple
 
 function sseEvent(chunk: unknown) {
   return `data: ${JSON.stringify(chunk)}\n\n`;
+}
+
+function extractDocumentsFromMessage(content: string, log: ToolingLog): KnowledgeBaseDocument[] {
+  const matches = content.match(/\{[\s\S]*?\}/g)!;
+  return matches.map((jsonStr) => JSON.parse(jsonStr));
 }

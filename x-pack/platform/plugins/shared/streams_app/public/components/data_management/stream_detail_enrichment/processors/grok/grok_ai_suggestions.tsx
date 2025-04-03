@@ -24,15 +24,19 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { FlattenRecord, IngestStreamGetResponse } from '@kbn/streams-schema';
+import { FlattenRecord } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
+import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { isEmpty } from 'lodash';
+import { css } from '@emotion/css';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
+import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
 
 const RefreshButton = ({
   generatePatterns,
@@ -126,15 +130,16 @@ const RefreshButton = ({
   );
 };
 
-function useAiEnabled() {
+function useAIFeatures() {
   const { dependencies, core } = useKibana();
   const { observabilityAIAssistant, licensing } = dependencies.start;
 
-  const aiAssistantEnabled = observabilityAIAssistant?.service.isEnabled();
+  const aiAssistantEnabled = observabilityAIAssistant.service.isEnabled();
 
-  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
+  const genAiConnectors = observabilityAIAssistant.useGenAIConnectors();
 
-  const aiEnabled = aiAssistantEnabled && (genAiConnectors?.connectors || []).length > 0;
+  const aiEnabled =
+    aiAssistantEnabled && genAiConnectors.connectors && !isEmpty(genAiConnectors.connectors);
 
   const currentLicense = useObservable(licensing.license$);
 
@@ -144,33 +149,37 @@ function useAiEnabled() {
   return {
     enabled: aiEnabled,
     couldBeEnabled,
+    genAiConnectors,
   };
 }
 
+export type SuggestionsResponse =
+  APIReturnType<'POST /internal/streams/{name}/processing/_suggestions'>;
+
 function InnerGrokAiSuggestions({
   previewDocuments,
-  definition,
+  genAiConnectors,
 }: {
   previewDocuments: FlattenRecord[];
-  definition: IngestStreamGetResponse;
+  genAiConnectors: UseGenAIConnectorsResult;
 }) {
-  const { dependencies } = useKibana();
+  const {
+    dependencies,
+    services: { telemetryClient },
+  } = useKibana();
   const {
     streams: { streamsRepositoryClient },
-    observabilityAIAssistant,
   } = dependencies.start;
 
+  const { definition } = useStreamDetail();
   const fieldValue = useWatch<ProcessorFormState, 'field'>({ name: 'field' });
   const form = useFormContext<GrokFormState>();
 
-  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
   const currentConnector = genAiConnectors?.selectedConnector;
 
   const [isLoadingSuggestions, setSuggestionsLoading] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState<Error | undefined>();
-  const [suggestions, setSuggestions] = useState<
-    { patterns: string[]; simulations: any[] } | undefined
-  >();
+  const [suggestions, setSuggestions] = useState<SuggestionsResponse | undefined>();
   const [blocklist, setBlocklist] = useState<Set<string>>(new Set());
 
   const abortController = useAbortController();
@@ -183,8 +192,13 @@ function InnerGrokAiSuggestions({
     setSuggestionsLoading(true);
     setSuggestionsError(undefined);
     setSuggestions(undefined);
+    const finishTrackingAndReport = telemetryClient.startTrackingAIGrokSuggestionLatency({
+      name: definition.stream.name,
+      field: fieldValue,
+      connector_id: currentConnector,
+    });
     streamsRepositoryClient
-      .fetch('POST /api/streams/{name}/processing/_suggestions', {
+      .fetch('POST /internal/streams/{name}/processing/_suggestions', {
         signal: abortController.signal,
         params: {
           path: { name: definition.stream.name },
@@ -196,6 +210,10 @@ function InnerGrokAiSuggestions({
         },
       })
       .then((response) => {
+        finishTrackingAndReport(
+          response.patterns.length || 0,
+          response.simulations.map((simulation) => simulation.documents_metrics.parsed_rate)
+        );
         setSuggestions(response);
         setSuggestionsLoading(false);
       })
@@ -210,6 +228,7 @@ function InnerGrokAiSuggestions({
     fieldValue,
     previewDocuments,
     streamsRepositoryClient,
+    telemetryClient,
   ]);
 
   let content: React.ReactNode = null;
@@ -232,7 +251,8 @@ function InnerGrokAiSuggestions({
   const filteredSuggestions = suggestions?.patterns
     .map((pattern, i) => ({
       pattern,
-      success_rate: suggestions.simulations[i].success_rate,
+      success_rate: suggestions.simulations[i].documents_metrics.parsed_rate,
+      detected_fields_count: suggestions.simulations[i].detected_fields.length,
     }))
     .filter(
       (suggestion) =>
@@ -302,6 +322,13 @@ function InnerGrokAiSuggestions({
                           { value: suggestion.pattern },
                         ]);
                       }
+                      telemetryClient.trackAIGrokSuggestionAccepted({
+                        name: definition.stream.name,
+                        field: fieldValue,
+                        connector_id: currentConnector || 'n/a',
+                        match_rate: suggestion.success_rate,
+                        detected_fields: suggestion.detected_fields_count,
+                      });
                     }}
                     data-test-subj="streamsAppGrokAiSuggestionsButton"
                     iconType="plusInCircle"
@@ -332,7 +359,15 @@ function InnerGrokAiSuggestions({
   return (
     <>
       {content != null && (
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="m"
+          // make sure the content is always filling the full width so the
+          // refresh button is rendered below in all cases
+          className={css`
+            width: 100%;
+          `}
+        >
           {content}
         </EuiFlexGroup>
       )}
@@ -356,9 +391,10 @@ export function GrokAiSuggestions() {
   const {
     core: { http },
   } = useKibana();
-  const { enabled: isAiEnabled, couldBeEnabled } = useAiEnabled();
-  const { definition } = useStreamDetail();
-  const previewDocuments = useSimulatorSelector((state) => state.context.previewDocuments);
+  const { enabled: isAiEnabled, couldBeEnabled, genAiConnectors } = useAIFeatures();
+  const previewDocuments = useSimulatorSelector((snapshot) =>
+    selectPreviewDocuments(snapshot.context)
+  );
 
   if (!isAiEnabled && couldBeEnabled) {
     return (
@@ -379,18 +415,18 @@ export function GrokAiSuggestions() {
         >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.aiAssistantNotEnabled',
-            {
-              defaultMessage: 'Enable AI Assistant features',
-            }
+            { defaultMessage: 'Enable AI Assistant features' }
           )}
         </EuiLink>
       </EuiToolTip>
     );
   }
 
-  if (!isAiEnabled || !definition) {
+  if (!isAiEnabled) {
     return null;
   }
 
-  return <InnerGrokAiSuggestions definition={definition} previewDocuments={previewDocuments} />;
+  return (
+    <InnerGrokAiSuggestions previewDocuments={previewDocuments} genAiConnectors={genAiConnectors} />
+  );
 }

@@ -8,7 +8,7 @@
 import * as tinymath from '@kbn/tinymath';
 import { parse as hjsonParse } from 'hjson';
 import moment from 'moment-timezone';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { formatNumber } from './number_formatter';
 
@@ -46,7 +46,37 @@ function getLambdas(logger: Logger) {
         const numberString = render(text.trim()).trim();
         return formatNumber(logger, numberString);
       },
+    EncodeURI: () =>
+      function (text: string, render: RenderFn) {
+        // specifically does not strip whitespace
+        const string = render(text);
+        return callEncodeURI(logger, string);
+      },
+    EncodeURIComponent: () =>
+      function (text: string, render: RenderFn) {
+        // specifically does not strip whitespace
+        const string = render(text);
+        return callEncodeURIComponent(logger, string);
+      },
   };
+}
+
+function callEncodeURI(logger: Logger, string: string): string {
+  const s = `${string}`;
+  try {
+    return encodeURI(s);
+  } catch (err) {
+    return logAndReturnErr(logger, `error evaluating encodeURI("${s}"): ${err.message}`);
+  }
+}
+
+function callEncodeURIComponent(logger: Logger, string: string): string {
+  const s = `${string}`;
+  try {
+    return encodeURIComponent(s);
+  } catch (err) {
+    return logAndReturnErr(logger, `error evaluating encodeURIComponent("${s}"): ${err.message}`);
+  }
 }
 
 function evalMath(vars: Variables, o: unknown, logger: Logger): string {

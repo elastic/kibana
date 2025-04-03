@@ -6,13 +6,13 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-plugin/server';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { listTypesRoute } from './list_types';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { actionsClientMock } from '../../../mocks';
-import { SubFeature } from '../../../../common';
+import type { SubFeature } from '../../../../common';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),

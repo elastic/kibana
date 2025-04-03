@@ -9,9 +9,9 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { TaskDefinition, TaskPriority } from '../task';
+import type { TaskDefinition, TaskPriority } from '../task';
 import { setupTestServers } from './lib';
-import { TaskTypeDictionary } from '../task_type_dictionary';
+import type { TaskTypeDictionary } from '../task_type_dictionary';
 
 jest.mock('../task_type_dictionary', () => {
   const actual = jest.requireActual('../task_type_dictionary');

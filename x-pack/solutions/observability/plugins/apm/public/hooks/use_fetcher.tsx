@@ -82,11 +82,12 @@ type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<in
   : unknown;
 
 export function useFetcher<TReturn>(
-  fn: (callApmApi: AutoAbortedAPMClient) => TReturn,
+  fn: (callApmApi: AutoAbortedAPMClient, signal: AbortSignal) => TReturn,
   fnDeps: any[],
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
+    skipTimeRangeRefreshUpdate?: boolean;
   } = {}
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
@@ -99,6 +100,21 @@ export function useFetcher<TReturn>(
   const { timeRangeId } = useTimeRangeId();
   const { addInspectorRequest } = useInspectorContext();
 
+  const deps = useMemo(() => {
+    const _deps = [counter, preservePreviousData, showToastOnError, ...fnDeps];
+    if (options.skipTimeRangeRefreshUpdate !== true) {
+      _deps.push(timeRangeId);
+    }
+    return _deps;
+  }, [
+    counter,
+    fnDeps,
+    options.skipTimeRangeRefreshUpdate,
+    preservePreviousData,
+    showToastOnError,
+    timeRangeId,
+  ]);
+
   useEffect(() => {
     let controller: AbortController = new AbortController();
 
@@ -109,7 +125,7 @@ export function useFetcher<TReturn>(
 
       const signal = controller.signal;
 
-      const promise = fn(createAutoAbortedAPMClient(signal, addInspectorRequest));
+      const promise = fn(createAutoAbortedAPMClient(signal, addInspectorRequest), signal);
       // if `fn` doesn't return a promise it is a signal that data fetching was not initiated.
       // This can happen if the data fetching is conditional (based on certain inputs).
       // In these cases it is not desirable to invoke the global loading spinner, or change the status to success
@@ -176,14 +192,7 @@ export function useFetcher<TReturn>(
       controller.abort();
     };
     /* eslint-disable react-hooks/exhaustive-deps */
-  }, [
-    counter,
-    preservePreviousData,
-    timeRangeId,
-    showToastOnError,
-    ...fnDeps,
-    /* eslint-enable react-hooks/exhaustive-deps */
-  ]);
+  }, deps);
 
   return useMemo(() => {
     return {

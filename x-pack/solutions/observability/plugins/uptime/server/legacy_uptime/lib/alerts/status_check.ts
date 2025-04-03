@@ -21,6 +21,7 @@ import {
   AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
+  observabilityFeatureId,
   observabilityPaths,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
@@ -290,6 +291,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
+  solution: observabilityFeatureId,
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
   }),

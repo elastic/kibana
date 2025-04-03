@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
+import type { IRouter } from '@kbn/core/server';
+import type { ILicenseState } from '../../../../lib';
+import { RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../types';
-import {
-  unmuteAllRuleRequestParamsSchemaV1,
-  UnmuteAllRuleRequestParamsV1,
-} from '../../../../../common/routes/rule/apis/unmute_all';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
+import type { UnmuteAllRuleRequestParamsV1 } from '../../../../../common/routes/rule/apis/unmute_all';
+import { unmuteAllRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/unmute_all';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const unmuteAllRuleRoute = (

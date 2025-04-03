@@ -8,7 +8,11 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
+import {
+  useAssistantContext,
+  type Conversation,
+  useAssistantLastConversation,
+} from '@kbn/elastic-assistant';
 import { useCurrentConversation } from '@kbn/elastic-assistant/impl/assistant/use_current_conversation';
 import { useDataStreamApis } from '@kbn/elastic-assistant/impl/assistant/use_data_stream_apis';
 import { getDefaultConnector } from '@kbn/elastic-assistant/impl/assistant/helpers';
@@ -61,9 +65,8 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    getLastConversation,
-    setLastConversation,
   } = useAssistantContext();
+  const { getLastConversation, setLastConversation } = useAssistantLastConversation({ spaceId });
   const {
     allSystemPrompts,
     conversations,
@@ -76,6 +79,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     allSystemPrompts,
     conversations,
     defaultConnector,
+    spaceId,
     refetchCurrentUserConversations,
     lastConversation: getLastConversation(),
     mayUpdateConversations:
@@ -102,7 +106,6 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       const config = getGenAiConfig(connector);
       const apiProvider = config?.apiProvider;
       const model = config?.defaultModel;
-
       if (currentConversation != null) {
         const conversation = await setApiConfig({
           conversation: currentConversation,
@@ -121,17 +124,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         }
       }
 
-      if (selectedConnectorId != null) {
+      if (connector) {
         setSelectedConnectorId(connectorId);
       }
     },
-    [
-      currentConversation,
-      selectedConnectorId,
-      setApiConfig,
-      onConversationChange,
-      setSelectedConnectorId,
-    ]
+    [currentConversation, setApiConfig, onConversationChange, setSelectedConnectorId]
   );
 
   if (!checkCompleteMetadata) {

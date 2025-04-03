@@ -13,8 +13,8 @@ import { connector, resilientIncidentTypes, resilientSeverity } from '../mock';
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 import Fields from './case_fields';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { MockFormWrapperComponent } from '../test_utils';
 
 jest.mock('../../../common/lib/kibana');
@@ -47,7 +47,6 @@ describe('ResilientParamsFields renders', () => {
   };
 
   let user: UserEvent;
-  let appMockRenderer: AppMockRenderer;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -60,14 +59,14 @@ describe('ResilientParamsFields renders', () => {
   beforeEach(() => {
     // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
     user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
-    appMockRenderer = createAppMockRenderer();
+
     useGetIncidentTypesMock.mockReturnValue(useGetIncidentTypesResponse);
     useGetSeverityMock.mockReturnValue(useGetSeverityResponse);
     jest.clearAllMocks();
   });
 
   it('all params fields are rendered', () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -80,7 +79,7 @@ describe('ResilientParamsFields renders', () => {
   it('disabled the fields when loading incident types', async () => {
     useGetIncidentTypesMock.mockReturnValue({ ...useGetIncidentTypesResponse, isLoading: true });
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -95,7 +94,7 @@ describe('ResilientParamsFields renders', () => {
       isLoading: true,
     });
 
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -105,7 +104,7 @@ describe('ResilientParamsFields renders', () => {
   });
 
   it('sets issue type correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -121,7 +120,7 @@ describe('ResilientParamsFields renders', () => {
   });
 
   it('sets severity correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -132,7 +131,7 @@ describe('ResilientParamsFields renders', () => {
   });
 
   it('should submit a resilient connector', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -140,8 +139,9 @@ describe('ResilientParamsFields renders', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('incidentTypeComboBox')).toBeInTheDocument();
-      expect(screen.getByRole('option', { name: 'Low' }));
     });
+
+    expect(screen.getByRole('option', { name: 'Low' }));
 
     const checkbox = within(screen.getByTestId('incidentTypeComboBox')).getByTestId(
       'comboBoxSearchInput'

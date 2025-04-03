@@ -40,8 +40,11 @@ export class BaseValidatorMock extends BaseValidator {
     return this.validateCanCreateByPolicyArtifacts(item);
   }
 
-  async _validateByPolicyItem(item: ExceptionItemLikeOptions): Promise<void> {
-    return this.validateByPolicyItem(item);
+  async _validateByPolicyItem(
+    item: ExceptionItemLikeOptions,
+    currentItem?: ExceptionListItemSchema
+  ): Promise<void> {
+    return this.validateByPolicyItem(item, currentItem);
   }
 
   _wasByPolicyEffectScopeChanged(
@@ -75,6 +78,10 @@ export class BaseValidatorMock extends BaseValidator {
 
   _validateCanDeleteItemInActiveSpace(currentSavedItem: ExceptionListItemSchema): Promise<void> {
     return this.validateCanDeleteItemInActiveSpace(currentSavedItem);
+  }
+
+  _validateCanReadItemInActiveSpace(currentSavedItem: ExceptionListItemSchema): Promise<void> {
+    return this.validateCanReadItemInActiveSpace(currentSavedItem);
   }
 }
 

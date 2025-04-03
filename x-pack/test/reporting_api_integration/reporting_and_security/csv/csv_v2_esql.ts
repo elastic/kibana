@@ -132,7 +132,8 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('export from timebased data view', () => {
-      const LOGSTASH_DATA_ARCHIVE = 'test/functional/fixtures/es_archiver/logstash_functional';
+      const LOGSTASH_DATA_ARCHIVE =
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional';
       before(async () => {
         log.info(`loading archives and fixtures`);
         await esArchiver.load(LOGSTASH_DATA_ARCHIVE);

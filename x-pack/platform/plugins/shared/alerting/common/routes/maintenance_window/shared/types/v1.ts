@@ -6,6 +6,6 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { maintenanceWindowCategoryIdsSchemaV1 } from '..';
+import type { maintenanceWindowCategoryIdsSchemaV1 } from '..';
 
 export type MaintenanceWindowCategoryIds = TypeOf<typeof maintenanceWindowCategoryIdsSchemaV1>;

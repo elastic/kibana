@@ -11,7 +11,7 @@ import type {
   GetViewInAppRelativeUrlFnOpts,
   AlertingServerSetup,
 } from '@kbn/alerting-plugin/server';
-import { observabilityPaths } from '@kbn/observability-plugin/common';
+import { observabilityFeatureId, observabilityPaths } from '@kbn/observability-plugin/common';
 import { metricInventoryThresholdRuleParamsSchema } from '@kbn/response-ops-rule-params/metric_inventory_threshold';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
@@ -79,6 +79,7 @@ export function registerInventoryThresholdRuleType(
     actionGroups: [FIRED_ACTIONS, WARNING_ACTIONS],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: 'infrastructure',
+    solution: observabilityFeatureId,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     /*

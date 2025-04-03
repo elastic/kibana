@@ -7,9 +7,9 @@
 
 import moment from 'moment';
 import sinon from 'sinon';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { RuleSnooze } from '../../types';
+import type { RuleSnooze } from '../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { clearExpiredSnoozes } from './clear_expired_snoozes';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';

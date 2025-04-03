@@ -5,8 +5,8 @@
  * 2.0.
  */
 import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { FilterStateStore } from '@kbn/es-query';
-import { RRuleParams } from './rrule_type';
+import type { FilterStateStore } from '@kbn/es-query';
+import type { RRuleParams } from './rrule_type';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',

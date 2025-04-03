@@ -1929,7 +1929,15 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<any>; } | undefined; } | undefined; defaultActionGroupId: \"default\"; category: string; producer: string; actionVariables?: { context?: ",
+          "<any>; } | undefined; } | undefined; defaultActionGroupId: \"default\"; category: string; producer: string; solution: ",
+          {
+            "pluginId": "@kbn/alerting-types",
+            "scope": "common",
+            "docId": "kibKbnAlertingTypesPluginApi",
+            "section": "def-common.RuleTypeSolution",
+            "text": "RuleTypeSolution"
+          },
+          "; actionVariables?: { context?: ",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",

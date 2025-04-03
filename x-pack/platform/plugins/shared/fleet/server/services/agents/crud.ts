@@ -118,16 +118,16 @@ export async function getAgents(
 
 export async function openPointInTime(
   esClient: ElasticsearchClient,
+  keepAlive: string = '10m',
   index: string = AGENTS_INDEX
 ): Promise<string> {
-  const pitKeepAlive = '10m';
   const pitRes = await esClient.openPointInTime({
     index,
-    keep_alive: pitKeepAlive,
+    keep_alive: keepAlive,
   });
 
   auditLoggingService.writeCustomAuditLog({
-    message: `User opened point in time query [index=${index}] [pitId=${pitRes.id}]`,
+    message: `User opened point in time query [index=${index}] [keepAlive=${keepAlive}] [pitId=${pitRes.id}]`,
   });
 
   return pitRes.id;
@@ -203,8 +203,10 @@ export async function getAgentsByKuery(
     getStatusSummary?: boolean;
     sortField?: string;
     sortOrder?: 'asc' | 'desc';
-    pitId?: string;
     searchAfter?: SortResults;
+    openPit?: boolean;
+    pitId?: string;
+    pitKeepAlive?: string;
     aggregations?: Record<string, AggregationsAggregationContainer>;
   }
 ): Promise<{
@@ -225,7 +227,9 @@ export async function getAgentsByKuery(
     getStatusSummary = false,
     showUpgradeable,
     searchAfter,
+    openPit,
     pitId,
+    pitKeepAlive = '1m',
     aggregations,
     spaceId,
   } = options;
@@ -262,7 +266,11 @@ export async function getAgentsByKuery(
     uninstalled: 0,
   };
 
-  const queryAgents = async (from: number, size: number) => {
+  const pitIdToUse = pitId || (openPit ? await openPointInTime(esClient, pitKeepAlive) : undefined);
+
+  const queryAgents = async (
+    queryOptions: { from: number; size: number } | { searchAfter: SortResults; size: number }
+  ) => {
     const aggs = {
       ...(aggregations || getStatusSummary
         ? {
@@ -286,32 +294,38 @@ export async function getAgentsByKuery(
       FleetServerAgent,
       { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
     >({
-      from,
-      size,
+      ...('from' in queryOptions
+        ? { from: queryOptions.from }
+        : {
+            search_after: queryOptions.searchAfter,
+          }),
+      size: queryOptions.size,
       track_total_hits: true,
       rest_total_hits_as_int: true,
       runtime_mappings: runtimeFields,
       fields: Object.keys(runtimeFields),
       sort,
       query: kueryNode ? toElasticsearchQuery(kueryNode) : undefined,
-      ...(pitId
+      ...(pitIdToUse
         ? {
             pit: {
-              id: pitId,
-              keep_alive: '1m',
+              id: pitIdToUse,
+              keep_alive: pitKeepAlive,
             },
           }
         : {
             index: AGENTS_INDEX,
             ignore_unavailable: true,
           }),
-      ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
       ...aggs,
     });
   };
   let res;
+
   try {
-    res = await queryAgents((page - 1) * perPage, perPage);
+    res = await queryAgents(
+      searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
+    );
   } catch (err) {
     appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
     throw err;
@@ -327,7 +341,7 @@ export async function getAgentsByKuery(
     // query all agents, then filter upgradeable, and return the requested page and correct total
     // if there are more than SO_SEARCH_LIMIT agents, the logic falls back to same as before
     if (total < SO_SEARCH_LIMIT) {
-      const response = await queryAgents(0, SO_SEARCH_LIMIT);
+      const response = await queryAgents({ from: 0, size: SO_SEARCH_LIMIT });
       agents = response.hits.hits
         .map(searchHitToAgent)
         .filter((agent) => isAgentUpgradeAvailable(agent, latestAgentVersion));
@@ -358,8 +372,9 @@ export async function getAgentsByKuery(
   return {
     agents,
     total,
-    page,
+    ...(searchAfter ? { page: 0 } : { page }),
     perPage,
+    ...(pitIdToUse ? { pit: pitIdToUse } : {}),
     ...(aggregations ? { aggregations: res.aggregations } : {}),
     ...(getStatusSummary ? { statusSummary } : {}),
   };

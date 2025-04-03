@@ -34,6 +34,7 @@ export interface FleetAuthz {
   };
 
   integrations: {
+    all: boolean;
     readPackageInfo: boolean;
     readInstalledPackages: boolean;
     installPackages: boolean;
@@ -151,6 +152,7 @@ export const calculateAuthz = ({
   return {
     fleet: fleetAuthz,
     integrations: {
+      all: integrations.all,
       readPackageInfo: hasFleetAll || fleet.setup || integrations.all || integrations.read,
       readInstalledPackages: integrations.all || integrations.read,
       installPackages: writeIntegrationPolicies && integrations.all,

@@ -9,13 +9,14 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import { ConstructorOptions, RuleTypeRegistry } from '../rule_type_registry';
+import type { ConstructorOptions } from '../rule_type_registry';
+import { RuleTypeRegistry } from '../rule_type_registry';
 import { TaskRunnerFactory } from '../task_runner/task_runner_factory';
-import { ILicenseState } from './license_state';
+import type { ILicenseState } from './license_state';
 import { licenseStateMock } from './license_state.mock';
 import { schema } from '@kbn/config-schema';
 import { createGetAlertIndicesAliasFn } from './create_get_alert_indices_alias';
-import { AlertingConfig } from '../config';
+import type { AlertingConfig } from '../config';
 
 describe('createGetAlertIndicesAliasFn', () => {
   const logger = loggingSystemMock.create().get();
@@ -50,6 +51,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     alerts: {
       context: 'test',
       mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
@@ -73,6 +75,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     alerts: {
       context: 'spaceAware',
       isSpaceAware: true,
@@ -97,6 +100,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: schema.any(),
     },

@@ -17,6 +17,12 @@ export function registerDocumentRoute({ router, log }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/indices/{index_name}/document/{document_id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       validate: {
         params: schema.object({
           document_id: schema.string(),

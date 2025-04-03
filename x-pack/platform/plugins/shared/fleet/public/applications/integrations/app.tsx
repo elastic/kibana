@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useRouteMatch } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -27,22 +27,25 @@ import {
   type FleetStatusProviderProps,
   KibanaVersionContext,
   useFleetStatus,
+  useAuthz,
 } from '../../hooks';
 import { SpaceSettingsContextProvider } from '../../hooks/use_space_settings_context';
 
 import { FleetServerFlyout } from '../fleet/components';
 
 import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
-import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
+import { FLEET_ROUTING_PATHS, INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
+
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
+
 import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
 import { AgentEnrollmentFlyout } from './components';
 import { ReadOnlyContextProvider } from './hooks/use_read_only_context';
-
 const queryClient = new QueryClient();
 
 const EmptyContext = () => <></>;
@@ -141,6 +144,19 @@ export const IntegrationsAppContext: React.FC<{
 export const AppRoutes = memo(() => {
   const flyoutContext = useFlyoutContext();
   const fleetStatus = useFleetStatus();
+  const authz = useAuthz();
+  const isAddIntegrationsPath = !!useRouteMatch(FLEET_ROUTING_PATHS.add_integration_to_policy);
+  const allowedToAccess =
+    authz.integrations.readIntegrationPolicies || authz.integrations.all || authz.fleet.all;
+  const missingPrivilegesString = 'MISSING_PRIVILEGES';
+
+  if (!allowedToAccess) {
+    return (
+      <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
+        <PermissionsError callingApplication="Integrations" error={missingPrivilegesString} />
+      </ErrorLayout>
+    );
+  }
 
   return (
     <>

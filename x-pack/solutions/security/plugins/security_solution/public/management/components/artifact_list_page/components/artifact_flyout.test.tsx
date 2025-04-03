@@ -36,11 +36,19 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
   let getLastFormComponentProps: ReturnType<
     typeof getFormComponentMock
   >['getLastFormComponentProps'];
+  let setExperimentalFlag: AppContextTestRender['setExperimentalFlag'];
 
   beforeEach(() => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
-    ({ history, coreStart, mockedApi, FormComponentMock, getLastFormComponentProps } = renderSetup);
+    ({
+      history,
+      coreStart,
+      mockedApi,
+      FormComponentMock,
+      getLastFormComponentProps,
+      setExperimentalFlag,
+    } = renderSetup);
 
     history.push('somepage?show=create');
 
@@ -112,6 +120,36 @@ describe('When the flyout is opened in the ArtifactListPage component', () => {
         policies: expect.any(Array),
         policiesIsLoading: false,
       },
+      expect.anything()
+    );
+  });
+
+  it('should initialize form with a per-policy artifact when user does not have global artifact privilege and spaces is enabeld', async () => {
+    setExperimentalFlag({ endpointManagementSpaceAwarenessEnabled: true });
+    useUserPrivileges.mockReturnValue({
+      ...useUserPrivileges(),
+      endpointPrivileges: getEndpointPrivilegesInitialStateMock({
+        canManageGlobalArtifacts: false,
+      }),
+    });
+    await render();
+
+    expect(FormComponentMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        item: {
+          comments: [],
+          description: '',
+          entries: [],
+          item_id: undefined,
+          list_id: 'endpoint_trusted_apps',
+          meta: expect.any(Object),
+          name: '',
+          namespace_type: 'agnostic',
+          os_types: ['windows'],
+          tags: [],
+          type: 'simple',
+        },
+      }),
       expect.anything()
     );
   });

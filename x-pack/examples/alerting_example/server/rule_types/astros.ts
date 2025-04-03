@@ -107,6 +107,7 @@ export const ruleType: RuleType<
   },
   category: 'example',
   producer: ALERTING_EXAMPLE_APP_ID,
+  solution: 'stack',
   getViewInAppRelativeUrl({ rule }) {
     return `/app/${ALERTING_EXAMPLE_APP_ID}/astros/${rule.id}`;
   },

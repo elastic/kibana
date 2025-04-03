@@ -15,7 +15,7 @@ import {
 } from '@kbn/apm-synthtrace';
 import { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
-import { Logger } from '@kbn/apm-synthtrace/src/lib/utils/create_logger';
+import { type Logger, extendToolingLog } from '@kbn/apm-synthtrace';
 import { Auth, Es } from '.';
 import { KibanaUrl } from './kibana_url';
 
@@ -39,45 +39,9 @@ export async function getSynthtraceClient(
   }
 }
 
-// Adapting ToolingLog instance to Logger interface
-class LoggerAdapter implements Logger {
-  private log: ToolingLog;
-  private joiner = ', ';
-
-  constructor(log: ToolingLog) {
-    this.log = log;
-  }
-
-  debug(...args: any[]): void {
-    this.log.debug(args.join(this.joiner));
-  }
-
-  info(...args: any[]): void {
-    this.log.info(args.join(this.joiner));
-  }
-
-  warn(...args: any[]): void {
-    this.log.warning(args.join(this.joiner));
-  }
-
-  error(arg: string | Error): void {
-    this.log.error(arg);
-  }
-
-  perf<T>(name: string, cb: () => T): T {
-    const startTime = Date.now();
-    const result = cb();
-    const duration = Date.now() - startTime;
-    const durationInSeconds = duration / 1000;
-    const formattedTime = durationInSeconds.toFixed(3) + 's';
-    this.log.info(`${name} took ${formattedTime}.`);
-    return result;
-  }
-}
-
 async function initInfraSynthtraceClient(options: SynthtraceClientOptions) {
   const { log, es, auth, kbnUrl } = options;
-  const logger: Logger = new LoggerAdapter(log);
+  const logger: Logger = extendToolingLog(log);
 
   const synthKbnClient = new InfraSynthtraceKibanaClient({
     logger,
@@ -99,7 +63,7 @@ async function initInfraSynthtraceClient(options: SynthtraceClientOptions) {
 
 async function initApmSynthtraceClient(options: SynthtraceClientOptions) {
   const { log, es, auth, kbnUrl } = options;
-  const logger: Logger = new LoggerAdapter(log);
+  const logger: Logger = extendToolingLog(log);
   const kibanaUrl = new URL(kbnUrl.get());
   const kibanaUrlWithAuth = Url.format({
     protocol: kibanaUrl.protocol,

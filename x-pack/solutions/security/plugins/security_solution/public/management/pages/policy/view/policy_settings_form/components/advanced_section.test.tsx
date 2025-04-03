@@ -24,8 +24,7 @@ jest.mock('../../../../../../common/hooks/use_license');
 
 const useLicenseMock = _useLicense as jest.Mock;
 
-// Failing: See https://github.com/elastic/kibana/issues/205141
-describe.skip('Policy Advanced Settings section', () => {
+describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
 
   let formProps: AdvancedSectionProps;

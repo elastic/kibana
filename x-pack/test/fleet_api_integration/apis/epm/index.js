@@ -33,6 +33,8 @@ export default function loadTests({ loadTestFile, getService }) {
     loadTestFile(require.resolve('./install_tag_assets'));
     loadTestFile(require.resolve('./install_with_streaming'));
     loadTestFile(require.resolve('./bulk_upgrade'));
+    loadTestFile(require.resolve('./bulk_uninstall'));
+    loadTestFile(require.resolve('./bulk_install_upgrade'));
     loadTestFile(require.resolve('./bulk_install'));
     loadTestFile(require.resolve('./update_assets'));
     loadTestFile(require.resolve('./data_stream'));

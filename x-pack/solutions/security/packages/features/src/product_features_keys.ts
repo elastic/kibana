@@ -8,6 +8,11 @@
 export enum ProductFeatureSecurityKey {
   /** Enables Advanced Insights (Entity Risk, GenAI) */
   advancedInsights = 'advanced_insights',
+  /** Enables Alerts Summary page for AI SOC */
+  alertsSummary = 'alerts_summary',
+
+  /** Enables Configurations page for AI SOC */
+  configurations = 'configurations',
   /**
    * Enables Investigation guide in Timeline
    */

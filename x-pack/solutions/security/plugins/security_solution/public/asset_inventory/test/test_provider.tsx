@@ -8,6 +8,7 @@
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render } from '@testing-library/react';
 interface TestProviderProps {
   children: React.ReactNode;
 }
@@ -29,4 +30,8 @@ export const createTestProviderWrapper = () => {
   return function Wrapper({ children }: { children: React.ReactNode }) {
     return <TestProvider>{children}</TestProvider>;
   };
+};
+
+export const renderWithTestProvider = (children: React.ReactNode) => {
+  return render(<TestProvider>{children}</TestProvider>);
 };

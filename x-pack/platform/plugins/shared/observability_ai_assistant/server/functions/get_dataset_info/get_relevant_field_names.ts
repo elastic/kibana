@@ -16,7 +16,7 @@ import { FunctionCallChatFunction } from '../../service/types';
 const SELECT_RELEVANT_FIELDS_NAME = 'select_relevant_fields';
 export const GET_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful assistant for Elastic Observability. 
 Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
-The list in the user message consists of JSON objects that map a human-readable "field" name to its unique "id". 
+The list in the user message consists of JSON objects that map a human-readable field "name" to its unique "id". 
 You must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.`;
 
 export async function getRelevantFieldNames({
@@ -114,10 +114,12 @@ export async function getRelevantFieldNames({
               '@timestamp': new Date().toISOString(),
               message: {
                 role: MessageRole.User,
-                content: `Below is a list of fields. Each entry is a JSON object that contains a "field" (the field name) and an "id" (the unique identifier). Use only the "id" values from this list when selecting relevant fields:
+                content: `Below is a list of fields. Each entry is a JSON object that contains a "name" (the field name) and an "id" (the unique identifier). Use only the "id" values from this list when selecting relevant fields:
 
             ${fieldsInChunk
-              .map((field) => JSON.stringify({ field, id: shortIdTable.take(field) }))
+              .map((fieldName) =>
+                JSON.stringify({ name: fieldName, id: shortIdTable.take(fieldName) })
+              )
               .join('\n')}`,
               },
             },

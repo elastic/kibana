@@ -10,9 +10,9 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverServices } from '../../../../build_services';
-import { InternalStateStore, RuntimeStateManager } from '../redux';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { DiscoverServices } from '../../../../build_services';
+import type { InternalStateStore, RuntimeStateManager } from '../redux';
 
 interface DataViewData {
   /**

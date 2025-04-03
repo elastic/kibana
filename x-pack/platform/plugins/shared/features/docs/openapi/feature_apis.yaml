@@ -1,0 +1,98 @@
+openapi: 3.0.3
+info:
+  title: Feature APIs
+  description: Kibana get feature APIs
+  version: "1.0.0"
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+tags:
+  - name: system
+    description: System
+servers:
+  - url: /
+paths:
+  /api/features:
+    get:
+      summary: Get features
+      description: >
+        Get information about all Kibana features.
+        Features are used by spaces and security to refine and secure access to Kibana.
+      operationId: get-features
+      x-state: Technical Preview
+      tags:
+        - system
+      responses:
+        '200':
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                type: object
+              examples:
+                getFeaturesExample:
+                  value: |
+                    {
+                      "features": [
+                        {
+                          "name": "tasks",
+                          "description": "Manages task results"
+                        },
+                        {
+                          "name": "security",
+                          "description": "Manages configuration for Security features, such as users and roles"
+                        },
+                        {
+                          "name": "searchable_snapshots",
+                          "description": "Manages caches and configuration for searchable snapshots"
+                        },
+                        {
+                          "name": "logstash_management",
+                          "description": "Enables Logstash Central Management pipeline storage"
+                        },
+                        {
+                          "name": "transform",
+                          "description": "Manages configuration and state for transforms"
+                        },
+                        {
+                          "name": "kibana",
+                          "description": "Manages Kibana configuration and reports"
+                        },
+                        {
+                          "name": "synonyms",
+                          "description": "Manages synonyms"
+                        },
+                        {
+                          "name": "async_search",
+                          "description": "Manages results of async searches"
+                        },
+                        {
+                          "name": "ent_search",
+                          "description": "Manages configuration for Enterprise Search features"
+                        },
+                        {
+                          "name": "machine_learning",
+                          "description": "Provides anomaly detection and forecasting functionality"
+                        },
+                        {
+                          "name": "geoip",
+                          "description": "Manages data related to GeoIP database downloader"
+                        },
+                        {
+                          "name": "watcher",
+                          "description": "Manages Watch definitions and state"
+                        },
+                        {
+                          "name": "fleet",
+                          "description": "Manages configuration for Fleet"
+                        },
+                        {
+                          "name": "enrich",
+                          "description": "Manages data related to Enrich policies"
+                        },
+                        {
+                          "name": "inference_plugin",
+                          "description": "Inference plugin for managing inference services and inference"
+                        }
+                      ]
+                    }

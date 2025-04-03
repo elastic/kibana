@@ -26,6 +26,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PACKAGES_SAVED_OBJECT_TYPE,
   SO_SEARCH_LIMIT,
+  USER_SETTINGS_TEMPLATE_SUFFIX,
 } from '../../../constants';
 import { ElasticsearchAssetType } from '../../../types';
 import type {
@@ -105,6 +106,7 @@ export async function removeInstallation(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'delete',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
@@ -386,7 +388,7 @@ async function deleteIndexTemplate(esClient: ElasticsearchClient, name: string):
 
 async function deleteComponentTemplate(esClient: ElasticsearchClient, name: string): Promise<void> {
   // '*' shouldn't ever appear here, but it still would delete all templates
-  if (name && name !== '*') {
+  if (name && name !== '*' && !name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX)) {
     try {
       await esClient.cluster.deleteComponentTemplate({ name }, { ignore: [404] });
     } catch (error) {

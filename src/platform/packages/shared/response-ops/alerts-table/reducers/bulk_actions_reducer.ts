@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BulkActionsReducerAction, BulkActionsState, BulkActionsVerbs } from '../types';
+import type { BulkActionsReducerAction, BulkActionsState } from '../types';
+import { BulkActionsVerbs } from '../types';
 
 const getAllRowsInPage = (rowCount: number) =>
   new Map(Array.from(Array(rowCount).keys()).map((idx) => [idx, { isLoading: false }]));

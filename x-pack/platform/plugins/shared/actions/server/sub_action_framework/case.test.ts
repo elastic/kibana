@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { TestCaseConnector } from './mocks';
-import { ActionsConfigurationUtilities } from '../actions_config';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import { ConnectorUsageCollector } from '../usage';
 
 describe('CaseConnector', () => {

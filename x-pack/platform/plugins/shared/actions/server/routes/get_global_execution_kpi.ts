@@ -4,16 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import {
-  GetGlobalExecutionKPIParams,
-  INTERNAL_BASE_ACTION_API_PATH,
-  RewriteRequestCase,
-} from '../../common';
+import type { GetGlobalExecutionKPIParams, RewriteRequestCase } from '../../common';
+import { INTERNAL_BASE_ACTION_API_PATH } from '../../common';
 import { verifyAccessAndContext } from './verify_access_and_context';
-import { ActionsRequestHandlerContext } from '../types';
-import { ILicenseState } from '../lib';
+import type { ActionsRequestHandlerContext } from '../types';
+import type { ILicenseState } from '../lib';
 import { rewriteNamespaces } from './rewrite_namespaces';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from './constants';
 

@@ -65,7 +65,7 @@ export function* fetchSyntheticsMonitorEffect() {
         recentPingFromList?.[ConfigKey.CONFIG_ID] &&
         lastRunPing?.[ConfigKey.CONFIG_ID] === recentPingFromList?.[ConfigKey.CONFIG_ID] &&
         lastRunPing?.observer?.geo?.name === recentPingFromList?.observer?.geo?.name &&
-        new Date(lastRunPing?.timestamp) < new Date(recentPingFromList?.timestamp)
+        new Date(lastRunPing?.['@timestamp']) < new Date(recentPingFromList?.['@timestamp'])
       ) {
         yield put(updateMonitorLastRunAction({ data: recentPingFromList }));
       }

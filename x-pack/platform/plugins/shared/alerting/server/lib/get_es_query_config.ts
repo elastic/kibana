@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
 export async function getEsQueryConfig(uiSettings: IUiSettingsClient) {

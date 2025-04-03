@@ -29,4 +29,5 @@ export {
   RuleActionsNotifyWhen,
   RuleActionsAlertsFilter,
   RuleActionsAlertsFilterTimeframe,
+  NOTIFY_WHEN_OPTIONS,
 } from './src/rule_actions';

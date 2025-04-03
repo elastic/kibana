@@ -9,7 +9,7 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 export const DISCOVER_SINGLE_DOC_LOCATOR = 'DISCOVER_SINGLE_DOC_LOCATOR';
 
@@ -27,31 +27,5 @@ export interface DocHistoryLocationState {
   dataViewSpec?: DataViewSpec;
 }
 
-export class DiscoverSingleDocLocatorDefinition
-  implements LocatorDefinition<DiscoverSingleDocLocatorParams>
-{
-  public readonly id = DISCOVER_SINGLE_DOC_LOCATOR;
-
-  constructor() {}
-
-  public readonly getLocation = async (params: DiscoverSingleDocLocatorParams) => {
-    const { index, rowId, rowIndex, referrer } = params;
-
-    let dataViewId;
-    const state: DocHistoryLocationState = { referrer };
-    if (typeof index === 'object') {
-      state.dataViewSpec = index;
-      dataViewId = index.id!;
-    } else {
-      dataViewId = index;
-    }
-
-    const path = `#/doc/${dataViewId}/${rowIndex}?id=${encodeURIComponent(rowId)}`;
-
-    return {
-      app: 'discover',
-      path,
-      state,
-    };
-  };
-}
+export type DiscoverSingleDocLocatorGetLocation =
+  LocatorDefinition<DiscoverSingleDocLocatorParams>['getLocation'];

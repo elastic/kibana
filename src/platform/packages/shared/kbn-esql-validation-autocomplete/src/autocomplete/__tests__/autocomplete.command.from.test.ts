@@ -77,7 +77,7 @@ describe('autocomplete.suggest', () => {
         });
         const { assertSuggestions } = await setup();
         const expected = [
-          'METADATA $0',
+          'METADATA ',
           ',',
           '| ',
           ...recommendedQueries.map((query) => query.queryString),
@@ -89,7 +89,7 @@ describe('autocomplete.suggest', () => {
       test('partially-typed METADATA keyword', async () => {
         const { assertSuggestions } = await setup();
 
-        assertSuggestions('FROM index1 MET/', ['METADATA $0']);
+        assertSuggestions('FROM index1 MET/', ['METADATA ']);
       });
 
       test('not before first index', async () => {

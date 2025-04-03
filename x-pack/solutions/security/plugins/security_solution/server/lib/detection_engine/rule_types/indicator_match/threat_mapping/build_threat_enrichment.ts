@@ -6,7 +6,7 @@
  */
 
 import type { SignalsEnrichment } from '../../types';
-import type { BuildThreatEnrichmentOptions } from './types';
+import type { BuildThreatEnrichmentOptions, GetThreatListOptions } from './types';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 
@@ -15,24 +15,17 @@ import { threatEnrichmentFactory } from './threat_enrichment_factory';
 // we do want to make extra requests to the threat index to get enrichments from all threats
 // previously we were enriched alerts only from `currentThreatList` but not all threats
 export const buildThreatEnrichment = ({
-  ruleExecutionLogger,
+  sharedParams,
   services,
   threatFilters,
-  threatIndex,
   threatIndicatorPath,
-  threatLanguage,
-  threatQuery,
   pitId,
   reassignPitId,
-  listClient,
-  exceptionFilter,
-  threatMapping,
-  runtimeMappings,
   threatIndexFields,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
     const threatFiltersFromEvents = buildThreatMappingFilter({
-      threatMapping,
+      threatMapping: sharedParams.completeRule.ruleParams.threatMapping,
       threatList: signals,
       entryKey: 'field',
       allowedFieldsForTermsQuery: {
@@ -41,22 +34,16 @@ export const buildThreatEnrichment = ({
       },
     });
 
-    const threatSearchParams = {
+    const threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'> = {
+      sharedParams,
       esClient: services.scopedClusterClient.asCurrentUser,
       threatFilters: [...threatFilters, threatFiltersFromEvents],
-      query: threatQuery,
-      language: threatLanguage,
-      index: threatIndex,
-      ruleExecutionLogger,
       threatListConfig: {
         _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
         fields: undefined,
       },
       pitId,
       reassignPitId,
-      runtimeMappings,
-      listClient,
-      exceptionFilter,
       indexFields: threatIndexFields,
     };
 

@@ -6,16 +6,15 @@
  */
 
 import React from 'react';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
-import { waitFor, fireEvent } from '@testing-library/react';
+import { waitFor, fireEvent, screen } from '@testing-library/react';
 import { RecentCasesFilters, caseFilterOptions } from '.';
 import type { FilterMode } from '../types';
+import { renderWithTestingProviders } from '../../../common/mock';
 
 describe('Severity form field', () => {
   const setFilterBy = jest.fn();
   const filterBy: FilterMode = 'recentlyCreated';
-  let appMockRender: AppMockRenderer;
+
   const props = {
     filterBy,
     setFilterBy,
@@ -23,36 +22,30 @@ describe('Severity form field', () => {
     isLoading: false,
   };
 
-  beforeEach(() => {
-    appMockRender = createAppMockRenderer();
-  });
-
   it('renders', () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} />);
-    expect(result.getByTestId('recent-cases-filter')).toBeTruthy();
+    renderWithTestingProviders(<RecentCasesFilters {...props} />);
+    expect(screen.getByTestId('recent-cases-filter')).toBeTruthy();
   });
 
   it('renders loading state correctly', () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} isLoading={true} />);
-    expect(result.getByLabelText('Loading')).toBeTruthy();
-    expect(result.getByRole('progressbar')).toBeTruthy();
+    renderWithTestingProviders(<RecentCasesFilters {...props} isLoading={true} />);
+    expect(screen.getByLabelText('Loading')).toBeTruthy();
+    expect(screen.getByRole('progressbar')).toBeTruthy();
   });
 
   it('renders disabled  state correctly', () => {
-    const result = appMockRender.render(
-      <RecentCasesFilters {...props} hasCurrentUserInfo={false} />
-    );
-    expect(result.getByTestId('recent-cases-filter')).toHaveAttribute('disabled');
+    renderWithTestingProviders(<RecentCasesFilters {...props} hasCurrentUserInfo={false} />);
+    expect(screen.getByTestId('recent-cases-filter')).toHaveAttribute('disabled');
   });
 
   it('selects the correct value when changed to reported by me', async () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} />);
+    renderWithTestingProviders(<RecentCasesFilters {...props} />);
 
-    const recentCasesFilter = result.getByTestId('recent-cases-filter');
+    const recentCasesFilter = screen.getByTestId('recent-cases-filter');
 
     expect(recentCasesFilter).toBeInTheDocument();
 
-    expect(result.getByText(caseFilterOptions[1].label)).toBeInTheDocument();
+    expect(screen.getByText(caseFilterOptions[1].label)).toBeInTheDocument();
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyReported' } });
 
@@ -62,13 +55,13 @@ describe('Severity form field', () => {
   });
 
   it('selects the correct value when changed assigned to me', async () => {
-    const result = appMockRender.render(<RecentCasesFilters {...props} />);
+    renderWithTestingProviders(<RecentCasesFilters {...props} />);
 
-    const recentCasesFilter = result.getByTestId('recent-cases-filter');
+    const recentCasesFilter = screen.getByTestId('recent-cases-filter');
 
     expect(recentCasesFilter).toBeInTheDocument();
 
-    expect(result.getByText(caseFilterOptions[2].label)).toBeInTheDocument();
+    expect(screen.getByText(caseFilterOptions[2].label)).toBeInTheDocument();
 
     fireEvent.change(recentCasesFilter, { target: { value: 'myRecentlyAssigned' } });
 

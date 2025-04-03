@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import type {
+import {
   CreateExceptionListItemSchema,
   CreateExceptionListSchema,
   ExceptionListItemSchema,
+  ExceptionListTypeEnum,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_ARTIFACT_LIST_IDS,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
+  ENDPOINT_LIST_NAME,
+  ENDPOINT_LIST_DESCRIPTION,
+  ENDPOINT_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
 import { Response } from 'superagent';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
@@ -26,6 +30,7 @@ import { BLOCKLISTS_LIST_DEFINITION } from '@kbn/security-solution-plugin/public
 import { ManifestConstants } from '@kbn/security-solution-plugin/server/endpoint/lib/artifacts';
 import TestAgent from 'supertest/lib/agent';
 import { addSpaceIdToPath, DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isArtifactGlobal } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { FtrService } from '../../functional/ftr_provider_context';
 import { InternalUnifiedManifestSchemaResponseType } from '../apps/integrations/mocks';
 
@@ -73,6 +78,8 @@ export class EndpointArtifactsTestResources extends FtrService {
     createPayload: CreateExceptionListItemSchema,
     { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
   ): Promise<ArtifactTestData> {
+    this.log.verbose(`Creating exception item:\n${JSON.stringify(createPayload)}`);
+
     const artifact = await supertest
       .post(addSpaceIdToPath('/', spaceId, EXCEPTION_LIST_ITEM_URL))
       .set('kbn-xsrf', 'true')
@@ -80,34 +87,64 @@ export class EndpointArtifactsTestResources extends FtrService {
       .then(this.getHttpResponseFailureHandler())
       .then((response) => response.body as ExceptionListItemSchema);
 
-    const { item_id: itemId, namespace_type: namespaceType, list_id: listId } = artifact;
+    const { item_id: itemId, list_id: listId } = artifact;
+    const artifactAssignment = isArtifactGlobal(artifact) ? 'Global' : 'Per-Policy';
 
     this.log.info(
-      `Created exception list item in space [${spaceId}], List ID [${listId}], Item ID ${itemId}`
+      `Created [${artifactAssignment}] exception list item in space [${spaceId}], List ID [${listId}], Item ID [${itemId}]`
     );
 
     const cleanup = async () => {
-      const deleteResponse = await supertest
-        .delete(
-          `${addSpaceIdToPath(
-            '/',
-            spaceId,
-            EXCEPTION_LIST_ITEM_URL
-          )}?item_id=${itemId}&namespace_type=${namespaceType}`
-        )
-        .set('kbn-xsrf', 'true')
-        .send()
-        .then(this.getHttpResponseFailureHandler([404]));
-
-      this.log.info(
-        `Deleted exception list item [${listId}]: ${itemId} (${deleteResponse.status})`
-      );
+      await this.deleteExceptionItem(artifact, { supertest, spaceId });
     };
 
     return {
       artifact,
       cleanup,
     };
+  }
+
+  async deleteExceptionItem(
+    {
+      list_id: listId,
+      item_id: itemId,
+      namespace_type: nameSpaceType,
+    }: Pick<ExceptionListItemSchema, 'list_id' | 'item_id' | 'namespace_type'>,
+    { supertest = this.supertest, spaceId = DEFAULT_SPACE_ID }: ArtifactCreateOptions = {}
+  ): Promise<void> {
+    const deleteResponse = await supertest
+      .delete(
+        `${addSpaceIdToPath(
+          '/',
+          spaceId,
+          EXCEPTION_LIST_ITEM_URL
+        )}?item_id=${itemId}&namespace_type=${nameSpaceType}`
+      )
+      .set('kbn-xsrf', 'true')
+      .send()
+      .then(this.getHttpResponseFailureHandler([404]));
+
+    this.log.info(`Deleted exception list item [${listId}]: ${itemId} (${deleteResponse.status})`);
+  }
+
+  async createEndpointException(
+    overrides: Partial<CreateExceptionListItemSchema> = {},
+    options?: ArtifactCreateOptions
+  ): Promise<ArtifactTestData> {
+    await this.ensureListExists(
+      {
+        name: ENDPOINT_LIST_NAME,
+        description: ENDPOINT_LIST_DESCRIPTION,
+        list_id: ENDPOINT_LIST_ID,
+        type: ExceptionListTypeEnum.ENDPOINT,
+        namespace_type: 'agnostic',
+      },
+      options
+    );
+    const endpointException =
+      this.exceptionsGenerator.generateEndpointExceptionForCreate(overrides);
+
+    return this.createExceptionItem(endpointException, options);
   }
 
   async createTrustedApp(
@@ -167,6 +204,9 @@ export class EndpointArtifactsTestResources extends FtrService {
       }
       case ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id: {
         return this.createHostIsolationException(overrides, options);
+      }
+      case ENDPOINT_LIST_ID: {
+        return this.createEndpointException(overrides, options);
       }
       default:
         throw new Error(`Unexpected list id ${listId}`);

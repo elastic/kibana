@@ -6,11 +6,12 @@
  */
 
 import type { Document } from '@langchain/core/documents';
-import type {
+import {
   AnalyticsServiceSetup,
   AuthenticatedUser,
   KibanaRequest,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
@@ -36,6 +37,7 @@ import {
   DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
 
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
 import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
 import type { GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
@@ -156,6 +158,9 @@ export function getAssistantToolParams({
     temperature: 0, // zero temperature because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
   });
 
   return {
@@ -400,6 +405,7 @@ export const invokeDefendInsightsGraph = async ({
   size,
   start,
   end,
+  savedObjectsClient,
 }: {
   insightType: DefendInsightType;
   endpointIds: string[];
@@ -416,6 +422,7 @@ export const invokeDefendInsightsGraph = async ({
   size?: number;
   start?: string;
   end?: string;
+  savedObjectsClient: SavedObjectsClientContract;
 }): Promise<{
   anonymizedEvents: Document[];
   insights: DefendInsights | null;
@@ -443,11 +450,23 @@ export const invokeDefendInsightsGraph = async ({
     temperature: 0,
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
   });
 
   if (llm == null) {
     throw new Error('LLM is required for Defend insights');
   }
+
+  const defendInsightsPrompts = await getDefendInsightsPrompt({
+    type: insightType,
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    model,
+    provider: llmType,
+    savedObjectsClient,
+  });
 
   const graph = getDefaultDefendInsightsGraph({
     insightType,
@@ -457,6 +476,7 @@ export const invokeDefendInsightsGraph = async ({
     llm,
     logger,
     onNewReplacements,
+    prompts: defendInsightsPrompts,
     replacements: latestReplacements,
     size,
     start,

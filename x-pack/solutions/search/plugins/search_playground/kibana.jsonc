@@ -26,7 +26,8 @@
       "security",
       "stackConnectors",
       "triggersActionsUi",
-      "uiActions"
+      "uiActions",
+      "inference"
     ],
     "optionalPlugins": [
       "cloud",

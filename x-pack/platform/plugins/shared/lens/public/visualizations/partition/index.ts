@@ -22,10 +22,12 @@ export interface PieVisualizationPluginStartPlugins {
 export class PieVisualization {
   setup(core: CoreSetup, { editorFrame, charts }: PieVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
-      const { getPieVisualization } = await import('../../async_services');
-      const palettes = await charts.palettes.getPalettes();
+      const [{ getPieVisualization }, paletteService] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
 
-      return getPieVisualization({ paletteService: palettes, kibanaTheme: core.theme });
+      return getPieVisualization({ paletteService, kibanaTheme: core.theme });
     });
   }
 }

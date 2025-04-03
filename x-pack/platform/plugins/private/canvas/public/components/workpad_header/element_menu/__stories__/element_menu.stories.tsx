@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import React from 'react';
 import { ElementSpec } from '../../../../../types';
@@ -134,6 +133,12 @@ You can use standard Markdown in here, but you can also access your piped-in dat
   },
 };
 
-storiesOf('components/WorkpadHeader/ElementMenu', module).add('default', () => (
-  <ElementMenu elements={testElements} addElement={action('addElement')} />
-));
+export default {
+  title: 'components/WorkpadHeader/ElementMenu',
+};
+
+export const Default = {
+  render: () => <ElementMenu elements={testElements} addElement={action('addElement')} />,
+
+  name: 'default',
+};

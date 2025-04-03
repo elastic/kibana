@@ -34,9 +34,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       // and load a set of makelogs data
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('discover');
