@@ -100,7 +100,9 @@ export function SpanLinksTable({ items }: Props) {
       }),
       sortable: true,
       render: (_, { spanId, traceId, details }) => {
-        if (details && details.transactionId) {
+        // For outgoing span links we are able to determine transaction root from parent_span_id available only in OTel
+        const transactionId = details?.transactionId || details?.parentSpanId;
+        if (transactionId) {
           return (
             <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
@@ -110,7 +112,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiLink
                   data-test-subj="apmColumnsLink"
                   href={router.link('/link-to/transaction/{transactionId}', {
-                    path: { transactionId: details.transactionId },
+                    path: { transactionId },
                     query: { waterfallItemId: spanId },
                   })}
                 >

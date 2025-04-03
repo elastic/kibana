@@ -20,5 +20,6 @@ export interface SpanLinkDetails {
     spanName?: string;
     spanSubtype?: string;
     spanType?: string;
+    parentSpanId?: string;
   };
 }

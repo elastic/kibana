@@ -204,6 +204,7 @@ export const SERVER_PORT = 'server.port';
 // OpenTelemetry span links
 export const LINKS_SPAN_ID = 'links.span_id';
 export const LINKS_TRACE_ID = 'links.trace_id';
+export const PARENT_SPAN_ID = 'parent_span_id';
 
 // Metadata
 export const TIER = '_tier';

@@ -23,6 +23,7 @@ import {
   SPAN_TYPE,
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
+  PARENT_SPAN_ID,
 } from '../../../common/es_fields/apm';
 import type { Environment } from '../../../common/environment_rt';
 import type { SpanLinkDetails } from '../../../common/span_links';
@@ -69,7 +70,7 @@ async function fetchSpanLinksDetails({
     SPAN_TYPE,
   ] as const);
 
-  const optionalFields = asMutableArray([SERVICE_ENVIRONMENT] as const);
+  const optionalFields = asMutableArray([SERVICE_ENVIRONMENT, PARENT_SPAN_ID] as const);
 
   const response = await apmEventClient.search('get_span_links_details', {
     apm: {
@@ -170,6 +171,7 @@ async function fetchSpanLinksDetails({
             duration: event.span.duration.us,
             spanSubtype: event.span.subtype,
             spanType: event.span.type,
+            parentSpanId: event.parent_span_id,
           },
         };
       }
