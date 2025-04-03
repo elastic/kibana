@@ -327,11 +327,6 @@ export interface SuggestOptions {
   callbacks?: ESQLCallbacks;
 }
 
-export type SuggestFn = (
-  query: string,
-  opts?: SuggestOptions
-) => Promise<SuggestionRawDefinition[]>;
-
 export type AssertSuggestionsFn = (
   query: string,
   expected: Array<string | PartialSuggestionWithText>,

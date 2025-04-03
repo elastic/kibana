@@ -32,6 +32,13 @@ export const EMPTY_WHERE_SUGGESTIONS = [
   ...allEvalFns,
 ];
 
+export const EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS = [
+  ...getFieldNamesByType(['text', 'keyword', 'ip', 'version']),
+  ...getFunctionSignaturesByReturnType(Location.WHERE, ['text', 'keyword', 'ip', 'version'], {
+    scalar: true,
+  }),
+];
+
 describe('WHERE <expression>', () => {
   test('beginning an expression', async () => {
     const { assertSuggestions } = await setup();
@@ -102,20 +109,13 @@ describe('WHERE <expression>', () => {
     test('after a comparison with a string field', async () => {
       const { assertSuggestions } = await setup();
 
-      const expectedComparisonWithTextFieldSuggestions = [
-        ...getFieldNamesByType(['text', 'keyword', 'ip', 'version']),
-        ...getFunctionSignaturesByReturnType(Location.WHERE, ['text', 'keyword', 'ip', 'version'], {
-          scalar: true,
-        }),
-      ];
-
       await assertSuggestions(
         'from a | where textField >= /',
-        expectedComparisonWithTextFieldSuggestions
+        EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS
       );
       await assertSuggestions(
         'from a | where textField >= textField/',
-        expectedComparisonWithTextFieldSuggestions
+        EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS
       );
     });
 

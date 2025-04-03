@@ -8,27 +8,34 @@
  */
 
 import {
+  ESQLSingleAstItem,
+  Walker,
   isIdentifier,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLFunction,
   type ESQLLiteral,
   type ESQLSource,
-  ESQLSingleAstItem,
-  Walker,
 } from '@kbn/esql-ast';
-import { uniqBy } from 'lodash';
 import { ESQLVariableType } from '@kbn/esql-types';
+import { uniqBy } from 'lodash';
+import { logicalOperators } from '../definitions/all_operators';
 import {
+  CommandSuggestParams,
+  FunctionDefinitionTypes,
+  Location,
   isParameterType,
+  isReturnType,
   type FunctionDefinition,
   type FunctionReturnType,
   type SupportedDataType,
-  isReturnType,
-  FunctionDefinitionTypes,
-  CommandSuggestParams,
-  Location,
 } from '../definitions/types';
+import {
+  EDITOR_MARKER,
+  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
+  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
+} from '../shared/constants';
+import { compareTypesWithLiterals } from '../shared/esql_types';
 import {
   findFinalWord,
   getColumnForASTNode,
@@ -40,27 +47,19 @@ import {
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
-import { compareTypesWithLiterals } from '../shared/esql_types';
+import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import { listCompleteItem } from './complete_items';
 import {
   TIME_SYSTEM_PARAMS,
   buildVariablesDefinitions,
-  getFunctionSuggestions,
   getCompatibleLiterals,
   getDateLiterals,
+  getFunctionSuggestions,
+  getOperatorSuggestion,
   getOperatorSuggestions,
   getSuggestionsAfterNot,
-  getOperatorSuggestion,
 } from './factories';
-import {
-  EDITOR_MARKER,
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../shared/constants';
-import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
-import { listCompleteItem } from './complete_items';
-import { removeMarkerArgFromArgsList } from '../shared/context';
-import { logicalOperators } from '../definitions/all_operators';
+import type { GetColumnsByTypeFn, SuggestionRawDefinition } from './types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -511,6 +510,29 @@ export function extractTypeFromASTArg(
   }
 }
 
+/**
+ * In several cases we don't want to count the last arg if it is
+ * of type unknown.
+ *
+ * this solves for the case where the user has typed a
+ * prefix (e.g. "keywordField != tex/")
+ *
+ * "tex" is not a recognizable identifier so it is of
+ * type "unknown" which leads us to continue suggesting
+ * fields/functions.
+ *
+ * Monaco will then filter our suggestions list
+ * based on the "tex" prefix which gives the correct UX
+ */
+function removeFinalUnknownIdentiferArg(
+  args: ESQLAstItem[],
+  getExpressionType: (expression: ESQLAstItem) => SupportedDataType | 'unknown'
+) {
+  return getExpressionType(args[args.length - 1]) === 'unknown'
+    ? args.slice(0, args.length - 1)
+    : args;
+}
+
 // @TODO: refactor this to be shared with validation
 export function checkFunctionInvocationComplete(
   func: ESQLFunction,
@@ -523,7 +545,9 @@ export function checkFunctionInvocationComplete(
   if (!fnDefinition) {
     return { complete: false };
   }
-  const cleanedArgs = removeMarkerArgFromArgsList(func)!.args;
+
+  const cleanedArgs = removeFinalUnknownIdentiferArg(func.args, getExpressionType);
+
   const argLengthCheck = fnDefinition.signatures.some((def) => {
     if (def.minParams && cleanedArgs.length >= def.minParams) {
       return true;
@@ -604,7 +628,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
     // and suggest the next argument based on types
 
     // pick the last arg and check its type to verify whether is incomplete for the given function
-    const cleanedArgs = removeMarkerArgFromArgsList(operator)!.args;
+    const cleanedArgs = removeFinalUnknownIdentiferArg(operator.args, getExpressionType);
     const leftArgType = getExpressionType(operator.args[cleanedArgs.length - 1]);
 
     if (isFnComplete.reason === 'tooFewArgs') {
