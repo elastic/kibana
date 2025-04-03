@@ -27,7 +27,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     },
   },
   params: bulkDeleteSLOParamsSchema,
-  handler: async ({ request, response, context, logger, plugins }) => {
+  handler: async ({ request, response, context, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
 
     const spaceId = await getSpaceId(plugins, request);
@@ -72,7 +72,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
     );
 
     // todo request type doesn't include ids
-    await bulkDeleteSLO.execute([]);
+    await bulkDeleteSLO.execute(params.body);
     return response.noContent();
   },
 });

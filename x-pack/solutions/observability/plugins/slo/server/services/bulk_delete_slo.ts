@@ -7,6 +7,7 @@
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { BulkDeleteSLOParams } from '@kbn/slo-schema';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -29,35 +30,37 @@ export class BulkDeleteSLO {
     private rulesClient: RulesClientApi
   ) {}
 
-  public async execute(sloIds: string[]): Promise<void> {
-    const slo = await this.repository.findAllByIds(sloIds);
+  public async execute(params: BulkDeleteSLOParams): Promise<void> {
+    const slos = await this.repository.findAllByIds(params.ids);
 
-    //   const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-    //   await this.summaryTransformManager.stop(summaryTransformId);
-    //   await this.summaryTransformManager.uninstall(summaryTransformId);
+    for (const slo of slos) {
+      const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+      await this.summaryTransformManager.stop(summaryTransformId);
+      await this.summaryTransformManager.uninstall(summaryTransformId);
 
-    //   const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    //   await this.transformManager.stop(rollupTransformId);
-    //   await this.transformManager.uninstall(rollupTransformId);
+      const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+      await this.transformManager.stop(rollupTransformId);
+      await this.transformManager.uninstall(rollupTransformId);
 
-    //   await retryTransientEsErrors(() =>
-    //     this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-    //       { id: getSLOPipelineId(slo.id, slo.revision) },
-    //       { ignore: [404] }
-    //     )
-    //   );
+      await retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: getSLOPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      );
 
-    //   await retryTransientEsErrors(() =>
-    //     this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-    //       { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-    //       { ignore: [404] }
-    //     )
-    //   );
+      await retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      );
 
-    //   await this.deleteRollupData(slo.id);
-    //   await this.deleteSummaryData(slo.id);
-    //   await this.deleteAssociatedRules(slo.id);
-    //   await this.repository.deleteById(slo.id);
+      await this.deleteRollupData(slo.id);
+      await this.deleteSummaryData(slo.id);
+      await this.deleteAssociatedRules(slo.id);
+      await this.repository.deleteById(slo.id);
+    }
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {

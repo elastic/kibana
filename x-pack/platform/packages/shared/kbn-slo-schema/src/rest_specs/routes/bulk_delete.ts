@@ -8,9 +8,10 @@ import * as t from 'io-ts';
 import { sloIdSchema } from '../../schema/slo';
 
 const bulkDeleteSLOParamsSchema = t.type({
-  path: t.type({
+  body: t.type({
     ids: t.array(sloIdSchema),
   }),
 });
 
+export type BulkDeleteSLOParams = t.TypeOf<typeof bulkDeleteSLOParamsSchema.props.body>; // Parsed payload used by the backend
 export { bulkDeleteSLOParamsSchema };
