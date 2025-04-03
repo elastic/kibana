@@ -3,7 +3,7 @@ import { Command } from "@langchain/langgraph";
 import { buildTree, getIndexPatterns } from "./utils";
 import { ElasticsearchClient } from "@kbn/core/server";
 
-export const getConvertIndicesToIndexPatterns = ({ esClient }: {
+export const fetchIndexPatterns = ({ esClient }: {
     esClient: ElasticsearchClient
 }) => {
 
