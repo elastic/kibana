@@ -80,10 +80,13 @@ export const TableView = (props: Props) => {
         const button = (
           <EuiToolTip content={tooltipText}>
             <EuiButtonEmpty
-              aria-label={i18n.translate('xpack.infra.tableView.columnName.openNodeDetailsButton', {
-                defaultMessage: 'Open host details {nodeName}',
-                values: { nodeName: value },
-              })}
+              aria-label={i18n.translate(
+                'xpack.infra.tableView.columnName.openNodeDetailsButton.ariaLabel',
+                {
+                  defaultMessage: 'Open host details {nodeName}',
+                  values: { nodeName: value },
+                }
+              )}
               data-test-subj="infraColumnsButton"
               onClick={() => toggleAssetPopover(uniqueID, item.node.id)}
             >
@@ -123,10 +126,13 @@ export const TableView = (props: Props) => {
         return (
           <EuiToolTip content="Set Filter">
             <EuiButtonEmpty
-              aria-label={i18n.translate('xpack.infra.tableView.groupByColumn.setFilterButton', {
-                defaultMessage: 'Set Filter {groupByName} to {value}',
-                values: { groupByName: fieldToName((grouping && grouping.field) || ''), value },
-              })}
+              aria-label={i18n.translate(
+                'xpack.infra.tableView.groupByColumn.setFilterButton.ariaLabel',
+                {
+                  defaultMessage: 'Set Filter {groupByName} to {value}',
+                  values: { groupByName: fieldToName((grouping && grouping.field) || ''), value },
+                }
+              )}
               data-test-subj="infraColumnsButton"
               onClick={handleClick}
             >
