@@ -491,31 +491,6 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
- * Given a SignalSearchResponse this will return a valid last date if it can find one, otherwise it
- * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
- * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
- * is not correctly ISO8601 or epoch milliseconds formatted.
- * @param searchResult The result to try and parse out the timestamp.
- * @param primaryTimestamp The primary timestamp to use.
- */
-export const lastValidDate = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->({
-  searchResult,
-  primaryTimestamp,
-}: {
-  searchResult: SignalSearchResponse<TAggregations>;
-  primaryTimestamp: TimestampOverride;
-}): Date | undefined => {
-  if (searchResult.hits.hits.length === 0) {
-    return undefined;
-  } else {
-    const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    return getValidDateFromDoc({ doc: lastRecord, primaryTimestamp });
-  }
-};
-
-/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
@@ -581,7 +556,6 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
-    lastLookBackDate: lastValidDate({ searchResult, primaryTimestamp }),
   });
 };
 
@@ -591,7 +565,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
-  lastLookBackDate,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -603,7 +576,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
-  lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -616,7 +588,6 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
-    lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
@@ -657,7 +628,6 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
-      lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -671,7 +641,6 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
-      lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -685,7 +654,6 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
-      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],

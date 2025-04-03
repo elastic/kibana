@@ -9,4 +9,6 @@ xpack.features.overrides:
   securitySolutionNotes.hidden: true
 
 # Override integrations home
-xpack.fleet.redirectIntegrationsHome: '/app/security/configurations/integrations'
+xpack.fleet.redirectIntegrationsHome: '/app/security/configurations/integrations' 
+## Agentless deployment by default
+xpack.fleet.agentless.isDefault: true
