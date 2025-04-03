@@ -452,6 +452,7 @@ describe('Ad Hoc Task Runner', () => {
 
     expect(call.executionId).toEqual(UUID);
     expect(call.services).toBeTruthy();
+    expect(call.services.actionsClient).toBeUndefined();
     expect(call.services.alertsClient).not.toBe(null);
     expect(call.services.alertsClient?.report).toBeTruthy();
     expect(call.services.alertsClient?.setAlertData).toBeTruthy();
