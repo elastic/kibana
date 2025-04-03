@@ -104,7 +104,14 @@ export const getSecurityV2BaseKibanaFeature = ({
     read: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [],
+      api: [
+        APP_ID,
+        'lists-read',
+        'rac',
+        'cloud-security-posture-read',
+        'cloud-defend-read',
+        'bulkGetUserProfiles',
+      ],
       savedObject: {
         all: [],
         read: [...savedObjects],
