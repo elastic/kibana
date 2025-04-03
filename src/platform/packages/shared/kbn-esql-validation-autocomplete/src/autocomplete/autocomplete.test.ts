@@ -1005,7 +1005,7 @@ describe('autocomplete', () => {
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
-      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
+      { text: 'IS NULL', rangeToReplace: undefined },
       '!= $0',
       '== $0',
       'IN $0',

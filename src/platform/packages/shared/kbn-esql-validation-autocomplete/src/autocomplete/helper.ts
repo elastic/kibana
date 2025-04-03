@@ -218,7 +218,7 @@ export function getCompatibleTypesToSuggestNext(
 export function getOverlapRange(
   query: string,
   suggestionText: string
-): { start: number; end: number } {
+): { start: number; end: number } | undefined {
   let overlapLength = 0;
 
   // Convert both strings to lowercase for case-insensitive comparison
@@ -230,6 +230,10 @@ export function getOverlapRange(
     if (lowerQuery.endsWith(substr)) {
       overlapLength = i;
     }
+  }
+
+  if (overlapLength === 0) {
+    return;
   }
 
   // add one since Monaco columns are 1-based
@@ -699,10 +703,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
     const overlap = getOverlapRange(queryText, s.text);
     return {
       ...s,
-      rangeToReplace: {
-        start: overlap.start,
-        end: overlap.end,
-      },
+      rangeToReplace: overlap,
     };
   });
 }
@@ -927,12 +928,8 @@ export async function suggestForExpression({
       if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
         // this suggestion has spaces in it (e.g. "IS NOT NULL")
         // so we need to see if there's an overlap
-        const overlap = getOverlapRange(innerText, s.text);
-        if (overlap.start < overlap.end) {
-          // there's an overlap so use that
-          s.rangeToReplace = overlap;
-          return;
-        }
+        s.rangeToReplace = getOverlapRange(innerText, s.text);
+        return;
       }
 
       // no overlap, so just replace from the last whitespace
