@@ -95,13 +95,6 @@ export const fetchAndCompareSyncedIntegrations = async (
     // find integrations installed on remote
     const installedIntegrations = await getPackageSavedObjects(savedObjectsClient);
 
-    if (!installedIntegrations && ccrIntegrations.length > 0) {
-      return {
-        integrations: [],
-        error: `No integrations installed on remote`,
-      };
-    }
-
     const installedIntegrationsByName = (installedIntegrations?.saved_objects || []).reduce(
       (acc, integration) => {
         if (integration?.id) {
@@ -138,8 +131,7 @@ const compareIntegrations = (
       if (!localIntegrationSO) {
         return {
           ...ccrIntegration,
-          sync_status: 'failed' as SyncStatus.FAILED,
-          error: `Installation not found on remote`,
+          sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
         };
       }
       if (ccrIntegration.package_version !== localIntegrationSO?.attributes.version) {
@@ -230,6 +222,12 @@ const compareCustomAssets = ({
 
   if (ccrCustomAsset.type === 'ingest_pipeline') {
     if (!ingestPipelines) {
+      if (ccrCustomAsset.is_deleted === true) {
+        return {
+          ...result,
+          sync_status: 'completed' as SyncStatus.COMPLETED,
+        };
+      }
       return {
         ...result,
         sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
@@ -237,8 +235,13 @@ const compareCustomAssets = ({
     }
 
     const installedPipeline = ingestPipelines[ccrCustomAsset?.name];
-
-    if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
+    if (ccrCustomAsset.is_deleted === true && installedPipeline) {
+      return {
+        ...result,
+        sync_status: 'failed' as SyncStatus.FAILED,
+        error: `Asset ${ccrCustomAsset.name} marked for deletion found installed`,
+      };
+    } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
       return {
         ...result,
         sync_status: 'completed' as SyncStatus.COMPLETED,
@@ -260,14 +263,26 @@ const compareCustomAssets = ({
     }
   } else if (ccrCustomAsset.type === 'component_template') {
     if (!componentTemplates) {
+      if (ccrCustomAsset.is_deleted === true) {
+        return {
+          ...result,
+          sync_status: 'completed' as SyncStatus.COMPLETED,
+        };
+      }
       return {
         ...result,
         sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     }
 
-    const installedAsset = componentTemplates[ccrCustomAsset?.name];
-    if (isEqual(installedAsset, ccrCustomAsset?.template)) {
+    const installedCompTemplate = componentTemplates[ccrCustomAsset?.name];
+    if (ccrCustomAsset.is_deleted === true && installedCompTemplate) {
+      return {
+        ...result,
+        sync_status: 'failed' as SyncStatus.FAILED,
+        error: `Asset ${ccrCustomAsset.name} marked for deletion found installed`,
+      };
+    } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {
       return {
         ...result,
         sync_status: 'completed' as SyncStatus.COMPLETED,
