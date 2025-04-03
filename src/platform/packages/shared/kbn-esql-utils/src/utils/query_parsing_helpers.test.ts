@@ -599,6 +599,24 @@ describe('esql query helpers', () => {
       } as monaco.Position);
       expect(values).toEqual(undefined);
     });
+
+    it('should return undefined if the query has a questionmark at the last position', () => {
+      const queryString = 'FROM my_index | STATS COUNT() BY ?';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 34,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
+
+    it('should return undefined if the query has a questionmark at the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 42,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
   });
 
   describe('fixESQLQueryWithVariables', () => {

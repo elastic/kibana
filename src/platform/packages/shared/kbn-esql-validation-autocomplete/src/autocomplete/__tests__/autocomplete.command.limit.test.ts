@@ -11,15 +11,38 @@ import { setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('LIMIT <number>', () => {
-    it('suggests numbers', async () => {
+    test('suggests numbers', async () => {
       const { assertSuggestions } = await setup();
       assertSuggestions('from a | limit /', ['10 ', '100 ', '1000 ']);
       assertSuggestions('from a | limit /', ['10 ', '100 ', '1000 '], { triggerCharacter: ' ' });
     });
 
-    it('suggests pipe after number', async () => {
+    test('suggests pipe after number', async () => {
       const { assertSuggestions } = await setup();
       assertSuggestions('from a | limit 4 /', ['| ']);
+    });
+  });
+
+  describe('create control suggestion', () => {
+    test('suggests `Create control` option if questionmark is typed', async () => {
+      const { suggest } = await setup();
+
+      const suggestions = await suggest('FROM a | LIMIT ?/', {
+        callbacks: {
+          canSuggestVariables: () => true,
+          getVariables: () => [],
+          getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+        },
+      });
+
+      expect(suggestions).toContainEqual({
+        label: 'Create control',
+        text: '',
+        kind: 'Issue',
+        detail: 'Click to create',
+        command: { id: 'esql.control.values.create', title: 'Click to create' },
+        sortText: '1',
+      });
     });
   });
 });

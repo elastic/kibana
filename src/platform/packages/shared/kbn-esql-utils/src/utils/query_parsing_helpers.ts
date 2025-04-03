@@ -210,7 +210,6 @@ const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Positio
   return previousLines + '\n' + currentLine;
 };
 
-// @internal
 const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
   if (typeof queryString !== 'string' || queryString.length === 0) {
     return false;

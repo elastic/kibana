@@ -506,6 +506,27 @@ describe('autocomplete.suggest', () => {
             sortText: '1A',
           });
         });
+
+        test('suggests `Create control` option when ? is being typed', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS PERCENTILE(bytes, ?/)', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariables: () => [],
+              getColumnsFor: () => Promise.resolve([{ name: 'bytes', type: 'double' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: 'Create control',
+            text: '',
+            kind: 'Issue',
+            detail: 'Click to create',
+            command: { id: 'esql.control.values.create', title: 'Click to create' },
+            sortText: '1',
+          });
+        });
       });
     });
   });

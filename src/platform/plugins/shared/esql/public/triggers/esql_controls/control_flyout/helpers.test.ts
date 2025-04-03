@@ -15,6 +15,7 @@ import {
   getRecurrentVariableName,
   validateVariableName,
   checkVariableExistence,
+  adjustQueryStringForTrailingQuestionMark,
 } from './helpers';
 
 describe('helpers', () => {
@@ -137,6 +138,40 @@ describe('helpers', () => {
       const variableName = '?my_variable2';
       const exists = checkVariableExistence(variables, variableName);
       expect(exists).toBe(false);
+    });
+  });
+
+  describe('adjustQueryStringForTrailingQuestionMark', () => {
+    it('should adjust the query string for trailing question mark', () => {
+      const queryString = 'FROM my_index | STATS BY ?';
+      const position = { column: 26, lineNumber: 1 } as monaco.Position;
+      const expectedPosition = { column: 25, lineNumber: 1 } as monaco.Position;
+      const adjustedQueryString = adjustQueryStringForTrailingQuestionMark(queryString, position);
+      expect(adjustedQueryString).toStrictEqual({
+        updatedQuery: 'FROM my_index | STATS BY ',
+        updatedPosition: expectedPosition,
+      });
+    });
+
+    it('should adjust the query string if there is a ? in the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const position = { column: 42, lineNumber: 1 } as monaco.Position;
+      const expectedPosition = { column: 41, lineNumber: 1 } as monaco.Position;
+      const adjustedQueryString = adjustQueryStringForTrailingQuestionMark(queryString, position);
+      expect(adjustedQueryString).toStrictEqual({
+        updatedQuery: 'FROM my_index | STATS PERCENTILE(bytes, )',
+        updatedPosition: expectedPosition,
+      });
+    });
+
+    it('should not adjust the query string if no trailing question mark', () => {
+      const queryString = 'FROM my_index | STATS BY field';
+      const position = { column: 30, lineNumber: 1 } as monaco.Position;
+      const adjustedQueryString = adjustQueryStringForTrailingQuestionMark(queryString, position);
+      expect(adjustedQueryString).toStrictEqual({
+        updatedQuery: queryString,
+        updatedPosition: position,
+      });
     });
   });
 });
