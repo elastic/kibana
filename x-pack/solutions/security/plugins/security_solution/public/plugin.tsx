@@ -325,6 +325,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         investigations: new subPluginClasses.Investigations(),
         machineLearning: new subPluginClasses.MachineLearning(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        configurations: new subPluginClasses.Configurations(),
       };
     }
     return this._subPlugins;
@@ -361,6 +362,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
+      configurations: subPlugins.configurations.start(),
     };
   }
 
@@ -422,7 +424,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   ) {
     if (!this._actionsRegistered) {
       const { registerActions } = await this.lazyActions();
-      registerActions(store, history, coreSetup, services);
+      await registerActions(store, history, coreSetup, services);
       this._actionsRegistered = true;
     }
   }
