@@ -49,10 +49,19 @@ describe('autocomplete.suggest', () => {
         it('delegates to subcommands', async () => {
           await assertSuggestions('FROM a | FORK (WHERE /)', EMPTY_WHERE_SUGGESTIONS);
           await assertSuggestions('FROM a | FORK (LIMIT /)', ['10 ', '100 ', '1000 ']);
+
           await assertSuggestions(
             'FROM a | FORK (SORT /)',
             EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS
           );
+          await assertSuggestions('FROM a | FORK (SORT integerField /)', [
+            'ASC',
+            'DESC',
+            ', ',
+            '| ',
+            'NULLS FIRST',
+            'NULLS LAST',
+          ]);
 
           // TODO SORT bug
         });
