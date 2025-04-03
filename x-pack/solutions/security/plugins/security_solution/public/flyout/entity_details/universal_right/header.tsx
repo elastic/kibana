@@ -106,6 +106,8 @@ export const UniversalEntityFlyoutHeader = ({
   const docTimestamp = source?.['@timestamp'];
   const timestamp = isDate(docTimestamp) ? docTimestamp : undefined;
 
+  const entityId = Array.isArray(entity?.id) ? entity.id[0] : entity?.id;
+
   return (
     <>
       <FlyoutHeader>
@@ -140,10 +142,10 @@ export const UniversalEntityFlyoutHeader = ({
             )}
           </div>
           <HeaderDataCards
-            id={entity.id}
+            id={entityId}
             type={entity.type}
             subType={entity.sub_type}
-            criticality={source.asset.criticality}
+            criticality={source.asset?.criticality}
           />
         </>
       </FlyoutHeader>
