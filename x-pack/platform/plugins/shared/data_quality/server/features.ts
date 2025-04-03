@@ -27,6 +27,9 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
       consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
     },
   ],
+  management: {
+    insightsAndAlerting: ['triggersActions'],
+  },
   privileges: {
     all: {
       app: [PLUGIN_ID],
@@ -53,6 +56,9 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
             },
           ],
         },
+      },
+      management: {
+        insightsAndAlerting: ['triggersActions'],
       },
     },
     read: {

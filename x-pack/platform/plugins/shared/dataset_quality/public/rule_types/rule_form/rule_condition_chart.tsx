@@ -23,11 +23,16 @@ import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
+import numeral from '@elastic/numeral';
 import {
   DATASET_QUALITY_RULE_RUNTIME_FIELD_MAPPING,
   DATASET_QUALITY_RULE_RUNTIME_FIELD_NAME,
 } from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../utils';
+import { ChartPreview } from './chart_preview';
+import { LoadingState, NoDataState } from './chart_preview_helper';
+
+export type Maybe<T> = T | null | undefined;
 
 const MAX_BREAKDOWN_SERIES = 5;
 
@@ -48,6 +53,32 @@ export interface RuleConditionChartProps {
   chartOptions?: ChartOptions;
 }
 
+// _.isNumber() returns true for NaN, _.isFinite() does not refine
+export function isFiniteNumber(value: any): value is number {
+  return isFinite(value);
+}
+
+export function asPercent(
+  numerator: Maybe<number>,
+  denominator: number | undefined,
+  fallbackResult = 'N/A'
+) {
+  if (!denominator || !isFiniteNumber(numerator)) {
+    return fallbackResult;
+  }
+
+  const decimal = numerator / denominator;
+
+  // 33.2 => 33%
+  // 3.32 => 3.3%
+  // 0 => 0%
+  if (Math.abs(decimal) >= 0.1 || decimal === 0) {
+    return numeral(decimal).format('0%');
+  }
+
+  return numeral(decimal).format('0.000%');
+}
+
 export const getBufferThreshold = (threshold?: number): string =>
   (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
 
@@ -63,10 +94,51 @@ export function RuleConditionChart({
   chartOptions: { seriesType, interval } = {},
 }: RuleConditionChartProps) {
   const {
-    services: { lens },
+    services: { lens, http },
   } = useKibanaContextForPlugin();
 
   const { euiTheme } = useEuiTheme();
+
+  const [series, setSeries] = useState<any[]>([]);
+  const [totalGroups, setTotalGroups] = useState<number>(0);
+
+  console.log(threshold);
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    if (http && dataView && timeSize && timeRange?.from && timeRange?.to) {
+      http
+        .get<any>('/internal/dataset_quality/rule_types/degraded_docs/chart_preview', {
+          signal: abortController.signal,
+          query: {
+            index: dataView?.getIndexPattern(),
+            start: timeRange?.from,
+            end: timeRange?.to,
+            interval: interval || `${timeSize}${timeUnit}`,
+            groupBy: ['_index'],
+          },
+        })
+        .then((data) => {
+          setTotalGroups(data.degradedDocsChartPreview.totalGroups);
+          setSeries(data.degradedDocsChartPreview.series);
+          console.log(data);
+        });
+    }
+    return () => {
+      abortController.abort();
+    };
+  }, [dataView, groupBy, http, interval, timeRange?.from, timeRange?.to, timeSize, timeUnit]);
+
+  const chartPreview = threshold && threshold.length > 0 && series.length > 0 && (
+    <ChartPreview
+      series={series}
+      threshold={threshold[0]}
+      yTickFormat={(d: number | null) => asPercent(d, 100)}
+      timeSize={timeSize}
+      timeUnit={timeUnit}
+      totalGroups={totalGroups}
+    />
+  );
 
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
@@ -277,6 +349,7 @@ export function RuleConditionChart({
           query: '',
         }}
       />
+      {chartPreview}
     </div>
   );
 }

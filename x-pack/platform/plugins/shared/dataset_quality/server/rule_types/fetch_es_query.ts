@@ -53,7 +53,7 @@ export async function fetchEsQuery({
   const aggs = {
     ...(groupBy.length > 0
       ? {
-          dataStreams: {
+          series: {
             ...(groupBy.length === 1
               ? {
                   terms: {

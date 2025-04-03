@@ -133,13 +133,6 @@ export const RuleForm: React.FunctionComponent<
     ruleParams.type,
   ]);
 
-  const emptyError = useMemo(() => {
-    return {
-      timeSizeUnit: [],
-      timeWindowSize: [],
-    };
-  }, []);
-
   const onGroupByChange = useCallback(
     (group: string | null | string[]) => {
       const gb = group ? (isArray(group) ? group : [group]) : [];
@@ -236,7 +229,10 @@ export const RuleForm: React.FunctionComponent<
       <ForLastExpression
         timeWindowSize={timeSize}
         timeWindowUnit={timeUnit}
-        errors={emptyError}
+        errors={{
+          timeSize: [],
+          timeUnit: [],
+        }}
         onChangeWindowSize={(value) => updateProperty('timeSize', value)}
         onChangeWindowUnit={(value) => updateProperty('timeUnit', value)}
         display="fullWidth"
