@@ -10,26 +10,23 @@
     "browser": true,
     "configPath": ["xpack", "streamsApp"],
     "requiredPlugins": [
-      "streams",
       "data",
+      "datasetQuality",
       "dataViews",
       "discoverShared",
-      "unifiedSearch",
-      "share",
-      "savedObjectsTagging",
-      "navigation",
       "fieldsMetadata",
-      "datasetQuality",
       "licensing",
       "indexManagement",
       "ingestPipelines",
+      "navigation",
+      "observabilityAIAssistant",
+      "savedObjectsTagging",
+      "share",
+      "streams",
+      "unifiedSearch",
     ],
     "requiredBundles": [
       "kibanaReact"
     ],
-    "optionalPlugins": [
-      "observabilityAIAssistant"
-    ],
-    "extraPublicDirs": []
   }
 }
