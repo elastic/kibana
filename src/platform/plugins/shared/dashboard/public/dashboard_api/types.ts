@@ -250,7 +250,7 @@ export interface DashboardInternalApi {
   getSerializedStateForControlGroup: () => SerializedPanelState<ControlGroupSerializedState>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
   setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
-
   scrollToBottom$: Subject<void>;
   scrollToBottom: () => void;
+  isSectionCollapsed: (id?: string) => boolean;
 }

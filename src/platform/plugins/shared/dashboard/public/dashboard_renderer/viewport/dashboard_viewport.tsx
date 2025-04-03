@@ -59,12 +59,16 @@ export const DashboardViewport = ({
     dashboardApi.setFullScreenMode(false);
   }, [dashboardApi]);
 
-  const { panelCount, sectionCount } = useMemo(() => {
+  const { panelCount, visiblePanelCount, sectionCount } = useMemo(() => {
+    const visiblePanels = Object.values(panels).filter(({ gridData }) => {
+      return !dashboardInternalApi.isSectionCollapsed(gridData.sectionId);
+    });
     return {
       panelCount: Object.keys(panels).length,
+      visiblePanelCount: visiblePanels.length,
       sectionCount: Object.keys(sections ?? {}).length,
     };
-  }, [panels, sections]);
+  }, [dashboardInternalApi, panels, sections]);
 
   const classes = classNames({
     dshDashboardViewport: true,
@@ -144,7 +148,7 @@ export const DashboardViewport = ({
         data-shared-items-container
         data-title={dashboardTitle}
         data-description={description}
-        data-shared-items-count={panelCount}
+        data-shared-items-count={visiblePanelCount}
       >
         {panelCount === 0 && sectionCount === 0 ? (
           <DashboardEmptyScreen />
