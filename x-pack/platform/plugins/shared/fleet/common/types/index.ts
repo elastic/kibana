@@ -88,7 +88,7 @@ export interface FleetConfigType {
   autoUpgrades?: {
     retryDelays?: string[];
   };
-  redirectIntegrationsHome?: string;
+  integrationsHomeOverride?: string;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

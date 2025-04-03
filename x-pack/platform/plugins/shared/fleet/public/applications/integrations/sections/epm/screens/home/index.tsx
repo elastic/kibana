@@ -50,8 +50,8 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 export const EPMHomePage: React.FC = () => {
   const config = useConfig();
   const { application } = useStartServices();
-  if (config.redirectIntegrationsHome) {
-    application.navigateToUrl(config.redirectIntegrationsHome);
+  if (config.integrationsHomeOverride) {
+    application.navigateToUrl(config.integrationsHomeOverride);
   }
 
   const authz = useAuthz();
