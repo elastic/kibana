@@ -14,7 +14,7 @@ import type {
   ApmFields,
   Fields,
   InfraDocument,
-  OtelDocument,
+  ApmOtelFields,
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
@@ -38,7 +38,7 @@ export type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<
 interface SynthtraceIngestionData {
   apm: Array<SynthtraceEvents<ApmFields>>;
   infra: Array<SynthtraceEvents<InfraDocument>>;
-  otel: Array<SynthtraceEvents<OtelDocument>>;
+  otel: Array<SynthtraceEvents<ApmOtelFields>>;
 }
 
 const getSynthtraceClient = (
