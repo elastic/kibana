@@ -163,7 +163,7 @@ export const toExpression = (
     secondaryPrefix: state.secondaryPrefix,
     secondaryColor:
       secondaryDynamicColorMode === 'static'
-        ? state.secondaryColor || SECONDARY_DEFAULT_STATIC_COLOR
+        ? state.secondaryColor ?? SECONDARY_DEFAULT_STATIC_COLOR
         : undefined,
     secondaryTrendVisuals: isSecondaryDynamicColorMode ? secondaryTrend.visuals : undefined,
     secondaryTrendBaseline: isSecondaryDynamicColorMode
@@ -184,7 +184,7 @@ export const toExpression = (
     valuesTextAlign: state.valuesTextAlign ?? metricStateDefaults.valuesTextAlign,
     iconAlign: state.iconAlign ?? metricStateDefaults.iconAlign,
     valueFontSize: state.valueFontMode ?? metricStateDefaults.valueFontMode,
-    color: state.color || getDefaultColor(state, isMetricNumeric),
+    color: state.color ?? getDefaultColor(state, isMetricNumeric),
     icon: hasIcon(state.icon) ? state.icon : undefined,
     palette:
       isMetricNumeric && state.palette?.params

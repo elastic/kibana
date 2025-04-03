@@ -306,7 +306,9 @@ describe('MetricVisComponent', function () {
       });
       // for the secondary metric
       const secondaryLabel = table.columns.find((col) => col.id === minPriceColumnId)!.name;
-      expect(screen.getByText(`${secondaryLabel} number-13.6328125`));
+      expect(
+        screen.getByText(`${secondaryLabel} number-${table.rows[0][minPriceColumnId]}`)
+      ).toBeInTheDocument();
 
       await rerender({
         config: {

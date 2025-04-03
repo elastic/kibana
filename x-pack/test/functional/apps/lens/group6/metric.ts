@@ -448,6 +448,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await lens.switchToVisualization('lnsMetric', 'Metric');
       await lens.configureDimension({
+        dimension: 'lnsMetric_primaryMetricDimensionPanel > lns-empty-dimension',
+        operation: 'average',
+        field: 'bytes',
+      });
+
+      await lens.configureDimension({
         dimension: 'lnsMetric_breakdownByDimensionPanel > lns-empty-dimension',
         operation: 'date_histogram',
         field: '@timestamp',

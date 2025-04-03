@@ -291,11 +291,24 @@ describe('metric visualization', () => {
       });
 
       test('collapse function', () => {
+        const frame = createMockFramePublicAPI({
+          datasourceLayers: {
+            [fullState.layerId]: createMockDatasource('formBased', {
+              getOperationForColumnId: jest.fn(() => ({
+                hasReducedTimeRange: false,
+                dataType: 'number',
+                hasTimeShift: false,
+                label: 'myMockedOperation',
+                isBucketed: false,
+              })),
+            }).publicAPIMock,
+          },
+        });
         expect(
           visualization.getConfiguration({
             state: fullState,
             layerId: fullState.layerId,
-            frame: mockFrameApi,
+            frame,
           }).groups[3].accessors
         ).toMatchInlineSnapshot(`
           Array [
@@ -310,7 +323,7 @@ describe('metric visualization', () => {
           visualization.getConfiguration({
             state: { ...fullState, collapseFn: undefined },
             layerId: fullState.layerId,
-            frame: mockFrameApi,
+            frame,
           }).groups[3].accessors
         ).toMatchInlineSnapshot(`
           Array [
@@ -985,8 +998,9 @@ describe('metric visualization', () => {
           },
           datasourceLayers
         );
+
         if (AST && typeof AST === 'object') {
-          const secondaryMetricAST = AST.chain[1].arguments;
+          const secondaryMetricAST = AST.chain[0].arguments;
           // even if color mode is dynamic it should fallback to static color as dataType is not numeric
           expect(secondaryMetricAST.secondaryColor[0]).toBe('#E4E8F1');
           expect(secondaryMetricAST.secondaryTrendPalette).toEqual(undefined);
@@ -1031,7 +1045,7 @@ describe('metric visualization', () => {
           datasourceLayers
         );
         if (AST && typeof AST === 'object') {
-          const secondaryMetricAST = AST.chain[1].arguments;
+          const secondaryMetricAST = AST.chain[0].arguments;
           // even if color mode is dynamic it should fallback to static color as dataType is not numeric
           expect(secondaryMetricAST.secondaryColor).toEqual(undefined);
           expect(secondaryMetricAST.secondaryTrendBaseline).toEqual([0]);
