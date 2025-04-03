@@ -11,10 +11,14 @@ import { ScoutPage } from '@kbn/scout/src/playwright';
 export class PainlessLab {
   public outputValueElement: Locator;
   public requestFlyoutHeader: Locator;
+  public viewRequestButton: Locator;
+  public flyoutResponseTab: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.outputValueElement = this.page.testSubj.locator('painlessTabs');
     this.requestFlyoutHeader = this.page.testSubj.locator('painlessLabRequestFlyoutHeader');
+    this.viewRequestButton = this.page.testSubj.locator('btnViewRequest');
+    this.flyoutResponseTab = this.page.locator('#response');
   }
 
   async goto() {
@@ -44,16 +48,8 @@ export class PainlessLab {
     );
   }
 
-  async clickShowApiRequest() {
-    this.page.testSubj.locator('btnViewRequest').click();
-  }
-
   async getFlyoutRequestBody() {
     return this.page.testSubj.locator('painlessLabFlyoutRequest').innerText();
-  }
-
-  async clickFlyoutResponseButton() {
-    this.page.locator('#response').click();
   }
 
   async getFlyoutResponseBody() {

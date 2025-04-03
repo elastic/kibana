@@ -49,12 +49,12 @@ test.describe('Painless Lab', { tag: tags.ESS_ONLY }, () => {
     await pageObjects.painlessLab.setCodeEditorValue(TEST_SCRIPT);
     await expect(pageObjects.painlessLab.outputValueElement).toContainText(TEST_SCRIPT_RESULT);
 
-    await pageObjects.painlessLab.clickShowApiRequest();
+    await pageObjects.painlessLab.viewRequestButton.click();
     await expect(pageObjects.painlessLab.requestFlyoutHeader).toBeVisible();
 
     expect(await pageObjects.painlessLab.getFlyoutRequestBody()).toBe(TEST_SCRIPT_REQUEST);
 
-    await pageObjects.painlessLab.clickFlyoutResponseButton();
+    await pageObjects.painlessLab.flyoutResponseTab.click();
     expect(await pageObjects.painlessLab.getFlyoutResponseBody()).toBe(
       UPDATED_TEST_SCRIPT_RESPONSE
     );
