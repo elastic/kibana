@@ -32,11 +32,25 @@ import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useKibana } from '../../common/lib/kibana';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 
 const DetectionResponseComponent = () => {
   const { cases } = useKibana().services;
   const { filterQuery } = useGlobalFilterQuery();
-  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+
+  let { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataView, status } = useDataView();
+  const { dataViewSpec } = useDataViewSpec();
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = dataViewSpec;
+    indicesExist = !!dataView?.matchedIndices.length;
+    isSourcererLoading = status !== 'ready';
+  }
+
   const { signalIndexName } = useSignalIndex();
   const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);

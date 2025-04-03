@@ -33,6 +33,9 @@ import {
   type ReportDataQualityIndexCheckedParams,
   DataQualityEventTypes,
 } from '../../common/lib/telemetry';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -47,7 +50,20 @@ const DataQualityComponent: React.FC = () => {
 
   const [defaultBytesFormat] = useUiSetting$<string>(DEFAULT_BYTES_FORMAT);
   const [defaultNumberFormat] = useUiSetting$<string>(DEFAULT_NUMBER_FORMAT);
-  const { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
+
+  let { indicesExist, loading: isSourcererLoading, selectedPatterns } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView, status } = useDataView();
+  const experimentalSelectedPatterns = useSelectedPatterns();
+
+  if (newDataViewPickerEnabled) {
+    indicesExist = !!dataView?.matchedIndices.length;
+    selectedPatterns = experimentalSelectedPatterns;
+    isSourcererLoading = status !== 'ready';
+  }
+
   const { signalIndexName, loading: isSignalIndexNameLoading } = useSignalIndex();
   const { configSettings, cases, telemetry } = useKibana().services;
   const isILMAvailable = configSettings.ILMEnabled;

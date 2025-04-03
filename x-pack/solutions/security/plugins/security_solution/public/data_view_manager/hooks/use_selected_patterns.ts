@@ -6,10 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import type { DataViewManagerScopeName } from '../constants';
+import { DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
 
-export const useSelectedPatterns = (scope: DataViewManagerScopeName): string[] => {
+export const useSelectedPatterns = (
+  scope: DataViewManagerScopeName = DataViewManagerScopeName.default
+): string[] => {
   const { dataView } = useDataView(scope);
   const indexPattern = dataView?.getIndexPattern?.() ?? '';
 

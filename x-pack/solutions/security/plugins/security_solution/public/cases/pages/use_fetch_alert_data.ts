@@ -13,9 +13,19 @@ import { useQueryAlerts } from '../../detections/containers/detection_engine/ale
 import { ALERTS_QUERY_NAMES } from '../../detections/containers/detection_engine/alerts/constants';
 import type { SignalHit } from '../../common/utils/alerts';
 import { buildAlertsQuery, formatAlertToEcsSignal } from '../../common/utils/alerts';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useSelectedPatterns } from '../../data_view_manager/hooks/use_selected_patterns';
 
 export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, unknown>] => {
-  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+  let { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const experimentalSelectedPatterns = useSelectedPatterns();
+  if (newDataViewPickerEnabled) {
+    selectedPatterns = experimentalSelectedPatterns;
+  }
+
   const alertsQuery = useMemo(() => buildAlertsQuery(alertIds), [alertIds]);
 
   const { loading: isLoadingAlerts, data: alertsData } = useQueryAlerts<SignalHit, unknown>({

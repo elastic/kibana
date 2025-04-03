@@ -10,7 +10,7 @@ import { type DataView } from '@kbn/data-views-plugin/public';
 
 import { useSelector } from 'react-redux';
 import { useKibana } from '../../common/lib/kibana';
-import { type DataViewManagerScopeName } from '../constants';
+import { DataViewManagerScopeName } from '../constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { sourcererAdapterSelector } from '../redux/selectors';
 import type { SharedDataViewSelectionState } from '../redux/types';
@@ -20,7 +20,7 @@ import type { SharedDataViewSelectionState } from '../redux/types';
  * selected data view.
  */
 export const useDataView = (
-  dataViewManagerScope: DataViewManagerScopeName
+  dataViewManagerScope: DataViewManagerScopeName = DataViewManagerScopeName.default
 ): { dataView: DataView | undefined; status: SharedDataViewSelectionState['status'] } => {
   const {
     services: { dataViews },
