@@ -210,7 +210,6 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                             onSelect={onSelect}
                             onSelectedTabKeyDown={onSelectedTabKeyDown}
                             onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                            tabPreviewData={getPreviewData(item)}
                           />
                         )}
                       </EuiDraggable>
