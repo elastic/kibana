@@ -29,7 +29,7 @@ import {
 } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { getDatatableColumn } from '../../../common/expressions/datatable/utils';
+import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 
 interface Props {
   paletteService: PaletteRegistry;
@@ -100,7 +100,7 @@ export function TagsDimensionEditor({
       label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
         defaultMessage: 'Color mapping',
       })}
-      style={{ alignItems: 'center' }}
+      css={{ alignItems: 'center' }}
       fullWidth
     >
       <PalettePanelContainer
