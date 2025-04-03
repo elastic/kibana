@@ -32,6 +32,7 @@ import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
@@ -55,8 +56,6 @@ const RefreshButton = ({
   isLoading: boolean;
   hasValidField: boolean;
 }) => {
-  const isManagedAIConnector = INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
-
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
@@ -129,19 +128,6 @@ const RefreshButton = ({
             />
           </EuiPopover>
         </EuiFlexItem>
-      )}
-      {isManagedAIConnector && (
-        <EuiIconTip
-          content={i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip',
-            {
-              defaultMessage:
-                'Your AI connector is managed by Elastic. This means that standard usage fees apply. For more information, please refer to your subscription details.',
-            }
-          )}
-          position="top"
-          type="iInCircle"
-        />
       )}
     </EuiFlexGroup>
   );
@@ -292,6 +278,14 @@ function InnerGrokAiSuggestions({
     content = null;
   }
 
+  const isManagedAIConnector = !INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
+  const [isManagedAiConnectorCalloutDismissed, setManagedAiConnectorCalloutDismissed] =
+    useLocalStorage('streams:managedAiConnectorCalloutDismissed', false);
+
+  const onDismissManagedAiConnectorCallout = useCallback(() => {
+    setManagedAiConnectorCalloutDismissed(true);
+  }, [setManagedAiConnectorCalloutDismissed]);
+
   if (filteredSuggestions && filteredSuggestions.length) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -399,6 +393,17 @@ function InnerGrokAiSuggestions({
           />
         </EuiFlexGroup>
       </EuiFlexItem>
+      {!isManagedAiConnectorCalloutDismissed && isManagedAIConnector && (
+        <EuiCallOut onDismiss={onDismissManagedAiConnectorCallout}>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip',
+            {
+              defaultMessage:
+                'Generating patterns is powered by a preconfigured LLM. Additional charges apply',
+            }
+          )}
+        </EuiCallOut>
+      )}
     </>
   );
 }
