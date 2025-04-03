@@ -199,3 +199,7 @@ pageLoadAssetSize:
   visTypeXy: 46868
   visualizations: 41000
   watcher: 43598
+  wciExternalServer: 35000
+  wciIndexSource: 40000
+  wciSalesforce: 25000
+  workchatApp: 25000

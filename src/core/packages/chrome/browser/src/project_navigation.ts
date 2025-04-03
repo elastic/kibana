@@ -36,11 +36,12 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
+import type { WorkchatApp, DeepLinkId as ChatLink } from '@kbn/deeplinks-chat';
 
 import type { ChromeNavLink } from './nav_links';
 import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
-export type SolutionId = 'es' | 'oblt' | 'security';
+export type SolutionId = 'es' | 'oblt' | 'security' | 'chat';
 
 /** @public */
 export type AppId =
@@ -56,7 +57,8 @@ export type AppId =
   | ObservabilityApp
   | SecurityApp
   | FleetApp
-  | SharedApp;
+  | SharedApp
+  | WorkchatApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -68,7 +70,8 @@ export type AppDeepLinkId =
   | ObservabilityLink
   | SecurityLink
   | FleetLink
-  | SharedLink;
+  | SharedLink
+  | ChatLink;
 
 /** @public */
 export type CloudLinkId =
