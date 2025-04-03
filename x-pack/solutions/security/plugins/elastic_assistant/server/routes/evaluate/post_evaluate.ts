@@ -486,7 +486,7 @@ export const postEvaluateRoute = (
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
-              maxConcurrency: 3,
+              maxConcurrency: 5,
             })
               .then((output) => {
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);

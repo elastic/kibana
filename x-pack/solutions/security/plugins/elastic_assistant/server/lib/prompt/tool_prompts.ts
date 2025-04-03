@@ -21,6 +21,17 @@ export const localToolPrompts: Prompt[] = [
     },
   },
   {
+    promptId: 'NaturalLanguageESQLTool',
+    promptGroupId,
+    prompt: {
+      default: `You MUST use the "NaturalLanguageESQLTool" function when the user wants to:
+  - breakdown or filter ES|QL queries that are displayed on the current page
+  - convert queries from another language to ES|QL
+  - asks general questions about ES|QL
+  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
+    },
+  },
+  {
     promptId: 'GenerateESQLTool',
     promptGroupId,
     prompt: {
