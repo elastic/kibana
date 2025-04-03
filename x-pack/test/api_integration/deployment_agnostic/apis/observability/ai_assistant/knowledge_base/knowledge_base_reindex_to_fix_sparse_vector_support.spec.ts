@@ -21,7 +21,6 @@ import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_as
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const retry = getService('retry');
   const log = getService('log');
 
@@ -46,7 +45,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     after(async () => {
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
-      await deleteKnowledgeBaseModel({ ml, es });
+      await deleteKnowledgeBaseModel(getService);
     });
 
     it('has an index created version earlier than 8.11', async () => {
