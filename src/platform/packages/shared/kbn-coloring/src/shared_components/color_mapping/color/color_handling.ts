@@ -20,6 +20,8 @@ import {
 } from '../config/default_color_mapping';
 import { getColorAssignmentMatcher } from './color_assignment_matcher';
 
+const FALLBACK_ASSIGNMENT_COLOR = 'red';
+
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
   color:
@@ -37,13 +39,17 @@ export function getAssignmentColor(
       return getColor(color, palettes);
     case 'gradient': {
       if (colorMode.type === 'categorical') {
-        return 'red';
+        return FALLBACK_ASSIGNMENT_COLOR;
       }
       const colorScale = getGradientColorScale(colorMode, palettes, isDarkMode);
-      return total === 0 ? 'red' : total === 1 ? colorScale(0) : colorScale(index / (total - 1));
+      return total === 0
+        ? FALLBACK_ASSIGNMENT_COLOR
+        : total === 1
+        ? colorScale(0)
+        : colorScale(index / (total - 1));
     }
     default:
-      return 'red';
+      return FALLBACK_ASSIGNMENT_COLOR;
   }
 }
 
