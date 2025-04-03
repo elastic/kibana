@@ -4,8 +4,8 @@ on:
     paths: # Trigger only if package.json changes
       - '**/package.json'
   push:
-    paths: # Trigger only if package.json changes
-      - '**/package.json'
+    branches:
+      - elena-shostak:health-score-test
 
 permissions:
   contents: read
