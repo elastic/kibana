@@ -314,8 +314,6 @@ paths:
                     has_alerts_mappings:
                       type: boolean
                       description: Indicates whether the rule type has custom mappings for the alert data.
-                    has_fields_for_a_a_d:
-                      type: boolean
                     id:
                       description: The unique identifier for the rule type.
                       type: string
@@ -528,7 +526,6 @@ components:
               all: true
           does_set_recovery_context: true
           has_alerts_mappings: true
-          has_fields_for_a_a_d: false
         - id: xpack.ml.anomaly_detection_jobs_health
           name: Anomaly detection jobs health
           category: management
@@ -590,7 +587,6 @@ components:
               all: true
           does_set_recovery_context: true
           has_alerts_mappings: false
-          has_fields_for_a_a_d: false
   schemas:
     401_response:
       type: object

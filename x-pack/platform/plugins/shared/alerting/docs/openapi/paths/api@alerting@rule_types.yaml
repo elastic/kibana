@@ -95,10 +95,10 @@ get:
                       type: string
                       description: Indicates whether new fields are added dynamically.
                       enum:
-                        - "false"
-                        - "runtime"
-                        - "strict"
-                        - "true"
+                        - 'false'
+                        - 'runtime'
+                        - 'strict'
+                        - 'true'
                     isSpaceAware:
                       type: boolean
                       description: >
@@ -232,8 +232,6 @@ get:
                 has_alerts_mappings:
                   type: boolean
                   description: Indicates whether the rule type has custom mappings for the alert data.
-                has_fields_for_a_a_d:
-                  type: boolean
                 id:
                   description: The unique identifier for the rule type.
                   type: string
