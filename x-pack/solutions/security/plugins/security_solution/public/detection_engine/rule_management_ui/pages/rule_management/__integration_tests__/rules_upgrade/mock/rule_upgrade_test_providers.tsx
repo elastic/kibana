@@ -10,7 +10,6 @@ import type { PropsWithChildren } from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { euiDarkVars } from '@kbn/ui-theme';
-// eslint-disable-next-line @kbn/eslint/module_migration
 import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Provider as ReduxStoreProvider } from 'react-redux';
