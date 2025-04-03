@@ -4,10 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { lazy } from 'react';
 
-export const PackageListGrid = lazy(async () => ({
-  default: await import('@kbn/fleet-plugin/public')
-    .then((module) => module.PackageList())
-    .then((pkg) => pkg.PackageListGrid),
-}));
+export { IntegrationsPage } from './integrations_grid';

@@ -7,13 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiSpacer, EuiBadge } from '@elastic/eui';
-import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { installationStatuses, type IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { SECURITY_UI_APP_ID } from '@kbn/security-solution-navigation';
-import { CONFIGURATIONS_PATH } from '../../../../../common/constants';
-import { RETURN_APP_ID, RETURN_PATH } from './constants';
-import type { IntegrationsFacets } from '../../../constants';
+import { CONFIGURATIONS_PATH } from '../../../../common/constants';
+import { RETURN_APP_ID, RETURN_PATH } from '../components/integrations/constants';
+import { IntegrationsFacets } from '../../constants';
 
-export const INTEGRATION_SORT_ORDER = [
+export const FEATURED_INTEGRATION_SORT_ORDER = [
   // 'splunk',
   'google_secops',
   'microsoft_sentinel',
@@ -65,20 +65,33 @@ const applyCategoryBadgeAndStyling = (
 
 const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
   return integrationsList.sort(
-    (a, b) => INTEGRATION_SORT_ORDER.indexOf(a.name) - INTEGRATION_SORT_ORDER.indexOf(b.name)
+    (a, b) =>
+      FEATURED_INTEGRATION_SORT_ORDER.indexOf(a.name) -
+      FEATURED_INTEGRATION_SORT_ORDER.indexOf(b.name)
   );
 };
 
 export const useEnhancedIntegrationCards = (
-  integrationsList: IntegrationCardItem[],
-  callerView: IntegrationsFacets
-): IntegrationCardItem[] => {
-  const enhancedIntegrationsList = useMemo(
-    () =>
-      applyCustomDisplayOrder(
-        integrationsList.map((card) => applyCategoryBadgeAndStyling(card, callerView))
-      ),
-    [integrationsList, callerView]
+  integrationsList: IntegrationCardItem[]
+): { available: IntegrationCardItem[]; installed: IntegrationCardItem[] } => {
+  const sorted = applyCustomDisplayOrder(integrationsList);
+
+  const available = useMemo(
+    () => sorted.map((card) => applyCategoryBadgeAndStyling(card, IntegrationsFacets.available)),
+    [sorted]
   );
-  return enhancedIntegrationsList;
+
+  const installed = useMemo(
+    () =>
+      sorted
+        .map((card) => applyCategoryBadgeAndStyling(card, IntegrationsFacets.installed))
+        .filter(
+          (card) =>
+            card.installStatus === installationStatuses.Installed ||
+            card.installStatus === installationStatuses.InstallFailed
+        ),
+    [sorted]
+  );
+
+  return { available, installed };
 };

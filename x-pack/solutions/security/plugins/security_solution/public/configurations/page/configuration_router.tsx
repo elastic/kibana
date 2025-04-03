@@ -13,14 +13,14 @@ import { BasicRules } from '../tabs/basic_rules';
 import { AiSettings } from '../tabs/ai_settings';
 import { CONFIGURATIONS_PATH } from '../../../common/constants';
 import { ConfigurationTabs } from '../constants';
-import { ConfigurationsIntegrationsHome } from '../tabs/integrations';
+import { LazyConfigurationsIntegrationsHome } from '../tabs/integrations';
 
 export const ConfigurationsRouter = React.memo(() => {
   return (
     <Routes>
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.integrations})`}
-        component={ConfigurationsIntegrationsHome}
+        component={LazyConfigurationsIntegrationsHome}
       />
       <Route
         path={`${CONFIGURATIONS_PATH}/:tab(${ConfigurationTabs.aiSettings})`}
