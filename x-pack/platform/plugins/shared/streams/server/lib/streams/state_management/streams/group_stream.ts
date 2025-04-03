@@ -26,7 +26,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
   }
 
   clone(): StreamActiveRecord<GroupStreamDefinition> {
-    return new GroupStream(cloneDeep(this.definition), this.dependencies);
+    return new GroupStream(cloneDeep(this._definition), this.dependencies);
   }
 
   protected async doHandleUpsertChange(
@@ -34,7 +34,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-    if (definition.name !== this.definition.name) {
+    if (definition.name !== this._definition.name) {
       return {
         changeStatus: this.changeStatus,
         cascadingChanges: [],
@@ -62,16 +62,16 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-    if (target === this.definition.name) {
+    if (target === this._definition.name) {
       return { cascadingChanges: [], changeStatus: 'deleted' };
     }
     // remove deleted streams from the group
-    if (this.changeStatus !== 'deleted' && this.definition.group.members.includes(target)) {
+    if (this.changeStatus !== 'deleted' && this._definition.group.members.includes(target)) {
       this._definition = {
-        ...this.definition,
+        ...this._definition,
         group: {
-          ...this.definition.group,
-          members: this.definition.group.members.filter((member) => member !== target),
+          ...this._definition.group,
+          members: this._definition.group.members.filter((member) => member !== target),
         },
       };
       return { cascadingChanges: [], changeStatus: 'upserted' };
@@ -85,23 +85,23 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       return { isValid: true, errors: [] };
     }
 
-    if (this.definition.name.startsWith('logs.')) {
+    if (this._definition.name.startsWith('logs.')) {
       throw new StatusError('A group stream name can not start with [logs.]', 400);
     }
 
-    const existsInStartingState = startingState.has(this.definition.name);
+    const existsInStartingState = startingState.has(this._definition.name);
 
     if (!existsInStartingState) {
       // Check for data stream conflict
       try {
         await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-          name: this.definition.name,
+          name: this._definition.name,
         });
 
         return {
           isValid: false,
           errors: [
-            `Cannot create group stream "${this.definition.name}" due to conflict caused by existing data stream or index`,
+            `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream or index`,
           ],
         };
       } catch (error) {
@@ -113,7 +113,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       // Check for index conflict
       // await this.dependencies.scopedClusterClient.asCurrentUser.indices
       //   .get({
-      //     index: this.definition.name,
+      //     index: this._definition.name,
       //   })
       //   .catch((error) => {
       //     if (!(isResponseError(error) && error.statusCode === 404)) {
@@ -124,13 +124,13 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       // return {
       //   isValid: false,
       //   errors: [
-      //     `Cannot create group stream "${this.definition.name}" due to conflict caused by existing index`,
+      //     `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`,
       //   ],
       // };
     }
 
     // validate members
-    for (const member of this.definition.group.members) {
+    for (const member of this._definition.group.members) {
       const memberStream = desiredState.get(member);
       if (!memberStream || memberStream.isDeleted()) {
         return {
@@ -155,7 +155,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     return [
       {
         type: 'upsert_dot_streams_document',
-        request: this.definition,
+        request: this._definition,
       },
     ];
   }
@@ -169,7 +169,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
       {
         type: 'delete_dot_streams_document',
         request: {
-          name: this.definition.name,
+          name: this._definition.name,
         },
       },
     ];

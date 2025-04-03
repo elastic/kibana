@@ -29,7 +29,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   }
 
   clone(): StreamActiveRecord<UnwiredStreamDefinition> {
-    return new UnwiredStream(cloneDeep(this.definition), this.dependencies);
+    return new UnwiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
   private _processingChanged: boolean = false;
@@ -40,7 +40,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-    if (definition.name !== this.definition.name) {
+    if (definition.name !== this._definition.name) {
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
@@ -50,7 +50,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
 
     this._definition = definition;
 
-    const startingStateStreamDefinition = startingState.get(this.definition.name)?.definition;
+    const startingStateStreamDefinition = startingState.get(this._definition.name)?.definition;
 
     if (
       startingStateStreamDefinition &&
@@ -62,13 +62,13 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     this._processingChanged =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        this.definition.ingest.processing,
+        this._definition.ingest.processing,
         startingStateStreamDefinition.ingest.processing
       );
 
     this._lifeCycleChanged =
       !startingStateStreamDefinition ||
-      !_.isEqual(this.definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
+      !_.isEqual(this._definition.ingest.lifecycle, startingStateStreamDefinition.ingest.lifecycle);
 
     return { cascadingChanges: [], changeStatus: 'upserted' };
   }
@@ -78,7 +78,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     desiredState: State,
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-    if (target !== this.definition.name) {
+    if (target !== this._definition.name) {
       return { cascadingChanges: [], changeStatus: this.changeStatus };
     }
 
@@ -87,7 +87,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
 
   protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
     if (this._lifeCycleChanged && isDslLifecycle(this.getLifeCycle())) {
-      const dataStream = await this.dependencies.streamsClient.getDataStream(this.definition.name);
+      const dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
       if (dataStream.ilm_policy !== undefined) {
         return {
           isValid: false,
@@ -106,21 +106,21 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   // This is to enable us to clean up any pipeline Streams creates when it is no longer needed
   protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this.definition.ingest.processing.length > 0) {
+    if (this._definition.ingest.processing.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
     if (!isInheritLifecycle(this.getLifeCycle())) {
       actions.push({
         type: 'update_lifecycle',
         request: {
-          name: this.definition.name,
+          name: this._definition.name,
           lifecycle: this.getLifeCycle(),
         },
       });
     }
     actions.push({
       type: 'upsert_dot_streams_document',
-      request: this.definition,
+      request: this._definition,
     });
     return actions;
   }
@@ -130,7 +130,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   }
 
   public getLifeCycle(): IngestStreamLifecycle {
-    return this.definition.ingest.lifecycle;
+    return this._definition.ingest.lifecycle;
   }
 
   protected async doDetermineUpdateActions(
@@ -139,12 +139,12 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     startingStateStream: UnwiredStream
   ): Promise<ElasticsearchAction[]> {
     const actions: ElasticsearchAction[] = [];
-    if (this._processingChanged && this.definition.ingest.processing.length > 0) {
+    if (this._processingChanged && this._definition.ingest.processing.length > 0) {
       actions.push(...(await this.createUpsertPipelineActions()));
     }
 
-    if (this._processingChanged && this.definition.ingest.processing.length === 0) {
-      const streamManagedPipelineName = getProcessingPipelineName(this.definition.name);
+    if (this._processingChanged && this._definition.ingest.processing.length === 0) {
+      const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
         request: {
@@ -157,7 +157,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
         type: 'delete_processor_from_ingest_pipeline',
         pipeline,
         template,
-        dataStream: this.definition.name,
+        dataStream: this._definition.name,
         referencePipeline: streamManagedPipelineName,
       });
     }
@@ -166,7 +166,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       actions.push({
         type: 'update_lifecycle',
         request: {
-          name: this.definition.name,
+          name: this._definition.name,
           lifecycle: this.getLifeCycle(),
         },
       });
@@ -174,7 +174,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
 
     actions.push({
       type: 'upsert_dot_streams_document',
-      request: this.definition,
+      request: this._definition,
     });
 
     return actions;
@@ -185,18 +185,18 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
 
     actions.push({
       type: 'upsert_ingest_pipeline',
-      stream: this.definition.name,
+      stream: this._definition.name,
       request: {
-        id: getProcessingPipelineName(this.definition.name),
-        ...generateClassicIngestPipelineBody(this.definition),
+        id: getProcessingPipelineName(this._definition.name),
+        ...generateClassicIngestPipelineBody(this._definition),
       },
     });
 
-    const streamManagedPipelineName = getProcessingPipelineName(this.definition.name);
+    const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
     const callStreamManagedPipelineProcessor: IngestProcessorContainer = {
       pipeline: {
         name: streamManagedPipelineName,
-        if: `ctx._index == '${this.definition.name}'`,
+        if: `ctx._index == '${this._definition.name}'`,
         ignore_missing_pipeline: true,
         description:
           "Call the stream's managed pipeline - do not change this manually but instead use the streams UI or API",
@@ -208,7 +208,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       type: 'append_processor_to_ingest_pipeline',
       pipeline,
       template,
-      dataStream: this.definition.name,
+      dataStream: this._definition.name,
       processor: callStreamManagedPipelineProcessor,
       referencePipeline: streamManagedPipelineName,
     });
@@ -221,19 +221,19 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
       {
         type: 'delete_datastream',
         request: {
-          name: this.definition.name,
+          name: this._definition.name,
         },
       },
       {
         type: 'delete_dot_streams_document',
         request: {
-          name: this.definition.name,
+          name: this._definition.name,
         },
       },
     ];
 
-    if (this.definition.ingest.processing.length > 0) {
-      const streamManagedPipelineName = getProcessingPipelineName(this.definition.name);
+    if (this._definition.ingest.processing.length > 0) {
+      const streamManagedPipelineName = getProcessingPipelineName(this._definition.name);
       actions.push({
         type: 'delete_ingest_pipeline',
         request: {
@@ -245,7 +245,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
         type: 'delete_processor_from_ingest_pipeline',
         pipeline,
         template,
-        dataStream: this.definition.name,
+        dataStream: this._definition.name,
         referencePipeline: streamManagedPipelineName,
       });
     }
@@ -254,7 +254,7 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   }
 
   private async getPipelineTargets() {
-    const dataStream = await this.dependencies.streamsClient.getDataStream(this.definition.name);
+    const dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
     const unmanagedAssets = await getUnmanagedElasticsearchAssets({
       dataStream,
       scopedClusterClient: this.dependencies.scopedClusterClient,
