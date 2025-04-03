@@ -4,12 +4,12 @@
   "owner": ["@elastic/appex-sharedux"],
   "group": "platform",
   "visibility": "private",
-  "description": "This plugin provides implementation for system level conditions which are then used in soliciting product feedback from users.",
+  "description": "This plugin leverages the intercepts plugin to in soliciting app-wide product feedback from users.",
   "plugin": {
     "id": "productIntercept",
     "browser": true,
     "server": true,
-    "requiredPlugins": ["cloud"],
+    "requiredPlugins": ["intercepts"],
     "requiredBundles": [],
     "configPath": ["xpack", "product_intercept"]
   }

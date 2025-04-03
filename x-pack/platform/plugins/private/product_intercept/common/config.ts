@@ -13,9 +13,6 @@ import type { PluginConfigDescriptor, ExposedToBrowserDescriptor } from '@kbn/co
  * and if the product intercept gets displayed on the client.
  */
 export const configSchema = schema.object({
-  enabled: schema.boolean({
-    defaultValue: true,
-  }),
   interval: schema.string({
     defaultValue: '30s',
     validate(value) {
@@ -29,7 +26,6 @@ export const configSchema = schema.object({
 export type ServerConfigSchema = TypeOf<typeof configSchema>;
 
 const browserConfigSchemaDescriptor: ExposedToBrowserDescriptor<ServerConfigSchema> = {
-  enabled: true,
   interval: false,
 };
 

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const TRIGGER_API_ENDPOINT = '/internal/product_intercept/trigger_info' as const;
+export const TRIGGER_DEF_ID = 'productInterceptTrigger' as const;

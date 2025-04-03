@@ -2484,7 +2484,22 @@
       }
     }
   },
-  "intercept_trigger": {
+  "intercept_interaction_record": {
+    "dynamic": false,
+    "properties": {
+      "metadata": {
+        "dynamic": false,
+        "type": "object"
+      },
+      "triggerId": {
+        "type": "keyword"
+      },
+      "userId": {
+        "type": "keyword"
+      }
+    }
+  },
+  "intercept_trigger_record": {
     "dynamic": false,
     "properties": {
       "firstRegisteredAt": {

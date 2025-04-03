@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
 import { ProductInterceptPublicPlugin } from './plugin';
 
 /**
  * @internal
  */
-export function plugin(initializerContext: PluginInitializerContext) {
-  return new ProductInterceptPublicPlugin(initializerContext);
+export function plugin() {
+  return new ProductInterceptPublicPlugin();
 }

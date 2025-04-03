@@ -85,7 +85,7 @@ export default function () {
           },
         })}`,
         // disable product intercept for all ftr tests by default
-        '--xpack.product_intercept.enabled=false',
+        '--xpack.intercepts.enabled=false',
       ],
     },
   };

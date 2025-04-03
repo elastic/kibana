@@ -1104,6 +1104,8 @@
       "@kbn/interactive-setup-plugin/*": ["src/platform/plugins/private/interactive_setup/*"],
       "@kbn/interactive-setup-test-endpoints-plugin": ["src/platform/test/interactive_setup_api_integration/plugins/test_endpoints"],
       "@kbn/interactive-setup-test-endpoints-plugin/*": ["src/platform/test/interactive_setup_api_integration/plugins/test_endpoints/*"],
+      "@kbn/intercepts-plugin": ["x-pack/platform/plugins/private/intercepts"],
+      "@kbn/intercepts-plugin/*": ["x-pack/platform/plugins/private/intercepts/*"],
       "@kbn/interpreter": ["src/platform/packages/shared/kbn-interpreter"],
       "@kbn/interpreter/*": ["src/platform/packages/shared/kbn-interpreter/*"],
       "@kbn/inventory-e2e": ["x-pack/solutions/observability/plugins/inventory/e2e"],

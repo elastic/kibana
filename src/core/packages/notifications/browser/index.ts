@@ -17,8 +17,6 @@ export type {
   NotificationCoordinator,
   NotificationCoordinatorState,
   NotificationCoordinatorPublicApi,
-  IInterceptPublicApi,
-  Intercept,
 } from './src/types';
 export type {
   ToastsSetup,

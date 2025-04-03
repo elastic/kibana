@@ -44,7 +44,7 @@ export default async function ({ readConfigFile }) {
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
 
         // disable product intercept
-        '--xpack.product_intercept.enabled=false',
+        '--xpack.intercepts.enabled=false',
       ],
     },
 
