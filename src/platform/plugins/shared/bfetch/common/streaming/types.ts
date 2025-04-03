@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-type ApmPageId = 'services' | 'traces' | 'dependencies';
-type InfraPageId = 'hosts';
-type OnboardingPageId = 'onboarding';
+import { Observable } from 'rxjs';
 
-export type Key = `${ApmPageId}` | `${InfraPageId}` | `${OnboardingPageId}`;
-
-export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;
+export interface StreamingResponseHandler<Payload, Response> {
+  getResponseStream(payload: Payload): Observable<Response>;
+}
