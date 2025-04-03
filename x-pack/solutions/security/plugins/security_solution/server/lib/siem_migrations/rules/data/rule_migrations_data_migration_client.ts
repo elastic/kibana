@@ -35,7 +35,6 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   }
 
   async get({ id }: { id: string }): Promise<StoredSiemMigration> {
-    this.logger.debug(`Getting migration ${id}.`);
     const index = await this.getIndexName();
     return this.esClient
       .get<StoredSiemMigration>({
