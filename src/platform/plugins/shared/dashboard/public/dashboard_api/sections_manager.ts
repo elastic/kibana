@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { StateComparators } from '@kbn/presentation-publishing';
 
-import { DashboardSectionMap } from '../../common/dashboard_container/types';
+import { DashboardSectionMap } from '../../common';
 import { DashboardState } from './types';
 
 export function initializeSectionsManager(initialSections: DashboardSectionMap | undefined) {

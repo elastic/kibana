@@ -54,8 +54,12 @@ import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SerializableRecord } from '@kbn/utility-types';
 
-import { DashboardPanelMap, DashboardPanelState } from '../../common';
-import { DashboardSectionMap, DashboardSectionState } from '../../common/dashboard_container/types';
+import {
+  DashboardPanelMap,
+  DashboardPanelState,
+  DashboardSectionMap,
+  DashboardSectionState,
+} from '../../common';
 import type {
   DashboardAttributes,
   DashboardOptions,
