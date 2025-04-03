@@ -69,6 +69,7 @@ exports[`ResetSLO happy path resets all associated resources 5`] = `
   "calls": Array [
     Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
@@ -82,10 +83,12 @@ exports[`ResetSLO happy path resets all associated resources 5`] = `
           },
         },
         "refresh": true,
+        "slices": "auto",
       },
     ],
     Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.summary-v3*",
         "query": Object {
           "bool": Object {
@@ -99,6 +102,7 @@ exports[`ResetSLO happy path resets all associated resources 5`] = `
           },
         },
         "refresh": true,
+        "slices": "auto",
       },
     ],
   ],
