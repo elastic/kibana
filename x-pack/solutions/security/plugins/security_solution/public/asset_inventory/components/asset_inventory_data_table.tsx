@@ -162,7 +162,6 @@ export const AssetInventoryDataTable = ({
 
   const {
     data: rowsData,
-    // error: fetchError,
     fetchNextPage: loadMore,
     isFetching: isFetchingGridData,
     isLoading: isLoadingGridData,
