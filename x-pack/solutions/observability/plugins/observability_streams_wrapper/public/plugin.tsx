@@ -130,24 +130,11 @@ export class ObservabilityStreamsWrapperPlugin
             if (status !== 'enabled') {
               return {
                 visibleIn: [],
-                deepLinks: [],
               };
             }
 
             return {
               visibleIn: ['sideNav', 'globalSearch'],
-              deepLinks:
-                status === 'enabled'
-                  ? [
-                      {
-                        id: 'streams',
-                        title: i18n.translate('xpack.streams.streamsAppDeepLinkTitle', {
-                          defaultMessage: 'Streams',
-                        }),
-                        path: '/',
-                      },
-                    ]
-                  : [],
             };
           };
         })
