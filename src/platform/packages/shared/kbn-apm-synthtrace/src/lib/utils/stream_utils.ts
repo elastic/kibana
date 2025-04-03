@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { eachSeries } from 'async';
+import { eachSeries, reduce } from 'async';
 import { Duplex, Readable, Transform, PassThrough } from 'stream';
 
 /**
@@ -16,7 +16,7 @@ import { Duplex, Readable, Transform, PassThrough } from 'stream';
  * @param sources A collection of streams to read from
  * @param destination The stream to pipe data to
  */
-async function combineStreams(sources: Readable[], destination: PassThrough) {
+export async function combineStreams(sources: Readable[], destination: PassThrough) {
   for (const stream of sources) {
     await new Promise((resolve, reject) => {
       stream.on('end', resolve);
@@ -83,4 +83,53 @@ export function createFilterTransform(filter: (chunk: any) => boolean): Transfor
   });
 
   return transform;
+}
+
+export function conditionalStreams(
+  condition: (chunk: any) => boolean,
+  transforms: Duplex[]
+): Duplex {
+  const proxy = new Transform({
+    objectMode: true,
+
+    transform(chunk, encoding, callback) {
+      if (!condition(chunk)) {
+        callback(null, chunk);
+      } else {
+        reduce(
+          transforms,
+          chunk,
+          (item, stream, cb) => {
+            let newValue = item;
+
+            stream.once('data', (data) => {
+              newValue = data;
+            });
+
+            stream.write(newValue, (err) => {
+              if (err) {
+                return cb(err);
+              }
+
+              stream.removeAllListeners();
+              cb(null, newValue);
+            });
+
+            if (!stream.writable) {
+              cb(null, newValue);
+            }
+          },
+          (err, finalChunk) => {
+            if (err) {
+              return callback(err);
+            }
+            this.push(finalChunk);
+            callback();
+          }
+        );
+      }
+    },
+  });
+
+  return proxy;
 }

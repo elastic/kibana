@@ -8,19 +8,19 @@
  */
 
 import { OtelInstance, ApmOtelFields } from '@kbn/apm-synthtrace-client';
-import { apmOtel } from '@kbn/apm-synthtrace-client/src/lib/apm';
+import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
   return {
-    generate: ({ range, clients: { otelEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'oteldemo.AdServiceEdotSynth/GetAds';
 
       const { logger } = runOptions;
 
-      const edotInstance = apmOtel
-        .service({
+      const edotInstance = apm
+        .otelService({
           name: 'adservice-edot-synth',
           namespace: 'opentelemetry-demo',
           sdkLanguage: 'java',
@@ -29,13 +29,21 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
         })
         .instance('edot-instance');
 
-      const otelNativeInstance = apmOtel
-        .service({
+      const otelNativeInstance = apm
+        .otelService({
           name: 'sendotlp-otel-native-synth',
           sdkName: 'otlp',
           sdkLanguage: 'nodejs',
         })
         .instance('otel-native-instance');
+
+      const otelApmServerInstace = apm
+        .service({
+          name: 'apmserver-otel-synth',
+          environment: 'prod',
+          agentName: 'opentelemetry/java',
+        })
+        .instance('otel-apmserver-instance');
 
       const successfulTimestamps = range.interval('1m').rate(180);
       const failedTimestamps = range.interval('1m').rate(40);
@@ -43,29 +51,28 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
       const instanceSpans = (instance: OtelInstance) => {
         const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
           instance
-            .transaction({
-              transactionName,
+            .span({
+              name: transactionName,
+              kind: 'Server',
             })
             .timestamp(timestamp)
             .duration(1000)
             .success()
             .children(
               instance
-                .span({
-                  spanName: 'GET /',
-                  spanType: 'db',
-                  spanSubtype: 'elasticsearch',
+                .dbExitSpan({
+                  name: 'GET /',
+                  type: 'elasticsearch',
                 })
                 .duration(1000)
                 .success()
-                .destination('elasticsearch')
                 .timestamp(timestamp)
             )
         );
 
         const failedTraceEvents = failedTimestamps.generator((timestamp) =>
           instance
-            .transaction({ transactionName })
+            .span({ name: transactionName, kind: 'Server' })
             .timestamp(timestamp)
             .duration(1000)
             .failure()
@@ -82,11 +89,41 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
         return [successfulTraceEvents, failedTraceEvents];
       };
 
+      const successfulApmServerTraceEvent = successfulTimestamps.generator((timestamp) =>
+        otelApmServerInstace
+          .transaction({ transactionName })
+          .timestamp(timestamp)
+          .defaults({
+            'url.domain': 'foo.bar',
+          })
+          .duration(1000)
+          .success()
+          .children(
+            otelApmServerInstace
+              .span({
+                spanName: 'GET apm-*/_search',
+                spanType: 'db',
+                spanSubtype: 'elasticsearch',
+              })
+              .duration(1000)
+              .success()
+              .destination('elasticsearch')
+              .timestamp(timestamp),
+            otelApmServerInstace
+              .span({ spanName: 'custom_operation', spanType: 'custom' })
+              .duration(100)
+              .success()
+              .timestamp(timestamp)
+          )
+      );
+
       return [
         withClient(
-          otelEsClient,
+          apmEsClient,
           logger.perf('generating_otel_trace', () =>
-            [otelNativeInstance, edotInstance].flatMap((instance) => instanceSpans(instance))
+            [otelNativeInstance, edotInstance]
+              .flatMap((instance) => instanceSpans(instance))
+              .concat(successfulApmServerTraceEvent)
           )
         ),
       ];

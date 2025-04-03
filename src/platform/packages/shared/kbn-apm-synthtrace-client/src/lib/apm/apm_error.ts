@@ -16,7 +16,6 @@ export class ApmError extends Serializable<ApmFields> {
     super({
       ...fields,
       'processor.event': 'error',
-      'processor.name': 'error',
       'error.id': generateShortId(),
     });
   }

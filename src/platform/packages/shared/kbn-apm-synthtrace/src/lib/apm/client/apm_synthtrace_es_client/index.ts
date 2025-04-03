@@ -36,7 +36,14 @@ export class ApmSynthtraceEsClient extends SynthtraceEsClient<ApmFields> {
       ...options,
       pipeline: apmPipeline(options.logger, options.version),
     });
-    this.dataStreams = ['traces-apm*', 'metrics-apm*', 'logs-apm*'];
+    this.dataStreams = [
+      'traces-apm*',
+      'metrics-apm*',
+      'logs-apm*',
+      'metrics-*.otel*',
+      'traces-*.otel*',
+      'logs-*.otel*',
+    ];
     this.version = options.version;
   }
 

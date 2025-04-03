@@ -32,12 +32,9 @@ const KEY_FIELDS: Array<keyof ApmOtelFields> = [
 
   'resource.attributes.host.name',
   'resource.attributes.container.id',
-  'resource.attributes.kubernetes.pod.name',
+  'resource.attributes.k8s.pod.name',
 
-  'resource.attributes.host.name',
   'resource.attributes.os.type',
-  'resource.attributes.container.id',
-  'resource.attributes.kubernetes.pod.name',
 
   'resource.attributes.cloud.provider',
   'resource.attributes.cloud.region',

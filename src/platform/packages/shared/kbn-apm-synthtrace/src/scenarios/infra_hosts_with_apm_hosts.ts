@@ -47,7 +47,7 @@ const scenario: Scenario<InfraDocument | ApmFields> = async ({
           .service({
             name: `synth-node-${index % 3}`,
             environment: ENVIRONMENT,
-            agentName: 'node-js',
+            agentName: 'nodejs',
           })
           .instance(`host-${index}`);
       });

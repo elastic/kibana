@@ -165,7 +165,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
         } else {
           this.logger.debug(doc);
           throw new Error(
-            `Could not determine operation: _index and _action not defined in document`
+            `Could not determine operation: _index and _action not defined in document ${doc}`
           );
         }
 

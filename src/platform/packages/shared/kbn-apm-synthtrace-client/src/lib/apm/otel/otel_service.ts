@@ -11,32 +11,27 @@ import { Entity } from '../../entity';
 import { ApmOtelFields } from './apm_otel_fields';
 import { OtelInstance } from './otel_instance';
 
-interface ServiceParams {
+export interface OtelServiceParams {
   name: string;
   namespace?: string;
   sdkName: 'opentelemetry' | 'otlp';
   sdkLanguage: string;
   distro?: 'elastic';
 }
-export class Service extends Entity<ApmOtelFields> {
-  constructor({ name, namespace, sdkName, sdkLanguage, distro }: ServiceParams) {
-    const agentName = `${sdkName}/${sdkLanguage}${distro ? `/${distro}` : ''}`;
+export class OtelService extends Entity<ApmOtelFields> {
+  constructor(params: OtelServiceParams) {
+    const { name, namespace, sdkName, sdkLanguage, distro } = params;
 
     const fields: ApmOtelFields = {
-      'attributes.service.name': name,
-      'attributes.service.namespace': namespace,
       'resource.attributes.service.name': name,
-      'resource.attributes.agent.name': agentName,
       'resource.attributes.service.namespace': namespace,
-      'resource.attributes.deployment.environment': namespace,
       'resource.attributes.telemetry.sdk.name': sdkName,
       'resource.attributes.telemetry.sdk.language': sdkLanguage,
       'resource.attributes.telemetry.distro.name': distro,
-      'scope.attributes.service.framework.name': name,
-      'scope.name': name,
     };
     super(fields);
   }
+
   instance(instanceName: string) {
     return new OtelInstance({
       ...this.fields,
@@ -44,8 +39,4 @@ export class Service extends Entity<ApmOtelFields> {
       'resource.attributes.host.name': instanceName,
     });
   }
-}
-
-export function service({ name, namespace, sdkName, sdkLanguage, distro }: ServiceParams): Service {
-  return new Service({ name, namespace, sdkName, sdkLanguage, distro });
 }
