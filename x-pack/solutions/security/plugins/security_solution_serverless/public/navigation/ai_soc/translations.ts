@@ -13,3 +13,9 @@ export const ALERT_SUMMARY = i18n.translate(
     defaultMessage: 'Alert summary',
   }
 );
+export const CONFIGURATIONS = i18n.translate(
+  'xpack.securitySolutionServerless.navigation.aiSoc.configurations',
+  {
+    defaultMessage: 'Configurations',
+  }
+);
