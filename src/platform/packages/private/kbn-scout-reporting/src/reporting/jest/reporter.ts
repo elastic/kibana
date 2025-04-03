@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Config, AggregatedResult, TestContext } from '@jest/reporters';
+import { Config, AggregatedResult, TestContext, ReporterOnStartOptions } from '@jest/reporters';
 import { BaseReporter } from '@jest/reporters';
 import { TestResult } from '@jest/types';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -42,7 +42,7 @@ export class ScoutJestReporter extends BaseReporter {
   readonly scoutLog: ToolingLog;
   readonly runId: string;
   private report: ScoutEventsReport;
-  readonly baseTestRunInfo: ScoutTestRunInfo;
+  private baseTestRunInfo: ScoutTestRunInfo;
   private readonly codeOwnersEntries: CodeOwnersEntry[];
 
   constructor(
@@ -63,10 +63,6 @@ export class ScoutJestReporter extends BaseReporter {
     this.baseTestRunInfo = {
       id: this.runId,
       config: {
-        file:
-          process.env.JEST_CONFIG_PATH !== undefined
-            ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, process.env.JEST_CONFIG_PATH))
-            : undefined,
         category: reporterOptions.configCategory,
       },
     };
@@ -176,10 +172,24 @@ export class ScoutJestReporter extends BaseReporter {
     });
   }
 
-  async onRunComplete(_testContexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
+  onRunStart(results: AggregatedResult, _options?: ReporterOnStartOptions): void {
     /**
-     * Test execution ended
+     * Test execution started
      */
+    // Look for Jest config path in environment variables
+    // Must do it here rather than the constructor as the reporter object is created when the Jest config is evaluated
+    // and the JEST_CONFIG_PATH environment variable might not be set
+    this.baseTestRunInfo = {
+      ...this.baseTestRunInfo,
+      config: {
+        ...this.baseTestRunInfo.config,
+        file:
+          process.env.JEST_CONFIG_PATH !== undefined
+            ? this.getScoutFileInfoForPath(path.relative(REPO_ROOT, process.env.JEST_CONFIG_PATH))
+            : undefined,
+      },
+    };
+
     // Log "run start" event
     this.report.logEvent({
       ...datasources.environmentMetadata,
@@ -193,7 +203,12 @@ export class ScoutJestReporter extends BaseReporter {
         action: ScoutReportEventAction.RUN_BEGIN,
       },
     });
+  }
 
+  async onRunComplete(_testContexts: Set<TestContext>, results: AggregatedResult): Promise<void> {
+    /**
+     * Test execution ended
+     */
     // Turn test results into events in bulk
     results.testResults.forEach((suite) => {
       suite.testResults.forEach((testResult) => {
