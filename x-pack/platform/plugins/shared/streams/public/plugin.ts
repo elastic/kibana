@@ -35,14 +35,14 @@ export class Plugin implements StreamsPluginClass {
   setup(core: CoreSetup, pluginSetup: StreamsPluginSetupDependencies): StreamsPluginSetup {
     this.repositoryClient = createRepositoryClient(core);
     return {
-      status$: createStreamsStatusObservable(pluginSetup),
+      status$: createStreamsStatusObservable(pluginSetup, this.repositoryClient, this.logger),
     };
   }
 
   start(core: CoreStart, pluginsStart: StreamsPluginStartDependencies): StreamsPluginStart {
     return {
       streamsRepositoryClient: this.repositoryClient,
-      status$: createStreamsStatusObservable(pluginsStart),
+      status$: createStreamsStatusObservable(pluginsStart, this.repositoryClient, this.logger),
     };
   }
 
@@ -50,14 +50,32 @@ export class Plugin implements StreamsPluginClass {
 }
 
 const createStreamsStatusObservable = once(
-  (deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies) => {
-    return from([
-      {
-        status:
-          deps.cloud?.isServerlessEnabled && deps.cloud?.serverless.projectType === 'observability'
-            ? ('enabled' as const)
-            : ('disabled' as const),
-      },
-    ]).pipe(startWith({ status: 'disabled' as const }), shareReplay(1));
+  (
+    deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
+    repositoryClient: StreamsRepositoryClient,
+    logger: Logger
+  ) => {
+    const isObservabilityServerless =
+      deps.cloud?.isServerlessEnabled && deps.cloud?.serverless.projectType === 'observability';
+
+    if (isObservabilityServerless) {
+      return from([{ status: 'enabled' as const }]);
+    }
+
+    return from(
+      repositoryClient
+        .fetch('GET /api/streams/_status', {
+          signal: new AbortController().signal,
+        })
+        .then(
+          (response) => ({
+            status: response.enabled ? ('enabled' as const) : ('disabled' as const),
+          }),
+          (error) => {
+            logger.error(error);
+            return { status: 'unknown' as const };
+          }
+        )
+    ).pipe(startWith({ status: 'unknown' as const }), shareReplay(1));
   }
 );
