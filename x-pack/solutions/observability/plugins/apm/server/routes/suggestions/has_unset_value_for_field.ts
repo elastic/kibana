@@ -31,8 +31,6 @@ export async function hasUnsetValueForField({
   start: number;
   end: number;
 }): Promise<boolean> {
-  const operationName = 'is_unset_environments';
-
   const params = {
     apm: {
       events: [
@@ -56,6 +54,6 @@ export async function hasUnsetValueForField({
       },
     },
   };
-  const resp = await apmEventClient.search(operationName, params);
+  const resp = await apmEventClient.search('has_unset_value_for_field', params);
   return resp.hits.total?.value > 0;
 }
