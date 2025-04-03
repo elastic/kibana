@@ -892,7 +892,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             .send(getTestRuleData(expectedArtifacts))
             .expect(200);
 
-          const estResponse = await es.get<SavedObject<RawRule>>(
+          const esResponse = await es.get<SavedObject<RawRule>>(
             {
               index: ALERTING_CASES_SAVED_OBJECT_INDEX,
               id: `alert:${createResponse.body.id}`,
@@ -901,7 +901,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           );
 
           const rawInvestigationGuide =
-            (estResponse.body._source as any)?.alert.artifacts.investigation_guide ?? {};
+            (esResponse.body._source as any)?.alert.artifacts.investigation_guide ?? {};
 
           expect(rawInvestigationGuide).to.eql(expectedArtifacts.artifacts.investigation_guide);
         });
