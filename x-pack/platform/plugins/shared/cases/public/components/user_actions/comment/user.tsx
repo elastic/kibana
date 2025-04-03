@@ -85,6 +85,7 @@ export const createUserAttachmentUserActionBuilder = ({
         <HoverableUsernameResolver user={attachment.createdBy} userProfiles={userProfiles} />
       ),
       'data-test-subj': `comment-create-action-${attachment.id}`,
+      css: css({ overflow: 'auto hidden' }),
       timestamp: (
         <UserActionTimestamp createdAt={attachment.createdAt} updatedAt={attachment.updatedAt} />
       ),
