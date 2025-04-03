@@ -51,11 +51,15 @@ export class OtelBaseSpan extends AbstractSpan<ApmOtelFields, OtelBaseSpan> {
   }
 
   isSpan(): this is OtelSpan {
-    return this.fields.kind === 'Internal' || this.fields.kind === 'Client';
+    return (
+      this.fields.kind === 'Internal' ||
+      this.fields.kind === 'Client' ||
+      this.fields.kind === 'Producer'
+    );
   }
 
   isTransaction(): this is OtelSpan {
-    return this.fields.kind === 'Server';
+    return this.fields.kind === 'Server' || this.fields.kind === 'Consumer';
   }
 
   override timestamp(timestamp: number) {

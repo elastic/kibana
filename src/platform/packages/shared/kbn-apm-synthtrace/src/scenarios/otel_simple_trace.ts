@@ -15,7 +15,7 @@ import { withClient } from '../lib/utils/with_client';
 const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
   return {
     generate: ({ range, clients: { apmEsClient } }) => {
-      const transactionName = 'oteldemo.AdServiceEdotSynth/GetAds';
+      const transactionName = 'oteldemo.AdServiceSynth/GetAds';
 
       const { logger } = runOptions;
 
