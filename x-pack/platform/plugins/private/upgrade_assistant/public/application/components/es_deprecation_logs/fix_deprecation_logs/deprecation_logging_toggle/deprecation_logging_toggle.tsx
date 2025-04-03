@@ -137,7 +137,7 @@ export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
       <EuiFlexItem grow={false}>
         <EuiSwitch
           data-test-subj="deprecationLoggingToggle"
-          label={i18nTexts.buttonLabel}
+          label={<EuiText>{i18nTexts.buttonLabel}</EuiText>}
           checked={!!isDeprecationLogIndexingEnabled}
           onChange={toggleLogging}
           disabled={Boolean(fetchError) || isUpdating}
