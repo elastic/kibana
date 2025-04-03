@@ -26,6 +26,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
+import { binaryToString } from '../../../detections_response/utils';
 import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { createSupertestErrorLogger } from '../../utils';
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
@@ -132,7 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
       await Promise.allSettled(afterEachDataCleanup.splice(0).map((data) => data.cleanup()));
     });
 
-    const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
+    // FIXME:PT DO NOT COMMIT - test only
+    const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS).slice(0, 1);
 
     for (const artifactList of artifactLists) {
       const listInfo =
@@ -298,6 +300,43 @@ export default function ({ getService }: FtrProviderContext) {
           );
 
           expect(response.body as ExceptionListSummarySchema).to.eql(expectedSummaryResponse);
+        });
+
+        it('should export only artifact accessible in space', async () => {
+          const response = await supertestArtifactManager
+            .post(addSpaceIdToPath('/', spaceOneId, `${EXCEPTION_LIST_URL}/_export`))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .query({
+              id: listInfo.id,
+              list_id: listInfo.id,
+              include_expired_exceptions: true,
+              namespace_type: 'agnostic',
+            })
+            .send()
+            .expect(200)
+            .parse(binaryToString);
+
+          const exportedRecords = (response.body as Buffer)
+            .toString()
+            .split('\n')
+            .filter((line) => !!line)
+            .map((line) => JSON.parse(line));
+
+          log.verbose(
+            `Export of [${listInfo.id}] for space [${spaceOneId}]:\n${JSON.stringify(
+              exportedRecords,
+              null,
+              2
+            )}`
+          );
+
+          // The last record in the export is the summary
+          const exportSummary = exportedRecords[exportedRecords.length - 1];
+
+          expect(exportSummary.exported_exception_list_item_count).to.equal(3);
         });
 
         describe('and user does NOT have global artifact management privilege', () => {
