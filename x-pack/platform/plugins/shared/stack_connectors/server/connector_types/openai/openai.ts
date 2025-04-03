@@ -70,7 +70,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     this.key = this.secrets.apiKey;
     this.headers = {
       ...this.config.headers,
-      'X-Stainless-Helper-Method': 'beta.chat.completions.parse',
       ...('organizationId' in this.config
         ? { 'OpenAI-Organization': this.config.organizationId }
         : {}),
