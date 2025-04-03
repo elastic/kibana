@@ -104,6 +104,16 @@ export const Tab: React.FC<TabProps> = (props) => {
     [onClose, item]
   );
 
+  const onClick = useCallback(
+    async (event: MouseEvent<HTMLDivElement>) => {
+      if (document.activeElement && document.activeElement !== event.target) {
+        (document.activeElement as HTMLElement).blur();
+      }
+      await onSelectEvent(event);
+    },
+    [onSelectEvent]
+  );
+
   const onDoubleClick = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
       event.stopPropagation();
@@ -153,7 +163,6 @@ export const Tab: React.FC<TabProps> = (props) => {
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
-
   const mainTabContent = (
     <EuiFlexGroup
       alignItems="center"
@@ -172,7 +181,7 @@ export const Tab: React.FC<TabProps> = (props) => {
           role="tab"
           tabIndex={isSelected ? 0 : -1}
           aria-selected={isSelected}
-          onClick={onSelectEvent}
+          onClick={onClick}
           onDoubleClick={onDoubleClick}
           onKeyDown={onKeyDownEvent}
         />
