@@ -80,6 +80,7 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   openLinksInNewTab?: boolean;
   whiteListedRules?: string[];
   onRender?: () => void;
+  isReversed: boolean;
 }
 
 export const Markdown = (props: MarkdownProps) => {
@@ -87,7 +88,14 @@ export const Markdown = (props: MarkdownProps) => {
     props.onRender?.();
   }, [props]);
 
-  const { className, markdown = '', openLinksInNewTab, whiteListedRules, ...rest } = props;
+  const {
+    className,
+    markdown = '',
+    openLinksInNewTab,
+    whiteListedRules,
+    isReversed,
+    ...rest
+  } = props;
   const classes = classNames('kbnMarkdown__body', className);
   const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
   const renderedMarkdown = markdownRenderer(markdown);
@@ -95,7 +103,7 @@ export const Markdown = (props: MarkdownProps) => {
     <div
       {...rest}
       className={classes}
-      css={markdownStyles()}
+      css={markdownStyles(isReversed)}
       /*
        * Justification for dangerouslySetInnerHTML:
        * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.

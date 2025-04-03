@@ -8,37 +8,56 @@
  */
 
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 
-export const markdownStyles = () => {
+// Default styles for Markdown element
+//
+// 1. Links
+// 2. Headings
+// 3. Images
+// 4. Blockquotes
+// 5. Horizontal rules
+// 6. Lists
+// 7. Tables
+// 8. Code blocks
+
+export const markdownStyles = (isReversed: boolean) => {
   const { euiTheme } = useEuiTheme();
-  // Base font size
+  // Note: The inlined base font size is set in common/functions/font.js. It should match $kbnMdFontSize.
   const kbnDefaultFontSize = 14;
+
   // Function to convert px to em
   const canvasToEm = (size: number): string => `${size / kbnDefaultFontSize}em`;
+
   // Font size variables
   const kbnMarkdownFontSizeS = canvasToEm(12);
   const kbnMarkdownFontSize = canvasToEm(14);
   const kbnMarkdownFontSizeL = canvasToEm(20);
   const kbnMarkdownFontSizeXL = canvasToEm(28);
   const kbnMarkdownFontSizeXXL = canvasToEm(36);
+
   // Spacing variables
   const kbnMarkdownSizeL = canvasToEm(24);
   const kbnMarkdownSize = canvasToEm(16);
   const kbnMarkdownSizeS = canvasToEm(12);
   const kbnMarkdownSizeXS = canvasToEm(8);
   const kbnMarkdownSizeXXS = canvasToEm(4);
+
   // Grayscale variables
-  const kbnMarkdownAlphaLightestShade = `rgba(${euiTheme.colors.fullShade}, .05)`;
-  const kbnMarkdownAlphaLightShade = `rgba(${euiTheme.colors.fullShade}, .15)`;
+  const kbnMarkdownAlphaLightestShade = transparentize(`${euiTheme.colors.fullShade}`, 0.05);
+  const kbnMarkdownAlphaLightShade = transparentize(`${euiTheme.colors.fullShade}`, 0.15);
+
   // Reverse grayscale for opposite of theme
-  const kbnMarkdownAlphaLightestShadeReversed = `rgba(${euiTheme.colors.emptyShade}, .05)`;
-  const kbnMarkdownAlphaLightShadeReversed = `rgba(${euiTheme.colors.emptyShade}, .15)`;
+  const kbnMarkdownAlphaLightestShadeReversed = transparentize(
+    `${euiTheme.colors.emptyShade}`,
+    0.05
+  );
+  const kbnMarkdownAlphaLightShadeReversed = transparentize(`${euiTheme.colors.emptyShade}`, 0.15);
 
   return css({
-    '&--reversed': {
+    ...(isReversed && {
       color: `${euiTheme.colors.lightestShade}`,
-    },
+    }),
 
     '> *:first-child': {
       marginTop: '0 !important',
@@ -123,9 +142,9 @@ export const markdownStyles = () => {
     blockquote: {
       padding: '0 1em',
       borderLeft: `${kbnMarkdownSizeXXS} solid ${kbnMarkdownAlphaLightShade}`,
-    },
-    '&--reversed blockquote': {
-      borderLeftColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      ...(isReversed && {
+        borderLeftColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      }),
     },
 
     // Horizontal rules
@@ -147,16 +166,16 @@ export const markdownStyles = () => {
         clear: 'both',
         content: '"',
       },
-    },
-    '&--reversed hr': {
-      backgroundColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      ...(isReversed && {
+        backgroundColor: kbnMarkdownAlphaLightShadeReversed,
+      }),
     },
 
     // Lists
     'ul, ol': {
-      paddingLeft: `${kbnMarkdownFontSizeL}`,
+      paddingLeft: `${kbnMarkdownSizeL}`,
       marginTop: 0,
-      marginBottom: `${kbnMarkdownFontSize}`,
+      marginBottom: `${kbnMarkdownSize}`,
     },
     ul: {
       listStyleType: 'disc',
@@ -196,12 +215,9 @@ export const markdownStyles = () => {
       borderLeft: `1px solid ${kbnMarkdownAlphaLightShade}`,
       borderSpacing: 0,
       borderCollapse: 'collapse',
-    },
-    '&--reversed table': {
-      borderLeftColor: `${kbnMarkdownAlphaLightShadeReversed}`,
-    },
-    'td, th': {
-      padding: 0,
+      ...(isReversed && {
+        borderLeftColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      }),
     },
     'table th, table td': {
       padding: `${kbnMarkdownSizeXXS} ${kbnMarkdownSizeS}`,
@@ -210,16 +226,16 @@ export const markdownStyles = () => {
       '&:last-child': {
         borderRight: `1px solid ${kbnMarkdownAlphaLightShade}`,
       },
-    },
-    '&--reversed table th, &--reversed table td': {
-      borderColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      ...(isReversed && {
+        borderColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      }),
     },
     'table tr': {
       backgroundColor: 'transparent',
       borderTop: `1px solid ${kbnMarkdownAlphaLightShade}`,
-    },
-    '&--reversed table tr': {
-      borderTopColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      ...(isReversed && {
+        borderTopColor: `${kbnMarkdownAlphaLightShadeReversed}`,
+      }),
     },
 
     // Code blocks
@@ -235,10 +251,11 @@ export const markdownStyles = () => {
       borderRadius: `${kbnMarkdownSizeXXS}`,
       '&::before, &::after': {
         letterSpacing: '-.2em',
+        content: '\xa0',
       },
-    },
-    '&--reversed code': {
-      backgroundColor: `${kbnMarkdownAlphaLightestShadeReversed}`,
+      ...(isReversed && {
+        backgroundColor: `${kbnMarkdownAlphaLightestShadeReversed}`,
+      }),
     },
 
     pre: {
@@ -249,9 +266,9 @@ export const markdownStyles = () => {
       backgroundColor: `${kbnMarkdownAlphaLightestShade}`,
       borderRadius: `${kbnMarkdownSizeXXS}`,
       wordWrap: 'normal',
-    },
-    '&--reversed pre': {
-      backgroundColor: `${kbnMarkdownAlphaLightestShadeReversed}`,
+      ...(isReversed && {
+        backgroundColor: `${kbnMarkdownAlphaLightestShadeReversed}`,
+      }),
     },
     'pre code': {
       display: 'inline',
