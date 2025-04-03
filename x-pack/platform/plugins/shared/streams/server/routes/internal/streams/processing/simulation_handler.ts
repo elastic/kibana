@@ -330,6 +330,7 @@ const executePipelineSimulation = async (
 ): Promise<PipelineSimulationResult> => {
   try {
     const simulation = await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
+    console.log(JSON.stringify(simulation, null, 2));
 
     return {
       status: 'success',

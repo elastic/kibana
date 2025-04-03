@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   DragDropContextProps,
+  EuiAccordion,
+  EuiCode,
+  EuiFlexGroup,
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
@@ -22,6 +25,7 @@ import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
@@ -138,7 +142,39 @@ const ProcessorsEditor = React.memo(() => {
     )
   );
 
-  const simulationSnapshot = useSimulatorSelector((s) => s);
+  const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
+
+  const errors = useMemo(() => {
+    if (!simulation) {
+      return null;
+    }
+
+    const ignoredFieldsSet = new Set<string>();
+    const mappingFailuresSet = new Set<string>();
+
+    simulation.documents.forEach((doc) => {
+      doc.errors.forEach((error) => {
+        if (error.type === 'ignored_fields_failure') {
+          error.ignored_fields.forEach((ignored) => {
+            ignoredFieldsSet.add(ignored.field);
+          });
+        }
+
+        if (error.type === 'field_mapping_failure' && mappingFailuresSet.size < 3) {
+          mappingFailuresSet.add(error.message);
+        }
+      });
+    });
+
+    const ignoredFields = Array.from(ignoredFieldsSet);
+    const mappingFailures = Array.from(mappingFailuresSet);
+
+    if (isEmpty(ignoredFields) && isEmpty(mappingFailures)) {
+      return null;
+    }
+
+    return { ignoredFields, mappingFailures };
+  }, [simulation]);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -195,15 +231,107 @@ const ProcessorsEditor = React.memo(() => {
                 key={processorRef.id}
                 idx={idx}
                 processorRef={processorRef}
-                processorMetrics={
-                  simulationSnapshot.context.simulation?.processors_metrics[processorRef.id]
-                }
+                processorMetrics={simulation?.processors_metrics[processorRef.id]}
               />
             ))}
           </SortableList>
         )}
         <AddProcessorPanel />
       </EuiPanel>
+      {errors && (
+        <EuiPanel paddingSize="m" hasShadow={false} borderRadius="none" grow={false}>
+          {!isEmpty(errors.ignoredFields) && (
+            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+              <EuiAccordion
+                id="ignored-fields-failures-accordion"
+                initialIsOpen
+                buttonContent={
+                  <strong>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
+                      { defaultMessage: 'Some fields were ignored during the simulation.' }
+                    )}
+                  </strong>
+                }
+              >
+                <EuiText component="p" size="s">
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                      {
+                        defaultMessage:
+                          'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                      }
+                    )}
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                      defaultMessage="The ignored fields are: {fields}"
+                      values={{
+                        fields: (
+                          <EuiFlexGroup
+                            gutterSize="s"
+                            css={css`
+                              margin-top: ${euiTheme.size.s};
+                            `}
+                          >
+                            {errors.ignoredFields.map((field) => (
+                              <EuiCode>{field}</EuiCode>
+                            ))}
+                          </EuiFlexGroup>
+                        ),
+                      }}
+                    />
+                  </p>
+                </EuiText>
+              </EuiAccordion>
+            </EuiPanel>
+          )}
+          {!isEmpty(errors.mappingFailures) && (
+            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
+              <EuiAccordion
+                id="mapping-failures-accordion"
+                initialIsOpen
+                buttonContent={
+                  <strong>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+                      {
+                        defaultMessage:
+                          'Some fields mapping were conflicting during the simulation.',
+                      }
+                    )}
+                  </strong>
+                }
+              >
+                <EuiText component="p" size="s">
+                  <p>
+                    {i18n.translate(
+                      'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.description',
+                      {
+                        defaultMessage:
+                          'Some fields in these documents were conflicting with the stream mappings during the ingestion simulation. Review the fields’ data format.',
+                      }
+                    )}
+                  </p>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
+                      defaultMessage="These are some mapping failures occurred during the simulation:"
+                    />
+                  </p>
+                  <ul>
+                    {errors.mappingFailures.map((failureMessage, id) => (
+                      <li key={id}>{failureMessage}</li>
+                    ))}
+                  </ul>
+                </EuiText>
+              </EuiAccordion>
+            </EuiPanel>
+          )}
+        </EuiPanel>
+      )}
     </>
   );
 });
