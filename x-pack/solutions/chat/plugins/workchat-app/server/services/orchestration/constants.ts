@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { conversationEventsToMessages } from './events_to_messages';
+/**
+ * Constants for graph names
+ */
+export const graphNames = {
+  mainAgent: 'mainAgent',
+  searchAgent: 'searchAgent',
+};

@@ -11,9 +11,12 @@ import type { Logger } from '@kbn/core/server';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import type { Agent } from '../../../common/agents';
 import { createAgentGraph } from './agent_graph';
-import { langchainToChatEvents, conversationEventsToMessages } from './utils';
+import { conversationEventsToMessages } from './utils';
+import { convertGraphEvents } from './graph_events';
 import type { AgentRunner, AgentRunResult } from './types';
 import type { McpGatewaySession } from './mcp_gateway';
+import { graphNames } from './constants';
+import { getGraphMeta } from './graph_events';
 
 export const createAgentRunner = async ({
   logger,
@@ -48,15 +51,16 @@ export const createAgentRunner = async ({
           version: 'v2',
           runName,
           metadata: {
+            ...getGraphMeta({ graphName: graphNames.mainAgent }),
             agentId: agent.id,
           },
-          recursionLimit: 5,
+          recursionLimit: 10,
         }
       );
 
       const events$ = from(eventStream).pipe(
         filter(isStreamEvent),
-        langchainToChatEvents({ runName }),
+        convertGraphEvents(),
         shareReplay()
       );
 

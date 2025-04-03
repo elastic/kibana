@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import { ToolsProvider } from '../../mcp_gateway';
 import { createSearchAgentGraph } from './search_agent_graph';
 import type { SearchAgentOutput } from './types';
+import { graphNames } from '../../constants';
 
 export const getSearchAgentCaller =
   (deps: { toolsProvider: ToolsProvider; chatModel: InferenceChatModel; logger: Logger }) =>
@@ -40,7 +41,16 @@ export const runSearchAgent = async ({
     .withConfig({
       tags: [`agent:search_agent`],
     })
-    .invoke({ searchQuery: query, searchContext: context }, { recursionLimit: 20 });
+    .invoke(
+      { searchQuery: query, searchContext: context },
+      {
+        recursionLimit: 20,
+        runName: 'searchAgentGraph',
+        metadata: {
+          graphName: graphNames.searchAgent,
+        },
+      }
+    );
 
   const { summary, citations } = finalState;
 

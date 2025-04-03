@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { conversationEventsToMessages } from './events_to_messages';
+export type { EventConverter } from './types';
+export { getSimpleGraphConverter } from './simple_graph';

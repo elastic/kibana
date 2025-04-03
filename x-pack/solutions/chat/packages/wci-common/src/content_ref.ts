@@ -31,6 +31,28 @@ export interface ContentRef {
   contentId: string;
 }
 
+/**
+ * Serialize a {@link ContentRef} to a string representation.
+ */
+export const serializeContentRef = (ref: ContentRef): string => {
+  return `ref||${ref.sourceType}||${ref.sourceId}||${ref.contentId}`;
+};
+
+/**
+ * Parses a serialized ref back.
+ */
+export const parseContentRef = (serializedRef: string): ContentRef => {
+  const parts = serializedRef.split('||');
+  if (parts.length !== 4) {
+    throw new Error(`Trying to parse ref with invalid format: ${serializedRef}`);
+  }
+  return {
+    sourceType: parts[1] as ContentRefSourceType,
+    sourceId: parts[2],
+    contentId: parts[3],
+  };
+};
+
 export const contentRefBuilder =
   ({ sourceId, sourceType }: { sourceType: ContentRefSourceType; sourceId: string }) =>
   (contentId: string): ContentRef => ({ sourceId, sourceType, contentId });

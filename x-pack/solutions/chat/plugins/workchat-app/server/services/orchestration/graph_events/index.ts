@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { conversationEventsToMessages } from './events_to_messages';
+export { getGraphMeta } from './get_graph_meta';
+export { convertGraphEvents } from './convert_graph_events';
