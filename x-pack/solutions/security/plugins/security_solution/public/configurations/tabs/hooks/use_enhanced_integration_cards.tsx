@@ -14,7 +14,7 @@ import { RETURN_APP_ID, RETURN_PATH } from '../components/integrations/constants
 import { IntegrationsFacets } from '../../constants';
 
 export const FEATURED_INTEGRATION_SORT_ORDER = [
-  // 'splunk',
+  // 'epr:splunk',
   'epr:google_secops',
   'epr:microsoft_sentinel',
   'epr:sentinel_one',
