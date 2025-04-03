@@ -136,6 +136,24 @@ function getMockedSoClient(
         });
       }
 
+      case outputIdToUuid('existing-logstash-output-with-ssl'): {
+        return mockOutputSO('existing-logstash-output-with-ssl', {
+          type: 'logstash',
+          is_default: false,
+          ssl: {
+            certificate: 'cert-value',
+            certificate_authorities: ['/path/to/CAs'],
+          },
+          secrets: {
+            ssl: {
+              key: {
+                id: 'wnES3pUBqsj3cVixODPG',
+              },
+            },
+          },
+        });
+      }
+
       case outputIdToUuid('existing-kafka-output'): {
         return mockOutputSO('existing-kafka-output', {
           type: 'kafka',
@@ -2316,6 +2334,30 @@ describe('Output Service', () => {
       ).rejects.toThrowError(
         'Remote_elasticsearch output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
+    });
+
+    it('Should delete SSL fields if SSL field is null', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(false);
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [],
+      } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-logstash-output-with-ssl', {
+        type: 'logstash',
+        hosts: ['0.0.0.0'],
+        ssl: null,
+      });
+
+      expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
+        type: 'logstash',
+        hosts: ['0.0.0.0'],
+        ssl: null,
+      });
     });
   });
 
