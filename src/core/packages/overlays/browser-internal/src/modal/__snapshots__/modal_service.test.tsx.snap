@@ -126,7 +126,19 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -445,7 +457,26 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -841,7 +872,33 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -1155,7 +1212,33 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -1474,7 +1557,33 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -1782,7 +1891,33 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+              Array [],
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -2017,7 +2152,19 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -2157,7 +2304,19 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -2302,7 +2461,19 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
@@ -2436,7 +2607,19 @@ Array [
           "bulkGet": [MockFunction],
           "getCurrent": [MockFunction],
           "getEnabled$": [MockFunction],
-          "getUserProfile$": [MockFunction],
+          "getUserProfile$": [MockFunction] {
+            "calls": Array [
+              Array [],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Observable {
+                  "_subscribe": [Function],
+                },
+              },
+            ],
+          },
           "partialUpdate": [MockFunction],
           "suggest": [MockFunction],
           "update": [MockFunction],
