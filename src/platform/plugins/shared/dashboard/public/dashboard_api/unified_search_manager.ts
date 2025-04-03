@@ -340,14 +340,17 @@ export function initializeUnifiedSearchManager(
     },
     internalApi: {
       controlGroupReload$,
-      anyStateChange$: () =>
-        combineLatest([filters$, query$, refreshInterval$, timeRange$]).pipe(map(() => {})),
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
-        return combineLatest([filters$, query$, refreshInterval$, timeRange$]).pipe(
+        return combineLatest([unifiedSearchFilters$, query$, refreshInterval$, timeRange$]).pipe(
           debounceTime(100),
-          map(() => getState()),
+          map(([filters, query, refreshInterval, timeRange]) => ({
+            filters: filters ?? DEFAULT_DASHBOARD_STATE.filters,
+            query: query ?? DEFAULT_DASHBOARD_STATE.query,
+            refreshInterval,
+            timeRange,
+          })),
           combineLatestWith(lastSavedState$),
-          map(([{ state: latestState }, lastSavedState]) =>
+          map(([latestState, lastSavedState]) =>
             diffComparators(comparators, lastSavedState, latestState)
           )
         );

@@ -19,10 +19,15 @@ export type ComparatorFunction<StateType, KeyType extends keyof StateType> = (
   currentState?: Partial<StateType>
 ) => boolean;
 
+/**
+ * A type that maps each key in a state type to a definition of how it should be compared. If a custom
+ * comparator is provided, return true if the values are equal, false otherwise.
+ */
 export type StateComparators<StateType> = {
   [KeyType in keyof Required<StateType>]:
     | 'referenceEquality'
     | 'deepEquality'
+    | 'skip'
     | ComparatorFunction<StateType, KeyType>;
 };
 
@@ -31,21 +36,18 @@ export type CustomComparators<StateType> = {
 };
 
 type SubjectsOf<T extends object> = {
-  [KeyType in keyof Required<T> as `${Capitalize<string & KeyType>}$`]: PublishingSubject<
-    T[KeyType]
-  >;
+  [KeyType in keyof Required<T> as `${string & KeyType}$`]: PublishingSubject<T[KeyType]>;
 };
 
 type SettersOf<T extends object> = {
-  [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: PublishingSubject<
-    T[KeyType]
-  >;
+  [KeyType in keyof Required<T> as `set${Capitalize<string & KeyType>}`]: (
+    value: T[KeyType]
+  ) => void;
 };
 
 export interface StateManager<StateType extends object> {
-  api: SettersOf<StateType> & SubjectsOf<StateType>;
-  comparators: StateComparators<StateType>;
   getLatestState: () => StateType;
-  reinitializeState: (newState: WithAllKeys<StateType>) => void;
+  reinitializeState: (newState?: Partial<StateType>) => void;
+  api: SettersOf<StateType> & SubjectsOf<StateType>;
   latestState$: Observable<StateType>;
 }

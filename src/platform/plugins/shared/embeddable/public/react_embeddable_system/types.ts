@@ -44,7 +44,7 @@ export interface BuildEmbeddableProps<
   /**
    * Initial serialized state provided by the parent.
    */
-  initialState?: SerializedPanelState<SerializedState>;
+  initialState: SerializedPanelState<SerializedState>;
 
   /**
    * A function that adds default & required methods to the passed API registration object.

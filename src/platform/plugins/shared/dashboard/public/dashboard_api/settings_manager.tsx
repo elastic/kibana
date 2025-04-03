@@ -12,12 +12,13 @@ import {
   StateComparators,
   diffComparators,
   initializeTitleManager,
+  titleComparators,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest, combineLatestWith, debounceTime, map } from 'rxjs';
 import { DashboardSettings, DashboardState } from './types';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
-// SERIALIZED STATE ONLY TODO: Use src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts in here
+// SERIALIZED STATE ONLY TODO: This could be simplified by using src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts
 export function initializeSettingsManager(initialState?: DashboardState) {
   const syncColors$ = new BehaviorSubject<boolean>(
     initialState?.syncColors ?? DEFAULT_DASHBOARD_STATE.syncColors
@@ -55,14 +56,17 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     if (useMargins !== useMargins$.value) useMargins$.next(useMargins);
   }
 
-  function getSettings() {
+  function getSettings(): DashboardSettings {
+    const titleState = titleManager.getLatestState();
     return {
-      ...titleManager.serialize(),
+      title: titleState.title ?? '',
+      description: titleState.description,
+      hidePanelTitles: titleState.hideTitle ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
       syncColors: syncColors$.value,
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,
       tags: tags$.value,
-      timeRestore: timeRestore$.value ?? false,
+      timeRestore: timeRestore$.value ?? DEFAULT_DASHBOARD_STATE.timeRestore,
       useMargins: useMargins$.value,
     };
   }
@@ -80,23 +84,15 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   }
 
   const comparators: StateComparators<DashboardSettings> = {
-    ...titleManager.comparators,
+    title: titleComparators.title,
+    description: titleComparators.description,
+    hidePanelTitles: 'referenceEquality',
     syncColors: 'referenceEquality',
     syncCursor: 'referenceEquality',
     syncTooltips: 'referenceEquality',
     timeRestore: 'referenceEquality',
     useMargins: 'referenceEquality',
     tags: 'deepEquality',
-  };
-
-  const getState = (): DashboardSettings => {
-    const settings = getSettings();
-    return {
-      ...settings,
-      title: settings.title ?? '',
-      timeRestore: settings.timeRestore ?? DEFAULT_DASHBOARD_STATE.timeRestore,
-      hidePanelTitles: settings.hidePanelTitles ?? DEFAULT_DASHBOARD_STATE.hidePanelTitles,
-    };
   };
 
   return {
@@ -123,20 +119,16 @@ export function initializeSettingsManager(initialState?: DashboardState) {
           timeRestore$,
           useMargins$,
 
-          // SERIALIZED STATE ONLY TODO: titlemanager should have a latestState$ observable
-          titleManager.api.title$,
-          titleManager.api.description$,
-          titleManager.api.hideTitle$,
+          titleManager.latestState$,
         ]).pipe(
           debounceTime(100),
-          map(() => getState()),
+          map(() => getSettings()),
           combineLatestWith(lastSavedState$),
           map(([latestState, lastSavedState]) =>
             diffComparators(comparators, lastSavedState, latestState)
           )
         );
       },
-      getState,
       reset: (lastSavedState: DashboardState) => {
         setSettings(lastSavedState);
       },

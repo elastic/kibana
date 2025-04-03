@@ -20,8 +20,9 @@ export const runComparator = <StateType extends object = object>(
   lastSavedValue?: StateType[keyof StateType],
   latestValue?: StateType[keyof StateType]
 ): boolean => {
-  if (comparator === 'referenceEquality') return referenceEquality(lastSavedValue, latestValue);
+  if (comparator === 'skip') return true;
   if (comparator === 'deepEquality') return deepEquality(lastSavedValue, latestValue);
+  if (comparator === 'referenceEquality') return referenceEquality(lastSavedValue, latestValue);
   if (typeof comparator === 'function') {
     return comparator(lastSavedValue, latestValue, lastSavedState, latestState);
   }

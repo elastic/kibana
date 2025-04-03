@@ -12,9 +12,11 @@ export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_
 export {
   type ComparatorFunction,
   type StateComparators,
+  type WithAllKeys,
   runComparator,
   areComparatorsEqual,
   diffComparators,
+  initializeStateManager,
 } from './state_manager';
 export {
   apiCanAccessViewMode,
@@ -146,7 +148,7 @@ export {
 export {
   initializeTitleManager,
   stateHasTitles,
-  defaultTitlesState,
+  titleComparators,
   type TitlesApi,
   type SerializedTitles,
 } from './interfaces/titles/title_manager';

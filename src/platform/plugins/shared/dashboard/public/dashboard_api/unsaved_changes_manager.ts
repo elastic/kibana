@@ -22,25 +22,28 @@ import { initializePanelsManager } from './panels_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { DashboardCreationOptions, DashboardState } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
+import { initializeViewModeManager } from './view_mode_manager';
 
 const DEBOUNCE_TIME = 100;
 
 export function initializeUnsavedChangesManager({
-  creationOptions,
-  controlGroupApi$,
-  lastSavedState,
   panelsManager,
   savedObjectId$,
+  lastSavedState,
   settingsManager,
-  unifiedSearchManager,
+  viewModeManager,
+  creationOptions,
+  controlGroupApi$,
   getPanelReferences,
+  unifiedSearchManager,
 }: {
+  lastSavedState: DashboardState;
   creationOptions?: DashboardCreationOptions;
   getPanelReferences: (id: string) => Reference[];
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
-  lastSavedState: DashboardState;
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
+  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
   panelsManager: ReturnType<typeof initializePanelsManager>;
+  viewModeManager: ReturnType<typeof initializeViewModeManager>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }): {
@@ -83,12 +86,13 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([
+    viewModeManager.api.viewMode$,
     dashboardStateChanges$,
     hasPanelChanges$,
-    of(false), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of Controls state - maybe with the new State Manager object
+    of(false), // SERIALIZED STATE ONLY TODO reinstate Dashboard diff checking of Controls state
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
+    .subscribe(([viewMode, dashboardChanges, hasPanelChanges, hasControlGroupChanges]) => {
       const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
       const hasUnsavedChanges = hasDashboardChanges || hasPanelChanges || hasControlGroupChanges;
 
@@ -103,6 +107,9 @@ export function initializeUnsavedChangesManager({
           'refreshInterval',
         ]);
 
+        // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
+        dashboardStateToBackup.viewMode = viewMode;
+
         // Backup latest state from children that have unsaved changes
         if (hasPanelChanges) {
           const { panels, references } = panelsManager.internalApi.serializePanels();
@@ -111,8 +118,7 @@ export function initializeUnsavedChangesManager({
         }
 
         // SERIALIZED STATE ONLY TODO back up controls state.
-
-        getDashboardBackupService().setState(savedObjectId$.value, dashboardChanges);
+        getDashboardBackupService().setState(savedObjectId$.value, dashboardStateToBackup);
       }
     });
 

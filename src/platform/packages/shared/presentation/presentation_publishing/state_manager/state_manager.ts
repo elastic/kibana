@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject, Observable, combineLatest, map, startWith } from 'rxjs';
-import { CustomComparators, StateComparators, StateManager, WithAllKeys } from './types';
+import { StateManager, WithAllKeys } from './types';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;
 
@@ -20,27 +20,19 @@ type KeyToSubjectMap<StateType extends object> = {
   [Key in keyof StateType]?: SubjectOf<StateType>;
 };
 
+/**
+ * Initializes a composable state manager instance for a given state type.
+ * @param initialState - The initial state of the state manager.
+ * @param defaultState - The default state of the state manager. Every key in this state must be present, for optional keys specify undefined explicly.
+ * @param customComparators - Custom comparators for each key in the state. If not provided, defaults to reference equality.
+ */
 export const initializeStateManager = <StateType extends object>(
   initialState: StateType,
-  defaultState: WithAllKeys<StateType>,
-  customComparators: CustomComparators<StateType>
+  defaultState: WithAllKeys<StateType>
 ): StateManager<StateType> => {
   const allState = { ...defaultState, ...initialState };
   const allSubjects: Array<SubjectOf<StateType>> = [];
   const keyToSubjectMap: KeyToSubjectMap<StateType> = {};
-
-  /**
-   * Set up comparators for each key in the state. We loop through default state because it is
-   * guaranteed to have all keys and if a custom comparator is not provided for a key, we default
-   * to reference equality.
-   */
-  const comparators: StateManager<StateType>['comparators'] = (
-    Object.keys(defaultState) as Array<keyof StateType>
-  ).reduce((acc, key) => {
-    const comparator = customComparators[key];
-    acc[key] = comparator ?? 'referenceEquality';
-    return acc;
-  }, {} as StateComparators<StateType>);
 
   /**
    * Build the API for this state type. We loop through default state because it is guaranteed to
@@ -50,11 +42,13 @@ export const initializeStateManager = <StateType extends object>(
     Object.keys(defaultState) as Array<keyof StateType>
   ).reduce((acc, key) => {
     const subject = new BehaviorSubject(allState[key]);
-    const setter = (value: StateType[typeof key]) => subject.next(value);
+    const setter = (value: StateType[typeof key]) => {
+      subject.next(value);
+    };
 
     const capitalizedKey = (key as string).charAt(0).toUpperCase() + (key as string).slice(1);
     acc[`set${capitalizedKey}`] = setter;
-    acc[`${capitalizedKey}$`] = subject;
+    acc[`${key as string}$`] = subject;
 
     allSubjects.push(subject);
     keyToSubjectMap[key] = subject;
@@ -64,17 +58,23 @@ export const initializeStateManager = <StateType extends object>(
   /**
    * Gets the latest state of this state manager.
    */
-  const getLatestState: StateManager<StateType>['getLatestState'] = () =>
-    allSubjects.map((subject) => subject.getValue()) as StateType;
+  const getLatestState: StateManager<StateType>['getLatestState'] = () => {
+    return Object.keys(defaultState).reduce((acc, key) => {
+      acc[key as keyof StateType] = keyToSubjectMap[key as keyof StateType]!.getValue();
+      return acc;
+    }, {} as StateType);
+  };
 
   /**
-   * Reinitializes the state of this state manager. All keys are required in the new state to ensure that every subject is overwritten.
+   * Reinitializes the state of this state manager. Takes a partial state object that may be undefined.
+   *
+   * This method resets ALL keys in this state, if a key is not present in the new state, it will be set to the default value.
    */
-  const reinitializeState = (newState: Partial<StateType>) => {
+  const reinitializeState = (newState?: Partial<StateType>) => {
     for (const [key, subject] of Object.entries<SubjectOf<StateType>>(
       keyToSubjectMap as { [key: string]: SubjectOf<StateType> }
     )) {
-      subject.next(newState[key as keyof StateType] ?? defaultState[key as keyof StateType]);
+      subject.next(newState?.[key as keyof StateType] ?? defaultState[key as keyof StateType]);
     }
   };
 
@@ -83,9 +83,10 @@ export const initializeStateManager = <StateType extends object>(
     map(() => getLatestState())
   );
 
+  // SERIALIZED STATE ONLY TODO: Remember that the state manager DOES NOT contain comparators, because it's meant for Runtime state, and comparators should be written against serialized state.
+
   return {
     api,
-    comparators,
     getLatestState,
     reinitializeState,
     latestState$,

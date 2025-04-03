@@ -93,6 +93,7 @@ export function getDashboardApi({
     creationOptions
   );
   const unsavedChangesManager = initializeUnsavedChangesManager({
+    viewModeManager,
     creationOptions,
     controlGroupApi$,
     lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
@@ -108,7 +109,7 @@ export function getDashboardApi({
     const { state: unifiedSearchState, references: searchSourceReferences } =
       unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
-      ...settingsManager.internalApi.getState(),
+      ...settingsManager.api.getSettings(),
       ...unifiedSearchState,
       panels,
       viewMode: viewModeManager.api.viewMode$.value,

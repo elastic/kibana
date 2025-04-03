@@ -48,7 +48,7 @@ export function getDashboardTitle(
   isNew: boolean
 ): string {
   const isEditMode = viewMode === 'edit';
-  const dashboardTitle = isNew || !Boolean(title) ? getNewDashboardTitle() : (title as string);
+  const dashboardTitle = isNew || !Boolean(title) ? getNewDashboardTitle(title) : (title as string);
   return isEditMode
     ? i18n.translate('dashboard.strings.dashboardEditTitle', {
         defaultMessage: 'Editing {title}',
@@ -79,10 +79,19 @@ export const getQuickCreateButtonGroupLegend = () =>
     defaultMessage: 'Shortcuts to popular visualization types',
   });
 
-export const getNewDashboardTitle = () =>
-  i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
+export const getNewDashboardTitle = (existingTitle?: string) => {
+  if (existingTitle) {
+    return i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
+      defaultMessage: 'New Dashboard - {existingTitle}',
+      values: {
+        existingTitle,
+      },
+    });
+  }
+  return i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
     defaultMessage: 'New Dashboard',
   });
+};
 
 export const getPanelAddedSuccessString = (savedObjectName?: string) =>
   savedObjectName
