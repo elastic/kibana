@@ -57,7 +57,7 @@ const formatter = new Intl.NumberFormat('en-US', {
 });
 
 const formatRateToPercentage = (rate?: number) =>
-  (rate ? formatter.format(rate) : undefined) as any;
+  (rate ? formatter.format(rate) : undefined) as any; // This is a workaround for the type error, since the numFilters & numActiveFilters props are defined as number | undefined
 
 const OutcomeControls = () => {
   const { changePreviewDocsFilter } = useStreamEnrichmentEvents();
