@@ -5354,6 +5354,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/encrypted-saved-objects-shared@link:src/platform/packages/shared/kbn-encrypted-saved-objects-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/enterprise-search-plugin@link:x-pack/solutions/search/plugins/enterprise_search":
   version "0.0.0"
   uid ""
@@ -7583,6 +7587,10 @@
   uid ""
 
 "@kbn/synthetics-private-location@link:x-pack/packages/kbn-synthetics-private-location":
+  version "0.0.0"
+  uid ""
+
+"@kbn/task-manager-dependencies-plugin@link:x-pack/platform/plugins/private/task_manager_dependencies":
   version "0.0.0"
   uid ""
 
