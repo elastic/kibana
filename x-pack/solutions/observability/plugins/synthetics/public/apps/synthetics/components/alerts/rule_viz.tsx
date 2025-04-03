@@ -129,5 +129,5 @@ export const RuleViz = ({ dispatchedAction }: { dispatchedAction: PayloadAction<
 };
 
 const inspectorDisabledTooltip = i18n.translate('xpack.synthetics.rules.inspectorDisabled', {
-  defaultMessage: 'Enable "Inspect ES queries" in Advanced Settings to see the Details',
+  defaultMessage: 'Enable "Inspect ES queries" in Advanced Settings to see Details',
 });
