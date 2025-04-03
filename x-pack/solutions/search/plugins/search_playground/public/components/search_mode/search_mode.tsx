@@ -41,7 +41,7 @@ export const SearchMode: React.FC = () => {
     pagination: Pagination;
   }>({ query: searchBarValue, pagination: DEFAULT_PAGINATION });
 
-  const { results, pagination } = useSearchPreview(searchQuery);
+  const { executionTime, results, pagination } = useSearchPreview(searchQuery);
   const { data: mappingData } = useIndexMappings();
 
   const queryClient = useQueryClient();
@@ -101,6 +101,7 @@ export const SearchMode: React.FC = () => {
                 <EuiFlexItem>
                   {searchQuery.query ? (
                     <ResultList
+                      executionTime={executionTime}
                       searchResults={results}
                       mappings={mappingData}
                       pagination={pagination}

@@ -26,7 +26,7 @@ describe('Initializing', () => {
   it('should navigate to the integrations page when clicking "Add integration" button', async () => {
     renderWithTestProvider(<Initializing />);
 
-    expect(screen.getByText(/initializing asset inventory/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /discovering your assets/i })).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole('button', { name: /add integration/i }));
 
