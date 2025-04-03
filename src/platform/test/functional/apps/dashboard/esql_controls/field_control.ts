@@ -46,6 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.clickEditorMenuButton();
       await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
       await dashboard.waitForRenderComplete();
+      await elasticChart.setNewChartUiDebugFlag(true);
 
       await retry.try(async () => {
         const panelCount = await dashboard.getPanelCount();
@@ -83,17 +84,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check Lens editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
-      expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ?field');
+      expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ??field');
     });
 
     it('should update the Lens chart accordingly', async () => {
-      await elasticChart.setNewChartUiDebugFlag(true);
       // change the control value
       await comboBox.set('esqlControlValuesDropdown', 'clientip');
       await dashboard.waitForRenderComplete();
 
-      const data = await elasticChart.getChartDebugData('xyVisChart');
-      expect(data?.axes?.x[0]?.title).to.be('clientip');
+      await retry.try(async () => {
+        const data = await elasticChart.getChartDebugData('xyVisChart');
+        expect(data?.axes?.x[0]?.title).to.be('clientip');
+      });
     });
   });
 }
