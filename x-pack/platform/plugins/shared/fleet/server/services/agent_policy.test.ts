@@ -219,7 +219,9 @@ describe('Agent policy', () => {
       soClient.create.mockResolvedValueOnce({
         id: 'test-agent-policy',
         type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
-        attributes: {},
+        attributes: {
+          name: 'test',
+        },
         references: [],
       });
 
@@ -237,6 +239,7 @@ describe('Agent policy', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
+        name: 'test',
         id: 'test-agent-policy',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -280,6 +283,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-agent-policy',
+        name: 'test',
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -491,7 +495,9 @@ describe('Agent policy', () => {
 
       soClient.get.mockResolvedValueOnce({
         id: 'test-agent-policy',
-        attributes: {},
+        attributes: {
+          name: 'Test',
+        },
         references: [],
         type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -501,6 +507,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
         action: 'get',
         id: 'test-agent-policy',
+        name: 'Test',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -514,13 +521,17 @@ describe('Agent policy', () => {
         saved_objects: [
           {
             id: 'test-agent-policy-1',
-            attributes: {},
+            attributes: {
+              name: 'Test 1',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
           {
             id: 'test-agent-policy-2',
-            attributes: {},
+            attributes: {
+              name: 'Test 2',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
           },
@@ -532,12 +543,14 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'get',
         id: 'test-agent-policy-1',
+        name: 'Test 1',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'get',
         id: 'test-agent-policy-2',
+        name: 'Test 2',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -552,14 +565,18 @@ describe('Agent policy', () => {
         saved_objects: [
           {
             id: 'test-agent-policy-1',
-            attributes: {},
+            attributes: {
+              name: 'Test 1',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
           },
           {
             id: 'test-agent-policy-2',
-            attributes: {},
+            attributes: {
+              name: 'Test 2',
+            },
             references: [],
             type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
             score: 0,
@@ -578,12 +595,14 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(1, {
         action: 'find',
         id: 'test-agent-policy-1',
+        name: 'Test 1',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenNthCalledWith(2, {
         action: 'find',
         id: 'test-agent-policy-2',
+        name: 'Test 2',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -594,7 +613,7 @@ describe('Agent policy', () => {
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
 
     beforeEach(() => {
-      soClient = getSavedObjectMock({ revision: 1, package_policies: ['package-1'] });
+      soClient = getSavedObjectMock({ revision: 1, name: 'Test', package_policies: ['package-1'] });
       mockedPackagePolicyService.findAllForAgentPolicy.mockReturnValue([
         {
           id: 'package-1',
@@ -648,6 +667,7 @@ describe('Agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'delete',
         id: 'mocked',
+        name: 'Test',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
@@ -994,7 +1014,9 @@ describe('Agent policy', () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
       soClient.get.mockResolvedValue({
-        attributes: {},
+        attributes: {
+          name: 'Test',
+        },
         references: [],
         id: 'test-agent-policy',
         type: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -1008,6 +1030,7 @@ describe('Agent policy', () => {
 
       expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'update',
+        name: 'Test',
         id: 'test-agent-policy',
         savedObjectType: LEGACY_AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
@@ -1556,7 +1579,7 @@ describe('Agent policy', () => {
             perPage: 1000,
             sortField: 'created_at',
             sortOrder: 'asc',
-            fields: ['id'],
+            fields: ['id', 'name'],
             filter: undefined,
           })
         );
@@ -1576,7 +1599,7 @@ describe('Agent policy', () => {
             perPage: 13,
             sortField: 'created_at',
             sortOrder: 'asc',
-            fields: ['id'],
+            fields: ['id', 'name'],
             filter: 'one=two',
           })
         );

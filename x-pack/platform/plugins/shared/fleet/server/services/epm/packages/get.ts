@@ -170,6 +170,7 @@ export async function getPackages(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -286,6 +287,7 @@ export async function getLimitedPackages(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: pkg.id,
+      name: pkg.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -307,6 +309,7 @@ export async function getPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -360,6 +363,7 @@ export async function getInstalledPackageSavedObjects(
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: savedObject.id,
+      name: savedObject.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
@@ -555,6 +559,7 @@ export const getPackageUsageStats = async ({
       auditLoggingService.writeCustomSoAuditLog({
         action: 'find',
         id: packagePolicy.id,
+        name: packagePolicy.attributes.name,
         savedObjectType: packagePolicySavedObjectType,
       });
     }
@@ -673,6 +678,7 @@ export async function getInstallationObject(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'find',
     id: installation.id,
+    name: installation.attributes.name,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
 
@@ -694,6 +700,7 @@ async function getInstallationObjects(options: {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'find',
       id: installation.id,
+      name: installation.attributes.name,
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
   }
