@@ -18,6 +18,7 @@ import {
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
+import { SLODefinition } from '../domain/models';
 
 export class DeleteSLO {
   constructor(
@@ -32,27 +33,22 @@ export class DeleteSLO {
   public async execute(sloId: string): Promise<void> {
     const slo = await this.repository.findById(sloId);
 
-    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-    await this.summaryTransformManager.stop(summaryTransformId);
-    await this.summaryTransformManager.uninstall(summaryTransformId);
+    await Promise.all([this.deleteSummaryTransform(slo), this.deleteRollupTransform(slo)]);
 
-    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.stop(rollupTransformId);
-    await this.transformManager.uninstall(rollupTransformId);
-
-    await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      )
-    );
-
-    await retryTransientEsErrors(() =>
-      this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-        { ignore: [404] }
-      )
-    );
+    await Promise.all([
+      retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: getSLOPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      ),
+      retryTransientEsErrors(() =>
+        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+          { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+          { ignore: [404] }
+        )
+      ),
+    ]);
 
     await Promise.all([
       this.deleteRollupData(slo.id),
@@ -60,6 +56,18 @@ export class DeleteSLO {
       this.deleteAssociatedRules(slo.id),
       this.repository.deleteById(slo.id),
     ]);
+  }
+
+  private async deleteRollupTransform(slo: SLODefinition) {
+    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+    await this.transformManager.stop(rollupTransformId);
+    await this.transformManager.uninstall(rollupTransformId);
+  }
+
+  private async deleteSummaryTransform(slo: SLODefinition) {
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+    await this.summaryTransformManager.stop(summaryTransformId);
+    await this.summaryTransformManager.uninstall(summaryTransformId);
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {
