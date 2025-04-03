@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT } from '../../../lib/telemetry/event_based/events';
 import type {
   UpdateWorkflowInsightsRequestBody,
   UpdateWorkflowInsightsRequestParams,
@@ -73,8 +74,17 @@ const updateInsightsRouteHandler = (
   return async (_, request, response) => {
     const { insightId } = request.params;
     const { canWriteWorkflowInsights } = await endpointContext.service.getEndpointAuthz(request);
-    if (!canWriteWorkflowInsights && !isOnlyActionTypeUpdate(request.body)) {
+    const onlyActionTypeUpdate = isOnlyActionTypeUpdate(request.body);
+    if (!canWriteWorkflowInsights && !onlyActionTypeUpdate) {
       return response.forbidden({ body: 'Unauthorized to update workflow insights' });
+    }
+    if (onlyActionTypeUpdate) {
+      if (request.body.action?.type === 'remediated') {
+        const telemetry = endpointContext.service.getTelemetryService();
+        telemetry.reportEvent(ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT.eventType, {
+          insightId,
+        });
+      }
     }
     logger.debug(`Updating insight ${insightId}`);
     try {

@@ -1241,6 +1241,21 @@ export const SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE: EventTypeOpts<{
   },
 };
 
+export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
+  insightId: string;
+}> = {
+  eventType: 'endpoint_workflow_insights_remediated_event',
+  schema: {
+    insightId: {
+      type: 'keyword',
+      _meta: {
+        description: 'The ID of the action that was sent to the endpoint',
+        optional: false,
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -1250,6 +1265,7 @@ export const events = [
   ENDPOINT_RESPONSE_ACTION_SENT_EVENT,
   ENDPOINT_RESPONSE_ACTION_SENT_ERROR_EVENT,
   ENDPOINT_RESPONSE_ACTION_STATUS_CHANGE_EVENT,
+  ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT,
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_DATA_VIEW_REFRESH_EXECUTION_EVENT,
   ENTITY_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
