@@ -14,7 +14,7 @@ import { FailedToRollbackError } from './errors/failed_to_rollback_error';
 import { InvalidStateError } from './errors/invalid_state_error';
 import { ExecutionPlan } from './execution_plan/execution_plan';
 import type { ActionsByType } from './execution_plan/types';
-import type { StreamActiveRecord } from './streams/stream_active_record';
+import type { PrintableStream, StreamActiveRecord } from './streams/stream_active_record';
 import { streamFromDefinition } from './streams/stream_from_definition';
 import type { StateDependencies, StreamChange } from './types';
 
@@ -292,5 +292,12 @@ export class State {
 
   has(name: string) {
     return this.streamsByName.has(name);
+  }
+
+  toPrintable(): Record<string, PrintableStream> {
+    // Drop all references to the dependencies since they cannot be JSON.stringified
+    return Object.fromEntries(
+      Array.from(this.streamsByName).map(([key, stream]) => [key, stream.toPrintable()])
+    );
   }
 }

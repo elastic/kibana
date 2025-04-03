@@ -21,9 +21,12 @@ import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
 import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
-import { StreamActiveRecord } from './stream_active_record';
+import { StreamActiveRecord, PrintableStream } from './stream_active_record';
 
 export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
+  private _processingChanged: boolean = false;
+  private _lifeCycleChanged: boolean = false;
+
   constructor(definition: UnwiredStreamDefinition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
@@ -32,8 +35,13 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     return new UnwiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
-  private _processingChanged: boolean = false;
-  private _lifeCycleChanged: boolean = false;
+  toPrintable(): PrintableStream {
+    return {
+      ...super.toPrintable(),
+      processingChanged: this._processingChanged,
+      lifeCycleChanged: this._lifeCycleChanged,
+    };
+  }
 
   protected async doHandleUpsertChange(
     definition: StreamDefinition,
@@ -85,7 +93,10 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     return { cascadingChanges: [], changeStatus: 'deleted' };
   }
 
-  protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
+  protected async doValidateUpsertion(
+    desiredState: State,
+    startingState: State
+  ): Promise<ValidationResult> {
     if (this._lifeCycleChanged && isDslLifecycle(this.getLifeCycle())) {
       const dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
       if (dataStream.ilm_policy !== undefined) {
@@ -97,6 +108,13 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
         };
       }
     }
+    return { isValid: true, errors: [] };
+  }
+
+  protected async doValidateDeletion(
+    desiredState: State,
+    startingState: State
+  ): Promise<ValidationResult> {
     return { isValid: true, errors: [] };
   }
 

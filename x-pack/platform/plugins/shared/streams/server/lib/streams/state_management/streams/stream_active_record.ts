@@ -15,11 +15,17 @@ export interface ValidationResult {
   errors: string[];
 }
 
+export interface PrintableStream {
+  changeStatus: StreamChangeStatus;
+  definition: StreamDefinition;
+  [key: string]: unknown;
+}
+
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
-  protected _definition: TDefinition;
   protected dependencies: StateDependencies;
+  protected _definition: TDefinition;
   private _changeStatus: StreamChangeStatus = 'unchanged';
 
   constructor(definition: TDefinition, dependencies: StateDependencies) {
@@ -27,11 +33,15 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     this.dependencies = dependencies;
   }
 
+  public get name(): string {
+    return this._definition.name;
+  }
+
   public get definition(): TDefinition {
     return this._definition;
   }
 
-  protected get changeStatus(): StreamChangeStatus {
+  public get changeStatus(): StreamChangeStatus {
     return this._changeStatus;
   }
 
@@ -92,7 +102,13 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
 
   async validate(desiredState: State, startingState: State): Promise<ValidationResult> {
     try {
-      return await this.doValidate(desiredState, startingState);
+      if (this._changeStatus === 'upserted') {
+        return await this.doValidateUpsertion(desiredState, startingState);
+      } else if (this._changeStatus === 'deleted') {
+        return await this.doValidateDeletion(desiredState, startingState);
+      }
+
+      return { isValid: true, errors: [] };
     } catch (error) {
       return { isValid: false, errors: [error.message] };
     }
@@ -116,6 +132,13 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     throw new Error('Cannot determine Elasticsearch actions for an unchanged stream');
   }
 
+  toPrintable(): PrintableStream {
+    return {
+      changeStatus: this.changeStatus,
+      definition: this.definition,
+    };
+  }
+
   abstract clone(): StreamActiveRecord;
 
   protected abstract doHandleUpsertChange(
@@ -130,7 +153,12 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     startingState: State
   ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }>;
 
-  protected abstract doValidate(
+  protected abstract doValidateUpsertion(
+    desiredState: State,
+    startingState: State
+  ): Promise<ValidationResult>;
+
+  protected abstract doValidateDeletion(
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult>;

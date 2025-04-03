@@ -42,11 +42,16 @@ import { getProcessingPipelineName, getReroutePipelineName } from '../../ingest_
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
-import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
+import type { PrintableStream, StreamChangeStatus, ValidationResult } from './stream_active_record';
 import { StreamActiveRecord } from './stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
+  private _ownFieldsChanged: boolean = false;
+  private _routingChanged: boolean = false;
+  private _processingChanged: boolean = false;
+  private _lifeCycleChanged: boolean = false;
+
   constructor(definition: WiredStreamDefinition, dependencies: StateDependencies) {
     super(definition, dependencies);
   }
@@ -55,10 +60,15 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return new WiredStream(cloneDeep(this._definition), this.dependencies);
   }
 
-  private _ownFieldsChanged: boolean = false;
-  private _routingChanged: boolean = false;
-  private _processingChanged: boolean = false;
-  private _lifeCycleChanged: boolean = false;
+  toPrintable(): PrintableStream {
+    return {
+      ...super.toPrintable(),
+      processingChanged: this._processingChanged,
+      lifeCycleChanged: this._lifeCycleChanged,
+      routingChanged: this._routingChanged,
+      ownFieldsChanged: this._ownFieldsChanged,
+    };
+  }
 
   protected async doHandleUpsertChange(
     definition: StreamDefinition,
@@ -73,7 +83,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
         isDescendantOf(definition.name, this._definition.name);
 
       return {
-        changeStatus: ancestorHasChanged ? 'upserted' : this.changeStatus,
+        changeStatus: ancestorHasChanged && !this.isDeleted() ? 'upserted' : this.changeStatus,
         cascadingChanges: [],
       };
     }
@@ -220,7 +230,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
         const hasChild = currentParentRouting.some(
           (routing) => routing.destination === this._definition.name
         );
-        if (!hasChild) {
+        if (hasChild) {
           cascadingChanges.push({
             type: 'upsert',
             definition: {
@@ -250,7 +260,10 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     return { cascadingChanges, changeStatus: 'deleted' };
   }
 
-  protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
+  protected async doValidateUpsertion(
+    desiredState: State,
+    startingState: State
+  ): Promise<ValidationResult> {
     if (!hasSupportedStreamsRoot(this._definition.name)) {
       return {
         isValid: false,
@@ -324,6 +337,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
 
     for (const stream of desiredState.all()) {
       if (
+        !stream.isDeleted() &&
         isChildOf(this._definition.name, stream.definition.name) &&
         !children.has(stream.definition.name)
       ) {
@@ -368,6 +382,13 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
       return { isValid: false, errors: ['Using ILM is not supported in Serverless'] };
     }
 
+    return { isValid: true, errors: [] };
+  }
+
+  protected async doValidateDeletion(
+    desiredState: State,
+    startingState: State
+  ): Promise<ValidationResult> {
     return { isValid: true, errors: [] };
   }
 

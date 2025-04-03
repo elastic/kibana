@@ -80,7 +80,10 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     return { cascadingChanges: [], changeStatus: this.changeStatus };
   }
 
-  protected async doValidate(desiredState: State, startingState: State): Promise<ValidationResult> {
+  protected async doValidateUpsertion(
+    desiredState: State,
+    startingState: State
+  ): Promise<ValidationResult> {
     if (this.isDeleted()) {
       return { isValid: true, errors: [] };
     }
@@ -148,6 +151,13 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
         };
       }
     }
+    return { isValid: true, errors: [] };
+  }
+
+  protected async doValidateDeletion(
+    desiredState: State,
+    startingState: State
+  ): Promise<ValidationResult> {
     return { isValid: true, errors: [] };
   }
 
