@@ -9,6 +9,7 @@
 
 import { Builder } from '.';
 import { BasicPrettyPrinter } from '../pretty_print';
+import { ESQLCommand } from '../types';
 
 describe('command', () => {
   test('can create a LIMIT command', () => {
@@ -415,6 +416,33 @@ describe('order', () => {
     const text = BasicPrettyPrinter.expression(node);
 
     expect(text).toBe('a.b.c ASC NULLS FIRST');
+  });
+});
+
+describe('fork branch', () => {
+  test('can construct a FORK branch', () => {
+    expect(Builder.expression.forkBranch()).toMatchObject({
+      type: 'fork_branch',
+      commands: [],
+    });
+
+    const limitCommand: ESQLCommand<'limit'> = {
+      args: [],
+      incomplete: false,
+      location: { min: 1, max: 3 },
+      name: 'limit',
+      text: 'limit ',
+      type: 'command',
+    };
+
+    expect(
+      Builder.expression.forkBranch({
+        commands: [limitCommand],
+      })
+    ).toMatchObject({
+      type: 'fork_branch',
+      commands: [limitCommand],
+    });
   });
 });
 

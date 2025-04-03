@@ -21,9 +21,9 @@ describe('FORK', () => {
 
       expect(ast[1].args).toHaveLength(3);
       expect(ast[1].args).toMatchObject([
-        [{ name: 'where' }],
-        [{ name: 'sort' }],
-        [{ name: 'limit' }],
+        { type: 'fork_branch', commands: [{ name: 'where' }] },
+        { type: 'fork_branch', commands: [{ name: 'sort' }] },
+        { type: 'fork_branch', commands: [{ name: 'limit' }] },
       ]);
     });
 
@@ -36,8 +36,8 @@ describe('FORK', () => {
 
       expect(ast[1].args).toHaveLength(2);
       expect(ast[1].args).toMatchObject([
-        [{ name: 'where' }, { name: 'sort' }, { name: 'limit' }],
-        [{ name: 'where' }, { name: 'limit' }],
+        { type: 'fork_branch', commands: [{ name: 'where' }, { name: 'sort' }, { name: 'limit' }] },
+        { type: 'fork_branch', commands: [{ name: 'where' }, { name: 'limit' }] },
       ]);
     });
   });
