@@ -6,11 +6,7 @@
  */
 
 import React from 'react';
-import type { PropsWithChildren } from 'react';
 import { render, act, fireEvent, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import { SecurityPageName } from '@kbn/deeplinks-security';
-import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import type {
   DataViewField,
   DataViewFieldMap,
@@ -29,10 +25,8 @@ import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
 } from '../../../../../../../../common/api/detection_engine';
-import { TestProviders } from '../../../../../../../common/mock';
-import { RouterSpyStateContext } from '../../../../../../../common/utils/route/helpers';
-import { AllRulesTabs } from '../../../../../components/rules_table/rules_table_toolbar';
 import { KibanaServices } from '../../../../../../../common/lib/kibana';
+import { RuleUpgradeTestProviders } from './rule_upgrade_test_providers';
 
 /** **********************************************/
 // Mocks necessary to render Rule Upgrade Flyout
@@ -63,7 +57,7 @@ export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof rende
   });
 
   const renderResult = render(<RulesPage />, {
-    wrapper: TestRuleUpgradeProviders,
+    wrapper: RuleUpgradeTestProviders,
   });
 
   await openRuleUpgradeFlyout();
@@ -210,30 +204,6 @@ export function mockTimelines(timelines: Array<{ id: string; title: string }>): 
  */
 export function mockKibanaFetchResponse(path: string, mockResponse: unknown): void {
   mockedResponses.set(path, mockResponse);
-}
-
-function TestRuleUpgradeProviders({ children }: PropsWithChildren<{}>): JSX.Element {
-  return (
-    <KibanaErrorBoundaryProvider analytics={undefined}>
-      <RouterSpyStateContext.Provider
-        value={[
-          {
-            pageName: SecurityPageName.rules,
-            detailName: undefined,
-            tabName: AllRulesTabs.updates,
-            search: '',
-            pathName: '/',
-            state: undefined,
-          },
-          jest.fn(),
-        ]}
-      >
-        <MemoryRouter>
-          <TestProviders>{children}</TestProviders>
-        </MemoryRouter>
-      </RouterSpyStateContext.Provider>
-    </KibanaErrorBoundaryProvider>
-  );
 }
 
 async function openRuleUpgradeFlyout(): Promise<void> {
