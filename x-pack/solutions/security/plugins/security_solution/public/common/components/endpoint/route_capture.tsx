@@ -17,9 +17,12 @@ import { timelineActions } from '../../../timelines/store';
  * It dispatches actions when the URL is changed.
  */
 export const RouteCapture = memo<PropsWithChildren<unknown>>(({ children }) => {
-  const { pathname, search, hash } = useLocation();
+  const { pathname, search, hash, state } = useLocation();
   const dispatch = useDispatch();
-  const relevantUrlParams = useMemo(() => ({ pathname, search, hash }), [pathname, search, hash]);
+  const relevantUrlParams = useMemo(
+    () => ({ pathname, search, hash, state }),
+    [pathname, search, hash, state]
+  );
 
   useEffect(() => {
     dispatch(timelineActions.showTimeline({ id: TimelineId.active, show: false }));
