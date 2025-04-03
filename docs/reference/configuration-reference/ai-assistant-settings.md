@@ -10,7 +10,7 @@ applies_to:
 # AI Assistant settings in {{kib}} [ai-assistant-settings-kb]
 
 `xpack.productDocBase.artifactRepositoryUrl`
-:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`
+:   Url of the repository to use to download and install the Elastic product documentation artifacts for the AI assistants. Supports both HTTP(S) URLs and local file paths (`file://`).  Defaults to `https://kibana-knowledge-base-artifacts.elastic.co`
 
 ## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
 
