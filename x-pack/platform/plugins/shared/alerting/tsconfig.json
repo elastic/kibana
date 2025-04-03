@@ -81,7 +81,8 @@
     "@kbn/core-deprecations-common",
     "@kbn/core-deprecations-server",
     "@kbn/response-ops-rule-params",
-    "@kbn/datemath"
+    "@kbn/datemath",
+    "@kbn/elastic-assistant-common"
   ],
   "exclude": [
     "target/**/*"

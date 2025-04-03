@@ -50,7 +50,12 @@ export function registerUpdateIndexRoute({
       const { index } = request.params;
       const { operations } = request.body;
       try {
-        await updateIndex({ esClient: client.asCurrentUser, log, index, operations });
+        await updateIndex({
+          esClient: client.asCurrentUser,
+          index,
+          operations,
+          log,
+        });
         return response.ok();
       } catch (err) {
         if (err instanceof errors.ResponseError) {

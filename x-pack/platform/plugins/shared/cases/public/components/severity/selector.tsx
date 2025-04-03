@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiSuperSelect } from '@elastic/e
 import React from 'react';
 import type { CaseSeverity } from '../../../common/types/domain';
 import { severities } from './config';
+import * as i18n from './translations';
 
 interface Props {
   selectedSeverity: CaseSeverity;
@@ -53,6 +54,7 @@ export const SeveritySelector: React.FC<Props> = ({
       valueOfSelected={selectedSeverity}
       onChange={onSeverityChange}
       data-test-subj="case-severity-selection"
+      aria-label={i18n.SEVERITY_TITLE}
     />
   );
 };

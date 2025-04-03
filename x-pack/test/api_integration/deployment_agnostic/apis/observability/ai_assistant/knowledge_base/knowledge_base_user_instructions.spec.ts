@@ -13,39 +13,31 @@ import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  clearConversations,
   clearKnowledgeBase,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from './helpers';
-import { getConversationCreatedEvent } from '../helpers';
+} from '../utils/knowledge_base';
 import {
   LlmProxy,
   createLlmProxy,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
 
 const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
   const retry = getService('retry');
 
   describe('Knowledge base user instructions', function () {
     before(async () => {
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });
@@ -121,7 +113,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      it('"secondaryEditor" can retrieve their own private instructions and the public instruction', async () => {
+      it('"admin" can retrieve their own private instructions and the public instruction', async () => {
         await retry.try(async () => {
           const res = await observabilityAIAssistantAPIClient.admin({
             endpoint: 'GET /internal/observability_ai_assistant/kb/user_instructions',

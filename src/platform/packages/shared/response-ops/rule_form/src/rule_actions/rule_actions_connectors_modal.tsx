@@ -15,6 +15,7 @@ import {
   useCurrentEuiBreakpoint,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { ACTION_TYPE_MODAL_TITLE } from '../translations';
 import { RuleActionsConnectorsBody } from './rule_actions_connectors_body';
@@ -24,6 +25,10 @@ export const RuleActionsConnectorsModal = () => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
   const isFullscreenPortrait = ['s', 'xs'].includes(currentBreakpoint);
+  const inLineContainerCss = css`
+    container-type: inline-size;
+    background-color: transparent;
+  `;
 
   const responsiveHeight = isFullscreenPortrait ? 'initial' : '80vh';
   const responsiveOverflow = isFullscreenPortrait ? 'auto' : 'hidden';
@@ -48,7 +53,7 @@ export const RuleActionsConnectorsModal = () => {
       <EuiModalHeader>
         <EuiModalHeaderTitle size="s">{ACTION_TYPE_MODAL_TITLE}</EuiModalHeaderTitle>
       </EuiModalHeader>
-      <EuiModalBody className="actionConnectorModal__container">
+      <EuiModalBody css={inLineContainerCss}>
         <RuleActionsConnectorsBody
           responsiveOverflow={responsiveOverflow}
           onSelectConnector={onClose}

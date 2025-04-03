@@ -87,7 +87,7 @@ describe('autocomplete', () => {
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     testSuggestions('/', [
-      ...sourceCommands.map((name) => name.toUpperCase() + ' $0'),
+      ...sourceCommands.map((name) => name.toUpperCase() + ' '),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = commandDefinitions
@@ -96,12 +96,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -254,7 +254,7 @@ describe('autocomplete', () => {
     // source command
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     testSuggestions('f/', [
-      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} $0`),
+      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -264,12 +264,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -319,7 +319,7 @@ describe('autocomplete', () => {
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
-    testSuggestions('FROM index1 M/', ['METADATA $0']);
+    testSuggestions('FROM index1 M/', ['METADATA ']);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -477,7 +477,7 @@ describe('autocomplete', () => {
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     // Source command
     testSuggestions('F/', [
-      ...['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
+      ...['FROM ', 'ROW ', 'SHOW '].map(attachTriggerCommand),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -487,12 +487,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -500,7 +500,7 @@ describe('autocomplete', () => {
     // Pipe command
     testSuggestions(
       'FROM a | E/',
-      commands.map((name) => attachTriggerCommand(name)).map(attachAsSnippet) // TODO consider making this check more fundamental
+      commands.map((name) => attachTriggerCommand(name))
     );
 
     describe('function arguments', () => {
@@ -570,7 +570,7 @@ describe('autocomplete', () => {
     testSuggestions('FROM a /', [
       attachTriggerCommand('| '),
       ',',
-      attachAsSnippet(attachTriggerCommand('METADATA $0')),
+      attachTriggerCommand('METADATA '),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -675,7 +675,6 @@ describe('autocomplete', () => {
           {
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
-            asSnippet: false, // important because the text includes "$"
             command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 6, end: 13 },
           },
@@ -708,7 +707,7 @@ describe('autocomplete', () => {
 
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [attachAsSnippet(attachTriggerCommand('METADATA $0'))]);
+    testSuggestions('FROM index1 M/', [attachTriggerCommand('METADATA ')]);
 
     describe('ENRICH', () => {
       testSuggestions(

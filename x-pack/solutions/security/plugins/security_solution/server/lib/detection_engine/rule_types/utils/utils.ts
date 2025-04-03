@@ -7,7 +7,7 @@
 
 import agent from 'elastic-apm-node';
 import { createHash } from 'crypto';
-import { chunk, get, invert, isEmpty, merge, partition } from 'lodash';
+import { get, invert, isEmpty, merge, partition } from 'lodash';
 import moment from 'moment';
 import objectHash from 'object-hash';
 
@@ -32,34 +32,21 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type {
-  ElasticsearchClient,
-  IUiSettingsClient,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState,
-  AlertingServerSetup,
-  RuleExecutorServices,
-} from '@kbn/alerting-plugin/server';
+import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import type { ExceptionListClient, ListClient, ListPluginSetup } from '@kbn/lists-plugin/server';
+import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { Privilege } from '../../../../../common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type {
-  BulkResponseErrorAggregation,
-  SignalHit,
   SearchAfterAndBulkCreateReturnType,
   SignalSearchResponse,
-  Signal,
   WrappedSignalHit,
   RuleRangeTuple,
   BaseSignalHit,
-  SignalSourceHit,
   SimpleHit,
   WrappedEventHit,
   SecuritySharedParams,
@@ -203,12 +190,6 @@ export const hasTimestampFields = async (args: {
   return { foundNoIndices: false, warningMessage: undefined };
 };
 
-export const checkPrivileges = async (
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>,
-  indices: string[]
-): Promise<Privilege> =>
-  checkPrivilegesFromEsClient(services.scopedClusterClient.asCurrentUser, indices);
-
 export const checkPrivilegesFromEsClient = async (
   esClient: ElasticsearchClient,
   indices: string[]
@@ -246,39 +227,6 @@ export const getNumCatchupIntervals = ({
   // This allows for a maximum of 4 consecutive rule execution misses
   // to be included in the number of signals generated.
   return ratio < MAX_RULE_GAP_RATIO ? ratio : MAX_RULE_GAP_RATIO;
-};
-
-export const getListsClient = ({
-  lists,
-  spaceId,
-  updatedByUser,
-  services,
-  savedObjectClient,
-}: {
-  lists: ListPluginSetup | undefined;
-  spaceId: string;
-  updatedByUser: string | null;
-  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
-  savedObjectClient: SavedObjectsClientContract;
-}): {
-  listClient: ListClient;
-  exceptionsClient: ExceptionListClient;
-} => {
-  if (lists == null) {
-    throw new Error('lists plugin unavailable during rule execution');
-  }
-
-  const listClient = lists.getListClient(
-    services.scopedClusterClient.asCurrentUser,
-    spaceId,
-    updatedByUser ?? 'elastic'
-  );
-  const exceptionsClient = lists.getExceptionListClient(
-    savedObjectClient,
-    updatedByUser ?? 'elastic'
-  );
-
-  return { listClient, exceptionsClient };
 };
 
 export const getExceptions = async ({
@@ -330,53 +278,6 @@ export const generateId = (
   ruleId: string
 ): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
 
-// TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
-export const generateSignalId = (signal: Signal) =>
-  createHash('sha256')
-    .update(
-      signal.parents
-        .reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
-        .concat(signal.rule.id)
-    )
-    .digest('hex');
-
-/**
- * Generates unique doc ids for each building block signal within a sequence. The id of each building block
- * depends on the parents of every building block, so that a signal which appears in multiple different sequences
- * (e.g. if multiple rules build sequences that share a common event/signal) will get a unique id per sequence.
- * @param buildingBlocks The full list of building blocks in the sequence.
- */
-export const generateBuildingBlockIds = (buildingBlocks: SignalHit[]): string[] => {
-  const baseHashString = buildingBlocks.reduce(
-    (baseString, block) =>
-      baseString
-        .concat(
-          block.signal.parents.reduce((acc, parent) => acc.concat(parent.id, parent.index), '')
-        )
-        .concat(block.signal.rule.id),
-    ''
-  );
-  return buildingBlocks.map((block, idx) =>
-    createHash('sha256').update(baseHashString).update(String(idx)).digest('hex')
-  );
-};
-
-export const wrapBuildingBlocks = (
-  buildingBlocks: SignalHit[],
-  index: string
-): WrappedSignalHit[] => {
-  const blockIds = generateBuildingBlockIds(buildingBlocks);
-  return buildingBlocks.map((block, idx) => {
-    return {
-      _id: blockIds[idx],
-      _index: index,
-      _source: {
-        ...block,
-      },
-    };
-  });
-};
-
 export const parseInterval = (intervalString: string): moment.Duration | null => {
   try {
     return moment.duration(parseDuration(intervalString));
@@ -406,49 +307,6 @@ export const getGapBetweenRuns = ({
 };
 
 export const makeFloatString = (num: number): string => Number(num).toFixed(2);
-
-/**
- * Given a BulkResponse this will return an aggregation based on the errors if any exist
- * from the BulkResponse. Errors are aggregated on the reason as the unique key.
- *
- * Example would be:
- * {
- *   'Parse Error': {
- *      count: 100,
- *      statusCode: 400,
- *   },
- *   'Internal server error': {
- *       count: 3,
- *       statusCode: 500,
- *   }
- * }
- * If this does not return any errors then you will get an empty object like so: {}
- * @param response The bulk response to aggregate based on the error message
- * @param ignoreStatusCodes Optional array of status codes to ignore when creating aggregate error messages
- * @returns The aggregated example as shown above.
- */
-export const errorAggregator = (
-  response: estypes.BulkResponse,
-  ignoreStatusCodes: number[]
-): BulkResponseErrorAggregation => {
-  return response.items.reduce<BulkResponseErrorAggregation>((accum, item) => {
-    if (item.create?.error != null && !ignoreStatusCodes.includes(item.create.status)) {
-      const reason = item.create.error.reason ?? 'unknown';
-      if (accum[reason] == null) {
-        accum[reason] = {
-          count: 1,
-          statusCode: item.create.status,
-        };
-      } else {
-        accum[reason] = {
-          count: accum[reason].count + 1,
-          statusCode: item.create.status,
-        };
-      }
-    }
-    return accum;
-  }, Object.create(null));
-};
 
 export const getRuleRangeTuples = async ({
   startedAt,
@@ -634,31 +492,6 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
 };
 
 /**
- * Given a SignalSearchResponse this will return a valid last date if it can find one, otherwise it
- * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
- * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
- * is not correctly ISO8601 or epoch milliseconds formatted.
- * @param searchResult The result to try and parse out the timestamp.
- * @param primaryTimestamp The primary timestamp to use.
- */
-export const lastValidDate = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->({
-  searchResult,
-  primaryTimestamp,
-}: {
-  searchResult: SignalSearchResponse<TAggregations>;
-  primaryTimestamp: TimestampOverride;
-}): Date | undefined => {
-  if (searchResult.hits.hits.length === 0) {
-    return undefined;
-  } else {
-    const lastRecord = searchResult.hits.hits[searchResult.hits.hits.length - 1];
-    return getValidDateFromDoc({ doc: lastRecord, primaryTimestamp });
-  }
-};
-
-/**
  * Given a search hit this will return a valid last date if it can find one, otherwise it
  * will return undefined. This tries the "fields" first to get a formatted date time if it can, but if
  * it cannot it will resort to using the "_source" fields second which can be problematic if the date time
@@ -724,16 +557,8 @@ export const createSearchAfterReturnTypeFromResponse = <
           )
         );
       }),
-    lastLookBackDate: lastValidDate({ searchResult, primaryTimestamp }),
   });
 };
-
-export interface PreviewReturnType {
-  totalCount: number;
-  matrixHistogramData: unknown[];
-  errors?: string[] | undefined;
-  warningMessages?: string[] | undefined;
-}
 
 export const createSearchAfterReturnType = ({
   success,
@@ -741,7 +566,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes,
   enrichmentTimes,
   bulkCreateTimes,
-  lastLookBackDate,
   createdSignalsCount,
   createdSignals,
   errors,
@@ -753,7 +577,6 @@ export const createSearchAfterReturnType = ({
   searchAfterTimes?: string[] | undefined;
   enrichmentTimes?: string[] | undefined;
   bulkCreateTimes?: string[] | undefined;
-  lastLookBackDate?: Date | undefined;
   createdSignalsCount?: number | undefined;
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
@@ -766,34 +589,11 @@ export const createSearchAfterReturnType = ({
     searchAfterTimes: searchAfterTimes ?? [],
     enrichmentTimes: enrichmentTimes ?? [],
     bulkCreateTimes: bulkCreateTimes ?? [],
-    lastLookBackDate: lastLookBackDate ?? null,
     createdSignalsCount: createdSignalsCount ?? 0,
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
     warningMessages: warningMessages ?? [],
     suppressedAlertsCount: suppressedAlertsCount ?? 0,
-  };
-};
-
-export const createSearchResultReturnType = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->(): SignalSearchResponse<TAggregations> => {
-  const hits: SignalSourceHit[] = [];
-  return {
-    took: 0,
-    timed_out: false,
-    _shards: {
-      total: 0,
-      successful: 0,
-      failed: 0,
-      skipped: 0,
-      failures: [],
-    },
-    hits: {
-      total: 0,
-      max_score: 0,
-      hits,
-    },
   };
 };
 
@@ -829,7 +629,6 @@ export const mergeReturns = (
       searchAfterTimes: existingSearchAfterTimes,
       bulkCreateTimes: existingBulkCreateTimes,
       enrichmentTimes: existingEnrichmentTimes,
-      lastLookBackDate: existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount,
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
@@ -843,7 +642,6 @@ export const mergeReturns = (
       searchAfterTimes: newSearchAfterTimes,
       enrichmentTimes: newEnrichmentTimes,
       bulkCreateTimes: newBulkCreateTimes,
-      lastLookBackDate: newLastLookBackDate,
       createdSignalsCount: newCreatedSignalsCount,
       createdSignals: newCreatedSignals,
       errors: newErrors,
@@ -857,60 +655,11 @@ export const mergeReturns = (
       searchAfterTimes: [...existingSearchAfterTimes, ...newSearchAfterTimes],
       enrichmentTimes: [...existingEnrichmentTimes, ...newEnrichmentTimes],
       bulkCreateTimes: [...existingBulkCreateTimes, ...newBulkCreateTimes],
-      lastLookBackDate: newLastLookBackDate ?? existingLastLookBackDate,
       createdSignalsCount: existingCreatedSignalsCount + newCreatedSignalsCount,
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
       suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
-    };
-  });
-};
-
-export const mergeSearchResults = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
->(
-  searchResults: Array<SignalSearchResponse<TAggregations>>
-) => {
-  return searchResults.reduce((prev, next) => {
-    const {
-      took: existingTook,
-      timed_out: existingTimedOut,
-      _shards: existingShards,
-      hits: existingHits,
-    } = prev;
-
-    const {
-      took: newTook,
-      timed_out: newTimedOut,
-      _scroll_id: newScrollId,
-      _shards: newShards,
-      aggregations: newAggregations,
-      hits: newHits,
-    } = next;
-
-    return {
-      took: Math.max(newTook, existingTook),
-      timed_out: newTimedOut && existingTimedOut,
-      _scroll_id: newScrollId,
-      _shards: {
-        total: newShards.total + existingShards.total,
-        successful: newShards.successful + existingShards.successful,
-        failed: newShards.failed + existingShards.failed,
-        // @ts-expect-error @elastic/elaticsearch skipped is optional in ShardStatistics
-        skipped: newShards.skipped + existingShards.skipped,
-        failures: [
-          ...(existingShards.failures != null ? existingShards.failures : []),
-          ...(newShards.failures != null ? newShards.failures : []),
-        ],
-      },
-      aggregations: newAggregations,
-      hits: {
-        total: calculateTotal(prev.hits.total, next.hits.total),
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        max_score: Math.max(newHits.max_score!, existingHits.max_score!),
-        hits: [...existingHits.hits, ...newHits.hits],
-      },
     };
   });
 };
@@ -966,19 +715,6 @@ export const getSafeSortIds = (sortIds: estypes.SortResults | undefined) => {
     }
     return sortId;
   });
-};
-
-export const buildChunkedOrFilter = (field: string, values: string[], chunkSize: number = 1024) => {
-  if (values.length === 0) {
-    return undefined;
-  }
-  const chunkedValues = chunk(values, chunkSize);
-  return chunkedValues
-    .map((subArray) => {
-      const joinedValues = subArray.map((value) => `"${value}"`).join(' OR ');
-      return `${field}: (${joinedValues})`;
-    })
-    .join(' OR ');
 };
 
 export const isWrappedEventHit = (event: SimpleHit): event is WrappedEventHit => {

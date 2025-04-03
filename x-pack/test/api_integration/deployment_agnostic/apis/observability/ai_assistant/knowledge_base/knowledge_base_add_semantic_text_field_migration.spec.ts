@@ -13,12 +13,10 @@ import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/commo
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  importTinyElserModel,
   clearKnowledgeBase,
-  deleteInferenceEndpoint,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
-} from './helpers';
+} from '../utils/knowledge_base';
+import { restoreIndexAssets } from '../utils/index_assets';
 
 interface InferenceChunk {
   text: string;
@@ -45,9 +43,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const ml = getService('ml');
   const retry = getService('retry');
-  const log = getService('log');
 
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
@@ -73,18 +69,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
+      await deleteKnowledgeBaseModel(getService);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     after(async () => {
-      await clearKnowledgeBase(es);
-      await esArchiver.unload(archive);
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     describe('before migrating', () => {

@@ -13,7 +13,7 @@ Object {
   "body": Object {
     "_source": Array [
       "span.links",
-      "transaction.agent.marks",
+      "transaction.marks.agent",
     ],
     "fields": Array [
       "trace.id",
@@ -34,6 +34,11 @@ Object {
       "http.response.status_code",
       "http.request.method",
       "user_agent.name",
+      "url.path",
+      "url.scheme",
+      "server.address",
+      "server.port",
+      "user_agent.version",
     ],
     "query": Object {
       "bool": Object {
