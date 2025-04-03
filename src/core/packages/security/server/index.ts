@@ -50,4 +50,4 @@ export type {
 export type { KibanaPrivilegesType, ElasticsearchPrivilegesType } from './src/roles';
 export { isCreateRestAPIKeyParams } from './src/authentication/api_keys';
 export type { CoreFipsService } from './src/fips';
-export { AuthzDisabled, AuthzOptOutReason } from './src/authz';
+export { AuthzDisabled, AuthzOptOutReason, unwindNestedSecurityPrivileges } from './src/authz';

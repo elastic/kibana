@@ -1572,6 +1572,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID",
+        "description": [],
+        "signature": [
+          "\"attack-discovery\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.AttackDiscoveries",
         "type": "Type",
         "tags": [],
