@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import { pipe } from 'fp-ts/lib/pipeable';
-import { map, getOrElse } from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/pipeable';
+import { map, getOrElse } from 'fp-ts/Option';
 
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,

@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { flow } from 'fp-ts/lib/function';
+import { flow } from 'fp-ts/function';
 import { Targets, Shard, ShardSerialized } from '../../types';
 import { calcTimes, initTree, normalizeIndices, sortIndices } from './unsafe_utils';
 import { IndexMap } from './types';

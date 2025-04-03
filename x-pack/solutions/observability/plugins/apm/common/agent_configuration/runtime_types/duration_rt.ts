@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { either } from 'fp-ts/lib/Either';
+import { either } from 'fp-ts/Either';
 import type { unitOfTime } from 'moment';
 import moment from 'moment';
 import type { AmountAndUnit } from '../amount_and_unit';

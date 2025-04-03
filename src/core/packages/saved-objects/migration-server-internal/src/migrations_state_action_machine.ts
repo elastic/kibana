@@ -8,7 +8,7 @@
  */
 
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import * as Option from 'fp-ts/lib/Option';
+import * as Option from 'fp-ts/Option';
 import type { Logger } from '@kbn/logging';
 import {
   getErrorMessage,

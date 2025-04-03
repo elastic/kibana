@@ -9,7 +9,7 @@
 
 import { Reducer } from 'react';
 import { produce } from 'immer';
-import { identity } from 'fp-ts/lib/function';
+import { identity } from 'fp-ts/function';
 
 import {
   EmbeddableConsoleView,

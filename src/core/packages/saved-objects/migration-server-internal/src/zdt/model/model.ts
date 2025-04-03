@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/Either';
 import type { State, AllActionStates } from '../state';
 import type { ResponseType } from '../next';
 import { delayRetryState, resetRetryState } from '../../model/retry_state';
