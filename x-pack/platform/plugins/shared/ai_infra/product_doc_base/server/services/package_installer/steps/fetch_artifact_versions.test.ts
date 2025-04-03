@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import * as fs from 'fs';
 import fetch, { Response } from 'node-fetch';
 import { fetchArtifactVersions } from './fetch_artifact_versions';
 import { getArtifactName, DocumentationProduct, ProductName } from '@kbn/product-doc-common';
 
 jest.mock('node-fetch');
+jest.mock('fs');
+
 const fetchMock = fetch as jest.MockedFn<typeof fetch>;
 
 const createResponse = ({
@@ -41,6 +44,7 @@ const createResponse = ({
 };
 
 const artifactRepositoryUrl = 'https://lost.com';
+const localArtifactRepositoryUrl = 'file://usr/local/file.xml';
 
 const expectVersions = (
   versions: Partial<Record<ProductName, string[]>>
@@ -67,6 +71,13 @@ describe('fetchArtifactVersions', () => {
     fetchMock.mockResolvedValue(response as Response);
   };
 
+  const mockFileResponse = (responseText: string) => {
+    const mockData = Buffer.from(responseText);
+    (fs.readFile as unknown as jest.Mock).mockImplementation((path, callback) => {
+      callback(null, mockData);
+    });
+  };
+
   it('calls fetch with the right parameters', async () => {
     mockResponse(createResponse({ artifactNames: [] }));
 
@@ -74,6 +85,25 @@ describe('fetchArtifactVersions', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(fetchMock).toHaveBeenCalledWith(`${artifactRepositoryUrl}?max-keys=1000`);
+  });
+
+  it('parses the local file', async () => {
+    const artifactNames = [
+      getArtifactName({ productName: 'kibana', productVersion: '8.16' }),
+      getArtifactName({ productName: 'elasticsearch', productVersion: '8.16' }),
+    ];
+    mockFileResponse(createResponse({ artifactNames }));
+
+    const result = await fetchArtifactVersions({
+      artifactRepositoryUrl: localArtifactRepositoryUrl,
+    });
+
+    expect(result).toEqual({
+      elasticsearch: ['8.16'],
+      kibana: ['8.16'],
+      observability: [],
+      security: [],
+    });
   });
 
   it('returns the list of versions from the repository', async () => {
