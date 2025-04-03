@@ -8,7 +8,7 @@
 
 const { statSync } = require('fs');
 
-const LRU = require('lru-cache');
+const LRU = require('lru-cache').LRUCache;
 
 const DIR = Symbol('dir');
 const FILE = Symbol('file');

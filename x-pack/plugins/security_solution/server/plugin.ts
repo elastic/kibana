@@ -6,7 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
-import LRU from 'lru-cache';
+import { LRUCache as LRU } from 'lru-cache';
 import { estypes } from '@elastic/elasticsearch';
 
 import { Logger, SavedObjectsClient } from '../../../../src/core/server';
@@ -119,7 +119,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.appClientFactory = new AppClientFactory();
 
     // Cache up to three artifacts with a max retention of 5 mins each
-    this.artifactsCache = new LRU<string, Buffer>({ max: 3, maxAge: 1000 * 60 * 5 });
+    this.artifactsCache = new LRU<string, Buffer>({ max: 3, ttl: 1000 * 60 * 5 });
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
