@@ -144,16 +144,21 @@ export function runJest(configName = 'jest.config.js') {
       process.argv.push(relative(wd, cwd));
     }
 
+    log.info('yarn jest', process.argv.slice(2).join(' '));
+
     if (SCOUT_REPORTER_ENABLED) {
       // Expose Jest config file path via environment variables
       process.env.JEST_CONFIG_PATH = configPath;
     }
-
-    log.info('yarn jest', process.argv.slice(2).join(' '));
   }
 
   if (process.env.NODE_ENV == null) {
     process.env.NODE_ENV = 'test';
+  }
+
+  if (SCOUT_REPORTER_ENABLED && argv.config) {
+    // Expose Jest config file path via environment variables
+    process.env.JEST_CONFIG_PATH = argv.config;
   }
 
   run().then(() => {
