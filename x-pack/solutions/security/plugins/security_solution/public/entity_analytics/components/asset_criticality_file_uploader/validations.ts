@@ -34,7 +34,7 @@ export const validateParsedContent = (
     errors: RowValidationErrors[];
   }>(
     (acc, row) => {
-      const parsedRow = parseAssetCriticalityCsvRow(row, experimentalFeatures);
+      const parsedRow = parseAssetCriticalityCsvRow(row);
       if (parsedRow.valid) {
         acc.valid.push(row);
       } else {
