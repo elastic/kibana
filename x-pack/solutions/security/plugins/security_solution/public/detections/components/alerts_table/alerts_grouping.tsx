@@ -13,6 +13,7 @@ import { isEmpty, isEqual } from 'lodash/fp';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import type { GroupingArgs } from '@kbn/grouping/src';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { getDefaultGroupingOptions } from '../../../common/utils/alerts';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -26,6 +27,8 @@ import { renderGroupPanel, getStats } from './grouping_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { GroupedSubLevel } from './alerts_sub_grouping';
 import { AlertsEventTypes, track } from '../../../common/lib/telemetry';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 export interface AlertsTableComponentProps {
   currentAlertStatusFilterValue?: Status[];
@@ -67,9 +70,16 @@ const useStorage = (storage: Storage, tableId: string) =>
 const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props) => {
   const dispatch = useDispatch();
 
-  const { sourcererDataView, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.detections
-  );
+  let { sourcererDataView, selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.detections);
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = experimentalDataViewSpec;
+    selectedPatterns = experimentalSelectedPatterns;
+  }
 
   const {
     services: { storage, telemetry },
