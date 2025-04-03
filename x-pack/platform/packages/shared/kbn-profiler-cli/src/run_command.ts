@@ -58,8 +58,10 @@ export async function runCommand({
   const limiter = pLimit(connections);
 
   await Promise.allSettled(
-    range(0, amount).map(async () => {
-      await limiter(() => Promise.race([abortPromise, executeCommand()]));
+    range(0, amount).map(async (index) => {
+      await limiter(() => {
+        return Promise.race([abortPromise, executeCommand()]);
+      });
     })
   ).then((results) => {
     const errors = results.flatMap((result) =>
