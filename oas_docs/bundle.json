@@ -44421,6 +44421,191 @@
         ]
       }
     },
+    "/api/saved_objects/_import": {
+      "post": {
+        "description": "Create sets of Kibana saved objects from a file created by the export API. Saved objects can only be imported into the same version, a newer minor on the same major, or the next major. Exported saved objects are not backwards compatible and cannot be imported into an older version of Kibana.",
+        "operationId": "post-saved-objects-import",
+        "parameters": [
+          {
+            "description": "A required header to protect against CSRF attacks",
+            "in": "header",
+            "name": "kbn-xsrf",
+            "required": true,
+            "schema": {
+              "example": "true",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Overwrites saved objects when they already exist. When used, potential conflict errors are automatically resolved by overwriting the destination object. NOTE: This option cannot be used with the `createNewCopies` option.",
+            "in": "query",
+            "name": "overwrite",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Creates copies of saved objects, regenerates each object ID, and resets the origin. When used, potential conflict errors are avoided. NOTE: This option cannot be used with the `overwrite` and `compatibilityMode` options.",
+            "in": "query",
+            "name": "createNewCopies",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Applies various adjustments to the saved objects that are being imported to maintain compatibility between different Kibana versions. Use this option only if you encounter issues with imported saved objects. NOTE: This option cannot be used with the `createNewCopies` option.",
+            "in": "query",
+            "name": "compatibilityMode",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "examples": {
+                "importObjectsRequest": {
+                  "value": {
+                    "file": "file.ndjson"
+                  }
+                }
+              },
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "file": {
+                    "description": "A file exported using the export API. Changing the contents of the exported file in any way before importing it can cause errors, crashes or data loss. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.",
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "importObjectsResponse": {
+                    "summary": "The import objects API response indicates a successful import and the objects are created. Since these objects are created as new copies, each entry in the successResults array includes a destinationId attribute.",
+                    "value": {
+                      "success": true,
+                      "successCount": 1,
+                      "successResults": [
+                        {
+                          "destinationId": "82d2760c-468f-49cf-83aa-b9a35b6a8943",
+                          "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+                          "managed": false,
+                          "meta": {
+                            "icon": "indexPatternApp",
+                            "title": "Kibana Sample Data Logs"
+                          },
+                          "type": "index-pattern"
+                        }
+                      ]
+                    }
+                  }
+                }
+              },
+              "multipart/form-data": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "errors": {
+                      "description": "Indicates the import was unsuccessful and specifies the objects that failed to import.\n\nNOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and conflict error.",
+                      "items": {
+                        "additionalProperties": true,
+                        "properties": {},
+                        "type": "object"
+                      },
+                      "type": "array"
+                    },
+                    "success": {
+                      "description": "Indicates when the import was successfully completed. When set to false, some objects may not have been created. For additional information, refer to the `errors` and `successResults` properties.",
+                      "type": "boolean"
+                    },
+                    "successCount": {
+                      "description": "Indicates the number of successfully imported records.",
+                      "type": "number"
+                    },
+                    "successResults": {
+                      "description": "Indicates the objects that are successfully imported, with any metadata if applicable.\n\nNOTE: Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the `successResults` array includes a `destinationId` attribute.",
+                      "items": {
+                        "additionalProperties": true,
+                        "properties": {},
+                        "type": "object"
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "required": [
+                    "success",
+                    "successCount",
+                    "errors",
+                    "successResults"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Indicates a successful call."
+          },
+          "400": {
+            "content": {
+              "multipart/form-data": {
+                "schema": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "error": {
+                      "type": "string"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "statusCode": {
+                      "enum": [
+                        400
+                      ],
+                      "type": "integer"
+                    }
+                  },
+                  "required": [
+                    "error",
+                    "message",
+                    "statusCode"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Bad request."
+          }
+        },
+        "summary": "Import saved objects",
+        "tags": [
+          "saved objects"
+        ],
+        "x-codeSamples": [
+          {
+            "label": "Import with createNewCopies",
+            "lang": "cURL",
+            "source": "curl \\\n  -X POST api/saved_objects/_import?createNewCopies=true\n  -H \"kbn-xsrf: true\"\n  --form file=@file.ndjson\n"
+          }
+        ]
+      }
+    },
     "/api/security/role": {
       "get": {
         "operationId": "get-security-role",
@@ -53489,6 +53674,9 @@
     },
     {
       "name": "roles"
+    },
+    {
+      "name": "saved objects"
     },
     {
       "name": "spaces"
