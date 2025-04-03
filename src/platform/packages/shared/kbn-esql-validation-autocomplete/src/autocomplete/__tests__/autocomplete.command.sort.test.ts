@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Location } from '../../definitions/types';
 import {
   setup,
   getFieldNamesByType,
@@ -18,7 +19,7 @@ describe('autocomplete.suggest', () => {
   describe('SORT ( <column> [ ASC / DESC ] [ NULLS FIST / NULLS LAST ] )+', () => {
     describe('SORT <column> ...', () => {
       const expectedFieldSuggestions = getFieldNamesByType('any').map(attachTriggerCommand);
-      const expectedFunctionSuggestions = getFunctionSignaturesByReturnType('sort', 'any', {
+      const expectedFunctionSuggestions = getFunctionSignaturesByReturnType(Location.SORT, 'any', {
         scalar: true,
       }).map(attachTriggerCommand);
 
