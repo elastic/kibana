@@ -24,7 +24,8 @@ interface Props {
 export const PanelNavItem: FC<Props> = ({ item }) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
-  const { id, icon, deepLink, openInNewTab, renderItem } = item;
+  const { id, icon, deepLink, openInNewTab, isExternalLink, renderItem } = item;
+
   const href = deepLink?.url ?? item.href;
   const { euiTheme } = useEuiTheme();
 
@@ -52,6 +53,9 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
           &.sideNavPanelLink:hover {
             background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
           }
+          & svg[class*='EuiExternalLinkIcon'] {
+            margin-left: auto;
+          }
         `
       )}
       size="s"
@@ -59,6 +63,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
       href={href}
       iconType={icon}
       onClick={onClick}
+      external={isExternalLink}
       target={openInNewTab ? '_blank' : undefined}
     />
   );
