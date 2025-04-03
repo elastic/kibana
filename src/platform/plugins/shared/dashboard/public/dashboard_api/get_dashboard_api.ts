@@ -26,9 +26,10 @@ import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getSerializedState } from './get_serialized_state';
-import { openSaveModal } from './save_modal/open_save_modal';
 import { initializePanelsManager } from './panels_manager';
+import { openSaveModal } from './save_modal/open_save_modal';
 import { initializeSearchSessionManager } from './search_sessions/search_session_manager';
+import { initializeSectionsManager } from './sections_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
@@ -44,7 +45,6 @@ import {
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { initializeSectionsManager } from './sections_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -125,14 +125,14 @@ export function getDashboardApi({
     referencesComparator,
   });
   function getState() {
-    const { panels, sections, references: panelReferences } = panelsManager.internalApi.getState();
+    const { panels, references: panelReferences } = panelsManager.internalApi.getState();
     const { state: unifiedSearchState, references: searchSourceReferences } =
       unifiedSearchManager.internalApi.getState();
     const dashboardState: DashboardState = {
       ...settingsManager.internalApi.getState(),
       ...unifiedSearchState,
       panels,
-      sections,
+      sections: sectionsManager.internalApi.getState(),
       viewMode: viewModeManager.api.viewMode$.value,
     };
 

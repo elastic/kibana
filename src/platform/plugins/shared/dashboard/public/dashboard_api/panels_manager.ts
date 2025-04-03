@@ -38,13 +38,13 @@ import { getDashboardPanelPlacementSetting } from '../panel_placement/panel_plac
 import { placeClonePanel } from '../panel_placement/place_clone_panel_strategy';
 import { runPanelPlacementStrategy } from '../panel_placement/place_new_panel_strategies';
 import { PanelPlacementStrategy } from '../plugin_constants';
+import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../utils/telemetry_constants';
 import { arePanelLayoutsEqual } from './are_panel_layouts_equal';
+import { initializeSectionsManager } from './sections_manager';
 import type { initializeTrackPanel } from './track_panel';
 import { DashboardState, UnsavedPanelState } from './types';
-import { getDashboardBackupService } from '../services/dashboard_backup_service';
-import { initializeSectionsManager } from './sections_manager';
 
 export function initializePanelsManager(
   incomingEmbeddable: EmbeddablePackageState | undefined,
@@ -396,7 +396,6 @@ export function initializePanelsManager(
       },
       getState: (): {
         panels: DashboardState['panels'];
-        sections: DashboardState['sections'];
         references: Reference[];
       } => {
         const references: Reference[] = [];
@@ -417,7 +416,7 @@ export function initializePanelsManager(
           return acc;
         }, {} as DashboardPanelMap);
 
-        return { panels, sections: sectionsManager.api.sections$.getValue(), references };
+        return { panels, references };
       },
     },
   };

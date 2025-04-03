@@ -58,6 +58,9 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
       ],
     } as StateComparators<Pick<DashboardState, 'sections'>>,
     internalApi: {
+      getState: (): DashboardState['sections'] => {
+        return sections$.getValue();
+      },
       reset: (lastSavedState: DashboardState) => {
         setSections(lastSavedState.sections);
       },
