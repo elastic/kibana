@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import * as i18n from './translations';
 import { useSettingsView } from './use_settings_view';
-import type { FilterSettings } from '../types';
+import type { AlertsSelectionSettings } from '../types';
 import { Schedule } from '../schedule';
 
 /*
@@ -36,12 +36,23 @@ export interface UseTabsView {
 }
 
 interface Props {
-  filterSettings: FilterSettings;
+  onSettingsReset?: () => void;
+  onSettingsSave?: () => void;
+  onSettingsChanged?: (settings: AlertsSelectionSettings) => void;
+  settings: AlertsSelectionSettings;
 }
 
-export const useTabsView = ({ filterSettings }: Props): UseTabsView => {
+export const useTabsView = ({
+  onSettingsReset,
+  onSettingsSave,
+  onSettingsChanged,
+  settings,
+}: Props): UseTabsView => {
   const { settingsView, actionButtons: filterActionButtons } = useSettingsView({
-    filterSettings,
+    onSettingsReset,
+    onSettingsSave,
+    onSettingsChanged,
+    settings,
   });
 
   const settingsTab: EuiTabbedContentTab = useMemo(

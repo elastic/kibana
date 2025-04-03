@@ -260,6 +260,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean?)',
         'xpack.fleet.agents.enabled (boolean?)',
         'xpack.fleet.agentless.enabled (boolean?)',
+        'xpack.fleet.agentless.isDefault (boolean?)',
         'xpack.fleet.enableExperimental (array?)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number?)',
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
@@ -376,6 +377,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.ruleFormV2Enabled (boolean?)',
         'xpack.observability.unsafe.ruleFormV2.enabled (boolean?)',
         'xpack.slo.experimental.ruleFormV2.enabled (boolean?)',
+        'xpack.slo.experimental.management.enabled (boolean?)',
         /**/
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large

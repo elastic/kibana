@@ -70,6 +70,8 @@ export const TabMenu: React.FC<TabMenuProps> = ({
       id={contextMenuPopoverId}
       isOpen={isPopoverOpen}
       panelPaddingSize="none"
+      hasArrow={false}
+      anchorPosition="downLeft"
       closePopover={closePopover}
       button={
         <EuiButtonIcon

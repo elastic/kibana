@@ -11,24 +11,6 @@ const INGEST_PIPELINE_PREFIX = 'testing-ingest-pipeline';
 const DS_PREFIX = 'testing-datastream';
 const ILM_PREFIX = 'testing-ilm';
 
-export const randomIngestPipeline = async (es: Client): Promise<string> => {
-  const id = `${INGEST_PIPELINE_PREFIX}-${Date.now()}`;
-
-  await es.ingest.putPipeline({
-    id,
-    processors: [
-      {
-        set: {
-          field: 'message',
-          value: 'changed',
-        },
-      },
-    ],
-  });
-
-  return id;
-};
-
 export const indexRandomData = async (es: Client, dsName: string, ingestPipeline: string) => {
   await es.index({
     index: dsName,
@@ -40,15 +22,32 @@ export const indexRandomData = async (es: Client, dsName: string, ingestPipeline
   });
 };
 
-export const randomDatastream = async (es: Client, policyName?: string): Promise<string> => {
+export const randomDatastream = async (
+  es: Client,
+  opts: { policyName?: string; defaultPipeline?: string; finalPipeline?: string } = {}
+): Promise<string> => {
   const name = `${DS_PREFIX}-${Date.now()}`;
 
   let settings = {};
 
-  if (policyName) {
+  if (opts.policyName) {
     settings = {
       ...settings,
-      'index.lifecycle.name': policyName,
+      'index.lifecycle.name': opts.policyName,
+    };
+  }
+
+  if (opts.defaultPipeline) {
+    settings = {
+      ...settings,
+      'index.default_pipeline': opts.defaultPipeline,
+    };
+  }
+
+  if (opts.finalPipeline) {
+    settings = {
+      ...settings,
+      'index.final_pipeline': opts.finalPipeline,
     };
   }
 
@@ -68,6 +67,24 @@ export const randomDatastream = async (es: Client, policyName?: string): Promise
   await es.indices.createDataStream({ name });
 
   return name;
+};
+
+export const randomIngestPipeline = async (es: Client): Promise<string> => {
+  const id = `${INGEST_PIPELINE_PREFIX}-${Date.now()}`;
+
+  await es.ingest.putPipeline({
+    id,
+    processors: [
+      {
+        set: {
+          field: `message-${performance.now()}`,
+          value: `changed-${Date.now()}`,
+        },
+      },
+    ],
+  });
+
+  return id;
 };
 
 export const randomIlmPolicy = async (es: Client): Promise<string> => {

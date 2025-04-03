@@ -23,6 +23,11 @@ import {
 import { TimelineId } from '../../../../common/types/timeline';
 import { sourcererPaths } from '../../../sourcerer/containers/sourcerer_paths';
 
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { DATA_VIEW_PICKER_TEST_ID } from '../../../data_view_manager/components/data_view_picker/constants';
+
+jest.mock('../../../common/hooks/use_experimental_features');
+
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
@@ -155,5 +160,23 @@ describe('global header', () => {
     );
 
     waitFor(() => expect(findByTestId('assistantNavLink')).toBeInTheDocument());
+  });
+
+  describe('when new data view picker is enabled', () => {
+    beforeEach(() => {
+      // Mocking location to be alerts page
+      (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[0] });
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    });
+
+    it('should render it instead of sourcerer', () => {
+      const { queryByTestId } = render(
+        <TestProviders store={store}>
+          <GlobalHeader />
+        </TestProviders>
+      );
+      expect(queryByTestId('sourcerer-trigger')).not.toBeInTheDocument();
+      expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
+    });
   });
 });
