@@ -25,7 +25,7 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   // Failing: See https://github.com/elastic/kibana/issues/193876
-  describe.skip('index threshold rule that hits max alerts circuit breaker', () => {
+  describe('index threshold rule that hits max alerts circuit breaker', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     beforeEach(async () => {
@@ -157,12 +157,8 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
         });
       });
 
-      // because the "execute" event is written at the end of execution
-      // after getting the correct number of recovered-instance events, we're often not
-      // getting the final "execute" event. use the execution UUID to grab it directly
-
-      const recoveredEventExecutionUuid = recoveredEvents[0]?.kibana?.alert?.rule?.execution?.uuid;
-
+      // To avoid flakiness, fetch 10 execute events after recovered alerts and
+      // find the execute event right after the recovered event
       const finalExecuteEvents = await retry.try(async () => {
         return await getEventLog({
           getService,
@@ -170,13 +166,15 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
           type: 'alert',
           id: ruleId,
           provider: 'alerting',
-          filter: `kibana.alert.rule.execution.uuid:(${recoveredEventExecutionUuid})`,
-          actions: new Map([['execute', { gte: 1 }]]),
+          actions: new Map([['execute', { gte: 10 }]]),
         });
       });
 
+      const finalExecuteEvent = finalExecuteEvents.find((event) => {
+        return event.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.recovered === 17;
+      });
+
       // get the latest execute event
-      const finalExecuteEvent = finalExecuteEvents[0];
       expect(finalExecuteEvent?.event?.outcome).to.eql('success');
       expect(finalExecuteEvent?.kibana?.alerting?.status).to.eql('active');
       expect(finalExecuteEvent?.event?.reason).to.be(undefined);
