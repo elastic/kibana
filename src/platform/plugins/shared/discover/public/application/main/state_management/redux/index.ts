@@ -23,7 +23,7 @@ import {
 
 export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
 
-export { type InternalStateStore, createInternalStateStore, createTabItem } from './internal_state';
+export { type InternalStateStore, createInternalStateStore } from './internal_state';
 
 export const internalStateActions = {
   ...omit(
@@ -47,18 +47,23 @@ export {
   InternalStateProvider,
   useInternalStateDispatch,
   useInternalStateSelector,
+  CurrentTabProvider,
+  useCurrentTabSelector,
+  useCurrentTabAction,
   useDataViewsForPicker,
 } from './hooks';
 
-export { selectAllTabs, selectCurrentTab } from './selectors';
+export { selectAllTabs, selectTab } from './selectors';
 
 export {
   type RuntimeStateManager,
   createRuntimeStateManager,
   useRuntimeState,
-  selectCurrentTabRuntimeState,
+  selectTabRuntimeState,
   useCurrentTabRuntimeState,
   RuntimeStateProvider,
   useCurrentDataView,
   useAdHocDataViews,
 } from './runtime_state';
+
+export { type TabActionInjector, createTabActionInjector, createTabItem } from './utils';
