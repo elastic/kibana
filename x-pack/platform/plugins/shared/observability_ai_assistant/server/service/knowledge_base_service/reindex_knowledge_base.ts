@@ -10,7 +10,7 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { CoreSetup } from '@kbn/core/server';
 import { resourceNames } from '..';
-import { createKbConcreteIndex } from '../index_assets_and_migrations/create_or_update_index_assets';
+import { createKbConcreteIndex } from '../startup_migrations/create_or_update_index_assets';
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';

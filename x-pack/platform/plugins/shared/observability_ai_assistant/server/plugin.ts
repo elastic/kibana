@@ -31,7 +31,8 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { updateIndexAssetsAndRunMigrations } from './service/index_assets_and_migrations/update_index_assets_and_run_migrations';
+import { reIndexKnowledgeBaseAndPopulateMissingSemanticTextField } from './service/startup_migrations/re_index_knowledge_base_and_populate_missing_semantic_text_field';
+import { updateExistingIndexAssets } from './service/startup_migrations/create_or_update_index_assets';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -129,15 +130,19 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-    updateIndexAssetsAndRunMigrations({
-      core,
-      logger: this.logger,
-      config: this.config,
-    }).catch((e) =>
-      this.logger.error(
-        `Knowledge base semantic_text migration task could not be registered: ${e.message}`
+    updateExistingIndexAssets({ logger: this.logger, core })
+      .then(() =>
+        reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
+          core,
+          logger: this.logger,
+          config: this.config,
+        })
       )
-    );
+      .catch((e) =>
+        this.logger.error(
+          `Knowledge base semantic_text migration task could not be registered: ${e.message}`
+        )
+      );
 
     service.register(registerFunctions);
 

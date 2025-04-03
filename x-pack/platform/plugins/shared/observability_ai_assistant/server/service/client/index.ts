@@ -67,14 +67,12 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import {
-  reIndexKnowledgeBaseAndPopulateSemanticTextField,
-  scheduleKbSemanticTextMigrationTask,
-} from '../index_assets_and_migrations/update_index_assets_and_run_migrations';
+import { reIndexKnowledgeBaseAndPopulateMissingSemanticTextField } from '../startup_migrations/re_index_knowledge_base_and_populate_missing_semantic_text_field';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
+import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -680,14 +678,13 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId);
 
-    core
-      .getStartServices()
-      .then(([_, pluginsStart]) =>
-        scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger })
-      )
-      .catch((error) => {
-        logger.error(`Failed to schedule semantic text migration task: ${error}`);
-      });
+    reIndexKnowledgeBaseWithLock({
+      core: this.dependencies.core,
+      logger: this.dependencies.logger,
+      esClient: this.dependencies.esClient,
+    }).catch((e) => {
+      this.dependencies.logger.error(`Failed to re-index knowledge base: ${e.message}`);
+    });
 
     return res;
   };
@@ -697,14 +694,21 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
-  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateSemanticTextField({
+  reIndexKnowledgeBaseWithLock = () => {
+    return reIndexKnowledgeBaseWithLock({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
+      logger: this.dependencies.logger,
+    });
+  };
+
+  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
+    return reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
+      core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
   };
-
   addUserInstruction = async ({
     entry,
   }: {

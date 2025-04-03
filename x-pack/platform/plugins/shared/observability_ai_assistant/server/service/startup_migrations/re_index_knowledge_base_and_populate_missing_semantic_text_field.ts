@@ -16,13 +16,12 @@ import { waitForKbModel } from '../inference_endpoint';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
-import { updateExistingIndexAssets } from './create_or_update_index_assets';
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant/plugin_startup';
 
-export async function updateIndexAssetsAndRunMigrations({
+export async function reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
   core,
   logger,
   config,
@@ -46,8 +45,14 @@ export async function updateIndexAssetsAndRunMigrations({
         return;
       }
 
-      await updateExistingIndexAssets({ logger, core });
-      await reIndexKnowledgeBaseIfSemanticTextIsUnsupported({ core, logger, esClient });
+      const isKbSemanticTextCompatible = await isKnowledgeBaseSemanticTextCompatible({
+        logger,
+        esClient,
+      });
+
+      if (!isKbSemanticTextCompatible) {
+        await reIndexKnowledgeBaseWithLock({ core, logger, esClient });
+      }
 
       await pRetry(
         async () => populateMissingSemanticTextFieldRecursively({ esClient, logger, config }),
@@ -61,6 +66,8 @@ export async function updateIndexAssetsAndRunMigrations({
     });
 }
 
+// Ensures that every doc has populated the `semantic_text` field.
+// It retrieves entries without the field, updates them in batches, and continues until no entries remain.
 async function populateMissingSemanticTextFieldRecursively({
   esClient,
   logger,
@@ -135,15 +142,15 @@ async function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function reIndexKnowledgeBaseIfSemanticTextIsUnsupported({
-  core,
+// Checks if the knowledge base index supports `semantic_text`
+// If the index was created before version 8.11, it requires re-indexing to support the `semantic_text` field.
+async function isKnowledgeBaseSemanticTextCompatible({
   logger,
   esClient,
 }: {
-  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
-}) {
+}): Promise<boolean> {
   const indexSettingsResponse = await esClient.asInternalUser.indices.getSettings({
     index: resourceNames.aliases.kb,
   });
@@ -151,7 +158,7 @@ export async function reIndexKnowledgeBaseIfSemanticTextIsUnsupported({
   const results = Object.entries(indexSettingsResponse);
   if (results.length === 0) {
     logger.debug('No knowledge base indices found. Skipping re-indexing.');
-    return;
+    return true;
   }
 
   const [indexName, { settings }] = results[0];
@@ -163,12 +170,12 @@ export async function reIndexKnowledgeBaseIfSemanticTextIsUnsupported({
     logger.debug(
       `Knowledge base index "${indexName}" was created in version ${createdVersion}, and does not require re-indexing. Semantic text field is already supported. Aborting`
     );
-    return;
+    return true;
   }
 
   logger.info(
     `Knowledge base index was created in ${createdVersion} and must be re-indexed in order to support semantic_text field. Re-indexing now...`
   );
 
-  await reIndexKnowledgeBaseWithLock({ core, logger, esClient });
+  return false;
 }

@@ -28,9 +28,15 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./public_complete/public_complete.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
     loadTestFile(
-      require.resolve('./knowledge_base/knowledge_base_add_semantic_text_field_migration.spec.ts')
+      require.resolve(
+        './knowledge_base/knowledge_base_populate_missing_semantic_text_fields.spec.ts'
+      )
     );
-    loadTestFile(require.resolve('./knowledge_base/knowledge_base_reindex.spec.ts'));
+    loadTestFile(
+      require.resolve(
+        './knowledge_base/knowledge_base_reindex_to_fix_sparse_vector_support.spec.ts'
+      )
+    );
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_status.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_user_instructions.spec.ts'));

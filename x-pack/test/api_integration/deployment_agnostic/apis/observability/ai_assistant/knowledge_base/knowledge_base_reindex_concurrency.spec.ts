@@ -85,7 +85,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('can add new entries after re-indexing', async () => {
-      await runKbSemanticTextMigration();
+      await reIndexKnowledgeBase();
 
       await retry.try(async () => {
         const { status } = await createKnowledgeBaseEntry();
@@ -143,9 +143,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     expect(status).to.be(200);
   }
 
-  async function runKbSemanticTextMigration() {
+  async function reIndexKnowledgeBase() {
     const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
+      endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
     });
     expect(status).to.be(200);
   }

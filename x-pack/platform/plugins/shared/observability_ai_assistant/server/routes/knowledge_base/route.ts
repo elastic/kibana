@@ -100,8 +100,22 @@ const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/kb/reindex',
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<void> => {
+    const client = await resources.service.getClient({ request: resources.request });
+    return client.reIndexKnowledgeBaseWithLock();
+  },
+});
+
 const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
+  endpoint:
+    'POST /internal/observability_ai_assistant/kb/migrations/populate_missing_semantic_text_field',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -320,6 +334,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 });
 
 export const knowledgeBaseRoutes = {
+  ...reIndexKnowledgeBase,
   ...semanticTextMigrationKnowledgeBase,
   ...setupKnowledgeBase,
   ...resetKnowledgeBase,
