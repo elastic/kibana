@@ -11,6 +11,12 @@ import type { AlertsFiltersExpression, AlertsFilter, FlattenedExpressionItem } f
 const isFilter = (item?: AlertsFiltersExpression | AlertsFilter): item is AlertsFilter =>
   item != null && !('operator' in item);
 
+export const isFlatExpressionFilter = (
+  item: FlattenedExpressionItem
+): item is {
+  filter: AlertsFilter;
+} => 'filter' in item;
+
 /**
  * Traverses the expression tree in pre-order and returns a flat array of
  * { operator: ... } | { filter: ... } items

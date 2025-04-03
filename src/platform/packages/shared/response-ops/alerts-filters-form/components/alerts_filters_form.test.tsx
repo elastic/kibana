@@ -19,7 +19,11 @@ import {
   DELETE_OPERAND_BUTTON_SUBJ,
   FORM_ITEM_SUBJ,
 } from '../constants';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
+const http = httpServiceMock.createStartContract();
+const notifications = notificationServiceMock.createStartContract();
 jest.mock('./alerts_filters_form_item');
 jest
   .mocked(AlertsFiltersFormItem)
@@ -42,7 +46,12 @@ describe('AlertsFiltersForm', () => {
   it('should render boolean expressions', () => {
     render(
       <IntlProvider locale="en">
-        <AlertsFiltersForm value={testExpression} onChange={jest.fn()} />
+        <AlertsFiltersForm
+          ruleTypeIds={[]}
+          value={testExpression}
+          onChange={jest.fn()}
+          services={{ http, notifications }}
+        />
       </IntlProvider>
     );
 
@@ -54,7 +63,12 @@ describe('AlertsFiltersForm', () => {
   it('should delete the correct operand when clicking on the trash icon', async () => {
     render(
       <IntlProvider locale="en">
-        <AlertsFiltersForm value={testExpression} onChange={jest.fn()} />
+        <AlertsFiltersForm
+          ruleTypeIds={[]}
+          value={testExpression}
+          onChange={jest.fn()}
+          services={{ http, notifications }}
+        />
       </IntlProvider>
     );
 
@@ -73,7 +87,12 @@ describe('AlertsFiltersForm', () => {
   it('should correctly add a new operand', async () => {
     render(
       <IntlProvider locale="en">
-        <AlertsFiltersForm value={testExpression} onChange={jest.fn()} />
+        <AlertsFiltersForm
+          ruleTypeIds={[]}
+          value={testExpression}
+          onChange={jest.fn()}
+          services={{ http, notifications }}
+        />
       </IntlProvider>
     );
 

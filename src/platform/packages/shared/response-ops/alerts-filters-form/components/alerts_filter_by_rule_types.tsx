@@ -17,15 +17,15 @@ import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import { RULE_TYPES_FILTER_LABEL, RULE_TYPES_LOAD_ERROR_MESSAGE } from '../translations';
 
-/**
- * Filters by one or more rule tags
- */
 export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
   isDisabled = false,
 }) => {
-  const { ruleTypeIds, http } = useAlertsFiltersFormContext();
+  const {
+    ruleTypeIds: allowedRuleTypeIds,
+    services: { http },
+  } = useAlertsFiltersFormContext();
 
   const {
     data: ruleTypes,
@@ -38,13 +38,12 @@ export const AlertsFilterByRuleTypes: AlertsFilterComponentType<string[]> = ({
   const options = useMemo<Array<SetRequired<EuiComboBoxOptionOption<string>, 'value'>>>(
     () =>
       ruleTypes
-        // Only suggest allowed rule type ids
-        ?.filter((ruleType) => ruleTypeIds.includes(ruleType.id))
+        ?.filter((ruleType) => allowedRuleTypeIds.includes(ruleType.id))
         .map((ruleType) => ({
           value: ruleType.id,
           label: ruleType.name,
         })) ?? [],
-    [ruleTypeIds, ruleTypes]
+    [allowedRuleTypeIds, ruleTypes]
   );
 
   const selectedOptions = useMemo(

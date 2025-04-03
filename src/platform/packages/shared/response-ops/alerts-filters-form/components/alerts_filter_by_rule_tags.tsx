@@ -16,9 +16,6 @@ import { RULE_TAGS_FILTER_LABEL, RULE_TAGS_LOAD_ERROR_MESSAGE } from '../transla
 import { useAlertsFiltersFormContext } from '../contexts/alerts_filters_form_context';
 import { AlertsFilterComponentType, AlertsFilterMetadata } from '../types';
 
-/**
- * Filters by one or more rule tags
- */
 export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
   value,
   onChange,
@@ -26,8 +23,10 @@ export const AlertsFilterByRuleTags: AlertsFilterComponentType<string[]> = ({
 }) => {
   const {
     ruleTypeIds,
-    http,
-    notifications: { toasts },
+    services: {
+      http,
+      notifications: { toasts },
+    },
   } = useAlertsFiltersFormContext();
 
   const { tags, isLoading, isError } = useGetRuleTagsQuery({

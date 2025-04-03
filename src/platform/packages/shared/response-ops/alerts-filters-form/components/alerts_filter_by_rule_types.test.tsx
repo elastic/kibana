@@ -37,7 +37,7 @@ describe('AlertsFilterByRuleTypes', () => {
       isError: false,
     });
     render(
-      <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds }}>
+      <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
         <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
     );
@@ -56,7 +56,9 @@ describe('AlertsFilterByRuleTypes', () => {
       isError: false,
     });
     render(
-      <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds: ['.es-query'] }}>
+      <AlertsFiltersFormContextProvider
+        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+      >
         <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
     );
@@ -72,7 +74,7 @@ describe('AlertsFilterByRuleTypes', () => {
       isError: false,
     });
     render(
-      <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds }}>
+      <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
         <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
     );
@@ -86,7 +88,7 @@ describe('AlertsFilterByRuleTypes', () => {
       isError: true,
     });
     render(
-      <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds }}>
+      <AlertsFiltersFormContextProvider value={{ ruleTypeIds, services: { http, notifications } }}>
         <AlertsFilterByRuleTypes value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
     );

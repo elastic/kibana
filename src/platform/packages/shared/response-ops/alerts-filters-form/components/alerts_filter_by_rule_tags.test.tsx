@@ -37,7 +37,9 @@ describe('AlertsFilterByRuleTags', () => {
       ...ruleTagsBaseQueryResult,
     });
     render(
-      <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds: ['.es-query'] }}>
+      <AlertsFiltersFormContextProvider
+        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+      >
         <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
     );
@@ -54,7 +56,9 @@ describe('AlertsFilterByRuleTags', () => {
       ...ruleTagsBaseQueryResult,
     });
     render(
-      <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds: ['.es-query'] }}>
+      <AlertsFiltersFormContextProvider
+        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+      >
         <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
     );
@@ -69,7 +73,9 @@ describe('AlertsFilterByRuleTags', () => {
       ...ruleTagsBaseQueryResult,
     });
     render(
-      <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds: ['.es-query'] }}>
+      <AlertsFiltersFormContextProvider
+        value={{ ruleTypeIds: ['.es-query'], services: { http, notifications } }}
+      >
         <AlertsFilterByRuleTags value={[]} onChange={jest.fn()} />
       </AlertsFiltersFormContextProvider>
     );

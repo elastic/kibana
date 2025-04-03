@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { AlertsFiltersFormContextProvider } from '@kbn/response-ops-alerts-filters-form/contexts/alerts_filters_form_context';
 import { HttpStart } from '@kbn/core-http-browser';
 import { NotificationsStart } from '@kbn/core-notifications-browser';
 import { AlertsFiltersForm } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
@@ -59,20 +58,27 @@ export const AlertsFiltersFormSandbox = ({
           {isLoadingRuleTypes ? (
             <EuiLoadingSpinner size="m" />
           ) : (
-            <AlertsFiltersFormContextProvider value={{ http, notifications, ruleTypeIds }}>
-              <EuiFlexGroup direction="column" gutterSize="s">
-                <EuiFlexItem>
-                  <EuiText>
-                    <h4>
-                      <FormattedMessage id="alertsFiltersForm.formTitle" defaultMessage="Filters" />
-                    </h4>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <AlertsFiltersForm value={filters} onChange={setFilters} isDisabled={!solution} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </AlertsFiltersFormContextProvider>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem>
+                <EuiText>
+                  <h4>
+                    <FormattedMessage id="alertsFiltersForm.formTitle" defaultMessage="Filters" />
+                  </h4>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <AlertsFiltersForm
+                  ruleTypeIds={ruleTypeIds}
+                  value={filters}
+                  onChange={setFilters}
+                  isDisabled={!solution}
+                  services={{
+                    http,
+                    notifications,
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

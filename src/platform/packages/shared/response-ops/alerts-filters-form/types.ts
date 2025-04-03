@@ -15,7 +15,7 @@ import type { alertsFiltersMetadata } from './filters';
 
 export type AlertsFilterComponentType<T> = ComponentType<{
   value?: T;
-  onChange?: (newValue: T) => void;
+  onChange: (newValue: T) => void;
   isDisabled?: boolean;
 }>;
 
@@ -43,9 +43,10 @@ export interface AlertsFiltersFormContextValue {
    */
   ruleTypeIds: string[];
 
-  // Services
-  http: HttpStart;
-  notifications: NotificationsStart;
+  services: {
+    http: HttpStart;
+    notifications: NotificationsStart;
+  };
 }
 
 export type AlertsFiltersFormItemType = keyof typeof alertsFiltersMetadata;
