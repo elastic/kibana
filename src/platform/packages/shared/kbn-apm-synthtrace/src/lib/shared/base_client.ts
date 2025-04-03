@@ -157,8 +157,11 @@ export class SynthtraceEsClient<TFields extends Fields> {
           action = doc._action!;
           delete doc._action;
         } else if (doc._index) {
-          action = { create: { _index: doc._index } };
+          action = { create: { _index: doc._index, dynamic_templates: doc._dynamicTemplates } };
           delete doc._index;
+          if (doc._dynamicTemplates) {
+            delete doc._dynamicTemplates;
+          }
         } else {
           this.logger.debug(doc);
           throw new Error(
