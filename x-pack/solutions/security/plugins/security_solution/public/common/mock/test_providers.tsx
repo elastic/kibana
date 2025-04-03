@@ -36,7 +36,6 @@ import { UserPrivilegesProvider } from '../components/user_privileges/user_privi
 import { MockDiscoverInTimelineContext } from '../components/discover_in_timeline/mocks/discover_in_timeline_provider';
 import { createMockStore } from './create_store';
 import type { StartServices } from '../../types';
-import { MlCapabilitiesProvider } from '../components/ml/permissions/ml_capabilities_provider';
 
 interface Props {
   children?: React.ReactNode;
@@ -77,33 +76,31 @@ export const TestProvidersComponent = ({
 
   return (
     <MockKibanaContextProvider startServices={startServices}>
-      <MlCapabilitiesProvider>
-        <I18nProvider>
-          <UpsellingProviderMock>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-                <QueryClientProvider client={queryClient}>
-                  <MockDiscoverInTimelineContext>
-                    <MockAssistantProvider>
-                      <ExpandableFlyoutTestProvider>
-                        <ConsoleManager>
-                          <CellActionsProvider
-                            getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                          >
-                            <EuiProvider highContrastMode={false}>
-                              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                            </EuiProvider>
-                          </CellActionsProvider>
-                        </ConsoleManager>
-                      </ExpandableFlyoutTestProvider>
-                    </MockAssistantProvider>
-                  </MockDiscoverInTimelineContext>
-                </QueryClientProvider>
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </UpsellingProviderMock>
-        </I18nProvider>
-      </MlCapabilitiesProvider>
+      <I18nProvider>
+        <UpsellingProviderMock>
+          <ReduxStoreProvider store={store}>
+            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+              <QueryClientProvider client={queryClient}>
+                <MockDiscoverInTimelineContext>
+                  <MockAssistantProvider>
+                    <ExpandableFlyoutTestProvider>
+                      <ConsoleManager>
+                        <CellActionsProvider
+                          getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                        >
+                          <EuiProvider highContrastMode={false}>
+                            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                          </EuiProvider>
+                        </CellActionsProvider>
+                      </ConsoleManager>
+                    </ExpandableFlyoutTestProvider>
+                  </MockAssistantProvider>
+                </MockDiscoverInTimelineContext>
+              </QueryClientProvider>
+            </ThemeProvider>
+          </ReduxStoreProvider>
+        </UpsellingProviderMock>
+      </I18nProvider>
     </MockKibanaContextProvider>
   );
 };
@@ -135,35 +132,33 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
   return (
     <I18nProvider>
       <MockKibanaContextProvider startServices={startServices}>
-        <MlCapabilitiesProvider>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
-              <QueryClientProvider client={queryClient}>
-                <MockDiscoverInTimelineContext>
-                  <MockAssistantProvider>
-                    <UserPrivilegesProvider
-                      kibanaCapabilities={
-                        {
-                          siemV2: { show: true, crud: true },
-                          [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
-                          [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
-                        } as unknown as Capabilities
-                      }
+        <ReduxStoreProvider store={store}>
+          <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+            <QueryClientProvider client={queryClient}>
+              <MockDiscoverInTimelineContext>
+                <MockAssistantProvider>
+                  <UserPrivilegesProvider
+                    kibanaCapabilities={
+                      {
+                        siemV2: { show: true, crud: true },
+                        [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
+                        [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
+                      } as unknown as Capabilities
+                    }
+                  >
+                    <CellActionsProvider
+                      getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                     >
-                      <CellActionsProvider
-                        getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                      >
-                        <EuiProvider highContrastMode={false}>
-                          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                        </EuiProvider>
-                      </CellActionsProvider>
-                    </UserPrivilegesProvider>
-                  </MockAssistantProvider>
-                </MockDiscoverInTimelineContext>
-              </QueryClientProvider>
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </MlCapabilitiesProvider>
+                      <EuiProvider highContrastMode={false}>
+                        <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                      </EuiProvider>
+                    </CellActionsProvider>
+                  </UserPrivilegesProvider>
+                </MockAssistantProvider>
+              </MockDiscoverInTimelineContext>
+            </QueryClientProvider>
+          </ThemeProvider>
+        </ReduxStoreProvider>
       </MockKibanaContextProvider>
     </I18nProvider>
   );
