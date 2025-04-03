@@ -22,6 +22,7 @@ import {
   useEuiMinBreakpoint,
   UseEuiTheme,
 } from '@elastic/eui';
+import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import {
@@ -63,7 +64,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const [hasESData, setHasESData] = useState(false);
   const [hasDataView, setHasDataView] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const minBreakpointM = useEuiMinBreakpoint('m');
   const { services } = useKibana<CoreStart & AppPluginStartDependencies>();
   const {
     http,
@@ -99,7 +99,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const addDataFeatures = getFeaturesByCategory('data');
   const manageDataFeatures = getFeaturesByCategory('admin');
   const devTools = findFeatureById('console');
-
+  const className = classNames(
+    !newsFetchResult?.feedItems?.length && 'kbnOverviewSupplements--noNews'
+  );
   // Show card for console if none of the manage data plugins are available, most likely in OSS
   if (manageDataFeatures.length < 1 && devTools) {
     manageDataFeatures.push(devTools);
@@ -243,6 +245,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   return (
     <KibanaPageTemplate
+      css={styles}
       pageHeader={{
         iconType: 'logoKibana',
         pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
@@ -268,18 +271,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
         {mainAppsUserHasAccessTo.length ? (
           <>
-            <EuiFlexGroup
-              css={({ euiTheme }: UseEuiTheme) =>
-                css({
-                  '.kbnOverviewApps__item': {
-                    [minBreakpointM]: {
-                      maxWidth: `calc(50% - ${euiTheme.size.l})`,
-                    },
-                  },
-                })
-              }
-              justifyContent="center"
-            >
+            <EuiFlexGroup className="kbnOverviewMainApps" justifyContent="center">
               {mainAppsUserHasAccessTo.map(renderAppCard)}
             </EuiFlexGroup>
 
@@ -288,40 +280,14 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
         ) : null}
 
         {remainingApps.length ? (
-          <EuiFlexGroup
-            css={({ euiTheme }: UseEuiTheme) =>
-              css({
-                '.kbnOverviewApps__item': {
-                  [minBreakpointM]: {
-                    maxWidth: `calc(25% - ${euiTheme.size.l})`,
-                  },
-                },
-              })
-            }
-            justifyContent="center"
-          >
+          <EuiFlexGroup className="kbnOverviewRemainingApps" justifyContent="center">
             {remainingApps.map(renderAppCard)}
           </EuiFlexGroup>
         ) : null}
       </KibanaPageTemplate.Section>
 
-      <KibanaPageTemplate.Section
-        bottomBorder
-        paddingSize="xl"
-        css={css({
-          '.kbnOverviewSupplements--noNews h2': {
-            [minBreakpointM]: {
-              textAlign: 'center',
-            },
-          },
-        })}
-      >
-        <EuiFlexGroup
-          alignItems="flexStart"
-          className={`${
-            !newsFetchResult?.feedItems?.length ? 'kbnOverviewSupplements--noNews' : ''
-          }`}
-        >
+      <KibanaPageTemplate.Section bottomBorder paddingSize="xl">
+        <EuiFlexGroup alignItems="flexStart" className={className}>
           {newsFetchResult && newsFetchResult.feedItems.length ? (
             <EuiFlexItem grow={1}>
               <NewsFeed newsFetchResult={newsFetchResult} />
@@ -347,13 +313,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                     <EuiFlexItem
                       data-test-subj="kbnOverviewItem"
                       key={id}
-                      css={({ euiTheme }: UseEuiTheme) =>
-                        css({
-                          [minBreakpointM]: {
-                            maxWidth: `calc(33,333% - ${euiTheme.size.l})`,
-                          },
-                        })
-                      }
+                      className="kbnOverviewItemSolution"
                     >
                       <RedirectAppLinksKibanaProvider
                         coreStart={{
@@ -364,27 +324,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
                         }}
                         {...application}
                       >
-                        <RedirectAppLinks
-                          css={({ euiTheme }: UseEuiTheme) =>
-                            css({
-                              '.enterpriseSearch': {
-                                '.euiCard__image': {
-                                  backgroundColor: euiTheme.colors.warning,
-                                },
-                              },
-                              '.observability': {
-                                '.euiCard__image': {
-                                  backgroundColor: euiTheme.colors.accent,
-                                },
-                              },
-                              '.securitySolution': {
-                                '.euiCard__image': {
-                                  backgroundColor: euiTheme.colors.accentSecondary,
-                                },
-                              },
-                            })
-                          }
-                        >
+                        <RedirectAppLinks className="kbnRedirectAppLinkImage">
                           <EuiCard
                             className={`${id}`}
                             description={description ? description : ''}
@@ -438,3 +378,48 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
     </KibanaPageTemplate>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    '.kbnRedirectAppLinkImage': {
+      '.enterpriseSearch': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.warning,
+        },
+      },
+      '.observability': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.accent,
+        },
+      },
+      '.securitySolution': {
+        '.euiCard__image': {
+          backgroundColor: euiTheme.colors.accentSecondary,
+        },
+      },
+    },
+    '.kbnOverviewItemSolution': {
+      [useEuiMinBreakpoint('m')]: {
+        maxWidth: `calc(33,333% - ${euiTheme.size.l})`,
+      },
+    },
+    '.kbnOverviewRemainingApps': {
+      '.kbnOverviewApps__item': {
+        [useEuiMinBreakpoint('m')]: {
+          maxWidth: `calc(25% - ${euiTheme.size.l})`,
+        },
+      },
+    },
+    '.kbnOverviewMainApps': {
+      '.kbnOverviewApps__item': {
+        [useEuiMinBreakpoint('m')]: {
+          maxWidth: `calc(50% - ${euiTheme.size.l})`,
+        },
+      },
+    },
+    '.kbnOverviewSupplements--noNews h2': {
+      [useEuiMinBreakpoint('m')]: {
+        textAlign: 'center',
+      },
+    },
+  });
