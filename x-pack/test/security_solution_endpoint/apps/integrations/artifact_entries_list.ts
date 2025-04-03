@@ -192,7 +192,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click(
           `${actions.pageObject}-form-effectedPolicies-policiesSelector-policy-${options.policyId}-checkbox`
         );
-        // trustedApps-form-effectedPolicies-policiesSelector
       }
 
       // Submit create artifact form

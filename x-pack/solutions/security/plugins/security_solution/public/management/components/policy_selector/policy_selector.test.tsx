@@ -106,7 +106,7 @@ describe('PolicySelector component', () => {
     expect(getByTestId('test-searchbar')).toBeTruthy();
     expect(getByTestId('test-viewSelectedButton')).toBeTruthy();
     expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(true);
-    expect(getByTestId('test-policyFetchTotal')).toBeTruthy();
+    expect(getByTestId(testUtils.testIds.policyFetchTotal)).toBeTruthy();
     expect(getByTestId('test-pagination')).toBeTruthy();
     expect(queryByTestId(`test-policy-${testPolicyId1}-checkbox`)).toBeNull();
     expect(queryByTestId(`test-policy-${testPolicyId1}-policyLink`)).toBeNull();
@@ -116,7 +116,7 @@ describe('PolicySelector component', () => {
     const { getByTestId } = await render();
     testUtils.clickOnPolicy(testPolicyId1);
 
-    expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
+    expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('1 of 50 selected');
     expect((getByTestId('test-viewSelectedButton') as HTMLButtonElement).disabled).toBe(false);
     expect(props.onChange).toHaveBeenCalledWith([testPolicyId1], []);
   });
@@ -125,7 +125,7 @@ describe('PolicySelector component', () => {
     const { getByTestId } = await render();
     testUtils.clickOnSelectAll();
 
-    expect(getByTestId('test-viewSelectedButton').textContent).toEqual('3 selected');
+    expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('3 of 50 selected');
     expect(props.onChange).toHaveBeenCalledWith([testPolicyId1, testPolicyId2, testPolicyId3], []);
   });
 
@@ -142,7 +142,7 @@ describe('PolicySelector component', () => {
 
     testUtils.clickOnUnSelectAll();
 
-    expect(getByTestId('test-viewSelectedButton').textContent).toEqual('0 selected');
+    expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('0 of 50 selected');
     expect(props.onChange).toHaveBeenCalledWith([], []);
   });
 
@@ -158,7 +158,7 @@ describe('PolicySelector component', () => {
         {
           query: {
             kuery:
-              '(ingest-package-policies.package.name: endpoint) AND ((ingest-package-policies.name:*foo*) OR (ingest-package-policies.description:*foo*) OR (ingest-package-policies.policy_ids:*foo*) OR (ingest-package-policies.package.name:*foo*))',
+              '(ingest-package-policies.package.name: endpoint) AND ((ingest-package-policies.name:*foo*) OR (ingest-package-policies.description:*foo*))',
             page: 1,
             perPage: 20,
             sortField: 'name',
@@ -275,7 +275,7 @@ describe('PolicySelector component', () => {
     it('should displayed selected policies', async () => {
       const { getByTestId } = await render();
 
-      expect(getByTestId('test-policyFetchTotal').textContent).toEqual('2 policies selected');
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('2 selected');
       expect(getByTestId(`test-policy-${testPolicyId1}`).getAttribute('aria-checked')).toEqual(
         'true'
       );
@@ -306,7 +306,7 @@ describe('PolicySelector component', () => {
       const { queryByTestId, getByTestId } = await render();
       testUtils.clickOnPolicy(testPolicyId2);
 
-      expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual('1 selected');
       expect(props.onChange).toHaveBeenCalledWith([testPolicyId1], []);
       await waitFor(() => {
         expect(queryByTestId(`test-policy-${testPolicyId2}`)).toBeNull();
@@ -320,7 +320,9 @@ describe('PolicySelector component', () => {
 
       expect(props.onChange).toHaveBeenCalledWith([], []);
       expect((getByTestId('test-searchbar') as HTMLInputElement).disabled).toBe(false);
-      expect(getByTestId('test-viewSelectedButton').textContent).toEqual('0 selected');
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '0 of 50 selected'
+      );
     });
   });
 
@@ -345,7 +347,9 @@ describe('PolicySelector component', () => {
 
       expect(getByTestId('customItem1')).toBeTruthy();
       expect(getByTestId('customItem2')).toBeTruthy();
-      expect(getByTestId('test-viewSelectedButton').textContent).toEqual('1 selected');
+      expect(getByTestId(testUtils.testIds.policyFetchTotal).textContent).toEqual(
+        '1 of 52 selected'
+      );
     });
 
     it('should show custom items in the selected items', async () => {

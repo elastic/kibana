@@ -125,7 +125,7 @@ export interface PolicySelectorProps {
    * A list of Integration policy fields that should be used when user enters a search value. The
    * fields should match those that are defined in the `PackagePolicy` type, including deep
    * references like `package.name`, etc.
-   * Default: `['name', 'description', 'policy_ids', 'package.name']`
+   * Default: `['name', 'description']`
    */
   searchFields?: string[];
   /**
@@ -191,7 +191,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
       perPage = 20,
     } = {},
     selectedPolicyIds,
-    searchFields = ['name', 'description', 'policy_ids', 'package.name'],
+    searchFields = ['name', 'description'],
     onChange,
     onFetch,
     height,
@@ -266,6 +266,10 @@ export const PolicySelector = memo<PolicySelectorProps>(
         additionalListItems.filter((item) => item.checked === 'on').length
       );
     }, [additionalListItems, selectedPolicyIds.length]);
+
+    const totalItems: number = useMemo(() => {
+      return (policyListResponse?.total ?? 0) + additionalListItems?.length ?? 0;
+    }, [additionalListItems?.length, policyListResponse?.total]);
 
     // @ts-expect-error EUI does not seem to have correctly types the `windowProps` which come from React-Window `FixedSizeList` component
     const listProps: EuiSelectableProps['listProps'] = useMemo(() => {
@@ -587,7 +591,7 @@ export const PolicySelector = memo<PolicySelectorProps>(
     return (
       <PolicySelectorContainer data-test-subj={dataTestSubj} height={height}>
         <EuiPanel paddingSize="s" hasShadow={false} hasBorder className="header-container">
-          <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem>
               <EuiToolTip
                 content={
@@ -622,14 +626,12 @@ export const PolicySelector = memo<PolicySelectorProps>(
                 size="s"
                 onClick={viewSelectedOnClickHandler}
                 disabled={selectedCount === 0}
-                color="text"
                 fill={view === 'selected-list'}
                 data-test-subj={getTestId('viewSelectedButton')}
               >
                 <FormattedMessage
-                  id="xpack.securitySolution.policySelector.selectedCount"
-                  defaultMessage="{count} selected"
-                  values={{ count: selectedCount }}
+                  id="xpack.securitySolution.policySelector.selectedButton"
+                  defaultMessage="Selected"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -658,33 +660,51 @@ export const PolicySelector = memo<PolicySelectorProps>(
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 {view === 'full-list' && (
                   <EuiFlexItem grow={false} className="border-right">
-                    <EuiButtonEmpty
-                      size="xs"
-                      value="selectAll"
-                      onClick={onSelectUnselectAllClickHandler}
-                      data-test-subj={getTestId('selectAllButton')}
-                      isDisabled={isDisabled}
+                    <EuiToolTip
+                      content={
+                        <FormattedMessage
+                          id="xpack.securitySolution.policySelector.selectAllTooltipMessage"
+                          defaultMessage="Select all displayed in current page"
+                        />
+                      }
                     >
-                      <FormattedMessage
-                        id="xpack.securitySolution.policySelector.selectAll"
-                        defaultMessage="Select all"
-                      />
-                    </EuiButtonEmpty>
+                      <EuiButtonEmpty
+                        size="xs"
+                        value="selectAll"
+                        onClick={onSelectUnselectAllClickHandler}
+                        data-test-subj={getTestId('selectAllButton')}
+                        isDisabled={isDisabled}
+                      >
+                        <FormattedMessage
+                          id="xpack.securitySolution.policySelector.selectAll"
+                          defaultMessage="Select all"
+                        />
+                      </EuiButtonEmpty>
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    size="xs"
-                    value="unSelectAll"
-                    onClick={onSelectUnselectAllClickHandler}
-                    data-test-subj={getTestId('unselectAllButton')}
-                    isDisabled={isDisabled}
+                  <EuiToolTip
+                    content={
+                      <FormattedMessage
+                        id="xpack.securitySolution.policySelector.unSelectAllTooltipMessage"
+                        defaultMessage="Un-select all in current page"
+                      />
+                    }
                   >
-                    <FormattedMessage
-                      id="xpack.securitySolution.policySelector.unSelectAll"
-                      defaultMessage="Un-select all"
-                    />
-                  </EuiButtonEmpty>
+                    <EuiButtonEmpty
+                      size="xs"
+                      value="unSelectAll"
+                      onClick={onSelectUnselectAllClickHandler}
+                      data-test-subj={getTestId('unselectAllButton')}
+                      isDisabled={isDisabled}
+                    >
+                      <FormattedMessage
+                        id="xpack.securitySolution.policySelector.unSelectAll"
+                        defaultMessage="Un-select all"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
@@ -711,14 +731,22 @@ export const PolicySelector = memo<PolicySelectorProps>(
           <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
             <EuiFlexItem className="border-right">
               <EuiText size="s" data-test-subj={getTestId('policyFetchTotal')}>
-                <FormattedMessage
-                  id="xpack.securitySolution.policySelector.totalPoliciesFound"
-                  defaultMessage="{count} {count, plural, =1 {policy} other {policies}} {isSelectedList, select, true {selected} other {found}}"
-                  values={{
-                    count: policyListResponse?.total ?? 0,
-                    isSelectedList: view === 'selected-list',
-                  }}
-                />
+                {view === 'selected-list' ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.policySelector.totalSelected"
+                    defaultMessage="{selectedCount} selected"
+                    values={{ selectedCount }}
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.policySelector.totalPoliciesFound"
+                    defaultMessage="{selectedCount} of {count} selected"
+                    values={{
+                      selectedCount,
+                      count: totalItems,
+                    }}
+                  />
+                )}
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
