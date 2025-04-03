@@ -33,6 +33,10 @@ export const FindAlertSummaryRequestQuery = z.object({
    */
   filter: z.string().optional(),
   /**
+   * Connector id used for prompt lookup
+   */
+  connector_id: z.string(),
+  /**
    * Field to sort by
    */
   sort_field: FindAlertSummarySortField.optional(),
@@ -53,6 +57,10 @@ export type FindAlertSummaryRequestQueryInput = z.input<typeof FindAlertSummaryR
 
 export type FindAlertSummaryResponse = z.infer<typeof FindAlertSummaryResponse>;
 export const FindAlertSummaryResponse = z.object({
+  /**
+   * Prompt to use to generate new alert summary
+   */
+  prompt: z.string(),
   page: z.number().int(),
   perPage: z.number().int(),
   total: z.number().int(),

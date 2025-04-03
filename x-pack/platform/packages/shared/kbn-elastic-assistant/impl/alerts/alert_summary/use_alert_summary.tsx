@@ -26,9 +26,6 @@ interface Props {
   promptContext: PromptContext;
   showAnonymizedValues: boolean;
 }
-const notActualPromptJustForTesting =
-  'Highlight any host names or user names at the top of your summary.';
-const prompt = `Give a brief analysis of the event from the context above and format your output neatly in markdown syntax. Give only key observations in paragraph format. ${notActualPromptJustForTesting}`;
 
 export const useAlertSummary = ({
   alertId,
@@ -49,8 +46,9 @@ export const useAlertSummary = ({
   } | null>(null);
   // indicates that an alert summary exists or is being created/fetched
   const [hasAlertSummary, setHasAlertSummary] = useState<boolean>(false);
-  const { data: fetchedAlertSummary } = useFetchAlertSummary({
+  const { data: fetchedAlertSummary, isFetched: isAlertSummaryFetched } = useFetchAlertSummary({
     alertId,
+    connectorId: defaultConnectorId,
   });
   const { bulkUpdate } = useBulkUpdateAlertSummary();
 
@@ -80,7 +78,7 @@ export const useAlertSummary = ({
 
       const userMessage = getCombinedMessage({
         currentReplacements: {},
-        promptText: prompt,
+        promptText: fetchedAlertSummary.prompt,
         selectedPromptContexts,
       });
       const baseReplacements: Replacements = userMessage.replacements ?? {};
@@ -96,12 +94,20 @@ export const useAlertSummary = ({
       setMessageAndReplacements({ message: userMessage.content ?? '', replacements });
     };
 
-    if (isFetchedAnonymizationFields && isContextReady) fetchContext();
-  }, [anonymizationFields, isFetchedAnonymizationFields, isContextReady, promptContext]);
+    if (isFetchedAnonymizationFields && isContextReady && isAlertSummaryFetched) fetchContext();
+  }, [
+    anonymizationFields,
+    isFetchedAnonymizationFields,
+    isContextReady,
+    isAlertSummaryFetched,
+    fetchedAlertSummary.prompt,
+    promptContext,
+  ]);
 
   const fetchAISummary = useCallback(() => {
     const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
       setHasAlertSummary(true);
+
       const rawResponse = await sendMessage(content);
       setAlertSummary(
         showAnonymizedValues
