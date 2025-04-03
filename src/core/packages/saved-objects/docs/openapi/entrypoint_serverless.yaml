@@ -28,8 +28,6 @@ servers:
 paths:
   '/api/saved_objects/_export':
     $ref: 'paths/api@saved_objects@_export.yaml'
-  '/api/saved_objects/_import':
-    $ref: 'paths/api@saved_objects@_import.yaml'
 # components:
 #   securitySchemes:
 #     apiKeyAuth:
