@@ -1495,6 +1495,27 @@
           },
           {
             "parentPluginId": "@kbn/user-profile-components",
+            "id": "def-common.UserSettingsData.contrastMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "contrastMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/user-profile-components",
+                "scope": "common",
+                "docId": "kibKbnUserProfileComponentsPluginApi",
+                "section": "def-common.ContrastModeValue",
+                "text": "ContrastModeValue"
+              },
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserSettingsData.solutionNavOptOut",
             "type": "CompoundType",
             "tags": [],
@@ -1586,6 +1607,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/user-profile-components",
+        "id": "def-common.ContrastModeValue",
+        "type": "Type",
+        "tags": [],
+        "label": "ContrastModeValue",
+        "description": [],
+        "signature": [
+          "\"standard\" | \"system\" | \"high\""
+        ],
+        "path": "src/platform/packages/shared/kbn-user-profile-components/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/user-profile-components",
         "id": "def-common.DarkModeValue",

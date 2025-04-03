@@ -290,12 +290,24 @@ export class ProductFeaturesService {
         const disabled = authz.requiredPrivileges.some((privilegeEntry) => {
           if (typeof privilegeEntry === 'object') {
             if (privilegeEntry.allRequired) {
-              if (privilegeEntry.allRequired.some(isApiPrivilegeSecurityAndDisabled)) {
+              if (
+                privilegeEntry.allRequired.some((entry) =>
+                  typeof entry === 'string'
+                    ? isApiPrivilegeSecurityAndDisabled(entry)
+                    : entry.anyOf.every(isApiPrivilegeSecurityAndDisabled)
+                )
+              ) {
                 return true;
               }
             }
             if (privilegeEntry.anyRequired) {
-              if (privilegeEntry.anyRequired.every(isApiPrivilegeSecurityAndDisabled)) {
+              if (
+                privilegeEntry.anyRequired.every((entry) =>
+                  typeof entry === 'string'
+                    ? isApiPrivilegeSecurityAndDisabled(entry)
+                    : entry.allOf.some(isApiPrivilegeSecurityAndDisabled)
+                )
+              ) {
                 return true;
               }
             }
