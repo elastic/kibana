@@ -18,6 +18,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { getErrorSource, isUserError } from '@kbn/task-manager-plugin/server/task_running';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { ActionScheduler, type RunResult } from './action_scheduler';
 import type {
   RuleRunnerErrorStackTraceLog,
@@ -367,6 +368,8 @@ export class TaskRunner<
       ruleTaskTimeout: this.ruleType.ruleTaskTimeout,
     });
 
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
+
     const {
       state: updatedRuleTypeState,
       error,
@@ -374,6 +377,8 @@ export class TaskRunner<
     } = await this.ruleTypeRunner.run({
       context: ruleTypeRunnerContext,
       alertsClient,
+      actionsClient:
+        this.ruleType.id === ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID ? actionsClient : undefined,
       executionId: this.executionId,
       executorServices,
       rule,
@@ -402,7 +407,7 @@ export class TaskRunner<
       ruleLabel,
       previousStartedAt: previousStartedAt ? new Date(previousStartedAt) : null,
       alertingEventLogger: this.alertingEventLogger,
-      actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
+      actionsClient,
       alertsClient,
     });
 
@@ -432,7 +437,7 @@ export class TaskRunner<
     // Only serialize alerts into task state if we're auto-recovering, otherwise
     // we don't need to keep this information around.
     if (this.ruleType.autoRecoverAlerts) {
-      const alerts = alertsClient.getRawAlertInstancesForState();
+      const alerts = alertsClient.getRawAlertInstancesForState(true);
       alertsToReturn = alerts.rawActiveAlerts;
       recoveredAlertsToReturn = alerts.rawRecoveredAlerts;
     }

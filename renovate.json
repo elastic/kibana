@@ -125,6 +125,28 @@
       "enabled": true
     },
     {
+      "groupName": "chainguard-fips",
+      "matchPackageNames": [
+        "docker.elastic.co/wolfi/chainguard-base-fips"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main",
+        "/^[9].*/",
+        "8.x",
+        "8.18"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip",
+        "ci:build-docker-fips"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "operations actions",
       "matchManagers": [
         "github-actions"
@@ -649,6 +671,7 @@
         "getos",
         "joi-to-json",
         "@apidevtools/json-schema-ref-parser",
+        "@fast-check/jest",
         "json5",
         "load-json-file",
         "mock-fs",
@@ -2118,6 +2141,28 @@
       "enabled": true
     },
     {
+      "groupName": "workchat gen-ai dependencies",
+      "matchDepNames": [
+        "@modelcontextprotocol/sdk",
+        "@n8n/json-schema-to-zod",
+        "expr-eval"
+      ],
+      "reviewers": [
+        "team:search-kibana"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Search",
+        "Team:Enterprise Search",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "vinyl",
       "matchDepNames": [
         "vinyl",
@@ -3231,11 +3276,33 @@
       "enabled": true
     },
     {
+      "groupName": "chromedriver",
+      "matchDepNames": [
+        "chromedriver"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "/.*/"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true,
+      "matchUpdateTypes": [
+        "major",
+        "minor"
+      ]
+    },
+    {
       "groupName": "ftr",
       "matchDepNames": [
         "@types/chromedriver",
         "@types/selenium-webdriver",
-        "chromedriver",
         "geckodriver",
         "ms-chromium-edge-driver",
         "selenium-webdriver"
@@ -3672,9 +3739,9 @@
       "enabled": true
     },
     {
-      "groupName": "native-hdr-histogram",
+      "groupName": "hdr-histogram-js",
       "matchDepNames": [
-        "native-hdr-histogram"
+        "hdr-histogram-js"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
@@ -4322,6 +4389,25 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
+    },
+    {
+      "groupName": "chrome-remote-interface",
+      "matchDepNames": [
+        "chrome-remote-interface",
+        "@types/chrome-remote-interface"
+      ],
+      "reviewers": [
+        "team:obs-knowledge-team"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
     }
   ],
   "customManagers": [
@@ -4333,6 +4419,17 @@
       ],
       "matchStrings": [
         "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
+      ],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "description": "Update Wolfi FIPS base image",
+      "customType": "regex",
+      "fileMatch": [
+        "^src/dev/build/tasks/os_packages/docker_generator/run\\.ts$"
+      ],
+      "matchStrings": [
+        "(?<depName>docker\\.elastic\\.co/wolfi/chainguard-base-fips):(?<currentValue>[-a-zA-Z0-9.]+)?(?:@(?<currentDigest>sha256:[a-fA-F0-9]+))?"
       ],
       "datasourceTemplate": "docker"
     },

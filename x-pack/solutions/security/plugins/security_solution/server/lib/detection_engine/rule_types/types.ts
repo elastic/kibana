@@ -25,11 +25,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import type { ListClient } from '@kbn/lists-plugin/server';
-import type {
-  PersistenceServices,
-  IRuleDataClient,
-  SuppressedAlertService,
-} from '@kbn/rule-registry-plugin/server';
+import type { PersistenceServices, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { EcsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map';
 import type { Filter } from '@kbn/es-query';
@@ -47,7 +43,6 @@ import type { RefreshTypes } from '../types';
 
 import type { Status } from '../../../../common/api/detection_engine';
 import type { BaseHit, SearchTypes } from '../../../../common/detection_engine/types';
-import type { GenericBulkCreateResponse } from './factories';
 import type { BuildReasonMessage } from './utils/reason_formatters';
 import type {
   BaseFieldsLatest,
@@ -58,8 +53,8 @@ import type {
   RuleAction,
   RuleResponse,
 } from '../../../../common/api/detection_engine/model/rule_schema';
-import type { EnrichEvents } from './utils/enrichments/types';
 import type { ThresholdResult } from './threshold/types';
+import type { ScheduleNotificationResponseActionsService } from '../rule_response_actions/schedule_notification_response_actions';
 
 export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   bulkCreateTimes: string[];
@@ -68,7 +63,6 @@ export interface SecurityAlertTypeReturnValue<TState extends RuleTypeState> {
   createdSignals: unknown[];
   errors: string[];
   userError?: boolean;
-  lastLookbackDate?: Date | null;
   searchAfterTimes: string[];
   state: TState;
   success: boolean;
@@ -88,7 +82,6 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   listClient: ListClient;
   searchAfterSize: number;
-  bulkCreate: BulkCreate;
   ruleDataClient: IRuleDataClient;
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -99,37 +92,46 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
   alertTimestampOverride: Date | undefined;
-  alertWithSuppression: SuppressedAlertService;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
-  experimentalFeatures?: ExperimentalFeatures;
+  experimentalFeatures: ExperimentalFeatures;
   intendedTimestamp: Date | undefined;
   spaceId: string;
   ignoreFields: Record<string, boolean>;
   ignoreFieldsRegexes: string[];
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
-export type SecurityAlertType<
+type SecurityActionGroupId = 'default';
+
+export type SecurityExecutorOptions<
   TParams extends RuleParams,
-  TState extends RuleTypeState,
-  TInstanceContext extends AlertInstanceContext = {},
-  TActionGroupIds extends string = never
-> = Omit<
-  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  TState extends RuleTypeState
+> = RuleExecutorOptions<
+  TParams,
+  TState,
+  AlertInstanceState,
+  AlertInstanceContext,
+  WithoutReservedActionGroups<SecurityActionGroupId, never>
+> & {
+  services: PersistenceServices;
+  sharedParams: SecuritySharedParams<TParams>;
+};
+
+export type SecurityAlertType<TParams extends RuleParams, TState extends RuleTypeState> = Omit<
+  RuleType<
+    TParams,
+    TParams,
+    TState,
+    AlertInstanceState,
+    AlertInstanceContext,
+    SecurityActionGroupId
+  >,
   'executor'
 > & {
-  executor: (
-    options: RuleExecutorOptions<
-      TParams,
-      TState,
-      AlertInstanceState,
-      TInstanceContext,
-      WithoutReservedActionGroups<TActionGroupIds, never>
-    > & {
-      services: PersistenceServices;
-      sharedParams: SecuritySharedParams<TParams>;
-    }
-  ) => Promise<
+  executor: (options: SecurityExecutorOptions<TParams, TState>) => Promise<
     SearchAfterAndBulkCreateReturnType & {
       state: TState;
       loggedRequests?: RulePreviewLoggedRequest[];
@@ -147,25 +149,19 @@ export interface CreateSecurityRuleTypeWrapperProps {
   ruleExecutionLoggerFactory: IRuleMonitoringService['createRuleExecutionLogClientForExecutors'];
   version: string;
   isPreview?: boolean;
-  experimentalFeatures?: ExperimentalFeatures;
+  experimentalFeatures: ExperimentalFeatures;
   alerting: SetupPlugins['alerting'];
   analytics?: AnalyticsServiceSetup;
+  eventsTelemetry: ITelemetryEventsSender | undefined;
+  licensing: LicensingPluginSetup;
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
 export type CreateSecurityRuleTypeWrapper = (
   options: CreateSecurityRuleTypeWrapperProps
 ) => <TParams extends RuleParams, TState extends RuleTypeState>(
-  type: SecurityAlertType<TParams, TState, AlertInstanceContext, 'default'>
+  type: SecurityAlertType<TParams, TState>
 ) => RuleType<TParams, TParams, TState, AlertInstanceState, AlertInstanceContext, 'default'>;
-
-export interface CreateRuleOptions {
-  experimentalFeatures: ExperimentalFeatures;
-  logger: Logger;
-  ml?: SetupPlugins['ml'];
-  eventsTelemetry?: ITelemetryEventsSender | undefined;
-  licensing: LicensingPluginSetup;
-  scheduleNotificationResponseActionsService: (params: ScheduleNotificationActions) => void;
-}
 
 export interface ScheduleNotificationActions {
   signals: unknown[];
@@ -173,7 +169,7 @@ export interface ScheduleNotificationActions {
   responseActions: RuleResponseAction[] | undefined;
 }
 
-export interface CreateQueryRuleOptions extends CreateRuleOptions {
+export interface CreateQueryRuleOptions {
   id: typeof QUERY_RULE_TYPE_ID | typeof SAVED_QUERY_RULE_TYPE_ID;
   name: 'Custom Query Rule' | 'Saved Query Rule';
 }
@@ -226,37 +222,6 @@ export interface SignalSource {
     threshold_result?: ThresholdResult;
   };
   kibana?: SearchTypes;
-}
-
-export interface BulkItem {
-  create?: {
-    _index: string;
-    _type?: string;
-    _id: string;
-    _version: number;
-    result?: string;
-    _shards?: {
-      total: number;
-      successful: number;
-      failed: number;
-    };
-    _seq_no?: number;
-    _primary_term?: number;
-    status: number;
-    error?: {
-      type: string;
-      reason: string;
-      index_uuid?: string;
-      shard: string;
-      index: string;
-    };
-  };
-}
-
-export interface BulkResponse {
-  took: number;
-  errors: boolean;
-  items: BulkItem[];
 }
 
 export type EventHit = Exclude<TypeOfFieldMap<EcsFieldMap>, '@timestamp'> & {
@@ -329,15 +294,7 @@ export interface AlertAttributes<T extends RuleParams = RuleParams> {
   params: T;
 }
 
-export type BulkResponseErrorAggregation = Record<string, { count: number; statusCode: number }>;
-
 export type SignalsEnrichment = (signals: SignalSourceHit[]) => Promise<SignalSourceHit[]>;
-
-export type BulkCreate = <T extends BaseFieldsLatest>(
-  docs: Array<WrappedFieldsLatest<T>>,
-  maxAlerts?: number,
-  enrichEvents?: EnrichEvents
-) => Promise<GenericBulkCreateResponse<T>>;
 
 export type SimpleHit = BaseHit<{ '@timestamp'?: string }>;
 
@@ -346,15 +303,16 @@ export type WrapSuppressedHits = (
   buildReasonMessage: BuildReasonMessage
 ) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
 
-export type RuleServices = RuleExecutorServices<
+export type SecurityRuleServices = RuleExecutorServices<
   AlertInstanceState,
   AlertInstanceContext,
   'default'
->;
+> &
+  PersistenceServices;
 
 export interface SearchAfterAndBulkCreateParams {
   sharedParams: SecuritySharedParams;
-  services: RuleServices;
+  services: SecurityRuleServices;
   eventsTelemetry: ITelemetryEventsSender | undefined;
   filter: estypes.QueryDslQueryContainer;
   buildReasonMessage: BuildReasonMessage;
@@ -375,7 +333,6 @@ export interface SearchAfterAndBulkCreateReturnType {
   searchAfterTimes: string[];
   enrichmentTimes: string[];
   bulkCreateTimes: string[];
-  lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
   createdSignals: unknown[];
   errors: string[];

@@ -21,7 +21,23 @@ import {
   closeOtherTabs,
   closeTabsToTheRight,
 } from '../../utils/manage_tabs';
-import type { TabItem, TabsServices } from '../../types';
+import type { TabItem, TabsServices, TabPreviewData } from '../../types';
+
+// TODO replace with real data when ready
+const RECENTLY_CLOSED_TABS_MOCK = [
+  {
+    label: 'Session 4',
+    id: '4',
+  },
+  {
+    label: 'Session 5',
+    id: '5',
+  },
+  {
+    label: 'Session 6',
+    id: '6',
+  },
+];
 
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   initialItems: TabItem[];
@@ -31,6 +47,7 @@ export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> 
   renderContent: (selectedItem: TabItem) => React.ReactNode;
   createItem: () => TabItem;
   onChanged: (state: TabbedContentState) => void;
+  getPreviewData: (item: TabItem) => TabPreviewData;
 }
 
 export interface TabbedContentState {
@@ -46,6 +63,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   renderContent,
   createItem,
   onChanged,
+  getPreviewData,
 }) => {
   const [tabContentId] = useState(() => htmlIdGenerator()());
   const [state, _setState] = useState<TabbedContentState>(() => {
@@ -126,6 +144,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         <TabsBar
           items={items}
           selectedItem={selectedItem}
+          recentlyClosedItems={RECENTLY_CLOSED_TABS_MOCK}
           maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}
@@ -134,6 +153,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
           onLabelEdited={onLabelEdited}
           onSelect={onSelect}
           onClose={onClose}
+          getPreviewData={getPreviewData}
         />
       </EuiFlexItem>
       {selectedItem ? (

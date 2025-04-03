@@ -10,11 +10,17 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { TabsBar } from './tabs_bar';
+import { TabStatus } from '../../types';
 import { servicesMock } from '../../../__mocks__/services';
 
 const items = Array.from({ length: 5 }).map((_, i) => ({
   id: `tab-${i}`,
   label: `Tab ${i}`,
+}));
+
+const recentlyClosedItems = Array.from({ length: 3 }).map((_, i) => ({
+  id: `closed-tab-${i}`,
+  label: `Closed Tab ${i}`,
 }));
 
 const tabContentId = 'test-content-id';
@@ -25,19 +31,29 @@ describe('TabsBar', () => {
     const onSelect = jest.fn();
     const onLabelEdited = jest.fn();
     const onClose = jest.fn();
+    const getPreviewData = jest.fn();
 
     const selectedItem = items[0];
+
+    getPreviewData.mockReturnValue({
+      query: {
+        esql: 'SELECT * FROM table',
+      },
+      status: TabStatus.SUCCESS,
+    });
 
     render(
       <TabsBar
         tabContentId={tabContentId}
         items={items}
+        recentlyClosedItems={recentlyClosedItems}
         selectedItem={selectedItem}
         services={servicesMock}
         onAdd={onAdd}
         onLabelEdited={onLabelEdited}
         onSelect={onSelect}
         onClose={onClose}
+        getPreviewData={getPreviewData}
       />
     );
 
@@ -46,7 +62,9 @@ describe('TabsBar', () => {
 
     items.forEach((tabItem, index) => {
       const tab = tabs[index];
-      expect(screen.getByText(tabItem.label)).toBeInTheDocument();
+      const tabButton = screen.getByTestId(`unifiedTabs_selectTabBtn_${tabItem.id}`);
+      expect(tabButton).toBeInTheDocument();
+      expect(tabButton).toHaveTextContent(tabItem.label);
       expect(tab).toHaveAttribute('id', `tab-${tabItem.id}`);
       expect(tab).toHaveAttribute('aria-controls', tabContentId);
       expect(tab).toHaveAttribute(
@@ -55,7 +73,7 @@ describe('TabsBar', () => {
       );
     });
 
-    const tab = screen.getByText(items[1].label);
+    const tab = screen.getByTestId(`unifiedTabs_selectTabBtn_${items[1].id}`);
     tab.click();
     expect(onSelect).toHaveBeenCalled();
 

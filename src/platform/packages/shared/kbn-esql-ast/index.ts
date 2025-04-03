@@ -29,6 +29,7 @@ export type {
   AstProviderFn,
   EditorError,
   ESQLAstNode,
+  ESQLInlineCast,
 } from './src/types';
 
 export {

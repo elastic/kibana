@@ -22,13 +22,11 @@ export class TagcloudVisualization {
     { editorFrame, formatFactory, charts }: TagcloudVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getTagcloudVisualization } = await import('../../async_services');
-      const palettes = await charts.palettes.getPalettes();
-      return getTagcloudVisualization({
-        paletteService: palettes,
-        kibanaTheme: core.theme,
-        formatFactory,
-      });
+      const [{ getTagcloudVisualization }, paletteService] = await Promise.all([
+        import('../../async_services'),
+        charts.palettes.getPalettes(),
+      ]);
+      return getTagcloudVisualization({ paletteService, kibanaTheme: core.theme, formatFactory });
     });
   }
 }

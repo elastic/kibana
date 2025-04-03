@@ -34,9 +34,10 @@ import {
   isCollapsed,
 } from './visualization';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { getDatatableColumn } from '../../../common/expressions/datatable/utils';
+import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
+import { getSortedAccessorsForGroup } from './to_expression';
 
-type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
+export type DimensionEditorProps = VisualizationDimensionEditorProps<PieVisualizationState> & {
   formatFactory: FormatFactory;
   paletteService: PaletteRegistry;
   palettes: KbnPalettes;
@@ -102,9 +103,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
     return null;
   }
 
-  const firstNonCollapsedColumnId = currentLayer.primaryGroups.find(
-    (id) => !isCollapsed(id, currentLayer)
+  const originalGroupOrder = getSortedAccessorsForGroup(
+    props.datasource,
+    currentLayer,
+    'primaryGroups'
   );
+  const firstNonCollapsedColumnId = originalGroupOrder.find((id) => !isCollapsed(id, currentLayer));
 
   const showColorPicker =
     currentLayer.metrics.includes(props.accessor) && currentLayer.allowMultipleMetrics;
@@ -140,7 +144,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
           label={i18n.translate('xpack.lens.colorMapping.editColorMappingSectionLabel', {
             defaultMessage: 'Color mapping',
           })}
-          style={{ alignItems: 'center' }}
+          css={{ alignItems: 'center' }}
           fullWidth
         >
           <PalettePanelContainer
