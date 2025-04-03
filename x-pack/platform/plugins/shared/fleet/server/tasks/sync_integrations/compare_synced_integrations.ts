@@ -221,31 +221,47 @@ const compareCustomAssets = ({
   ingestPipelines?: IngestGetPipelineResponse;
   componentTemplates?: Record<string, ClusterComponentTemplateSummary>;
 }): RemoteSyncedCustomAssetsStatus => {
+  const result = {
+    name: ccrCustomAsset.name,
+    type: ccrCustomAsset.type,
+    package_name: ccrCustomAsset.package_name,
+    package_version: ccrCustomAsset.package_version,
+  };
+
   if (ccrCustomAsset.type === 'ingest_pipeline') {
     if (!ingestPipelines) {
       return {
-        ...ccrCustomAsset,
+        ...result,
         sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     }
 
-    const installedAsset = ingestPipelines[ccrCustomAsset?.name];
+    const installedPipeline = ingestPipelines[ccrCustomAsset?.name];
 
-    if (isEqual(installedAsset, ccrCustomAsset?.pipeline)) {
+    if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
       return {
-        ...ccrCustomAsset,
+        ...result,
         sync_status: 'completed' as SyncStatus.COMPLETED,
+      };
+    } else if (
+      installedPipeline?.version &&
+      installedPipeline.version < ccrCustomAsset.pipeline.version
+    ) {
+      return {
+        ...result,
+        sync_status: 'failed' as SyncStatus.FAILED,
+        error: `Found incorrect installed version ${installedPipeline.version}`,
       };
     } else {
       return {
-        ...ccrCustomAsset,
+        ...result,
         sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     }
   } else if (ccrCustomAsset.type === 'component_template') {
     if (!componentTemplates) {
       return {
-        ...ccrCustomAsset,
+        ...result,
         sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     }
@@ -253,12 +269,12 @@ const compareCustomAssets = ({
     const installedAsset = componentTemplates[ccrCustomAsset?.name];
     if (isEqual(installedAsset, ccrCustomAsset?.template)) {
       return {
-        ...ccrCustomAsset,
+        ...result,
         sync_status: 'completed' as SyncStatus.COMPLETED,
       };
     } else {
       return {
-        ...ccrCustomAsset,
+        ...result,
         sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     }

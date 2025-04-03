@@ -13,6 +13,7 @@ import { installCustomAsset } from './custom_assets';
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
 jest.mock('../../services');
+jest.mock('./custom_assets');
 
 const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
 

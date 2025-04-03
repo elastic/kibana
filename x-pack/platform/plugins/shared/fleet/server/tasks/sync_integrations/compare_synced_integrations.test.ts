@@ -509,38 +509,16 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
         custom_assets: {
           'component_template:logs-system.auth@custom': {
-            is_deleted: false,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'synchronizing',
-            template: {
-              mappings: {
-                dynamic_templates: [],
-                properties: {
-                  'Test-mapping': {
-                    type: 'text',
-                  },
-                },
-              },
-            },
             type: 'component_template',
           },
           'ingest_pipeline:logs-system.auth@custom': {
-            is_deleted: false,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
-            pipeline: {
-              processors: [
-                {
-                  set: {
-                    field: 'test',
-                    value: 'test-value',
-                  },
-                },
-              ],
-            },
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
@@ -548,7 +526,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
     });
 
-    it('should return completed if custom assets are equal', async () => {
+    it('should return status = completed if custom assets are equal', async () => {
       (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
         'logs-system.auth@custom': {
           processors: [
@@ -619,40 +597,137 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
         custom_assets: {
           'component_template:logs-system.auth@custom': {
-            is_deleted: false,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'completed',
-            template: {
-              mappings: {
-                dynamic_templates: [],
-                properties: {
-                  'Test-mapping': {
-                    type: 'text',
+            type: 'component_template',
+          },
+          'ingest_pipeline:logs-system.auth@custom': {
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            type: 'ingest_pipeline',
+          },
+        },
+      });
+    });
+    it('should return status = failed if versions do not match', async () => {
+      const searchMockWithVersionedPipeline = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                integrations: [
+                  {
+                    package_name: 'system',
+                    package_version: '1.67.3',
+                    updated_at: '2025-03-20T14:18:40.076Z',
+                  },
+                ],
+                custom_assets: {
+                  'ingest_pipeline:logs-system.auth@custom': {
+                    type: 'ingest_pipeline',
+                    name: 'logs-system.auth@custom',
+                    package_name: 'system',
+                    package_version: '1.67.3',
+                    is_deleted: false,
+                    pipeline: {
+                      processors: [
+                        {
+                          set: {
+                            field: 'test',
+                            value: 'test-value',
+                          },
+                        },
+                      ],
+                      version: 2,
+                    },
                   },
                 },
               },
             },
-            type: 'component_template',
+          ],
+        },
+      });
+      (getPipelineMock as jest.MockedFunction<any>).mockResolvedValue({
+        'logs-system.auth@custom': {
+          processors: [
+            {
+              set: {
+                field: 'test',
+                value: 'test-value',
+              },
+            },
+          ],
+          version: 1,
+        },
+      });
+      (getComponentTemplateMock as jest.MockedFunction<any>).mockResolvedValue({
+        component_templates: [
+          {
+            name: 'logs-system.auth@custom',
+            component_template: {
+              template: {
+                mappings: {
+                  dynamic_templates: [],
+                  properties: {
+                    'Test-mapping': {
+                      type: 'text',
+                    },
+                  },
+                },
+              },
+            },
           },
+        ],
+      });
+
+      esClientMock = {
+        search: searchMockWithVersionedPipeline,
+      };
+      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'system',
+            attributes: {
+              version: '1.67.3',
+              install_status: 'installed',
+            },
+            updated_at: '2025-03-26T14:06:27.611Z',
+          },
+        ],
+      });
+
+      const res = await fetchAndCompareSyncedIntegrations(
+        esClientMock,
+        soClientMock,
+        'fleet-synced-integrations-ccr-*',
+        loggerMock
+      );
+
+      expect(res).toEqual({
+        integrations: [
+          {
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            updated_at: expect.any(String),
+          },
+        ],
+        custom_assets: {
           'ingest_pipeline:logs-system.auth@custom': {
-            is_deleted: false,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
-            pipeline: {
-              processors: [
-                {
-                  set: {
-                    field: 'test',
-                    value: 'test-value',
-                  },
-                },
-              ],
-            },
-            sync_status: 'completed',
+            sync_status: 'failed',
             type: 'ingest_pipeline',
+            error: 'Found incorrect installed version 1',
           },
         },
       });
@@ -688,38 +763,16 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       expect(res).toEqual({
         custom_assets: {
           'component_template:logs-system.auth@custom': {
-            is_deleted: false,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
             sync_status: 'synchronizing',
-            template: {
-              mappings: {
-                dynamic_templates: [],
-                properties: {
-                  'Test-mapping': {
-                    type: 'text',
-                  },
-                },
-              },
-            },
             type: 'component_template',
           },
           'ingest_pipeline:logs-system.auth@custom': {
-            is_deleted: false,
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
-            pipeline: {
-              processors: [
-                {
-                  set: {
-                    field: 'test',
-                    value: 'test-value',
-                  },
-                },
-              ],
-            },
             sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
