@@ -137,7 +137,7 @@ export const SettingsPage: React.FC<Props> = memo(
     });
 
     const {
-      formattedChangelog,
+      changelog,
       isLoading: isChangelogLoading,
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
@@ -502,7 +502,7 @@ export const SettingsPage: React.FC<Props> = memo(
         <EuiPortal>
           {isChangelogModalOpen && (
             <ChangelogModal
-              changelogText={formattedChangelog}
+              changelog={changelog}
               isLoading={isChangelogLoading}
               onClose={toggleChangelogModal}
             />

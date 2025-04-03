@@ -6,26 +6,30 @@
  */
 
 import { useGetFileByPathQuery } from '../../../../../hooks';
-import { getFormattedChangelog } from '../utils';
+import { parseYamlChangelog } from '../utils';
 
 /**
- * @param packageName the package to get the change log for
- * @param version the version of change log for the specified package
- * @param fromVersion is used to display the change log starting from this version up to the request version
+ * @param packageName the package to get the changelog for
+ * @param latestVersion the version of changelog for the specified package
+ * @param currentVersion is used to display the changelog starting from this version up to the latest version
  */
-export const useChangelog = (packageName: string, version: string, fromVersion?: string) => {
+export const useChangelog = (
+  packageName: string,
+  latestVersion: string,
+  currentVersion?: string
+) => {
   const {
     data: fileResponse,
     error,
     isLoading,
-  } = useGetFileByPathQuery(`/package/${packageName}/${version}/changelog.yml`);
+  } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
 
   const changelogText = fileResponse?.data;
 
-  const formattedChangelog = getFormattedChangelog(changelogText, version, fromVersion);
+  const changelog = parseYamlChangelog(changelogText, latestVersion, currentVersion);
 
   return {
-    formattedChangelog,
+    changelog,
     error,
     isLoading,
   };

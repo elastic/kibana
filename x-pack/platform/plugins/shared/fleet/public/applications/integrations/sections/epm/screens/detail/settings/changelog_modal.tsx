@@ -18,26 +18,21 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export interface ChangeLogParams {
-  version: string;
-  changes: Array<{
-    description: string;
-    link: string;
-    type: string;
-  }>;
-}
+import { type ChangelogEntry, formatChangelog } from '../utils';
 
 interface Props {
-  changelogText: string;
+  changelog: ChangelogEntry[];
   isLoading: boolean;
   onClose: () => void;
 }
 
 export const ChangelogModal: React.FunctionComponent<Props> = ({
-  changelogText,
+  changelog,
   isLoading,
   onClose,
 }) => {
+  const changelogText = formatChangelog(changelog);
+
   return (
     <EuiModal maxWidth={true} onClose={onClose} data-test-subj="integrations.changelogModal">
       <EuiModalHeader>
