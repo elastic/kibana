@@ -31,6 +31,7 @@ import { dashboardUrlParams } from '../../dashboard_router';
 const showFilterBarId = 'showFilterBar';
 
 export interface ShowShareModalProps {
+  asExport?: boolean;
   isDirty: boolean;
   savedObjectId?: string;
   dashboardTitle?: string;
@@ -47,6 +48,7 @@ export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => 
 
 export function ShowShareModal({
   isDirty,
+  asExport,
   anchorElement,
   savedObjectId,
   dashboardTitle,
@@ -155,6 +157,7 @@ export function ShowShareModal({
     anchorElement,
     allowShortUrl,
     shareableUrl,
+    asExport,
     objectId: savedObjectId,
     objectType: 'dashboard',
     objectTypeMeta: {

@@ -55,8 +55,9 @@ export const useDashboardMenuItems = ({
    * Show the Dashboard app's share menu
    */
   const showShare = useCallback(
-    (anchorElement: HTMLElement) => {
+    (anchorElement: HTMLElement, asExport?: boolean) => {
       ShowShareModal({
+        asExport,
         dashboardTitle,
         anchorElement,
         savedObjectId: lastSavedId,
@@ -194,6 +195,14 @@ export const useDashboardMenuItems = ({
         run: showShare,
       } as TopNavMenuData,
 
+      export: {
+        ...topNavStrings.export,
+        id: 'export',
+        testId: 'dashboardExportMenuItem',
+        disableButton: disableTopNav, // TODO: add logic to disable this button if the user doesn't have export capabilities
+        run: (anchorElement) => showShare(anchorElement, true),
+      } as TopNavMenuData,
+
       settings: {
         ...topNavStrings.settings,
         id: 'settings',
@@ -250,7 +259,7 @@ export const useDashboardMenuItems = ({
     const { showWriteControls } = getDashboardCapabilities();
 
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.share] : [];
+    const shareMenuItem = shareService ? [menuItems.export, menuItems.share] : [];
     const duplicateMenuItem = showWriteControls ? [menuItems.interactiveSave] : [];
     const editMenuItem = showWriteControls && !dashboardApi.isManaged ? [menuItems.edit] : [];
     const mayberesetChangesMenuItem = showResetChange ? [resetChangesMenuItem] : [];
@@ -258,16 +267,16 @@ export const useDashboardMenuItems = ({
     return [
       ...labsMenuItem,
       menuItems.fullScreen,
-      ...shareMenuItem,
       ...duplicateMenuItem,
       ...mayberesetChangesMenuItem,
+      ...shareMenuItem,
       ...editMenuItem,
     ];
   }, [isLabsEnabled, menuItems, dashboardApi.isManaged, showResetChange, resetChangesMenuItem]);
 
   const editModeTopNavConfig = useMemo(() => {
     const labsMenuItem = isLabsEnabled ? [menuItems.labs] : [];
-    const shareMenuItem = shareService ? [menuItems.share] : [];
+    const shareMenuItem = shareService ? [menuItems.export, menuItems.share] : [];
     const editModeItems: TopNavMenuData[] = [];
 
     if (lastSavedId) {

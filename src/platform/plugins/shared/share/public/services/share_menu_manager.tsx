@@ -15,6 +15,7 @@ import { ShowShareMenuOptions } from '../types';
 import { ShareRegistry } from './share_menu_registry';
 import type { ShareConfigs } from '../types';
 import { ShareMenu } from '../components/share_tabs';
+import { ExportMenu } from '../components/export_popover';
 
 interface ShareMenuManagerStartDeps {
   core: CoreStart;
@@ -73,6 +74,7 @@ export class ShareMenuManager {
     shareableUrlLocatorParams,
     onClose,
     isDirty,
+    asExport,
     publicAPIEnabled,
     ...startServices
   }: ShowShareMenuOptions & {
@@ -93,8 +95,8 @@ export class ShareMenuManager {
     let unmount: ReturnType<ReturnType<typeof toMountPoint>>;
 
     const mount = toMountPoint(
-      <ShareMenu
-        shareContext={{
+      React.createElement(asExport ? ExportMenu : ShareMenu, {
+        shareContext: {
           objectId,
           objectType,
           objectTypeMeta,
@@ -111,8 +113,8 @@ export class ShareMenuManager {
             unmount();
           },
           ...startServices,
-        }}
-      />,
+        },
+      }),
       startServices
     );
 
