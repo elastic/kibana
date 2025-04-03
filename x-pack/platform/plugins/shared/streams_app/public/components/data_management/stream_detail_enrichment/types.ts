@@ -8,11 +8,12 @@
 import {
   DateProcessorConfig,
   DissectProcessorConfig,
-  FieldDefinitionType,
   GrokProcessorConfig,
   ProcessorDefinition,
   ProcessorTypeOf,
 } from '@kbn/streams-schema';
+
+import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 export type WithUIAttributes<T extends ProcessorDefinition> = T & {
   id: string;
@@ -20,11 +21,6 @@ export type WithUIAttributes<T extends ProcessorDefinition> = T & {
 };
 
 export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
-
-export interface DetectedField {
-  name: string;
-  type?: FieldDefinitionType | 'system';
-}
 
 export type GrokFormState = Omit<GrokProcessorConfig, 'patterns'> & {
   type: 'grok';
@@ -35,4 +31,14 @@ export type DissectFormState = DissectProcessorConfig & { type: 'dissect' };
 
 export type DateFormState = DateProcessorConfig & { type: 'date' };
 
-export type ProcessorFormState = GrokFormState | DissectFormState | DateFormState;
+export type SpecialisedFormState = GrokFormState | DissectFormState | DateFormState;
+
+export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
+
+export type ExtractBooleanFields<TInput> = NonNullable<
+  TInput extends Record<string, unknown>
+    ? {
+        [K in keyof TInput]: boolean extends TInput[K] ? K : never;
+      }[keyof TInput]
+    : never
+>;

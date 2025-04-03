@@ -96,6 +96,17 @@ export const Sidebar = ({ history }: { history: ScopedHistory }) => {
               },
             ],
           },
+          {
+            name: 'Task Manager with API key',
+            id: 'task-manager-with-api-key',
+            items: [
+              {
+                id: 'task-manager-with-api-key-page',
+                name: 'Task Manager with API Key',
+                onClick: () => history.push('/task_manager_with_api_key'),
+              },
+            ],
+          },
         ]}
       />
     </EuiPageSidebar>
