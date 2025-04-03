@@ -29,7 +29,7 @@ export default function getAlertDeletionPreview({ getService }: FtrProviderConte
       const { user, space } = scenario;
       describe(scenario.id, () => {
         it('should handle get alert deletion preview request appropriately', async () => {
-          const url = `/internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&active_alert_delete_threshold=90&is_inactive_alert_delete_enabled=true&inactive_alert_deletee_threshold=90`;
+          const url = `/internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&active_alert_delete_threshold=90&is_inactive_alert_delete_enabled=true&inactive_alert_delete_threshold=90`;
 
           const response = await supertestWithoutAuth
             .get(`${getUrlPrefix(space.id)}${url}`)
@@ -44,7 +44,7 @@ export default function getAlertDeletionPreview({ getService }: FtrProviderConte
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `API [GET ${url}] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-deletion-settings]`,
+                message: `API [GET ${url}] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
                 statusCode: 403,
               });
               break;
@@ -52,9 +52,7 @@ export default function getAlertDeletionPreview({ getService }: FtrProviderConte
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
-              // TODO: 5 is the value returned by the fake alert deletion client.
-              // Needs to be updated once we use the right client. Probably just 0
-              expect(response.body.affected_alert_count).to.eql(5);
+              expect(response.body.affected_alert_count).to.eql(55);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);

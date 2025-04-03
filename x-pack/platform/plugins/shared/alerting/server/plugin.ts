@@ -674,7 +674,7 @@ export class AlertingPlugin {
           return {
             previewTask: async (settings: unknown, spaceId: string) => {
               return {
-                affectedAlertCount: Math.floor(Math.random() * 100),
+                affectedAlertCount: 55,
               };
             },
           };

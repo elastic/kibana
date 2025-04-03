@@ -30,15 +30,16 @@ export const alertDeletePreview = async ({
   activeAlertDeleteThreshold,
   inactiveAlertDeleteThreshold,
 }: AlertDeletePreviewParams) => {
-  const params = new URLSearchParams({
-    isActiveAlertDeleteEnabled: String(isActiveAlertDeleteEnabled),
-    isInactiveAlertDeleteEnabled: String(isInactiveAlertDeleteEnabled),
-    activeAlertDeleteThreshold: String(activeAlertDeleteThreshold),
-    inactiveAlertDeleteThreshold: String(inactiveAlertDeleteThreshold),
-  });
-
   const { affected_alert_count: affectedAlertCount } = await http.get<AlertDeletePreviewResponse>(
-    `${BASE_ALERTING_API_PATH}/rules/settings/_alert_delete_preview?${params.toString()}`
+    `${BASE_ALERTING_API_PATH}/rules/settings/_alert_delete_preview`,
+    {
+      query: {
+        is_active_alert_delete_enabled: isActiveAlertDeleteEnabled,
+        is_inactive_alert_delete_enabled: isInactiveAlertDeleteEnabled,
+        active_alert_delete_threshold: activeAlertDeleteThreshold,
+        inactive_alert_delete_threshold: inactiveAlertDeleteThreshold,
+      },
+    }
   );
 
   return { affectedAlertCount };
