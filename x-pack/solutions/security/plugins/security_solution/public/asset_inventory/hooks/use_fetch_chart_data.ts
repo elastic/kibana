@@ -114,14 +114,6 @@ const tooltipOtherLabel = i18n.translate(
   }
 );
 
-// Example output:
-//
-// [
-//   { type: 'cloud-compute', subType: 'gcp-compute', count: 500, },
-//   { type: 'cloud-compute', subType: 'aws-security', count: 300, },
-//   { type: 'cloud-storage', subType: 'gcp-compute', count: 221, },
-//   { type: 'cloud-storage', subType: 'aws-security', count: 117, },
-// ];
 function transformAggregation(agg: AssetAggs) {
   const result: AggregationResult[] = [];
 
