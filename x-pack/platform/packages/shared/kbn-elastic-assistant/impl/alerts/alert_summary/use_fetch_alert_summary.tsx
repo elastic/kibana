@@ -16,6 +16,7 @@ import { useAssistantContext } from '../../..';
 export interface UseFetchAlertSummaryParams {
   signal?: AbortSignal | undefined;
   alertId: string;
+  connectorId: string;
 }
 
 /**
@@ -28,7 +29,11 @@ export interface UseFetchAlertSummaryParams {
  * @returns {useQuery} hook for getting the status of the alert_summary
  */
 
-export const useFetchAlertSummary = ({ alertId, signal }: UseFetchAlertSummaryParams) => {
+export const useFetchAlertSummary = ({
+  alertId,
+  connectorId,
+  signal,
+}: UseFetchAlertSummaryParams) => {
   const {
     assistantAvailability: { isAssistantEnabled },
     http,
@@ -38,6 +43,7 @@ export const useFetchAlertSummary = ({ alertId, signal }: UseFetchAlertSummaryPa
     page: 1,
     per_page: 1, // only fetching one alert summary
     filter: `alert_id:${alertId}`,
+    connector_id: connectorId,
   };
 
   const CACHING_KEYS = [
@@ -45,6 +51,7 @@ export const useFetchAlertSummary = ({ alertId, signal }: UseFetchAlertSummaryPa
     QUERY.page,
     QUERY.per_page,
     QUERY.filter,
+    QUERY.connector_id,
     API_VERSIONS.internal.v1,
   ];
 
@@ -63,12 +70,14 @@ export const useFetchAlertSummary = ({ alertId, signal }: UseFetchAlertSummaryPa
         page: 1,
         perPage: 1,
         total: 0,
+        prompt: '',
       },
       placeholderData: {
         data: [],
         page: 1,
         perPage: 1,
         total: 0,
+        prompt: '',
       },
       keepPreviousData: true,
       enabled: isAssistantEnabled,

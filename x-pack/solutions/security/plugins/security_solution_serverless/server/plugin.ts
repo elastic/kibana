@@ -98,7 +98,6 @@ export class SecuritySolutionServerlessPlugin
             const aiConnectors = actionsClient.context.inMemoryConnectors.filter((connector) =>
               isSupportedConnector(connector)
             );
-            console.log('aiConnectors ==>', aiConnectors);
             const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
             if (defaultAIConnectorSetting !== null) {
               const didReg = await coreSetup.uiSettings.register(defaultAIConnectorSetting);
