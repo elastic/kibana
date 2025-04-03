@@ -129,6 +129,12 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
   const subdued = useEuiBackgroundColor('subdued');
   const { euiTheme } = useEuiTheme();
 
+  const ruleActionsSystemActionsItemCss = css`
+    .actCheckActionTypeEnabled__disabledActionWarningCard {
+      background-color: ${subdued};
+    }
+  `;
+
   const dispatch = useRuleFormDispatch();
   const actionTypeModel = actionTypeRegistry.get(action.actionTypeId);
   const actionType = connectorTypes.find(({ id }) => id === action.actionTypeId)!;
@@ -230,6 +236,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       data-test-subj="ruleActionsSystemActionsItem"
       initialIsOpen
       borders="all"
+      css={ruleActionsSystemActionsItemCss}
       style={{
         backgroundColor: subdued,
         borderRadius: euiTheme.border.radius.medium,

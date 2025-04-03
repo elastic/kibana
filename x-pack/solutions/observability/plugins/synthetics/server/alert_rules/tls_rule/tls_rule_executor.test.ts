@@ -16,6 +16,9 @@ import * as monitorUtils from '../../saved_objects/synthetics_monitor/get_all_mo
 import * as locationsUtils from '../../synthetics_service/get_all_locations';
 import type { PublicLocation } from '../../../common/runtime_types';
 import { SyntheticsServerSetup } from '../../types';
+import { randomUUID } from 'node:crypto';
+import { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 describe('tlsRuleExecutor', () => {
   const mockEsClient = elasticsearchClientMock.createElasticsearchClient();
@@ -59,25 +62,117 @@ describe('tlsRuleExecutor', () => {
 
   const monitorClient = new SyntheticsMonitorClient(syntheticsService, serverMock);
 
+  const commonFilter =
+    'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)';
+
+  const getTLSRuleExecutorParams = (
+    ruleParams: TLSRuleParams = {}
+  ): [
+    Date,
+    TLSRuleParams,
+    SavedObjectsClientContract,
+    ElasticsearchClient,
+    SyntheticsServerSetup,
+    SyntheticsMonitorClient,
+    string,
+    string
+  ] => [
+    moment().toDate(),
+    ruleParams,
+    soClient,
+    mockEsClient,
+    serverMock,
+    monitorClient,
+    'test-space',
+    'rule-name',
+  ];
+
   it('should only query enabled monitors', async () => {
+    const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams());
     const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
-    const tlsRule = new TLSRuleExecutor(
-      moment().toDate(),
-      {},
-      soClient,
-      mockEsClient,
-      serverMock,
-      monitorClient
-    );
 
     const { certs } = await tlsRule.getExpiredCertificates();
 
     expect(certs).toEqual([]);
 
     expect(spy).toHaveBeenCalledWith({
-      filter:
-        'synthetics-monitor.attributes.alert.tls.enabled: true and (synthetics-monitor.attributes.type: http or synthetics-monitor.attributes.type: tcp)',
+      filter: commonFilter,
       soClient,
+    });
+  });
+
+  describe('getMonitors', () => {
+    it('should filter monitors based on monitor ids', async () => {
+      const monitorId = randomUUID();
+      const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ monitorIds: [monitorId] }));
+      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(spy).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor.attributes.id:(\"${monitorId}\")`,
+        soClient,
+      });
+    });
+
+    it('should filter monitors based on tags', async () => {
+      const tag = 'myMonitor';
+      const tlsRule = new TLSRuleExecutor(...getTLSRuleExecutorParams({ tags: [tag] }));
+      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(spy).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor.attributes.tags:(\"${tag}\")`,
+        soClient,
+      });
+    });
+
+    it('should filter monitors based on monitor types', async () => {
+      const monitorType = 'http';
+      const tlsRule = new TLSRuleExecutor(
+        ...getTLSRuleExecutorParams({ monitorTypes: [monitorType] })
+      );
+      const spy = jest.spyOn(monitorUtils, 'getAllMonitors').mockResolvedValue([]);
+
+      await tlsRule.getMonitors();
+
+      expect(spy).toHaveBeenCalledWith({
+        filter: `${commonFilter} AND synthetics-monitor.attributes.type:(\"${monitorType}\")`,
+        soClient,
+      });
+    });
+
+    it('should filter monitors based on KQL query', async () => {
+      const tlsRule = new TLSRuleExecutor(
+        ...getTLSRuleExecutorParams({ kqlQuery: 'monitor.type : "tcp" ' })
+      );
+
+      await tlsRule.getMonitors();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                filter: expect.arrayContaining([
+                  {
+                    bool: {
+                      should: {
+                        bool: {
+                          should: [{ match_phrase: { 'monitor.type': 'tcp' } }],
+                          minimum_should_match: 1,
+                        },
+                      },
+                    },
+                  },
+                ]),
+              }),
+            }),
+          }),
+        }),
+        { meta: true }
+      );
     });
   });
 });

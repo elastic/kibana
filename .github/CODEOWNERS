@@ -724,6 +724,7 @@ src/platform/plugins/shared/presentation_util @elastic/kibana-presentation
 x-pack/packages/ai-infra/product-doc-artifact-builder @elastic/appex-ai-infra
 x-pack/platform/plugins/shared/ai_infra/product_doc_base @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
+x-pack/platform/packages/shared/kbn-profiler-cli @elastic/obs-knowledge-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/profiling @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team

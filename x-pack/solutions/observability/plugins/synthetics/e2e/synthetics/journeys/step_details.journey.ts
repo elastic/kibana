@@ -15,7 +15,7 @@ journey(`StepDetailsPage`, async ({ page, params }) => {
   const services = new SyntheticsServices(params);
 
   before(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
     await services.enableMonitorManagedViaApi();
     await services.addTestMonitor(
       'https://www.google.com',
@@ -32,7 +32,7 @@ journey(`StepDetailsPage`, async ({ page, params }) => {
   });
 
   after(async () => {
-    await services.cleaUp();
+    await services.cleanUp();
   });
 
   step('Go to step details page', async () => {

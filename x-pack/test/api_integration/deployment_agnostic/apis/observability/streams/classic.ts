@@ -303,5 +303,120 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
     });
+
+    describe('Orphaned classic stream', () => {
+      const ORPHANED_STREAM_NAME = 'logs-orphaned-default';
+
+      before(async () => {
+        const doc = {
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, ORPHANED_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+        // PUT the stream to make sure it's a classic stream
+        await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+            body: {
+              dashboards: [],
+              stream: {
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [],
+                  unwired: {},
+                },
+              },
+            },
+          },
+        });
+        // delete the underlying data stream
+        await esClient.indices.deleteDataStream({
+          name: ORPHANED_STREAM_NAME,
+        });
+      });
+
+      it('should still be able to fetch the stream', async () => {
+        const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+      });
+
+      it('should still be able to fetch the dashboards for the stream', async () => {
+        const getResponse = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+      });
+
+      it('should still be possible to call _details', async () => {
+        const getResponse = await apiClient.fetch('GET /internal/streams/{name}/_details', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+            query: {
+              start: '2023-01-01T00:00:00.000Z',
+              end: '2023-01-01T00:00:20.000Z',
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+      });
+
+      it('same APIs should return 404 for actually non-existing streams', async () => {
+        const getStreamResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'non-existing-stream',
+            },
+          },
+        });
+        expect(getStreamResponse.status).to.eql(404);
+        const getDashboardsResponse = await apiClient.fetch(
+          'GET /api/streams/{name}/dashboards 2023-10-31',
+          {
+            params: {
+              path: {
+                name: 'non-existing-stream',
+              },
+            },
+          }
+        );
+        expect(getDashboardsResponse.status).to.eql(404);
+        const getDetailsResponse = await apiClient.fetch('GET /internal/streams/{name}/_details', {
+          params: {
+            path: {
+              name: 'non-existing-stream',
+            },
+            query: {
+              start: '2023-01-01T00:00:00.000Z',
+              end: '2023-01-01T00:00:20.000Z',
+            },
+          },
+        });
+        expect(getDetailsResponse.status).to.eql(404);
+      });
+
+      after(async () => {
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+          },
+        });
+      });
+    });
   });
 }

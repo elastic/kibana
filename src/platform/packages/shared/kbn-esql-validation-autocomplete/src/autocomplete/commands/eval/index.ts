@@ -10,7 +10,7 @@
 import type { ESQLSingleAstItem } from '@kbn/esql-ast';
 import { isMarkerNode } from '../../../shared/context';
 import { isAssignment, isColumnItem } from '../../../..';
-import { CommandSuggestParams } from '../../../definitions/types';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { getNewVariableSuggestion } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
@@ -40,7 +40,7 @@ export async function suggest(
   const suggestions = await suggestForExpression({
     ...params,
     expressionRoot,
-    commandName: 'eval',
+    location: Location.EVAL,
   });
 
   const positionInExpression = getExpressionPosition(params.innerText, expressionRoot);

@@ -8,7 +8,7 @@
  */
 
 import { type ESQLSingleAstItem } from '@kbn/esql-ast';
-import { CommandSuggestParams } from '../../../definitions/types';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import { buildPartialMatcher, suggestForExpression } from '../../helper';
@@ -23,7 +23,8 @@ export async function suggest(
   const suggestions = await suggestForExpression({
     ...params,
     expressionRoot,
-    commandName: 'where',
+    location: Location.WHERE,
+    preferredExpressionType: 'boolean',
   });
 
   const isExpressionComplete =

@@ -11,17 +11,13 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
+import type { SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
 import { getIsAlertSuppressionActive } from '../utils/get_is_alert_suppression_active';
 import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
 
-export const createEqlAlertType = (
-  createOptions: CreateRuleOptions
-): SecurityAlertType<EqlRuleParams, {}> => {
-  const { experimentalFeatures, licensing, scheduleNotificationResponseActionsService } =
-    createOptions;
+export const createEqlAlertType = (): SecurityAlertType<EqlRuleParams, {}> => {
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -66,7 +62,7 @@ export const createEqlAlertType = (
 
       const isAlertSuppressionActive = await getIsAlertSuppressionActive({
         alertSuppression: sharedParams.completeRule.ruleParams.alertSuppression,
-        licensing,
+        licensing: sharedParams.licensing,
       });
 
       const wrapSuppressedHits = (
@@ -84,9 +80,10 @@ export const createEqlAlertType = (
         services,
         wrapSuppressedHits,
         isAlertSuppressionActive,
-        experimentalFeatures,
+        experimentalFeatures: sharedParams.experimentalFeatures,
         state,
-        scheduleNotificationResponseActionsService,
+        scheduleNotificationResponseActionsService:
+          sharedParams.scheduleNotificationResponseActionsService,
       });
       return { ...result, state, ...(loggedRequests ? { loggedRequests } : {}) };
     },

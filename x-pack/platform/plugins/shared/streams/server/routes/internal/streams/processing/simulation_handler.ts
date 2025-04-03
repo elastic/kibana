@@ -673,11 +673,11 @@ const computeSkippedRate = (docs: SimulationDocReport[]) => {
 
 const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) => {
   return Object.fromEntries(
-    detectedFields.flatMap(({ name, type }) => {
-      if (type === 'system') {
+    detectedFields.flatMap(({ name, ...config }) => {
+      if (config.type === 'system') {
         return [];
       }
-      return [[name, { type }]];
+      return [[name, config]];
     })
   );
 };

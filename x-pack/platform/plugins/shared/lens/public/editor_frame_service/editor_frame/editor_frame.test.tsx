@@ -27,13 +27,14 @@ import {
   createExpressionRendererMock,
   mockStoreDeps,
   renderWithReduxStore,
+  mockDataPlugin,
 } from '../../mocks';
+import { mountWithProvider } from '../../mocks/enzyme';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
-import { mockDataPlugin, mountWithProvider } from '../../mocks';
 import { LensAppState, setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';

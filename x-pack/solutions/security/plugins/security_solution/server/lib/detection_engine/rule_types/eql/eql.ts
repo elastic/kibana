@@ -13,7 +13,6 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import type {
   SearchAfterAndBulkCreateReturnType,
   SignalSource,
-  CreateRuleOptions,
   WrapSuppressedHits,
   SecuritySharedParams,
   SecurityRuleServices,
@@ -47,6 +46,7 @@ import { logShardFailures } from '../utils/log_shard_failure';
 import { checkErrorDetails } from '../utils/check_error_details';
 import { wrapSequences } from './wrap_sequences';
 import { bulkCreate, wrapHits } from '../factories';
+import type { ScheduleNotificationResponseActionsService } from '../../rule_response_actions/schedule_notification_response_actions';
 
 interface EqlExecutorParams {
   sharedParams: SecuritySharedParams<EqlRuleParams>;
@@ -55,7 +55,7 @@ interface EqlExecutorParams {
   isAlertSuppressionActive: boolean;
   experimentalFeatures: ExperimentalFeatures;
   state?: Record<string, unknown>;
-  scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
+  scheduleNotificationResponseActionsService: ScheduleNotificationResponseActionsService;
 }
 
 export const eqlExecutor = async ({

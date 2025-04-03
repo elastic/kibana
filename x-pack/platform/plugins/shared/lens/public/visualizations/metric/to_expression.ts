@@ -21,7 +21,7 @@ import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
 import { MetricVisualizationState } from './types';
 import { metricStateDefaults } from './constants';
-import { isMetricNumericType } from './helpers';
+import { getAccessorType } from '../../shared_components';
 
 // TODO - deduplicate with gauges?
 function computePaletteParams(params: CustomPaletteParams) {
@@ -94,7 +94,7 @@ export const toExpression = (
   const datasource = datasourceLayers[state.layerId];
   const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
 
-  const isMetricNumeric = isMetricNumericType(datasource, state.metricAccessor);
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
   const maxPossibleTiles =
     // if there's a collapse function, no need to calculate since we're dealing with a single tile
     state.breakdownByAccessor && !state.collapseFn
@@ -128,7 +128,9 @@ export const toExpression = (
     };
   };
 
-  const collapseExpressionFunction = state.collapseFn
+  const canCollapseBy = state.collapseFn && isMetricNumeric;
+
+  const collapseExpressionFunction = canCollapseBy
     ? buildExpressionFunction<CollapseExpressionFunction>(
         'lens_collapse',
         getCollapseFnArguments()
@@ -143,7 +145,7 @@ export const toExpression = (
     secondaryPrefix: state.secondaryPrefix,
     max: state.maxAccessor,
     breakdownBy:
-      state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
+      state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,
     trendline: trendlineExpression ? [trendlineExpression] : [],
     subtitle: state.subtitle ?? undefined,
     progressDirection: showingBar(state)

@@ -6,27 +6,21 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Subject, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import stats from 'stats-lite';
 import { take, bufferCount, skip, map } from 'rxjs';
 
-import { ConcreteTaskInstance, TaskStatus } from '../task';
-import {
-  asTaskRunEvent,
-  TaskTiming,
-  asTaskManagerStatEvent,
-  TaskPersistence,
-} from '../task_events';
+import type { ConcreteTaskInstance } from '../task';
+import { TaskStatus } from '../task';
+import type { TaskTiming } from '../task_events';
+import { asTaskRunEvent, asTaskManagerStatEvent, TaskPersistence } from '../task_events';
 import { asOk } from '../lib/result_type';
-import { TaskLifecycleEvent } from '../polling_lifecycle';
+import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
-import {
-  createEphemeralTaskAggregator,
-  summarizeEphemeralStat,
-  SummarizedEphemeralTaskStat,
-  EphemeralTaskStat,
-} from './ephemeral_task_statistics';
-import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
+import type { SummarizedEphemeralTaskStat, EphemeralTaskStat } from './ephemeral_task_statistics';
+import { createEphemeralTaskAggregator, summarizeEphemeralStat } from './ephemeral_task_statistics';
+import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { ephemeralTaskLifecycleMock } from '../ephemeral_task_lifecycle.mock';
 import { times, takeRight, take as takeLeft } from 'lodash';
 

@@ -294,6 +294,7 @@ export default function searchSolutionNavigation({
         'enterpriseSearchContent:webCrawlers',
         'build',
         'searchPlayground',
+        'searchSynonyms:synonyms',
         'enterpriseSearchApplications:searchApplications',
         'enterpriseSearchAnalytics',
         'relevance',

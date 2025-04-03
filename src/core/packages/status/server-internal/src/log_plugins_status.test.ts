@@ -15,8 +15,7 @@ import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { logPluginsStatusChanges } from './log_plugins_status';
 import type { PluginStatus } from './types';
 
-const delay = async (millis: number = 10) =>
-  await new Promise((resolve) => setTimeout(resolve, millis));
+const delay = async (millis: number = 10) => await jest.advanceTimersByTimeAsync(millis);
 
 describe('logPluginsStatusChanges', () => {
   const reportedUnavailable: PluginStatus = {
@@ -46,6 +45,7 @@ describe('logPluginsStatusChanges', () => {
   let l: Logger; // using short name for clarity
 
   beforeEach(() => {
+    jest.useFakeTimers();
     plugins$ = new Subject<Record<string, PluginStatus>>();
     stop$ = new Subject<void>();
     loggerFactory = loggingSystemMock.create();
@@ -53,6 +53,8 @@ describe('logPluginsStatusChanges', () => {
   });
 
   afterEach(() => {
+    jest.clearAllTimers();
+    jest.useRealTimers();
     stop$.next();
     stop$.complete();
     loggingSystemMock.clear(loggerFactory);
@@ -142,7 +144,7 @@ describe('logPluginsStatusChanges', () => {
     plugins$.next({ A: reportedAvailable, B: reportedAvailable });
 
     // give the 'bufferTime' operator enough time to emit and log
-    await delay(20);
+    await delay(1_000);
 
     expect(l.get).toBeCalledWith('A');
     expect(l.get).toBeCalledWith('B');
@@ -186,7 +188,7 @@ describe('logPluginsStatusChanges', () => {
     plugins$.next({ A: { ...reportedUnavailable, summary: `attempt #${++attempt}` } });
 
     // give the 'bufferTime' operator enough time to emit and log
-    await delay(20);
+    await delay(1_000);
 
     // emit a last message (some time after)
     plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
