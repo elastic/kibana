@@ -32,7 +32,9 @@ import { getKuery } from '../utils/get_kuery';
 
 const REFRESH_INTERVAL_MS = 30000;
 const MAX_AGENT_ACTIONS = 100;
-
+const NO_TAGS_VALUE = i18n.translate('xpack.fleet.noTagsValue', {
+  defaultMessage: 'No Tags',
+});
 /** Allow to fetch full agent policy using a cache */
 function useFullAgentPolicyFetcher() {
   const authz = useAuthz();
@@ -293,7 +295,7 @@ export function useFetchAgentsData() {
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
-            setAllTags([...newAllTags, 'No Tags']);
+            setAllTags([...newAllTags, NO_TAGS_VALUE]);
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
