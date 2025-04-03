@@ -16,6 +16,7 @@ import {
   IngestSimulateDocumentResult,
   SimulateIngestRequest,
   ErrorCause,
+  MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
@@ -139,10 +140,16 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
 }: SimulateProcessingDeps) => {
+  /* 0. Retrieve required data to prepare the simulation */
+  const streamMappings = await getStreamMappings(
+    scopedClusterClient,
+    streamsClient,
+    params.path.name
+  );
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
-  const ingestSimulationBody = prepareIngestSimulationBody(simulationData, params);
+  const ingestSimulationBody = prepareIngestSimulationBody(simulationData, streamMappings, params);
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
    * - The pipeline simulation is used to extract the documents reports and the processor metrics. This always runs.
@@ -264,6 +271,7 @@ const preparePipelineSimulationBody = (
 
 const prepareIngestSimulationBody = (
   simulationData: ReturnType<typeof prepareSimulationData>,
+  mappings: MappingTypeMapping,
   params: ProcessingSimulationParams
 ): SimulateIngestRequest => {
   const { path, body } = params;
@@ -278,20 +286,20 @@ const prepareIngestSimulationBody = (
         processors,
       },
     },
-  };
-
-  if (detected_fields) {
-    const properties = computeMappingProperties(detected_fields);
-    simulationBody.component_template_substitutions = {
+    component_template_substitutions: {
       [`${path.name}@stream.layer`]: {
         template: {
           mappings: {
-            properties,
+            ...mappings,
+            properties: {
+              ...mappings.properties,
+              ...(detected_fields && computeMappingProperties(detected_fields)),
+            },
           },
         },
       },
-    };
-  }
+    },
+  };
 
   return simulationBody;
 };
@@ -614,7 +622,7 @@ const collectIngestDocumentErrors = (docResult: SuccessfulIngestSimulateDocument
   if (docResult.doc?.ignored_fields) {
     const ignoredFields = docResult.doc.ignored_fields.map((ignored) => ignored.field).join(', ');
     errors.push({
-      type: 'field_mapping_failure',
+      type: 'ignored_fields_failure',
       message: `Some field were ignored for this document ingestion: [${ignoredFields}]`,
     });
   }
@@ -665,6 +673,24 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
     success_rate: 0,
     is_non_additive_simulation: isNonAdditiveSimulationError(error),
   };
+};
+
+const getStreamMappings = async (
+  scopedClusterClient: IScopedClusterClient,
+  streamsClient: StreamsClient,
+  streamName: string
+): Promise<MappingTypeMapping> => {
+  const dataStream = await streamsClient.getDataStream(streamName);
+  const lastIndex = dataStream.indices.at(-1);
+  if (!lastIndex) {
+    throw new Error(`No writing index found for stream ${streamName}`);
+  }
+
+  const lastIndexMapping = await scopedClusterClient.asCurrentUser.indices.getMapping({
+    index: lastIndex.index_name,
+  });
+
+  return lastIndexMapping[lastIndex.index_name].mappings;
 };
 
 const getStreamFields = async (
