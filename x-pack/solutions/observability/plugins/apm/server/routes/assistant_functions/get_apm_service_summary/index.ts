@@ -118,8 +118,7 @@ export async function getApmServiceSummary({
       logger,
       transactionType,
     }).catch((error) => {
-      logger.error('Failed to get anomalies');
-      logger.error(error);
+      logger.warn('Failed to get anomalies', { error });
       return {
         error,
       };

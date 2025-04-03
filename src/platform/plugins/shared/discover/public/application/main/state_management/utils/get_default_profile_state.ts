@@ -14,7 +14,7 @@ import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DefaultAppStateColumn, ProfilesManager } from '../../../../context_awareness';
 import { getMergedAccessor } from '../../../../context_awareness';
 import type { DataDocumentsMsg } from '../discover_data_state_container';
-import type { DiscoverInternalState } from '../redux';
+import type { TabState } from '../redux';
 
 export const getDefaultProfileState = ({
   profilesManager,
@@ -22,7 +22,7 @@ export const getDefaultProfileState = ({
   dataView,
 }: {
   profilesManager: ProfilesManager;
-  resetDefaultProfileState: DiscoverInternalState['resetDefaultProfileState'];
+  resetDefaultProfileState: TabState['resetDefaultProfileState'];
   dataView: DataView;
 }) => {
   const defaultState = getDefaultState(profilesManager, dataView);

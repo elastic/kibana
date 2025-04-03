@@ -1983,6 +1983,14 @@
             "path": "x-pack/platform/plugins/shared/maps/public/routes/map_page/saved_map/save_to_library.ts"
           },
           {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+          },
+          {
+            "plugin": "streamsApp",
+            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
+          },
+          {
             "plugin": "graph",
             "path": "x-pack/platform/plugins/private/graph/public/services/persistence/saved_workspace_references.ts"
           },
@@ -2001,14 +2009,6 @@
           {
             "plugin": "graph",
             "path": "x-pack/platform/plugins/private/graph/public/types/persistence.ts"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
-          },
-          {
-            "plugin": "streamsApp",
-            "path": "x-pack/platform/plugins/shared/streams_app/public/components/stream_detail_dashboards_view/to_reference_list.ts"
           },
           {
             "plugin": "lens",
@@ -2236,23 +2236,23 @@
           },
           {
             "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
-            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
-          },
-          {
-            "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
           },
           {
             "plugin": "lens",
             "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
           },
           {
             "plugin": "maps",
