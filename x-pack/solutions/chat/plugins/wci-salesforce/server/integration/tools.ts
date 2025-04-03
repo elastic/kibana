@@ -31,7 +31,6 @@ interface CaseRetrievalParams {
   commentAuthorEmail?: string[];
   commentCreatedAfter?: string;
   commentCreatedBefore?: string;
-  commentContent?: string;
 }
 
 interface AccountRetrievalParams {
@@ -53,7 +52,7 @@ interface AccountRetrievalParams {
  * @param indexName - Index name to query
  * @param params - Search parameters including optional sorting configuration
  */
-export async function retrieveCases(
+export async function getCases(
   esClient: ElasticsearchClient,
   logger: Logger,
   indexName: string,
@@ -84,10 +83,12 @@ export async function retrieveCases(
     const contextFields = [
       { field: 'title', type: 'keyword' },
       { field: 'description', type: 'text' },
-      { field: 'content', type: 'text' },
+      { field: 'url', type: 'keyword' },
       { field: 'metadata.case_number', type: 'keyword' },
       { field: 'metadata.priority', type: 'keyword' },
       { field: 'metadata.status', type: 'keyword' },
+      { field: 'metadata.account_id', type: 'keyword' },
+      { field: 'metadata.account_name', type: 'keyword' },
       { field: 'owner.email', type: 'keyword' },
       { field: 'owner.name', type: 'keyword' },
     ];
@@ -109,9 +110,11 @@ export async function retrieveCases(
       // Format comments if they exist
       let commentsText = '';
       if (source.comments && source.comments.length > 0) {
+        const limitedComments = source.comments.slice(0, 10);
+
         commentsText =
           '\n\nComments:\n' +
-          source.comments
+          limitedComments
             .map((comment, index) => {
               return (
                 `Comment ${index + 1}:\n` +
@@ -166,7 +169,7 @@ export async function retrieveCases(
  * @param indexName - Index name to query
  * @param params - Search parameters including optional sorting configuration
  */
-export async function retrieveAccounts(
+export async function getAccounts(
   esClient: ElasticsearchClient,
   logger: Logger,
   indexName: string,
@@ -197,6 +200,7 @@ export async function retrieveAccounts(
     const contextFields = [
       { field: 'id', type: 'keyword' },
       { field: 'title', type: 'keyword' },
+      { field: 'url', type: 'keyword' },
       { field: 'owner.email', type: 'keyword' },
       { field: 'owner.name', type: 'keyword' },
       { field: 'created_at', type: 'date' },
@@ -220,9 +224,10 @@ export async function retrieveAccounts(
       // Format contacts if they exist
       let contactsText = '';
       if (source.contacts && source.contacts.length > 0) {
+        const limitedContacts = source.contacts.slice(0, 10);
         contactsText =
           '\n\nContacts:\n' +
-          source.contacts
+          limitedContacts
             .map((contact, index) => {
               return (
                 `Contact ${index + 1}:\n` +
@@ -298,12 +303,7 @@ function buildCaseQuery(params: CaseRetrievalParams): any {
   }
 
   // Add comment-related queries
-  if (
-    params.commentAuthorEmail ||
-    params.commentCreatedAfter ||
-    params.commentCreatedBefore ||
-    params.commentContent
-  ) {
+  if (params.commentAuthorEmail || params.commentCreatedAfter || params.commentCreatedBefore) {
     const nestedQuery: any = {
       nested: {
         path: 'comments',
@@ -330,13 +330,6 @@ function buildCaseQuery(params: CaseRetrievalParams): any {
       if (params.commentCreatedBefore)
         commentDateRange.range['comments.created_at'].lte = params.commentCreatedBefore;
       nestedQuery.nested.query.bool.must.push(commentDateRange);
-    }
-
-    // Add comment content search
-    if (params.commentContent) {
-      nestedQuery.nested.query.bool.must.push({
-        match: { 'comments.content': params.commentContent },
-      });
     }
 
     mustClauses.push(nestedQuery);

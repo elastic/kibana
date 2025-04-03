@@ -8,7 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { retrieveCases, retrieveAccounts } from './tools';
+import { getCases, getAccounts } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -63,7 +63,7 @@ export async function createMcpServer({
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
 
   server.tool(
-    'retrieve_cases',
+    'get_cases',
     `Retrieves Salesforce support cases with flexible filtering options`,
     {
       caseNumber: z
@@ -140,7 +140,6 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Filter cases with comments created before this date (format: YYYY-MM-DD)'),
-      commentContent: z.string().optional().describe('Search for specific text in case comments'),
     },
     async ({
       id,
@@ -159,10 +158,9 @@ export async function createMcpServer({
       commentAuthorEmail,
       commentCreatedAfter,
       commentCreatedBefore,
-      commentContent,
       ownerEmail,
     }) => {
-      const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
+      const caseContent = await getCases(elasticsearchClient, logger, index, {
         id,
         size,
         sortField,
@@ -179,11 +177,12 @@ export async function createMcpServer({
         commentAuthorEmail,
         commentCreatedAfter,
         commentCreatedBefore,
-        commentContent,
         ownerEmail,
       });
 
       logger.info(`Retrieved ${caseContent.length} support cases`);
+
+      logger.info(`Case content: ${JSON.stringify(caseContent)}`);
 
       return {
         content: caseContent,
@@ -192,7 +191,7 @@ export async function createMcpServer({
   );
 
   server.tool(
-    'retrieve_accounts',
+    'get_accounts',
     `Retrieves Salesforce accounts with flexible filtering options`,
     {
       id: z.array(z.string()).optional().describe('Salesforce internal IDs of the accounts'),
@@ -236,7 +235,7 @@ export async function createMcpServer({
       createdBefore,
       ownerEmail,
     }) => {
-      const accountContent = await retrieveAccounts(elasticsearchClient, logger, index, {
+      const accountContent = await getAccounts(elasticsearchClient, logger, index, {
         id,
         size,
         sortField,
