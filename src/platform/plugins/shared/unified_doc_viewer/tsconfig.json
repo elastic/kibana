@@ -41,6 +41,7 @@
     "@kbn/event-stacktrace",
     "@kbn/elastic-agent-utils",
     "@kbn/data-view-utils",
+    "@kbn/apm-ui-shared",
     "@kbn/react-hooks"
   ],
   "exclude": ["target/**/*"]
