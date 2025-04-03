@@ -142,6 +142,10 @@ module.exports = (_, argv) => {
         // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',
+        buffer: [
+          Path.resolve(REPO_ROOT, 'node_modules/node-libs-browser/node_modules/buffer'),
+          require.resolve('buffer')
+        ]
       },
       extensions: ['.js', '.ts'],
       mainFields: ['browser', 'module', 'main'],
