@@ -8,6 +8,7 @@
  */
 
 import { watchPackage } from '../lib/webpack.mjs';
+import { run } from '../lib/spawn.mjs';
 
 /** @type {import('../lib/command').Command} */
 export const command = {
@@ -24,13 +25,22 @@ export const command = {
     id: 'total',
   },
 
-  async run() {
-    const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
+  async run({ args }) {
+    const quiet = args.getBooleanValue('quiet') ?? false;
+
+    // Since the watch doesn't guarantee the right ordering, we'd run a build first:
+    await run('yarn', ['kbn', 'build-shared'], { pipe: !quiet });
+
+    // Watch packages
+    const kbnUiSharedDepsNpmPath = 'src/platform/packages/private/kbn-ui-shared-deps-npm';
+    const kbnUiSharedDepsSrcPath = 'src/platform/packages/private/kbn-ui-shared-deps-src';
+    const kbnMonacoPath = 'src/platform/packages/shared/kbn-monaco';
+
     const watchesFinished = [];
-    for (const packageName of packageNames) {
+    for (const packageName of [kbnUiSharedDepsSrcPath, kbnMonacoPath, kbnUiSharedDepsNpmPath]) {
       watchesFinished.push(
         watchPackage(packageName, {
-          quiet: false,
+          quiet,
         })
       );
     }

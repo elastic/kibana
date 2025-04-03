@@ -13,32 +13,36 @@ import path from 'path';
 
 /**
  * Builds a single package using its npm build script
- * @param {string} packageName
+ * @param {string} packagePath
  * @param {{quiet: boolean, dist:boolean, log: import('@kbn/some-dev-log/src/some_dev_log').SomeDevLog}} options
  * @returns {Promise<void>}
  */
-export async function buildPackage(packageName, { log, quiet, dist }) {
-  log.info('build package @ ' + packageName);
+export async function buildPackage(packagePath, { log, quiet, dist }) {
+  log.info('build package @ ' + packagePath);
 
   await run('yarn', ['build'].concat(dist ? ['--dist'] : []), {
     env: {
       ...process.env,
       REPO_ROOT,
     },
-    cwd: path.resolve(REPO_ROOT, packageName),
+    cwd: path.resolve(REPO_ROOT, packagePath),
     pipe: !quiet,
   });
 }
 
 /**
  * Runs the build script in watch mode for a single package
- * @param {string} packageName
+ * @param {string} packagePath
  * @param {{quiet: boolean}} options
  * @returns {Promise<void>}
  */
-export async function watchPackage(packageName, { quiet }) {
+export async function watchPackage(packagePath, { quiet }) {
   await run('yarn', ['build', '--watch'], {
-    cwd: path.resolve(REPO_ROOT, 'packages', packageName),
+    env: {
+      ...process.env,
+      REPO_ROOT,
+    },
+    cwd: path.resolve(REPO_ROOT, packagePath),
     pipe: !quiet,
   });
 }
