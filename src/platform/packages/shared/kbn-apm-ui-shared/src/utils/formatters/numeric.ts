@@ -13,7 +13,7 @@ import numeral from '@elastic/numeral';
 import { Maybe } from '../../typings';
 
 export const NOT_AVAILABLE_LABEL = i18n.translate(
-  'unifiedDocViewer.formatters.numeric.notAvailableLabel',
+  'apmUiShared.formatters.numeric.notAvailableLabel',
   {
     defaultMessage: 'N/A',
   }
@@ -44,4 +44,22 @@ export function asDecimalOrInteger(value: Maybe<number>, threshold = 10) {
     return asInteger(value);
   }
   return asDecimal(value);
+}
+
+export function asPercent(
+  numerator: Maybe<number>,
+  denominator: number | undefined,
+  fallbackResult = NOT_AVAILABLE_LABEL
+) {
+  if (numerator === null || numerator === undefined || !denominator || !isFinite(numerator)) {
+    return fallbackResult;
+  }
+
+  const decimal = numerator / denominator;
+
+  if (Math.abs(decimal) >= 0.1 || decimal === 0) {
+    return numeral(decimal).format('0%');
+  }
+
+  return numeral(decimal).format('0.0%');
 }
