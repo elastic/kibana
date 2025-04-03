@@ -29,7 +29,7 @@
           "\nFind what area a code owner belongs to\n"
         ],
         "signature": [
-          "(owner: string) => \"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\" | undefined"
+          "(owner: string) => \"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\" | undefined"
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
@@ -299,7 +299,7 @@
             "label": "areas",
             "description": [],
             "signature": [
-              "(\"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\")[]"
+              "(\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\")[]"
             ],
             "path": "src/platform/packages/private/kbn-code-owners/src/code_owners.ts",
             "deprecated": false,
@@ -333,7 +333,7 @@
         "label": "CodeOwnerArea",
         "description": [],
         "signature": [
-          "\"search\" | \"security\" | \"observability\" | \"platform\" | \"chat\""
+          "\"search\" | \"security\" | \"observability\" | \"chat\" | \"platform\""
         ],
         "path": "src/platform/packages/private/kbn-code-owners/src/code_owner_areas.ts",
         "deprecated": false,
