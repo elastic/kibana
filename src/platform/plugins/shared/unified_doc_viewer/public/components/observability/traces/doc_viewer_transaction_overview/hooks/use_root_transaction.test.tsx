@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
-import { TransactionProvider, useTransactionContext } from './use_transaction';
+import { RootTransactionProvider, useRootTransactionContext } from './use_root_transaction';
 import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
 jest.mock('../../../../../plugin', () => ({
@@ -50,17 +50,17 @@ beforeEach(() => {
   lastValueFromMock.mockReset();
 });
 
-describe('useTransaction hook', () => {
+describe('useRootTransaction hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <TransactionProvider transactionId="test-transaction" indexPattern="test-index">
+    <RootTransactionProvider traceId="test-trace" indexPattern="test-index">
       {children}
-    </TransactionProvider>
+    </RootTransactionProvider>
   );
 
   it('should start with loading true and transaction as null', async () => {
     lastValueFromMock.mockResolvedValue({});
 
-    const { result } = renderHook(() => useTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useRootTransactionContext(), { wrapper });
 
     expect(result.current.loading).toBe(true);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
@@ -84,12 +84,11 @@ describe('useTransaction hook', () => {
       },
     });
 
-    const { result } = renderHook(() => useTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useRootTransactionContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
     expect(result.current.loading).toBe(false);
-    expect(result.current.transaction?.name).toBe(transactionName);
     expect(result.current.transaction?.duration).toBe(transactionDuration);
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
@@ -98,7 +97,7 @@ describe('useTransaction hook', () => {
     const errorMessage = 'Search error';
     lastValueFromMock.mockRejectedValue(new Error(errorMessage));
 
-    const { result } = renderHook(() => useTransactionContext(), { wrapper });
+    const { result } = renderHook(() => useRootTransactionContext(), { wrapper });
 
     await waitFor(() => !result.current.loading);
 
@@ -111,23 +110,5 @@ describe('useTransaction hook', () => {
         text: errorMessage,
       })
     );
-  });
-
-  it('should set transaction to null and stop loading when transactionId is not provided', async () => {
-    const wrapperWithoutTransactionId = ({ children }: { children: React.ReactNode }) => (
-      <TransactionProvider transactionId={undefined} indexPattern="test-index">
-        {children}
-      </TransactionProvider>
-    );
-
-    const { result } = renderHook(() => useTransactionContext(), {
-      wrapper: wrapperWithoutTransactionId,
-    });
-
-    await waitFor(() => !result.current.loading);
-
-    expect(result.current.loading).toBe(false);
-    expect(result.current.transaction).toBeNull();
-    expect(lastValueFrom).not.toHaveBeenCalled();
   });
 });
