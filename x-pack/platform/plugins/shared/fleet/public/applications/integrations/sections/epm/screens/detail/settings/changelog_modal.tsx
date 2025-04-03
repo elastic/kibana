@@ -16,12 +16,7 @@ import {
   EuiButton,
   EuiSkeletonText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
-
-import { getFormattedChangelog } from '../utils';
 
 export interface ChangeLogParams {
   version: string;
@@ -33,40 +28,16 @@ export interface ChangeLogParams {
 }
 
 interface Props {
-  latestVersion: string;
-  currentVersion?: string;
-  packageName: string;
+  changelogText: string;
+  isLoading: boolean;
   onClose: () => void;
 }
 
 export const ChangelogModal: React.FunctionComponent<Props> = ({
-  latestVersion,
-  currentVersion,
-  packageName,
+  changelogText,
+  isLoading,
   onClose,
 }) => {
-  const { notifications } = useStartServices();
-
-  const {
-    data: changelogResponse,
-    error: changelogError,
-    isLoading,
-  } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
-  const changelogText = changelogResponse?.data;
-
-  // currentVersion is used to display the changelog up to the current installed version, when there is a newer one available
-  const finalChangelog = currentVersion
-    ? getFormattedChangelog(changelogText, latestVersion, currentVersion)
-    : getFormattedChangelog(changelogText, latestVersion);
-
-  if (changelogError) {
-    notifications.toasts.addError(changelogError, {
-      title: i18n.translate('xpack.fleet.epm.errorLoadingChangelog', {
-        defaultMessage: 'Error loading changelog information',
-      }),
-    });
-  }
-
   return (
     <EuiModal maxWidth={true} onClose={onClose} data-test-subj="integrations.changelogModal">
       <EuiModalHeader>
@@ -79,7 +50,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
           isLoading={isLoading}
           contentAriaLabel="changelog text"
         >
-          <EuiCodeBlock overflowHeight={360}>{finalChangelog}</EuiCodeBlock>
+          <EuiCodeBlock overflowHeight={360}>{changelogText}</EuiCodeBlock>
         </EuiSkeletonText>
       </EuiModalBody>
       <EuiModalFooter>

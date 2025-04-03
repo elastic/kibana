@@ -44,6 +44,7 @@ import {
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
+import { useChangelog } from '../hooks';
 
 import { InstallButton } from './install_button';
 import { ReinstallButton } from './reinstall_button';
@@ -134,6 +135,12 @@ export const SettingsPage: React.FC<Props> = memo(
       page: 1,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
     });
+
+    const {
+      formattedChangelog,
+      isLoading: isChangelogLoading,
+      error: changelogError,
+    } = useChangelog(name, latestVersion, version);
 
     const packagePolicyIds = useMemo(
       () => packagePoliciesData?.items.map(({ id }) => id),
@@ -237,6 +244,14 @@ export const SettingsPage: React.FC<Props> = memo(
       (installationStatus === InstallStatus.installed && installedVersion !== version);
 
     const isUpdating = installationStatus === InstallStatus.installing && installedVersion;
+
+    if (changelogError) {
+      notifications.toasts.addError(changelogError, {
+        title: i18n.translate('xpack.fleet.epm.errorLoadingChangelog', {
+          defaultMessage: 'Error loading changelog information',
+        }),
+      });
+    }
 
     return (
       <>
@@ -487,9 +502,8 @@ export const SettingsPage: React.FC<Props> = memo(
         <EuiPortal>
           {isChangelogModalOpen && (
             <ChangelogModal
-              currentVersion={version}
-              latestVersion={latestVersion}
-              packageName={name}
+              changelogText={formattedChangelog}
+              isLoading={isChangelogLoading}
               onClose={toggleChangelogModal}
             />
           )}
