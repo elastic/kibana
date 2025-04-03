@@ -16,7 +16,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { getEsqlSelfHealingGraph } from '../../server/assistant/tools/esql/esql_self_healing_graph';
+import { getEsqlSelfHealingGraph } from '../../server/assistant/tools/esql/graphs/generate_esql/esql_self_healing_graph';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
@@ -57,6 +57,7 @@ async function esqlSelfHealing(logger: Logger): Promise<Drawable> {
     inference: {} as unknown as InferenceServerStart,
     logger,
     request: {} as unknown as KibanaRequest,
+    createLlmInstance: () => { return mockLlm as ActionsClientChatOpenAI; },
   }).getGraphAsync({ xray: true });
 }
 
@@ -83,12 +84,12 @@ export const drawGraph = async ({
 
 export const draw = async () => {
   await drawGraph({
+    getGraphAsync: esqlSelfHealing,
+    outputFilename: '../../docs/esql_self_healing/img/esql_self_healing_graph.png',
+  });
+  await drawGraph({
     getGraphAsync: getSiemMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',
   });
 
-  await drawGraph({
-    getGraphAsync: esqlSelfHealing,
-    outputFilename: '../../docs/esql_self_healing/img/esql_self_healing_graph.png',
-  });
 };

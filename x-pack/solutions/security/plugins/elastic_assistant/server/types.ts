@@ -243,6 +243,7 @@ export type AssistantToolLlm =
 
 export interface AssistantToolParams {
   alertsIndexPattern?: string;
+  assistantContext: ElasticAssistantApiRequestHandlerContext;
   anonymizationFields?: AnonymizationFieldResponse[];
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
@@ -254,7 +255,7 @@ export interface AssistantToolParams {
   langChainTimeout?: number;
   llm?: ActionsClientLlm | AssistantToolLlm;
   llmTasks?: LlmTasksPluginStart;
-  isOssModel?: boolean;
+  isOssModel: boolean | undefined;
   logger: Logger;
   onNewReplacements?: (newReplacements: Replacements) => void;
   replacements?: Replacements;
@@ -265,4 +266,5 @@ export interface AssistantToolParams {
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
+  createLlmInstance: () => ActionsClientChatBedrockConverse | ActionsClientChatVertexAI | ActionsClientChatOpenAI
 }

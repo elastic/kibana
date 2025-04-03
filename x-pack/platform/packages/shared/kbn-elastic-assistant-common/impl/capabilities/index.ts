@@ -22,4 +22,5 @@ export const defaultAssistantFeatures = Object.freeze({
   assistantModelEvaluation: false,
   defendInsights: true,
   assistantAttackDiscoverySchedulingEnabled: false,
+  advancedEsqlGeneration: false,
 });

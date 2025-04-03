@@ -7,14 +7,13 @@
 
 import { tool } from '@langchain/core/tools';
 import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
+import { lastValueFrom } from 'rxjs';
+import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod';
-import { AIMessage, HumanMessage } from '@langchain/core/messages';
-import { v4 as uuidv4 } from 'uuid';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
-import { getEsqlSelfHealingGraph } from './esql_self_healing_graph';
-import { toolDetails as indexNamesToolDetails } from './index_names_tool';
 
+// select only some properties of AssistantToolParams
 export type ESQLToolParams = AssistantToolParams;
 
 const TOOL_NAME = 'NaturalLanguageESQLTool';
@@ -30,7 +29,7 @@ const toolDetails = {
   - convert queries from another language to ES|QL
   - asks general questions about ES|QL
 
-  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer. The tool will validate the query.`,
+  ALWAYS use this tool to generate ES|QL queries or explain anything about the ES|QL query language rather than coming up with your own answer.`,
 };
 
 export const NL_TO_ESQL_TOOL: AssistantTool = {
@@ -43,41 +42,28 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request, isOssModel, esClient } = params;
+    const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
     if (inference == null || connectorId == null) return null;
 
-    const selfHealingGraph = getEsqlSelfHealingGraph({
-      esClient,
-      connectorId,
-      inference,
-      logger,
-      request,
-    });
+    const callNaturalLanguageToEsql = async (question: string) => {
+      return lastValueFrom(
+        naturalLanguageToEsql({
+          client: inference.getClient({ request }),
+          connectorId,
+          input: question,
+          functionCalling: 'auto',
+          logger,
+        })
+      );
+    };
 
     return tool(
-      async ({ question, shouldValidate }) => {
-        const humanMessage = new HumanMessage({ content: question });
-        // When validation is enabled, we force the the graph to fetch the index names.
-        const aiMessage = new AIMessage({
-          content: '',
-          tool_calls: [
-            {
-              id: uuidv4(),
-              name: indexNamesToolDetails.name,
-              args: {},
-            },
-          ],
-        });
-        const result = await selfHealingGraph.invoke(
-          {
-            messages: [humanMessage, aiMessage],
-            shouldValidate,
-          },
-          { recursionLimit: 30 }
-        );
-        const { messages } = result;
-        const lastMessage = messages[messages.length - 1];
-        return lastMessage.content;
+      async (input) => {
+        const generateEvent = await callNaturalLanguageToEsql(input.question);
+        const answer = generateEvent.content ?? 'An error occurred in the tool';
+
+        logger.debug(`Received response from NL to ESQL tool: ${answer}`);
+        return answer;
       },
       {
         name: toolDetails.name,
@@ -86,11 +72,6 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
           (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
         schema: z.object({
           question: z.string().describe(`The user's exact question about ESQL`),
-          shouldValidate: z
-            .boolean()
-            .describe(
-              'Whether to regenerate the queries until no errors are returned when the query is run. If the user is asking a general question about ESQL, set this to false. If the user is asking for a query, set this to true.'
-            ),
         }),
         tags: ['esql', 'query-generation', 'knowledge-base'],
       }

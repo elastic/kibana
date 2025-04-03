@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
-import { ChatOpenAI } from '@langchain/openai';
+import { ChatOpenAI, OpenAIClient } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -125,6 +125,13 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return 'base_chat_model';
   }
 
+
+  async betaParsedCompletionWithRetry(
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
+  ): Promise<ReturnType<OpenAIClient["beta"]["chat"]["completions"]["parse"]>>{
+    return await this.completionWithRetry(request)
+  }
+
   async completionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsStreaming
   ): Promise<AsyncIterable<OpenAI.ChatCompletionChunk>>;
@@ -132,7 +139,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   async completionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsNonStreaming
   ): Promise<OpenAI.ChatCompletion>;
-
   async completionWithRetry(
     completionRequest:
       | OpenAI.ChatCompletionCreateParamsStreaming
@@ -195,6 +201,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     signal?: AbortSignal;
   } {
+
     const body = {
       temperature: this.#temperature,
       // possible client model override
@@ -204,6 +211,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       n: completionRequest.n,
       stop: completionRequest.stop,
       tools: completionRequest.tools,
+      ...(completionRequest.response_format?{response_format: completionRequest.response_format}:{}),
       ...(completionRequest.tool_choice ? { tool_choice: completionRequest.tool_choice } : {}),
       // deprecated, use tools
       ...(completionRequest.functions ? { functions: completionRequest?.functions } : {}),

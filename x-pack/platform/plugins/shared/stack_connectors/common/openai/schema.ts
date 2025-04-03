@@ -150,6 +150,7 @@ export const InvokeAIActionParamsSchema = schema.object({
     schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
   ),
   temperature: schema.maybe(schema.number()),
+  response_format: schema.maybe(schema.any()),
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),

@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { metricsApmIndexCreateRequest } from './metrics-apm.evaluations.2025.03.21';
-import { tracesApmIndexCreateRequest } from './traces-apm.evlauations.2025.03.21';
-import { nycTaxisIndexCreateRequest } from './nyc_taxis.evaluations.2025.03.21';
-import { postgresLogsIndexCreateRequest } from './postgres-logs.evaluations.2025.03.21';
-import { employeesIndexCreateRequest } from './employees.evaluations.2025.03.21';
-import { metricbeatIndexCreateRequest } from './metricbeat.evaluations-2025.03.21';
-import { packetbeatIndexCreateRequest } from './packetbeat-network.evaluations.2025.03.21';
-import { logsIndexCreateRequest } from './logs-all.evaluations.2025.03.24';
+import { nycTaxisIndexCreateRequest } from './nyc_taxis-[environment].evaluations.[date]';
+import { postgresLogsIndexCreateRequest } from './postgres-logs-[environment].evaluations.[date]';
+import { employeesIndexCreateRequest } from './employees-[environment].evaluations.[date]';
+import { metricbeatIndexCreateRequest } from './metricbeat-[environment].evaluations-[date]';
+import { packetbeatIndexCreateRequest } from './packetbeat-[environment].evaluations.[date]';
+import { logsIndexCreateRequest } from './logs-[environment].evaluations.[date]';
 
 export const indicesCreateRequests = {
-  metricsApmIndexCreateRequest,
-  tracesApmIndexCreateRequest,
   nycTaxisIndexCreateRequest,
   postgresLogsIndexCreateRequest,
   employeesIndexCreateRequest,

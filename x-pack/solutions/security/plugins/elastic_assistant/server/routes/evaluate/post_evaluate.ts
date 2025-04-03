@@ -194,6 +194,7 @@ export const postEvaluateRoute = (
           });
 
           if (assistantGraphs.length > 0) {
+            await prepareIndicesForAssistantGraph.cleanup();
             await prepareIndicesForAssistantGraph.setup();
           }
 
@@ -310,6 +311,7 @@ export const postEvaluateRoute = (
                     pluginId: 'security_ai_assistant',
                   },
                 });
+
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(
@@ -366,6 +368,7 @@ export const postEvaluateRoute = (
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+                createLlmInstance
               };
 
               const tools: StructuredTool[] = (
@@ -482,7 +485,7 @@ export const postEvaluateRoute = (
               experimentPrefix: name,
               client: new Client({ apiKey: langSmithApiKey }),
               // prevent rate limiting and unexpected multiple experiment runs
-              maxConcurrency: 5,
+              maxConcurrency: 3,
             })
               .then((output) => {
                 logger.debug(`runResp:\n ${JSON.stringify(output, null, 2)}`);
