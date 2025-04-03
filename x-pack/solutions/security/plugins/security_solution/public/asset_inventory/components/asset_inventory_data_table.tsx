@@ -34,7 +34,6 @@ import { type AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
@@ -59,6 +58,7 @@ import {
   LOCAL_STORAGE_COLUMNS_SETTINGS_KEY,
   LOCAL_STORAGE_COLUMNS_KEY,
 } from '../constants';
+import type { GenericEntityRecord } from '../types/generic_entity_record';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -125,23 +125,6 @@ const defaultColumns: AssetInventoryDefaultColumn[] = [
   { id: '@timestamp' },
 ];
 
-// TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
-const getEntity = (record: DataTableRecord) => {
-  const { _source } = record.raw;
-
-  const entityMock = {
-    tags: ['infrastructure', 'linux', 'admin', 'active'],
-    labels: { Group: 'cloud-sec-dev', Environment: 'Production' },
-    id: 'mock-entity-id',
-    criticality: 'low_impact',
-  } as unknown as EntityEcs;
-
-  return {
-    entity: { ...(_source?.entity || {}), ...entityMock },
-    source: _source || {},
-  };
-};
-
 export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
   height?: number;
@@ -173,13 +156,14 @@ export const AssetInventoryDataTable = ({
     onFlyoutClose: () => setExpandedDoc(undefined),
   });
 
-  const onExpandDocClick = (record?: DataTableRecord | undefined) => {
-    if (record) {
-      const { entity, source } = getEntity(record);
-      setExpandedDoc(record); // Table is expecting the same doc ref to highlight the selected row
+  const openTableFlyout = (doc?: DataTableRecord | undefined) => {
+    if (doc && doc.raw._source) {
+      const source = doc.raw._source as GenericEntityRecord;
+      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
       openDynamicFlyout({
-        entity,
-        source,
+        entityDocId: doc.raw._id,
+        entityType: source.entity?.type,
+        entityName: source.entity?.name,
         scopeId: ASSET_INVENTORY_TABLE_ID,
         contextId: ASSET_INVENTORY_TABLE_ID,
       });
@@ -239,7 +223,7 @@ export const AssetInventoryDataTable = ({
     };
   }, [persistedSettings]);
 
-  const { dataView } = useDataViewContext();
+  const { dataView, dataViewIsLoading } = useDataViewContext();
 
   const {
     uiActions,
@@ -369,8 +353,7 @@ export const AssetInventoryDataTable = ({
     },
   ];
 
-  const loadingState =
-    isLoadingGridData || !dataView ? DataLoadingState.loading : DataLoadingState.loaded;
+  const loadingState = isLoadingGridData ? DataLoadingState.loading : DataLoadingState.loaded;
 
   return (
     <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
@@ -381,8 +364,13 @@ export const AssetInventoryDataTable = ({
           height: computeDataTableRendering.wrapperHeight,
         }}
       >
-        <EuiProgress size="xs" color="accent" style={{ opacity: isFetchingGridData ? 1 : 0 }} />
-        {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
+        <EuiProgress
+          size="xs"
+          color="accent"
+          style={{ opacity: isFetchingGridData ? 1 : 0 }}
+          className={styles.gridProgressBar}
+        />
+        {dataViewIsLoading ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
           <AssetInventoryEmptyState onResetFilters={onResetFilters} />
         ) : (
           <UnifiedDataTable
@@ -399,7 +387,7 @@ export const AssetInventoryDataTable = ({
             rows={rows}
             sampleSizeState={MAX_ASSETS_TO_LOAD}
             expandedDoc={expandedDoc}
-            setExpandedDoc={onExpandDocClick}
+            setExpandedDoc={openTableFlyout}
             renderDocumentView={EmptyComponent}
             sort={sort}
             rowsPerPageState={pageSize}
