@@ -16,7 +16,7 @@ import {
   IngestSimulateDocumentResult,
   SimulateIngestRequest,
   ErrorCause,
-  MappingTypeMapping,
+  IndicesIndexState,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
@@ -141,15 +141,12 @@ export const simulateProcessing = async ({
   streamsClient,
 }: SimulateProcessingDeps) => {
   /* 0. Retrieve required data to prepare the simulation */
-  const streamMappings = await getStreamMappings(
-    scopedClusterClient,
-    streamsClient,
-    params.path.name
-  );
+  const streamIndex = await getStreamIndex(scopedClusterClient, streamsClient, params.path.name);
+
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
-  const ingestSimulationBody = prepareIngestSimulationBody(simulationData, streamMappings, params);
+  const ingestSimulationBody = prepareIngestSimulationBody(simulationData, streamIndex, params);
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
    * - The pipeline simulation is used to extract the documents reports and the processor metrics. This always runs.
@@ -271,32 +268,31 @@ const preparePipelineSimulationBody = (
 
 const prepareIngestSimulationBody = (
   simulationData: ReturnType<typeof prepareSimulationData>,
-  mappings: MappingTypeMapping,
+  streamIndex: IndicesIndexState,
   params: ProcessingSimulationParams
 ): SimulateIngestRequest => {
-  const { path, body } = params;
+  const { body } = params;
   const { detected_fields } = body;
 
   const { docs, processors } = simulationData;
 
+  const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
+  const mappings = streamIndex.mappings;
+
   const simulationBody: SimulateIngestRequest = {
     docs,
-    pipeline_substitutions: {
-      [`${path.name}@stream.processing`]: {
-        processors,
-      },
-    },
-    component_template_substitutions: {
-      [`${path.name}@stream.layer`]: {
-        template: {
-          mappings: {
-            ...mappings,
-            properties: {
-              ...mappings.properties,
-              ...(detected_fields && computeMappingProperties(detected_fields)),
-            },
-          },
+    ...(defaultPipelineName && {
+      pipeline_substitutions: {
+        [defaultPipelineName]: {
+          processors,
         },
+      },
+    }),
+    mapping_addition: {
+      ...mappings,
+      properties: {
+        ...(mappings && mappings.properties),
+        ...(detected_fields && computeMappingProperties(detected_fields)),
       },
     },
   };
@@ -405,9 +401,14 @@ const computePipelineSimulationResult = (
     .map(([name]) => name);
 
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
-    const { errors, status, value } = getLastDoc(pipelineDocResult, sampleDocs[id]._source);
-
     const ingestDocResult = ingestSimulationResult.docs[id];
+    const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
+
+    const { errors, status, value } = getLastDoc(
+      pipelineDocResult,
+      sampleDocs[id]._source,
+      ingestDocErrors
+    );
 
     const diff = computeSimulationDocDiff(
       pipelineDocResult,
@@ -428,7 +429,7 @@ const computePipelineSimulationResult = (
     });
 
     errors.push(...diff.errors); // Add diffing errors to the document errors list, such as reserved fields or non-additive changes
-    errors.push(...collectIngestDocumentErrors(ingestDocResult)); // Add ingestion errors to the document errors list, such as ignored_fields or mapping errors
+    errors.push(...ingestDocErrors); // Add ingestion errors to the document errors list, such as ignored_fields or mapping errors
     errors.forEach((error) => {
       const procId = error.processor_id;
 
@@ -497,7 +498,14 @@ const extractProcessorMetrics = ({
   });
 };
 
-const getDocumentStatus = (doc: SuccessfulPipelineSimulateDocumentResult): DocSimulationStatus => {
+const getDocumentStatus = (
+  doc: SuccessfulPipelineSimulateDocumentResult,
+  ingestDocErrors: SimulationError[]
+): DocSimulationStatus => {
+  // If there is an ingestion mapping error, the document parsing should be considered failed
+  if (ingestDocErrors.some((error) => error.type === 'field_mapping_failure')) {
+    return 'failed';
+  }
   // Remove the always present base processor for dot expander
   const processorResults = doc.processor_results.slice(1);
 
@@ -516,8 +524,12 @@ const getDocumentStatus = (doc: SuccessfulPipelineSimulateDocumentResult): DocSi
   return 'failed';
 };
 
-const getLastDoc = (docResult: SuccessfulPipelineSimulateDocumentResult, sample: FlattenRecord) => {
-  const status = getDocumentStatus(docResult);
+const getLastDoc = (
+  docResult: SuccessfulPipelineSimulateDocumentResult,
+  sample: FlattenRecord,
+  ingestDocErrors: SimulationError[]
+) => {
+  const status = getDocumentStatus(docResult, ingestDocErrors);
   const lastDocSource =
     docResult.processor_results
       .slice(1) // Remove the always present base processor for dot expander
@@ -675,22 +687,22 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
   };
 };
 
-const getStreamMappings = async (
+const getStreamIndex = async (
   scopedClusterClient: IScopedClusterClient,
   streamsClient: StreamsClient,
   streamName: string
-): Promise<MappingTypeMapping> => {
+): Promise<IndicesIndexState> => {
   const dataStream = await streamsClient.getDataStream(streamName);
   const lastIndex = dataStream.indices.at(-1);
   if (!lastIndex) {
     throw new Error(`No writing index found for stream ${streamName}`);
   }
 
-  const lastIndexMapping = await scopedClusterClient.asCurrentUser.indices.getMapping({
+  const lastIndexMapping = await scopedClusterClient.asCurrentUser.indices.get({
     index: lastIndex.index_name,
   });
 
-  return lastIndexMapping[lastIndex.index_name].mappings;
+  return lastIndexMapping[lastIndex.index_name];
 };
 
 const getStreamFields = async (
