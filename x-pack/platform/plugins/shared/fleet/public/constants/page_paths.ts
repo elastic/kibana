@@ -6,7 +6,6 @@
  */
 
 import { stringify } from 'query-string';
-import { agent } from 'superagent';
 
 export type StaticPage =
   | 'base'

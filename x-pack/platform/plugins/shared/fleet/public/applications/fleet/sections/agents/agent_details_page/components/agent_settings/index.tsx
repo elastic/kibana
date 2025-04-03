@@ -6,16 +6,16 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiPanel, EuiText } from '@elastic/eui';
-import { SelectLogLevel } from '../agent_logs/select_log_level';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiPanel } from '@elastic/eui';
+
+import { SelectLogLevel } from '../agent_logs/select_log_level';
 
 import type { Agent, AgentPolicy } from '../../../../../types';
 interface AgentSettingsProps {
   agent: Agent;
   agentPolicy: AgentPolicy | undefined;
 }
-// Allows child text to be truncated
 
 export const AgentSettings: React.FunctionComponent<AgentSettingsProps> = ({
   agent,
