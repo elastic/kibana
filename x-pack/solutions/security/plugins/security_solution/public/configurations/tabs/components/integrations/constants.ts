@@ -8,7 +8,7 @@
 export const AVAILABLE_INTEGRATIONS = [
   'splunk', // in PR
   'google_secops', // labelled edr/xdr
-  'microsoft_sentinel',
+  'microsoft_sentinel', // labelled edr/xdr
   'sentinel_one',
   'crowdstrike',
 ];
