@@ -69,7 +69,13 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
 
     return (
       <EuiText size="xs">
-        <strong className={titleClassname} aria-label={`${label}: ${fieldsCount} items.`}>
+        <strong
+          className={titleClassname}
+          aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
+            defaultMessage: '{label}: {fieldsCount} items',
+            values: { label, fieldsCount },
+          })}
+        >
           {label}
         </strong>
         {!!helpTooltip && (
