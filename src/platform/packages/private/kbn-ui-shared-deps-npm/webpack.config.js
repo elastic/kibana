@@ -144,8 +144,8 @@ module.exports = (_, argv) => {
         'scheduler/tracing': 'scheduler/tracing-profiling',
         buffer: [
           Path.resolve(REPO_ROOT, 'node_modules/node-libs-browser/node_modules/buffer'),
-          require.resolve('buffer')
-        ]
+          require.resolve('buffer'),
+        ],
       },
       extensions: ['.js', '.ts'],
       mainFields: ['browser', 'module', 'main'],
