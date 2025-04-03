@@ -20,6 +20,8 @@ import { createCustomizationService } from './customization_service';
 
 const customizationContext = createContext(createCustomizationService());
 
+export const DiscoverCustomizationProvider = customizationContext.Provider;
+
 export const useDiscoverCustomization$ = <TCustomizationId extends DiscoverCustomizationId>(
   id: TCustomizationId
 ) => useContext(customizationContext).get$(id);
@@ -31,7 +33,6 @@ export const useDiscoverCustomization = <TCustomizationId extends DiscoverCustom
   return useObservable(customizationService.get$(id), customizationService.get(id));
 };
 
-export const DiscoverCustomizationProvider = customizationContext.Provider;
 export interface ConnectedCustomizationService extends DiscoverCustomizationService {
   cleanup: () => Promise<void>;
 }
