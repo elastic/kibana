@@ -54,6 +54,19 @@ export type AuthenticationProviderSpecificOptions = Record<string, unknown>;
 export const ELASTIC_CLOUD_SSO_REALM_NAME = 'cloud-saml-kibana';
 
 /**
+ * Names of the user properties that aren't available in the "minimal" authentication mode, and should throw an error
+ * when accessed.
+ */
+const USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE = new Set([
+  'username',
+  'elastic_cloud_user',
+  'authentication_realm',
+  'lookup_realm',
+  'authentication_type',
+  'roles',
+]);
+
+/**
  * Base class that all authentication providers should extend.
  */
 export abstract class BaseAuthenticationProvider {
@@ -72,6 +85,12 @@ export abstract class BaseAuthenticationProvider {
    * Logger instance bound to a specific provider context.
    */
   protected readonly logger: Logger;
+
+  /**
+   * A proxy for the user object returned in minimally authenticated mode. We cache proxy for each
+   * provider to avoid creating them for every request, as they are stateless and can be reused.
+   */
+  private minAuthenticationUserProxy?: AuthenticatedUser;
 
   /**
    * Instantiates AuthenticationProvider.
@@ -137,6 +156,14 @@ export abstract class BaseAuthenticationProvider {
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
+    // For "minimal" authentication, we don't need to call the `_authenticate` endpoint and can just
+    // return a static user proxy. The caveat here is that we don't validate credentials, but it
+    // will be done by the Elasticsearch itself.
+    if (request.route.options.security?.authc?.enabled === 'minimal') {
+      this.logger.debug(`Performing "minimal" authentication for request ${request.url.pathname}.`);
+      return this.getMinAuthenticationUserProxy();
+    }
+
     return this.authenticationInfoToAuthenticatedUser(
       // @ts-expect-error Metadata is defined as Record<string, any>
       await this.options.client
@@ -158,5 +185,42 @@ export abstract class BaseAuthenticationProvider {
         authenticationInfo.authentication_realm.type === 'saml' &&
         authenticationInfo.authentication_realm.name === ELASTIC_CLOUD_SSO_REALM_NAME,
     } as AuthenticatedUser);
+  }
+
+  private getMinAuthenticationUserProxy() {
+    if (this.minAuthenticationUserProxy) {
+      return this.minAuthenticationUserProxy;
+    }
+
+    // We can retrieve `username` and `elastic_cloud_user` from the session, if there is a need in the future.
+    // As for `authentication_realm`, `lookup_realm`, `authentication_type` and `roles`, we're considering to
+    // remove them in the future to make the `AuthenticatedUser` interface lighter.
+    const minUserStub: Partial<AuthenticatedUser> = {
+      enabled: true,
+      authentication_provider: { type: this.type, name: this.options.name },
+    };
+
+    this.minAuthenticationUserProxy = deepFreeze(
+      new Proxy(minUserStub as AuthenticatedUser, {
+        get: (target, prop, receiver) => {
+          const value = Reflect.get(target, prop, receiver);
+          if (USER_PROPERTIES_NOT_AVAILABLE_IN_MIN_AUTHC_MODE.has(prop.toString())) {
+            this.logger.warn(
+              `Property "${String(prop)}" is not available for minimally authenticated users: ${
+                new Error().stack
+              }`
+            );
+
+            // throw new Error(
+            //   `Property "${String(prop)}" is not available for minimally authenticated users.`
+            // );
+          }
+
+          return value;
+        },
+      })
+    );
+
+    return this.minAuthenticationUserProxy;
   }
 }

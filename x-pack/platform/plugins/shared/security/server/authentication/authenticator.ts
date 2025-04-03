@@ -754,6 +754,7 @@ export class Authenticator {
    * Updates, creates, extends or clears session value based on the received authentication result.
    * @param request Request instance.
    * @param provider Provider that produced provided authentication result.
+   * @param providerInstance Provider instance that produced provided authentication result.
    * @param authenticationResult Result of the authentication or login attempt.
    * @param existingSessionValue Value of the existing session if any.
    */
@@ -785,6 +786,14 @@ export class Authenticator {
           authenticationType: provider.type,
         })
       );
+    }
+
+    // Don't update session if request is "minimally" authenticated.
+    if (request.route.options.security?.authc?.enabled === 'minimal') {
+      this.logger.debug(
+        'Session should not be changed for requests that require minimal authentication, skipping session update.'
+      );
+      return null;
     }
 
     if (!existingSessionValue && !authenticationResult.shouldUpdateState()) {
