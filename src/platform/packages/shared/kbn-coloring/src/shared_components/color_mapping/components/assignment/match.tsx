@@ -16,6 +16,7 @@ import { ColorMapping } from '../../config';
 import { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
 import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
 import { DuplicateWarning } from './duplicate_warning';
+import { getValueKey } from '../../color/utils';
 
 export const isNotNull = <T,>(value: T | null): value is NonNullable<T> => value !== null;
 
@@ -162,10 +163,10 @@ function getOptionForRawValueFn(fieldFormat?: IFieldFormat) {
   const formatter = fieldFormat?.convert.bind(fieldFormat) ?? String;
   return (serializedValue: unknown) => {
     const rawValue = deserializeField(serializedValue);
-    const key = String(rawValue);
+    const key = getValueKey(rawValue);
     return {
       key,
-      value: typeof rawValue === 'number' ? String(rawValue) : undefined,
+      value: typeof rawValue === 'number' ? key : undefined,
       label: formatter(rawValue),
     } satisfies EuiComboBoxOptionOption<string>;
   };

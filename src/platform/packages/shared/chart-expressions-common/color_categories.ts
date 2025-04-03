@@ -9,6 +9,7 @@
 
 import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { RawValue, SerializedValue, serializeField } from '@kbn/data-plugin/common';
+import { getValueKey } from '@kbn/coloring';
 
 /**
  * Returns all serialized categories of the dataset for color matching.
@@ -28,7 +29,7 @@ export function getColorCategories(
   return rows.reduce<SerializedValue[]>((acc, row) => {
     const hasValue = Object.hasOwn(row, accessor);
     const rawValue: RawValue = row[accessor];
-    const key = String(rawValue);
+    const key = getValueKey(rawValue);
     if (hasValue && !exclude?.includes(rawValue) && !seen.has(key)) {
       const value = serializeField(rawValue);
       seen.add(key);

@@ -19,6 +19,7 @@ import {
   DEFAULT_OTHER_ASSIGNMENT_INDEX,
 } from '../config/default_color_mapping';
 import { getColorAssignmentMatcher } from './color_assignment_matcher';
+import { getValueKey } from './utils';
 
 const FALLBACK_ASSIGNMENT_COLOR = 'red';
 
@@ -97,7 +98,7 @@ export function getColorFactory(
             return !assignmentMatcher.hasMatch(category);
           })
           .map((category: RawValue, i) => {
-            const key = String(category);
+            const key = getValueKey(category);
             const autoAssignment = autoAssignments[i];
             return [key, { ...autoAssignment, categoryIndex: i }];
           })
@@ -105,7 +106,7 @@ export function getColorFactory(
   );
 
   return (rawValue: RawValue) => {
-    const key = String(rawValue);
+    const key = getValueKey(rawValue);
 
     if (unassignedAutoAssignmentsMap.has(key)) {
       const {

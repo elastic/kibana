@@ -9,6 +9,7 @@
 
 import { RawValue, deserializeField } from '@kbn/data-plugin/common';
 import { ColorMapping } from '../config';
+import { getValueKey } from './utils';
 
 type AssignmentMatchCount = [assignmentIndex: number, matchCount: number];
 
@@ -44,7 +45,7 @@ export class ColorAssignmentMatcher {
   }
 
   #getMatch(value: RawValue): AssignmentMatchCount {
-    const key = String(value);
+    const key = getValueKey(value);
     return this.#assignmentMap.get(key) ?? [-1, 0];
   }
 
@@ -86,7 +87,7 @@ function getKey(rule: ColorMapping.ColorRule): string | null {
   }
 
   if (rule.type === 'raw') {
-    return String(deserializeField(rule.value));
+    return getValueKey(deserializeField(rule.value));
   }
 
   // nondeterministic match, cannot assign ambiguous keys

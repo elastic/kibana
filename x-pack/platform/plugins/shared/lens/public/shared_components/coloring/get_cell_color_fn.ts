@@ -10,6 +10,7 @@ import {
   PaletteOutput,
   PaletteRegistry,
   getSpecialString,
+  getValueKey,
 } from '@kbn/coloring';
 import { CustomPaletteState } from '@kbn/charts-plugin/common';
 import { KbnPalettes } from '@kbn/palettes';
@@ -45,7 +46,7 @@ export function getCellColorFn(
       return (value: RawValue) => {
         if (value === undefined || value === null) return null;
 
-        const key = String(value); // can be a number as a string
+        const key = getValueKey(value);
 
         return paletteService.get(palette.name).getCategoricalColor(
           [
