@@ -126,6 +126,8 @@ export class ResetSLO {
     await this.esClient.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }],
@@ -144,6 +146,8 @@ export class ResetSLO {
     await this.esClient.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }],
