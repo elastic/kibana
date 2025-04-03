@@ -1,0 +1,68 @@
+name: Dependency Review
+on:
+  pull_request:
+    paths: # Trigger only if package.json changes
+      - '**/package.json'
+  push:
+    paths: # Trigger only if package.json changes
+      - '**/package.json'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  analyze:
+    name: Analyze New Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@1e60f620b9541d16bece96c5465dc8ee9832be0b # v4.0.3
+        with:
+          node-version: '20.18.2'
+          cache: 'npm'
+
+      - name: Install Dependencies for Script
+        run: npm install axios @actions/core @actions/github semver
+        working-directory: ./.github/scripts
+
+      - name: Run Dependency Analysis Script
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        id: analysis
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const scriptModule = await import('./.github/scripts/check_dependency_health.mjs');
+            const analyzeDependencies = scriptModule.default;
+
+            const result = await analyzeDependencies({
+              github,
+              context,
+              core,
+              snykToken: process.env.SNYK_TOKEN,
+              snykOrgId: process.env.SNYK_ORG_ID
+            });
+
+            core.setOutput('comment_body', result.commentBody);
+            core.setOutput('analysis_performed', result.analysisPerformed);
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+          SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
+
+      - name: Post Comment to PR
+        if: steps.analysis.outputs.analysis_performed == 'true'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
+        with:
+          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
+          script: |
+            const commentBody = `${{ steps.analysis.outputs.comment_body }}`;
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: commentBody
+            });
+            console.log(`Posted comment to PR #${context.issue.number}`);
