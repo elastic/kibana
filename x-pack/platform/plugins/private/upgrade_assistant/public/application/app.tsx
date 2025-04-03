@@ -26,7 +26,7 @@ import {
 } from '../shared_imports';
 import { AppDependencies } from '../types';
 import { AppContextProvider, useAppContext } from './app_context';
-import { EsDeprecations, EsDeprecationLogs, KibanaDeprecations, Overview } from './components';
+import { EsDeprecations, KibanaDeprecations, Overview } from './components';
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 
@@ -121,7 +121,6 @@ const AppHandlingClusterUpgradeState: React.FunctionComponent = () => {
     <Routes>
       <Route exact path="/overview" component={Overview} />
       <Route exact path="/es_deprecations" component={EsDeprecations} />
-      <Route exact path="/es_deprecation_logs" component={EsDeprecationLogs} />
       <Route exact path="/kibana_deprecations" component={KibanaDeprecations} />
       <Redirect from="/" to="/overview" />
     </Routes>
