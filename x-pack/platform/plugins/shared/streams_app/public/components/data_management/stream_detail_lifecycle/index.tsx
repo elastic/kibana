@@ -190,7 +190,6 @@ export function StreamDetailLifecycle({
             <RetentionMetadata
               definition={definition}
               lifecycleActions={lifecycleActions}
-              ilmLocator={ilmLocator}
               openEditModal={(action) => setOpenEditModal(action)}
               isLoadingStats={isLoadingStats}
               stats={stats}
@@ -218,11 +217,7 @@ export function StreamDetailLifecycle({
           {isIlmLifecycle(definition.effective_lifecycle) ? (
             <EuiFlexItem grow={3}>
               <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
-                <IlmSummary
-                  definition={definition}
-                  lifecycle={definition.effective_lifecycle}
-                  ilmLocator={ilmLocator}
-                />
+                <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
               </EuiPanel>
             </EuiFlexItem>
           ) : null}
