@@ -202,9 +202,7 @@ export class FileUploadManager {
           fileClashes:
             formatsOk === false
               ? fileClashes
-              : mappingsOk === false
-              ? getMappingClashInfo(mappingClashes, existingIndexChecks, statuses)
-              : [],
+              : getMappingClashInfo(mappingClashes, existingIndexChecks, statuses),
           analysisStatus: mappingsOk && formatsOk ? STATUS.COMPLETED : STATUS.FAILED,
           pipelinesJsonValid: this.allPipelinesValid(),
         });
