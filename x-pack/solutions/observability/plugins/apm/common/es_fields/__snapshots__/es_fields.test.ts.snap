@@ -67,6 +67,8 @@ exports[`Error DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Error DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
 
+exports[`Error ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
+
 exports[`Error ERROR_CULPRIT 1`] = `"handleOopsie"`;
 
 exports[`Error ERROR_EXC_HANDLED 1`] = `undefined`;
@@ -344,8 +346,6 @@ exports[`Error TIMESTAMP_US 1`] = `1337`;
 
 exports[`Error TRACE_ID 1`] = `"trace id"`;
 
-exports[`Error TRANSACTION_MARKS_AGENT 1`] = `undefined`;
-
 exports[`Error TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Error TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -355,6 +355,8 @@ exports[`Error TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Error TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Error TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Error TRANSACTION_NAME 1`] = `undefined`;
 
@@ -458,6 +460,8 @@ exports[`Span DATA_STEAM_TYPE 1`] = `undefined`;
 exports[`Span DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Span DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
+
+exports[`Span ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
 exports[`Span ERROR_CULPRIT 1`] = `undefined`;
 
@@ -719,8 +723,6 @@ exports[`Span TIMESTAMP_US 1`] = `1337`;
 
 exports[`Span TRACE_ID 1`] = `"trace id"`;
 
-exports[`Span TRANSACTION_MARKS_AGENT 1`] = `undefined`;
-
 exports[`Span TRANSACTION_DURATION 1`] = `undefined`;
 
 exports[`Span TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -730,6 +732,8 @@ exports[`Span TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Span TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Span TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Span TRANSACTION_NAME 1`] = `undefined`;
 
@@ -837,6 +841,8 @@ exports[`Transaction DATA_STEAM_TYPE 1`] = `undefined`;
 exports[`Transaction DESTINATION_ADDRESS 1`] = `undefined`;
 
 exports[`Transaction DEVICE_MODEL_IDENTIFIER 1`] = `undefined`;
+
+exports[`Transaction ELASTIC_PROFILER_STACK_TRACE_IDS 1`] = `undefined`;
 
 exports[`Transaction ERROR_CULPRIT 1`] = `undefined`;
 
@@ -1112,8 +1118,6 @@ exports[`Transaction TIMESTAMP_US 1`] = `1337`;
 
 exports[`Transaction TRACE_ID 1`] = `"trace id"`;
 
-exports[`Transaction TRANSACTION_MARKS_AGENT 1`] = `undefined`;
-
 exports[`Transaction TRANSACTION_DURATION 1`] = `1337`;
 
 exports[`Transaction TRANSACTION_DURATION_HISTOGRAM 1`] = `undefined`;
@@ -1123,6 +1127,8 @@ exports[`Transaction TRANSACTION_DURATION_SUMMARY 1`] = `undefined`;
 exports[`Transaction TRANSACTION_FAILURE_COUNT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_ID 1`] = `"transaction id"`;
+
+exports[`Transaction TRANSACTION_MARKS_AGENT 1`] = `undefined`;
 
 exports[`Transaction TRANSACTION_NAME 1`] = `"transaction name"`;
 
