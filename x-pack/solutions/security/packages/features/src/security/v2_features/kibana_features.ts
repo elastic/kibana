@@ -76,18 +76,7 @@ export const getSecurityV2BaseKibanaFeature = ({
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [
-        APP_ID,
-        'lists-all',
-        'lists-read',
-        'lists-summary',
-        'rac',
-        'cloud-security-posture-all',
-        'cloud-security-posture-read',
-        'cloud-defend-all',
-        'cloud-defend-read',
-        'bulkGetUserProfiles',
-      ],
+      api: [],
       savedObject: {
         all: ['alert', ...savedObjects],
         read: [],
@@ -99,19 +88,12 @@ export const getSecurityV2BaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show', 'crud'],
+      ui: [],
     },
     read: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [
-        APP_ID,
-        'lists-read',
-        'rac',
-        'cloud-security-posture-read',
-        'cloud-defend-read',
-        'bulkGetUserProfiles',
-      ],
+      api: [],
       savedObject: {
         all: [],
         read: [...savedObjects],
@@ -127,7 +109,7 @@ export const getSecurityV2BaseKibanaFeature = ({
       management: {
         insightsAndAlerting: ['triggersActions'],
       },
-      ui: ['show'],
+      ui: [],
     },
   },
 });

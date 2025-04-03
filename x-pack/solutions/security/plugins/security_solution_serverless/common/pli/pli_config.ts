@@ -19,8 +19,8 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
     search_ai_lake: [
       ProductFeatureKey.attackDiscovery,
       ProductFeatureKey.assistant,
-      ProductFeatureKey.alertsSummary,
       ProductFeatureKey.configurations,
+      ProductFeatureKey.externalDetections,
     ],
     essentials: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],
     complete: [ProductFeatureKey.attackDiscovery, ProductFeatureKey.assistant],

@@ -33,15 +33,15 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
 
-  [ProductFeatureSecurityKey.alertsSummary]: {
+  [ProductFeatureSecurityKey.externalDetections]: {
     privileges: {
       all: {
-        ui: ['alerts_summary'],
-        api: [`${APP_ID}-alert-summary`],
+        ui: ['show', 'external_detections'],
+        api: [APP_ID, 'lists-all', 'lists-read', 'lists-summary', 'rac'],
       },
       read: {
-        ui: ['alerts_summary_read'],
-        api: [`${APP_ID}-alert-summary`],
+        ui: ['show', 'external_detections'],
+        api: [APP_ID, 'lists-read', 'rac'],
       },
     },
   },

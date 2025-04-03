@@ -32,7 +32,7 @@ export const alertSummaryLink: LinkItem = {
   id: SecurityPageName.alertSummary,
   path: ALERT_SUMMARY_PATH,
   title: ALERT_SUMMARY,
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.alerts_summary_read`]],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.external_detections`]],
   globalNavPosition: 3,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alertSummary', {
