@@ -20,6 +20,7 @@ import {
   FirehosePage,
 } from './pages';
 import { ObservabilityOnboardingAppServices } from '..';
+import { useFlowBreadcrumb } from './shared/use_flow_breadcrumbs';
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,8 @@ export function ObservabilityOnboardingFlow() {
       context: { isDev, isCloud },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
+  useFlowBreadcrumb(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
