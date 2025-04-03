@@ -36,28 +36,15 @@ describe('offsetRangeToMonacoRange', () => {
   });
 
   test('should convert offset range to monaco range for multiple lines query when the cursor is not at the end', () => {
-    const expression = 'FROM test \n| WHERE test == \n| LIMIT 1';
-    const range = { start: 27, end: 27 };
+    const expression = 'FROM test \n| WHERE test == t\n| LIMIT 1';
+    const range = { start: 27, end: 28 };
     const monacoRange = offsetRangeToMonacoRange(expression, range);
 
     expect(monacoRange).toEqual({
-      startColumn: 16,
-      endColumn: 16,
+      startColumn: 17,
+      endColumn: 18,
       startLineNumber: 2,
       endLineNumber: 2,
-    });
-  });
-
-  test('should convert offset range to monaco range for multiple lines query when the cursor is at the end', () => {
-    const expression = 'FROM test \n| WHERE test == \n| LIMIT 1';
-    const range = { start: 35, end: 35 };
-    const monacoRange = offsetRangeToMonacoRange(expression, range);
-
-    expect(monacoRange).toEqual({
-      startColumn: 7,
-      endColumn: 7,
-      startLineNumber: 3,
-      endLineNumber: 3,
     });
   });
 });

@@ -372,7 +372,7 @@ describe('WHERE <expression>', () => {
 
         (await suggest('FROM index | WHERE some.prefix/')).forEach((suggestion) => {
           expect(suggestion.rangeToReplace).toEqual({
-            start: 20,
+            start: 19,
             end: 30,
           });
         });
@@ -384,13 +384,13 @@ describe('WHERE <expression>', () => {
         const suggestions = await suggest('FROM index | WHERE doubleField IS N/');
 
         expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 32,
-          end: 36,
+          start: 31,
+          end: 35,
         });
 
         expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 32,
-          end: 36,
+          start: 31,
+          end: 35,
         });
       });
 
@@ -400,13 +400,13 @@ describe('WHERE <expression>', () => {
         const suggestions = await suggest('FROM index | WHERE doubleField IS /');
 
         expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
-          start: 32,
-          end: 35,
+          start: 31,
+          end: 34,
         });
 
         expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
-          start: 32,
-          end: 35,
+          start: 31,
+          end: 34,
         });
       });
     });

@@ -236,10 +236,9 @@ export function getOverlapRange(
     return;
   }
 
-  // add one since Monaco columns are 1-based
   return {
-    start: query.length - overlapLength + 1,
-    end: query.length + 1,
+    start: query.length - overlapLength,
+    end: query.length,
   };
 }
 
@@ -921,24 +920,21 @@ export async function suggestForExpression({
    * TODO - think about how to generalize this — issue: https://github.com/elastic/kibana/issues/209905
    */
   const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
-  if (hasNonWhitespacePrefix) {
-    // get index of first char of final word
-    const lastWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
-    suggestions.forEach((s) => {
-      if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
-        // this suggestion has spaces in it (e.g. "IS NOT NULL")
-        // so we need to see if there's an overlap
-        s.rangeToReplace = getOverlapRange(innerText, s.text);
-        return;
-      }
-
-      // no overlap, so just replace from the last whitespace
+  suggestions.forEach((s) => {
+    if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
+      // this suggestion has spaces in it (e.g. "IS NOT NULL")
+      // so we need to see if there's an overlap
+      s.rangeToReplace = getOverlapRange(innerText, s.text);
+      return;
+    } else if (hasNonWhitespacePrefix) {
+      // get index of first char of final word
+      const lastNonWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
       s.rangeToReplace = {
-        start: lastWhitespaceIndex + 1,
+        start: lastNonWhitespaceIndex,
         end: innerText.length,
       };
-    });
-  }
+    }
+  });
 
   return suggestions;
 }
