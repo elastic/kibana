@@ -114,7 +114,6 @@ components:
           items:
             $ref: '#/components/schemas/AttackDiscoveryStat'
 
-
     AttackDiscoveryResponse:
       type: object
       required:
@@ -142,8 +141,8 @@ components:
           description: The last time attack discovery was viewed in the browser.
           type: string
         alertsContextCount:
-            type: integer
-            description: The number of alerts in the context.
+          type: integer
+          description: The number of alerts in the context.
         createdAt:
           description: The time attack discovery was created.
           type: string
@@ -242,3 +241,43 @@ components:
         replacements:
           $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
 
+    AttackDiscoveryGenerationConfig:
+      type: object
+      required:
+        - apiConfig
+        - alertsIndexPattern
+        - anonymizationFields
+        - size
+        - subAction
+      properties:
+        alertsIndexPattern:
+          type: string
+        anonymizationFields:
+          items:
+            $ref: '../anonymization_fields/bulk_crud_anonymization_fields_route.schema.yaml#/components/schemas/AnonymizationFieldResponse'
+          type: array
+        apiConfig:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+          description: LLM API configuration.
+        end:
+          type: string
+        filter:
+          type: object
+          additionalProperties: true
+        langSmithProject:
+          type: string
+        langSmithApiKey:
+          type: string
+        model:
+          type: string
+        replacements:
+          $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/Replacements'
+        size:
+          type: number
+        start:
+          type: string
+        subAction:
+          type: string
+          enum:
+            - invokeAI
+            - invokeStream

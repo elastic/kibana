@@ -144,6 +144,10 @@ describe('EditOutputFlyout', () => {
       id: 'output123',
       is_default: false,
       is_default_monitoring: false,
+      ssl: {
+        certificate: 'ssl-cert-value',
+        key: 'ssl-key-value',
+      },
     });
     expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
     fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
