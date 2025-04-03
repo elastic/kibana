@@ -313,7 +313,7 @@ export function initializeVisualization({
         () => '',
         visualizationState.state,
         COLORING_METHOD,
-        'formBased' in datasourceStates
+        'formBased' in datasourceStates && datasourceStates.formBased.state
           ? (datasourceStates.formBased.state as FormBasedPersistedState)
           : undefined,
         // initialize a new visualization with the color mapping off
