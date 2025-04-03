@@ -46,7 +46,6 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
         scrollToBottom$.next();
       },
       setSections,
-      scrollToBottom$,
     },
     comparators: {
       sections: [
@@ -58,6 +57,10 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
       ],
     } as StateComparators<Pick<DashboardState, 'sections'>>,
     internalApi: {
+      scrollToBottom$,
+      scrollToBottom: () => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      },
       getState: (): DashboardState['sections'] => {
         return sections$.getValue();
       },

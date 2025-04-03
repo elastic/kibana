@@ -72,9 +72,6 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
     scrollToTop: () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    scrollToBottom: () => {
-      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-    },
     setFocusedPanelId: (id: string | undefined) => {
       if (focusedPanelId$.value !== id) focusedPanelId$.next(id);
       setScrollToPanelId(id);

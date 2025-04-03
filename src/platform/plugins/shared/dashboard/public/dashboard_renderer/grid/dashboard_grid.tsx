@@ -30,6 +30,7 @@ import {
 } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
+import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 
 export const DashboardGrid = ({
   dashboardContainerRef,
@@ -37,6 +38,7 @@ export const DashboardGrid = ({
   dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
 }) => {
   const dashboardApi = useDashboardApi();
+  const internalDashboardApi = useDashboardInternalApi();
   const layoutStyles = useLayoutStyles();
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
@@ -205,7 +207,7 @@ export const DashboardGrid = ({
       if (first) {
         first = false;
       } else {
-        dashboardApi.scrollToBottom();
+        internalDashboardApi.scrollToBottom();
         scrollToBottomOnResize.disconnect(); // once scrolled, stop observing resize events
       }
     });
@@ -214,7 +216,7 @@ export const DashboardGrid = ({
      * When `scrollToBottom$` emits, wait for the `layoutRef` size to change then scroll
      * to the bottom of the screen
      */
-    const scrollToBottomSubscription = dashboardApi.scrollToBottom$.subscribe(() => {
+    const scrollToBottomSubscription = internalDashboardApi.scrollToBottom$.subscribe(() => {
       if (!layoutRef.current) return;
       first = true; // ensure that only the second resize callback actually triggers scrolling
       scrollToBottomOnResize.observe(layoutRef.current);
@@ -224,7 +226,7 @@ export const DashboardGrid = ({
       scrollToBottomOnResize.disconnect();
       scrollToBottomSubscription.unsubscribe();
     };
-  }, [dashboardApi]);
+  }, [internalDashboardApi]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {
     return {
