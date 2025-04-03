@@ -63,6 +63,8 @@ export type {
   AuthcDisabled,
   AuthcEnabled,
   RouteSecurity,
+  AllRequiredCondition,
+  AnyRequiredCondition,
   Privilege,
   PrivilegeSet,
   RouteDeprecationInfo,
