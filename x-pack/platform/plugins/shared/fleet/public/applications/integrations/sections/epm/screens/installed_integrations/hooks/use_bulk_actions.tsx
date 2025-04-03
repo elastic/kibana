@@ -76,7 +76,6 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
           setPollingBulkActions((actions) => actions.filter((a) => a.taskId !== action.taskId));
 
           if (res.status === 'success') {
-            // TODO update copy and view integrations https://github.com/elastic/kibana/issues/209892
             toasts.addSuccess({
               title:
                 action.type === 'bulk_upgrade'
@@ -94,7 +93,6 @@ export const BulkActionContextProvider: React.FunctionComponent<{ children: Reac
                     ),
             });
           } else if (res.status === 'failed') {
-            // TODO update copy and view integrations https://github.com/elastic/kibana/issues/209892
             const errorMessage = res.error?.message
               ? res.error?.message
               : res.results
@@ -174,6 +172,21 @@ export function useBulkActions() {
             integrations: items,
           },
         ]);
+        toasts.addInfo({
+          title: i18n.translate(
+            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeInProgressTitle',
+            {
+              defaultMessage: 'Upgrade in progress',
+            }
+          ),
+          content: i18n.translate(
+            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUpgradeInProgressDescription',
+            {
+              defaultMessage:
+                'The integrations and the policies are upgrading to the latest version.',
+            }
+          ),
+        });
       } catch (error) {
         toasts.addError(error, {
           title: i18n.translate(
@@ -206,6 +219,14 @@ export function useBulkActions() {
             integrations: items,
           },
         ]);
+        toasts.addInfo({
+          title: i18n.translate(
+            'xpack.fleet.epmInstalledIntegrations.bulkActions.bulkUninstallInProgressTitle',
+            {
+              defaultMessage: 'Uninstall in progress',
+            }
+          ),
+        });
       } catch (error) {
         toasts.addError(error, {
           title: i18n.translate(
