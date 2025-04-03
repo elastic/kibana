@@ -192,7 +192,7 @@ export const mapVariableToColumn = (
   return columns;
 };
 
-const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
+export const getQueryUpToCursor = (queryString: string, cursorPosition?: monaco.Position) => {
   const lines = queryString.split('\n');
   const lineNumber = cursorPosition?.lineNumber ?? lines.length;
   const column = cursorPosition?.column ?? lines[lineNumber - 1].length;
@@ -224,7 +224,7 @@ const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
 
-  if (hasQuestionMarkAtEndOrSecondLastPosition(queryString)) {
+  if (hasQuestionMarkAtEndOrSecondLastPosition(queryInCursorPosition)) {
     return undefined;
   }
 

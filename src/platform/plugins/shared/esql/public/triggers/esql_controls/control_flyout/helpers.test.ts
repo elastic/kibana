@@ -15,7 +15,6 @@ import {
   getRecurrentVariableName,
   validateVariableName,
   checkVariableExistence,
-  adjustQueryStringForTrailingQuestionMark,
 } from './helpers';
 
 describe('helpers', () => {
@@ -42,6 +41,70 @@ describe('helpers', () => {
         cursorPosition
       );
       expect(updatedQueryString).toBe('FROM my_index \n| STATS BY ?my_variable');
+    });
+
+    it('should adjust the query string for trailing question mark', () => {
+      const queryString = 'FROM my_index | STATS BY ?';
+      const cursorPosition = { column: 27, lineNumber: 1 } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe('FROM my_index | STATS BY ?my_variable');
+    });
+
+    it('should adjust the query string if there is a ? at the second last position', () => {
+      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
+      const cursorPosition = { column: 42, lineNumber: 1 } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe('FROM my_index | STATS PERCENTILE(bytes, ?my_variable)');
+    });
+
+    it('should adjust the query string if there is a ? at the last cursor position', () => {
+      const queryString =
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const cursorPosition = {
+        lineNumber: 1,
+        column: 54,
+      } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe(
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?my_variable, ?_tstart, ?_tend)'
+      );
+    });
+
+    it('should adjust the query string if there is a ? at the last cursor position for multilines query', () => {
+      const queryString =
+        'FROM my_index \n| STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const cursorPosition = {
+        lineNumber: 2,
+        column: 40,
+      } as monaco.Position;
+      const variable = '?my_variable';
+
+      const updatedQueryString = updateQueryStringWithVariable(
+        queryString,
+        variable,
+        cursorPosition
+      );
+      expect(updatedQueryString).toBe(
+        'FROM my_index \n| STATS COUNT() BY BUCKET(@timestamp, ?my_variable, ?_tstart, ?_tend)'
+      );
     });
   });
 
@@ -138,40 +201,6 @@ describe('helpers', () => {
       const variableName = '?my_variable2';
       const exists = checkVariableExistence(variables, variableName);
       expect(exists).toBe(false);
-    });
-  });
-
-  describe('adjustQueryStringForTrailingQuestionMark', () => {
-    it('should adjust the query string for trailing question mark', () => {
-      const queryString = 'FROM my_index | STATS BY ?';
-      const position = { column: 26, lineNumber: 1 } as monaco.Position;
-      const expectedPosition = { column: 25, lineNumber: 1 } as monaco.Position;
-      const adjustedQueryString = adjustQueryStringForTrailingQuestionMark(queryString, position);
-      expect(adjustedQueryString).toStrictEqual({
-        updatedQuery: 'FROM my_index | STATS BY ',
-        updatedPosition: expectedPosition,
-      });
-    });
-
-    it('should adjust the query string if there is a ? in the second last position', () => {
-      const queryString = 'FROM my_index | STATS PERCENTILE(bytes, ?)';
-      const position = { column: 42, lineNumber: 1 } as monaco.Position;
-      const expectedPosition = { column: 41, lineNumber: 1 } as monaco.Position;
-      const adjustedQueryString = adjustQueryStringForTrailingQuestionMark(queryString, position);
-      expect(adjustedQueryString).toStrictEqual({
-        updatedQuery: 'FROM my_index | STATS PERCENTILE(bytes, )',
-        updatedPosition: expectedPosition,
-      });
-    });
-
-    it('should not adjust the query string if no trailing question mark', () => {
-      const queryString = 'FROM my_index | STATS BY field';
-      const position = { column: 30, lineNumber: 1 } as monaco.Position;
-      const adjustedQueryString = adjustQueryStringForTrailingQuestionMark(queryString, position);
-      expect(adjustedQueryString).toStrictEqual({
-        updatedQuery: queryString,
-        updatedPosition: position,
-      });
     });
   });
 });

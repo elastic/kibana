@@ -617,6 +617,16 @@ describe('esql query helpers', () => {
       } as monaco.Position);
       expect(values).toEqual(undefined);
     });
+
+    it('should return undefined if the query has a questionmark at the last cursor position', () => {
+      const queryString =
+        'FROM my_index | STATS COUNT() BY BUCKET(@timestamp, ?, ?_tstart, ?_tend)';
+      const values = getValuesFromQueryField(queryString, {
+        lineNumber: 1,
+        column: 52,
+      } as monaco.Position);
+      expect(values).toEqual(undefined);
+    });
   });
 
   describe('fixESQLQueryWithVariables', () => {

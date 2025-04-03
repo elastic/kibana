@@ -28,7 +28,6 @@ import {
   getVariableTypeFromQuery,
   getVariableNamePrefix,
   checkVariableExistence,
-  adjustQueryStringForTrailingQuestionMark,
 } from './helpers';
 
 interface ESQLControlsFlyoutProps {
@@ -60,10 +59,10 @@ export function ESQLControlsFlyout({
   );
   const valuesField = useMemo(() => {
     if (initialVariableType === ESQLVariableType.VALUES) {
-      return getValuesFromQueryField(queryString);
+      return getValuesFromQueryField(queryString, cursorPosition);
     }
     return undefined;
-  }, [initialVariableType, queryString]);
+  }, [cursorPosition, initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
   const styling = useMemo(() => getFlyoutStyling(), []);
@@ -152,11 +151,7 @@ export function ESQLControlsFlyout({
     if (controlState && controlState.availableOptions.length) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
-          const { updatedQuery, updatedPosition } = adjustQueryStringForTrailingQuestionMark(
-            queryString,
-            cursorPosition
-          );
-          const query = updateQueryStringWithVariable(updatedQuery, variableName, updatedPosition);
+          const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
           await onSaveControl?.(controlState, query);
         }
       } else {
