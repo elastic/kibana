@@ -176,6 +176,8 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     await this.esClient.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ terms: { 'slo.id': summarySloIds } }, { term: { isTempDoc: true } }],
