@@ -48,7 +48,7 @@ export const AddDocumentsCodeExample = ({
 
   const [selectedLanguage, setSelectedLanguage] =
     useState<AvailableLanguages>(getDefaultCodingLanguage);
-  const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples, workflow } = useWorkflow();
+  const { selectedWorkflowId, setSelectedWorkflowId, ingestExamples } = useWorkflow();
   const selectedCodeExamples = ingestExamples[selectedLanguage];
   const codeSampleMappings = indexHasMappings ? mappingProperties : ingestExamples.defaultMapping;
   const onSelectLanguage = useCallback(
