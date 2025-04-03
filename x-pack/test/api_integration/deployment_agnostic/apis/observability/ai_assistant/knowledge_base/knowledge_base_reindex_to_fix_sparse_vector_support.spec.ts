@@ -11,7 +11,12 @@ import AdmZip from 'adm-zip';
 import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { deleteKnowledgeBaseModel, setupKnowledgeBase } from '../utils/knowledge_base';
+import {
+  deleteKbIndices,
+  deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+} from '../utils/knowledge_base';
+import { createOrUpdateIndexAssets, restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -33,14 +38,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     beforeEach(async () => {
-      await deleteKbIndex();
+      await deleteKbIndices(es);
       await restoreKbSnapshot();
-      await createOrUpdateIndexAssets();
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
-      await deleteKbIndex();
-      await createOrUpdateIndexAssets();
+      await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await deleteKnowledgeBaseModel(getService);
     });
 
@@ -93,15 +97,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return parseInt(settings?.index?.version?.created ?? '', 10);
   }
 
-  async function deleteKbIndex() {
-    log.debug('Deleting KB index');
-
-    await es.indices.delete(
-      { index: resourceNames.concreteIndexName.kb, ignore_unavailable: true },
-      { ignore: [404] }
-    );
-  }
-
   async function restoreKbSnapshot() {
     log.debug(
       `Restoring snapshot of ${resourceNames.concreteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
@@ -124,13 +119,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     await es.snapshot.deleteRepository({ name: snapshotRepoName });
-  }
-
-  async function createOrUpdateIndexAssets() {
-    const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/index_assets',
-    });
-    expect(status).to.be(200);
   }
 
   async function reIndexKnowledgeBase() {

@@ -6,18 +6,17 @@
  */
 
 import expect from '@kbn/expect';
-import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import AdmZip from 'adm-zip';
 import path from 'path';
+import { times } from 'lodash';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  importTinyElserModel,
-  deleteInferenceEndpoint,
   setupKnowledgeBase,
-  waitForKnowledgeBaseReady,
+  deleteKbIndices,
 } from '../utils/knowledge_base';
+import { createOrUpdateIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -26,7 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('when the knowledge base index was created before 8.11', function () {
+  describe('POST /internal/observability_ai_assistant/kb/reindex', function () {
     // Intentionally skipped in all serverless environnments (local and MKI)
     // because the migration scenario being tested is not relevant to MKI and Serverless.
     this.tags(['skipServerless']);
@@ -36,64 +35,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
       new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
 
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+      await setupKnowledgeBase(getService);
     });
 
     beforeEach(async () => {
-      await deleteKbIndex();
-      await restoreKbSnapshot();
-      await createOrUpdateIndexAssets();
+      await deleteKbIndices(es);
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
 
     after(async () => {
-      await deleteKbIndex();
-      await createOrUpdateIndexAssets();
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKbIndices(es);
+      await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
+      await deleteKnowledgeBaseModel(getService);
+    });
+
+    it('will only perform a single reindex at a time', async () => {
+      const results = await Promise.all(times(20).map(() => reIndexKnowledgeBase()));
+      expect(results).to.eql();
     });
   });
-
-  async function deleteKbIndex() {
-    log.debug('Deleting KB index');
-
-    await es.indices.delete(
-      { index: resourceNames.concreteIndexName.kb, ignore_unavailable: true },
-      { ignore: [404] }
-    );
-  }
-
-  async function restoreKbSnapshot() {
-    log.debug(
-      `Restoring snapshot of ${resourceNames.concreteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
-    );
-    const snapshotRepoName = 'snapshot-repo-8-10';
-    const snapshotName = 'my_snapshot';
-    await es.snapshot.createRepository({
-      name: snapshotRepoName,
-      repository: {
-        type: 'fs',
-        settings: { location: AI_ASSISTANT_SNAPSHOT_REPO_PATH },
-      },
-    });
-
-    await es.snapshot.restore({
-      repository: snapshotRepoName,
-      snapshot: snapshotName,
-      wait_for_completion: true,
-      indices: resourceNames.concreteIndexName.kb,
-    });
-
-    await es.snapshot.deleteRepository({ name: snapshotRepoName });
-  }
-
-  async function createOrUpdateIndexAssets() {
-    const { status } = await observabilityAIAssistantAPIClient.editor({
-      endpoint: 'POST /internal/observability_ai_assistant/index_assets',
-    });
-    expect(status).to.be(200);
-  }
 
   async function reIndexKnowledgeBase() {
     const { status } = await observabilityAIAssistantAPIClient.editor({
