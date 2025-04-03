@@ -27,7 +27,7 @@
         "label": "DocumentList",
         "description": [],
         "signature": [
-          "({ dataTelemetryIdPrefix, docs, docsPerPage, isLoading, mappings, meta, onPaginate, setDocsPerPage, onDocumentClick, resultProps, }: DocumentListProps) => React.JSX.Element"
+          "({ executionTime, dataTelemetryIdPrefix, docs, docsPerPage, isLoading, mappings, meta, onPaginate, setDocsPerPage, onDocumentClick, resultProps, }: DocumentListProps) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-index-documents/components/document_list.tsx",
         "deprecated": false,
@@ -38,7 +38,7 @@
             "id": "def-common.DocumentList.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n  onDocumentClick,\n  resultProps = {},\n}",
+            "label": "{\n  executionTime,\n  dataTelemetryIdPrefix,\n  docs,\n  docsPerPage,\n  isLoading,\n  mappings,\n  meta,\n  onPaginate,\n  setDocsPerPage,\n  onDocumentClick,\n  resultProps = {},\n}",
             "description": [],
             "signature": [
               "DocumentListProps"
