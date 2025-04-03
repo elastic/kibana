@@ -9,6 +9,7 @@
 
 import type { OpenAPIV3 } from 'openapi-types';
 import type { DeepPartial } from '@kbn/utility-types';
+import type { Duration } from 'moment';
 import type { RouteValidator } from './route_validator';
 
 /**
@@ -244,10 +245,12 @@ export interface AuthzDisabled {
 /**
  * Describes the authentication status when authentication is enabled.
  *
- * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or `'optional'` (authentication is optional).
+ * - `enabled`: A boolean or string indicating the authentication status. Can be `true` (authentication required) or
+ *   `'optional'` (authentication is optional), or `'minimal'` (only existence of credentials is checked).
  */
 export interface AuthcEnabled {
-  enabled: true | 'optional';
+  enabled: true | 'optional' | 'minimal';
+  sessionCache?: Duration;
 }
 
 /**

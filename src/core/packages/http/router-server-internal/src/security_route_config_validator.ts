@@ -148,12 +148,25 @@ const authzSchema = schema.object({
 });
 
 const authcSchema = schema.object({
-  enabled: schema.oneOf([schema.literal(true), schema.literal('optional'), schema.literal(false)]),
+  enabled: schema.oneOf([
+    schema.literal(true),
+    schema.literal('optional'),
+    schema.literal('minimal'),
+    schema.literal(false),
+  ]),
   reason: schema.conditional(
     schema.siblingRef('enabled'),
     schema.literal(false),
     schema.string(),
     schema.never()
+  ),
+  sessionCache: schema.maybe(
+    schema.conditional(
+      schema.siblingRef('enabled'),
+      schema.literal(false),
+      schema.never(),
+      schema.duration()
+    )
   ),
 });
 
