@@ -9,7 +9,7 @@ import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plu
 import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { DataView, type DataViewListItem } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewManagerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
@@ -18,6 +18,8 @@ import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
+import { useManagedDataViews } from '../../hooks/use_managed_data_views';
+import { useSavedDataViews } from '../../hooks/use_saved_data_views';
 
 export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
   const dispatch = useDispatch();
@@ -103,21 +105,14 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
     };
   }, [dataViewSpec.id, dataViewSpec?.name, status]);
 
-  const { adhocDataViews: adhocDataViewSpecs, dataViews } = useSelector(sharedStateSelector);
-
-  const savedDataViews = useMemo(() => {
-    const managed: DataViewListItem[] = dataViews.map((spec) => ({
-      id: spec.id ?? '',
-      title: spec.title ?? '',
-      name: spec.name,
-    }));
-
-    return managed;
-  }, [dataViews]);
+  const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
 
   const adhocDataViews = useMemo(() => {
     return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
   }, [adhocDataViewSpecs, fieldFormats]);
+
+  const managedDataViews = useManagedDataViews();
+  const savedDataViews = useSavedDataViews();
 
   return (
     <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
@@ -131,6 +126,7 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
         onDataViewCreated={createNewDataView}
         adHocDataViews={adhocDataViews}
         savedDataViews={savedDataViews}
+        managedDataViews={managedDataViews}
       />
     </div>
   );
