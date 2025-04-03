@@ -25,6 +25,7 @@ export const getExceptionsPreExportHandler = (
 
     const { listId: maybeListId, id } = data;
     let listId: string | null | undefined = maybeListId;
+    let isEndpointArtifact = false;
 
     if (!listId && id) {
       listId = (await exceptionListClient.getExceptionList(data))?.list_id ?? null;
@@ -36,35 +37,43 @@ export const getExceptionsPreExportHandler = (
 
     // Validate Trusted Applications
     if (TrustedAppValidator.isTrustedApp({ listId })) {
+      isEndpointArtifact = true;
       await new TrustedAppValidator(endpointAppContextService, request).validatePreExport();
-      return data;
     }
 
     // Host Isolation Exceptions validations
     if (HostIsolationExceptionsValidator.isHostIsolationException({ listId })) {
+      isEndpointArtifact = true;
       await new HostIsolationExceptionsValidator(
         endpointAppContextService,
         request
       ).validatePreExport();
-      return data;
     }
 
     // Event Filter validations
     if (EventFilterValidator.isEventFilter({ listId })) {
+      isEndpointArtifact = true;
       await new EventFilterValidator(endpointAppContextService, request).validatePreExport();
-      return data;
     }
 
     // Validate Blocklists
     if (BlocklistValidator.isBlocklist({ listId })) {
+      isEndpointArtifact = true;
       await new BlocklistValidator(endpointAppContextService, request).validatePreExport();
-      return data;
     }
 
     // Validate Endpoint Exceptions
     if (EndpointExceptionsValidator.isEndpointException({ listId })) {
+      isEndpointArtifact = true;
       await new EndpointExceptionsValidator(endpointAppContextService, request).validatePreExport();
-      return data;
+    }
+
+    // If space awareness is enabled, add space filter to export options
+    if (
+      isEndpointArtifact &&
+      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+    ) {
+      // TODO:PT implement once PR #216722 merges (it refactors the filter utility)
     }
 
     return data;
