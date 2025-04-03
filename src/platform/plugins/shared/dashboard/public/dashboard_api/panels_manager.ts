@@ -133,7 +133,7 @@ export function initializePanelsManager(
 
     // if the panel is in a collapsed section and has never been built, then childApi will be undefined
     const sectionId = panels$.value[id].gridData.sectionId;
-    if (sectionId && (sectionsManager.api.sections$.value ?? {})[sectionId]?.collapsed) {
+    if (sectionsManager.internalApi.isSectionCollapsed(sectionId)) {
       return undefined;
     }
 

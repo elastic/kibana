@@ -64,6 +64,10 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
       reset: (lastSavedState: DashboardState) => {
         setSections(lastSavedState.sections);
       },
+      isSectionCollapsed: (id?: string) => {
+        if (!id) return false; // this is the first section and it cannot be collapsed
+        return Boolean(sections$.getValue()?.[id]?.collapsed);
+      },
     },
   };
 }
