@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 
 import { getErrorMessage } from '../../../common/errors';
-import { FullHeight, QueryViewTitlePanel } from './styles';
+import { FullHeight, PanelFillContainer, QueryViewTitlePanel } from './styles';
 import { QueryTestResponse } from '../../types';
 
 const LOADING_MESSAGE = i18n.translate(
@@ -56,7 +56,7 @@ export const ElasticsearchQueryOutput = ({
           </h5>
         </EuiText>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner paddingSize="none">
+      <EuiSplitPanel.Inner paddingSize="none" css={PanelFillContainer}>
         {!!respJSON ? (
           <CodeEditor
             dataTestSubj="ViewElasticsearchQueryResponse"

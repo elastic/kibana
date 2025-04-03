@@ -13,7 +13,7 @@ import type {
 
 import type { WritableDraft } from 'immer/dist/internal';
 import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import { alertSummaryLink } from './links';
+import { alertSummaryLink, configurationsLink } from './links';
 import { AiForTheSocIcon } from './icons';
 import { filterFromWhitelist } from './utils';
 import { type SecurityProductTypes } from '../../../common/config';
@@ -41,6 +41,7 @@ const whitelist = [
   SecurityPageName.caseConfigure,
   SecurityPageName.alertSummary,
   SecurityPageName.attackDiscovery,
+  SecurityPageName.configurations,
   ExternalPageName.discover,
   SecurityPageName.mlLanding,
 ];
@@ -63,7 +64,7 @@ export const applyAiSocNavigation = (
   >;
 
   // hardcode elements existing only in AI for SOC group
-  securityGroup.children.push(alertSummaryLink);
+  securityGroup.children.push(alertSummaryLink, configurationsLink);
 
   // Overwrite the children with only the elements available for AI for SOC navigation
   // Temporary solution until we have clarity how to proceed with Upselling in the new Tier
