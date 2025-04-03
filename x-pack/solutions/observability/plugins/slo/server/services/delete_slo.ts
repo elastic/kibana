@@ -54,16 +54,20 @@ export class DeleteSLO {
       )
     );
 
-    await this.deleteRollupData(slo.id);
-    await this.deleteSummaryData(slo.id);
-    await this.deleteAssociatedRules(slo.id);
-    await this.repository.deleteById(slo.id);
+    await Promise.all([
+      this.deleteRollupData(slo.id),
+      this.deleteSummaryData(slo.id),
+      this.deleteAssociatedRules(slo.id),
+      this.repository.deleteById(slo.id),
+    ]);
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         match: {
           'slo.id': sloId,
@@ -76,6 +80,9 @@ export class DeleteSLO {
     await this.esClient.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         match: {
           'slo.id': sloId,
