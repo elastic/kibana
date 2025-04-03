@@ -66,6 +66,7 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
+import { WaitForTaskCompletedWithErrorRetryOriginal } from '../actions/wait_for_task';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -88,6 +89,7 @@ describe('migrations v2 model', () => {
     kibanaVersion: '7.11.0',
     logs: [],
     retryCount: 0,
+    skipRetryReset: false,
     retryDelay: 0,
     retryAttempts: 15,
     batchSize: 1000,
@@ -3083,7 +3085,7 @@ describe('migrations v2 model', () => {
           Either.left({
             message: 'Some error happened that makes us want to retry the original task',
             type: 'wait_for_task_completed_with_error_retry_original',
-          })
+          } as WaitForTaskCompletedWithErrorRetryOriginal)
         ) as UpdateTargetMappingsPropertiesWaitForTaskState;
         expect(retryingMappingsUpdate.retryCount).toBe(initialRetryCount + 1);
         expect(retryingMappingsUpdate.skipRetryReset).toBe(true);
@@ -3094,7 +3096,7 @@ describe('migrations v2 model', () => {
           Either.left({
             type: 'retryable_es_client_error',
             message: 'random retryable error',
-          })
+          } as RetryableEsClientError)
         ) as UpdateTargetMappingsPropertiesWaitForTaskState;
         expect(retryingMappingsUpdateAgain.retryCount).toBe(initialRetryCount + 2);
         expect(retryingMappingsUpdateAgain.skipRetryReset).toBe(true);

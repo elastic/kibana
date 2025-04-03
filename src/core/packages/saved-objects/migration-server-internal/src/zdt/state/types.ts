@@ -22,7 +22,7 @@ import type { TransformErrorObjects } from '../../core';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;
-  readonly skipRetryReset?: boolean;
+  readonly skipRetryReset: boolean;
   readonly retryDelay: number;
   readonly logs: MigrationLog[];
   /**

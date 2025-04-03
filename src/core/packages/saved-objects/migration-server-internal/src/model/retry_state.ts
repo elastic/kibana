@@ -12,7 +12,7 @@ import type { MigrationLog } from '../types';
 export interface RetryableState {
   controlState: string;
   retryCount: number;
-  skipRetryReset?: boolean;
+  skipRetryReset: boolean;
   retryDelay: number;
   logs: MigrationLog[];
 }
