@@ -95,7 +95,7 @@ export const IndexSelection: FC<Props> = ({
           ) : (
             <EuiComboBox
               placeholder={i18n.translate('visDefaultEditor.aggSelect.selectAggPlaceholder', {
-                defaultMessage: 'Select an aggregation',
+                defaultMessage: 'Select an index',
               })}
               id={`visDefaultEditorAggSelect$`}
               options={indices.map((index) => ({
