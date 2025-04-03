@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
   IngestStreamGetResponse,
   isDisabledLifecycle,
