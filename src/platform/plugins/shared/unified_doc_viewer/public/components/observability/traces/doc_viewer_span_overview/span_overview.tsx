@@ -11,12 +11,18 @@ import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { TRANSACTION_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
+import {
+  SPAN_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
+  getTraceDocumentOverview,
+} from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { TransactionProvider } from './hooks/use_transaction';
 import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
-import { SpanSummary } from './sub_components/span_summary';
+import { SpanSummaryField } from './sub_components/span_summary_field';
+import { SpanDurationSummary } from './sub_components/span_duration_summary';
+
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
 };
@@ -30,10 +36,7 @@ export function SpanOverview({
   transactionIndexPattern,
 }: SpanOverviewProps) {
   const parsedDoc = getTraceDocumentOverview(hit);
-
-  const detailTitle = i18n.translate('unifiedDocViewer.observability.traces.spanOverview.title', {
-    defaultMessage: 'Span detail',
-  });
+  const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
 
   return (
     <TransactionProvider
@@ -49,20 +52,31 @@ export function SpanOverview({
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
           <EuiTitle size="s">
-            <h2>{detailTitle}</h2>
+            <h2>
+              {i18n.translate('unifiedDocViewer.observability.traces.spanOverview.title', {
+                defaultMessage: 'Span detail',
+              })}
+            </h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => {
             const fieldConfiguration = getSpanFieldConfiguration(parsedDoc)[fieldId];
 
             return (
-              <SpanSummary
+              <SpanSummaryField
                 key={fieldId}
                 fieldId={fieldId}
                 fieldConfiguration={fieldConfiguration}
               />
             );
           })}
+
+          {spanDuration && (
+            <>
+              <EuiSpacer size="m" />
+              <SpanDurationSummary duration={spanDuration} />
+            </>
+          )}
         </EuiPanel>
       </FieldActionsProvider>
     </TransactionProvider>

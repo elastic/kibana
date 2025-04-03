@@ -47,7 +47,7 @@ function getUnitLabelAndConvertedValue(
   switch (unitKey) {
     case 'hours': {
       return {
-        unitLabel: i18n.translate('unifiedDocViewer.formatters.duration.hoursTimeUnitLabel', {
+        unitLabel: i18n.translate('apmUiShared.formatters.duration.hoursTimeUnitLabel', {
           defaultMessage: 'h',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asHours(), threshold),
@@ -55,7 +55,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'minutes': {
       return {
-        unitLabel: i18n.translate('unifiedDocViewer.formatters.duration.minutesTimeUnitLabel', {
+        unitLabel: i18n.translate('apmUiShared.formatters.duration.minutesTimeUnitLabel', {
           defaultMessage: 'min',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asMinutes(), threshold),
@@ -63,7 +63,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'seconds': {
       return {
-        unitLabel: i18n.translate('unifiedDocViewer.formatters.duration.secondsTimeUnitLabel', {
+        unitLabel: i18n.translate('apmUiShared.formatters.duration.secondsTimeUnitLabel', {
           defaultMessage: 's',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asSeconds(), threshold),
@@ -71,7 +71,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'milliseconds': {
       return {
-        unitLabel: i18n.translate('unifiedDocViewer.formatters.duration.millisTimeUnitLabel', {
+        unitLabel: i18n.translate('apmUiShared.formatters.duration.millisTimeUnitLabel', {
           defaultMessage: 'ms',
         }),
         convertedValue: asDecimalOrInteger(moment.duration(ms).asMilliseconds(), threshold),
@@ -79,7 +79,7 @@ function getUnitLabelAndConvertedValue(
     }
     case 'microseconds': {
       return {
-        unitLabel: i18n.translate('unifiedDocViewer.formatters.duration.microsTimeUnitLabel', {
+        unitLabel: i18n.translate('apmUiShared.formatters.duration.microsTimeUnitLabel', {
           defaultMessage: 'μs',
         }),
         convertedValue: asInteger(value),

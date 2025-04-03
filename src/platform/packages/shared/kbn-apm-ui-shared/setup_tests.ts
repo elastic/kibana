@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createGetDocViewer } from './doc_viewer';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';

@@ -9,35 +9,30 @@
 
 import createContainer from 'constate';
 import { useState, useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
+import { PARENT_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_DURATION_FIELD } from '@kbn/discover-utils';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import {
-  PROCESSOR_EVENT_FIELD,
-  TRANSACTION_DURATION_FIELD,
-  TRANSACTION_ID_FIELD,
-  TRANSACTION_NAME_FIELD,
-} from '@kbn/discover-utils';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
-interface UseTransactionPrams {
-  transactionId?: string;
+interface UseRootTransactionParams {
+  traceId: string;
   indexPattern: string;
 }
 
-interface GetTransactionParams {
-  transactionId: string;
-  indexPattern: string;
+interface GetRootTransactionParams {
   data: DataPublicPluginStart;
   signal: AbortSignal;
+  traceId: string;
+  indexPattern: string;
 }
 
-async function getTransactionData({
-  transactionId,
-  indexPattern,
+async function getRootTransaction({
   data,
   signal,
-}: GetTransactionParams) {
+  traceId,
+  indexPattern,
+}: GetRootTransactionParams) {
   return lastValueFrom(
     data.search.search(
       {
@@ -46,21 +41,21 @@ async function getTransactionData({
           size: 1,
           body: {
             timeout: '20s',
-            fields: [TRANSACTION_NAME_FIELD, TRANSACTION_DURATION_FIELD],
+            fields: [TRANSACTION_DURATION_FIELD],
             query: {
               bool: {
-                must: [
+                should: [
                   {
-                    term: {
-                      [TRANSACTION_ID_FIELD]: transactionId,
-                    },
-                  },
-                  {
-                    term: {
-                      [PROCESSOR_EVENT_FIELD]: 'transaction',
+                    constant_score: {
+                      filter: {
+                        bool: {
+                          must_not: { exists: { field: PARENT_ID_FIELD } },
+                        },
+                      },
                     },
                   },
                 ],
+                filter: [{ term: { [TRACE_ID_FIELD]: traceId } }],
               },
             },
           },
@@ -72,17 +67,16 @@ async function getTransactionData({
 }
 
 export interface Transaction {
-  name: string;
   duration: number;
 }
 
-const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) => {
-  const { data, core } = getUnifiedDocViewerServices();
+const useRootTransaction = ({ traceId, indexPattern }: UseRootTransactionParams) => {
+  const { core, data } = getUnifiedDocViewerServices();
   const [transaction, setTransaction] = useState<Transaction | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (!transactionId) {
+    if (!traceId) {
       setTransaction(null);
       setLoading(false);
       return;
@@ -94,23 +88,24 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
     const fetchData = async () => {
       try {
         setLoading(true);
-        const result = await getTransactionData({ transactionId, indexPattern, data, signal });
+        const result = await getRootTransaction({ data, signal, traceId, indexPattern });
 
         const fields = result.rawResponse.hits.hits[0]?.fields;
-        const transactionName = fields?.[TRANSACTION_NAME_FIELD];
         const transactionDuration = fields?.[TRANSACTION_DURATION_FIELD];
 
         setTransaction({
-          name: transactionName || null,
           duration: transactionDuration || null,
         });
       } catch (err) {
         if (!signal.aborted) {
           const error = err as Error;
           core.notifications.toasts.addDanger({
-            title: i18n.translate('unifiedDocViewer.docViewerSpanOverview.useTransaction.error', {
-              defaultMessage: 'An error occurred while fetching the transaction',
-            }),
+            title: i18n.translate(
+              'unifiedDocViewer.docViewerSpanOverview.useRootTransaction.error',
+              {
+                defaultMessage: 'An error occurred while fetching the transaction',
+              }
+            ),
             text: error.message,
           });
           setTransaction(null);
@@ -125,9 +120,10 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
     return function onUnmount() {
       controller.abort();
     };
-  }, [core.notifications.toasts, data, indexPattern, transactionId]);
+  }, [data, core.notifications.toasts, traceId, indexPattern]);
 
   return { loading, transaction };
 };
 
-export const [TransactionProvider, useTransactionContext] = createContainer(useTransaction);
+export const [RootTransactionProvider, useRootTransactionContext] =
+  createContainer(useRootTransaction);
