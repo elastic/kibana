@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Location } from '../../definitions/types';
 import { getNewVariableSuggestion } from '../factories';
 import { attachTriggerCommand, getFunctionSignaturesByReturnType, setup } from './helpers';
 
 describe('autocomplete.suggest', () => {
   describe('ROW column1 = value1[, ..., columnN = valueN]', () => {
-    const functions = getFunctionSignaturesByReturnType('row', 'any', { scalar: true });
+    const functions = getFunctionSignaturesByReturnType(Location.ROW, 'any', { scalar: true });
     it('suggests functions and an assignment for new expressions', async () => {
       const { assertSuggestions } = await setup();
       const expectedSuggestions = [getNewVariableSuggestion('var0'), ...functions];
