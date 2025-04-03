@@ -12,15 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 const ERROR_MESSAGES = {
   generic: {
-    title: (
-      <FormattedMessage
-        id="xpack.search.queryRules.errorTitle"
-        defaultMessage="An error occurred"
-      />
-    ),
+    title: <FormattedMessage id="xpack.queryRules.errorTitle" defaultMessage="An error occurred" />,
     body: (
       <FormattedMessage
-        id="xpack.search.queryRules.errorDescription"
+        id="xpack.queryRules.errorDescription"
         defaultMessage="An error occurred while fetching query rules. Check Kibana logs for more information."
       />
     ),
@@ -28,13 +23,13 @@ const ERROR_MESSAGES = {
   missingPermissions: {
     title: (
       <FormattedMessage
-        id="xpack.search.queryRules.missingPermissionsTitle"
+        id="xpack.queryRules.missingPermissionsTitle"
         defaultMessage="Missing permissions"
       />
     ),
     body: (
       <FormattedMessage
-        id="xpack.search.queryRules.missingPermissionsDescription"
+        id="xpack.queryRules.missingPermissionsDescription"
         defaultMessage="You do not have the necessary permissions to manage query rules. Contact your system administrator."
       />
     ),
