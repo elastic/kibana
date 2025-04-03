@@ -352,7 +352,6 @@ export const postEvaluateRoute = (
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
-                assistantContext,
                 esClient,
                 isEnabledKnowledgeBase,
                 kbDataClient: dataClients?.kbDataClient,
@@ -369,7 +368,6 @@ export const postEvaluateRoute = (
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-                createLlmInstance,
               };
 
               const tools: StructuredTool[] = (
