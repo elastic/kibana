@@ -68,12 +68,12 @@ export class PrepareIndicesForAssistantGraphEvalusations extends PrepareIndicesF
       .map((dataStream) => dataStream.name);
 
     if (indicesToDelete.length > 0) {
-      console.log('Deleting indices', JSON.stringify(indicesToDelete, null, 2));
+      this.logger.info('Deleting indices');
       await this.esClient.indices.delete({ index: indicesToDelete });
     }
 
     if (dataStreamsToDelete.length > 0) {
-      console.log('Deleting data streams', JSON.stringify(dataStreamsToDelete, null, 2));
+      this.logger.info('Deleting data streams');
       await this.esClient.indices.deleteDataStream({ name: dataStreamsToDelete });
     }
   }
