@@ -16,11 +16,7 @@ import {
   isUnwiredStreamGetResponse,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import {
-  ILM_LOCATOR_ID,
-  IlmLocatorParams,
-  PolicyFromES,
-} from '@kbn/index-lifecycle-management-common-shared';
+import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -98,7 +94,6 @@ export function StreamDetailLifecycle({
     core: { http, notifications },
     dependencies: {
       start: {
-        share,
         streams: { streamsRepositoryClient },
       },
     },
@@ -121,8 +116,6 @@ export function StreamDetailLifecycle({
   } = useDataStreamStats({ definition });
 
   const { signal } = useAbortController();
-
-  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   const getIlmPolicies = () =>
     http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies', {
@@ -177,7 +170,6 @@ export function StreamDetailLifecycle({
         updateLifecycle={updateLifecycle}
         getIlmPolicies={getIlmPolicies}
         updateInProgress={updateInProgress}
-        ilmLocator={ilmLocator}
       />
 
       <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="s">
