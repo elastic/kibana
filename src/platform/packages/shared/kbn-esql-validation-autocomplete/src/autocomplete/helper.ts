@@ -952,3 +952,27 @@ export function buildPartialMatcher(str: string) {
   // Return the final regex pattern
   return new RegExp(pattern + '$', 'i');
 }
+
+const isNullMatcher = buildPartialMatcher('is nul');
+const isNotNullMatcher = buildPartialMatcher('is not nul');
+
+/**
+ * Checks whether an expression is truly complete.
+ *
+ * (Encapsulates handling of the "is null" and "is not null"
+ * checks)
+ *
+ * @todo use the simpler "getExpressionType(root) !== 'unknown'"
+ * as soon as https://github.com/elastic/kibana/issues/199401 is resolved
+ */
+export function isExpressionComplete(
+  expressionType: SupportedDataType | 'unknown',
+  innerText: string
+) {
+  return (
+    expressionType !== 'unknown' &&
+    // see https://github.com/elastic/kibana/issues/199401
+    // for the reason we need this string check.
+    !(isNullMatcher.test(innerText) || isNotNullMatcher.test(innerText))
+  );
+}
