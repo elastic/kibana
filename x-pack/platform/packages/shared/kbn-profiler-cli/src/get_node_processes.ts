@@ -8,7 +8,7 @@
 import execa from 'execa';
 
 export async function getNodeProcesses(
-  grep: string
+  grep?: string
 ): Promise<Array<{ pid: number; command: string; ports: number[] }>> {
   const candidates = await execa
     .command(

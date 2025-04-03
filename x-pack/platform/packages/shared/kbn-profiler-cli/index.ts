@@ -36,9 +36,11 @@ export function cli() {
         }, Number(flags.timeout));
       }
 
+      log.debug(`Sending SIGUSR1 to ${pid}`);
+
       process.kill(pid, 'SIGUSR1');
 
-      const stop = once(await getProfiler({ log, type: flags.heap ? 'heap' : 'cpu' }));
+      const stop = once(await getProfiler({ pid, log, type: flags.heap ? 'heap' : 'cpu' }));
 
       addCleanupTask(() => {
         // exit-hook, which is used by addCleanupTask,
