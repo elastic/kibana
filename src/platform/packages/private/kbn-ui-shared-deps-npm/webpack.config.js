@@ -81,6 +81,7 @@ module.exports = (_, argv) => {
         'fflate',
         'fastest-levenshtein',
         'history',
+        'fp-ts',
         'io-ts',
         'jquery',
         'lodash',

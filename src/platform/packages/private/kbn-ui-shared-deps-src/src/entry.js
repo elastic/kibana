@@ -30,6 +30,18 @@ export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 
+const { option, pipeable, either, taskEither, task, set, ord, array, ...rest } = require('fp-ts');
+export const FpTs = {
+  option,
+  pipeable,
+  either,
+  taskEither,
+  function: rest.function,
+  task,
+  set,
+  ord,
+  array,
+};
 export const IoTs = require('io-ts');
 export const KbnMonaco = require('@kbn/monaco');
 export const MonacoBarePluginApi = require('@kbn/monaco').BarePluginApi;
