@@ -23,6 +23,22 @@ import {
 } from '../../utils/manage_tabs';
 import type { TabItem, TabsServices, TabPreviewData } from '../../types';
 
+// TODO replace with real data when ready
+const RECENTLY_CLOSED_TABS_MOCK = [
+  {
+    label: 'Session 4',
+    id: '4',
+  },
+  {
+    label: 'Session 5',
+    id: '5',
+  },
+  {
+    label: 'Session 6',
+    id: '6',
+  },
+];
+
 export interface TabbedContentProps extends Pick<TabsBarProps, 'maxItemsCount'> {
   initialItems: TabItem[];
   initialSelectedItemId?: string;
@@ -138,6 +154,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         <TabsBar
           items={items}
           selectedItem={selectedItem}
+          recentlyClosedItems={RECENTLY_CLOSED_TABS_MOCK}
           maxItemsCount={maxItemsCount}
           tabContentId={tabContentId}
           getTabMenuItems={getTabMenuItems}

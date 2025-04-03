@@ -24,15 +24,9 @@ import {
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
-import type {
-  TabItem,
-  TabsSizeConfig,
-  GetTabMenuItems,
-  TabsServices,
-  TabPreviewData,
-} from '../../types';
+import type { TabItem, TabsSizeConfig, GetTabMenuItems, TabsServices } from '../../types';
 import { TabWithBackground } from '../tabs_visual_glue_to_header/tab_with_background';
-import { TabPreview } from '../tab_preview';
+import { TabPreview, type TabPreviewProps } from '../tab_preview';
 
 export interface TabProps {
   item: TabItem;
@@ -42,12 +36,12 @@ export interface TabProps {
   tabContentId: string;
   tabsSizeConfig: TabsSizeConfig;
   getTabMenuItems?: GetTabMenuItems;
+  getPreviewData: TabPreviewProps['getPreviewData'];
   services: TabsServices;
   onLabelEdited: EditTabLabelProps['onLabelEdited'];
   onSelect: (item: TabItem) => Promise<void>;
   onClose: ((item: TabItem) => Promise<void>) | undefined;
   onSelectedTabKeyDown?: (event: KeyboardEvent<HTMLDivElement>) => Promise<void>;
-  tabPreviewData: TabPreviewData;
 }
 
 export const Tab: React.FC<TabProps> = (props) => {
@@ -59,12 +53,12 @@ export const Tab: React.FC<TabProps> = (props) => {
     tabContentId,
     tabsSizeConfig,
     getTabMenuItems,
+    getPreviewData,
     services,
     onLabelEdited,
     onSelect,
     onClose,
     onSelectedTabKeyDown,
-    tabPreviewData,
   } = props;
   const { euiTheme } = useEuiTheme();
   const tabInteractiveElementRef = useRef<HTMLDivElement | null>(null);
@@ -159,6 +153,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     }
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
+
   const mainTabContent = (
     <EuiFlexGroup
       alignItems="center"
@@ -240,8 +235,8 @@ export const Tab: React.FC<TabProps> = (props) => {
       showPreview={showPreview}
       setShowPreview={setShowPreview}
       stopPreviewOnHover={isInlineEditActive || isActionPopoverOpen}
-      tabPreviewData={tabPreviewData}
       tabItem={item}
+      getPreviewData={getPreviewData}
     >
       <TabWithBackground
         data-test-subj={`unifiedTabs_tab_${item.id}`}

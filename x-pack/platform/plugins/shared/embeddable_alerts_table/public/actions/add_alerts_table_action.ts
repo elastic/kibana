@@ -6,7 +6,7 @@
  */
 
 import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { fetchRuleTypes } from '@kbn/alerts-ui-shared/src/common/apis/fetch_rule_types';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -18,7 +18,7 @@ import { ADD_ALERTS_TABLE_ACTION_ID, EMBEDDABLE_ALERTS_TABLE_ID } from '../const
 
 const checkRuleTypesPermissions = async (http: CoreStart['http']) => {
   try {
-    const ruleTypes = await fetchRuleTypes({ http });
+    const ruleTypes = await getRuleTypes({ http });
     if (!ruleTypes.length) {
       // If no rule types we should not show the action.
       return false;

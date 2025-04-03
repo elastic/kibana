@@ -23,10 +23,11 @@ import {
   keys,
 } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem, TabsServices, TabPreviewData } from '../../types';
+import type { TabItem, TabsServices } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
+import { TabsBarMenu } from '../tabs_bar_menu';
 
 const DROPPABLE_ID = 'unifiedTabsOrder';
 
@@ -42,20 +43,21 @@ const droppableCss = css`
 
 export type TabsBarProps = Pick<
   TabProps,
-  'getTabMenuItems' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
+  'getTabMenuItems' | 'getPreviewData' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
+  recentlyClosedItems: TabItem[];
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
   onReorder: (items: TabItem[]) => void;
-  getPreviewData: (item: TabItem) => TabPreviewData;
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
+  recentlyClosedItems,
   maxItemsCount,
   tabContentId,
   getTabMenuItems,
@@ -173,7 +175,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       alignItems="center"
       gutterSize="s"
       css={css`
-        padding-right: ${euiTheme.size.xs};
+        padding-right: ${euiTheme.size.base};
       `}
     >
       <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
@@ -203,6 +205,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
                             tabsSizeConfig={tabsSizeConfig}
                             services={services}
                             getTabMenuItems={getTabMenuItems}
+                            getPreviewData={getPreviewData}
                             onLabelEdited={onLabelEdited}
                             onSelect={onSelect}
                             onSelectedTabKeyDown={onSelectedTabKeyDown}
@@ -234,12 +237,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          color="text"
-          aria-label="Tabs menu placeholder"
-          title="Tabs menu placeholder"
-          onClick={() => alert('TODO: Implement tabs menu')}
+        <TabsBarMenu
+          openedItems={items}
+          selectedItem={selectedItem}
+          onSelectOpenedTab={onSelect}
+          recentlyClosedItems={recentlyClosedItems}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
