@@ -8,7 +8,7 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { retrieveCases } from './tools';
+import { getCases, getAccounts } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -63,7 +63,7 @@ export async function createMcpServer({
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
 
   server.tool(
-    'retrieve_cases',
+    'get_cases',
     `Retrieves Salesforce support cases with flexible filtering options`,
     {
       caseNumber: z
@@ -128,6 +128,18 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Return cases updated before this date (format: YYYY-MM-DD)'),
+      commentAuthorEmail: z
+        .array(z.string())
+        .optional()
+        .describe('Filter cases by the email of the comment author'),
+      commentCreatedAfter: z
+        .string()
+        .optional()
+        .describe('Filter cases with comments created after this date (format: YYYY-MM-DD)'),
+      commentCreatedBefore: z
+        .string()
+        .optional()
+        .describe('Filter cases with comments created before this date (format: YYYY-MM-DD)'),
     },
     async ({
       id,
@@ -143,8 +155,12 @@ export async function createMcpServer({
       status,
       updatedAfter,
       updatedBefore,
+      commentAuthorEmail,
+      commentCreatedAfter,
+      commentCreatedBefore,
+      ownerEmail,
     }) => {
-      const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
+      const caseContent = await getCases(elasticsearchClient, logger, index, {
         id,
         size,
         sortField,
@@ -158,12 +174,82 @@ export async function createMcpServer({
         status,
         updatedAfter,
         updatedBefore,
+        commentAuthorEmail,
+        commentCreatedAfter,
+        commentCreatedBefore,
+        ownerEmail,
       });
 
       logger.info(`Retrieved ${caseContent.length} support cases`);
 
+      logger.info(`Case content: ${JSON.stringify(caseContent)}`);
+
       return {
         content: caseContent,
+      };
+    }
+  );
+
+  server.tool(
+    'get_accounts',
+    `Retrieves Salesforce accounts with flexible filtering options`,
+    {
+      id: z.array(z.string()).optional().describe('Salesforce internal IDs of the accounts'),
+      size: z
+        .number()
+        .int()
+        .positive()
+        .default(10)
+        .describe('Maximum number of accounts to return'),
+      sortField: z
+        .string()
+        .optional()
+        .describe(`Field to sort results by. Can only be one of these ${sortableFields}`),
+      sortOrder: z
+        .string()
+        .optional()
+        .describe(
+          `Sorting order. Can only be 'desc' meaning sort in descending order or 'asc' meaning sort in ascending order`
+        ),
+      ownerEmail: z
+        .array(z.string())
+        .optional()
+        .describe('Emails of account owners/assignees to filter results'),
+      isPartner: z.boolean().optional().describe('Filter accounts by partner status (true/false)'),
+      createdAfter: z
+        .string()
+        .optional()
+        .describe('Return accounts created after this date (format: YYYY-MM-DD)'),
+      createdBefore: z
+        .string()
+        .optional()
+        .describe('Return accounts created before this date (format: YYYY-MM-DD)'),
+    },
+    async ({
+      id,
+      size = 10,
+      sortField,
+      sortOrder,
+      isPartner,
+      createdAfter,
+      createdBefore,
+      ownerEmail,
+    }) => {
+      const accountContent = await getAccounts(elasticsearchClient, logger, index, {
+        id,
+        size,
+        sortField,
+        sortOrder,
+        isPartner,
+        createdAfter,
+        createdBefore,
+        ownerEmail,
+      });
+
+      logger.info(`Retrieved ${accountContent.length} accounts`);
+
+      return {
+        content: accountContent,
       };
     }
   );
