@@ -37726,13 +37726,9 @@ paths:
                 properties:
                   custom_assets:
                     additionalProperties:
-                      additionalProperties: true
+                      additionalProperties: false
                       type: object
                       properties:
-                        deleted_at:
-                          type: string
-                        is_deleted:
-                          type: boolean
                         name:
                           type: string
                         package_name:
@@ -37752,7 +37748,6 @@ paths:
                         - name
                         - package_name
                         - package_version
-                        - is_deleted
                         - sync_status
                     type: object
                   error:
