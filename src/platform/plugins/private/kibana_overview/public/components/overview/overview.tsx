@@ -21,6 +21,7 @@ import {
   EuiLoadingSpinner,
   useEuiMinBreakpoint,
   UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -78,7 +79,11 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   } = services;
   const addBasePath = http.basePath.prepend;
   const currentTheme = useObservable(theme.theme$, { darkMode: false, name: 'amsterdam' });
-
+  const { euiTheme } = useEuiTheme();
+  const minBreakpointM = useEuiMinBreakpoint('m');
+  const className = classNames(
+    !newsFetchResult?.feedItems?.length && 'kbnOverviewSupplements--noNews'
+  );
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
   const devToolsHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
@@ -99,9 +104,6 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const addDataFeatures = getFeaturesByCategory('data');
   const manageDataFeatures = getFeaturesByCategory('admin');
   const devTools = findFeatureById('console');
-  const className = classNames(
-    !newsFetchResult?.feedItems?.length && 'kbnOverviewSupplements--noNews'
-  );
   // Show card for console if none of the manage data plugins are available, most likely in OSS
   if (manageDataFeatures.length < 1 && devTools) {
     manageDataFeatures.push(devTools);
@@ -245,7 +247,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
 
   return (
     <KibanaPageTemplate
-      css={styles}
+      css={styles(euiTheme, minBreakpointM)}
       pageHeader={{
         iconType: 'logoKibana',
         pageTitle: <FormattedMessage defaultMessage="Analytics" id="kibanaOverview.header.title" />,
@@ -379,7 +381,7 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   );
 };
 
-const styles = ({ euiTheme }: UseEuiTheme) =>
+const styles = (euiTheme: UseEuiTheme['euiTheme'], minBreakpointM: string) =>
   css({
     '.kbnRedirectAppLinkImage': {
       '.enterpriseSearch': {
@@ -399,26 +401,26 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
       },
     },
     '.kbnOverviewItemSolution': {
-      [useEuiMinBreakpoint('m')]: {
+      [minBreakpointM]: {
         maxWidth: `calc(33,333% - ${euiTheme.size.l})`,
       },
     },
     '.kbnOverviewRemainingApps': {
       '.kbnOverviewApps__item': {
-        [useEuiMinBreakpoint('m')]: {
+        [minBreakpointM]: {
           maxWidth: `calc(25% - ${euiTheme.size.l})`,
         },
       },
     },
     '.kbnOverviewMainApps': {
       '.kbnOverviewApps__item': {
-        [useEuiMinBreakpoint('m')]: {
+        [minBreakpointM]: {
           maxWidth: `calc(50% - ${euiTheme.size.l})`,
         },
       },
     },
     '.kbnOverviewSupplements--noNews h2': {
-      [useEuiMinBreakpoint('m')]: {
+      [minBreakpointM]: {
         textAlign: 'center',
       },
     },
