@@ -13,9 +13,6 @@ import { installationStatuses } from '../../../../../../../common/constants';
 
 import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
-import { isPackageUpdatable } from '../../../../services';
-
-import { useAuthz, useGetPackagesQuery, useGetSettingsQuery } from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
@@ -42,6 +39,12 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 };
 
 export const EPMHomePage: React.FC = () => {
+  const config = useConfig();
+  const { application } = useStartServices();
+  if (config.integrationsHomeOverride) {
+    application.navigateToUrl(config.integrationsHomeOverride);
+  }
+
   const authz = useAuthz();
   const isAuthorizedToFetchSettings = authz.fleet.readSettings;
   const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
