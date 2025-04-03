@@ -62,7 +62,6 @@ import {
   DISCOVER_URL,
   RULES_COVERAGE_URL,
   OSQUERY_URL,
-  FLEET_URL,
   HOSTS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
@@ -267,7 +266,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', RULES_MANAGEMENT_URL);
   });
 
-  it('navigates to the Rules page', () => {
+  it('navigates to the CSP Benchmarks page', () => {
     navigateFromHeaderTo(ServerlessHeaders.CSP_BENCHMARKS, true);
     cy.url().should('include', CSP_BENCHMARKS_URL);
   });
@@ -329,9 +328,5 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   it('navigates to the Endpoints page', () => {
     navigateFromHeaderTo(ServerlessHeaders.ENDPOINTS, true);
     cy.url().should('include', ENDPOINTS_URL);
-  });
-  it('navigates to the Fleet page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.FLEET, true);
-    cy.url().should('include', FLEET_URL);
   });
 });
