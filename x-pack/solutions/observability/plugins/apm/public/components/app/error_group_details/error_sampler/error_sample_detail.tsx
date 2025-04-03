@@ -176,6 +176,23 @@ export function ErrorSampleDetails({
     },
   });
 
+  const transactionViewLink = transaction
+    ? router.link('/services/{serviceName}/transactions/view', {
+        path: { serviceName: transaction.service.name },
+        query: {
+          ...query,
+          traceId: transaction.trace.id,
+          transactionId: transaction.transaction.id,
+          transactionName: transaction.transaction.name,
+          transactionType: transaction.transaction.type,
+          comparisonEnabled: !!comparisonEnabled,
+          showCriticalPath: false,
+          offset,
+          kuery,
+        },
+      })
+    : undefined;
+
   return (
     <EuiPanel hasBorder={true}>
       <EuiFlexGroup alignItems="center">
@@ -265,6 +282,7 @@ export function ErrorSampleDetails({
                   serviceName={transaction.service.name}
                   offset={offset}
                   comparisonEnabled={comparisonEnabled}
+                  href={transactionViewLink}
                 >
                   <EuiIcon type="merge" />
                   <TransactionLinkName>{transaction.transaction.name}</TransactionLinkName>

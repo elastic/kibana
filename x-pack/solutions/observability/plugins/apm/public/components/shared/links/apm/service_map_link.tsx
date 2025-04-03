@@ -11,7 +11,9 @@ import type { APMLinkExtendProps } from './apm_link';
 import { useAPMHref } from './apm_link';
 
 export function useServiceMapHref(serviceName?: string) {
-  const path = serviceName ? `/services/${serviceName}/service-map` : '/service-map';
+  const path = serviceName
+    ? `/services/${encodeURIComponent(serviceName)}/service-map`
+    : '/service-map';
   return useAPMHref({ path });
 }
 

@@ -31,6 +31,7 @@ interface Props extends APMLinkExtendProps {
   transactionName: string;
   transactionType?: string;
   latencyAggregationType?: string;
+  href?: string;
   environment?: string;
   comparisonEnabled?: boolean;
   offset?: string;
@@ -50,6 +51,7 @@ export function TransactionDetailLink({
   comparisonEnabled,
   offset = '1d',
   overflowCount = 0,
+  href,
   ...rest
 }: Props) {
   const { urlParams } = useLegacyUrlParams();
@@ -59,9 +61,10 @@ export function TransactionDetailLink({
     urlComparisonEnabled: comparisonEnabled,
   });
   const location = useLocation();
-  const href = getLegacyApmHref({
+
+  const hrefLegacy = getLegacyApmHref({
     basePath: core.http.basePath,
-    path: `/services/${serviceName}/transactions/view`,
+    path: `/services/${encodeURIComponent(serviceName)}/transactions/view`,
     query: {
       traceId,
       transactionId,
@@ -79,7 +82,13 @@ export function TransactionDetailLink({
     return (
       <TruncateWithTooltip
         text={transactionName}
-        content={<EuiLink data-test-subj="apmTransactionDetailLinkLink" href={href} {...rest} />}
+        content={
+          <EuiLink
+            data-test-subj="apmTransactionDetailLinkLink"
+            href={href ?? hrefLegacy}
+            {...rest}
+          />
+        }
       />
     );
   }

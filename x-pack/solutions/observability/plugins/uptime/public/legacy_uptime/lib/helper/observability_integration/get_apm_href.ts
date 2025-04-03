@@ -19,7 +19,9 @@ export const getLegacyApmHref = (
   if (serviceName) {
     return addBasePath(
       basePath,
-      `/app/apm/services/${serviceName}/overview/?rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
+      `/app/apm/services/${encodeURIComponent(
+        serviceName
+      )}/overview/?rangeFrom=${dateRangeStart}&rangeTo=${dateRangeEnd}`
     );
   }
 

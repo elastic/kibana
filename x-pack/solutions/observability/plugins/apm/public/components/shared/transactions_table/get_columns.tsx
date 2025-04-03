@@ -138,6 +138,17 @@ export function getColumns({
             comparisonEnabled={comparisonEnabled}
             offset={offset}
             overflowCount={transactionOverflowCount}
+            href={link('/services/{serviceName}/transactions/view', {
+              path: { serviceName },
+              query: {
+                ...query,
+                transactionName: name,
+                transactionType: type,
+                comparisonEnabled: !!comparisonEnabled,
+                showCriticalPath: false,
+                offset,
+              },
+            })}
           >
             {name}
           </TransactionDetailLink>

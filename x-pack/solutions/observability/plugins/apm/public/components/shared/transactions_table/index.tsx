@@ -82,7 +82,8 @@ export function TransactionsTable({
     '/services/{serviceName}/transactions',
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/overview'
+    '/mobile-services/{serviceName}/overview',
+    '/services/{serviceName}/transactions/view'
   );
 
   const latencyAggregationType = getLatencyAggregationType(latencyAggregationTypeFromQuery);
@@ -159,6 +160,22 @@ export function TransactionsTable({
     };
   }, [isTableSearchBarEnabled, mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
 
+  const transactionViewLink = link('/services/{serviceName}/transactions/view', {
+    path: { serviceName },
+    query: {
+      environment,
+      transactionName: '',
+      showCriticalPath: false,
+      transactionType,
+      latencyAggregationType,
+      rangeFrom: start,
+      rangeTo: end,
+      kuery,
+      serviceGroup: '',
+      comparisonEnabled: !!comparisonEnabled,
+    },
+  });
+
   useEffect(() => {
     return setScreenContext?.({
       data: [
@@ -196,6 +213,7 @@ export function TransactionsTable({
                   serviceName={serviceName}
                   latencyAggregationType={latencyAggregationType}
                   transactionType={transactionType}
+                  href={transactionViewLink}
                 >
                   {i18n.translate('xpack.apm.transactionsTable.linkText', {
                     defaultMessage: 'View transactions',

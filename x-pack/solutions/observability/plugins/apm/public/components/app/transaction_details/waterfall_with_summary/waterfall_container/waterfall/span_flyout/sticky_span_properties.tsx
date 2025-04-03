@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { useApmRouter } from '../../../../../../../hooks/use_apm_router';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
@@ -37,6 +38,8 @@ export function StickySpanProperties({ span, transaction }: Props) {
     '/traces/explorer',
     '/dependencies/operation'
   );
+  const router = useApmRouter();
+
   const { environment, comparisonEnabled, offset } = query;
 
   const latencyAggregationType =
@@ -54,6 +57,17 @@ export function StickySpanProperties({ span, transaction }: Props) {
 
   const spanName = span.span.name;
   const dependencyName = span.span.destination?.service.resource;
+  const transactionViewLink = transaction
+    ? router.link('/services/{serviceName}/transactions/view', {
+        path: { serviceName: transaction?.service.name },
+        query: {
+          ...query,
+          serviceGroup,
+          latencyAggregationType,
+          transactionName: transaction.transaction.name,
+        },
+      })
+    : undefined;
 
   const transactionStickyProperties = transaction
     ? [
@@ -91,6 +105,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
               latencyAggregationType={latencyAggregationType}
               comparisonEnabled={comparisonEnabled}
               offset={offset}
+              href={transactionViewLink}
             >
               {transaction.transaction.name}
             </TransactionDetailLink>
