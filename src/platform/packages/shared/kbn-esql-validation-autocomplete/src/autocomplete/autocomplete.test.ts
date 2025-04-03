@@ -1004,7 +1004,7 @@ describe('autocomplete', () => {
 
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
       { text: 'IS NULL', rangeToReplace: undefined },
       '!= $0',
       '== $0',
@@ -1014,9 +1014,9 @@ describe('autocomplete', () => {
       'OR $0',
     ]);
     testSuggestions('FROM a | WHERE doubleField IS N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
-      { text: 'IS NULL', rangeToReplace: { start: 28, end: 32 } },
-      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 31 } },
+      { text: 'IS NULL', rangeToReplace: { start: 27, end: 31 } },
+      { text: '!= $0', rangeToReplace: { start: 30, end: 31 } },
       '== $0',
       'IN $0',
       'AND $0',
@@ -1024,7 +1024,7 @@ describe('autocomplete', () => {
       'OR $0',
     ]);
     testSuggestions('FROM a | EVAL doubleField IS NOT N/', [
-      { text: 'IS NOT NULL', rangeToReplace: { start: 27, end: 35 } },
+      { text: 'IS NOT NULL', rangeToReplace: { start: 26, end: 34 } },
       'IS NULL',
       '!= $0',
       '== $0',
