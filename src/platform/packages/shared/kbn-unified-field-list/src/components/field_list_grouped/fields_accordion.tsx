@@ -138,7 +138,6 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
 
   return (
     <EuiAccordion
-      // aria-label={`${label} ${fieldsCount} fields`}
       initialIsOpen={initialIsOpen}
       onToggle={onToggle}
       data-test-subj={id}
