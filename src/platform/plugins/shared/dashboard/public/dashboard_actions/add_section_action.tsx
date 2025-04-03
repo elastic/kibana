@@ -13,6 +13,7 @@ import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_ADD_SECTION } from './constants';
+import { i18n } from '@kbn/i18n';
 
 type AddSectionActionApi = CanAddNewSection;
 
@@ -22,11 +23,13 @@ const isApiCompatible = (api: unknown | null): api is AddSectionActionApi =>
 export class AddSectionAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_SECTION;
   public readonly id = ACTION_ADD_SECTION;
-  public order = 9;
+  public order = 40;
   public grouping = [ADD_PANEL_ANNOTATION_GROUP];
 
   public getDisplayName() {
-    return 'Section';
+    return i18n.translate('dashboard.collapsibleSection.displayName', {
+      defaultMessage: 'Collapsible section',
+    });
   }
 
   public getIconType() {
