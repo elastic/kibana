@@ -1262,11 +1262,11 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Global Experience
 
 ### Reporting
-/x-pack/test/functional/apps/dashboard/reporting/ @elastic/appex-sharedux
+/x-pack/test/functional/apps/dashboard/reporting/ @elastic/response-ops
 /x-pack/test/functional/apps/reporting/ @elastic/response-ops
 /x-pack/test/functional/apps/reporting_management/ @elastic/response-ops
 /x-pack/test/examples/screenshotting/ @elastic/response-ops
-/x-pack/test/functional/es_archives/lens/reporting/ @elastic/appex-sharedux
+/x-pack/test/functional/es_archives/lens/reporting/ @elastic/response-ops
 /x-pack/test/functional/es_archives/reporting/ @elastic/response-ops
 /x-pack/test/functional/fixtures/kbn_archiver/reporting/ @elastic/response-ops
 /x-pack/test/reporting_api_integration/ @elastic/response-ops
