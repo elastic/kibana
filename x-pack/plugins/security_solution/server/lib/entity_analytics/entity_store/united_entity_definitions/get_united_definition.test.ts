@@ -15,6 +15,7 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       fieldHistoryLength: 10,
       indexPatterns,
+      filter: ' ',
       syncDelay: '1m',
       frequency: '1m',
     });
@@ -172,6 +173,7 @@ describe('getUnitedEntityDefinition', () => {
       expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{host.name}}",
+          "filter": " ",
           "id": "security_host_test",
           "identityFields": Array [
             Object {
@@ -328,6 +330,7 @@ describe('getUnitedEntityDefinition', () => {
       namespace: 'test',
       fieldHistoryLength: 10,
       indexPatterns,
+      filter: ' ',
       syncDelay: '1m',
       frequency: '1m',
     });
@@ -461,6 +464,7 @@ describe('getUnitedEntityDefinition', () => {
       expect(unitedDefinition.entityManagerDefinition).toMatchInlineSnapshot(`
         Object {
           "displayNameTemplate": "{{user.name}}",
+          "filter": " ",
           "id": "security_user_test",
           "identityFields": Array [
             Object {
