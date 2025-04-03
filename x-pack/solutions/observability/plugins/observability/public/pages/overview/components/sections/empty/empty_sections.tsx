@@ -21,7 +21,7 @@ export function EmptySections() {
   const { http, serverless: isServerless } = useKibana().services;
   const theme = useContext(ThemeContext);
   const { hasDataMap } = useHasData();
-  const { euiTheme, highContrastMode } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const appEmptySections = getEmptySections({ http }).filter(({ id, showInServerless }) => {
     const app = hasDataMap[id];
@@ -48,7 +48,7 @@ export function EmptySections() {
               key={app.id}
               style={{
                 border: `${theme.eui.euiBorderEditable}`,
-                borderColor: highContrastMode ? euiTheme.border.color : '',
+                borderColor: euiTheme.border.color,
                 borderRadius: `${theme.eui.euiBorderRadius}`,
               }}
             >
