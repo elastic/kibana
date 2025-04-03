@@ -400,6 +400,25 @@ describe('ProductFeaturesService', () => {
               expect(toolkit.next).toHaveBeenCalledTimes(1);
             });
 
+            it('should allow access when all actions are registered with nested anyOf', async () => {
+              const req = getReq([
+                {
+                  allRequired: [
+                    { anyOf: ['securitySolution-enabled', 'securitySolution-enabled2'] },
+                    'securitySolution-enabled3',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled3');
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+
             it('should restrict access if one action is not registered', async () => {
               const req = getReq([
                 {
@@ -445,6 +464,25 @@ describe('ProductFeaturesService', () => {
               expect(res.notFound).toHaveBeenCalledTimes(1);
               expect(toolkit.next).not.toHaveBeenCalled();
             });
+
+            it('should restrict only based on security privileges and ignore non-security with nested anyOf', async () => {
+              const req = getReq([
+                {
+                  allRequired: [
+                    { anyOf: ['securitySolution-disabled', 'securitySolution-disabled2'] },
+                    'notSecurityPrivilege',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled2');
+
+              expect(res.notFound).toHaveBeenCalledTimes(1);
+              expect(toolkit.next).not.toHaveBeenCalled();
+            });
           });
 
           describe('when using anyRequired', () => {
@@ -468,10 +506,49 @@ describe('ProductFeaturesService', () => {
               expect(toolkit.next).toHaveBeenCalledTimes(1);
             });
 
+            it('should allow access when one action is registered with nested allOf', async () => {
+              const req = getReq([
+                {
+                  anyRequired: [
+                    { allOf: ['securitySolution-disabled2', 'securitySolution-disabled'] },
+                    'securitySolution-enabled',
+                    'securitySolution-notCalled',
+                  ],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled2');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-enabled');
+
+              expect(res.notFound).not.toHaveBeenCalled();
+              expect(toolkit.next).toHaveBeenCalledTimes(1);
+            });
+
             it('should restrict access when no action is registered', async () => {
               const req = getReq([
                 {
                   anyRequired: ['securitySolution-disabled', 'securitySolution-disabled2'],
+                },
+              ]);
+              await lastRegisteredFn(req, res, toolkit);
+
+              expect(mockIsActionRegistered).toHaveBeenCalledTimes(2);
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled');
+              expect(mockIsActionRegistered).toHaveBeenCalledWith('api:securitySolution-disabled2');
+
+              expect(res.notFound).toHaveBeenCalledTimes(1);
+              expect(toolkit.next).not.toHaveBeenCalled();
+            });
+
+            it('should restrict access when no action is registered with nested allOf', async () => {
+              const req = getReq([
+                {
+                  anyRequired: [
+                    { allOf: ['notSecurityPrivilege', 'securitySolution-disabled2'] },
+                    { allOf: ['notSecurityPrivilege2', 'securitySolution-disabled'] },
+                  ],
                 },
               ]);
               await lastRegisteredFn(req, res, toolkit);
