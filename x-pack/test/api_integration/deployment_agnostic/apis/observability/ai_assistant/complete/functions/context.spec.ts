@@ -70,7 +70,6 @@ const userPrompt = `What's my favourite color?`;
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
 
   describe('context', function () {
@@ -108,7 +107,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         actionId: connectorId,
       });
 
-      await deleteKnowledgeBaseModel({ ml, es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
     });
 

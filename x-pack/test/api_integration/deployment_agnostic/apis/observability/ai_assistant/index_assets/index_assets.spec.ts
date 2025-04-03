@@ -20,7 +20,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     for (const componentTemplateName of Object.values(resourceNames.componentTemplate)) {
-      it(`should create components template: ${componentTemplateName}`, async () => {
+      it(`should create the component template: ${componentTemplateName}`, async () => {
         const exists = await es.cluster.existsComponentTemplate({ name: componentTemplateName });
         expect(exists).to.be(true);
       });

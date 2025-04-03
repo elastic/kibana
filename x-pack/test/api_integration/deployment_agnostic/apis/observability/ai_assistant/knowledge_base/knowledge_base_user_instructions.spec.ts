@@ -28,7 +28,6 @@ const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(dat
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const log = getService('log');
   const retry = getService('retry');
 
@@ -38,7 +37,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel({ ml, es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
       await clearConversations(es);
     });

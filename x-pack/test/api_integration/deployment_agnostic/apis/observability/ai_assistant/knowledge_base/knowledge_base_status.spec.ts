@@ -15,7 +15,6 @@ import {
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
@@ -25,7 +24,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     afterEach(async () => {
-      await deleteKnowledgeBaseModel({ ml, es }).catch((e) => {});
+      await deleteKnowledgeBaseModel(getService);
     });
 
     it('returns correct status after knowledge base is setup', async () => {
@@ -41,7 +40,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     it('returns correct status after model is deleted', async () => {
-      await deleteKnowledgeBaseModel({ ml, es, shouldDeleteInferenceEndpoint: false });
+      await deleteKnowledgeBaseModel(getService, { shouldDeleteInferenceEndpoint: false });
 
       const res = await observabilityAIAssistantAPIClient.editor({
         endpoint: 'GET /internal/observability_ai_assistant/kb/status',

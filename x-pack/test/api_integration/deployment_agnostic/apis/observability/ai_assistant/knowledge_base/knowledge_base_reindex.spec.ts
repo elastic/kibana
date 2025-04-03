@@ -27,7 +27,6 @@ const targetIndex = `${resourceNames.writeIndexAlias.kb}-000002`;
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
   const retry = getService('retry');
 
   describe('POST /internal/observability_ai_assistant/kb/reindex', function () {
@@ -40,7 +39,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel({ ml, es });
+      await deleteKnowledgeBaseModel(getService);
     });
 
     describe('when reindexing is successful', () => {

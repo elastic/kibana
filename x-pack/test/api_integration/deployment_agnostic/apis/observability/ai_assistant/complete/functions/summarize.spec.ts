@@ -21,7 +21,6 @@ import {
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
-  const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
@@ -67,7 +66,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      await deleteKnowledgeBaseModel({ ml, es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
     });
 

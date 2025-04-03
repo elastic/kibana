@@ -18,19 +18,18 @@ import {
 import { restoreIndexAssets } from '../utils/index_assets';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
   const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/setup', function () {
     before(async () => {
-      await deleteKnowledgeBaseModel({ ml, es }).catch(() => {});
+      await deleteKnowledgeBaseModel(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
     afterEach(async () => {
-      await deleteKnowledgeBaseModel({ ml, es }).catch(() => {});
+      await deleteKnowledgeBaseModel(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 

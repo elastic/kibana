@@ -15,7 +15,6 @@ import {
 } from '../utils/knowledge_base';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
-  const ml = getService('ml');
   const es = getService('es');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
@@ -50,7 +49,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel({ ml, es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
     });
 

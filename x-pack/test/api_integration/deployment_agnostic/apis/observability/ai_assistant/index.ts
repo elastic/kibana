@@ -47,5 +47,6 @@ export default function aiAssistantApiIntegrationTests({
 
     // public endpoints
     loadTestFile(require.resolve('./public_complete/public_complete.spec.ts'));
+    loadTestFile(require.resolve('./distributed_lock_manager/distributed_lock_manager.spec.ts'));
   });
 }

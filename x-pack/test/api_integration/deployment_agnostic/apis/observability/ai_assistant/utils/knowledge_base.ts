@@ -95,21 +95,33 @@ export async function waitForKnowledgeBaseReady({
   });
 }
 
-export async function deleteKnowledgeBaseModel({
-  ml,
-  es,
-  shouldDeleteInferenceEndpoint = true,
-}: {
-  ml: ReturnType<typeof MachineLearningProvider>;
-  es: Client;
-  shouldDeleteInferenceEndpoint?: boolean;
-}) {
-  await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-  await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-  await ml.testResources.cleanMLSavedObjects();
+export async function deleteKnowledgeBaseModel(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  {
+    shouldDeleteInferenceEndpoint = true,
+  }: {
+    shouldDeleteInferenceEndpoint?: boolean;
+  } = {}
+) {
+  const log = getService('log');
+  const ml = getService('ml');
+  const es = getService('es');
 
-  if (shouldDeleteInferenceEndpoint) {
-    await deleteInferenceEndpoint({ es });
+  try {
+    await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
+    await ml.api.deleteTrainedModelES(TINY_ELSER.id);
+    await ml.testResources.cleanMLSavedObjects();
+
+    if (shouldDeleteInferenceEndpoint) {
+      await deleteInferenceEndpoint({ es });
+    }
+  } catch (e) {
+    if (e.message.includes('resource_not_found_exception')) {
+      log.debug(`Knowledge base model was already deleted.`);
+      return;
+    }
+
+    log.error(`Could not delete knowledge base model: ${e}`);
   }
 }
 

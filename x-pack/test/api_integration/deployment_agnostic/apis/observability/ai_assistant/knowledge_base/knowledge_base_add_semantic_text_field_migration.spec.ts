@@ -43,7 +43,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
-  const ml = getService('ml');
   const retry = getService('retry');
 
   const archive =
@@ -68,7 +67,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
-      await deleteKnowledgeBaseModel({ ml, es }).catch(() => {});
+      await deleteKnowledgeBaseModel(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
@@ -76,7 +75,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel({ ml, es });
+      await deleteKnowledgeBaseModel(getService);
       await restoreIndexAssets(observabilityAIAssistantAPIClient, es);
     });
 
