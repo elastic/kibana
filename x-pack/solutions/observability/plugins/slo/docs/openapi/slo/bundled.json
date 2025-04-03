@@ -266,6 +266,79 @@
         }
       }
     },
+    "/s/{spaceId}/api/observability/slos/bulk-delete": {
+      "post": {
+        "summary": "Bulk delete SLOs",
+        "operationId": "bulkDeleteSlosOp",
+        "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bulk_delete_slos_request"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Successful request"
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/s/{spaceId}/api/observability/slos/{sloId}": {
       "get": {
         "summary": "Get an SLO",
@@ -2111,6 +2184,22 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/slo_with_summary_response"
+            }
+          }
+        }
+      },
+      "bulk_delete_slo_request": {
+        "title": "Bulk Delete SLO request",
+        "type": "object",
+        "required": [
+          "ids"
+        ],
+        "properties": {
+          "ids": {
+            "description": "List of ids for SLOs to delete",
+            "type": "array",
+            "items": {
+              "type": "string"
             }
           }
         }

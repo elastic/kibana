@@ -16,6 +16,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
+  EuiTableSelectionType,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -57,6 +58,11 @@ export function SloManagementTable() {
   });
 
   const { data: permissions } = usePermissions();
+
+  const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
+  const onSelectionChange = (newSelectedItems: SLODefinitionResponse[]) => {
+    setSelectedItems(newSelectedItems);
+  };
 
   const [sloToDelete, setSloToDelete] = useState<SLODefinitionResponse | undefined>(undefined);
   const [sloToReset, setSloToReset] = useState<SLODefinitionResponse | undefined>(undefined);
@@ -280,6 +286,11 @@ export function SloManagementTable() {
     }
   };
 
+  const selection: EuiTableSelectionType<SLODefinitionResponse> = {
+    onSelectionChange,
+    selected: selectedItems,
+  };
+
   const pagination = {
     pageIndex: page,
     pageSize: perPage,
@@ -303,8 +314,10 @@ export function SloManagementTable() {
               : undefined
           }
           items={data?.results ?? []}
+          itemId="id"
           rowHeader="name"
           columns={columns}
+          selection={selection}
           pagination={pagination}
           onChange={onTableChange}
           loading={isLoading}

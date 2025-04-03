@@ -11,6 +11,7 @@ import { createSLORoute } from './create_slo';
 import { inspectSLORoute } from './inspect_slo';
 import { updateSLORoute } from './update_slo';
 import { deleteSLORoute } from './delete_slo';
+import { bulkDeleteSLORoute } from './bulk_delete_slo';
 import { enableSLORoute } from './enable_slo';
 import { getSLORoute } from './get_slo';
 import { deleteSloInstancesRoute } from './delete_instances';
@@ -35,6 +36,7 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...putSloSettings(isServerless),
     ...createSLORoute,
     ...inspectSLORoute,
+    ...bulkDeleteSLORoute,
     ...deleteSLORoute,
     ...deleteSloInstancesRoute,
     ...disableSLORoute,

@@ -21,12 +21,12 @@ export function useDeleteSlo() {
   const { sloClient } = usePluginContext();
   const queryClient = useQueryClient();
 
-  return useMutation<void, ServerError, { id: string; name: string }>(
+  return useMutation<void, ServerError, { ids: string[]; name: string }>(
     ['deleteSlo'],
-    ({ id }) => {
+    ({ ids }) => {
       try {
-        return sloClient.fetch(`DELETE /api/observability/slos/{id} 2023-10-31`, {
-          params: { path: { id } },
+        return sloClient.fetch(`POST /api/observability/slos/bulk-delete 2023-10-31`, {
+          params: { path: { ids } },
         });
       } catch (error) {
         return Promise.reject(`Something went wrong: ${String(error)}`);

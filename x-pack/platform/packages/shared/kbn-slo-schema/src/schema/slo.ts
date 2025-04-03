@@ -70,6 +70,8 @@ const sloIdSchema = new t.Type<string, string, unknown>(
   t.identity
 );
 
+const bulkDeleteSchema = t.array(sloIdSchema);
+
 function isValidId(id: string): boolean {
   const MIN_ID_LENGTH = 8;
   const MAX_ID_LENGTH = 48;
@@ -110,6 +112,7 @@ export {
   settingsSchema,
   sloDefinitionSchema,
   sloIdSchema,
+  bulkDeleteSchema,
   tagsSchema,
   targetSchema,
   timeslicesBudgetingMethodSchema,

@@ -19,6 +19,8 @@ servers:
 paths:
   '/s/{spaceId}/api/observability/slos':
     $ref: 'paths/s@{spaceid}@api@slos.yaml'
+  '/s/{spaceId}/api/observability/slos/_bulk-delete':
+    $ref: 'paths/s@{spaceid}@api@slos.yaml'
   '/s/{spaceId}/api/observability/slos/{sloId}':
     $ref: 'paths/s@{spaceid}@api@slos@{sloid}.yaml'
   '/s/{spaceId}/api/observability/slos/{sloId}/enable':
