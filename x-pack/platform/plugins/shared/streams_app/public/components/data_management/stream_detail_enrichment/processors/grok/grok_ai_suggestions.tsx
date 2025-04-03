@@ -29,6 +29,7 @@ import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
+import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -155,6 +156,9 @@ function useAIFeatures() {
   };
 }
 
+export type SuggestionsResponse =
+  APIReturnType<'POST /internal/streams/{name}/processing/_suggestions'>;
+
 function InnerGrokAiSuggestions({
   previewDocuments,
   genAiConnectors,
@@ -178,9 +182,7 @@ function InnerGrokAiSuggestions({
 
   const [isLoadingSuggestions, setSuggestionsLoading] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState<Error | undefined>();
-  const [suggestions, setSuggestions] = useState<
-    { patterns: string[]; simulations: any[] } | undefined
-  >();
+  const [suggestions, setSuggestions] = useState<SuggestionsResponse | undefined>();
   const [blocklist, setBlocklist] = useState<Set<string>>(new Set());
 
   const abortController = useAbortController();
@@ -213,7 +215,7 @@ function InnerGrokAiSuggestions({
       .then((response) => {
         finishTrackingAndReport(
           response.patterns.length || 0,
-          response.simulations.map((item) => item.success_rate)
+          response.simulations.map((simulation) => simulation.documents_metrics.parsed_rate)
         );
         setSuggestions(response);
         setSuggestionsLoading(false);
@@ -252,7 +254,7 @@ function InnerGrokAiSuggestions({
   const filteredSuggestions = suggestions?.patterns
     .map((pattern, i) => ({
       pattern,
-      success_rate: suggestions.simulations[i].success_rate,
+      success_rate: suggestions.simulations[i].documents_metrics.parsed_rate,
       detected_fields_count: suggestions.simulations[i].detected_fields.length,
     }))
     .filter(
