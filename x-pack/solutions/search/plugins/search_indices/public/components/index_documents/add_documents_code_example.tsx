@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
@@ -143,17 +143,6 @@ export const AddDocumentsCodeExample = ({
             </EuiFlexItem>
           )}
         </EuiFlexItem>
-        {!!workflow && (
-          <EuiFlexItem>
-            <EuiTitle>
-              <h3>{workflow.title}</h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiText>
-              <p>{workflow.summary}</p>
-            </EuiText>
-          </EuiFlexItem>
-        )}
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample
