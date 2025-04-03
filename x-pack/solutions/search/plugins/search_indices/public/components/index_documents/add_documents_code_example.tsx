@@ -84,64 +84,57 @@ export const AddDocumentsCodeExample = ({
       data-test-subj="SearchIndicesAddDocumentsCode"
     >
       <EuiFlexGroup direction="column">
-        <EuiFlexGroup
-          justifyContent={indexHasMappings ? 'flexEnd' : 'spaceBetween'}
-          alignItems="center"
-        >
-          {!indexHasMappings && (
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h5>
-                  {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
-                    defaultMessage: 'Select a workflow guide',
-                  })}
-                </h5>
-              </EuiTitle>
-            </EuiFlexItem>
-          )}
+        {!indexHasMappings && (
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
-              <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
-                <LanguageSelector
-                  options={LanguageOptions}
-                  selectedLanguage={selectedLanguage}
-                  onSelectLanguage={onSelectLanguage}
-                  showLabel
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TryInConsoleButton
-                  request={
-                    !indexHasMappings
-                      ? `${ingestExamples.sense.updateMappingsCommand(
-                          codeParams
-                        )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
-                      : ingestExamples.sense.ingestCommand(codeParams)
-                  }
-                  application={application}
-                  sharePlugin={share}
-                  consolePlugin={consolePlugin}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
+                  defaultMessage: 'Select a workflow guide',
+                })}
+              </h5>
+            </EuiTitle>
           </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexItem>
-          {!indexHasMappings && (
-            <EuiFlexItem grow={false}>
-              <GuideSelector
-                selectedWorkflowId={selectedWorkflowId}
-                onChange={(workflowId: WorkflowId) => {
-                  setSelectedWorkflowId(workflowId);
-                  usageTracker.click([
-                    AnalyticsEvents.indexDetailsWorkflowSelect,
-                    `${AnalyticsEvents.indexDetailsWorkflowSelect}_${workflowId}`,
-                  ]);
-                }}
-                showTour
+        )}
+        {!indexHasMappings && (
+          <EuiFlexItem grow={false}>
+            <GuideSelector
+              selectedWorkflowId={selectedWorkflowId}
+              onChange={(workflowId: WorkflowId) => {
+                setSelectedWorkflowId(workflowId);
+                usageTracker.click([
+                  AnalyticsEvents.indexDetailsWorkflowSelect,
+                  `${AnalyticsEvents.indexDetailsWorkflowSelect}_${workflowId}`,
+                ]);
+              }}
+              showTour
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="s">
+            <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+              <LanguageSelector
+                options={LanguageOptions}
+                selectedLanguage={selectedLanguage}
+                onSelectLanguage={onSelectLanguage}
+                showLabel
               />
             </EuiFlexItem>
-          )}
+            <EuiFlexItem grow={false}>
+              <TryInConsoleButton
+                request={
+                  !indexHasMappings
+                    ? `${ingestExamples.sense.updateMappingsCommand(
+                        codeParams
+                      )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                    : ingestExamples.sense.ingestCommand(codeParams)
+                }
+                application={application}
+                sharePlugin={share}
+                consolePlugin={consolePlugin}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
