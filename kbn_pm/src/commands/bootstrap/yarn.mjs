@@ -50,7 +50,7 @@ export async function yarnInstallDeps(log, { offline, quiet }) {
 
   await run('yarn', ['playwright', 'install'], {
     cwd: process.cwd(),
-    pipe: !quiet,
+    pipe: false,
     env: {
       PLAYWRIGHT_SKIP_BROWSER_GC: '1',
     },
