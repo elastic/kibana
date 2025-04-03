@@ -10,14 +10,11 @@
 import type { ESQLSingleAstItem } from '@kbn/esql-ast';
 import { isMarkerNode } from '../../../shared/context';
 import { isAssignment, isColumnItem } from '../../../..';
-import { CommandSuggestParams } from '../../../definitions/types';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import { getNewVariableSuggestion } from '../../factories';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { buildPartialMatcher, getExpressionPosition, suggestForExpression } from '../../helper';
-
-const isNullMatcher = buildPartialMatcher('is nul');
-const isNotNullMatcher = buildPartialMatcher('is not nul');
+import { getExpressionPosition, isExpressionComplete, suggestForExpression } from '../../helper';
 
 export async function suggest(
   params: CommandSuggestParams<'eval'>
@@ -40,7 +37,7 @@ export async function suggest(
   const suggestions = await suggestForExpression({
     ...params,
     expressionRoot,
-    commandName: 'eval',
+    location: Location.EVAL,
   });
 
   const positionInExpression = getExpressionPosition(params.innerText, expressionRoot);
@@ -48,15 +45,9 @@ export async function suggest(
     suggestions.push(getNewVariableSuggestion(params.getSuggestedVariableName()));
   }
 
-  const isExpressionComplete =
-    params.getExpressionType(expressionRoot) !== 'unknown' &&
-    // see https://github.com/elastic/kibana/issues/199401
-    // for the reason we need this string check.
-    !(isNullMatcher.test(params.innerText) || isNotNullMatcher.test(params.innerText));
-
   if (
     // don't suggest finishing characters if incomplete expression
-    isExpressionComplete &&
+    isExpressionComplete(params.getExpressionType(expressionRoot), params.innerText) &&
     // don't suggest finishing characters if the expression is a column
     // because "EVAL columnName" is a useless expression
     expressionRoot &&

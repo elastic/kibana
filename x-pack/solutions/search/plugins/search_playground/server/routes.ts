@@ -29,6 +29,7 @@ import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
 import { MODELS } from '../common/models';
 import { ContextLimitError } from './lib/errors';
+import { contextDocumentHitMapper } from './utils/context_document_mapper';
 import { parseSourceFields } from './utils/parse_source_fields';
 import { getErrorMessage } from '../common/errors';
 
@@ -319,6 +320,7 @@ export function defineRoutes({
 
         return response.ok({
           body: {
+            executionTime: searchResult.took,
             results: searchResult.hits.hits,
             pagination: {
               from,
@@ -411,12 +413,24 @@ export function defineRoutes({
           indices: schema.arrayOf(schema.string()),
           size: schema.maybe(schema.number({ defaultValue: 10, min: 0 })),
           from: schema.maybe(schema.number({ defaultValue: 0, min: 0 })),
+          chat_context: schema.maybe(
+            schema.object({
+              source_fields: schema.string(),
+              doc_size: schema.number(),
+            })
+          ),
         }),
       },
     },
     errorHandler(logger)(async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { elasticsearch_query: elasticsearchQuery, indices, size, from } = request.body;
+      const {
+        elasticsearch_query: elasticsearchQuery,
+        indices,
+        size,
+        from,
+        chat_context: chatContext,
+      } = request.body;
 
       if (indices.length === 0) {
         return response.badRequest({
@@ -425,7 +439,6 @@ export function defineRoutes({
           },
         });
       }
-
       let searchQuery: Partial<SearchRequest>;
       try {
         searchQuery = parseElasticsearchQuery(elasticsearchQuery)(request.body.query);
@@ -437,22 +450,50 @@ export function defineRoutes({
           },
         });
       }
-      const searchResponse = await client.asCurrentUser.search({
-        ...searchQuery,
-        index: indices,
-        from,
-        size,
-      });
-      const body: QueryTestResponse = {
-        searchResponse,
-      };
 
-      return response.ok({
-        body,
-        headers: {
-          'content-type': 'application/json',
-        },
-      });
+      if (!chatContext) {
+        const searchResponse = await client.asCurrentUser.search({
+          ...searchQuery,
+          index: indices,
+          from,
+          size,
+        });
+        const body: QueryTestResponse = {
+          searchResponse,
+        };
+
+        return response.ok({
+          body,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      } else {
+        let sourceFields: ElasticsearchRetrieverContentField;
+        try {
+          sourceFields = parseSourceFields(chatContext.source_fields);
+        } catch (e) {
+          logger.error('Failed to parse the source fields', e);
+          throw Error(e);
+        }
+        const searchResponse = await client.asCurrentUser.search({
+          ...searchQuery,
+          index: indices,
+          size: chatContext.doc_size,
+        });
+        const documents = searchResponse.hits.hits.map(contextDocumentHitMapper(sourceFields));
+
+        const body: QueryTestResponse = {
+          documents,
+          searchResponse,
+        };
+        return response.ok({
+          body,
+          headers: {
+            'content-type': 'application/json',
+          },
+        });
+      }
     })
   );
 }

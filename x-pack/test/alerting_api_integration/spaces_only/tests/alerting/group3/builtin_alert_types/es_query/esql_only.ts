@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import {
   createConnector,
@@ -73,12 +73,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'never fire',
         esqlQuery:
-          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
+          'from kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
       });
       await createRule({
         name: 'always fire',
         esqlQuery:
-          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
+          'from kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
       });
 
       const docs = await waitForDocs(2);
@@ -117,13 +117,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+        esqlQuery: 'from kibana-alerting-test-data | stats c = count(date) | where c < 0',
 
         timeField: 'date_epoch_millis',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c > -1',
+        esqlQuery: 'from kibana-alerting-test-data | stats c = count(date) | where c > -1',
 
         timeField: 'date_epoch_millis',
       });
@@ -145,7 +145,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     it('runs correctly: no matches', async () => {
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 1',
+        esqlQuery: 'from kibana-alerting-test-data | stats c = count(date) | where c < 1',
       });
 
       const docs = await waitForDocs(1);
@@ -167,7 +167,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       // and then recover when we add more documents.
       await createRule({
         name: 'fire then recovers',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 1',
+        esqlQuery: 'from kibana-alerting-test-data | stats c = count(date) | where c < 1',
 
         notifyWhen: 'onActionGroupChange',
         timeWindowSize: RULE_INTERVAL_SECONDS,
@@ -272,7 +272,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             searchType: 'esqlQuery',
             timeField: 'date',
             esqlQuery: {
-              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              esql: 'from kibana-alerting-test-data | stats c = count(date) | where c < 0',
             },
           },
         })
@@ -303,7 +303,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             searchType: 'esqlQuery',
             timeField: 'date',
             esqlQuery: {
-              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              esql: 'from kibana-alerting-test-data | stats c = count(date) | where c < 0',
             },
           },
         })
@@ -331,7 +331,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             threshold: [0],
             searchType: 'esqlQuery',
             esqlQuery: {
-              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              esql: 'from kibana-alerting-test-data | stats c = count(date) | where c < 0',
             },
           },
         })
