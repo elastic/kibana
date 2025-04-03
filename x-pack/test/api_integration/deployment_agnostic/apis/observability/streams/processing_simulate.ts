@@ -250,6 +250,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         ]);
         expect(grokMetrics.failed_rate).to.be(1);
         expect(grokMetrics.parsed_rate).to.be(0);
+        expect(grokMetrics.skipped_rate).to.be(0);
       });
 
       it('should return accurate rates', async () => {
@@ -290,6 +291,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(dissectMetrics.parsed_rate).to.be(0.75);
         expect(grokMetrics.failed_rate).to.be(0.75);
         expect(grokMetrics.parsed_rate).to.be(0.25);
+      });
+
+      it('should return metrics for skipped documents due to non-hit condition', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: [
+            {
+              ...basicDissectProcessor,
+              dissect: {
+                ...basicDissectProcessor.dissect,
+                if: { field: 'message', operator: 'contains', value: 'test' },
+              },
+            },
+          ],
+          documents: [
+            createTestDocument(`${TEST_TIMESTAMP} info test`),
+            createTestDocument('invalid format'),
+            createTestDocument('invalid format'),
+            createTestDocument('invalid format'),
+          ],
+        });
+
+        expect(response.body.documents_metrics.skipped_rate).to.be(0.75);
+        expect(response.body.documents).to.have.length(4);
+        expect(response.body.documents[0].status).to.be('parsed');
+        expect(response.body.documents[1].status).to.be('skipped');
+        expect(response.body.documents[2].status).to.be('skipped');
+        expect(response.body.documents[3].status).to.be('skipped');
+
+        const processorsMetrics = response.body.processors_metrics;
+        const dissectMetrics = processorsMetrics['dissect-uuid'];
+
+        expect(dissectMetrics.failed_rate).to.be(0);
+        expect(dissectMetrics.parsed_rate).to.be(0.25);
+        expect(dissectMetrics.skipped_rate).to.be(0.75);
       });
 
       it('should allow overriding fields detected by previous simulation processors (skip non-additive check)', async () => {
