@@ -13,7 +13,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
 import type { BaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
-import { ASSET_INVENTORY_INDEX_PATTERN, QUERY_KEY_CHART_DATA } from '../constants';
+import { ASSET_FIELDS, ASSET_INVENTORY_INDEX_PATTERN, QUERY_KEY_CHART_DATA } from '../constants';
 import { getMultiFieldsSort } from './fetch_utils';
 
 interface UseTopAssetsOptions extends BaseEsQuery {
@@ -27,7 +27,7 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
   aggs: {
     entityType: {
       terms: {
-        field: 'entity.type',
+        field: ASSET_FIELDS.ENTITY_TYPE,
         order: {
           entityId: 'desc',
         },
@@ -36,7 +36,7 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
       aggs: {
         entitySubType: {
           terms: {
-            field: 'entity.sub_type',
+            field: ASSET_FIELDS.ENTITY_SUB_TYPE,
             order: {
               entityId: 'desc',
             },
@@ -45,14 +45,14 @@ const getTopAssetsQuery = ({ query, sort }: UseTopAssetsOptions) => ({
           aggs: {
             entityId: {
               value_count: {
-                field: 'entity.id',
+                field: ASSET_FIELDS.ENTITY_ID,
               },
             },
           },
         },
         entityId: {
           value_count: {
-            field: 'entity.id',
+            field: ASSET_FIELDS.ENTITY_ID,
           },
         },
       },

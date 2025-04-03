@@ -53,7 +53,7 @@ const defaultGroupingOptions: GroupOption[] = [
   },
   {
     label: GROUPING_LABELS.SOURCE,
-    key: ASSET_GROUPING_OPTIONS.SOURCE,
+    key: ASSET_GROUPING_OPTIONS.ENTITY_SOURCE,
   },
 ];
 
@@ -103,8 +103,8 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         getTermAggregation('accountName', ASSET_FIELDS.CLOUD_ACCOUNT_NAME),
         getTermAggregation('cloudProvider', ASSET_FIELDS.CLOUD_PROVIDER),
       ];
-    case ASSET_GROUPING_OPTIONS.SOURCE:
-      return [...aggMetrics, getTermAggregation('source', ASSET_FIELDS.SOURCE)];
+    case ASSET_GROUPING_OPTIONS.ENTITY_SOURCE:
+      return [...aggMetrics, getTermAggregation('source', ASSET_FIELDS.ENTITY_SOURCE)];
   }
   return aggMetrics;
 };

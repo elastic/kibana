@@ -46,6 +46,7 @@ import { useFetchGridData } from '../hooks/use_fetch_grid_data';
 import type { AssetInventoryURLStateResult } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 
 import {
+  ASSET_FIELDS,
   DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ASSETS_TO_LOAD,
   ASSET_INVENTORY_TABLE_ID,
@@ -67,31 +68,43 @@ const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.ta
 });
 
 const columnHeaders: Record<string, string> = {
-  'entity.name': i18n.translate('xpack.securitySolution.assetInventory.allAssets.name', {
-    defaultMessage: 'Name',
-  }),
-  'entity.id': i18n.translate('xpack.securitySolution.assetInventory.allAssets.id', {
+  [ASSET_FIELDS.ENTITY_NAME]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.name',
+    {
+      defaultMessage: 'Name',
+    }
+  ),
+  [ASSET_FIELDS.ENTITY_ID]: i18n.translate('xpack.securitySolution.assetInventory.allAssets.id', {
     defaultMessage: 'ID',
   }),
-  'entity.type': i18n.translate('xpack.securitySolution.assetInventory.allAssets.type', {
-    defaultMessage: 'Type',
-  }),
-  'entity.source': i18n.translate('xpack.securitySolution.assetInventory.allAssets.source', {
-    defaultMessage: 'Source',
-  }),
-  '@timestamp': i18n.translate('xpack.securitySolution.assetInventory.allAssets.lastSeen', {
-    defaultMessage: 'Last Seen',
-  }),
+  [ASSET_FIELDS.ENTITY_TYPE]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.type',
+    {
+      defaultMessage: 'Type',
+    }
+  ),
+  [ASSET_FIELDS.ENTITY_SOURCE]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.source',
+    {
+      defaultMessage: 'Source',
+    }
+  ),
+  [ASSET_FIELDS.TIMESTAMP]: i18n.translate(
+    'xpack.securitySolution.assetInventory.allAssets.lastSeen',
+    {
+      defaultMessage: 'Last Seen',
+    }
+  ),
 } as const;
 
 const customCellRenderer = (rows: DataTableRecord[]): CustomCellRenderer => ({
-  'entity.risk': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
-    const risk = rows[rowIndex].flattened['entity.risk'] as number;
+  [ASSET_FIELDS.ENTITY_RISK]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+    const risk = rows[rowIndex].flattened[ASSET_FIELDS.ENTITY_RISK] as number;
     return <RiskBadge risk={risk} />;
   },
-  'asset.criticality': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
+  [ASSET_FIELDS.ASSET_CRITICALITY]: ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const criticality = rows[rowIndex].flattened[
-      'asset.criticality'
+      ASSET_FIELDS.ASSET_CRITICALITY
     ] as CriticalityLevelWithUnassigned;
     return <AssetCriticalityBadge criticalityLevel={criticality} />;
   },
@@ -103,11 +116,11 @@ interface AssetInventoryDefaultColumn {
 }
 
 const defaultColumns: AssetInventoryDefaultColumn[] = [
-  { id: 'entity.name', width: 400 },
-  { id: 'entity.id' },
-  { id: 'entity.type' },
-  { id: 'entity.source' },
-  { id: '@timestamp' },
+  { id: ASSET_FIELDS.ENTITY_NAME, width: 400 },
+  { id: ASSET_FIELDS.ENTITY_ID },
+  { id: ASSET_FIELDS.ENTITY_TYPE },
+  { id: ASSET_FIELDS.ENTITY_SOURCE },
+  { id: ASSET_FIELDS.TIMESTAMP },
 ];
 
 export interface AssetInventoryDataTableProps {
