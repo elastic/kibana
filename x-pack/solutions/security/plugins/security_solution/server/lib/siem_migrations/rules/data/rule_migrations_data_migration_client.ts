@@ -37,26 +37,17 @@ export class RuleMigrationsDataMigrationClient extends RuleMigrationsDataBaseCli
   async get({ id }: { id: string }): Promise<StoredSiemMigration> {
     this.logger.debug(`Getting migration ${id}.`);
     const index = await this.getIndexName();
-    const response = await this.esClient
+    return this.esClient
       .get<StoredSiemMigration>({
         index,
         id,
-        _source: true,
+      })
+      .then((document) => {
+        return this.processHit(document);
       })
       .catch((error) => {
         this.logger.error(`Error getting migration ${id}: ${error}`);
         throw error;
       });
-
-    if (!response._source) {
-      throw new Error(
-        `Migration document ${id} has no source. This is an unknown error. Please create a new migration.`
-      );
-    }
-
-    return {
-      ...response._source,
-      id: response._id,
-    };
   }
 }

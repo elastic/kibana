@@ -47,7 +47,7 @@ describe('RuleMigrationsDataMigrationClient', () => {
       const result = await ruleMigrationsDataMigrationClient.create();
 
       expect(result).not.toBeFalsy();
-      expect(esClient.asInternalUser.index).toHaveBeenCalledWith({
+      expect(esClient.asInternalUser.create).toHaveBeenCalledWith({
         refresh: 'wait_for',
         id: result,
         index,
@@ -55,18 +55,17 @@ describe('RuleMigrationsDataMigrationClient', () => {
           created_by: currentUser.profile_uid,
           created_at: expect.any(String),
         },
-        op_type: 'create',
       });
     });
 
     test('should throw an error if an error occurs', async () => {
       (
-        esClient.asInternalUser.index as unknown as jest.MockedFn<typeof IndexApi>
+        esClient.asInternalUser.create as unknown as jest.MockedFn<typeof IndexApi>
       ).mockRejectedValueOnce(new Error('Test error'));
 
       await expect(ruleMigrationsDataMigrationClient.create()).rejects.toThrow('Test error');
 
-      expect(esClient.asInternalUser.index).toHaveBeenCalled();
+      expect(esClient.asInternalUser.create).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalled();
     });
   });
