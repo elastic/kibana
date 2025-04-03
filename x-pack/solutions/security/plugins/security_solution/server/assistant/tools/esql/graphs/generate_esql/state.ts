@@ -7,12 +7,12 @@
 
 import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
-import { ValidateEsqlResult } from './nodes/validate_esql_in_last_message_node/utils';
+import type { ValidateEsqlResult } from './nodes/validate_esql_in_last_message_node/utils';
 
 export const EsqlSelfHealingAnnotation = Annotation.Root({
   input: Annotation<string>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => "",
+    default: () => '',
   }),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
@@ -20,13 +20,13 @@ export const EsqlSelfHealingAnnotation = Annotation.Root({
   }),
   objectiveSummary: Annotation<string>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => "",
+    default: () => '',
   }),
   validateEsqlResults: Annotation<ValidateEsqlResult[]>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => [],
   }),
-   maximumValidationAttempts: Annotation<number>({
+  maximumValidationAttempts: Annotation<number>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => 5,
   }),
@@ -40,6 +40,6 @@ export const EsqlSelfHealingAnnotation = Annotation.Root({
   }),
   selectedIndexPattern: Annotation<string>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => "",
+    default: () => '',
   }),
 });

@@ -20,18 +20,16 @@ export const toolDetails = {
   description: `Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index. Call this tool repeatedly to inspect nested fields.
 This is an example of the fields in logs-*:
 \`\`\`
-${JSON.stringify(
-  {
-    field1: {
+${JSON.stringify({
+  field1: {
+    type: 'keyword',
+  },
+  field2: {
+    nested_field: {
       type: 'keyword',
     },
-    field2: {
-      nested_field: {
-        type: 'keyword',
-      },
-    },
   },
-)}
+})}
 \`\`\`
 To get the properties of the root object, call the tool with an empty string as the key. For example:
 \`\`\`
@@ -53,20 +51,16 @@ Output:
 \`\`\
 The tool can be called repeatedly to explore the nested fields. For example:
 \`\`\`
-${JSON.stringify(
-  {
-    indexName: 'logs-*',
-    key: 'field2.nested_field',
-  },
-)}
+${JSON.stringify({
+  indexName: 'logs-*',
+  key: 'field2.nested_field',
+})}
 \`\`\`
 Output:
 \`\`\`
-${JSON.stringify(
-  {
-    type: 'keyword',
-  },
-)}
+${JSON.stringify({
+  type: 'keyword',
+})}
 \`\`\``,
 };
 

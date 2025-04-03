@@ -10,16 +10,16 @@ import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 export const tracesApmIndexRequest: IndexRequest = {
   index: 'traces-apm-[environment].evlauations.[date]',
   document: {
-    "@timestamp": "2024-04-02T12:00:00.000Z",
-    "event": {
-      "outcome": "success",
+    '@timestamp': '2024-04-02T12:00:00.000Z',
+    event: {
+      outcome: 'success',
     },
-    "transaction": {
-      "duration": {
-        "us": 1000,
+    transaction: {
+      duration: {
+        us: 1000,
       },
-      "transaction": { "id": "945254c567a5417e" },
-      "service": { "name": "my-service" },
-    }
-  }
+      transaction: { id: '945254c567a5417e' },
+      service: { name: 'my-service' },
+    },
+  },
 };

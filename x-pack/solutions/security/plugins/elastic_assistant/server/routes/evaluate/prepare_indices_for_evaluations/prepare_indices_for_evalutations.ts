@@ -28,18 +28,16 @@ export class PrepareIndicesForEvaluations {
   }) {
     this.esClient = esClient;
     this.indicesCreateRequests = indicesCreateRequests;
-    this.indexRequests = indexRequests
+    this.indexRequests = indexRequests;
     this.logger = logger;
   }
 
   async setup() {
     this.logger.debug('Creating assistant indices for evaluations');
-    await Promise.all(
-      [
-        ...this.indicesCreateRequests.map((index) => this.esClient.indices.create(index)),
-        ...this.indexRequests.map((indexRequest) => this.esClient.index(indexRequest)),
-      ]
-    );
+    await Promise.all([
+      ...this.indicesCreateRequests.map((index) => this.esClient.indices.create(index)),
+      ...this.indexRequests.map((indexRequest) => this.esClient.index(indexRequest)),
+    ]);
   }
 
   async cleanup() {

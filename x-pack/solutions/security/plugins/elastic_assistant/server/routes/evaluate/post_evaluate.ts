@@ -368,7 +368,7 @@ export const postEvaluateRoute = (
                 size,
                 telemetry: ctx.elasticAssistant.telemetry,
                 ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-                createLlmInstance
+                createLlmInstance,
               };
 
               const tools: StructuredTool[] = (

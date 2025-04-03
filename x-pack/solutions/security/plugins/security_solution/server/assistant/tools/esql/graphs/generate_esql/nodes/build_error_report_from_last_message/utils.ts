@@ -1,5 +1,13 @@
-import { BaseMessage, HumanMessage } from "@langchain/core/messages";
-import { ValidateEsqlResult } from "../validate_esql_in_last_message_node/utils";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage } from '@langchain/core/messages';
+import type { ValidateEsqlResult } from '../validate_esql_in_last_message_node/utils';
 
 /**
  * Returns the last message with the error report for each query.

@@ -25,9 +25,9 @@ export const getIndexNamesTool = ({ esClient }: { esClient: ElasticsearchClient 
       const resolvedIndexNames = Object.values(indicesResolveIndexResponse)
         .flat()
         .map((item) => item.name as string)
-        .sort((a, b)=>{
-          if(a.startsWith(".") && !b.startsWith(".")) return 1;
-          if(!a.startsWith(".") && b.startsWith(".")) return -1;
+        .sort((a, b) => {
+          if (a.startsWith('.') && !b.startsWith('.')) return 1;
+          if (!a.startsWith('.') && b.startsWith('.')) return -1;
           return a.localeCompare(b);
         });
 

@@ -125,11 +125,10 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     return 'base_chat_model';
   }
 
-
   async betaParsedCompletionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsNonStreaming
-  ): Promise<ReturnType<OpenAIClient["beta"]["chat"]["completions"]["parse"]>>{
-    return await this.completionWithRetry(request)
+  ): Promise<ReturnType<OpenAIClient['beta']['chat']['completions']['parse']>> {
+    return await this.completionWithRetry(request);
   }
 
   async completionWithRetry(
@@ -201,7 +200,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
     signal?: AbortSignal;
   } {
-
     const body = {
       temperature: this.#temperature,
       // possible client model override
@@ -211,7 +209,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       n: completionRequest.n,
       stop: completionRequest.stop,
       tools: completionRequest.tools,
-      ...(completionRequest.response_format?{response_format: completionRequest.response_format}:{}),
+      ...(completionRequest.response_format
+        ? { response_format: completionRequest.response_format }
+        : {}),
       ...(completionRequest.tool_choice ? { tool_choice: completionRequest.tool_choice } : {}),
       // deprecated, use tools
       ...(completionRequest.functions ? { functions: completionRequest?.functions } : {}),

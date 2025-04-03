@@ -10,15 +10,15 @@ import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 export const metricsApmIndexRequest: IndexRequest = {
   index: 'metrics-apm-[environment].evaluations.[date]',
   document: {
-    "@timestamp": "2024-04-02T12:00:00.000Z",
-    "metricset": {
-      "name": "app",
-      "interval": "1m",
+    '@timestamp': '2024-04-02T12:00:00.000Z',
+    metricset: {
+      name: 'app',
+      interval: '1m',
     },
-    "transaction": {
-      "duration": {
-        "us": 13980
+    transaction: {
+      duration: {
+        us: 13980,
       },
     },
-  }
-}
+  },
+};

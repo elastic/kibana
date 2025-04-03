@@ -35,12 +35,17 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
   sourceRegister: APP_UI_ID,
   isSupported: (params: GenerateEsqlParams): params is GenerateEsqlParams => {
     const { inference, connectorId, assistantContext } = params;
-    return inference != null && connectorId != null && assistantContext.getRegisteredFeatures("securitySolutionUI").advancedEsqlGeneration;
+    return (
+      inference != null &&
+      connectorId != null &&
+      assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration
+    );
   },
   getTool(params: GenerateEsqlParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, inference, logger, request, isOssModel, esClient, createLlmInstance } = params;
+    const { connectorId, inference, logger, request, isOssModel, esClient, createLlmInstance } =
+      params;
     if (inference == null || connectorId == null) return null;
 
     const selfHealingGraph = getEsqlSelfHealingGraph({
@@ -72,7 +77,11 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
           (params.description || toolDetails.description) +
           (isOssModel ? getPromptSuffixForOssModel(TOOL_NAME) : ''),
         schema: z.object({
-          question: z.string().describe(`The user's exact question about ES|QL. Provide as much detail as possible including the name of the index and fields if the user has provided those.`),
+          question: z
+            .string()
+            .describe(
+              `The user's exact question about ES|QL. Provide as much detail as possible including the name of the index and fields if the user has provided those.`
+            ),
         }),
         tags: ['esql', 'query-generation', 'knowledge-base'],
       }

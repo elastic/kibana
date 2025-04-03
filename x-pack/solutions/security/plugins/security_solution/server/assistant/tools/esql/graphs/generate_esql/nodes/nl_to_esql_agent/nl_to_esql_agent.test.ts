@@ -15,7 +15,7 @@ import { Observable } from 'rxjs';
 import type { ChatCompletionMessageEvent } from '@kbn/inference-common';
 import { ChatCompletionEventType } from '@kbn/inference-common';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
-import { EsqlSelfHealingAnnotation } from '../../state';
+import type { EsqlSelfHealingAnnotation } from '../../state';
 
 jest.mock('@kbn/inference-plugin/server', () => ({
   naturalLanguageToEsql: jest.fn(),

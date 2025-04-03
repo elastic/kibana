@@ -7,56 +7,70 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
+import { IndexRequest, IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { PrepareIndicesForEvaluations } from '../../prepare_indices_for_evalutations';
 import { indicesCreateRequests } from './indices_create_requests';
 import { indexRequests } from './index_requests';
-import { IndexRequest, IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 const ENVIRONMENTS = ['production', 'staging', 'development'];
 export class PrepareIndicesForAssistantGraphEvalusations extends PrepareIndicesForEvaluations {
   constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
     super({
       esClient,
-      indicesCreateRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(Object.values(indicesCreateRequests)),
-      indexRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(Object.values(indexRequests)),
+      indicesCreateRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(
+        Object.values(indicesCreateRequests)
+      ),
+      indexRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(
+        Object.values(indexRequests)
+      ),
       logger,
     });
   }
 
   static hydrateRequestTemplate<T extends IndicesCreateRequest | IndexRequest>(requests: T[]): T[] {
-    return requests.map((request) => {
-      return ENVIRONMENTS.map((environment) => {
-        return {
-          ...request,
-          index: request.index.replace(/\[environment\]/g, environment).replace(/\[date\]/g, this.getRandomDate()),
-        } as T
+    return requests
+      .map((request) => {
+        return ENVIRONMENTS.map((environment) => {
+          return {
+            ...request,
+            index: request.index
+              .replace(/\[environment\]/g, environment)
+              .replace(/\[date\]/g, this.getRandomDate()),
+          } as T;
+        });
       })
-    }).flat();
+      .flat();
   }
 
   async cleanup() {
     this.logger.debug('Deleting assistant indices for evaluations');
 
     const requests = [...Object.values(indicesCreateRequests), ...Object.values(indexRequests)];
-    const indexPatternsToDelete = Object.values(requests).map(index => index.index.replace(/\[environment\]/g, '*').replace(/\[date\]/g, "*"))
+    const indexPatternsToDelete = Object.values(requests).map((index) =>
+      index.index.replace(/\[environment\]/g, '*').replace(/\[date\]/g, '*')
+    );
 
-    const indicesResolveIndexResponses = await Promise.all(indexPatternsToDelete.map(async (indexPattern) =>
-      this.esClient.indices.resolveIndex({
-        name: indexPattern,
-        expand_wildcards: 'open',
+    const indicesResolveIndexResponses = await Promise.all(
+      indexPatternsToDelete.map(async (indexPattern) =>
+        this.esClient.indices.resolveIndex({
+          name: indexPattern,
+          expand_wildcards: 'open',
+        })
+      )
+    );
+
+    const indicesToDelete = indicesResolveIndexResponses
+      .flatMap((response) => {
+        return response.indices;
       })
-    ))
-
-    const indicesToDelete = indicesResolveIndexResponses.flatMap((response) => {
-      return response.indices
-    }).map((index) => index.name);
+      .map((index) => index.name);
 
     if (indicesToDelete.length === 0) {
       this.logger.debug('No indices to delete');
       return;
     }
 
-    await this.esClient.indices.delete({ index: indicesToDelete })
+    await this.esClient.indices.delete({ index: indicesToDelete });
   }
 
   static getRandomDate() {

@@ -6,7 +6,7 @@
  */
 
 import type { EditorError } from '@kbn/esql-ast';
-import { ValidateEsqlResult } from '../validate_esql_in_last_message_node/utils';
+import type { ValidateEsqlResult } from '../validate_esql_in_last_message_node/utils';
 import { lastMessageWithErrorReport } from './utils';
 
 describe('esql self healing validator utils', () => {

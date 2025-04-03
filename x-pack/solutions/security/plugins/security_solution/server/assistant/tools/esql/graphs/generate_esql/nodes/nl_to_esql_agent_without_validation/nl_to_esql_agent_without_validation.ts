@@ -26,7 +26,6 @@ export const getNlToEsqlAgentWithoutValidation = ({
   request: KibanaRequest;
 }) => {
   return async (state: typeof EsqlSelfHealingAnnotation.State) => {
-
     const { input } = state;
 
     const result = (await lastValueFrom(

@@ -14,8 +14,6 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
-import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
@@ -28,7 +26,6 @@ interface Drawable {
 const mockLlm = new FakeLLM({
   response: JSON.stringify({}, null, 2),
 }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
-
 
 const esqlKnowledgeBase = {} as EsqlKnowledgeBase;
 const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
@@ -76,5 +73,4 @@ export const draw = async () => {
     getGraphAsync: getSiemMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',
   });
-
 };
