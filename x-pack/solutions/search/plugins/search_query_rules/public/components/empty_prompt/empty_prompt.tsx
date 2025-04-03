@@ -28,6 +28,7 @@ import { css } from '@emotion/react';
 import { docLinks } from '../../../common/doc_links';
 
 import queryRulesImg from '../../assets/query-rules-context-alt.svg';
+import backgroundPanelImg from '../../assets/query-rule-panel-background.svg';
 
 interface EmptyPromptProps {
   getStartedAction: () => void;
@@ -55,10 +56,16 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
   const positionRelative = css({
     position: 'relative',
   });
+  const backgroundPanel = css({
+    backgroundImage: `url(${backgroundPanelImg})`,
+    backgroundSize: '50%',
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'top right',
+  });
 
   return (
     <EuiFlexItem grow={false} css={boxedPrompt}>
-      <EuiSplitPanel.Outer grow={false}>
+      <EuiSplitPanel.Outer grow={false} css={backgroundPanel}>
         <EuiSplitPanel.Inner paddingSize="l">
           <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
             <EuiFlexItem grow>
