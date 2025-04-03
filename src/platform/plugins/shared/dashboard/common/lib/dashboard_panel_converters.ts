@@ -58,6 +58,10 @@ export const convertPanelMapToPanelsArray = (
       ...(!removeLegacyVersion ? { version: panelState.version } : {}),
 
       type: panelState.type,
+      /**
+       * Removing `sectionId` if it is undefined so that `gridData` for panels in the main Dashboard section
+       * does not change shape between Kibana versions
+       */
       gridData: gridData.sectionId === undefined ? omit(gridData, 'sectionId') : gridData,
       panelIndex: panelId,
       panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
