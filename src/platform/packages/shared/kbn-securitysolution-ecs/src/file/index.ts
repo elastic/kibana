@@ -14,7 +14,7 @@ interface Original {
 
 export interface CodeSignature {
   subject_name: string[];
-  trusted: string[];
+  trusted: boolean;
 }
 
 export interface Token {

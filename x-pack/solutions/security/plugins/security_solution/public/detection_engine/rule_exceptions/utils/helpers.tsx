@@ -46,7 +46,7 @@ import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securityso
 import type { EventSummaryField } from '../../../common/components/event_details/types';
 import { getEventFieldsToDisplay } from '../../../common/components/event_details/get_alert_summary_rows';
 import * as i18n from './translations';
-import type { AlertData, Flattened } from './types';
+import type { AlertData, Flattened, FlattenedCodeSignature } from './types';
 
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
@@ -303,7 +303,7 @@ export const getFileCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrU
 
   if (codeSignature) {
     return getCodeSignatureValue(codeSignature, 'file.Ext.code_signature');
-  } else if (file?.code_signature?.trusted === 'true') {
+  } else if (file?.code_signature?.trusted === true) {
     return [
       {
         field: 'file.code_signature.subject_name',
@@ -331,7 +331,7 @@ export const getProcessCodeSignature = (alertData: Flattened<Ecs>): EntriesArray
   const codeSignature = process && process.Ext && process.Ext.code_signature;
   if (codeSignature) {
     return getCodeSignatureValue(codeSignature, 'process.Ext.code_signature');
-  } else if (process?.code_signature?.trusted === 'true') {
+  } else if (process?.code_signature?.trusted === true) {
     return [
       {
         field: 'process.code_signature.subject_name',
@@ -359,7 +359,7 @@ export const getDllCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUn
   const codeSignature = dll && dll.Ext && dll.Ext.code_signature;
   if (codeSignature) {
     return getCodeSignatureValue(codeSignature, 'dll.Ext.code_signature');
-  } else if (dll?.code_signature?.trusted === 'true') {
+  } else if (dll?.code_signature?.trusted === true) {
     return [
       {
         field: 'dll.code_signature.subject_name',
@@ -381,14 +381,14 @@ export const getDllCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUn
  * a single object with subject_name and trusted.
  */
 export const getCodeSignatureValue = (
-  codeSignature: Flattened<CodeSignature> | Flattened<CodeSignature[]> | undefined,
+  codeSignature: Flattened<CodeSignature> | FlattenedCodeSignature[] | undefined,
   field: string
 ): EntryNested[] | undefined => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     const codeSignatureEntries: EntryNested[] = [];
     const noDuplicates = new Set<string>();
     return codeSignature.reduce((acc, signature) => {
-      if (signature?.trusted === 'true' && !noDuplicates.has(signature?.subject_name)) {
+      if (signature?.trusted === true && !noDuplicates.has(signature?.subject_name)) {
         noDuplicates.add(signature.subject_name);
         acc.push({
           field,
@@ -415,7 +415,7 @@ export const getCodeSignatureValue = (
     const signature: Flattened<CodeSignature> | undefined = !Array.isArray(codeSignature)
       ? codeSignature
       : undefined;
-    if (signature?.trusted === 'true') {
+    if (signature?.trusted === true) {
       return [
         {
           field,
