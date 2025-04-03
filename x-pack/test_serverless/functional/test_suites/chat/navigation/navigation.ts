@@ -15,6 +15,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
     before(async () => {
       await svlCommonPage.loginWithRole('developer');
     });
+
     it('navigates to landing page', async () => {
       await svlChatNavigation.navigateToLandingPage();
     });
