@@ -85,11 +85,8 @@ describe('useManagedDataViews', () => {
       { id: 'some-id', title: 'Some Data View' },
       { id: 'another-id', title: 'Another Data View' },
     ];
-
-    // Mock the Redux selector
     (useSelector as jest.Mock).mockReturnValue({ dataViews: mockDataViews });
 
-    // Render the hook
     const { result } = renderHook(() => useManagedDataViews());
 
     // Expect no data views to be included
