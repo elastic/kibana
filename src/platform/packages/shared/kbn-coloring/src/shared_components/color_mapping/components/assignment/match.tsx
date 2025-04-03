@@ -8,29 +8,16 @@
  */
 
 import React from 'react';
-import {
-  EuiComboBox,
-  EuiComboBoxOptionOption,
-  EuiFlexItem,
-  EuiIcon,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RawValue, SerializedValue, deserializeField } from '@kbn/data-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ColorMapping } from '../../config';
 import { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
 import { ColorAssignmentMatcher } from '../../color/color_assignment_matcher';
+import { DuplicateWarning } from './duplicate_warning';
 
 export const isNotNull = <T,>(value: T | null): value is NonNullable<T> => value !== null;
-const duplicateWarning = i18n.translate(
-  'coloring.colorMapping.assignments.duplicateCategoryWarning',
-  {
-    defaultMessage:
-      'This category has already been assigned a different color. Only the first matching assignment will be used.',
-  }
-);
 
 export const Match: React.FC<{
   index: number;
@@ -74,11 +61,7 @@ export const Match: React.FC<{
           rawCategoryValueMap.set(option.key, rule.value);
           return {
             ...option,
-            append: hasDuplicate && (
-              <EuiToolTip position="bottom" content={duplicateWarning}>
-                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-              </EuiToolTip>
-            ),
+            append: hasDuplicate && <DuplicateWarning />,
           };
         }
         case 'match': {
@@ -88,11 +71,7 @@ export const Match: React.FC<{
           return {
             label: specialTokens.get(rule.pattern) ?? rule.pattern,
             key: rule.pattern,
-            append: hasDuplicate && (
-              <EuiToolTip position="bottom" content={duplicateWarning}>
-                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-              </EuiToolTip>
-            ),
+            append: hasDuplicate && <DuplicateWarning />,
           };
         }
         case 'regex': {
@@ -102,11 +81,7 @@ export const Match: React.FC<{
           return {
             label: rule.pattern,
             key: rule.pattern,
-            append: hasDuplicate && (
-              <EuiToolTip position="bottom" content={duplicateWarning}>
-                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-              </EuiToolTip>
-            ),
+            append: hasDuplicate && <DuplicateWarning />,
           };
         }
         default:
