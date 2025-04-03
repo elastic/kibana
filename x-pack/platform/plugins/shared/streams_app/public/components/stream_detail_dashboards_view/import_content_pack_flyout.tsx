@@ -6,14 +6,14 @@
  */
 
 import React, { useState } from 'react';
-import { capitalize, compact, uniqBy } from 'lodash';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { ContentPack, ContentPackObject, ContentPackSavedObject } from '@kbn/content-packs-schema';
+import { ContentPack, ContentPackObject } from '@kbn/content-packs-schema';
 import {
-  EuiBadge,
-  EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -22,8 +22,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { useKibana } from '../../hooks/use_kibana';
+import { ContentPackObjectsList, includeReferences } from './content_pack_objects_list';
 
 export function ImportContentPackFlyout({
   definition,
@@ -48,7 +48,7 @@ export function ImportContentPackFlyout({
 
   return (
     <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>
             {i18n.translate('xpack.streams.streamDetailDashboard.importContent', {
@@ -91,101 +91,70 @@ export function ImportContentPackFlyout({
           <>
             <EuiSpacer />
 
-            <EuiBasicTable
-              items={contentPackObjects.filter((object) => object.content.type === 'dashboard')}
-              itemId={(record: ContentPackObject) => record.content.id}
-              columns={[
-                {
-                  name: 'Asset name',
-                  render: (record: ContentPackObject) => {
-                    if (record.type === 'saved_object' && record.content.type === 'dashboard') {
-                      const { content } = record as ContentPackSavedObject<DashboardAttributes>;
-                      return content.attributes.title;
-                    }
-                  },
-                  truncateText: true,
-                },
-                {
-                  name: 'Type',
-                  render: (record: ContentPackObject) => {
-                    const type = record.type === 'saved_object' ? record.content.type : record.type;
-                    const iconType = 'dashboardApp';
-                    return (
-                      <EuiBadge color="hollow" iconType={iconType} iconSide="left">
-                        {capitalize(type)}
-                      </EuiBadge>
-                    );
-                  },
-                },
-              ]}
-              selection={{
-                onSelectionChange: (selectedObjects: ContentPackObject[]) => {
-                  setSelectedContentPackObjects(selectedObjects);
-                },
-              }}
-              rowHeader="objectName"
+            <ContentPackObjectsList
+              objects={contentPackObjects}
+              onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
             />
           </>
         ) : null}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButton
-          data-test-subj="streamsAppModalFooterButton"
-          disabled={!file || !selectedContentPackObjects.length}
-          isLoading={isLoading}
-          fill
-          onClick={() => {
-            if (!file) return;
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onClose()}>Cancel</EuiButtonEmpty>
+          </EuiFlexItem>
 
-            setIsLoading(true);
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="streamsAppModalFooterButton"
+              disabled={!file || !selectedContentPackObjects.length}
+              isLoading={isLoading}
+              fill
+              onClick={() => {
+                if (!file) return;
 
-            const body = new FormData();
-            body.append(
-              'content',
-              new File(
-                [
-                  JSON.stringify({
-                    ...contentPack,
-                    content: selectedContentPackObjects
-                      .flatMap((object) => {
-                        const references = compact(
-                          uniqBy(object.content.references, (ref) => ref.id).map((ref) =>
-                            JSON.stringify(
-                              contentPackObjects.find(({ content: { id } }) => id === ref.id)
-                            )
-                          )
-                        );
-                        return [...references, JSON.stringify(object)];
-                      })
-                      .join('\n'),
-                  }),
-                ],
-                'content.json',
-                { type: 'application/json' }
-              )
-            );
+                setIsLoading(true);
 
-            http
-              .post(`/api/streams/${definition.stream.name}/content/import`, {
-                body,
-                headers: {
-                  // Important to be undefined, it forces proper headers to be set for FormData
-                  'Content-Type': undefined,
-                },
-              })
-              .then(() => {
-                setIsLoading(false);
-                setContentPackObjects([]);
-                setFile(null);
-                onImport();
-              });
-          }}
-        >
-          {i18n.translate('xpack.streams.importContentPackFlyout.importObjects', {
-            defaultMessage: 'Import objects',
-          })}
-        </EuiButton>
+                const body = new FormData();
+                body.append(
+                  'content',
+                  new File(
+                    [
+                      JSON.stringify({
+                        ...contentPack,
+                        content: includeReferences(contentPackObjects, selectedContentPackObjects)
+                          .map((object) => JSON.stringify(object))
+                          .join('\n'),
+                      }),
+                    ],
+                    'content.json',
+                    { type: 'application/json' }
+                  )
+                );
+
+                http
+                  .post(`/api/streams/${definition.stream.name}/content/import`, {
+                    body,
+                    headers: {
+                      // Important to be undefined, it forces proper headers to be set for FormData
+                      'Content-Type': undefined,
+                    },
+                  })
+                  .then(() => {
+                    setIsLoading(false);
+                    setContentPackObjects([]);
+                    setFile(null);
+                    onImport();
+                  });
+              }}
+            >
+              {i18n.translate('xpack.streams.importContentPackFlyout.importToStream', {
+                defaultMessage: 'Import to stream',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

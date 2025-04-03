@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { capitalize, uniq } from 'lodash';
+import { uniq } from 'lodash';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
@@ -19,11 +19,12 @@ import {
   replaceIndexPatterns,
 } from '@kbn/content-packs-schema';
 import {
-  EuiBadge,
-  EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiCheckboxGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -33,9 +34,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { ContentPackObjectsList, includeReferences } from './content_pack_objects_list';
 
 export function ExportContentPackFlyout({
   definition,
@@ -84,13 +85,16 @@ export function ExportContentPackFlyout({
     [definition, streamsRepositoryClient]
   );
 
+  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackObject[]>(
+    []
+  );
   const [indexPatternReplacements, setIndexPatternReplacements] = useState<Record<string, boolean>>(
     {}
   );
 
   return (
     <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle>
           <h2>
             {i18n.translate('xpack.streams.streamDetailDashboard.exportContent', {
@@ -146,89 +150,74 @@ export function ExportContentPackFlyout({
 
             <EuiSpacer />
 
-            <EuiBasicTable
-              items={exportResponse.objects.filter((object) => object.content.type === 'dashboard')}
-              itemId={(record: ContentPackObject) => record.content.id}
-              columns={[
-                {
-                  name: 'Asset name',
-                  render: (record: ContentPackObject) => {
-                    if (record.type === 'saved_object') {
-                      const { content } = record as ContentPackSavedObject;
-
-                      if (content.type === 'dashboard') {
-                        return (content.attributes as DashboardAttributes).title;
-                      }
-                    }
-
-                    return 'unknown object type';
-                  },
-                  truncateText: true,
-                },
-                {
-                  name: 'Type',
-                  render: (record: ContentPackObject) => {
-                    const type = record.type === 'saved_object' ? record.content.type : record.type;
-                    const iconType = 'dashboardApp';
-                    return (
-                      <EuiBadge color="hollow" iconType={iconType} iconSide="left">
-                        {capitalize(type)}
-                      </EuiBadge>
-                    );
-                  },
-                },
-              ]}
-              rowHeader="objectName"
+            <ContentPackObjectsList
+              objects={exportResponse.objects}
+              onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
             />
           </>
         ) : null}
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
-        <EuiButton
-          data-test-subj="streamsAppModalFooterButton"
-          isLoading={isLoadingContentPack}
-          fill
-          onClick={() => {
-            if (!exportResponse || exportResponse.objects.length === 0) {
-              return;
-            }
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onClose()}>Cancel</EuiButtonEmpty>
+          </EuiFlexItem>
 
-            const replacements = Object.keys(indexPatternReplacements).reduce((acc, index) => {
-              if (indexPatternReplacements[index]) {
-                acc[index] = INDEX_PLACEHOLDER;
-              }
-              return acc;
-            }, {} as Record<string, string>);
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="streamsAppModalFooterButton"
+              isLoading={isLoadingContentPack}
+              fill
+              onClick={() => {
+                if (!exportResponse || selectedContentPackObjects.length === 0) {
+                  return;
+                }
 
-            saveAs(
-              new Blob(
-                [
-                  JSON.stringify({
-                    ...exportResponse.contentPack,
-                    content: exportResponse.objects
-                      .map((object) => {
-                        if (object.type === 'saved_object' && object.content.type === 'dashboard') {
-                          return JSON.stringify(replaceIndexPatterns(object, replacements));
-                        }
+                const replacements = Object.keys(indexPatternReplacements).reduce((acc, index) => {
+                  if (indexPatternReplacements[index]) {
+                    acc[index] = INDEX_PLACEHOLDER;
+                  }
+                  return acc;
+                }, {} as Record<string, string>);
 
-                        return JSON.stringify(object);
-                      })
-                      .join('\n'),
-                  }),
-                ],
-                { type: 'application/json' }
-              ),
-              `${exportResponse.contentPack.name}.json`
-            );
+                saveAs(
+                  new Blob(
+                    [
+                      JSON.stringify({
+                        ...exportResponse.contentPack,
+                        content: includeReferences(
+                          exportResponse.objects,
+                          selectedContentPackObjects
+                        )
+                          .map((object) => {
+                            if (
+                              object.type === 'saved_object' &&
+                              object.content.type === 'dashboard'
+                            ) {
+                              return replaceIndexPatterns(object, replacements);
+                            }
 
-            onExport();
-          }}
-        >
-          {i18n.translate('xpack.streams.exportContentPackFlyout.exportObjects', {
-            defaultMessage: 'Export objects',
-          })}
-        </EuiButton>
+                            return object;
+                          })
+                          .map((object) => JSON.stringify(object))
+                          .join('\n'),
+                      }),
+                    ],
+                    { type: 'application/json' }
+                  ),
+                  `${exportResponse.contentPack.name}.json`
+                );
+
+                onExport();
+              }}
+            >
+              {i18n.translate('xpack.streams.exportContentPackFlyout.exportContentPack', {
+                defaultMessage: 'Export content pack',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );
