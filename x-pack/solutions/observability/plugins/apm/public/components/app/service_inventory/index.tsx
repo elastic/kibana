@@ -139,8 +139,6 @@ function useServicesDetailedStatisticsFetcher({
   const itemsToFetch = useMemo(
     () =>
       mainStatisticsData.items
-        // Spread the start/end index tuple for slicing the visible items
-        // from the main request data
         .slice(...renderedItemIndices)
         .map(({ serviceName }) => serviceName)
         .sort(),

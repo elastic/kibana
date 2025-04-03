@@ -341,8 +341,6 @@ function useTableData({
   const itemsToFetch = useMemo(
     () =>
       mainStatistics.transactionGroups
-        // Spread the start/end index tuple for slicing the visible items
-        // from the main request data
         .slice(...renderedItemIndices)
         .map(({ name }) => name)
         .filter((name) => Boolean(name))
