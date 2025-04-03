@@ -12,7 +12,7 @@
 .dshDashboardViewport {
   width: 100%;
 
-  &:not(.dshDashboardViewport--print) {
+  &.dshDashboardViewport--empty {
     height: 100%;
   } 
 

@@ -68,6 +68,7 @@ export const DashboardViewport = ({
 
   const classes = classNames({
     dshDashboardViewport: true,
+    'dshDashboardViewport--empty': panelCount === 0 && sectionCount === 0,
     'dshDashboardViewport--print': viewMode === 'print',
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
