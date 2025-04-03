@@ -112,13 +112,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createGroupedEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) by group | where c < 0',
+        esqlQuery: 'from kibana-alerting-test-data | stats c = count(date) by group | where c < 0',
         groupBy: 'row',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery:
-          'from .kibana-alerting-test-data | stats c = count(date) by group | where c > -1',
+        esqlQuery: 'from kibana-alerting-test-data | stats c = count(date) by group | where c > -1',
         groupBy: 'row',
       });
 
@@ -157,12 +156,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createGroupedEsDocumentsInGroups(1, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from .kibana-alerting-test-data METADATA _id | KEEP group, _id | limit 0',
+        esqlQuery: 'from kibana-alerting-test-data METADATA _id | KEEP group, _id | limit 0',
         groupBy: 'row',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from .kibana-alerting-test-data METADATA _id | keep group, _id | limit 10',
+        esqlQuery: 'from kibana-alerting-test-data METADATA _id | keep group, _id | limit 10',
         groupBy: 'row',
       });
 
@@ -205,12 +204,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from .kibana-alerting-test-data | limit 0',
+        esqlQuery: 'from kibana-alerting-test-data | limit 0',
         groupBy: 'row',
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from .kibana-alerting-test-data',
+        esqlQuery: 'from kibana-alerting-test-data',
         groupBy: 'row',
       });
 
@@ -342,12 +341,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'never fire',
         esqlQuery:
-          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
+          'from kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
       });
       await createRule({
         name: 'always fire',
         esqlQuery:
-          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
+          'from kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
       });
 
       const docs = await waitForDocs(2);
