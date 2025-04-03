@@ -35,10 +35,10 @@ export const getPlaywrightProject = (
   return 'local';
 };
 
-async function runPlaywrightTest(procs: ProcRunner, cmd: string, cmdArgs: string[]) {
+async function runPlaywrightTest(procs: ProcRunner, cmd: string, args: string[]) {
   return procs.run(`playwright`, {
     cmd,
-    args: cmdArgs,
+    args,
     cwd: resolve(REPO_ROOT),
     env: {
       ...process.env,
@@ -119,26 +119,26 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const runStartTime = Date.now();
   const reportTime = getTimeReporter(log, 'scripts/scout run-tests');
 
-  const playwrightGrepTag = getPlaywrightGrepTag(options.mode);
-  const playwrightConfigPath = options.configPath;
-  const playwrightProject = getPlaywrightProject(options.testTarget, options.mode);
+  const pwGrepTag = getPlaywrightGrepTag(options.mode);
+  const pwConfigPath = options.configPath;
+  const pwProject = getPlaywrightProject(options.testTarget, options.mode);
 
-  const testCmd = resolve(REPO_ROOT, './node_modules/.bin/playwright');
-  const testCmdArgs = [
+  const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
+  const pwCmdArgs = [
     'test',
-    `--config=${playwrightConfigPath}`,
-    `--grep=${playwrightGrepTag}`,
-    `--project=${playwrightProject}`,
+    `--config=${pwGrepTag}`,
+    `--grep=${pwConfigPath}`,
+    `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
   ];
 
   await withProcRunner(log, async (procs) => {
-    await validatePlaywrightConfig(log, testCmd, testCmdArgs, playwrightConfigPath);
+    await validatePlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
 
-    if (playwrightProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, testCmd, testCmdArgs);
+    if (pwProject === 'local') {
+      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs);
     } else {
-      await runPlaywrightTest(procs, testCmd, testCmdArgs);
+      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs);
     }
 
     reportTime(runStartTime, 'ready', {

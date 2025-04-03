@@ -244,7 +244,7 @@ npx playwright test \
 ```
 
 - **`--project`**: Specifies the test target (`ech` for Stateful or `mki` for Serverless).
-- **`--grep`**: Filters tests by tags (e.g., `@ess` for Elasticsearch or `@svlOblt` for Observability).
+- **`--grep`**: Filters tests by tags (e.g., `@svlSearch` for Elasticsearch or `@svlOblt` for Observability).
 
 By following these steps, you can efficiently run tests in various environments using Scout.
 

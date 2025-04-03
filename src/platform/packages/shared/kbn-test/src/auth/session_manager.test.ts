@@ -32,7 +32,6 @@ const cloudUsersFilePath = resolve(REPO_ROOT, SERVERLESS_ROLES_ROOT_PATH, 'role_
 const createLocalSAMLSessionMock = jest.spyOn(samlAuth, 'createLocalSAMLSession');
 const getSecurityProfileMock = jest.spyOn(samlAuth, 'getSecurityProfile');
 const readCloudUsersFromFileMock = jest.spyOn(helper, 'readCloudUsersFromFile');
-// const isValidHostnameMock = jest.spyOn(helper, 'isValidHostname');
 
 const getTestToken = () => 'kbn_cookie_' + crypto.randomBytes(16).toString('hex');
 
