@@ -108,7 +108,7 @@ export function ImportContentPackFlyout({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
-              disabled={!file || !selectedContentPackObjects.length}
+              disabled={!file || selectedContentPackObjects.length === 0}
               isLoading={isLoading}
               fill
               onClick={() => {

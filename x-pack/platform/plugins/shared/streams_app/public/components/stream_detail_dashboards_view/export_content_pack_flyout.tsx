@@ -168,6 +168,7 @@ export function ExportContentPackFlyout({
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
               isLoading={isLoadingContentPack}
+              isDisabled={selectedContentPackObjects.length === 0}
               fill
               onClick={() => {
                 if (!exportResponse || selectedContentPackObjects.length === 0) {
