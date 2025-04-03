@@ -77,6 +77,19 @@ describe('WHERE <expression>', () => {
           ['and', 'or', 'not']
         ),
       ]);
+
+      await assertSuggestions('from a | where keywordField I/', [
+        // all functions compatible with a keywordField type
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'boolean',
+          {
+            operators: true,
+          },
+          undefined,
+          ['and', 'or', 'not']
+        ),
+      ]);
     });
 
     test('suggests dates after a comparison with a date', async () => {

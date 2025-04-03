@@ -52,6 +52,7 @@ describe('autocomplete.suggest', () => {
         describe('delegation to subcommands', () => {
           test('where', async () => {
             await assertSuggestions('FROM a | FORK (WHERE /)', EMPTY_WHERE_SUGGESTIONS);
+            await assertSuggestions('FROM a | FORK (WHERE key/)', EMPTY_WHERE_SUGGESTIONS);
             await assertSuggestions(
               'FROM a | FORK (WHERE textField != /)',
               EXPECTED_COMPARISON_WITH_TEXT_FIELD_SUGGESTIONS

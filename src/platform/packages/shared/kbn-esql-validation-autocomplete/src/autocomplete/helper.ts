@@ -743,7 +743,11 @@ export const getExpressionPosition = (
   }
 
   if (expressionRoot) {
-    if (isColumnItem(expressionRoot)) {
+    if (
+      isColumnItem(expressionRoot) &&
+      // and not directly after the column name or prefix e.g. "colu/"
+      !new RegExp(`${expressionRoot.parts.join('\\.')}$`).test(innerText)
+    ) {
       return 'after_column';
     }
 
