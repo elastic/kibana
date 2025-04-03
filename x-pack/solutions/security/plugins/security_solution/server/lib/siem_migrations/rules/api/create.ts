@@ -52,12 +52,12 @@ export const registerSiemRuleMigrationsCreateRoute = (
             }
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
+            await siemMigrationAuditLogger.logCreateMigration({ migrationId: providedMigrationId });
 
             let migrationId: string;
 
             if (!providedMigrationId) {
               /** if new migration */
-              await siemMigrationAuditLogger.logCreateMigration({});
               migrationId = await ruleMigrationsClient.data.migrations.create();
             } else {
               /** if updating existing migration */
