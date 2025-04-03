@@ -34,5 +34,6 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_status.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base.spec.ts'));
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_user_instructions.spec.ts'));
+    loadTestFile(require.resolve('./distributed_lock_manager/distributed_lock_manager.spec.ts'));
   });
 }

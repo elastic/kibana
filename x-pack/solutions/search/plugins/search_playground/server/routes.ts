@@ -320,6 +320,7 @@ export function defineRoutes({
 
         return response.ok({
           body: {
+            executionTime: searchResult.took,
             results: searchResult.hits.hits,
             pagination: {
               from,
