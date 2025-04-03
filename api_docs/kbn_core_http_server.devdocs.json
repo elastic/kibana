@@ -3385,10 +3385,6 @@
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
-                "plugin": "banners",
-                "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
-              },
-              {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
               },
@@ -3407,6 +3403,10 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
+              },
+              {
+                "plugin": "banners",
+                "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
               {
                 "plugin": "indexManagement",
@@ -3867,6 +3867,30 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/conversation.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -6157,6 +6181,26 @@
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
               },
               {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/chat.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/conversation.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "wciIndexSource",
+                "path": "x-pack/solutions/chat/plugins/wci-index-source/server/routes/configuration.ts"
+              },
+              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/platform/plugins/shared/vis_types/timeseries/server/routes/vis.ts"
               },
@@ -7549,6 +7593,14 @@
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -8215,6 +8267,10 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
               },
               {
                 "plugin": "infra",

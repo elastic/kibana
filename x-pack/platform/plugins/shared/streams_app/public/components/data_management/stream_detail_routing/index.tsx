@@ -27,7 +27,7 @@ export function StreamDetailRouting({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredStreamGetResponse;
+  definition: WiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const { appParams, core } = useKibana();
@@ -60,10 +60,6 @@ export function StreamDetailRouting({
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
-
-  if (!definition) {
-    return null;
-  }
 
   const closeModal = () => routingAppState.setShowDeleteModal(false);
 
