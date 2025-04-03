@@ -15,6 +15,7 @@ import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import {
   SEARCH_FIELDS_FROM_SOURCE as mockSearchFieldsFromSource,
   buildDataTableRecord,
+  DataTableRecord,
 } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../plugin';
 import { UnifiedDocViewerServices } from '../types';
@@ -296,18 +297,16 @@ describe('Test of <Doc /> helper / hook', () => {
       getComputedFields: () => [],
       getIndexPattern: () => index,
     };
-    const props = {
+    const props: EsDocSearchProps = {
       id: '1',
       index: 'index1',
-      dataView,
-      textBasedHits: [
-        {
-          id: '1',
-          raw: { field1: 1, field2: 2 },
-          flattened: { field1: 1, field2: 2 },
-        },
-      ],
-    } as unknown as EsDocSearchProps;
+      dataView: dataView as unknown as EsDocSearchProps['dataView'],
+      esqlHit: {
+        id: '1',
+        raw: { field1: 1, field2: 2 },
+        flattened: { field1: 1, field2: 2 },
+      } as DataTableRecord,
+    };
 
     const hook = renderHook((p: EsDocSearchProps) => useEsDocSearch(p), {
       initialProps: props,
