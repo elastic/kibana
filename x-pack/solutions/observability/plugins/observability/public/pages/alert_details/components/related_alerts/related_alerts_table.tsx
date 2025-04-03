@@ -68,6 +68,9 @@ export function RelatedAlertsTable({ alertData }: Props) {
           config,
           parentAlert: alert,
         }}
+        toolbarVisibility={{
+          showSortSelector: false,
+        }}
         renderCellValue={AlertsTableCellValue}
         renderFlyoutBody={AlertsFlyoutBody}
         renderFlyoutFooter={AlertsFlyoutFooter}
