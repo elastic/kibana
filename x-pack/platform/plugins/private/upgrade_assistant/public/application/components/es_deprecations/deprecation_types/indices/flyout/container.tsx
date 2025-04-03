@@ -182,6 +182,8 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
             startReindex={startReindexWithWarnings}
             reindexState={reindexState}
             cancelReindex={onStopReindex}
+            startReadonly={onMakeReadonly}
+            deprecation={deprecation}
           />
         );
       case 'unfreeze':
