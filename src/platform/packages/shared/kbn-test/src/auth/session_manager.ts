@@ -89,7 +89,9 @@ export class SamlSessionManager {
 
   private validateCloudHostName() {
     if (!this.cloudHostName) {
-      throw new Error('SAML Authentication requires TEST_CLOUD_HOST_NAME env variable to be set');
+      throw new Error(
+        `'cloudHostName' is required for Cloud authentication. Provide it in the constructor or via the TEST_CLOUD_HOST_NAME environment variable.`
+      );
     }
 
     if (!isValidHostname(this.cloudHostName)) {

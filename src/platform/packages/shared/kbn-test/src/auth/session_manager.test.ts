@@ -243,7 +243,7 @@ describe('SamlSessionManager', () => {
 
       test('should throw error if TEST_CLOUD_HOST_NAME is not set', async () => {
         expect(() => new SamlSessionManager(samlSessionManagerOptions)).toThrow(
-          'SAML Authentication requires TEST_CLOUD_HOST_NAME env variable to be set'
+          `'cloudHostName' is required for Cloud authentication. Provide it in the constructor or via the TEST_CLOUD_HOST_NAME environment variable.`
         );
       });
 

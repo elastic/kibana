@@ -157,7 +157,7 @@ export const createCloudSession = async (
         await delay(retryParams.attemptDelay);
       } else {
         log.error(
-          `Failed to create the new cloud session with ${retryParams.attemptsCount} attempts`
+          `Failed to create the new cloud session with ${retryParams.attemptsCount} attempts for ${email} user`
         );
         // throw original error with stacktrace
         throw ex;
@@ -273,7 +273,6 @@ export const finishSAMLHandshake = async ({
   while (attemptsLeft > 0) {
     try {
       authResponse = await axios.request(request);
-
       // SAML callback should return 302
       if (authResponse.status === 302) {
         return getCookieFromResponseHeaders(
