@@ -42,8 +42,7 @@ export function assertRuleUpgradeAfterReview({
   fieldName: rawFieldName,
   fieldVersions: { initial, customized, upgrade, resolvedValue: rawResolvedValue },
 }: AssertRuleUpgradeAfterReviewParams) {
-  // It's much more convenient to have uncasted `resolvedValue` since
-  // TS isn't able to correspond test data and exected by `inputFieldValue()` values.
+  // TS isn't able to infer the type of the field name for inputFieldValue()
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const resolvedValue = rawResolvedValue as any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
