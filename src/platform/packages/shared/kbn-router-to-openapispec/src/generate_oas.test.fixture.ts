@@ -36,7 +36,6 @@ export const sharedOas = {
         deprecated: true,
         'x-discontinued': 'route discontinued version or date',
         operationId: 'get-bar',
-        description: '[Required authorization] Route required privileges: foo.',
         parameters: [],
         requestBody: {
           content: {
