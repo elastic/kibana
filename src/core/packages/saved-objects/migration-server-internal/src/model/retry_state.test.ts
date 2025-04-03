@@ -133,7 +133,7 @@ describe('resetRetryState', () => {
     });
   });
 
-  it('doesnt reset retry state if skipRetryReset is true and sets skipRetryReset to false', () => {
+  it('doesnt reset retry attributes if skipRetryReset is true and resets skipRetryReset', () => {
     const state = createState({
       hello: 'dolly',
       foo: 42,

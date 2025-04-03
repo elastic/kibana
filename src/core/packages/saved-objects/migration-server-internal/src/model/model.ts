@@ -1559,31 +1559,15 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
       } else if (isTypeof(left, 'wait_for_task_completed_with_error_retry_original')) {
-        if (stateP.retryCount < stateP.retryAttempts) {
-          const retryCount = stateP.retryCount + 1;
-          const retryDelay = 1500 + 1000 * Math.random();
-          return {
+        return delayRetryState(
+          {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
             skipRetryReset: true,
-            retryCount,
-            retryDelay,
-            logs: [
-              ...stateP.logs,
-              {
-                level: 'warning',
-                message: `Errors occurred while trying to update index mappings. Retrying attempt ${retryCount}.`,
-              },
-            ],
-          };
-        } else {
-          const reason = `Migration was retried ${stateP.retryCount} times but failed with: ${left.message}.`;
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason,
-          };
-        }
+          },
+          left.message,
+          stateP.retryAttempts
+        );
       } else {
         throwBadResponse(stateP, left);
       }

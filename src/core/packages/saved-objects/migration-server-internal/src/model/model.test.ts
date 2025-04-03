@@ -3069,7 +3069,7 @@ describe('migrations v2 model', () => {
         );
       });
 
-      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK maintains retryCount', () => {
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK updates retry attributes correctly', () => {
         const initialRetryCount = 3;
 
         // First, we are in UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK
@@ -3101,7 +3101,7 @@ describe('migrations v2 model', () => {
         expect(retryingMappingsUpdateAgain.retryCount).toBe(initialRetryCount + 2);
         expect(retryingMappingsUpdateAgain.skipRetryReset).toBe(true);
 
-        // Go back to the wait state, so retryCount should remain the same
+        // Go again to the wait state, so retryCount should remain the same
         const finalWaitStateBeforeCompletion = model(
           retryingMappingsUpdateAgain,
           Either.right({
@@ -3134,7 +3134,7 @@ describe('migrations v2 model', () => {
         const newState = model(state, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
         expect(newState.reason).toMatchInlineSnapshot(
-          `"Migration was retried 8 times but failed with: some_retryable_error_during_update."`
+          `"Unable to complete the UPDATE_TARGET_MAPPINGS_PROPERTIES step after 8 attempts, terminating. The last failure message was: some_retryable_error_during_update"`
         );
       });
     });

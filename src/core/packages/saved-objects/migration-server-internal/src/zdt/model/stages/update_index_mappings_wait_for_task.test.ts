@@ -25,6 +25,7 @@ import { updateIndexMappingsWaitForTask } from './update_index_mappings_wait_for
 import { model } from '../model';
 import { RetryableEsClientError } from '../../actions';
 import { WaitForTaskCompletedWithErrorRetryOriginal } from '../../../actions/wait_for_task';
+import { FatalState } from '../../../state';
 
 describe('Stage: updateIndexMappings', () => {
   let context: MockedMigratorContext;
@@ -124,8 +125,8 @@ describe('Stage: updateIndexMappings', () => {
       retryDelay: expect.any(Number),
       logs: expect.arrayContaining([
         expect.objectContaining({
-          level: 'warning',
-          message: `Errors occurred while trying to update index mappings. Retrying attempt 13.`,
+          level: 'error',
+          message: `Action failed with 'search_phase_execution_exception'. Retrying attempt 13 in 64 seconds.`,
         }),
       ]),
     });
@@ -139,17 +140,16 @@ describe('Stage: updateIndexMappings', () => {
       waitForTaskCompletedWithErrorRetryOriginal
     );
 
-    const newState = updateIndexMappingsWaitForTask(state, res, context);
+    const newState = updateIndexMappingsWaitForTask(state, res, context) as unknown as FatalState;
 
-    expect(newState).toEqual({
-      ...state,
-      controlState: 'FATAL',
-      reason: `Migration was retried ${state.retryCount} times but failed with: search_phase_execution_exception.`,
-    });
+    expect(newState.controlState).toEqual('FATAL');
+    expect(newState.reason).toMatchInlineSnapshot(
+      `"Unable to complete the UPDATE_INDEX_MAPPINGS step after 15 attempts, terminating. The last failure message was: search_phase_execution_exception"`
+    );
   });
 
   describe('skipRetryReset', () => {
-    test('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK maintains retryCount', () => {
+    test('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK updates retry attributes correctly', () => {
       const initialRetryCount = 3;
 
       // First, we are in UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK state
