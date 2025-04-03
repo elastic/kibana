@@ -11,7 +11,6 @@ import type { SecuritySolutionApiRequestHandlerContext } from '../../../../..';
 
 export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_CREATED = 'siem_migration_created',
-  SIEM_MIGRATION_UPDATED = 'siem_migration_updated',
   SIEM_MIGRATION_RETRIEVED = 'siem_migration_retrieved',
   SIEM_MIGRATION_UPLOADED_RESOURCES = 'siem_migration_uploaded_resources',
   SIEM_MIGRATION_RETRIEVED_RESOURCES = 'siem_migration_retrieved_resources',
@@ -47,7 +46,6 @@ export const siemMigrationAuditEventType: Record<
   ArrayElement<EcsEvent['type']>
 > = {
   [SiemMigrationsAuditActions.SIEM_MIGRATION_CREATED]: AUDIT_TYPE.CREATION,
-  [SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES]: AUDIT_TYPE.CREATION,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RESOURCES]: AUDIT_TYPE.ACCESS,
