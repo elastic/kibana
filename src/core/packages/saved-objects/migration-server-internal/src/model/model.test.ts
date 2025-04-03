@@ -3067,6 +3067,59 @@ describe('migrations v2 model', () => {
         );
       });
 
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK maintains retryCount', () => {
+        const initialRetryCount = 3;
+
+        // First, we are in UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK
+        const initialWaitState = Object.assign({}, updateTargetMappingsWaitForTaskState, {
+          retryCount: initialRetryCount,
+        });
+        expect(initialWaitState.retryCount).toBe(initialRetryCount);
+        expect(initialWaitState.skipRetryReset).toBeFalsy();
+
+        // Move to UPDATE_TARGET_MAPPINGS_PROPERTIES and retry it (+1 retry)
+        const retryingMappingsUpdate = model(
+          initialWaitState,
+          Either.left({
+            message: 'Some error happened that makes us want to retry the original task',
+            type: 'wait_for_task_completed_with_error_retry_original',
+          })
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(retryingMappingsUpdate.retryCount).toBe(initialRetryCount + 1);
+        expect(retryingMappingsUpdate.skipRetryReset).toBe(true);
+
+        // Retry UPDATE_TARGET_MAPPINGS_PROPERTIES again (+1 retry)
+        const retryingMappingsUpdateAgain = model(
+          retryingMappingsUpdate,
+          Either.left({
+            type: 'retryable_es_client_error',
+            message: 'random retryable error',
+          })
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(retryingMappingsUpdateAgain.retryCount).toBe(initialRetryCount + 2);
+        expect(retryingMappingsUpdateAgain.skipRetryReset).toBe(true);
+
+        // Go back to the wait state, so retryCount should remain the same
+        const finalWaitStateBeforeCompletion = model(
+          retryingMappingsUpdateAgain,
+          Either.right({
+            taskId: 'update target mappings task',
+          }) as ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'>
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(finalWaitStateBeforeCompletion.retryCount).toBe(initialRetryCount + 2);
+        expect(finalWaitStateBeforeCompletion.skipRetryReset).toBeFalsy();
+
+        // The wait state completes successfully, so retryCount should reset
+        const postUpdateState = model(
+          finalWaitStateBeforeCompletion,
+          Either.right(
+            'pickup_updated_mappings_succeeded'
+          ) as ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'>
+        ) as UpdateTargetMappingsMeta;
+        expect(postUpdateState.retryCount).toBe(0);
+        expect(postUpdateState.skipRetryReset).toBeFalsy();
+      });
+
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> FATAL if wait_for_task_completed_with_error_retry_original has no more retry attemps', () => {
         const state = Object.assign({}, updateTargetMappingsWaitForTaskState, {
           retryCount: 8,

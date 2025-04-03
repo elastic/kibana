@@ -1565,13 +1565,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           return {
             ...stateP,
             controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
+            skipRetryReset: true,
             retryCount,
             retryDelay,
             logs: [
               ...stateP.logs,
               {
                 level: 'warning',
-                message: `Errors occurred while trying to update index mapping. Retrying attempt ${retryCount}.`,
+                message: `Errors occurred while trying to update index mappings. Retrying attempt ${retryCount}.`,
               },
             ],
           };

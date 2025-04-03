@@ -35,6 +35,7 @@ export const updateIndexMappingsWaitForTask: ModelStage<
           controlState: 'UPDATE_INDEX_MAPPINGS',
           retryCount,
           retryDelay,
+          skipRetryReset: true,
           logs: [
             ...state.logs,
             {

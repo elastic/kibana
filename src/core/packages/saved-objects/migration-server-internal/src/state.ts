@@ -51,6 +51,7 @@ export interface BaseState extends ControlState {
   readonly preMigrationScript: Option.Option<string>;
   readonly outdatedDocumentsQuery: QueryDslQueryContainer;
   readonly retryCount: number;
+  readonly skipRetryReset?: boolean;
   readonly retryDelay: number;
   /**
    * How many times to retry a step that fails with retryable_es_client_error
