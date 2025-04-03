@@ -34,6 +34,7 @@ import {
   isSemanticTextUnsupportedError,
   reIndexKnowledgeBaseWithLock,
 } from './reindex_knowledge_base';
+import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -448,6 +449,10 @@ export class KnowledgeBaseService {
           logger: this.dependencies.logger,
           esClient: this.dependencies.esClient,
         }).catch((e) => {
+          if (error instanceof LockAcquisitionError) {
+            this.dependencies.logger.debug(`Re-indexing operation is already in progress`);
+            return;
+          }
           this.dependencies.logger.error(`Failed to re-index knowledge base: ${e.message}`);
         });
 

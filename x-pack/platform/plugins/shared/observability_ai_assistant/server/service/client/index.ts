@@ -678,12 +678,14 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId);
 
-    reIndexKnowledgeBaseWithLock({
-      core: this.dependencies.core,
-      logger: this.dependencies.logger,
-      esClient: this.dependencies.esClient,
+    reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
+      core,
+      logger,
+      config: this.dependencies.config,
     }).catch((e) => {
-      this.dependencies.logger.error(`Failed to re-index knowledge base: ${e.message}`);
+      this.dependencies.logger.error(
+        `Failed to populate missing semantic text fields: ${e.message}`
+      );
     });
 
     return res;

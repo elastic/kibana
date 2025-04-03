@@ -30,15 +30,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
-      const zipFilePath = `${AI_ASSISTANT_SNAPSHOT_REPO_PATH}.zip`;
-      log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
-      new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
-
+      await unZipKbSnapshot();
       await setupKnowledgeBase(getService);
     });
 
     beforeEach(async () => {
-      await deleteKbIndices(es);
       await restoreKbSnapshot();
       await createOrUpdateIndexAssets(observabilityAIAssistantAPIClient);
     });
@@ -97,7 +93,15 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return parseInt(settings?.index?.version?.created ?? '', 10);
   }
 
+  async function unZipKbSnapshot() {
+    const zipFilePath = `${AI_ASSISTANT_SNAPSHOT_REPO_PATH}.zip`;
+    log.debug(`Unzipping ${zipFilePath} to ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`);
+    new AdmZip(zipFilePath).extractAllTo(path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH), true);
+  }
+
   async function restoreKbSnapshot() {
+    await deleteKbIndices(es);
+
     log.debug(
       `Restoring snapshot of ${resourceNames.concreteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
     );

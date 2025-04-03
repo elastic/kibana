@@ -267,7 +267,7 @@ export async function withLock<T>(
     retryOptions?: pRetry.Options;
   } & AcquireOptions,
   callback: () => Promise<T>
-): Promise<T | undefined> {
+): Promise<T> {
   const lockManager = new LockManager(lockId, esClient, logger);
   const acquired =
     waitForLock ?? retryOptions
