@@ -14,6 +14,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
   link: string;
   label: string;
   id: string;
+  accessedAt: Date;
 }
 
 /**
