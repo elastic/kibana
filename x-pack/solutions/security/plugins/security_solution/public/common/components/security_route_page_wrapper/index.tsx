@@ -102,11 +102,18 @@ export const SecurityRoutePageWrapper: FC<PropsWithChildren<SecurityRoutePageWra
 export const withSecurityRoutePageWrapper = <T extends {}>(
   Component: React.ComponentType<T>,
   pageName: SecurityPageName,
-  redirectOnMissing?: boolean
+  {
+    redirectOnMissing,
+    redirectIfUnauthorized,
+  }: { redirectOnMissing?: boolean; redirectIfUnauthorized?: boolean } = {}
 ) => {
   return function WithSecurityRoutePageWrapper(props: T) {
     return (
-      <SecurityRoutePageWrapper pageName={pageName} redirectOnMissing={redirectOnMissing}>
+      <SecurityRoutePageWrapper
+        pageName={pageName}
+        redirectOnMissing={redirectOnMissing}
+        redirectIfUnauthorized={redirectIfUnauthorized}
+      >
         <Component {...props} />
       </SecurityRoutePageWrapper>
     );

@@ -55,7 +55,7 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
     },
   },
   async fn(data, args, handlers) {
-    const { layeredXyVisFn } = await import('./layered_xy_vis_fn');
+    const { layeredXyVisFn } = await import('./expression_module');
     return await layeredXyVisFn(data, args, handlers);
   },
 };

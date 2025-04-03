@@ -6,7 +6,7 @@
  */
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
-import { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
+import { CoreSetup, Logger, RouteRegistrar, RouteSecurity } from '@kbn/core/server';
 import {
   IoTsParamsObject,
   ServerRouteRepository,
@@ -50,7 +50,7 @@ export function registerRoutes({
         path: pathname,
         validate: passThroughValidationObject,
         options,
-        security: route.security,
+        security: route.security as RouteSecurity,
       },
       async (context, request, response) => {
         try {

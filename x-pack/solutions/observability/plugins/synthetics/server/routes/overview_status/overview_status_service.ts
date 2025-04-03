@@ -36,7 +36,7 @@ export const SUMMARIES_PAGE_SIZE = 5000;
 
 export class OverviewStatusService {
   filterData: {
-    locationFilter?: string[] | string;
+    locationIds?: string[] | string;
     filtersStr?: string;
   } = {};
   constructor(
@@ -61,7 +61,7 @@ export class OverviewStatusService {
       disabledCount,
       disabledMonitorsCount,
       projectMonitorsCount,
-    } = processMonitors(allConfigs, this.filterData?.locationFilter);
+    } = processMonitors(allConfigs, this.filterData?.locationIds);
 
     return {
       allIds,
@@ -91,7 +91,7 @@ export class OverviewStatusService {
       projects,
       showFromAllSpaces,
     } = params;
-    const { locationFilter } = this.filterData;
+    const { locationIds } = this.filterData;
     const getTermFilter = (field: string, value: string | string[] | undefined) => {
       if (!value || isEmpty(value)) {
         return [];
@@ -120,10 +120,10 @@ export class OverviewStatusService {
       ...getTermFilter('monitor.project.id', projects),
     ];
 
-    if (scopeStatusByLocation && !isEmpty(locationFilter) && locationFilter) {
+    if (scopeStatusByLocation && !isEmpty(locationIds) && locationIds) {
       filters.push({
         terms: {
-          'observer.name': locationFilter,
+          'observer.name': locationIds,
         },
       });
     }
@@ -231,7 +231,7 @@ export class OverviewStatusService {
     const enabledMonitors = monitors.filter((monitor) => monitor.attributes[ConfigKey.ENABLED]);
     const disabledMonitors = monitors.filter((monitor) => !monitor.attributes[ConfigKey.ENABLED]);
 
-    const queryLocIds = this.filterData?.locationFilter;
+    const queryLocIds = this.filterData?.locationIds;
 
     disabledMonitors.forEach((monitor) => {
       const monitorQueryId = monitor.attributes[ConfigKey.MONITOR_QUERY_ID];

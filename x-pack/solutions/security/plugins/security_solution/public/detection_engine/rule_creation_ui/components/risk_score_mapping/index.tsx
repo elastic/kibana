@@ -12,7 +12,7 @@ import {
   getFieldValidityAndErrorMessage,
   type FieldHook,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { AboutStepRiskScore } from '../../../../detections/pages/detection_engine/rules/types';
+import type { AboutStepRiskScore } from '../../../common/types';
 import { DefaultRiskScore } from './default_risk_score';
 import { RiskScoreOverride } from './risk_score_override';
 

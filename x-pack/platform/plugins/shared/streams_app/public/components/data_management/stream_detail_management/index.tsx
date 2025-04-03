@@ -13,13 +13,9 @@ export function StreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   refreshDefinition: () => void;
 }) {
-  if (!definition) {
-    return null;
-  }
-
   if (isWiredStreamGetResponse(definition)) {
     return (
       <WiredStreamDetailManagement definition={definition} refreshDefinition={refreshDefinition} />

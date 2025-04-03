@@ -19,6 +19,7 @@ import {
   niceTimeFormatter,
   LIGHT_THEME,
   DARK_THEME,
+  DomainRange,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -62,14 +63,14 @@ export function ControlledEsqlChart<T extends string>({
   metricNames,
   chartType = 'line',
   height,
-  timerange,
+  xDomain: customXDomain,
 }: {
   id: string;
   result: AbortableAsyncState<UnparsedEsqlResponse>;
   metricNames: T[];
   chartType?: 'area' | 'bar' | 'line';
   height?: number;
-  timerange?: { start: number; end: number };
+  xDomain?: DomainRange;
 }) {
   const {
     core: { uiSettings },
@@ -102,14 +103,16 @@ export function ControlledEsqlChart<T extends string>({
   const xValues = allTimeseries.flatMap(({ data }) => data.map(({ x }) => x));
 
   // todo - pull in time range here
-  const min = timerange?.start ?? Math.min(...xValues);
-  const max = timerange?.end ?? Math.max(...xValues);
+  const min = customXDomain?.min ?? Math.min(...xValues);
+  const max = customXDomain?.max ?? Math.max(...xValues);
 
   const isEmpty = min === 0 && max === 0;
 
   const xFormatter = niceTimeFormatter([min, max]);
 
-  const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
+  const xDomain: DomainRange = isEmpty
+    ? { min: 0, max: 1 }
+    : { min, max, minInterval: customXDomain?.minInterval };
 
   const yTickFormat = (value: number | null) => (value === null ? '' : String(value));
   const yLabelFormat = (label: string) => label;
