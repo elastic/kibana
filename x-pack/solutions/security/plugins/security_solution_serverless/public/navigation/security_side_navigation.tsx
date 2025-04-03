@@ -416,6 +416,20 @@ export const createSecurityNavigationTree$ = (
             renderAs: 'panelOpener',
           },
           {
+            id: 'entity_analytics-landing',
+            link: securityLink(SecurityPageName.entityAnalyticsLanding),
+            title: i18nStrings.entityAnalytics.landing,
+            spaceBefore: null,
+            children: [
+              {
+                id: 'entity_analytics-privileged_user_monitoring',
+                link: securityLink(SecurityPageName.privilegedUserMonitoring),
+                renderAs: 'item',
+              },
+            ],
+            renderAs: 'panelOpener',
+          },
+          {
             id: 'machine_learning-landing',
             link: securityLink(SecurityPageName.mlLanding),
             title: i18nStrings.ml.title,
