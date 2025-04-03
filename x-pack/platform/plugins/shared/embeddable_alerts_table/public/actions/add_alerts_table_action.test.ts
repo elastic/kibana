@@ -6,7 +6,7 @@
  */
 import { coreMock } from '@kbn/core/public/mocks';
 import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
-import { fetchRuleTypes } from '@kbn/alerts-ui-shared/src/common/apis/fetch_rule_types';
+import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
 
 import { getAddAlertsTableAction } from './add_alerts_table_action';
 import { ALERTS_FEATURE_ID } from '@kbn/alerts-ui-shared/src/common/constants';
@@ -15,15 +15,15 @@ import type { RuleType } from '@kbn/triggers-actions-ui-types';
 const core = coreMock.createStart();
 const mockPresentationContainer = getMockPresentationContainer();
 
-jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_rule_types');
-const mockFetchRuleTypes = jest.mocked(fetchRuleTypes);
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const mockGetRuleTypes = jest.mocked(getRuleTypes);
 
 describe('getAddAlertsTableAction', () => {
   it('should be compatible only when the user has access to at least one rule type', async () => {
     const ruleTypes = [
       { authorizedConsumers: { [ALERTS_FEATURE_ID]: { all: true } } },
     ] as unknown as Array<RuleType<string, string>>;
-    mockFetchRuleTypes.mockResolvedValue(ruleTypes);
+    mockGetRuleTypes.mockResolvedValue(ruleTypes);
 
     const action = getAddAlertsTableAction({ http: core.http });
 
@@ -36,7 +36,7 @@ describe('getAddAlertsTableAction', () => {
 
   it("should not be compatible when the user doesn't have access to any rule type", async () => {
     const ruleTypes = [] as unknown as Array<RuleType<string, string>>;
-    mockFetchRuleTypes.mockResolvedValue(ruleTypes);
+    mockGetRuleTypes.mockResolvedValue(ruleTypes);
 
     const action = getAddAlertsTableAction({ http: core.http });
 

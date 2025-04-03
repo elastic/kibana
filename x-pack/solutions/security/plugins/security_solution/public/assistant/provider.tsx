@@ -24,7 +24,6 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type { Message } from '@kbn/elastic-assistant-common';
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import useObservable from 'react-use/lib/useObservable';
-import { useSpaceId } from '../common/hooks/use_space_id';
 import { APP_ID } from '../../common';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
@@ -148,7 +147,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     share,
     triggersActionsUi,
   } = useKibana().services;
-  const spaceId = useSpaceId();
   const { navigateToApp, currentAppId$ } = application;
 
   let inferenceEnabled = false;
@@ -240,7 +238,6 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       inferenceEnabled={inferenceEnabled}
       navigateToApp={navigateToApp}
       productDocBase={productDocBase}
-      spaceId={spaceId ?? 'default'}
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}

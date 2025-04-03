@@ -21,6 +21,7 @@ import { of } from 'rxjs';
 import { applicationServiceMock } from '@kbn/core/public/mocks';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
 import { AssistantAvailability } from '../../assistant_context/types';
+import { AssistantSpaceIdProvider } from '../../assistant/use_space_aware_context';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
@@ -102,9 +103,8 @@ export const TestProvidersComponent: React.FC<Props> = ({
             }}
             userProfileService={jest.fn() as unknown as UserProfileService}
             chrome={chrome}
-            spaceId="default"
           >
-            {children}
+            <AssistantSpaceIdProvider spaceId="default">{children}</AssistantSpaceIdProvider>
           </AssistantProvider>
         </QueryClientProvider>
       </ThemeProvider>

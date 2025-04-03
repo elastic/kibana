@@ -63,6 +63,7 @@ import { createGrokCommand } from './factories/grok';
 import { createStatsCommand } from './factories/stats';
 import { createChangePointCommand } from './factories/change_point';
 import { createWhereCommand } from './factories/where';
+import { createRowCommand } from './factories/row';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -112,9 +113,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitRowCommand(ctx: RowCommandContext) {
-    const command = createCommand('row', ctx);
+    const command = createRowCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**

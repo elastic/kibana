@@ -12,7 +12,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isEqual } from 'lodash';
-import { internalStateSlice, type InternalStateThunkActionCreator } from '../internal_state';
+import {
+  internalStateSlice,
+  type TabActionPayload,
+  type InternalStateThunkActionCreator,
+} from '../internal_state';
 import {
   getInitialState,
   type AppStateUrl,
@@ -30,6 +34,7 @@ import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../../utils/v
 import { getValidFilters } from '../../../../../utils/get_valid_filters';
 import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { selectTabRuntimeState } from '../runtime_state';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
@@ -39,16 +44,19 @@ export interface InitializeSessionParams {
 }
 
 export const initializeSession: InternalStateThunkActionCreator<
-  [InitializeSessionParams],
+  [TabActionPayload<{ initializeSessionParams: InitializeSessionParams }>],
   Promise<{ showNoDataPage: boolean }>
 > =
-  ({ stateContainer, discoverSessionId, dataViewSpec, defaultUrlState }) =>
+  ({
+    tabId,
+    initializeSessionParams: { stateContainer, discoverSessionId, dataViewSpec, defaultUrlState },
+  }) =>
   async (
     dispatch,
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage }
   ) => {
-    dispatch(internalStateSlice.actions.resetOnSavedSearchChange());
+    dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
     /**
      * "No data" checks
@@ -108,10 +116,12 @@ export const initializeSession: InternalStateThunkActionCreator<
     let dataView: DataView;
 
     if (isOfAggregateQueryType(initialQuery)) {
+      const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
+
       // Regardless of what was requested, we always use ad hoc data views for ES|QL
       dataView = await getEsqlDataView(
         initialQuery,
-        discoverSessionDataView ?? runtimeStateManager.currentDataView$.getValue(),
+        discoverSessionDataView ?? currentDataView$.getValue(),
         services
       );
     } else {
@@ -131,7 +141,7 @@ export const initializeSession: InternalStateThunkActionCreator<
       dataView = result.dataView;
     }
 
-    dispatch(setDataView(dataView));
+    dispatch(setDataView({ tabId, dataView }));
 
     if (!dataView.isPersisted()) {
       dispatch(appendAdHocDataViews(dataView));

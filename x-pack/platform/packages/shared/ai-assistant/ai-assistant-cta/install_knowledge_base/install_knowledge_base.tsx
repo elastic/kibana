@@ -8,17 +8,23 @@
 import React from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 
-import { AssistantCallToAction } from '../call_to_action';
+import { AssistantCallToAction, type AssistantCallToActionProps } from '../call_to_action';
 import { translations } from './install_knowledge_base.translations';
 import { CallToActionCard } from '../call_to_action_panel';
 
+/** Data test subject for the install knowledge base button. */
+export const DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON = 'aiCTAInstallKnowledgeBaseButton';
+
 /**
- * Props for the `InstallKnowledgeBase`.
+ * Props for the `InstallKnowledgeBase` call to action.
  */
-export interface InstallKnowledgeBaseProps {
+export interface InstallKnowledgeBaseProps
+  extends Pick<AssistantCallToActionProps, 'data-test-subj' | 'centered'> {
   /** Callback to handle installing a knowledge base. */
   onInstallKnowledgeBase: () => void;
+  /** True if the Knowledge Base is currently installing, false otherwise. */
   isInstalling?: boolean;
+  /** True if the Knowledge Base can be installed, false otherwise. */
   isInstallAvailable?: boolean;
 }
 
@@ -29,8 +35,9 @@ export const InstallKnowledgeBase = ({
   onInstallKnowledgeBase,
   isInstalling = false,
   isInstallAvailable = true,
+  ...props
 }: InstallKnowledgeBaseProps) => (
-  <AssistantCallToAction>
+  <AssistantCallToAction {...props}>
     <CallToActionCard
       iconType="database"
       color="subdued"
@@ -38,7 +45,7 @@ export const InstallKnowledgeBase = ({
       description={translations.cardDescription}
     >
       <EuiToolTip
-        position={'bottom'}
+        position="bottom"
         content={!isInstallAvailable ? translations.unavailableTooltip : undefined}
       >
         <EuiButton
@@ -49,7 +56,7 @@ export const InstallKnowledgeBase = ({
           onClick={onInstallKnowledgeBase}
           isDisabled={!isInstallAvailable || isInstalling}
           isLoading={isInstalling}
-          data-test-subj="install-knowledge-base-button"
+          data-test-subj={DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON}
         >
           {isInstalling ? translations.installingButton : translations.installButton}
         </EuiButton>

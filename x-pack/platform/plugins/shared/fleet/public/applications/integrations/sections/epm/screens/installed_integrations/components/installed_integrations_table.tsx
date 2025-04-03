@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiBasicTable,
   EuiLink,
@@ -31,11 +31,14 @@ export const InstalledIntegrationsTable: React.FunctionComponent<{
   total: number;
   isLoading: boolean;
   pagination: UrlPagination;
-}> = ({ installedPackages, total, isLoading, pagination }) => {
+  selection: {
+    selectedItems: InstalledPackageUIPackageListItem[];
+    setSelectedItems: React.Dispatch<React.SetStateAction<InstalledPackageUIPackageListItem[]>>;
+  };
+}> = ({ installedPackages, total, isLoading, pagination, selection }) => {
   const authz = useAuthz();
   const { getHref } = useLink();
-
-  const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
+  const { selectedItems, setSelectedItems } = selection;
 
   const { setPagination } = pagination;
   const handleTablePagination = React.useCallback(
