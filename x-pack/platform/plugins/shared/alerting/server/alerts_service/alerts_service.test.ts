@@ -902,6 +902,7 @@ describe('Alerts Service', () => {
                       },
                     }),
                 'index.mapping.ignore_malformed': true,
+                'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
                 'index.mapping.total_fields.limit': 2500,
               },
               mappings: {
