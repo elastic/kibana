@@ -70,7 +70,10 @@ export function EnvironmentSelect({
 
   const isInvalid = getEnvironmentLabel(environment) !== searchValue && searchValue !== '';
 
-  const options: Array<EuiComboBoxOptionOption<string>> = [...getEnvironmentOptions(environments)];
+  const options: Array<EuiComboBoxOptionOption<string>> = useMemo(
+    () => getEnvironmentOptions(environments),
+    [environments]
+  );
 
   return (
     <EuiFormRow
