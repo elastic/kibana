@@ -12,6 +12,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 import * as Either from 'fp-ts/Either';
+import { WaitForTaskCompletedWithErrorRetryOriginal } from './wait_for_task';
 
 jest.mock('./catch_retryable_es_client_errors', () => {
   const { catchRetryableEsClientErrors: actualImplementation } = jest.requireActual(
@@ -86,7 +87,8 @@ describe('waitForPickupUpdatedMappingsTask', () => {
     const task = waitForPickupUpdatedMappingsTask({ client, taskId: '4273', timeout: '2m' });
     const result = await task();
     expect(Either.isLeft(result)).toBe(true);
-    expect((result as Either.Left<any>).left).toMatchInlineSnapshot(`
+    expect((result as Either.Left<WaitForTaskCompletedWithErrorRetryOriginal>).left)
+      .toMatchInlineSnapshot(`
       Object {
         "message": "The task being waited on encountered a search_phase_execution_exception error",
         "type": "wait_for_task_completed_with_error_retry_original",
