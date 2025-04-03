@@ -288,6 +288,69 @@
           "- An object containing the throttled function (`run`), and methods to cancel (`cancel`) or flush (`flush`) the throttle."
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-hooks",
+        "id": "def-common.useTruncateText",
+        "type": "Function",
+        "tags": [],
+        "label": "useTruncateText",
+        "description": [],
+        "signature": [
+          "(text: string, maxLength?: number, maxCharLength?: number) => { displayText: string; isExpanded: boolean; toggleExpanded: () => void; shouldTruncate: boolean; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useTruncateText.$1",
+            "type": "string",
+            "tags": [],
+            "label": "text",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useTruncateText.$2",
+            "type": "number",
+            "tags": [],
+            "label": "maxLength",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-hooks",
+            "id": "def-common.useTruncateText.$3",
+            "type": "number",
+            "tags": [],
+            "label": "maxCharLength",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "src/platform/packages/shared/kbn-react-hooks/src/use_truncate_text/use_truncate_text.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
