@@ -13,6 +13,14 @@ import { CONFIGURATIONS_PATH } from '../../../../../common/constants';
 import { RETURN_APP_ID, RETURN_PATH } from './constants';
 import type { IntegrationsFacets } from '../../../constants';
 
+export const INTEGRATION_SORT_ORDER = [
+  // 'splunk',
+  'google_secops',
+  'microsoft_sentinel',
+  'sentinel_one',
+  'crowdstrike',
+];
+
 const addPathParamToUrl = (url: string, path: string) => {
   const encodedPath = encodeURIComponent(path);
   const paramsString = `${RETURN_APP_ID}=${SECURITY_UI_APP_ID}&${RETURN_PATH}=${encodedPath}`;
@@ -55,12 +63,21 @@ const applyCategoryBadgeAndStyling = (
   };
 };
 
+const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
+  return integrationsList.sort(
+    (a, b) => INTEGRATION_SORT_ORDER.indexOf(a.name) - INTEGRATION_SORT_ORDER.indexOf(b.name)
+  );
+};
+
 export const useEnhancedIntegrationCards = (
   integrationsList: IntegrationCardItem[],
   callerView: IntegrationsFacets
 ): IntegrationCardItem[] => {
   const enhancedIntegrationsList = useMemo(
-    () => integrationsList.map((card) => applyCategoryBadgeAndStyling(card, callerView)),
+    () =>
+      applyCustomDisplayOrder(
+        integrationsList.map((card) => applyCategoryBadgeAndStyling(card, callerView))
+      ),
     [integrationsList, callerView]
   );
   return enhancedIntegrationsList;

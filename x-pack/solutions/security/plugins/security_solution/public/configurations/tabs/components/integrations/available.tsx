@@ -27,14 +27,14 @@ export const AvailableIntegrationsPage = React.memo<IntegrationsPageProps>(
       prereleaseIntegrationsEnabled: true,
     });
 
-    const installed = filteredCards.filter(
+    const availableIntegrations = filteredCards.filter((card) =>
+      AVAILABLE_INTEGRATIONS.includes(card.name)
+    );
+
+    const installed = availableIntegrations.filter(
       (card) =>
         card.installStatus === installationStatuses.Installed ||
         card.installStatus === installationStatuses.InstallFailed
-    );
-
-    const availableIntegrations = filteredCards.filter((card) =>
-      AVAILABLE_INTEGRATIONS.includes(card.name)
     );
 
     const gridList: IntegrationCardItem[] = useEnhancedIntegrationCards(

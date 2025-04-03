@@ -31,8 +31,9 @@ export const InstalledIntegrationsPage = React.memo<IntegrationsPageProps>(
 
     const installed = filteredCards.filter(
       (card) =>
-        card.installStatus === installationStatuses.Installed ||
-        card.installStatus === installationStatuses.InstallFailed
+        AVAILABLE_INTEGRATIONS.includes(card.name) &&
+        (card.installStatus === installationStatuses.Installed ||
+          card.installStatus === installationStatuses.InstallFailed)
     );
 
     const gridList: IntegrationCardItem[] = useEnhancedIntegrationCards(
