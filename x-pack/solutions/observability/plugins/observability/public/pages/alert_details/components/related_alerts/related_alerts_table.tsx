@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { ALERT_START, ALERT_UUID } from '@kbn/rule-data-utils';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import { getRelatedColumns } from './get_related_columns';
@@ -30,11 +31,15 @@ interface Props {
 }
 
 const columns = getRelatedColumns();
-const initialSort = [
+const initialSort: Array<Record<string, SortOrder>> = [
   {
-    ['_score']: {
-      order: 'desc' as SortOrder,
-    },
+    _score: 'desc',
+  },
+  {
+    [ALERT_START]: 'desc',
+  },
+  {
+    [ALERT_UUID]: 'desc',
   },
 ];
 
