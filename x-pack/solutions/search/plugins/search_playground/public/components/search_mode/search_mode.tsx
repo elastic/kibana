@@ -7,7 +7,7 @@
 
 import {
   EuiEmptyPrompt,
-  EuiFieldText,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -80,11 +80,10 @@ export const SearchMode: React.FC = () => {
                   control={control}
                   name={ChatFormFields.searchQuery}
                   render={({ field }) => (
-                    <EuiFieldText
+                    <EuiFieldSearch
                       data-test-subj="searchPlaygroundSearchModeFieldText"
                       {...field}
                       value={searchBarValue}
-                      icon="search"
                       fullWidth
                       placeholder={i18n.translate(
                         'xpack.searchPlayground.searchMode.searchBar.placeholder',
