@@ -10,7 +10,6 @@
 4. How to Use
 5. Contributing
 6. Running tests on CI
-7. Running tests agaist Cloud
 
 ### Overview
 
