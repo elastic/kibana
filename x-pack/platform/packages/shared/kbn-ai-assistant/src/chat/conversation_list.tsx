@@ -89,20 +89,15 @@ export function ConversationList({
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
-  const allConversations = useMemo(
-    () => conversations.value?.conversations ?? [],
-    [conversations.value?.conversations]
-  );
+  const [allConversations, activeConversations, archivedConversations] = useMemo(() => {
+    const conversationList = conversations.value?.conversations ?? [];
 
-  const activeConversations = useMemo(
-    () => allConversations.filter((c) => !c.archived),
-    [allConversations]
-  );
-
-  const archivedConversations = useMemo(
-    () => allConversations.filter((c) => c.archived),
-    [allConversations]
-  );
+    return [
+      conversationList,
+      conversationList.filter((c) => !c.archived),
+      conversationList.filter((c) => c.archived),
+    ];
+  }, [conversations.value?.conversations]);
 
   const selectedConversation = useMemo(
     () => allConversations.find((c) => c.conversation.id === selectedConversationId),

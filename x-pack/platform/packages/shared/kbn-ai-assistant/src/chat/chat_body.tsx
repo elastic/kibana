@@ -381,8 +381,16 @@ export function ChatBody({
   const isPublic = conversation.value?.public;
   const isArchived = !!conversation.value?.archived;
   const showPromptEditor = !isArchived && (!isPublic || isConversationOwnedByCurrentUser);
+
   const sharedBannerTitle = i18n.translate('xpack.aiAssistant.shareBanner.title', {
     defaultMessage: 'This conversation is shared with your team.',
+  });
+  const viewerDescription = i18n.translate('xpack.aiAssistant.banner.viewerDescription', {
+    defaultMessage:
+      "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
+  });
+  const duplicateButton = i18n.translate('xpack.aiAssistant.duplicateButton', {
+    defaultMessage: 'Duplicate',
   });
 
   let sharedBanner = null;
@@ -391,15 +399,10 @@ export function ChatBody({
     sharedBanner = (
       <ChatBanner
         title={sharedBannerTitle}
-        description={i18n.translate('xpack.aiAssistant.shareBanner.viewerDescription', {
-          defaultMessage:
-            "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
-        })}
+        description={viewerDescription}
         button={
           <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
-            {i18n.translate('xpack.aiAssistant.duplicateButton', {
-              defaultMessage: 'Duplicate',
-            })}
+            {duplicateButton}
           </EuiButton>
         }
       />
@@ -448,15 +451,10 @@ export function ChatBody({
       <ChatBanner
         title={archivedBannerTitle}
         icon="folderOpen"
-        description={i18n.translate('xpack.aiAssistant.archivedBanner.viewerDescription', {
-          defaultMessage:
-            "You can't edit or continue this conversation, but you can duplicate it into a new private conversation. The original conversation will remain unchanged.",
-        })}
+        description={viewerDescription}
         button={
           <EuiButton onClick={duplicateConversation} iconType="copy" size="s">
-            {i18n.translate('xpack.aiAssistant.duplicateButton', {
-              defaultMessage: 'Duplicate',
-            })}
+            {duplicateButton}
           </EuiButton>
         }
       />
@@ -565,7 +563,7 @@ export function ChatBody({
             <EuiFlexItem
               grow={false}
               className={promptEditorClassname(euiTheme)}
-              style={{ height: promptEditorHeight }}
+              css={{ height: promptEditorHeight }}
             >
               <EuiHorizontalRule margin="none" />
               <EuiPanel
