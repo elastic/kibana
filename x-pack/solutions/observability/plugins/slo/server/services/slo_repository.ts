@@ -24,7 +24,10 @@ export interface SLORepository {
   search(
     search: string,
     pagination: Pagination,
-    options?: { includeOutdatedOnly?: boolean }
+    options?: {
+      includeOutdatedOnly: boolean;
+      tags: string[];
+    }
   ): Promise<Paginated<SLODefinition>>;
 }
 
@@ -112,17 +115,28 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
   async search(
     search: string,
     pagination: Pagination,
-    options: { includeOutdatedOnly?: boolean } = { includeOutdatedOnly: false }
+    options: {
+      includeOutdatedOnly?: boolean;
+      tags: string[];
+    } = { tags: [] }
   ): Promise<Paginated<SLODefinition>> {
+    const { includeOutdatedOnly, tags } = options;
+    const filter = [];
+    if (tags.length > 0) {
+      filter.push(`slo.attributes.tags: (${tags.join(' OR ')})`);
+    }
+
+    if (!!includeOutdatedOnly) {
+      filter.push(`slo.attributes.version < ${SLO_MODEL_VERSION}`);
+    }
+
     const response = await this.soClient.find<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       page: pagination.page,
       perPage: pagination.perPage,
       search,
       searchFields: ['name'],
-      ...(!!options.includeOutdatedOnly && {
-        filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
-      }),
+      ...(filter.length && { filter: filter.join(' AND ') }),
       sortField: 'id',
       sortOrder: 'asc',
     });
