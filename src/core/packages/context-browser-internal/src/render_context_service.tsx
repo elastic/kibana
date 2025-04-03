@@ -55,7 +55,13 @@ export class RenderContextService implements IRenderContextService {
 
   public addContext(element: React.ReactNode): React.ReactElement<string> {
     const Component: React.FC = () => {
-      const deps = useObservable(this.deps, null);
+      /**
+       * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
+       * methods could be called before the CoreStart services are completely settled internally. If this
+       * assumption is wrong, the available dependencies are given as the initial value to `useObservable`, and
+       * there is no unnecessary re-render.
+       */
+      const deps = useObservable(this.deps, this.deps.getValue());
 
       if (!deps) {
         return <EuiLoadingSpinner size="s" />;
