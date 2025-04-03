@@ -7,6 +7,10 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type {
+  ConnectionNodeLegacy,
+  ExitSpanDestinationLegacy,
+} from '../../../common/service_map/types';
 import {
   AGENT_NAME,
   PARENT_ID,
@@ -18,11 +22,6 @@ import {
   SPAN_TYPE,
   TRACE_ID,
 } from '../../../common/es_fields/apm';
-import type {
-  ConnectionNode,
-  ExternalConnectionNode,
-  ServiceConnectionNode,
-} from '../../../common/service_map';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { calculateDocsPerShard } from './calculate_docs_per_shard';
 
@@ -328,11 +327,8 @@ export async function fetchServicePathsFromTraceIds({
     aggregations?: {
       service_map: {
         value: {
-          paths: ConnectionNode[][];
-          discoveredServices: Array<{
-            from: ExternalConnectionNode;
-            to: ServiceConnectionNode;
-          }>;
+          paths: ConnectionNodeLegacy[][];
+          discoveredServices: ExitSpanDestinationLegacy[];
         };
       };
     };

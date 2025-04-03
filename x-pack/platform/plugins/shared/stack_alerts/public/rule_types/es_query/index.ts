@@ -7,11 +7,11 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
-import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
-import { EsQueryRuleParams, SearchType } from './types';
+import type { EsQueryRuleParams, SearchType } from './types';
 import { validateExpression } from './validation';
 import { isSearchSourceRule } from './util';
 

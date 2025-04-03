@@ -37,7 +37,6 @@ import { getNotificationResultsLink } from '../rule_actions_legacy';
 // eslint-disable-next-line no-restricted-imports
 import { formatAlertForNotificationActions } from '../rule_actions_legacy/logic/notifications/schedule_notification_actions';
 import { createResultObject } from './utils';
-import { bulkCreateFactory, wrapHitsFactory } from './factories';
 import { RuleExecutionStatusEnum } from '../../../../common/api/detection_engine/rule_monitoring';
 import { truncateList } from '../rule_monitoring';
 import aadFieldConversion from '../routes/index/signal_aad_mapping.json';
@@ -48,6 +47,21 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
+import type { RuleParams } from '../rule_schema';
+import {
+  SECURITY_FROM,
+  SECURITY_IMMUTABLE,
+  SECURITY_INPUT_INDEX,
+  SECURITY_MAX_SIGNALS,
+  SECURITY_MERGE_STRATEGY,
+  SECURITY_NUM_ALERTS_CREATED,
+  SECURITY_NUM_IGNORE_FIELDS_REGEX,
+  SECURITY_NUM_IGNORE_FIELDS_STANDARD,
+  SECURITY_NUM_RANGE_TUPLES,
+  SECURITY_PARAMS,
+  SECURITY_RULE_ID,
+  SECURITY_TO,
+} from './utils/apm_field_names';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -57,6 +71,19 @@ Object.entries(aadFieldConversion).forEach(([key, value]) => {
     path: value,
   };
 });
+
+const addApmLabelsFromParams = (params: RuleParams) => {
+  agent.addLabels(
+    {
+      [SECURITY_FROM]: params.from,
+      [SECURITY_IMMUTABLE]: params.immutable,
+      [SECURITY_MAX_SIGNALS]: params.maxSignals,
+      [SECURITY_RULE_ID]: params.ruleId,
+      [SECURITY_TO]: params.to,
+    },
+    false
+  );
+};
 
 export const securityRuleTypeFieldMap = {
   ...technicalRuleFieldMap,
@@ -80,6 +107,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     experimentalFeatures,
     alerting,
     analytics,
+    eventsTelemetry,
+    licensing,
+    scheduleNotificationResponseActionsService,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -136,14 +166,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             state,
             rule,
           } = options;
+          addApmLabelsFromParams(params);
+          agent.setCustomContext({ [SECURITY_MERGE_STRATEGY]: mergeStrategy });
+          agent.setCustomContext({ [SECURITY_PARAMS]: params });
           let runState = state;
           let inputIndex: string[] = [];
           let runtimeMappings: estypes.MappingRuntimeFields | undefined;
           const { from, maxSignals, timestampOverride, timestampOverrideFallbackDisabled, to } =
             params;
           const {
-            alertWithPersistence,
-            alertWithSuppression,
             savedObjectsClient,
             scopedClusterClient,
             uiSettingsClient,
@@ -256,6 +287,10 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             }
           }
 
+          // Make a copy of `inputIndex` or else the APM agent reports it as [Circular] for most rule types because it's the same object
+          // as `index`
+          agent.setCustomContext({ [SECURITY_INPUT_INDEX]: [...inputIndex] });
+
           // check if rule has permissions to access given index pattern
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
@@ -332,6 +367,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             wrapperWarnings.push(rangeTuplesWarningMessage);
           }
 
+          agent.setCustomContext({ [SECURITY_NUM_RANGE_TUPLES]: tuples.length });
+
           if (remainingGap.asMilliseconds() > 0) {
             const gapDuration = `${remainingGap.humanize()} (${remainingGap.asMilliseconds()}ms)`;
             const gapErrorMessage = `${gapDuration} were not queried between this rule execution and the last execution, so signals may have been missed. Consider increasing your look behind time or adding more Kibana instances`;
@@ -341,7 +378,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
               message: gapErrorMessage,
               metrics: {
                 executionGap: remainingGap,
-                gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+                gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
               },
             });
           }
@@ -361,12 +398,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             });
 
             const alertTimestampOverride = isPreview ? startedAt : undefined;
-            const bulkCreate = bulkCreateFactory(
-              alertWithPersistence,
-              refresh,
-              ruleExecutionLogger,
-              experimentalFeatures
-            );
 
             const legacySignalFields: string[] = Object.keys(aadFieldConversion);
             const [ignoreFieldsRegexes, ignoreFieldsStandard] = partition(
@@ -377,19 +408,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             ignoreFieldsStandard.forEach((field) => {
               ignoreFieldsObject[field] = true;
             });
-            const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
-            const wrapHits = wrapHitsFactory({
-              ignoreFields: ignoreFieldsObject,
-              ignoreFieldsRegexes,
-              mergeStrategy,
-              completeRule,
-              spaceId,
-              indicesToQuery: inputIndex,
-              alertTimestampOverride,
-              publicBaseUrl,
-              ruleExecutionLogger,
-              intendedTimestamp,
+
+            agent.setCustomContext({
+              [SECURITY_NUM_IGNORE_FIELDS_STANDARD]: ignoreFieldsStandard.length,
+              [SECURITY_NUM_IGNORE_FIELDS_REGEX]: ignoreFieldsRegexes.length,
             });
+
+            const intendedTimestamp = startedAtOverridden ? startedAt : undefined;
 
             const { filter: exceptionFilter, unprocessedExceptions } = await buildExceptionFilter({
               startedAt,
@@ -417,8 +442,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     },
                     searchAfterSize,
                     tuple,
-                    bulkCreate,
-                    wrapHits,
                     listClient,
                     ruleDataClient,
                     mergeStrategy,
@@ -427,12 +450,16 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     ruleExecutionLogger,
                     aggregatableTimestampField,
                     alertTimestampOverride,
-                    alertWithSuppression,
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
                     experimentalFeatures,
                     intendedTimestamp,
                     spaceId,
+                    ignoreFields: ignoreFieldsObject,
+                    ignoreFieldsRegexes,
+                    eventsTelemetry,
+                    licensing,
+                    scheduleNotificationResponseActionsService,
                   },
                 });
 
@@ -445,7 +472,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
                   errors: result.errors.concat(runResult.errors),
-                  lastLookbackDate: runResult.lastLookBackDate,
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
                   success: result.success && runResult.success,
@@ -478,6 +504,8 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
 
             const createdSignalsCount = result.createdSignals.length;
 
+            agent.setCustomContext({ [SECURITY_NUM_ALERTS_CREATED]: createdSignalsCount });
+
             if (disabledActions.length > 0) {
               const disabledActionsWarning = getDisabledActionsWarningText({
                 alertsCreated: createdSignalsCount > 0,
@@ -509,7 +537,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   indexingDurations: result.bulkCreateTimes,
                   enrichmentDurations: result.enrichmentTimes,
                   executionGap: remainingGap,
-                  gapRange: experimentalFeatures?.storeGapsInEventLogEnabled ? gap : undefined,
+                  gapRange: experimentalFeatures.storeGapsInEventLogEnabled ? gap : undefined,
                 },
                 userError: result.userError,
               });

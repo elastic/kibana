@@ -20,7 +20,6 @@ import type { RuleUpdateProps } from '../../../../../../../common/api/detection_
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { getRuleByIdOrRuleId } from './get_rule_by_id_or_rule_id';
 import { convertAlertingRuleToRuleResponse } from '../converters/convert_alerting_rule_to_rule_response';
-import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 
 interface UpdateRuleArguments {
   actionsClient: ActionsClient;
@@ -28,7 +27,6 @@ interface UpdateRuleArguments {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   ruleUpdate: RuleUpdateProps;
   mlAuthz: MlAuthz;
-  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
 export const updateRule = async ({
@@ -37,7 +35,6 @@ export const updateRule = async ({
   prebuiltRuleAssetClient,
   ruleUpdate,
   mlAuthz,
-  ruleCustomizationStatus,
 }: UpdateRuleArguments): Promise<RuleResponse> => {
   const { rule_id: ruleId, id } = ruleUpdate;
 
@@ -60,7 +57,6 @@ export const updateRule = async ({
     prebuiltRuleAssetClient,
     existingRule,
     ruleUpdate,
-    ruleCustomizationStatus,
   });
 
   const updatedRule = await rulesClient.update({

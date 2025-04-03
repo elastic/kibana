@@ -138,6 +138,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
         <EuiCodeBlock isCopyable paddingSize="s">
           {`{
   "id": "a_unique_human_readable_id",
+  "title": "Title of item",
   "text": "Contents of item",
 }
 `}
@@ -158,6 +159,7 @@ export function KnowledgeBaseBulkImportFlyout({ onClose }: { onClose: () => void
             { defaultMessage: 'Select or drag and drop a .ndjson file' }
           )}
           onChange={onChange}
+          accept=".ndjson"
         />
       </EuiFlyoutBody>
 

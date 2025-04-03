@@ -24,7 +24,8 @@ import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { defaultAlertsTableSort } from '@kbn/response-ops-alerts-table/configuration';
 import { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
-import { AlertActionsCell } from './alert_actions_cell';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
+import { AlertActionsCell } from '@kbn/response-ops-alerts-table/components/alert_actions_cell';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
@@ -42,7 +43,6 @@ import {
   createMatchPhraseFilter,
   createRuleTypesFilter,
 } from '../../../lib/search_filters';
-import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { nonNullable } from '../../../../../common/utils';
 import {
   RuleTypeIdsByFeatureId,
@@ -76,12 +76,14 @@ const PageContentWrapperComponent: React.FC = () => {
   const {
     chrome: { docTitle },
     setBreadcrumbs,
+    http,
+    notifications: { toasts },
   } = useKibana().services;
 
   const {
-    ruleTypesState: { data: ruleTypesIndex, initialLoad: isInitialLoadingRuleTypes },
+    ruleTypesState: { data: ruleTypesIndex, isInitialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
-  } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
+  } = useGetRuleTypesPermissions({ http, toasts, filteredRuleTypes: [] });
 
   const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
 

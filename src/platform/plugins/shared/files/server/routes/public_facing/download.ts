@@ -74,8 +74,17 @@ export function register(router: FilesRouter) {
       path: FILES_API_ROUTES.public.download,
       validate: { ...rt },
       options: {
-        authRequired: false,
         access: 'public',
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is public and does not require user authentication',
+        },
+        authc: {
+          enabled: false,
+          reason: 'This route is public and does not require user authentication',
+        },
       },
     },
     handler

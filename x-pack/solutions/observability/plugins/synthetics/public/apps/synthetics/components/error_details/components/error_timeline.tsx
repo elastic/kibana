@@ -26,7 +26,7 @@ export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
         from: moment(startedAt)
           .subtract(diff / 2, 'minutes')
           .toISOString(),
-        to: moment(lastTestRun.timestamp)
+        to: moment(lastTestRun['@timestamp'])
           .add(diff / 2, 'minutes')
           .toISOString(),
       }}

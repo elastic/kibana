@@ -12,7 +12,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { buildTimeRangeFilter } from '../../utils/build_events_query';
 import type {
-  RuleServices,
+  SecurityRuleServices,
   SecuritySharedParams,
   SearchAfterAndBulkCreateReturnType,
 } from '../../types';
@@ -34,10 +34,9 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../../com
 import { bulkCreateUnsuppressedAlerts } from './bulk_create_unsuppressed_alerts';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../../common/detection_engine/constants';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { createEnrichEventsFunction } from '../../utils/enrichments';
 import { getNumberOfSuppressedAlerts } from '../../utils/get_number_of_suppressed_alerts';
 import * as i18n from '../../translations';
+import { bulkCreate } from '../../factories';
 
 export interface BucketHistory {
   key: Record<string, string | number | null>;
@@ -46,13 +45,12 @@ export interface BucketHistory {
 
 export interface GroupAndBulkCreateParams {
   sharedParams: SecuritySharedParams<UnifiedQueryRuleParams>;
-  services: RuleServices;
+  services: SecurityRuleServices;
   filter: estypes.QueryDslQueryContainer;
   buildReasonMessage: BuildReasonMessage;
   bucketHistory?: BucketHistory[];
   groupByFields: string[];
   eventsTelemetry: ITelemetryEventsSender | undefined;
-  experimentalFeatures: ExperimentalFeatures;
   isLoggedRequestsEnabled: boolean;
 }
 
@@ -132,7 +130,6 @@ export const groupAndBulkCreate = async ({
   bucketHistory,
   groupByFields,
   eventsTelemetry,
-  experimentalFeatures,
   isLoggedRequestsEnabled,
 }: GroupAndBulkCreateParams): Promise<GroupAndBulkCreateReturnType> => {
   return withSecuritySpan('groupAndBulkCreate', async () => {
@@ -149,7 +146,6 @@ export const groupAndBulkCreate = async ({
       searchAfterTimes: [],
       enrichmentTimes: [],
       bulkCreateTimes: [],
-      lastLookBackDate: null,
       createdSignalsCount: 0,
       createdSignals: [],
       errors: [],
@@ -267,16 +263,9 @@ export const groupAndBulkCreate = async ({
       }));
 
       const wrappedAlerts = wrapSuppressedAlerts({
+        sharedParams,
         suppressionBuckets,
-        spaceId: sharedParams.spaceId,
-        completeRule: sharedParams.completeRule,
-        mergeStrategy: sharedParams.mergeStrategy,
-        indicesToQuery: sharedParams.inputIndex,
-        publicBaseUrl: sharedParams.publicBaseUrl,
         buildReasonMessage,
-        alertTimestampOverride: sharedParams.alertTimestampOverride,
-        ruleExecutionLogger: sharedParams.ruleExecutionLogger,
-        intendedTimestamp: sharedParams.intendedTimestamp,
       });
 
       const suppressionDuration = sharedParams.completeRule.ruleParams.alertSuppression?.duration;
@@ -288,7 +277,6 @@ export const groupAndBulkCreate = async ({
           wrappedDocs: wrappedAlerts,
           services,
           suppressionWindow,
-          experimentalFeatures,
           ruleType: 'query',
         });
         addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
@@ -296,14 +284,11 @@ export const groupAndBulkCreate = async ({
           `created ${bulkCreateResult.createdItemsCount} signals`
         );
       } else {
-        const bulkCreateResult = await sharedParams.bulkCreate(
+        const bulkCreateResult = await bulkCreate({
+          services,
+          sharedParams,
           wrappedAlerts,
-          undefined,
-          createEnrichEventsFunction({
-            services,
-            logger: sharedParams.ruleExecutionLogger,
-          })
-        );
+        });
         addToSearchAfterReturn({
           current: toReturn,
           next: {

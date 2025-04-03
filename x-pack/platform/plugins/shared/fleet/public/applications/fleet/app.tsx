@@ -60,7 +60,7 @@ import { EnrollmentTokenListPage } from './sections/agents/enrollment_token_list
 import { UninstallTokenListPage } from './sections/agents/uninstall_token_list_page';
 import { SettingsApp } from './sections/settings';
 import { DebugPage } from './sections/debug';
-import { ErrorLayout, PermissionsError } from './layouts';
+import { ErrorLayout, PermissionsError } from '../../layouts/error';
 
 const FEEDBACK_URL = 'https://ela.st/fleet-feedback';
 
@@ -76,6 +76,8 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
     authz.fleet.readAgents ||
     authz.fleet.readAgentPolicies ||
     authz.fleet.readSettings;
+
+  const hasIntegrationsCreateOrUpdatePrivileges = authz.integrations.all;
 
   const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
   const [permissionsError, setPermissionsError] = useState<string>();
@@ -111,6 +113,9 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
             if (!hasAnyFleetReadPrivileges) {
               setPermissionsError('MISSING_PRIVILEGES');
             }
+            if (!hasIntegrationsCreateOrUpdatePrivileges && isAddIntegrationsPath) {
+              setPermissionsError('MISSING_PRIVILEGES');
+            }
           } catch (err) {
             setInitializationError(err);
           }
@@ -122,12 +127,21 @@ export const WithPermissionsAndSetup = memo<{ children?: React.ReactNode }>(({ c
         setPermissionsError('REQUEST_ERROR');
       }
     })();
-  }, [notifications.toasts, hasAnyFleetReadPrivileges]);
+  }, [
+    notifications.toasts,
+    hasAnyFleetReadPrivileges,
+    hasIntegrationsCreateOrUpdatePrivileges,
+    isAddIntegrationsPath,
+  ]);
 
   if (isPermissionsLoading || permissionsError) {
     return (
       <ErrorLayout isAddIntegrationsPath={isAddIntegrationsPath}>
-        {isPermissionsLoading ? <Loading /> : <PermissionsError error={permissionsError!} />}
+        {isPermissionsLoading ? (
+          <Loading />
+        ) : (
+          <PermissionsError callingApplication="Fleet" error={permissionsError!} />
+        )}
       </ErrorLayout>
     );
   }
@@ -322,7 +336,11 @@ export const AppRoutes = memo(
             ) : (
               <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
                 <ErrorLayout isAddIntegrationsPath={false}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents Read" />
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Agents Read"
+                  />
                 </ErrorLayout>
               </AppLayout>
             )}
@@ -340,6 +358,7 @@ export const AppRoutes = memo(
               <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
                 <ErrorLayout isAddIntegrationsPath={false}>
                   <PermissionsError
+                    callingApplication="Fleet"
                     error="MISSING_PRIVILEGES"
                     requiredFleetRole="Agent policies Read"
                   />
@@ -356,7 +375,11 @@ export const AppRoutes = memo(
             ) : (
               <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
                 <ErrorLayout isAddIntegrationsPath={false}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Agents All"
+                  />
                 </ErrorLayout>
               </AppLayout>
             )}
@@ -369,7 +392,11 @@ export const AppRoutes = memo(
             ) : (
               <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
                 <ErrorLayout isAddIntegrationsPath={false}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Agents All" />
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Agents All"
+                  />
                 </ErrorLayout>
               </AppLayout>
             )}
@@ -391,7 +418,11 @@ export const AppRoutes = memo(
             ) : (
               <ErrorLayout isAddIntegrationsPath={false}>
                 <AppLayout setHeaderActionMenu={setHeaderActionMenu}>
-                  <PermissionsError error="MISSING_PRIVILEGES" requiredFleetRole="Settings Read" />
+                  <PermissionsError
+                    callingApplication="Fleet"
+                    error="MISSING_PRIVILEGES"
+                    requiredFleetRole="Settings Read"
+                  />
                 </AppLayout>
               </ErrorLayout>
             )}

@@ -53,6 +53,7 @@ export {
   profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
   apmEnableServiceInventoryTableSearchBar,
+  apmEnableServiceMapApiV2,
   profilingFetchTopNFunctionsFromStacktraces,
 } from './ui_settings_keys';
 
@@ -81,6 +82,7 @@ export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCAT
 export const syntheticsMonitorLocationQueryLocatorID =
   'SYNTHETICS_MONITOR_GROUP_BY_LOCATION_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
+export const syntheticsAddMonitorLocatorID = 'SYNTHETICS_ADD_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const alertsLocatorID = 'ALERTS_LOCATOR';
 export const ruleDetailsLocatorID = 'RULE_DETAILS_LOCATOR';
