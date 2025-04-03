@@ -6,6 +6,9 @@
  */
 
 import type { ExceptionsListPreExportServerExtension } from '@kbn/lists-plugin/server';
+import { EndpointArtifactExceptionValidationError } from '../validators/errors';
+import { stringify } from '../../../endpoint/utils/stringify';
+import { buildSpaceDataFilter } from '../utils';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import {
   BlocklistValidator,
@@ -18,6 +21,8 @@ import {
 export const getExceptionsPreExportHandler = (
   endpointAppContextService: EndpointAppContextService
 ): ExceptionsListPreExportServerExtension['callback'] => {
+  const logger = endpointAppContextService.createLogger('listsExceptionsPreExportHandler');
+
   return async function ({ data, context: { request, exceptionListClient } }) {
     if (data.namespaceType !== 'agnostic') {
       return data;
@@ -73,7 +78,16 @@ export const getExceptionsPreExportHandler = (
       isEndpointArtifact &&
       endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
     ) {
-      // TODO:PT implement once PR #216722 merges (it refactors the filter utility)
+      if (!request) {
+        throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);
+      }
+
+      const spaceDataFilter = (await buildSpaceDataFilter(endpointAppContextService, request))
+        .filter;
+
+      data.filter = spaceDataFilter + (data.filter ? ` AND (${data.filter})` : '');
+
+      logger.debug(`Export request after adding space filter:\n${stringify(data)}`);
     }
 
     return data;
