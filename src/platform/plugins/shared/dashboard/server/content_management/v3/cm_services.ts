@@ -33,6 +33,7 @@ import {
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../../common/content_management';
 import { getResultV3ToV2 } from './transform_utils';
+import { sectionSchema } from '../../dashboard_saved_object/schema/v2/v2';
 
 const apiError = schema.object({
   error: schema.string(),
@@ -306,29 +307,6 @@ export const panelSchema = schema.object({
     })
   ),
 });
-
-export const sectionSchema = schema.arrayOf(
-  schema.object({
-    id: schema.maybe(
-      schema.string({
-        meta: { description: 'The unique ID of the section.' },
-      })
-    ),
-    order: schema.number({
-      min: 1,
-      meta: {
-        description:
-          'The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.',
-      },
-    }),
-    title: schema.string({
-      meta: { description: 'The title of the section.' },
-    }),
-    collapsed: schema.boolean({
-      meta: { description: 'The collapsed state of the section.' },
-    }),
-  })
-);
 
 export const optionsSchema = schema.object({
   hidePanelTitles: schema.boolean({
