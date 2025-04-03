@@ -34,7 +34,6 @@ import { DatasetFilter } from './filter_dataset';
 import { LogLevelFilter } from './filter_log_level';
 import { LogQueryBar } from './query_bar';
 import { buildQuery } from './build_query';
-import { SelectLogLevel } from './select_log_level';
 import { ViewLogsButton, getFormattedRange } from './view_logs_button';
 
 const WrapperFlexGroup = styled(EuiFlexGroup)`
