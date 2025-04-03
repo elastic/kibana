@@ -72,8 +72,6 @@ export function EnvironmentSelect({
 
   const options: Array<EuiComboBoxOptionOption<string>> = [...getEnvironmentOptions(environments)];
 
-  const onSearch = useMemo(() => setSearchValue, []);
-
   return (
     <EuiFormRow
       error={i18n.translate('xpack.apm.filter.environment.error', {
@@ -99,7 +97,7 @@ export function EnvironmentSelect({
         options={options}
         selectedOptions={selectedOptions}
         onChange={(changedOptions) => onSelect(changedOptions)}
-        onSearchChange={onSearch}
+        onSearchChange={setSearchValue}
         isLoading={status === FETCH_STATUS.LOADING}
       />
     </EuiFormRow>
