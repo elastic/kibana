@@ -16,6 +16,7 @@ import { aggFunctionDefinitions } from '../../definitions/generated/aggregation_
 import { timeUnitsToSuggest } from '../../definitions/literals';
 import {
   FunctionDefinitionTypes,
+  Location,
   getLocationFromCommandOrOptionName,
 } from '../../definitions/types';
 import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
@@ -135,7 +136,7 @@ export const policies = [
  * @returns
  */
 export function getFunctionSignaturesByReturnType(
-  command: string | string[],
+  location: Location | Location[],
   _expectedReturnType: Readonly<FunctionReturnType | 'any' | Array<FunctionReturnType | 'any'>>,
   {
     agg,
@@ -177,7 +178,7 @@ export function getFunctionSignaturesByReturnType(
 
   const deduped = Array.from(new Set(list));
 
-  const commands = Array.isArray(command) ? command : [command];
+  const locations = Array.isArray(location) ? location : [location];
 
   return deduped
     .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
@@ -185,8 +186,8 @@ export function getFunctionSignaturesByReturnType(
         return false;
       }
       if (
-        !(option ? [...commands, option] : commands).some((name) =>
-          locationsAvailable.includes(getLocationFromCommandOrOptionName(name))
+        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+          (loc) => locationsAvailable.includes(loc)
         )
       ) {
         return false;
@@ -336,6 +337,11 @@ export type AssertSuggestionsFn = (
   expected: Array<string | PartialSuggestionWithText>,
   opts?: SuggestOptions
 ) => Promise<void>;
+
+export type SuggestFn = (
+  query: string,
+  opts?: SuggestOptions
+) => Promise<SuggestionRawDefinition[]>;
 
 export const setup = async (caret = '/') => {
   if (caret.length !== 1) {

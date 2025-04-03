@@ -19,8 +19,9 @@ import {
   setup,
 } from './helpers';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../shared/constants';
+import { Location } from '../../definitions/types';
 
-const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
+const allEvalFns = getFunctionSignaturesByReturnType(Location.WHERE, 'any', {
   scalar: true,
 });
 
@@ -60,7 +61,7 @@ describe('WHERE <expression>', () => {
       await assertSuggestions('from a | where keywordField /', [
         // all functions compatible with a keywordField type
         ...getFunctionSignaturesByReturnType(
-          'where',
+          Location.WHERE,
           'boolean',
           {
             operators: true,
@@ -78,7 +79,9 @@ describe('WHERE <expression>', () => {
         ...getDateLiterals(),
         ...getFieldNamesByType(['date']),
         ...getFieldNamesByType(['date_nanos']),
-        ...getFunctionSignaturesByReturnType('where', ['date', 'date_nanos'], { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.WHERE, ['date', 'date_nanos'], {
+          scalar: true,
+        }),
       ];
       await assertSuggestions(
         'from a | where dateField == /',
@@ -101,7 +104,7 @@ describe('WHERE <expression>', () => {
 
       const expectedComparisonWithTextFieldSuggestions = [
         ...getFieldNamesByType(['text', 'keyword', 'ip', 'version']),
-        ...getFunctionSignaturesByReturnType('where', ['text', 'keyword', 'ip', 'version'], {
+        ...getFunctionSignaturesByReturnType(Location.WHERE, ['text', 'keyword', 'ip', 'version'], {
           scalar: true,
         }),
       ];
@@ -122,16 +125,18 @@ describe('WHERE <expression>', () => {
       for (const op of ['and', 'or']) {
         await assertSuggestions(`from a | where keywordField >= keywordField ${op} /`, [
           ...getFieldNamesByType('any'),
-          ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
         ]);
         await assertSuggestions(`from a | where keywordField >= keywordField ${op} doubleField /`, [
-          ...getFunctionSignaturesByReturnType('where', 'boolean', { operators: true }, ['double']),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', { operators: true }, [
+            'double',
+          ]),
         ]);
         await assertSuggestions(
           `from a | where keywordField >= keywordField ${op} doubleField == /`,
           [
             ...getFieldNamesByType(ESQL_COMMON_NUMERIC_TYPES),
-            ...getFunctionSignaturesByReturnType('where', ESQL_COMMON_NUMERIC_TYPES, {
+            ...getFunctionSignaturesByReturnType(Location.WHERE, ESQL_COMMON_NUMERIC_TYPES, {
               scalar: true,
             }),
           ]
@@ -162,7 +167,7 @@ describe('WHERE <expression>', () => {
 
       await assertSuggestions('from a | stats a=avg(doubleField) | where a /', [
         ...getFunctionSignaturesByReturnType(
-          'where',
+          Location.WHERE,
           'any',
           { operators: true, skipAssign: true },
           ['double']
@@ -189,7 +194,7 @@ describe('WHERE <expression>', () => {
         [
           ...getFieldNamesByType(log10ParameterTypes),
           ...getFunctionSignaturesByReturnType(
-            'where',
+            Location.WHERE,
             log10ParameterTypes,
             { scalar: true },
             undefined,
@@ -203,7 +208,7 @@ describe('WHERE <expression>', () => {
         [
           ...getFieldNamesByType(powParameterTypes),
           ...getFunctionSignaturesByReturnType(
-            'where',
+            Location.WHERE,
             powParameterTypes,
             { scalar: true },
             undefined,
@@ -218,8 +223,12 @@ describe('WHERE <expression>', () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('from a | where log10(doubleField) /', [
-        ...getFunctionSignaturesByReturnType('where', 'double', { operators: true }, ['double']),
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { operators: true }, ['double']),
+        ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { operators: true }, [
+          'double',
+        ]),
+        ...getFunctionSignaturesByReturnType(Location.WHERE, 'boolean', { operators: true }, [
+          'double',
+        ]),
       ]);
     });
 
@@ -237,13 +246,17 @@ describe('WHERE <expression>', () => {
       ]);
       await assertSuggestions('from index | WHERE not /', [
         ...getFieldNamesByType('boolean').map((name) => attachTriggerCommand(`${name} `)),
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { scalar: true }, undefined, [
-          ':',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          Location.WHERE,
+          'boolean',
+          { scalar: true },
+          undefined,
+          [':']
+        ),
       ]);
       await assertSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") /', [
         ...getFunctionSignaturesByReturnType(
-          'where',
+          Location.WHERE,
           'boolean',
           { operators: true },
           ['boolean'],
@@ -283,7 +296,7 @@ describe('WHERE <expression>', () => {
         'from index | WHERE doubleField not in (/)',
         [
           ...getFieldNamesByType('double').filter((name) => name !== 'doubleField'),
-          ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }),
+          ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
         ],
         { triggerCharacter: '(' }
       );
@@ -291,30 +304,22 @@ describe('WHERE <expression>', () => {
         ...getFieldNamesByType('double').filter(
           (name) => name !== '`any#Char$Field`' && name !== 'doubleField'
         ),
-        ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
       ]);
       await assertSuggestions('from index | WHERE doubleField not in ( `any#Char$Field`, /)', [
         ...getFieldNamesByType('double').filter(
           (name) => name !== '`any#Char$Field`' && name !== 'doubleField'
         ),
-        ...getFunctionSignaturesByReturnType('where', 'double', { scalar: true }),
+        ...getFunctionSignaturesByReturnType(Location.WHERE, 'double', { scalar: true }),
       ]);
     });
 
     test('suggestions after IS (NOT) NULL', async () => {
       const { assertSuggestions } = await setup();
 
-      await assertSuggestions('FROM index | WHERE tags.keyword IS NULL /', [
-        'AND $0',
-        'OR $0',
-        '| ',
-      ]);
+      await assertSuggestions('FROM index | WHERE tags.keyword IS NULL /', ['AND $0', 'OR $0']);
 
-      await assertSuggestions('FROM index | WHERE tags.keyword IS NOT NULL /', [
-        'AND $0',
-        'OR $0',
-        '| ',
-      ]);
+      await assertSuggestions('FROM index | WHERE tags.keyword IS NOT NULL /', ['AND $0', 'OR $0']);
     });
 
     test('suggestions after an arithmetic expression', async () => {
@@ -322,7 +327,7 @@ describe('WHERE <expression>', () => {
 
       await assertSuggestions('FROM index | WHERE doubleField + doubleField /', [
         ...getFunctionSignaturesByReturnType(
-          'where',
+          Location.WHERE,
           'any',
           { operators: true, skipAssign: true },
           ['double'],
