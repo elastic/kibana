@@ -88,7 +88,6 @@ export const createThreatSignals = async ({
     enrichmentTimes: [],
     bulkCreateTimes: [],
     searchAfterTimes: [],
-    lastLookBackDate: null,
     createdSignalsCount: 0,
     suppressedAlertsCount: 0,
     createdSignals: [],
