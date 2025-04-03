@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { useFieldArray, Controller } from 'react-hook-form';
 import {
   EuiTextArea,
+  EuiComboBox,
   EuiFormRow,
   EuiDescribedFormGroup,
   EuiFieldText,
@@ -26,6 +28,8 @@ import type { IndexSourceDefinition } from '@kbn/wci-common';
 import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 import type { WCIIndexSourceFilterField, WCIIndexSourceContextField } from '../../common/types';
 import { useGenerateSchema } from '../hooks/use_generate_schema';
+import type { SearchIndicesResponse } from '../../common/http_api/configuration';
+import { useIndexNameAutocomplete } from '../hooks/use_index_name_autocomplete';
 
 export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
   form,
@@ -35,6 +39,12 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     control,
     name: 'configuration.fields.filterFields',
   });
+  const [query, setQuery] = useState<{
+    searchValue: string;
+  }>();
+  const [options, setOptions] = useState([] as string[]);
+  
+  let searchTimeout;
 
   const contextFieldsArray = useFieldArray({
     control,
@@ -50,6 +60,32 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   ];
 
   const { generateSchema } = useGenerateSchema();
+  const { isLoading, data } = useIndexNameAutocomplete();
+
+  const [selectedOption, setSelected] = useState([]);
+
+  const onChange = (selectedOption) => {
+    setSelected(selectedOption);
+  };
+
+  const onSearchChange = (searchValue: string) => {
+    console.log(`onSearchChange with ${searchValue}`);
+    let result: string[] = [];
+    setOptions(result);
+
+    if (data) {
+      data({ indexName: searchValue}).then(
+        (indexNames: string[]) => {
+          console.log("Got response");
+          if (indexNames) { 
+            console.log("Setting index names");
+            console.log(indexNames);
+            setOptions(indexNames);
+          }
+        }
+      )
+    }
+  };
 
   const onSchemaGenerated = useCallback(
     (definition: IndexSourceDefinition) => {
@@ -116,21 +152,14 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             name="configuration.index"
             control={control}
             render={({ field }) => (
-              <EuiFieldText
-                data-test-subj="workchatAppIntegrationEditViewIndex"
-                placeholder="Enter index name"
-                {...field}
-                append={
-                  <EuiButtonEmpty
-                    size="xs"
-                    iconType="gear"
-                    onClick={() => {
-                      generateSchema({ indexName: field.value }, { onSuccess: onSchemaGenerated });
-                    }}
-                  >
-                    Generate configuration
-                  </EuiButtonEmpty>
-                }
+              <EuiComboBox
+                placeholder="Select an index"
+                isLoading={isLoading}
+                selectedOptions={selectedOption}
+                singleSelection={{ asPlainText: true }}
+                options={options.map((option) => ({ label: option, key: option }))}
+                onChange={onChange}
+                onSearchChange={onSearchChange}
               />
             )}
           />

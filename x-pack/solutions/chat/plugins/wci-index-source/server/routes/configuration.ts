@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { apiCapabilities } from '@kbn/workchat-app/common/features';
 import { buildSchema } from '@kbn/wc-index-schema-builder';
 import { getConnectorList, getDefaultConnector } from '@kbn/wc-genai-utils';
-import type { GenerateConfigurationResponse } from '../../common/http_api/configuration';
+import type { GenerateConfigurationResponse, SearchIndicesResponse } from '../../common/http_api/configuration';
 import type { RouteDependencies } from './types';
 
 export const registerConfigurationRoutes = ({ router, core, logger }: RouteDependencies) => {
@@ -61,4 +61,43 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
       }
     }
   );
+
+  router.get(
+    {
+      path: '/internal/wci-index-source/indices-autocomplete/{query}',
+      security: {
+        authz: {
+          requiredPrivileges: [apiCapabilities.manageWorkchat],
+        },
+      },
+      validate: {
+        params: schema.object({
+          query: schema.maybe(schema.string())
+        })
+      }
+    },
+    async (ctx, request, res) => {
+      try {
+        const { elasticsearch } = await ctx.core;
+        const pattern  = request.params.query;
+
+        const esClient = elasticsearch.client.asCurrentUser
+
+        const response = await esClient.cat.indices({
+          index: [`${pattern}*`],
+          h: 'index',
+          format: 'json'
+        });
+
+        return res.ok<SearchIndicesResponse>({
+          body: {
+            indexNames: response.map(indexRecord => indexRecord.index).filter(index => !!index) as string[]
+          },
+        });
+      } catch (e) {
+        logger.error(e);
+        throw e;
+      }
+    }
+  )
 };
