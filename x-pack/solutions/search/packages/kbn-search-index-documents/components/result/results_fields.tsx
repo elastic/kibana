@@ -27,31 +27,34 @@ export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }
         values: { documentId },
       })}
     >
-      <EuiTableHeader>
-        <EuiTableHeaderCell width="20%">
-          {i18n.translate('searchIndexDocuments.resultFields.fieldTypeHeaderLabel', {
-            defaultMessage: 'Field',
-          })}
-        </EuiTableHeaderCell>
-        <EuiTableHeaderCell>
-          {i18n.translate('searchIndexDocuments.resultFields.contentstableHeaderLabel', {
-            defaultMessage: 'Contents',
-          })}
-        </EuiTableHeaderCell>
-      </EuiTableHeader>
-
-      <EuiTableBody>
-        {fields.map((field) => (
-          <ResultField
-            isExpanded={isExpanded}
-            iconType={field.iconType}
-            fieldName={field.fieldName}
-            fieldValue={field.fieldValue}
-            fieldType={field.fieldType}
-            key={field.fieldName}
-          />
-        ))}
-      </EuiTableBody>
+      {fields.length > 0 && (
+        <>
+          <EuiTableHeader>
+            <EuiTableHeaderCell width="20%">
+              {i18n.translate('searchIndexDocuments.resultFields.fieldTypeHeaderLabel', {
+                defaultMessage: 'Field',
+              })}
+            </EuiTableHeaderCell>
+            <EuiTableHeaderCell>
+              {i18n.translate('searchIndexDocuments.resultFields.contentstableHeaderLabel', {
+                defaultMessage: 'Contents',
+              })}
+            </EuiTableHeaderCell>
+          </EuiTableHeader>
+          <EuiTableBody>
+            {fields.map((field) => (
+              <ResultField
+                isExpanded={isExpanded}
+                iconType={field.iconType}
+                fieldName={field.fieldName}
+                fieldValue={field.fieldValue}
+                fieldType={field.fieldType}
+                key={field.fieldName}
+              />
+            ))}
+          </EuiTableBody>
+        </>
+      )}
     </EuiTable>
   );
 };
