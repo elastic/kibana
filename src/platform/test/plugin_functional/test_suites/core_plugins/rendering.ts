@@ -260,6 +260,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean?)',
         'xpack.fleet.agents.enabled (boolean?)',
         'xpack.fleet.agentless.enabled (boolean?)',
+        'xpack.fleet.agentless.isDefault (boolean?)',
         'xpack.fleet.enableExperimental (array?)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number?)',
         'xpack.fleet.internal.fleetServerStandalone (boolean?)',
