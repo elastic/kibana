@@ -24,7 +24,18 @@ import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { PopoverItems } from '../../../../common/components/popover_items';
 import { COLUMN_TAGS } from '../../../../detection_engine/common/translations';
 
-export const renderGroupPanel: GroupPanelRenderer<AlertsGroupingAggregation> = (
+/**
+ * Returns renderers to be used in the `buttonContent` property of the EuiAccordion component used within the kbn-grouping package.
+ * It handles custom renders for the following fields:
+ * - kibana.alert.rule.name
+ * - host.name
+ * - user.name
+ * - source.ip
+ * For all the other fields the default renderer managed within the kbn-grouping package will be used.
+ *
+ * This go hand in hand with defaultGroupingOptions and defaultGroupStatsRenderer and defaultGroupStatsAggregations.
+ */
+export const defaultGroupTitleRenderers: GroupPanelRenderer<AlertsGroupingAggregation> = (
   selectedGroup,
   bucket,
   nullGroupMessage
