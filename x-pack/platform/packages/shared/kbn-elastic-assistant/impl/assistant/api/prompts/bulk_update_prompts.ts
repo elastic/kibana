@@ -56,5 +56,6 @@ export const bulkUpdatePrompts = async (
         },
       }),
     });
+    return { success: false };
   }
 };
