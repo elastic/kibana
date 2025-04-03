@@ -30,11 +30,12 @@ import type { FileUploadManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
-import { IndexInput } from './index_input';
+
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
 import { useFileUpload } from './use_file_upload';
 import { UploadImage } from './upload_image';
+import { IndexSelection } from './index_selection';
 
 interface Props {
   fileUploadManager: FileUploadManager;
@@ -57,6 +58,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
     uploadInProgress,
     onImportClick,
     canImport,
+    indices,
   } = useFileUpload(fileUploadManager, onUploadComplete);
 
   const existingIndexName = fileUploadManager.getExistingIndexName();
@@ -164,10 +166,11 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
           uploadStatus.analysisStatus !== STATUS.NOT_STARTED ? (
             <>
               {fileUploadManager.isExistingIndexUpload() === false ? (
-                <IndexInput
+                <IndexSelection
                   setIndexName={setIndexName}
                   setIndexValidationStatus={setIndexValidationStatus}
                   initialIndexName={initialIndexName}
+                  indices={indices}
                 />
               ) : null}
             </>

@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
+import type { HttpSetup } from '@kbn/core/public';
 import type { ResultLinks } from '../../common/app';
 import {
   ResultsLinks,
@@ -20,14 +21,15 @@ import type { FileUploadManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
-import { IndexInput } from './index_input';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
 import { useFileUpload } from './use_file_upload';
 import { AdvancedSection } from './advanced_section';
 import { UploadImage } from './upload_image';
+import { IndexSelection } from './index_selection';
 
 interface Props {
+  http: HttpSetup;
   fileUploadManager: FileUploadManager;
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
@@ -36,7 +38,7 @@ interface Props {
   onClose?: () => void;
 }
 
-export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset }) => {
+export const FileUploadView: FC<Props> = ({ http, fileUploadManager, onClose, reset }) => {
   const {
     indexName,
     setIndexName,
@@ -55,7 +57,12 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
     dataViewName,
     setDataViewName,
     dataViewNameError,
-  } = useFileUpload(fileUploadManager);
+    indexCreateMode,
+    setIndexCreateMode,
+    indices,
+    existingIndexName,
+    setExistingIndexName,
+  } = useFileUpload(fileUploadManager, undefined, http);
 
   const showImportControls =
     uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
@@ -132,13 +139,20 @@ export const FileUploadView: FC<Props> = ({ fileUploadManager, onClose, reset })
               dataViewNameError={dataViewNameError}
               results={2}
               filesStatus={filesStatus}
+              indexCreateMode={indexCreateMode}
             />
 
             <EuiSpacer />
 
-            <IndexInput
+            <IndexSelection
               setIndexName={setIndexName}
               setIndexValidationStatus={setIndexValidationStatus}
+              initialIndexName={indexName}
+              indexCreateMode={indexCreateMode}
+              setIndexCreateMode={setIndexCreateMode}
+              indices={indices}
+              existingIndexName={existingIndexName}
+              setExistingIndexName={setExistingIndexName}
             />
           </>
         ) : null}

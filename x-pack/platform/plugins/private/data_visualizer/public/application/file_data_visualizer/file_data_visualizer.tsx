@@ -65,10 +65,10 @@ export const FileDataVisualizer: FC<Props> = ({
         fileUpload,
         coreStart.http,
         data.dataViews,
-        existingIndex ?? null,
         autoAddInference ?? null,
         autoCreateDataView,
         true,
+        existingIndex ?? null,
         indexSettings
       )
     );
@@ -97,6 +97,7 @@ export const FileDataVisualizer: FC<Props> = ({
         <CloudContext>
           {mode === TEST_MODE.NEW ? (
             <FileUploadView
+              http={coreStart.http}
               fileUploadManager={fileUploadManager}
               getAdditionalLinks={getAdditionalLinks}
               resultLinks={resultLinks}

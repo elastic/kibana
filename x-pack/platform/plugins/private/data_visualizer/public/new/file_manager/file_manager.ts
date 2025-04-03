@@ -109,6 +109,8 @@ export class FileUploadManager {
     valid: false,
     count: 0,
   });
+  public readonly existingIndexName$ = new BehaviorSubject<string | null>(null);
+
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
@@ -137,19 +139,20 @@ export class FileUploadManager {
     private fileUpload: FileUploadStartApi,
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
-    private existingIndexName: string | null = null,
     private autoAddInferenceEndpointName: string | null = null,
     private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
+    existingIndexName: string | null = null,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined
   ) {
     // eslint-disable-next-line no-console
     console.log('FileUploadManager constructor');
+    this.setExistingIndexName(existingIndexName);
 
-    if (this.existingIndexName !== null) {
-      this.loadExistingIndexMappings();
-      this.autoCreateDataView = false;
-    }
+    // if (existingIndexName !== null) {
+    //   this.loadExistingIndexMappings();
+    //   this.autoCreateDataView = false;
+    // }
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.updateSettings(indexSettingsOverride ?? {});
@@ -160,9 +163,13 @@ export class FileUploadManager {
     ]).subscribe(([statuses, existingIndexMappings]) => {
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
       const isExistingMappingsReady =
-        this.existingIndexName === null || existingIndexMappings !== null;
+        this.getExistingIndexName() === null || existingIndexMappings !== null;
 
       if (allFilesAnalyzed && isExistingMappingsReady) {
+        this.setStatus({
+          analysisStatus: STATUS.STARTED,
+        });
+
         this.analysisValid$.next(true);
         const uploadStatus = this.uploadStatus$.getValue();
         if (uploadStatus.overallImportStatus === STATUS.STARTED) {
@@ -171,6 +178,7 @@ export class FileUploadManager {
         if (this.getFiles().length === 0) {
           this.setStatus({
             fileClashes: [],
+            analysisStatus: STATUS.NOT_STARTED,
           });
           return;
         }
@@ -282,11 +290,23 @@ export class FileUploadManager {
   }
 
   public getExistingIndexName() {
-    return this.existingIndexName;
+    return this.existingIndexName$.getValue();
+  }
+  public setExistingIndexName(name: string | null) {
+    this.setStatus({
+      analysisStatus: STATUS.NOT_STARTED,
+    });
+    this.existingIndexName$.next(name);
+    if (name === null) {
+      this.existingIndexMappings$.next(null);
+    } else {
+      this.loadExistingIndexMappings();
+      this.autoCreateDataView = false;
+    }
   }
 
   public isExistingIndexUpload() {
-    return this.existingIndexName !== null;
+    return this.getExistingIndexName() !== null;
   }
 
   public getFiles() {
@@ -664,12 +684,13 @@ export class FileUploadManager {
   }
 
   private async loadExistingIndexMappings() {
-    if (this.existingIndexName === null) {
+    const existingIndexName = this.getExistingIndexName();
+    if (existingIndexName === null) {
       return;
     }
     try {
       const { mappings } = await this.http.fetch<{ mappings: MappingTypeMapping }>(
-        `/api/index_management/mapping/${this.existingIndexName}`,
+        `/api/index_management/mapping/${existingIndexName}`,
         {
           method: 'GET',
           version: '1',

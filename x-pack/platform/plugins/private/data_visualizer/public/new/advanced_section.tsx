@@ -29,6 +29,7 @@ import { CreateDataViewToolTip } from '../application/file_data_visualizer/compo
 import type { CombinedField } from '../application/common/components/combined_fields';
 import { CombinedFieldsForm } from '../application/common/components/combined_fields';
 import type { FileAnalysis } from './file_manager/file_wrapper';
+import { UPLOAD_TYPE } from './use_file_upload';
 
 interface Props {
   mappings: MappingTypeMapping | null;
@@ -44,6 +45,7 @@ interface Props {
   dataViewNameError: string;
   results: any;
   filesStatus: FileAnalysis[];
+  indexCreateMode: UPLOAD_TYPE;
 }
 
 export const AdvancedSection: FC<Props> = ({
@@ -60,6 +62,7 @@ export const AdvancedSection: FC<Props> = ({
   dataViewNameError,
   results,
   filesStatus,
+  indexCreateMode,
 }) => {
   const [combinedFields, setCombinedFields] = useState<CombinedField[]>([]);
   return (
@@ -75,43 +78,47 @@ export const AdvancedSection: FC<Props> = ({
 
       <EuiSpacer />
 
-      <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
-        <EuiCheckbox
-          id="createDataView"
-          label={
-            <FormattedMessage
-              id="xpack.dataVisualizer.file.advancedImportSettings.createDataViewLabel"
-              defaultMessage="Create data view"
+      {indexCreateMode === UPLOAD_TYPE.NEW ? (
+        <>
+          <CreateDataViewToolTip showTooltip={canCreateDataView === false}>
+            <EuiCheckbox
+              id="createDataView"
+              label={
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.advancedImportSettings.createDataViewLabel"
+                  defaultMessage="Create data view"
+                />
+              }
+              checked={dataViewName === null ? false : true}
+              disabled={canCreateDataView === false}
+              onChange={(e) => setDataViewName(e.target.checked ? '' : null)}
             />
-          }
-          checked={dataViewName === null ? false : true}
-          disabled={canCreateDataView === false}
-          onChange={(e) => setDataViewName(e.target.checked ? '' : null)}
-        />
-      </CreateDataViewToolTip>
+          </CreateDataViewToolTip>
 
-      <EuiSpacer size="s" />
+          <EuiSpacer size="s" />
 
-      <EuiFormRow
-        label={
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameLabel"
-            defaultMessage="Data view name"
-          />
-        }
-        isInvalid={dataViewNameError !== ''}
-        error={[dataViewNameError]}
-      >
-        <EuiFieldText
-          disabled={dataViewName === null}
-          placeholder={dataViewName === null ? '' : indexName}
-          value={dataViewName ?? ''}
-          onChange={(e) => setDataViewName(e.target.value)}
-          isInvalid={dataViewNameError !== ''}
-        />
-      </EuiFormRow>
+          <EuiFormRow
+            label={
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.advancedImportSettings.dataViewNameLabel"
+                defaultMessage="Data view name"
+              />
+            }
+            isInvalid={dataViewNameError !== ''}
+            error={[dataViewNameError]}
+          >
+            <EuiFieldText
+              disabled={dataViewName === null}
+              placeholder={dataViewName === null ? '' : indexName}
+              value={dataViewName ?? ''}
+              onChange={(e) => setDataViewName(e.target.value)}
+              isInvalid={dataViewNameError !== ''}
+            />
+          </EuiFormRow>
 
-      <EuiSpacer />
+          <EuiSpacer />
+        </>
+      ) : null}
 
       <CombinedFieldsForm
         mappings={mappings!}

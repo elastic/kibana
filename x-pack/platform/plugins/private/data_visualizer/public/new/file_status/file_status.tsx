@@ -82,7 +82,8 @@ export const FileStatus: FC<Props> = ({
 
   const importStarted =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
-    uploadStatus.overallImportStatus === STATUS.COMPLETED;
+    uploadStatus.overallImportStatus === STATUS.COMPLETED ||
+    uploadStatus.overallImportStatus === STATUS.FAILED;
 
   const buttonCss = css`
     &:hover {
@@ -139,7 +140,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.SUMMARY}
                         onClick={() => setSelectedTab(TAB.SUMMARY)}
-                        data-test-subj="mlNodesOverviewPanelDetailsTab"
+                        data-test-subj="mlFileUploadFileStatusSummaryTab"
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.summaryTabTitle"
@@ -152,7 +153,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.STATS}
                         onClick={() => setSelectedTab(TAB.STATS)}
-                        data-test-subj="mlNodesOverviewPanelMemoryTab"
+                        data-test-subj="mlFileUploadFileStatusStatsTab"
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.statsTabTitle"
@@ -165,7 +166,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.CONTENT}
                         onClick={() => setSelectedTab(TAB.CONTENT)}
-                        data-test-subj="mlNodesOverviewPanelMemoryTab"
+                        data-test-subj="mlFileUploadFileStatusContentTab"
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
@@ -178,7 +179,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.EXPLANATION}
                         onClick={() => setSelectedTab(TAB.EXPLANATION)}
-                        data-test-subj="mlNodesOverviewPanelMemoryTab"
+                        data-test-subj="MLfileUploadFileStatusExplanationTab"
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.contentTabTitle"
@@ -191,7 +192,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.MAPPINGS}
                         onClick={() => setSelectedTab(TAB.MAPPINGS)}
-                        data-test-subj="mlNodesOverviewPanelMemoryTab"
+                        data-test-subj="mlFileUploadFileStatusMappingsTab"
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.mappingsTabTitle"
@@ -203,7 +204,7 @@ export const FileStatus: FC<Props> = ({
                       <EuiTab
                         isSelected={selectedTab === TAB.PIPELINE}
                         onClick={() => setSelectedTab(TAB.PIPELINE)}
-                        data-test-subj="mlNodesOverviewPanelMemoryTab"
+                        data-test-subj="mlFileUploadFileStatusPipelineTab"
                       >
                         <FormattedMessage
                           id="xpack.dataVisualizer.file.fileStatus.pipelineTabTitle"

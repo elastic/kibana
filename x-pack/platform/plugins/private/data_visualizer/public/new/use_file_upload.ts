@@ -9,14 +9,22 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
+import type { Index } from '@kbn/index-management-shared-types/src/types';
+import type { HttpSetup } from '@kbn/core/public';
 import type { FileUploadManager } from './file_manager/file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
 import { useDataVisualizerKibana } from '../application/kibana_context';
 
+export enum UPLOAD_TYPE {
+  NEW = 'new',
+  EXISTING = 'existing',
+}
+
 export function useFileUpload(
   fileUploadManager: FileUploadManager,
-  onUploadComplete?: (results: FileUploadResults | null) => void
+  onUploadComplete?: (results: FileUploadResults | null) => void,
+  http?: HttpSetup
 ) {
   const {
     services: {
@@ -26,6 +34,8 @@ export function useFileUpload(
   } = useDataVisualizerKibana();
 
   const [importResults, setImportResults] = useState<FileUploadResults | null>(null);
+  const [indexCreateMode, setIndexCreateMode] = useState<UPLOAD_TYPE>(UPLOAD_TYPE.NEW);
+  const [indices, setIndices] = useState<Index[]>([]);
 
   const [indexName, setIndexName] = useState<string>(
     fileUploadManager.getExistingIndexName() ?? ''
@@ -63,6 +73,16 @@ export function useFileUpload(
   );
 
   useEffect(() => {
+    if (http === undefined) {
+      return;
+    }
+
+    http.get<Index[]>('/api/index_management/indices').then((indx) => {
+      setIndices(indx.filter((i) => i.hidden === false && i.isFrozen === false));
+    });
+  }, [http, fileUploadManager]);
+
+  useEffect(() => {
     dataViews.getTitles().then((titles) => {
       setExistingDataViewNames(titles);
     });
@@ -89,8 +109,10 @@ export function useFileUpload(
     uploadStatus.overallImportStatus === STATUS.FAILED;
 
   const onImportClick = useCallback(() => {
+    const existingIndex = fileUploadManager.getExistingIndexName();
+    const index = existingIndex !== null ? existingIndex : indexName;
     const dv = dataViewName === '' ? undefined : dataViewName;
-    fileUploadManager.import(indexName, dv).then((res) => {
+    fileUploadManager.import(index, dv).then((res) => {
       if (onUploadComplete && res) {
         onUploadComplete(res);
       }
@@ -98,11 +120,16 @@ export function useFileUpload(
     });
   }, [dataViewName, fileUploadManager, indexName, onUploadComplete]);
 
+  const existingIndexName = useObservable(
+    fileUploadManager.existingIndexName$,
+    fileUploadManager.getExistingIndexName()
+  );
+
   const canImport = useMemo(() => {
     return (
       uploadStatus.analysisStatus === STATUS.COMPLETED &&
       indexValidationStatus === STATUS.COMPLETED &&
-      indexName !== '' &&
+      ((existingIndexName === null && indexName !== '') || existingIndexName !== null) &&
       uploadStatus.mappingsJsonValid === true &&
       uploadStatus.settingsJsonValid === true &&
       uploadStatus.pipelinesJsonValid === true &&
@@ -116,6 +143,7 @@ export function useFileUpload(
     uploadStatus.mappingsJsonValid,
     uploadStatus.pipelinesJsonValid,
     uploadStatus.settingsJsonValid,
+    existingIndexName,
   ]);
 
   const mappings = useObservable(
@@ -126,6 +154,18 @@ export function useFileUpload(
     fileUploadManager.settings$,
     fileUploadManager.settings$.getValue()
   );
+
+  const setExistingIndexName = useCallback(
+    (idxName: string | null) => {
+      fileUploadManager.setExistingIndexName(idxName);
+    },
+    [fileUploadManager]
+  );
+
+  useEffect(() => {
+    setIndexName('');
+    setExistingIndexName(null);
+  }, [indexCreateMode, setExistingIndexName]);
 
   const pipelines = useObservable(fileUploadManager.filePipelines$, []);
 
@@ -149,6 +189,11 @@ export function useFileUpload(
     dataViewName,
     setDataViewName,
     dataViewNameError,
+    indexCreateMode,
+    setIndexCreateMode,
+    indices,
+    existingIndexName,
+    setExistingIndexName,
   };
 }
 

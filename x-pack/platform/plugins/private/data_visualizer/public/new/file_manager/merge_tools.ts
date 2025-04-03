@@ -83,6 +83,12 @@ export function createMergedMappings(
 
   const fieldsPerFile = mappings.map((m) => getFieldsFromMappings(m as MappingTypeMapping));
 
+  if (existingIndexMappings !== null) {
+    // add the existing index mappings to the beginning of the fields array
+    // so the merged mappings contain the existing index mappings
+    fieldsPerFile.splice(0, 0, getFieldsFromMappings(existingIndexMappings as MappingTypeMapping));
+  }
+
   const mappingClashes: MappingClash[] = [];
 
   const mergedMappingsMap = fieldsPerFile.reduce((acc, fields, i) => {
@@ -116,6 +122,12 @@ export function createMergedMappings(
     });
     return acc;
   }, new Map<string, any>()); // remove any !!!!!!!!!!!!!!!!!!!!
+
+  if (existingIndexMappings !== null) {
+    // remove the existing index mappings from the fields array
+    // so the indices of fieldsPerFile match the files array
+    fieldsPerFile.splice(0, 1);
+  }
 
   const mergedMappings = {
     properties: Object.fromEntries(mergedMappingsMap),
