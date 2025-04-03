@@ -23,7 +23,7 @@ import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/u
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import type { TableSearchBar } from '../managed_table';
+import type { TableSearchBar, VisibleItemsStartEnd } from '../managed_table';
 import { ManagedTable } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
@@ -73,7 +73,7 @@ export function TransactionsTable({
   showSparkPlots,
 }: Props) {
   const { link } = useApmRouter();
-  const [renderedItems, setRenderedItems] = useState<readonly [number, number]>([0, 0]);
+  const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
 
   const {
     query,
@@ -104,7 +104,7 @@ export function TransactionsTable({
       serviceName,
       start,
       transactionType,
-      renderedItems,
+      renderedItemIndices,
     });
 
   useEffect(() => {
@@ -252,7 +252,7 @@ export function TransactionsTable({
             tableSearchBar={tableSearchBar}
             showPerPageOptions={showPerPageOptions}
             saveTableOptionsToUrl={saveTableOptionsToUrl}
-            onChangeItemIndices={setRenderedItems}
+            onChangeItemIndices={setRenderedItemIndices}
           />
         </OverviewTableContainer>
       </EuiFlexItem>
@@ -271,7 +271,7 @@ function useTableData({
   serviceName,
   start,
   transactionType,
-  renderedItems,
+  renderedItemIndices,
 }: {
   comparisonEnabled: boolean | undefined;
   end: string;
@@ -283,7 +283,7 @@ function useTableData({
   serviceName: string;
   start: string;
   transactionType: string | undefined;
-  renderedItems: readonly [number, number];
+  renderedItemIndices: VisibleItemsStartEnd;
 }) {
   const preferredDataSource = usePreferredDataSourceAndBucketSize({
     start,
@@ -341,11 +341,13 @@ function useTableData({
   const itemsToFetch = useMemo(
     () =>
       mainStatistics.transactionGroups
-        .slice(...renderedItems)
+        // Spread the start/end index tuple for slicing the visible items
+        // from the main request data
+        .slice(...renderedItemIndices)
         .map(({ name }) => name)
         .filter((name) => Boolean(name))
         .sort(),
-    [renderedItems, mainStatistics.transactionGroups]
+    [renderedItemIndices, mainStatistics.transactionGroups]
   );
 
   const { data: detailedStatistics, status: detailedStatisticsStatus } = useFetcher(

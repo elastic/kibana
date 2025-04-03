@@ -21,6 +21,12 @@ import {
 
 type SortDirection = 'asc' | 'desc';
 
+/**
+ * A tuple of the start and end indices for all visible/rendered items
+ * for the `ManagedTable` component.
+ */
+export type VisibleItemsStartEnd = readonly [number, number];
+
 export interface TableOptions<T> {
   page: { index: number; size: number };
   sort: { direction: SortDirection; field: keyof T };
@@ -86,7 +92,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   // onChange handlers
   onChangeRenderedItems?: (renderedItems: T[]) => void;
   onChangeSorting?: (sorting: TableOptions<T>['sort']) => void;
-  onChangeItemIndices?: (range: readonly [number, number]) => void;
+  onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 
   // sorting
   sortItems?: boolean;
@@ -199,12 +205,11 @@ function UnoptimizedManagedTable<T extends object>(props: {
         });
   }, [items, searchQuery, tableSearchBar.fieldsToSearch]);
 
-  const renderedIndices = useMemo(
-    () =>
-      [
-        tableOptions.page.index * tableOptions.page.size,
-        (tableOptions.page.index + 1) * tableOptions.page.size,
-      ] as const,
+  const renderedIndices = useMemo<VisibleItemsStartEnd>(
+    () => [
+      tableOptions.page.index * tableOptions.page.size,
+      (tableOptions.page.index + 1) * tableOptions.page.size,
+    ],
     [tableOptions.page.index, tableOptions.page.size]
   );
 

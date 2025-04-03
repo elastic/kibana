@@ -45,7 +45,12 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
-import type { ITableColumn, SortFunction, TableSearchBar } from '../../../shared/managed_table';
+import type {
+  ITableColumn,
+  SortFunction,
+  TableSearchBar,
+  VisibleItemsStartEnd,
+} from '../../../shared/managed_table';
 import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
@@ -296,7 +301,7 @@ interface Props {
   maxCountExceeded: boolean;
   onChangeSearchQuery?: (searchQuery: string) => void;
   onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
-  onChangeItemIndices?: (range: readonly [number, number]) => void;
+  onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 }
 export function ApmServicesTable({
   status,

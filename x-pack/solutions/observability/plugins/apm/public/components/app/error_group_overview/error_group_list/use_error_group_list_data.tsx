@@ -12,7 +12,7 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useStateDebounced } from '../../../../hooks/use_debounce';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import type { TableOptions } from '../../../shared/managed_table';
+import type { TableOptions, VisibleItemsStartEnd } from '../../../shared/managed_table';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
@@ -35,10 +35,10 @@ const INITIAL_STATE_DETAILED_STATISTICS: DetailedStatistics = {
 };
 
 export function useErrorGroupListData({
-  renderedItems,
+  renderedItemIndices,
   sorting,
 }: {
-  renderedItems: readonly [number, number];
+  renderedItemIndices: VisibleItemsStartEnd;
   sorting: TableOptions<ErrorGroupItem>['sort'];
 }) {
   const { serviceName } = useApmServiceContext();
@@ -84,10 +84,12 @@ export function useErrorGroupListData({
   const itemsToFetch = useMemo(
     () =>
       mainStatistics.errorGroups
-        .slice(...renderedItems)
+        // Spread the start/end index tuple for slicing the visible items
+        // from the main request data
+        .slice(...renderedItemIndices)
         .map(({ groupId }) => groupId)
         .sort(),
-    [mainStatistics.errorGroups, renderedItems]
+    [mainStatistics.errorGroups, renderedItemIndices]
   );
 
   const {
