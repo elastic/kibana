@@ -134,7 +134,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   ];
 
   return (
-    <EuiProvider theme={EuiThemeAmsterdam}>
+    <EuiProvider theme={EuiThemeAmsterdam} highContrastMode={false}>
       <EuiPageTemplate restrictWidth>
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>
