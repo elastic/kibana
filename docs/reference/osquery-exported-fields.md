@@ -249,7 +249,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **attributes** - keyword, text.text
 
-* *file.attributes* - File attrib string. See: https://ss64.com/nt/attrib.html
+* *file.attributes* - File attrib string. See: [https://ss64.com/nt/attrib.html](https://ss64.com/nt/attrib.html)
 
 **audible_alarm** - keyword, text.text
 
@@ -752,7 +752,7 @@ For more information about osquery tables, see the [osquery schema documentation
 
 **chemistry** - keyword, text.text
 
-* *battery.chemistry* - The battery chemistry type (eg. LiP). Some possible values are documented in https://learn.microsoft.com/en-us/windows/win32/power/battery-information-str.
+* *battery.chemistry* - The battery chemistry type (eg. LiP). Some possible values are documented in [https://learn.microsoft.com/en-us/windows/win32/power/battery-information-str](https://learn.microsoft.com/en-us/windows/win32/power/battery-information-str).
 
 **child_pid** - keyword, number.long
 
@@ -6598,4 +6598,5 @@ For more information about osquery tables, see the [osquery schema documentation
 
 * *azure_instance_metadata.zone* - Availability zone of the VM
 * *ycloud_instance_metadata.zone* - Availability zone of the VM
+
 
