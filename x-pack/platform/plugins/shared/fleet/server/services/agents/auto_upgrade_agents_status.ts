@@ -6,6 +6,7 @@
  */
 
 import { AGENTS_PREFIX } from '../../../common';
+import { AgentStatusKueryHelper } from '../../../common/services';
 import type {
   CurrentVersionCount,
   GetAutoUpgradeAgentsStatusResponse,
