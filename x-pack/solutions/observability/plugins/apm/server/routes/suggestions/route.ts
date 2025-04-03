@@ -40,7 +40,7 @@ const suggestionsRoute = createApmServerRoute({
     const coreContext = await context.core;
     const size = await coreContext.uiSettings.client.get<number>(maxSuggestions);
 
-    const hasUnset = await hasUnsetValueForField({
+    const hasUnset = hasUnsetValueForField({
       apmEventClient,
       searchAggregatedTransactions,
       serviceName,
@@ -64,7 +64,7 @@ const suggestionsRoute = createApmServerRoute({
       // This is useful because terms enum can only find terms that start with the search query
       // whereas terms agg approach can find terms that contain the search query
       if (suggestions.terms.length > 0) {
-        return { ...suggestions, hasUnset };
+        return { ...suggestions, hasUnset: await hasUnset };
       }
     }
 
@@ -79,7 +79,7 @@ const suggestionsRoute = createApmServerRoute({
         start,
         end,
       })),
-      hasUnset,
+      hasUnset: await hasUnset,
     };
   },
 });
