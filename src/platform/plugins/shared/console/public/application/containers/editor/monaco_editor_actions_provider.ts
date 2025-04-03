@@ -38,6 +38,7 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
+  isInsideTripleQuote,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -781,22 +782,6 @@ export class MonacoEditorActionsProvider {
    */
   public getCurrentPosition(): monaco.IPosition {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
-  }
-
-  private isInsideTripleQuote(text: string): boolean {
-    let insideTripleQuote = false;
-    let i = 0;
-
-    while (i < text.length) {
-      if (text.startsWith('"""', i)) {
-        insideTripleQuote = !insideTripleQuote;
-        i += 3; // Skip the triple quotes
-      } else {
-        i++;
-      }
-    }
-
-    return insideTripleQuote;
   }
 
   private async isPositionInsideScript(model, position): Promise<boolean> {
