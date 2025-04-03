@@ -3385,6 +3385,26 @@
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/find_assignable_objects.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/get_assignable_types.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
+              },
+              {
                 "plugin": "banners",
                 "path": "x-pack/platform/plugins/private/banners/server/routes/info.ts"
               },
@@ -3527,26 +3547,6 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/platform/plugins/private/monitoring/server/plugin.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_all_tags.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/get_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/find_assignable_objects.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/get_assignable_types.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/find_tags.ts"
               },
               {
                 "plugin": "reporting",
@@ -3867,6 +3867,30 @@
               {
                 "plugin": "spaces",
                 "path": "x-pack/platform/plugins/shared/spaces/server/lib/request_interceptors/on_request_interceptor.test.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/conversation.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/connectors.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -5733,6 +5757,22 @@
                 "path": "src/platform/packages/shared/content-management/content_insights/content_insights_server/src/register.ts"
               },
               {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/create_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/update_tag.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/update_tags_assignments.ts"
+              },
+              {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_create_route.ts"
               },
@@ -5879,22 +5919,6 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/platform/plugins/private/monitoring/server/plugin.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/create_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/update_tag.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/assignments/update_tags_assignments.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
               },
               {
                 "plugin": "painlessLab",
@@ -6155,6 +6179,26 @@
               {
                 "plugin": "@kbn/search-api-keys-server",
                 "path": "x-pack/solutions/search/packages/kbn-search-api-keys-server/src/routes/routes.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/chat.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/conversation.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
+                "plugin": "wciIndexSource",
+                "path": "x-pack/solutions/chat/plugins/wci-index-source/server/routes/configuration.ts"
               },
               {
                 "plugin": "visTypeTimeseries",
@@ -7549,6 +7593,14 @@
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
               },
               {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/agents.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/solutions/observability/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -8137,6 +8189,10 @@
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/backfill/apis/delete/delete_backfill_route.ts"
               },
               {
+                "plugin": "savedObjectsTagging",
+                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/delete_tag.ts"
+              },
+              {
                 "plugin": "indexManagement",
                 "path": "x-pack/platform/plugins/shared/index_management/server/routes/api/component_templates/register_delete_route.ts"
               },
@@ -8159,10 +8215,6 @@
               {
                 "plugin": "logstash",
                 "path": "x-pack/platform/plugins/private/logstash/server/routes/pipeline/delete.ts"
-              },
-              {
-                "plugin": "savedObjectsTagging",
-                "path": "x-pack/platform/plugins/shared/saved_objects_tagging/server/routes/tags/delete_tag.ts"
               },
               {
                 "plugin": "reporting",
@@ -8215,6 +8267,10 @@
               {
                 "plugin": "grokdebugger",
                 "path": "x-pack/platform/plugins/private/grokdebugger/server/lib/kibana_framework.ts"
+              },
+              {
+                "plugin": "workchatApp",
+                "path": "x-pack/solutions/chat/plugins/workchat-app/server/routes/integrations.ts"
               },
               {
                 "plugin": "infra",
@@ -13162,18 +13218,6 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               },
               {
-                "plugin": "dataUsage",
-                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.ts"
-              },
-              {
-                "plugin": "dataVisualizer",
-                "path": "x-pack/platform/plugins/private/data_visualizer/server/routes.ts"
-              },
-              {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
-              },
-              {
                 "plugin": "telemetry",
                 "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_config.ts"
               },
@@ -13192,6 +13236,18 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "dataUsage",
+                "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/data_streams.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/platform/plugins/private/data_visualizer/server/routes.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
               },
               {
                 "plugin": "transform",
@@ -14616,6 +14672,26 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/functions/functions.ts"
               },
               {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in_stats.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
+              },
+              {
+                "plugin": "telemetry",
+                "path": "src/platform/plugins/shared/telemetry/server/local_shipper/initialize_local_shipper.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "dataUsage",
                 "path": "x-pack/platform/plugins/private/data_usage/server/routes/internal/usage_metrics.ts"
               },
@@ -14654,26 +14730,6 @@
               {
                 "plugin": "fileUpload",
                 "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in_stats.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_opt_in.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/routes/telemetry_usage_stats.ts"
-              },
-              {
-                "plugin": "telemetry",
-                "path": "src/platform/plugins/shared/telemetry/server/local_shipper/initialize_local_shipper.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "transform",
@@ -15786,12 +15842,12 @@
                 "path": "x-pack/platform/plugins/private/canvas/server/routes/workpad/delete.ts"
               },
               {
-                "plugin": "fileUpload",
-                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
-              },
-              {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/platform/plugins/private/file_upload/server/routes.ts"
               },
               {
                 "plugin": "logsShared",

@@ -52,7 +52,7 @@ export const RulesSettingsFlappingFormSection = memo(
     const { lookBackWindow, statusChangeThreshold } = flappingSettings;
 
     return (
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="s">
         {compressed && (
           <>
             <EuiFlexItem>
