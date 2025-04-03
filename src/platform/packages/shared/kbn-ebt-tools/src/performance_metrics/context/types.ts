@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Time To First Meaningful Paint (ttfmp)
-export const perfomanceMarkers = {
-  startPageChange: 'start::pageChange',
-  endPageReady: 'end::pageReady',
-  startPageRefresh: 'start::pageRefresh',
-};
+type ApmPageId = 'services' | 'traces' | 'dependencies';
+type InfraPageId = 'hosts';
+type OnboardingPageId = 'onboarding';
+
+export type Key = `${ApmPageId}` | `${InfraPageId}` | `${OnboardingPageId}`;
+
+export type DescriptionWithPrefix = `[ttfmp_${Key}] ${string}`;
