@@ -114,7 +114,6 @@ export const DocumentList: React.FC<DocumentListProps> = ({
               onDocumentClick={onDocumentClick ? () => onDocumentClick(doc) : undefined}
               {...resultProps}
             />
-            <EuiSpacer size="s" />
           </React.Fragment>
         );
       })}
