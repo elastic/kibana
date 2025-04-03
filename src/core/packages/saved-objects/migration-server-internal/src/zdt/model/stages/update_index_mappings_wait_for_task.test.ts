@@ -100,6 +100,7 @@ describe('Stage: updateIndexMappings', () => {
       ...state,
       controlState: 'UPDATE_INDEX_MAPPINGS',
       retryCount: 1,
+      skipRetryReset: true,
       retryDelay: expect.any(Number),
       logs: expect.any(Array),
     });
@@ -119,6 +120,7 @@ describe('Stage: updateIndexMappings', () => {
       ...state,
       controlState: 'UPDATE_INDEX_MAPPINGS',
       retryCount: 13,
+      skipRetryReset: true,
       retryDelay: expect.any(Number),
       logs: expect.arrayContaining([
         expect.objectContaining({

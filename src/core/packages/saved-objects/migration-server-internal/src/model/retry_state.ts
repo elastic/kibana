@@ -52,7 +52,7 @@ export const resetRetryState = <S extends RetryableState>(state: S): S => {
   return {
     ...state,
     retryCount: state.skipRetryReset ? state.retryCount : 0,
+    retryDelay: state.skipRetryReset ? state.retryDelay : 0,
     skipRetryReset: false,
-    retryDelay: 0,
   };
 };
