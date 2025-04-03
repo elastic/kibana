@@ -99,7 +99,6 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
 
             const flappingSettings = await rulesSettingsClient.flapping().get();
 
-            console.log('the create body', JSON.stringify(createRuleData));
             // TODO (http-versioning): Remove this cast, this enables us to move forward
             // without fixing all of other solution types
             const createdRule: Rule<RuleParamsV1> = (await rulesClient.create<RuleParamsV1>({

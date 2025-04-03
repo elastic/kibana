@@ -106,6 +106,5 @@ export const transformCreateBody = <Params extends RuleParams = never>({
       : {}),
     ...(createBody.artifacts ? { artifacts: createBody.artifacts } : {}),
   };
-  console.log('after transform', afterTransform);
   return afterTransform;
 };

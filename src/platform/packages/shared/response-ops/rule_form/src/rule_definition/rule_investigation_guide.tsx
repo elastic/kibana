@@ -15,11 +15,10 @@ import {
   EuiMarkdownEditor,
   EuiSpacer,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 // import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
-import { RuleTypeParams, RuleTypeParamsExpressionProps } from '@kbn/alerts-ui-shared';
+import { RuleTypeParams } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 
@@ -73,7 +72,6 @@ export function InvestigationManager<T extends RuleTypeParams>({
   setRuleParams: (v: { investigation_guide: { blob: string } }) => void;
   value: string;
 }) {
-  console.log('value from guide', value);
   const [messages, setMessages] = useState<string[]>([]);
   const onParse = useCallback((error: any, { messages: msg, astVal }: any) => {
     setMessages(error ? [error] : [msg]);

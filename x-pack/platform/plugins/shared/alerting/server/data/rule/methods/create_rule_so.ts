@@ -22,7 +22,6 @@ export interface CreateRuleSoParams {
 export const createRuleSo = (params: CreateRuleSoParams): Promise<SavedObject<RawRule>> => {
   const { savedObjectsClient, ruleAttributes, savedObjectsCreateOptions } = params;
 
-  console.log('before create call')
   return savedObjectsClient.create(
     RULE_SAVED_OBJECT_TYPE,
     ruleAttributes,

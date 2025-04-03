@@ -75,7 +75,6 @@ const buildGetRuleRoute = ({
           excludeFromPublicApi,
           includeSnoozeData: true,
         })) as Rule<RuleParamsV1>;
-        console.log('the get rule', JSON.stringify(rule));
 
         const response: GetRuleResponseV1<RuleParamsV1> = {
           body: transformRuleToRuleResponseV1<RuleParamsV1>(rule),

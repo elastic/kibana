@@ -238,7 +238,6 @@ export async function createRule<Params extends RuleParams = never>(
     },
   });
 
-  console.log('rule attributes', ruleAttributes);
   const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },
     () =>
@@ -252,7 +251,6 @@ export async function createRule<Params extends RuleParams = never>(
       })
   );
 
-  console.log('after rule saved object create')
   // Convert ES RawRule back to domain rule object
   const ruleDomain: RuleDomain<Params> = transformRuleAttributesToRuleDomain<Params>(
     createdRuleSavedObject.attributes,

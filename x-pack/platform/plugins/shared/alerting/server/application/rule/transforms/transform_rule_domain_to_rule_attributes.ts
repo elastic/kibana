@@ -26,12 +26,10 @@ export const transformRuleDomainToRuleAttributes = ({
   rule: Omit<RuleDomain, 'actions' | 'params' | 'systemActions'>;
   params: TransformRuleToEsParams;
 }): RawRule => {
-  console.log('the rule!!', rule);
-  console.log('bool check', rule.artifacts !== undefined);
   const { legacyId, paramsWithRefs, meta } = params;
   const mappedParams = getMappedParams(paramsWithRefs);
 
-  const ret = {
+  return {
     name: rule.name,
     tags: rule.tags,
     enabled: rule.enabled,
@@ -88,7 +86,4 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.flapping !== undefined ? { flapping: rule.flapping } : {}),
     artifacts: artifactsWithRefs,
   } as RawRule;
-
-  console.log('ret', ret);
-  return ret;
 };
