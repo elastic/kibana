@@ -6,22 +6,23 @@
  */
 
 export enum ServiceProviderKeys {
+  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
   amazonbedrock = 'amazonbedrock',
-  azureopenai = 'azureopenai',
+  anthropic = 'anthropic',
   azureaistudio = 'azureaistudio',
+  azureopenai = 'azureopenai',
   cohere = 'cohere',
-  elasticsearch = 'elasticsearch',
+  deepseek = 'deepseek',
   elastic = 'elastic',
+  elasticsearch = 'elasticsearch',
   googleaistudio = 'googleaistudio',
   googlevertexai = 'googlevertexai',
   hugging_face = 'hugging_face',
+  jinaai = 'jinaai',
   mistral = 'mistral',
   openai = 'openai',
-  anthropic = 'anthropic',
-  watsonxai = 'watsonxai',
-  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
-  jinaai = 'jinaai',
   voyageai = 'voyageai',
+  watsonxai = 'watsonxai',
 }
 
 export const DEFAULT_TASK_TYPE = 'completion';
