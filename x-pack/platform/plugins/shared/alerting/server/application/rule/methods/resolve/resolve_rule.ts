@@ -42,8 +42,6 @@ Promise<ResolvedSanitizedRule<Params>> {
         ruleId: id,
       })
   );
-  // the field is not getting persisted on the saved object, or so it seems
-  console.log('resolve result', result);
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: result.attributes.alertTypeId,
@@ -103,7 +101,6 @@ Promise<ResolvedSanitizedRule<Params>> {
       // without fixing all of other solution types
     } as ResolvedSanitizedRule;
   }
-
   return {
     ...rule,
     ...resolveResponse,

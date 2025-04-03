@@ -117,7 +117,6 @@ export const RuleDefinition = () => {
   const { readFlappingSettingsUI, writeFlappingSettingsUI } = rulesSettings || {};
 
   const { params, schedule, notifyWhen, flapping, consumer, ruleTypeId } = formData;
-  console.log('form data', formData);
 
   const [isAdvancedOptionsVisible, setIsAdvancedOptionsVisible] = useState<boolean>(false);
 
@@ -219,7 +218,6 @@ export const RuleDefinition = () => {
 
   const onSetArtifacts = useCallback(
     (value: object) => {
-      console.log('vaaaaaaalue', value);
       dispatch({
         type: 'setRuleProperty',
         payload: {
@@ -230,9 +228,6 @@ export const RuleDefinition = () => {
     },
     [dispatch, formData.artifacts]
   );
-
-  console.log('params', params);
-  console.log('value', formData.artifacts?.investigation_guide?.blob);
   return (
     <EuiSplitPanel.Outer
       hasBorder
