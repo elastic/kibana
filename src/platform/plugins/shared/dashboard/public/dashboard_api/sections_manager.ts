@@ -33,7 +33,7 @@ export function initializeSectionsManager(initialSections: DashboardSectionMap |
         setSections({
           ...oldSections,
           [newId]: {
-            id: uuidv4(),
+            id: newId,
             order: Object.keys(oldSections).length + 1,
             title: i18n.translate('dashboard.defaultSectionTitle', {
               defaultMessage: 'New collapsible section',
