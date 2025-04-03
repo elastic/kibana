@@ -68,7 +68,7 @@ export function EnvironmentSelect({
     [searchValue, availableEnvironments]
   );
 
-  const isInvalid = environment !== searchValue && searchValue !== '';
+  const isInvalid = getEnvironmentLabel(environment) !== searchValue && searchValue !== '';
 
   const options: Array<EuiComboBoxOptionOption<string>> = [...getEnvironmentOptions(environments)];
 
