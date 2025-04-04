@@ -154,7 +154,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
               id="selectAgentLogLevel"
               data-test-subj="selectAgentLogLevel"
               value={selectedLogLevel}
-              onChange={async (event) => {
+              onChange={(event) => {
                 setSelectedLogLevel(event.target.value);
               }}
               options={AGENT_LOG_LEVELS.map((level) => ({

@@ -29,7 +29,7 @@ jest.mock('../../../../../hooks', () => {
 
 const mockUseStartServices = useStartServices as jest.Mock;
 
-describe.only('AgentSettings', () => {
+describe('AgentSettings', () => {
   beforeEach(() => {
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
