@@ -9,9 +9,7 @@ import { messageContainsToolCalls } from '../generate_esql/step_router';
 import { AGENT, RESPOND, TOOLS } from './constants';
 import type { AnalyseIndexPatternAnnotation } from './state';
 
-export const startStepRouter = (
-  state: typeof AnalyseIndexPatternAnnotation.State
-): string => {
+export const startStepRouter = (state: typeof AnalyseIndexPatternAnnotation.State): string => {
   const { messages } = state;
   const lastMessage = messages[messages.length - 1];
   if (messageContainsToolCalls(lastMessage)) {
@@ -21,9 +19,7 @@ export const startStepRouter = (
   return AGENT;
 };
 
-export const agentStepRouter = (
-  state: typeof AnalyseIndexPatternAnnotation.State
-): string => {
+export const agentStepRouter = (state: typeof AnalyseIndexPatternAnnotation.State): string => {
   const { messages } = state;
   const lastMessage = messages[messages.length - 1];
   if (messageContainsToolCalls(lastMessage)) {

@@ -107,7 +107,9 @@ export const getGenerateEsqlGraph = ({
   const graph = new StateGraph(GenerateEsqlAnnotation)
     // Nodes
     .addNode(SUMMARIZE_OBJECTIVE, getSummarizeObjective({ createLlmInstance }))
-    .addNode(SELECT_INDEX_PATTERN_GRAPH, selectIndexPatternSubGraph, { subgraphs: [identifyIndexGraph] })
+    .addNode(SELECT_INDEX_PATTERN_GRAPH, selectIndexPatternSubGraph, {
+      subgraphs: [identifyIndexGraph],
+    })
     .addNode(NL_TO_ESQL_AGENT_NODE, nlToEsqlAgentNode, { retryPolicy: { maxAttempts: 3 } })
     .addNode(TOOLS_NODE, toolNode)
     .addNode(VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE, validateEsqlInLastMessageNode)

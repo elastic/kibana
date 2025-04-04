@@ -36,7 +36,7 @@ export const SelectIndexPatternAnnotation = Annotation.Root({
     default: () => ({}),
   }),
   selectedIndexPattern: Annotation<string | undefined | null>({
-    reducer: (currentValue, newValue) => newValue === undefined ? currentValue : newValue,
+    reducer: (currentValue, newValue) => (newValue === undefined ? currentValue : newValue),
     default: () => undefined,
   }),
 });

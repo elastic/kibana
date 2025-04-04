@@ -15,14 +15,14 @@ import { Stream } from 'openai/streaming';
 import type OpenAI from 'openai';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
+import { parseChatCompletion } from 'openai/lib/parser';
+import { ChatCompletionCreateParams } from 'openai/resources';
 import { DEFAULT_OPEN_AI_MODEL, DEFAULT_TIMEOUT } from './constants';
 import {
   InferenceChatCompleteParamsSchema,
   InvokeAIActionParamsSchema,
   RunActionParamsSchema,
 } from './types';
-import { parseChatCompletion } from 'openai/lib/parser';
-import { ChatCompletionCreateParams } from 'openai/resources';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
@@ -128,9 +128,14 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   }
 
   async betaParsedCompletionWithRetry(
-    request: OpenAI.ChatCompletionCreateParamsNonStreaming,
+    request: OpenAI.ChatCompletionCreateParamsNonStreaming
   ): Promise<ReturnType<OpenAIClient['beta']['chat']['completions']['parse']>> {
-    return await this.completionWithRetry(request).then((response) => parseChatCompletion(response, this.constructBody(request, this.llmType) as ChatCompletionCreateParams));
+    return await this.completionWithRetry(request).then((response) =>
+      parseChatCompletion(
+        response,
+        this.constructBody(request, this.llmType) as ChatCompletionCreateParams
+      )
+    );
   }
 
   async completionWithRetry(
@@ -195,9 +200,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     actionId: string;
     params: {
       subActionParams:
-      | InvokeAIActionParamsSchema
-      | RunActionParamsSchema
-      | InferenceChatCompleteParamsSchema;
+        | InvokeAIActionParamsSchema
+        | RunActionParamsSchema
+        | InferenceChatCompleteParamsSchema;
       subAction: string;
     };
     signal?: AbortSignal;
@@ -213,15 +218,15 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
         // for non-stream, use `run` instead of `invokeAI` in order to get the entire OpenAI.ChatCompletion response,
         // which may contain non-content messages like functions
         completionRequest.stream
-          ? 'invokeAsyncIterator'
-          : 'run';
+        ? 'invokeAsyncIterator'
+        : 'run';
     // create a new connector request body with the assistant message:
     const subActionParams = {
       ...(llmType === 'inference'
         ? { body }
         : completionRequest.stream
-          ? { ...body, timeout: this.#timeout ?? DEFAULT_TIMEOUT }
-          : { body: JSON.stringify(body), timeout: this.#timeout ?? DEFAULT_TIMEOUT }),
+        ? { ...body, timeout: this.#timeout ?? DEFAULT_TIMEOUT }
+        : { body: JSON.stringify(body), timeout: this.#timeout ?? DEFAULT_TIMEOUT }),
       telemetryMetadata: this.telemetryMetadata,
       signal: this.#signal,
     };
@@ -235,10 +240,12 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
   }
 
-  constructBody(completionRequest:
-    | OpenAI.ChatCompletionCreateParamsNonStreaming
-    | OpenAI.ChatCompletionCreateParamsStreaming,
-    llmType: string) {
+  constructBody(
+    completionRequest:
+      | OpenAI.ChatCompletionCreateParamsNonStreaming
+      | OpenAI.ChatCompletionCreateParamsStreaming,
+    llmType: string
+  ) {
     const body = {
       temperature: this.#temperature,
       // possible client model override

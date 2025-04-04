@@ -15,14 +15,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import fs from 'fs/promises';
 import path from 'path';
+import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ActionsClientChatBedrockConverse } from '@kbn/langchain/server';
+import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '../../server/assistant/tools/esql/graphs/generate_esql/generate_esql';
 import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/task/agent';
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
 import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
-import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '@kbn/security-solution-plugin/server/assistant/tools/esql/graphs/generate_esql/generate_esql';
-import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
-import { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { ActionsClientChatBedrockConverse } from '@kbn/langchain/server';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -55,18 +55,18 @@ async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
 async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
   const graph = getGenerateEsqlAgent({
     esClient: {} as unknown as ElasticsearchClient,
-    connectorId: "test-connector-id",
+    connectorId: 'test-connector-id',
     inference: {} as unknown as InferenceServerStart,
     logger,
     request: {} as unknown as KibanaRequest,
-    createLlmInstance: () => ({bindTools: () => null}) as unknown as ActionsClientChatBedrockConverse
+    createLlmInstance: () =>
+      ({ bindTools: () => null } as unknown as
+        | ActionsClientChatBedrockConverse
         | ActionsClientChatVertexAI
-        | ActionsClientChatOpenAI,
+        | ActionsClientChatOpenAI),
   });
   return graph.getGraphAsync({ xray: true });
 }
-
-
 
 export const drawGraph = async ({
   getGraphAsync,
