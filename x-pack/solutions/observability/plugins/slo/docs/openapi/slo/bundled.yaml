@@ -168,7 +168,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-  /s/{spaceId}/api/observability/slos/bulk-delete:
+  /s/{spaceId}/api/observability/slos/_bulk_delete:
     post:
       summary: Delete multiple SLOs
       operationId: deleteSlosOp

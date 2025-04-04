@@ -19,7 +19,7 @@ import { getSpaceId } from './utils/get_space_id';
 import { DeleteSLO } from '../../services/delete_slo';
 
 export const bulkDeleteSLORoute = createSloServerRoute({
-  endpoint: 'POST /api/observability/slos/bulk-delete 2023-10-31',
+  endpoint: 'POST /api/observability/slos/_bulk_delete 2023-10-31',
   options: { access: 'public' },
   security: {
     authz: {

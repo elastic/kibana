@@ -266,7 +266,7 @@
         }
       }
     },
-    "/s/{spaceId}/api/observability/slos/bulk-delete": {
+    "/s/{spaceId}/api/observability/slos/_bulk_delete": {
       "post": {
         "summary": "Bulk delete SLOs",
         "operationId": "bulkDeleteSlosOp",
@@ -2188,7 +2188,7 @@
           }
         }
       },
-      "bulk_delete_slo_request": {
+      "_bulk_delete_slo_request": {
         "title": "Bulk Delete SLO request",
         "type": "object",
         "required": [
