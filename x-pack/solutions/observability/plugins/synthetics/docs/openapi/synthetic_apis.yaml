@@ -1052,7 +1052,7 @@ components:
             The private locations to which the monitors will be deployed.
             These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
             You can specify a private location using the location's name.
-            To list available privalte locations you can:
+            To list available private locations you can:
             
             - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
             - Go to *Synthetics > Settings* and click *Private locationsr*. Private locations will be listed in the table.
