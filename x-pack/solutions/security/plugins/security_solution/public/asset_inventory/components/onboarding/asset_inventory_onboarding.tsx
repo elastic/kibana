@@ -30,6 +30,7 @@ export const AssetInventoryOnboarding: FC<PropsWithChildren> = ({ children }) =>
 
   // Render different screens based on the onboarding status.
   switch (status) {
+    case 'inactive_feature':
     case 'disabled': // The user has not yet started the onboarding process.
       return <GetStarted />;
     case 'initializing': // The onboarding process is currently initializing.
