@@ -20,7 +20,7 @@ import {
 import { type ChangelogChange } from '../utils';
 
 const calloutText =
-  'A breaking change is included in a new version of this integration. Please review the linked pull request in the changelog below and confirm that you understand the breaking change before continuing';
+  'A breaking change is included in a new version of this integration. Please review the linked pull request in the changelog below and confirm that you understand the breaking change before continuing.';
 
 interface BreakingChangesCalloutProps {
   changes: ChangelogChange[];

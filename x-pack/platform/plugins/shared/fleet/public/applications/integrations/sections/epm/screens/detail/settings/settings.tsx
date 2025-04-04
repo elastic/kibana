@@ -146,6 +146,7 @@ export const SettingsPage: React.FC<Props> = memo(
     } = useChangelog(name, latestVersion, version);
 
     const breakingChanges = getBreakingChanges(changelog);
+    const hasBreakingChanges = breakingChanges.length > 0;
 
     const packagePolicyIds = useMemo(
       () => packagePoliciesData?.items.map(({ id }) => id),
@@ -335,7 +336,7 @@ export const SettingsPage: React.FC<Props> = memo(
                         toggleChangelogModal={toggleChangelogModal}
                       />
                       <EuiSpacer size="l" />
-                      {breakingChanges.length > 0 && (
+                      {hasBreakingChanges && (
                         <>
                           <BreakingChangesCallout
                             changes={breakingChanges}
@@ -355,6 +356,7 @@ export const SettingsPage: React.FC<Props> = memo(
                           isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                           setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
                           startServices={startServices}
+                          isDisabled={hasBreakingChanges && !isBreakingChangeUnderstood}
                         />
                       </p>
                     </>
