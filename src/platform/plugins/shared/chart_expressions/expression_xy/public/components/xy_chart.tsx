@@ -750,7 +750,8 @@ export function XYChart({
 
   // ES|QL charts are allowed to create filters only when the unified search bar query is ES|QL (e.g. in Discover)
   const applicationQuery = data.query.queryString.getQuery();
-  const canCreateFilters = applicationQuery && isOfAggregateQueryType(applicationQuery);
+  const canCreateFilters =
+    !isEsqlMode || (isEsqlMode && applicationQuery && isOfAggregateQueryType(applicationQuery));
 
   return (
     <>
