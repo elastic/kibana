@@ -202,6 +202,7 @@ export const simulationMachine = setup({
           actions: [{ type: 'mapField', params: ({ event }) => event }],
         },
         'simulation.fields.unmap': {
+          target: 'assertingSimulationRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
         },
       },
