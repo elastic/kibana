@@ -2139,10 +2139,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.0.0-alpha.3":
-  version "9.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.0.0-alpha.3.tgz#7580ca3f984cef7c4a9ecda0c5853dfa4671996d"
-  integrity sha512-10ZJtFXij0TiDc+5WpDfHB+ckEeeEgo6ZwY4QjjNNEFSLZSx+gg7DBgQkddRYpjBe7VM6dBhY76NkRmgod7p9A==
+"@elastic/elasticsearch@9.0.0-alpha.4":
+  version "9.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.0.0-alpha.4.tgz#747541e0bd93d2310d522c7d6bf21bec5872eacd"
+  integrity sha512-qGtiC3lWH//J4rTneaXU8vPpxQe8kPO57ZU94kMSttpyyDE+yvs0uh/tsOwKwQS9i5L37fGZG1I02x0Kf5HHfw==
   dependencies:
     "@elastic/transport" "9.0.0-alpha.1"
     apache-arrow "^18.0.0"
@@ -3886,6 +3886,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/apm-ui-shared@link:src/platform/packages/shared/kbn-apm-ui-shared":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-utils@link:src/platform/packages/shared/kbn-apm-utils":
   version "0.0.0"
   uid ""
@@ -5351,6 +5355,10 @@
   uid ""
 
 "@kbn/encrypted-saved-objects-plugin@link:x-pack/platform/plugins/shared/encrypted_saved_objects":
+  version "0.0.0"
+  uid ""
+
+"@kbn/encrypted-saved-objects-shared@link:src/platform/packages/shared/kbn-encrypted-saved-objects-shared":
   version "0.0.0"
   uid ""
 
@@ -7583,6 +7591,10 @@
   uid ""
 
 "@kbn/synthetics-private-location@link:x-pack/packages/kbn-synthetics-private-location":
+  version "0.0.0"
+  uid ""
+
+"@kbn/task-manager-dependencies-plugin@link:x-pack/platform/plugins/private/task_manager_dependencies":
   version "0.0.0"
   uid ""
 
