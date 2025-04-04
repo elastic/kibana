@@ -18,8 +18,8 @@ import { PopoverTooltip } from '../../../popover_tooltip';
 import { getComparisonEnabled } from '../../../time_comparison/get_comparison_enabled';
 import { TruncateWithTooltip } from '../../../truncate_with_tooltip';
 import type { APMQueryParams } from '../../url_helpers';
-import type { APMLinkExtendProps } from '../apm_link';
-import { getLegacyApmHref } from '../apm_link';
+import type { APMLinkExtendProps } from '../apm_link_hooks';
+import { getLegacyApmHref } from '../apm_link_hooks';
 import { MaxGroupsMessage } from '../max_groups_message';
 
 export const txGroupsDroppedBucketName = '_other';

@@ -12,8 +12,8 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import type { APMLinkExtendProps } from './apm_link';
-import { getLegacyApmHref } from './apm_link';
+import type { APMLinkExtendProps } from './apm_link_hooks';
+import { getLegacyApmHref } from './apm_link_hooks';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;

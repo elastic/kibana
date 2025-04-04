@@ -6,10 +6,8 @@
  */
 
 import type { EuiLinkAnchorProps } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
 import type { IBasePath } from '@kbn/core/public';
 import { pick } from 'lodash';
-import React from 'react';
 import { useLocation } from 'react-router-dom';
 import url from 'url';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
@@ -86,16 +84,4 @@ export function getLegacyApmHref({
     pathname: basePath.prepend(`/app/apm${path}`),
     search: nextSearch,
   });
-}
-
-export function LegacyAPMLink({ path = '', query, mergeQuery, ...rest }: Props) {
-  const { core } = useApmPluginContext();
-  const { search } = useLocation();
-  const { basePath } = core.http;
-
-  const mergedQuery = mergeQuery ? mergeQuery(query ?? {}) : query;
-
-  const href = getLegacyApmHref({ basePath, path, search, query: mergedQuery });
-
-  return <EuiLink data-test-subj="apmLegacyAPMLinkLink" {...rest} href={href} />;
 }

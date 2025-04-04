@@ -10,9 +10,9 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { EuiLink } from '@elastic/eui';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
 import type { APMQueryParams } from '../url_helpers';
-import { useAPMHref } from './apm_link';
+import { useAPMHref } from './apm_link_hooks';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import type { APMLinkExtendProps } from './apm_link';
+import type { APMLinkExtendProps } from './apm_link_hooks';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'host',

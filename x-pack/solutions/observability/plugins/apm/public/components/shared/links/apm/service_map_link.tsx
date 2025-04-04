@@ -10,7 +10,7 @@ import type { TypeOf } from '@kbn/typed-react-router-config';
 import { EuiLink } from '@elastic/eui';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import type { ApmRoutes } from '../../../routing/apm_route_config';
-import type { APMLinkExtendProps } from './apm_link';
+import type { APMLinkExtendProps } from './apm_link_hooks';
 
 interface ServiceMapLinkProps extends APMLinkExtendProps {
   serviceName?: string;

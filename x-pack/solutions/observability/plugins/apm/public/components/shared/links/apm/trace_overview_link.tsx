@@ -6,7 +6,7 @@
  */
 
 import type { APMQueryParams } from '../url_helpers';
-import { useAPMHref } from './apm_link';
+import { useAPMHref } from './apm_link_hooks';
 
 const persistedFilters: Array<keyof APMQueryParams> = [
   'transactionResult',

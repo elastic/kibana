@@ -8,8 +8,8 @@
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
 import type { APMQueryParams } from '../url_helpers';
-import type { APMLinkExtendProps } from './apm_link';
-import { useAPMHref } from './apm_link';
+import type { APMLinkExtendProps } from './apm_link_hooks';
+import { useAPMHref } from './apm_link_hooks';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
