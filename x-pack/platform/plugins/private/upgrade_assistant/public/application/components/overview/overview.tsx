@@ -78,9 +78,11 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
   };
 
   const versionTooltipContent = () => {
-    return currentVersion >= MIN_VERSION_TO_UPGRADE_TO_LATEST ? (
-      <></>
-    ) : (
+    if (currentVersion >= MIN_VERSION_TO_UPGRADE_TO_LATEST) {
+      return null;
+    }
+
+    return (
       <EuiToolTip
         position="right"
         content={
