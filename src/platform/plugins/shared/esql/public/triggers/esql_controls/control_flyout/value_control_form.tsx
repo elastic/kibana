@@ -337,6 +337,7 @@ export function ValueControlForm({
             selectedOptions={selectedValues}
             onChange={onValuesChange}
             onCreateOption={onCreateOption}
+            isClearable
             fullWidth
             compressed
             css={css`

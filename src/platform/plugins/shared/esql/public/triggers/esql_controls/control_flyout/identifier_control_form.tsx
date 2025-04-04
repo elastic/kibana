@@ -207,6 +207,7 @@ export function IdentifierControlForm({
           data-test-subj="esqlIdentifiersOptions"
           fullWidth
           compressed
+          isClearable
         />
       </EuiFormRow>
 
