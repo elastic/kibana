@@ -41,7 +41,6 @@ import {
   Axis,
   Chart,
   CurveType,
-  LEGACY_LIGHT_THEME,
   LineAnnotation,
   LineSeries,
   Position,
@@ -62,7 +61,7 @@ import type {
 import type { JobMessage } from '../../../../../../common/types/audit_message';
 import type { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
-import { useMlApi } from '../../../../contexts/kibana';
+import { useMlApi, useMlKibana } from '../../../../contexts/kibana';
 import { RevertModelSnapshotFlyout } from '../../../../components/model_snapshots/revert_model_snapshot_flyout';
 import { JobMessagesPane } from '../job_details/job_messages_pane';
 import { EditQueryDelay } from './edit_query_delay';
@@ -142,6 +141,16 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
   const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
   const canStartStopDatafeed = useMemo(() => checkPermission('canStartStopDatafeed'), []);
+
+  const {
+    services: {
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
+  } = useMlKibana();
+
+  const baseTheme = useChartsBaseTheme();
 
   const {
     getModelSnapshots,
@@ -442,9 +451,11 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                                 visible: 'never',
                               },
                             },
+                            chartMargins: {
+                              top: 10,
+                            },
                           }}
-                          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                          baseTheme={LEGACY_LIGHT_THEME}
+                          baseTheme={baseTheme}
                           locale={i18n.getLocale()}
                         />
                         <Axis
