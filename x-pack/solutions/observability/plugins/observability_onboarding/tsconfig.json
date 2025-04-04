@@ -4,12 +4,12 @@
     "outDir": "target/types"
   },
   "include": [
-    "../../../../../typings/**/*",
     "common/**/*",
     "public/**/*",
-    "typings/**/*",
+    "../../../../../typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    "e2e/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
