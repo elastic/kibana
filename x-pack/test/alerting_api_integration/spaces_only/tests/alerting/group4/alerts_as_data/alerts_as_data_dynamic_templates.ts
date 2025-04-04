@@ -11,6 +11,7 @@ import type {
   PropertyName,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
+import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { alertFieldMap, type Alert } from '@kbn/alerts-as-data-utils';
 import { TOTAL_FIELDS_LIMIT } from '@kbn/alerting-plugin/server';
@@ -23,6 +24,7 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
+import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataDynamicTemplatesTest({ getService }: FtrProviderContext) {
@@ -31,7 +33,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
-  const alertsAsDataIndex = '*alerts-observability.test.alerts.dynamic.templates.*';
+  const alertsAsDataIndex = '.internal.alerts-observability.test.alerts.dynamic.templates.*';
 
   describe('alerts as data dynamic templates', function () {
     this.tags('skipFIPS');
@@ -45,6 +47,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
     });
 
     it(`should add the dynamic fields`, async () => {
+      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
       const ruleParameters = {
         dynamic_fields: { 'host.id': '1', 'host.name': 'host-1' },
       };
@@ -108,7 +111,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
 
       const mapping = await es.indices.getMapping({ index: alertsAsDataIndex });
       const dynamicFiled = get(
-        mapping[Object.keys(mapping)[0]],
+        mapping[alertsAsDataIndex],
         'mappings.properties.kibana.properties.alert.properties.dynamic.properties.host.properties.id.type'
       );
 
