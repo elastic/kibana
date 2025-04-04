@@ -9,7 +9,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createMcpServer as createServer, McpServerTool, toolResultFactory } from '@kbn/wci-server';
-import { getCases, getAccounts } from './tools';
+import { getCases, getAccounts, search, get } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -59,6 +59,79 @@ export async function createMcpServer({
     priorityValues.length ? (priorityValues as [string, ...string[]]) : ['']
   );
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
+  const dataSources = ['support_case', 'account', 'all']
+
+  const search: McpServerTool = {
+    name: 'search',
+    description: 'Searches through Salesforce data sources using a semantic query',
+    schema: {
+      dataSource: z.string().describe(`what Salesforce object type to search through. Can only be a out of these ${dataSources}`),
+      semanticQuery: z
+        .string()
+        .optional()
+        .describe('Natural language query to search case content semantically'),
+      createdAfter: z
+        .string()
+        .optional()
+        .describe('Return cases created after this date (format: YYYY-MM-DD)'),
+      createdBefore: z
+        .string()
+        .optional()
+        .describe('Return cases created before this date (format: YYYY-MM-DD)'),
+      updatedAfter: z
+        .string()
+        .optional()
+        .describe('Return cases updated after this date (format: YYYY-MM-DD)'),
+      updatedBefore: z
+        .string()
+        .optional()
+        .describe('Return cases updated before this date (format: YYYY-MM-DD)'),
+    },
+    execute: async ({
+      dataSource,
+      semanticQuery,
+      createdAfter,
+      createdBefore,
+      updatedAfter,
+      updatedBefore,
+    }) => {
+
+      const searchResult = await search(elasticsearchClient, logger, index, dataSource, {
+        semanticQuery,
+        createdAfter,
+        createdBefore,
+        updatedAfter,
+        updatedBefore,
+      });
+      
+      return {
+        content: searchResult,
+      };
+    }
+  }
+  
+  const get: McpServerTool = {
+    name: 'get',
+    description: 'Retrieves a Salesforce document by id',
+    schema: {
+      id: z.string().describe('id of document '),
+      dataSource: z.string().describe(`what Salesforce object type to search through. Can only be a out of these ${dataSources}`),
+    },
+    execute: async ({
+      id,
+      dataSource,
+    }) => {
+
+      const searchResult = await get(elasticsearchClient, logger, index, dataSource, {
+        id
+      });
+      
+      logger.info(`results: ${JSON.stringify(searchResult)}`)
+      return {
+        content: searchResult,
+      };
+    }
+  }
 
   const getCasesTool: McpServerTool = {
     name: 'search_cases',
@@ -114,10 +187,6 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Return cases created before this date (format: YYYY-MM-DD)'),
-      semanticQuery: z
-        .string()
-        .optional()
-        .describe('Natural language query to search case content semantically'),
       updatedAfter: z
         .string()
         .optional()
@@ -149,7 +218,6 @@ export async function createMcpServer({
       caseNumber,
       createdAfter,
       createdBefore,
-      semanticQuery,
       status,
       updatedAfter,
       updatedBefore,
@@ -174,7 +242,6 @@ export async function createMcpServer({
             caseNumber,
             createdAfter,
             createdBefore,
-            semanticQuery,
             status,
             updatedAfter,
             updatedBefore,

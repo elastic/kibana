@@ -6,6 +6,7 @@
  */
 
 import type {
+  QueryDslQueryContainer,
   SearchRequest,
   SearchResponse,
   SortOrder,
@@ -14,6 +15,15 @@ import { contentRefBuilder, ContentRefSourceType } from '@kbn/wci-common';
 import { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase, Account } from './types';
+
+interface SearchParams {
+  size?: number;
+  createdAfter?: string;
+  createdBefore?: string;
+  semanticQuery?: string;
+  updatedAfter?: string;
+  updatedBefore?: string;
+}
 
 interface CaseRetrievalParams {
   id?: string[];
@@ -26,7 +36,6 @@ interface CaseRetrievalParams {
   caseNumber?: string[];
   createdAfter?: string;
   createdBefore?: string;
-  semanticQuery?: string;
   status?: string[];
   updatedAfter?: string;
   updatedBefore?: string;
@@ -45,6 +54,148 @@ interface AccountRetrievalParams {
   createdAfter?: string;
   createdBefore?: string;
 }
+
+// Shared base mappings
+const baseObjectMappings: Record<string, string> = {
+  'id': 'id',
+  'title': 'title',
+  'url': 'url',
+  'ownerEmail': 'owner.email',
+  'ownerName': 'owner.name',
+  'createdAt': 'created_at',
+  'updatedAt': 'updated_at',
+};
+
+/**
+ * Search through Salesforce
+ *
+ * @param esClient - Elasticsearch client
+ * @param logger - Logger instance
+ * @param indexName - Index name to query
+ * @param dataSource - data source to search through
+ * @param params - parameters to filter results by
+ */
+export async function search(
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  indexName: string,
+  dataSource: string,
+  params: SearchParams
+){
+  const size = params.size || 10;
+
+  let query: QueryDslQueryContainer = {}
+  if (dataSource == 'support_case'){
+    query = buildQuery(params, 'support_case', baseObjectMappings)
+  } else if (dataSource == 'account') {
+    query = buildQuery(params, 'account', baseObjectMappings)
+  } else if (dataSource == 'all') {
+    query = buildQuery(params, 'all', baseObjectMappings)
+  }
+  
+  try {
+    const searchRequest: SearchRequest = {
+      index: indexName,
+      query: query,
+      size: size
+    };
+    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+
+    const contextFields = [
+      { field: 'id', type:  'keyword'},
+      { field: 'title', type:  'keyword' },
+      { field: 'description', type: 'text' },
+      { field: 'url', type:  'keyword' },
+    ];
+
+    const contentFragments = response.hits.hits.map((hit) => {
+      const source = hit._source as SupportCase;
+
+      return {
+        type: 'text' as const,
+        text:
+          contextFields
+            .map(({ field }) => {
+            const value = (source[field as keyof SupportCase] || '').toString()
+            return `$ field}: ${value}`;
+            })
+            .join('\n')
+      };
+    });
+
+    return contentFragments;
+  } catch (error) {
+    logger.error(`Search failed: ${error}`);
+
+    return [
+      {
+        type: 'text' as const,
+        text: `Error: Search failed: ${error}`,
+      },
+    ];
+  }
+}
+
+export async function get(
+  esClient: ElasticsearchClient,
+  logger: Logger,
+  indexName: string,
+  dataSource: string,
+  params: Record<string, any>
+){
+
+  let query: QueryDslQueryContainer = {}
+  if (dataSource == 'support_case'){
+    query = buildQuery(params, 'support_case', baseObjectMappings)
+  } else if (dataSource == 'account') {
+    query = buildQuery(params, 'account', baseObjectMappings)
+  } else if (dataSource == 'all') {
+    query = buildQuery(params, 'all', baseObjectMappings)
+  }
+  
+  try {
+    const searchRequest: SearchRequest = {
+      index: indexName,
+      query: query
+    };
+    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+
+    const contextFields = [
+      { field: 'id', type:  'keyword'},
+      { field: 'title', type:  'keyword' },
+      { field: 'description', type: 'text' },
+      { field: 'url', type:  'keyword' },
+    ];
+
+    const contentFragments = response.hits.hits.map((hit) => {
+      const source = hit._source as SupportCase;
+
+      return {
+        type: 'text' as const,
+        text:
+          contextFields
+            .map(({ field }) => {
+            const value = (source[field as keyof SupportCase] || '').toString()
+            return `$ field}: ${value}`;
+            })
+            .join('\n')
+      };
+    });
+
+    return contentFragments;
+  } catch (error) {
+    logger.error(`Search failed: ${error}`);
+
+    return [
+      {
+        type: 'text' as const,
+        text: `Error: Search failed: ${error}`,
+      },
+    ];
+  }
+}
+
+
 
 /**
  * Retrieves Salesforce cases
@@ -71,8 +222,18 @@ export async function getCases({
   const sort = params.sortField
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
+  const supportCaseMappings: Record<string, string> = {
+    ...baseObjectMappings,
+    'caseNumber': 'metadata.case_number',
+    'priority': 'metadata.priority',
+    'status': 'metadata.status',
+    'accountId': 'metadata.account_id',
+    'accountName': 'metadata.account_name',
+  };
 
-  const query = buildCaseQuery(params);
+  try {
+
+    const query = buildQuery(params, 'support_case', supportCaseMappings);
 
   const searchRequest: SearchRequest = {
     index: indexName,
@@ -165,6 +326,16 @@ export async function getCases({
   });
 
   return contentFragments;
+} catch (error) {
+  logger.error(`Search failed: ${error}`);
+
+  return [
+    {
+      type: 'text' as const,
+      text: `Error: Search failed: ${error}`,
+    },
+  ];
+}
 }
 
 /**
@@ -192,8 +363,16 @@ export async function getAccounts({
   const sort = params.sortField
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
+  const accountMappings: Record<string, string> = {
+    ...baseObjectMappings,
+    'recordTypeId': 'metadata.record_type_id',
+    'isPartner': 'metadata.is_partner',
+    'isCustomerPortal': 'metadata.is_customer_portal',
+  };
 
-  const query = buildAccountQuery(params);
+  try {
+
+  const query = buildQuery(params, 'account', accountMappings);
 
   const searchRequest: SearchRequest = {
     index: indexName,
@@ -226,17 +405,6 @@ export async function getAccounts({
 
   const contentFragments = response.hits.hits.map((hit) => {
     const source = hit._source as Account;
-
-    // Helper function to safely get nested values
-    const getNestedValue = (obj: any, path: string[]): string => {
-      return (
-        path
-          .reduce((prev, curr) => {
-            return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
-          }, obj)
-          ?.toString() || ''
-      );
-    };
 
     // Format contacts if they exist
     let contactsText = '';
@@ -280,38 +448,52 @@ export async function getAccounts({
   });
 
   return contentFragments;
+} catch (error) {
+  logger.error(`Search failed: ${error}`);
+
+  return [
+    {
+      type: 'text' as const,
+      text: `Error: Search failed: ${error}`,
+    },
+  ];
+}
 }
 
-function buildCaseQuery(params: CaseRetrievalParams): any {
-  const mustClauses: any[] = [{ term: { object_type: 'support_case' } }];
+// Helper function to safely get nested values
+function getNestedValue(obj: any, path: string[]) {
+  return (
+    path
+      .reduce((prev, curr) => {
+        return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
+      }, obj)
+      ?.toString() || ''
+  );
+};
 
-  if (params.id && params.id.length > 0) mustClauses.push({ terms: { id: params.id } });
-  if (params.caseNumber && params.caseNumber.length > 0)
-    mustClauses.push({ terms: { 'metadata.case_number': params.caseNumber } });
-  if (params.ownerEmail && params.ownerEmail.length > 0)
-    mustClauses.push({ terms: { 'owner.email': params.ownerEmail } });
-  if (params.priority && params.priority.length > 0)
-    mustClauses.push({ terms: { 'metadata.priority': params.priority } });
-  if (params.status && params.status.length > 0)
-    mustClauses.push({ terms: { 'metadata.status': params.status } });
-  if (params.closed !== undefined) mustClauses.push({ term: { 'metadata.closed': params.closed } });
+function addTermsClause(mustClauses: any[], field: string, value: any, mappings?: Record<string, string>) {
 
-  if (params.createdAfter || params.createdBefore) {
-    const range: any = { range: { created_at: {} } };
-    if (params.createdAfter) range.range.created_at.gte = params.createdAfter;
-    if (params.createdBefore) range.range.created_at.lte = params.createdBefore;
-    mustClauses.push(range);
+  if (mappings && mappings[field]) {
+    if (Array.isArray(value)) {
+      mustClauses.push({ terms: { [mappings[field]]: value } });
+    } else {
+      mustClauses.push({ term: { [mappings[field]]: value } });
+    }
+  }
+}
+
+function addDateRangeClause(mustClauses: any[], field: string, createdAfter?: string, createdBefore?: string) {
+  if (createdAfter || createdBefore) {
+    const range: any = { range: { [field]: {} } };
+    if (createdAfter) range.range[field].gte = createdAfter;
+    if (createdBefore) range.range[field].lte = createdBefore;
+       mustClauses.push(range);
+     }
   }
 
-  if (params.updatedAfter || params.updatedBefore) {
-    const range: any = { range: { updated_at: {} } };
-    if (params.updatedAfter) range.range.updated_at.gte = params.updatedAfter;
-    if (params.updatedBefore) range.range.updated_at.lte = params.updatedBefore;
-    mustClauses.push(range);
-  }
-
+function addCommentFilters(mustClauses: any[], commentAuthorEmail: string, commentCreatedAfter: string, commentCreatedBefore: string) {
   // Add comment-related queries
-  if (params.commentAuthorEmail || params.commentCreatedAfter || params.commentCreatedBefore) {
+  if (commentAuthorEmail || commentCreatedAfter || commentCreatedBefore) {
     const nestedQuery: any = {
       nested: {
         path: 'comments',
@@ -324,49 +506,62 @@ function buildCaseQuery(params: CaseRetrievalParams): any {
     };
 
     // Add comment author filter
-    if (params.commentAuthorEmail && params.commentAuthorEmail.length > 0) {
+    if (commentAuthorEmail && commentAuthorEmail.length > 0) {
       nestedQuery.nested.query.bool.must.push({
-        terms: { 'comments.author.email': params.commentAuthorEmail },
+        terms: { 'comments.author.email': commentAuthorEmail },
       });
     }
 
     // Add comment date range filters
-    if (params.commentCreatedAfter || params.commentCreatedBefore) {
+    if (commentCreatedAfter || commentCreatedBefore) {
       const commentDateRange: any = { range: { 'comments.created_at': {} } };
-      if (params.commentCreatedAfter)
-        commentDateRange.range['comments.created_at'].gte = params.commentCreatedAfter;
-      if (params.commentCreatedBefore)
-        commentDateRange.range['comments.created_at'].lte = params.commentCreatedBefore;
+      if (commentCreatedAfter)
+        commentDateRange.range['comments.created_at'].gte = commentCreatedAfter;
+      if (commentCreatedBefore)
+        commentDateRange.range['comments.created_at'].lte = commentCreatedBefore;
       nestedQuery.nested.query.bool.must.push(commentDateRange);
     }
 
     mustClauses.push(nestedQuery);
   }
-
-  if (params.semanticQuery) {
-    mustClauses.push({
-      semantic: { field: 'content_semantic', query: params.semanticQuery, boost: 2.0 },
-    });
-  }
-
-  return { bool: { must: mustClauses } };
 }
 
-function buildAccountQuery(params: AccountRetrievalParams): any {
-  const mustClauses: any[] = [{ term: { object_type: 'account' } }];
+function addSemanticQuery(mustClauses: any[], semanticQuery?: string): void {
+  if (semanticQuery) {
+    mustClauses.push({
+      semantic: { field: 'content_semantic', query: semanticQuery, boost: 2.0 },
+    });
+  }
+}
 
-  if (params.id && params.id.length > 0) mustClauses.push({ terms: { id: params.id } });
-  if (params.ownerEmail && params.ownerEmail.length > 0)
-    mustClauses.push({ terms: { 'owner.email': params.ownerEmail } });
-  if (params.isPartner !== undefined)
-    mustClauses.push({ term: { 'metadata.is_partner': params.isPartner } });
-
-  if (params.createdAfter || params.createdBefore) {
-    const range: any = { range: { created_at: {} } };
-    if (params.createdAfter) range.range.created_at.gte = params.createdAfter;
-    if (params.createdBefore) range.range.created_at.lte = params.createdBefore;
-    mustClauses.push(range);
+function buildQuery(params: Record<string,any>, objectType: string, mappings: Record<string, string>): any {
+  let mustClauses: any[] = [];
+  
+  if (objectType == 'all') {
+    mustClauses.push({ terms: { object_type: ['support_case', 'account']} });
+  } else {
+    mustClauses.push({ term: { object_type: objectType} });
   }
 
+  Object.entries(params).forEach(( [field, value]) => {
+    if (value) {
+      if  (field === 'semanticQuery') {
+        addSemanticQuery(mustClauses, value);
+      } else if  (field === 'createdAfter' || field === 'createdBefore') {
+        if (!mustClauses.some(clause => clause.range && clause.range.created_at !== undefined)) {
+          addDateRangeClause(mustClauses, 'created_at', params.createdAfter, params.createdBefore);
+        }
+      } else if  (field === 'updatedAfter' || field === 'updatedBefore') {
+        if (!mustClauses.some(clause => clause.range && clause.range.updated_at !== undefined)) {
+          addDateRangeClause(mustClauses, 'updated_at', params.updatedAfter, params.updatedBefore);
+        }
+      } else if  (field === 'commentAuthorEmail' || field === 'commentCreatedAfter' || field === 'commentCreatedBefore') {
+        addCommentFilters(mustClauses, params.commentAuthorEmail, params.commentCreatedAfter, params.commentCreatedBefore)
+      } else {
+        addTermsClause(mustClauses, field, value, mappings);
+      }
+    }
+  });
+  
   return { bool: { must: mustClauses } };
 }
