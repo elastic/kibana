@@ -23,6 +23,7 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
     fieldConstants.SERVICE_ENVIRONMENT_FIELD,
     fieldConstants.AGENT_NAME_FIELD,
     fieldConstants.TRANSACTION_ID_FIELD,
+    fieldConstants.TRANSACTION_TYPE_FIELD,
     fieldConstants.TRANSACTION_NAME_FIELD,
     fieldConstants.TRANSACTION_DURATION_FIELD,
     fieldConstants.SPAN_NAME_FIELD,

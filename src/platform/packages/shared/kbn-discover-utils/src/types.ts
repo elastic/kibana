@@ -133,6 +133,7 @@ export interface ServiceFields {
 
 export interface TransactionTraceFields {
   'transaction.id'?: string;
+  'transaction.type'?: string;
   'transaction.name'?: string;
   'transaction.duration.us'?: number;
 }
