@@ -5,60 +5,68 @@
  * 2.0.
  */
 
-import { render } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
+import { useStartServices } from '../../../../../../../hooks';
+
 import { BackLink } from './back_link';
 
+jest.mock('../../../../../../../hooks', () => {
+  return {
+    ...jest.requireActual('../../../../../../../hooks'),
+    useStartServices: jest.fn().mockReturnValue({
+      application: { navigateToApp: jest.fn() },
+    }),
+  };
+});
+
 describe('BackLink', () => {
-  it('renders back to selection link', () => {
-    const expectedUrl = '/app/experimental-onboarding';
+  beforeEach(() => {
+    jest.mocked(useStartServices().application.navigateToApp).mockReset();
+  });
+
+  it('renders back to selection link when returnAppId and returnPath are present', async () => {
+    const appId = 'observabilityOnboarding';
+    const path = '?category=aws';
     const queryParams = new URLSearchParams();
-    queryParams.set('observabilityOnboardingLink', expectedUrl);
-    const { getByText, getByRole } = render(
+    queryParams.set('returnAppId', appId);
+    queryParams.set('returnPath', path);
+
+    const { getByText } = render(
       <I18nProvider>
-        <BackLink queryParams={queryParams} href="/app/integrations" />
+        <BackLink queryParams={queryParams} integrationsPath="/browse" />
       </I18nProvider>
     );
     expect(getByText('Back to selection')).toBeInTheDocument();
-    expect(getByRole('link').getAttribute('href')).toBe(expectedUrl);
+    await act(async () => {
+      fireEvent.click(getByText('Back to selection'));
+    });
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
+        path,
+      });
+    });
   });
 
-  it('renders back to selection link when onboardingLink param is provided', () => {
-    const expectedUrl = '/app/experimental-onboarding';
+  it('renders back to integrations link when no query params are present', async () => {
+    const appId = 'integrations';
+    const path = '/browse';
     const queryParams = new URLSearchParams();
-    queryParams.set('onboardingLink', expectedUrl);
-    const { getByText, getByRole } = render(
+    const { getByText } = render(
       <I18nProvider>
-        <BackLink queryParams={queryParams} href="/app/integrations" />
-      </I18nProvider>
-    );
-    expect(getByText('Back to selection')).toBeInTheDocument();
-    expect(getByRole('link').getAttribute('href')).toBe(expectedUrl);
-  });
-
-  it('renders back to selection link with params', () => {
-    const expectedUrl = '/app/experimental-onboarding&search=aws&category=infra';
-    const queryParams = new URLSearchParams();
-    queryParams.set('observabilityOnboardingLink', expectedUrl);
-    const { getByText, getByRole } = render(
-      <I18nProvider>
-        <BackLink queryParams={queryParams} href="/app/integrations" />
-      </I18nProvider>
-    );
-    expect(getByText('Back to selection')).toBeInTheDocument();
-    expect(getByRole('link').getAttribute('href')).toBe(expectedUrl);
-  });
-
-  it('renders back to integrations link', () => {
-    const queryParams = new URLSearchParams();
-    const { getByText, getByRole } = render(
-      <I18nProvider>
-        <BackLink queryParams={queryParams} href="/app/integrations" />
+        <BackLink queryParams={queryParams} integrationsPath="/browse" />
       </I18nProvider>
     );
     expect(getByText('Back to integrations')).toBeInTheDocument();
-    expect(getByRole('link').getAttribute('href')).toBe('/app/integrations');
+    await act(async () => {
+      fireEvent.click(getByText('Back to integrations'));
+    });
+    await waitFor(() => {
+      expect(useStartServices().application.navigateToApp).toHaveBeenCalledWith(appId, {
+        path,
+      });
+    });
   });
 });

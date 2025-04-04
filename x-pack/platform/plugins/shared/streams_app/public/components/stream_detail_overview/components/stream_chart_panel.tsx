@@ -8,6 +8,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@e
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import type { DomainRange } from '@elastic/charts';
 
 import { AbortableAsyncState } from '@kbn/react-hooks';
 import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
@@ -16,16 +17,13 @@ import { ControlledEsqlChart } from '../../esql_chart/controlled_esql_chart';
 interface StreamChartPanelProps {
   histogramQueryFetch: AbortableAsyncState<UnparsedEsqlResponse | undefined>;
   discoverLink?: string;
-  timerange: {
-    start: number;
-    end: number;
-  };
+  xDomain?: DomainRange;
 }
 
 export function StreamChartPanel({
   histogramQueryFetch,
   discoverLink,
-  timerange,
+  xDomain,
 }: StreamChartPanelProps) {
   return (
     <EuiPanel hasShadow={false} hasBorder>
@@ -62,7 +60,7 @@ export function StreamChartPanel({
             id="entity_log_rate"
             metricNames={['metric']}
             chartType={'bar'}
-            timerange={timerange}
+            xDomain={xDomain}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

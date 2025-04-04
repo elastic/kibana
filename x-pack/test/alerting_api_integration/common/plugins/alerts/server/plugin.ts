@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   CoreSetup,
   CoreStart,
@@ -14,20 +14,20 @@ import {
   ElasticsearchClient,
 } from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
-import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
-import {
+import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server/plugin';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
-import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
+import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';

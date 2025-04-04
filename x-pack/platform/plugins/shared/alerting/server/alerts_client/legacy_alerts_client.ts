@@ -129,10 +129,6 @@ export class LegacyAlertsClient<
     });
   }
 
-  public getTrackedAlerts() {
-    return this.trackedAlerts;
-  }
-
   public getAlert(id: string) {
     return this.alertFactory?.get(id);
   }
@@ -211,10 +207,11 @@ export class LegacyAlertsClient<
     return {};
   }
 
-  public getRawAlertInstancesForState() {
+  public getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean) {
     return toRawAlertInstances<State, Context, ActionGroupIds, RecoveryActionGroupId>(
       this.processedAlerts.trackedActiveAlerts,
-      this.processedAlerts.trackedRecoveredAlerts
+      this.processedAlerts.trackedRecoveredAlerts,
+      shouldOptimizeTaskState
     );
   }
 
@@ -284,5 +281,8 @@ export class LegacyAlertsClient<
 
   public async setAlertStatusToUntracked() {
     return;
+  }
+  public getTrackedExecutions() {
+    return new Set([]);
   }
 }

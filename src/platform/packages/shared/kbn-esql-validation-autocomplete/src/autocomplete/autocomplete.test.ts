@@ -31,6 +31,7 @@ import { METADATA_FIELDS } from '../shared/constants';
 import { ESQL_STRING_TYPES } from '../shared/esql_types';
 import { getRecommendedQueries } from './recommended_queries/templates';
 import { getDateHistogramCompletionItem } from './commands/stats/util';
+import { Location } from '../definitions/types';
 
 const commandDefinitions = unmodifiedCommandDefinitions.filter(({ hidden }) => !hidden);
 
@@ -87,7 +88,7 @@ describe('autocomplete', () => {
   describe('New command', () => {
     const recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     testSuggestions('/', [
-      ...sourceCommands.map((name) => name.toUpperCase() + ' $0'),
+      ...sourceCommands.map((name) => name.toUpperCase() + ' '),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
     const commands = commandDefinitions
@@ -96,12 +97,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -254,7 +255,7 @@ describe('autocomplete', () => {
     // source command
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     testSuggestions('f/', [
-      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} $0`),
+      ...sourceCommands.map((cmd) => `${cmd.toUpperCase()} `),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -264,12 +265,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -282,7 +283,7 @@ describe('autocomplete', () => {
       testSuggestions('FROM kibana_sample_data_logs | EVAL TRIM(e/)', [
         ...getFieldNamesByType(['text', 'keyword']),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ['text', 'keyword'],
           { scalar: true },
           undefined,
@@ -295,12 +296,12 @@ describe('autocomplete', () => {
         TIME_PICKER_SUGGESTION,
         ...TIME_SYSTEM_PARAMS.map((t) => `${t}, `),
         ...getFieldNamesByType(['date', 'date_nanos']).map((name) => `${name}, `),
-        ...getFunctionSignaturesByReturnType('eval', ['date', 'date_nanos'], { scalar: true }).map(
-          (s) => ({
-            ...s,
-            text: `${s.text},`,
-          })
-        ),
+        ...getFunctionSignaturesByReturnType(Location.EVAL, ['date', 'date_nanos'], {
+          scalar: true,
+        }).map((s) => ({
+          ...s,
+          text: `${s.text},`,
+        })),
       ];
       testSuggestions('FROM a | EVAL DATE_DIFF("day", /)', expectedDateDiff2ndArgSuggestions);
 
@@ -319,7 +320,7 @@ describe('autocomplete', () => {
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
-    testSuggestions('FROM index1 M/', ['METADATA $0']);
+    testSuggestions('FROM index1 M/', ['METADATA ']);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -328,12 +329,12 @@ describe('autocomplete', () => {
     testSuggestions('FROM index1 | EVAL b/', [
       'var0 = ',
       ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
 
     testSuggestions('FROM index1 | EVAL var0 = f/', [
       ...getFieldNamesByType('any').map((name) => `${name} `),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.EVAL, 'any', { scalar: true }),
     ]);
 
     // DISSECT field
@@ -411,7 +412,7 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
-      ...getFunctionSignaturesByReturnType('stats', 'any', {
+      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
         scalar: true,
         agg: true,
         grouping: true,
@@ -419,27 +420,27 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['BY ', ', ', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['WHERE ', 'BY ', ', ', '| ']);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
       'var0 = ',
       getDateHistogramCompletionItem(),
-      ...getFunctionSignaturesByReturnType('stats', 'any', { grouping: true, scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.STATS, 'any', { grouping: true, scalar: true }),
       ...getFieldNamesByType('any').map((field) => `${field} `),
     ]);
 
     // WHERE argument
     testSuggestions('FROM index1 | WHERE f/', [
       ...getFieldNamesByType('any').map((field) => `${field} `),
-      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
+      ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }),
     ]);
 
     // WHERE argument comparison
     testSuggestions(
       'FROM index1 | WHERE keywordField i/',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'boolean',
         {
           operators: true,
@@ -453,7 +454,7 @@ describe('autocomplete', () => {
     testSuggestions(
       'FROM index1 | WHERE ABS(integerField) i/',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'any',
         {
           operators: true,
@@ -477,7 +478,7 @@ describe('autocomplete', () => {
     let recommendedQuerySuggestions = getRecommendedQueriesSuggestions('FROM logs*', 'dateField');
     // Source command
     testSuggestions('F/', [
-      ...['FROM $0', 'ROW $0', 'SHOW $0'].map(attachTriggerCommand).map(attachAsSnippet),
+      ...['FROM ', 'ROW ', 'SHOW '].map(attachTriggerCommand),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -487,12 +488,12 @@ describe('autocomplete', () => {
         if (types && types.length) {
           const cmds: string[] = [];
           for (const type of types) {
-            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' $0';
+            const cmd = type.name.toUpperCase() + ' ' + name.toUpperCase() + ' ';
             cmds.push(cmd);
           }
           return cmds;
         } else {
-          return name.toUpperCase() + ' $0';
+          return name.toUpperCase() + ' ';
         }
       })
       .flat();
@@ -500,7 +501,7 @@ describe('autocomplete', () => {
     // Pipe command
     testSuggestions(
       'FROM a | E/',
-      commands.map((name) => attachTriggerCommand(name)).map(attachAsSnippet) // TODO consider making this check more fundamental
+      commands.map((name) => attachTriggerCommand(name))
     );
 
     describe('function arguments', () => {
@@ -520,7 +521,7 @@ describe('autocomplete', () => {
           .map((field) => `${field}, `)
           .map(attachTriggerCommand),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ESQL_STRING_TYPES,
           { scalar: true },
           undefined,
@@ -546,7 +547,7 @@ describe('autocomplete', () => {
           command: undefined,
         })),
         ...getFunctionSignaturesByReturnType(
-          'eval',
+          Location.EVAL,
           ESQL_STRING_TYPES,
           { scalar: true },
           undefined,
@@ -570,7 +571,7 @@ describe('autocomplete', () => {
     testSuggestions('FROM a /', [
       attachTriggerCommand('| '),
       ',',
-      attachAsSnippet(attachTriggerCommand('METADATA $0')),
+      attachTriggerCommand('METADATA '),
       ...recommendedQuerySuggestions.map((q) => q.queryString),
     ]);
 
@@ -675,7 +676,6 @@ describe('autocomplete', () => {
           {
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
-            asSnippet: false, // important because the text includes "$"
             command: TRIGGER_SUGGESTION_COMMAND,
             rangeToReplace: { start: 6, end: 13 },
           },
@@ -708,7 +708,7 @@ describe('autocomplete', () => {
 
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [attachAsSnippet(attachTriggerCommand('METADATA $0'))]);
+    testSuggestions('FROM index1 M/', [attachTriggerCommand('METADATA ')]);
 
     describe('ENRICH', () => {
       testSuggestions(
@@ -767,7 +767,7 @@ describe('autocomplete', () => {
       'FROM a | STATS /',
       [
         'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', {
+        ...getFunctionSignaturesByReturnType(Location.STATS, 'any', {
           scalar: true,
           agg: true,
           grouping: true,
@@ -778,13 +778,14 @@ describe('autocomplete', () => {
     // STATS argument BY
     testSuggestions('FROM a | STATS AVG(numberField) /', [
       ', ',
+      attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
       attachTriggerCommand('| '),
     ]);
 
     // STATS argument BY field
     const allByCompatibleFunctions = getFunctionSignaturesByReturnType(
-      'stats',
+      Location.STATS,
       'any',
       {
         scalar: true,
@@ -817,14 +818,16 @@ describe('autocomplete', () => {
       ...getFieldNamesByType('any')
         .map((field) => `${field} `)
         .map(attachTriggerCommand),
-      ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }).map(attachAsSnippet),
+      ...getFunctionSignaturesByReturnType(Location.WHERE, 'any', { scalar: true }).map(
+        attachAsSnippet
+      ),
     ]);
 
     // WHERE argument comparison
     testSuggestions(
       'FROM a | WHERE keywordField /',
       getFunctionSignaturesByReturnType(
-        'where',
+        Location.WHERE,
         'boolean',
         {
           operators: true,

@@ -48,6 +48,12 @@ describe('registerRouteForBundle', () => {
           httpResource: true,
         },
         validate: expect.any(Object),
+        security: {
+          authz: {
+            enabled: false,
+            reason: expect.any(String),
+          },
+        },
       },
       handler
     );

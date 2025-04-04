@@ -1311,20 +1311,23 @@ export class TimeSeriesExplorer extends React.Component {
               <EuiSpacer size="m" />
             </div>
           )}
-        {arePartitioningFieldsProvided && jobs.length > 0 && hasResults === true && (
-          <AnomaliesTable
-            bounds={bounds}
-            tableData={tableData}
-            filter={this.tableFilter}
-            sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
-            selectedJobs={[
-              {
-                id: selectedJob.job_id,
-                modelPlotEnabled,
-              },
-            ]}
-          />
-        )}
+        {arePartitioningFieldsProvided &&
+          jobs.length > 0 &&
+          hasResults === true &&
+          tableData?.anomalies && (
+            <AnomaliesTable
+              bounds={bounds}
+              tableData={tableData}
+              filter={this.tableFilter}
+              sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
+              selectedJobs={[
+                {
+                  id: selectedJob.job_id,
+                  modelPlotEnabled,
+                },
+              ]}
+            />
+          )}
       </TimeSeriesExplorerPage>
     );
   }
