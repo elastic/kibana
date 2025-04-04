@@ -45,7 +45,6 @@
     "@kbn/core-application-browser",
     "@kbn/core-plugins-server",
     "@kbn/logs-shared-plugin",
-    "@kbn/tooling-log"
   ],
   "exclude": [
     "target/**/*"
