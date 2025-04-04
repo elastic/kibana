@@ -2,6 +2,8 @@
 
 ## Disable plugins
 xpack.osquery.enabled: false
+
+## Disable features
 xpack.alerting.maintenanceWindow.enabled: false
 xpack.alerting.rulesSettings.enabled: false
 
