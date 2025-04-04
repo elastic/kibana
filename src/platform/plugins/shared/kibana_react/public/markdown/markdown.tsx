@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
-import { getSecureRelForTarget } from '@elastic/eui';
+import { getSecureRelForTarget, useEuiTheme } from '@elastic/eui';
 import { markdownStyles } from './markdownStyles';
 
 /**
@@ -96,14 +96,19 @@ export const Markdown = (props: MarkdownProps) => {
     isReversed = false,
     ...rest
   } = props;
-  const classes = classNames('kbnMarkdown__body', className);
+  const { euiTheme } = useEuiTheme();
+  const classes = classNames(
+    'kbnMarkdown__body',
+    { 'kbnMarkdown__body--reversed': isReversed },
+    className
+  );
   const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
   const renderedMarkdown = markdownRenderer(markdown);
   return (
     <div
       {...rest}
       className={classes}
-      css={markdownStyles(isReversed)}
+      css={markdownStyles(euiTheme, isReversed)}
       /*
        * Justification for dangerouslySetInnerHTML:
        * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.

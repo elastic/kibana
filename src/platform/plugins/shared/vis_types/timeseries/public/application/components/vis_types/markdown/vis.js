@@ -53,15 +53,11 @@ function MarkdownVisualization(props) {
         ...variables,
       }
     );
-    const markdownClasses = classNames('kbnMarkdown__body', {
-      'kbnMarkdown__body--reversed': isReversed,
-    });
 
     const contentClasses = classNames(
       'tvbMarkdown__content',
       `tvbMarkdown__content--${model.markdown_vertical_align}`,
-      { 'tvbMarkdown__content-isScrolling': model.markdown_scrollbars },
-      markdownClasses
+      { 'tvbMarkdown__content-isScrolling': model.markdown_scrollbars }
     );
 
     const markdownError = markdownSource instanceof Error ? markdownSource : null;

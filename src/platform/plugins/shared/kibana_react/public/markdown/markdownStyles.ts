@@ -8,7 +8,7 @@
  */
 
 import { css } from '@emotion/react';
-import { transparentize, useEuiTheme } from '@elastic/eui';
+import { UseEuiTheme, transparentize } from '@elastic/eui';
 
 // Default styles for Markdown element
 //
@@ -21,8 +21,7 @@ import { transparentize, useEuiTheme } from '@elastic/eui';
 // 7. Tables
 // 8. Code blocks
 
-export const markdownStyles = (isReversed: boolean) => {
-  const { euiTheme } = useEuiTheme();
+export const markdownStyles = (euiTheme: UseEuiTheme['euiTheme'], isReversed: boolean) => {
   // Note: The inlined base font size is set in common/functions/font.js. It should match $kbnMdFontSize.
   const kbnDefaultFontSize = 14;
 
