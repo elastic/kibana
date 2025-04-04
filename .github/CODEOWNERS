@@ -2380,7 +2380,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-explore
