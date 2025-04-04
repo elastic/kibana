@@ -11,6 +11,15 @@ export const SPACE_SELECTOR_COMBO_BOX = '[data-test-subj="spaceSelectorComboBox"
 export const SECURITY_PRIVILEGE = '[data-test-subj="featureCategory_securitySolution"]';
 
 // Sub-privileges
+export const SECURITY_SUB_PRIVILEGE = '[data-test-subj="featureCategory_securitySolution_siemV2"]';
+export const CASES_SUB_PRIVILEGE =
+  '[data-test-subj="featureCategory_securitySolution_securitySolutionCasesV3"]';
+export const MACHINE_LEARNING_SUB_PRIVILEGE =
+  '[data-test-subj="featureCategory_securitySolution_ml"]';
+export const ELASTIC_AI_ASSISTANT_SUB_PRIVILEGE =
+  '[data-test-subj="featureCategory_securitySolution_securitySolutionAssistant"]';
+export const ATTACK_DISCOVERY_SUB_PRIVILEGE =
+  '[data-test-subj="featureCategory_securitySolution_securitySolutionAttackDiscovery"]';
 export const TIMELINE_SUB_PRIVILEGE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionTimeline"]';
 export const NOTES_SUB_PRIVILEGE =
