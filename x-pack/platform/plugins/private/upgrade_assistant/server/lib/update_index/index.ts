@@ -33,7 +33,7 @@ export async function updateIndex({ esClient, index, operations, log }: UpdateIn
         // stop related rollup job if it exists
         const rollupJob = await getRollupJobByIndexName(esClient, log, index);
         if (rollupJob) {
-          await esClient.rollup.stopJob({ id: rollupJob });
+          await esClient.rollup.stopJob({ id: rollupJob, wait_for_completion: true });
         }
 
         res = await esClient.indices.addBlock({ index, block: 'write' });
