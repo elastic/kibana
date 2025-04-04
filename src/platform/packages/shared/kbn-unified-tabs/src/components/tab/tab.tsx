@@ -117,10 +117,11 @@ export const Tab: React.FC<TabProps> = (props) => {
   const onDoubleClick = useCallback(
     (event?: MouseEvent<HTMLDivElement>) => {
       event?.stopPropagation();
-      setIsInlineEditActive(true);
       hidePreview();
+      setActionPopover(false);
+      setIsInlineEditActive(true);
     },
-    [setIsInlineEditActive, hidePreview]
+    [setIsInlineEditActive, hidePreview, setActionPopover]
   );
 
   const onEnterRenaming = useCallback(async () => {
@@ -135,10 +136,10 @@ export const Tab: React.FC<TabProps> = (props) => {
       if (event.key === keys.ENTER) {
         event.preventDefault();
         tabInteractiveElementRef.current?.focus();
-        await onSelectEvent(event);
+        setActionPopover(true);
       }
     },
-    [onSelectEvent]
+    [setActionPopover]
   );
 
   const onGlobalKeyDown = useCallback(
@@ -171,80 +172,74 @@ export const Tab: React.FC<TabProps> = (props) => {
   }, [isInlineEditActive, isSelected, setIsInlineEditActive]);
 
   const mainTabContent = (
-    <EuiFlexGroup
-      alignItems="center"
-      direction="row"
-      css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}
-      responsive={false}
-      gutterSize="none"
-    >
-      {!isInlineEditActive && (
-        <div
-          ref={tabInteractiveElementRef}
-          aria-label={tabButtonAriaLabel}
-          css={tabInteractiveElementCss}
-          {...dragHandleProps}
-          {...getTabAttributes(item, tabContentId)}
-          role="tab"
-          tabIndex={isSelected ? 0 : -1}
-          aria-selected={isSelected}
-          onClick={onClick}
-          onDoubleClick={onDoubleClick}
-          onKeyDown={onKeyDownEvent}
-        />
-      )}
-      <div css={getTabContentCss(isInlineEditActive)}>
-        {isInlineEditActive ? (
+    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, isDragging)}>
+      {isInlineEditActive ? (
+        <div css={getTabContentCss(euiTheme)}>
           <EditTabLabel
             item={item}
             onLabelEdited={onLabelEdited}
             onExit={() => setIsInlineEditActive(false)}
           />
-        ) : (
-          <>
-            <div
-              css={getTabButtonCss(euiTheme)}
-              className="unifiedTabs__tabLabel"
-              data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-            >
-              <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
-                {item.label}
-              </EuiText>
+        </div>
+      ) : (
+        <>
+          <div
+            ref={tabInteractiveElementRef}
+            aria-label={tabButtonAriaLabel}
+            {...dragHandleProps}
+            {...getTabAttributes(item, tabContentId)}
+            role="tab"
+            tabIndex={isSelected ? 0 : -1}
+            aria-selected={isSelected}
+            onClick={onClick}
+            onDoubleClick={onDoubleClick}
+            onKeyDown={onKeyDownEvent}
+          >
+            <div css={getTabContentCss(euiTheme)}>
+              <div
+                css={getTabButtonCss(euiTheme)}
+                className="unifiedTabs__tabLabel"
+                data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
+              >
+                <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
+                  {item.label}
+                </EuiText>
+              </div>
             </div>
-            <div className="unifiedTabs__tabActions">
-              <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
-                {!!getTabMenuItems && (
-                  <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
-                    <TabMenu
-                      item={item}
-                      getTabMenuItems={getTabMenuItems}
-                      isPopoverOpen={isActionPopoverOpen}
-                      setPopover={onToggleActionsMenu}
-                      onEnterRenaming={onEnterRenaming}
-                    />
-                  </EuiFlexItem>
-                )}
-                {!!onClose && (
-                  <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                    <EuiButtonIcon
-                      // semantically role="tablist" does not allow other buttons in tabs
-                      aria-hidden={true}
-                      tabIndex={-1}
-                      aria-label={closeButtonLabel} // TODO: replace with a EuiToolTip
-                      title={closeButtonLabel}
-                      color="text"
-                      data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
-                      iconType="cross"
-                      onClick={onCloseEvent}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </div>
-          </>
-        )}
-      </div>
-    </EuiFlexGroup>
+          </div>
+          <div className="unifiedTabs__tabActions">
+            <EuiFlexGroup responsive={false} direction="row" gutterSize="none">
+              {!!getTabMenuItems && (
+                <EuiFlexItem grow={false} className="unifiedTabs__tabMenuBtn">
+                  <TabMenu
+                    item={item}
+                    getTabMenuItems={getTabMenuItems}
+                    isPopoverOpen={isActionPopoverOpen}
+                    setPopover={onToggleActionsMenu}
+                    onEnterRenaming={onEnterRenaming}
+                  />
+                </EuiFlexItem>
+              )}
+              {!!onClose && (
+                <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
+                  <EuiButtonIcon
+                    // semantically role="tablist" does not allow other buttons in tabs
+                    aria-hidden={true}
+                    tabIndex={-1}
+                    aria-label={closeButtonLabel} // TODO: replace with a EuiToolTip
+                    title={closeButtonLabel}
+                    color="text"
+                    data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
+                    iconType="cross"
+                    onClick={onCloseEvent}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </div>
+        </>
+      )}
+    </div>
   );
 
   return (
@@ -267,11 +262,6 @@ export const Tab: React.FC<TabProps> = (props) => {
   );
 };
 
-const tabInteractiveElementCss = css`
-  position: absolute;
-  inset: 0;
-`;
-
 function getTabContainerCss(
   euiTheme: EuiThemeComputed,
   tabsSizeConfig: TabsSizeConfig,
@@ -282,11 +272,10 @@ function getTabContainerCss(
 
   return css`
     position: relative;
-    display: inline-flex;
+    display: inline-block;
     border-right: ${euiTheme.border.thin};
     border-color: ${isDragging ? 'transparent' : euiTheme.colors.lightShade};
     height: ${euiTheme.size.xl};
-    padding-inline: ${euiTheme.size.xs};
     min-width: ${tabsSizeConfig.regularTabMinWidth}px;
     max-width: ${tabsSizeConfig.regularTabMaxWidth}px;
 
@@ -294,8 +283,8 @@ function getTabContainerCss(
 
     .unifiedTabs__tabActions {
       position: absolute;
-      top: 0;
-      right: 0;
+      top: ${euiTheme.size.xs};
+      right: ${euiTheme.size.xs};
       opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
       pointer-events: auto;
@@ -321,11 +310,15 @@ function getTabContainerCss(
   `;
 }
 
-function getTabContentCss(isInlineEditActive: boolean) {
+function getTabContentCss(euiTheme: EuiThemeComputed) {
   return css`
     position: relative;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
     width: 100%;
-    ${isInlineEditActive ? '' : 'pointer-events: none;'}
+    height: ${euiTheme.size.xl};
+    padding-inline: ${euiTheme.size.xs};
   `;
 }
 
@@ -340,7 +333,6 @@ function getTabButtonCss(euiTheme: EuiThemeComputed) {
     border: none;
     border-radius: 0;
     background: transparent;
-    pointer-events: none;
   `;
 }
 
