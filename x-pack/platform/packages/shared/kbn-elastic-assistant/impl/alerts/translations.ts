@@ -19,6 +19,13 @@ export const NO_SUMMARY_AVAILABLE = i18n.translate(
   }
 );
 
+export const RECOMMENDED_ACTIONS = i18n.translate(
+  'xpack.elasticAssistant.alertSummary.recommendedActions',
+  {
+    defaultMessage: 'Recommended actions',
+  }
+);
+
 export const GENERATING = i18n.translate('xpack.elasticAssistant.alertSummary.generating', {
   defaultMessage: 'Generating AI description and recommended actions.',
 });

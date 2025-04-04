@@ -26,6 +26,14 @@ interface Props {
   promptContext: PromptContext;
   showAnonymizedValues: boolean;
 }
+interface UseAlertSummary {
+  alertSummary: string;
+  hasAlertSummary: boolean;
+  fetchAISummary: () => void;
+  isLoading: boolean;
+  messageAndReplacements: { message: string; replacements: Replacements } | null;
+  recommendedActions: string | undefined;
+}
 
 export const useAlertSummary = ({
   alertId,
@@ -33,13 +41,14 @@ export const useAlertSummary = ({
   isContextReady,
   promptContext,
   showAnonymizedValues,
-}: Props) => {
+}: Props): UseAlertSummary => {
   const { abortStream, isLoading, sendMessage } = useChatComplete({
     connectorId: defaultConnectorId,
   });
   const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
     useFetchAnonymizationFields();
   const [alertSummary, setAlertSummary] = useState<string>(i18n.NO_SUMMARY_AVAILABLE);
+  const [recommendedActions, setRecommendedActions] = useState<string | undefined>();
   const [messageAndReplacements, setMessageAndReplacements] = useState<{
     message: string;
     replacements: Replacements;
@@ -63,6 +72,16 @@ export const useAlertSummary = ({
               replacements: fetchedAlertSummary.data[0].replacements,
             })
       );
+      if (fetchedAlertSummary.data[0].recommendedActions) {
+        setRecommendedActions(
+          showAnonymizedValues
+            ? fetchedAlertSummary.data[0].recommendedActions
+            : replaceAnonymizedValuesWithOriginalValues({
+                messageContent: fetchedAlertSummary.data[0].recommendedActions,
+                replacements: fetchedAlertSummary.data[0].replacements,
+              })
+        );
+      }
     }
   }, [fetchedAlertSummary, showAnonymizedValues]);
 
@@ -108,15 +127,39 @@ export const useAlertSummary = ({
     const fetchSummary = async (content: { message: string; replacements: Replacements }) => {
       setHasAlertSummary(true);
 
-      const rawResponse = await sendMessage(content);
+      const rawResponse = await sendMessage({
+        ...content,
+        promptIds: { promptGroupId: 'aiForSoc', promptId: 'alertSummarySystemPrompt' },
+      });
+      let responseSummary;
+      let responseRecommendedActions;
+      try {
+        const parsedResponse = JSON.parse(rawResponse.response);
+        responseSummary = parsedResponse.summary;
+        responseRecommendedActions = parsedResponse.recommendedActions;
+      } catch (e) {
+        // AI did not return the expected JSON
+        responseSummary = rawResponse.response;
+      }
+
       setAlertSummary(
         showAnonymizedValues
-          ? rawResponse.response
+          ? responseSummary
           : replaceAnonymizedValuesWithOriginalValues({
-              messageContent: rawResponse.response,
+              messageContent: responseSummary,
               replacements: content.replacements,
             })
       );
+      if (responseRecommendedActions) {
+        setRecommendedActions(
+          showAnonymizedValues
+            ? responseRecommendedActions
+            : replaceAnonymizedValuesWithOriginalValues({
+                messageContent: responseRecommendedActions,
+                replacements: content.replacements,
+              })
+        );
+      }
 
       if (!rawResponse.isError) {
         if (fetchedAlertSummary.data.length > 0) {
@@ -125,7 +168,10 @@ export const useAlertSummary = ({
               update: [
                 {
                   id: fetchedAlertSummary.data[0].id,
-                  summary: rawResponse.response,
+                  summary: responseSummary,
+                  ...(responseRecommendedActions
+                    ? { recommendedActions: responseRecommendedActions }
+                    : {}),
                   replacements: content.replacements,
                 },
               ],
@@ -137,7 +183,10 @@ export const useAlertSummary = ({
               create: [
                 {
                   alertId,
-                  summary: rawResponse.response,
+                  summary: responseSummary,
+                  ...(responseRecommendedActions
+                    ? { recommendedActions: responseRecommendedActions }
+                    : {}),
                   replacements: content.replacements,
                 },
               ],
@@ -168,5 +217,6 @@ export const useAlertSummary = ({
     fetchAISummary,
     isLoading,
     messageAndReplacements,
+    recommendedActions,
   };
 };

@@ -49,6 +49,7 @@ export const AlertSummaryResponse = z.object({
   alertId: NonEmptyString,
   timestamp: NonEmptyString.optional(),
   summary: z.string(),
+  recommendedActions: z.string().optional(),
   replacements: Replacements,
   updatedAt: z.string().optional(),
   updatedBy: z.string().optional(),
@@ -106,6 +107,7 @@ export type AlertSummaryCreateProps = z.infer<typeof AlertSummaryCreateProps>;
 export const AlertSummaryCreateProps = z.object({
   alertId: z.string(),
   summary: z.string(),
+  recommendedActions: z.string().optional(),
   replacements: Replacements,
 });
 
@@ -113,6 +115,7 @@ export type AlertSummaryUpdateProps = z.infer<typeof AlertSummaryUpdateProps>;
 export const AlertSummaryUpdateProps = z.object({
   id: z.string(),
   summary: z.string().optional(),
+  recommendedActions: z.string().optional(),
   replacements: Replacements.optional(),
 });
 

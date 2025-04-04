@@ -6,13 +6,14 @@
  */
 
 import { useCallback, useMemo, useRef, useState } from 'react';
-import { Replacements } from '@kbn/elastic-assistant-common';
+import { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
 import { EXECUTE_ACTION_TIMEOUT } from '../../use_send_message';
 import { ChatCompleteResponse, postChatComplete } from './post_chat_complete';
 import { useAssistantContext, useLoadConnectors } from '../../../..';
 import { FETCH_MESSAGE_TIMEOUT_ERROR } from '../../use_send_message/translations';
 interface SendMessageProps {
   message: string;
+  promptIds?: PromptIds;
   replacements: Replacements;
 }
 interface UseChatComplete {
@@ -33,7 +34,7 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
     [connectors, connectorId]
   );
   const sendMessage = useCallback(
-    async ({ message, replacements }: SendMessageProps) => {
+    async ({ message, promptIds, replacements }: SendMessageProps) => {
       setIsLoading(true);
 
       const timeoutId = setTimeout(() => {
@@ -48,6 +49,7 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
           connectorId,
           http,
           message,
+          promptIds,
           replacements,
           signal: abortController.current.signal,
           traceOptions,
