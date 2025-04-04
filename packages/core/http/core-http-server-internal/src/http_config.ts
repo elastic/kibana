@@ -126,6 +126,7 @@ const configSchema = schema.object(
     protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
       defaultValue: 'http1',
     }),
+    prototypeHardening: schema.boolean({ defaultValue: false }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,
@@ -327,6 +328,7 @@ export class HttpConfig implements IHttpConfig {
     brotli: { enabled: boolean; quality: number };
   };
   public csp: ICspConfig;
+  public prototypeHardening: boolean;
   public externalUrl: IExternalUrlConfig;
   public xsrf: { disableProtection: boolean; allowlist: string[] };
   public requestId: { allowFromAnyIp: boolean; ipAllowlist: string[] };
@@ -380,6 +382,7 @@ export class HttpConfig implements IHttpConfig {
     this.compression = rawHttpConfig.compression;
     this.cdn = CdnConfig.from(rawHttpConfig.cdn);
     this.csp = new CspConfig({ ...rawCspConfig, disableEmbedding }, this.cdn.getCspConfig());
+    this.prototypeHardening = rawHttpConfig.prototypeHardening;
     this.externalUrl = rawExternalUrlConfig;
     this.xsrf = rawHttpConfig.xsrf;
     this.requestId = rawHttpConfig.requestId;

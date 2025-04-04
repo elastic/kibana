@@ -1,0 +1,32 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+  ],
+  exclude = [
+    "**/test_helpers.ts",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+BUNDLER_DEPS = [
+]
+
+js_library(
+  name = "kbn-security-hardening",
+  package_name = "@kbn/security-hardening",
+  srcs = ["package.json"] + SRCS,
+  deps = BUNDLER_DEPS,
+  visibility = ["//visibility:public"],
+)

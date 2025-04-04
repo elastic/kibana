@@ -28,6 +28,7 @@ import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-i
 
 /** @internal */
 export interface RenderingMetadata {
+  hardenPrototypes: ICspConfig['strict'];
   strictCsp: ICspConfig['strict'];
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
