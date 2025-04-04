@@ -140,7 +140,6 @@ export const DualBrush: FC<DualBrushProps> = (props) => {
         '.brush .selection': {
           stroke: 'none',
           fill: euiTheme.colors.vis.euiColorVisGrey2,
-          opacity: '0.5 !important',
         },
       }),
     [euiTheme.colors.vis.euiColorVisGrey2]
