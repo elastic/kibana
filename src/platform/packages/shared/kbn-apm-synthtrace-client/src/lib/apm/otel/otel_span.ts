@@ -57,6 +57,12 @@ export class OtelSpan extends OtelBaseSpan {
     return this;
   }
 
+  destination(resource: string) {
+    this.fields['attributes.span.destination.service.resource'] = resource;
+    this.fields.kind = 'Client';
+    return this;
+  }
+
   serialize() {
     const [transaction, ...spans] = super.serialize();
 

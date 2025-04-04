@@ -64,23 +64,3 @@ export type OpenTelemetryAgentName = (typeof OPEN_TELEMETRY_AGENT_NAMES)[number]
 
 // Unable to reference AgentName from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent' due to circular reference
 export type AgentName = ElasticAgentName | OpenTelemetryAgentName;
-
-export function hasOpenTelemetryPrefix(agentName?: string, language: string = '') {
-  if (!agentName) {
-    return false;
-  }
-
-  return (
-    agentName.startsWith(`opentelemetry/${language}`) || agentName.startsWith(`otlp/${language}`)
-  );
-}
-
-export function isOpenTelemetryAgent(agentName: string): agentName is OpenTelemetryAgentName {
-  return (
-    hasOpenTelemetryPrefix(agentName) ||
-    OPEN_TELEMETRY_AGENT_NAMES.includes(agentName as OpenTelemetryAgentName)
-  );
-}
-export function isElasticApmAgent(agentName: string): agentName is OpenTelemetryAgentName {
-  return !isOpenTelemetryAgent(agentName);
-}

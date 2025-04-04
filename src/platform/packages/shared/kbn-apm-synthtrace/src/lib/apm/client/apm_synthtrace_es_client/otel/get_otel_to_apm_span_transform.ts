@@ -18,7 +18,7 @@ const kindToProcessorEvent: Record<SpanKind, 'transaction' | 'span'> = {
   Producer: 'span',
 };
 
-export function getApmSpanTransform() {
+export function getOtelToApmTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ApmOtelFields, encoding, callback) {
@@ -40,9 +40,8 @@ export function getApmSpanTransform() {
         document['resource.attributes.service.name'];
       document['scope.name'] = document['resource.attributes.service.name'];
 
-      document['attributes.processor.event'] = kind
-        ? kindToProcessorEvent[kind]
-        : document['attributes.processor.event'];
+      document['attributes.processor.event'] =
+        document['attributes.processor.event'] ?? (!!kind ? kindToProcessorEvent[kind] : undefined);
 
       const event = document['attributes.processor.event'];
 
@@ -50,19 +49,24 @@ export function getApmSpanTransform() {
         case 'span': {
           document['attributes.span.id'] = spanId;
           document['attributes.span.name'] = name;
-          document['attributes.span.type'] = document['attributes.http.url']
-            ? 'http'
-            : document['attributes.db.system']
-            ? 'db'
-            : document['attributes.messaging.system']
-            ? 'messaging'
-            : 'app';
+          document['attributes.span.type'] =
+            kind === 'Internal'
+              ? 'app'
+              : document['attributes.http.url']
+              ? 'http'
+              : document['attributes.db.system']
+              ? 'db'
+              : document['attributes.messaging.system']
+              ? 'messaging'
+              : 'custom';
           document['attributes.span.subtype'] =
             kind === 'Internal'
               ? 'internal'
               : document['attributes.http.url']
               ? 'http'
-              : document['attributes.db.system'] ?? document['attributes.messaging.system'] ?? 'in';
+              : document['attributes.db.system'] ??
+                document['attributes.messaging.system'] ??
+                'internal';
 
           document['attributes.span.duration.us'] = duration;
           break;
@@ -71,9 +75,14 @@ export function getApmSpanTransform() {
           document['attributes.transaction.id'] = spanId;
           document['attributes.transaction.name'] = name;
           document['attributes.transaction.duration.us'] = duration;
-          document['attributes.transaction.type'] =
-            document['attributes.messaging.system'] ?? 'request';
+          document['attributes.transaction.type'] = document['attributes.http.request.method']
+            ? 'request'
+            : document['attributes.messaging.system'] ?? 'unknown';
           document['attributes.transaction.sampled'] = true;
+        }
+        default: {
+          const error = new Error('Cannot determine a processor.event for event');
+          Object.assign(error, { document });
         }
       }
 

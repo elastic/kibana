@@ -11,9 +11,15 @@ import { OtelInstance, ApmOtelFields } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
 import { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
+import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+
+const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
   return {
+    bootstrap: async ({ apmEsClient }) => {
+      apmEsClient.pipeline(apmEsClient.getPipeline('otelToApm'));
+    },
     generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'oteldemo.AdServiceSynth/GetAds';
 
@@ -22,7 +28,7 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
       const edotInstance = apm
         .otelService({
           name: 'adservice-edot-synth',
-          namespace: 'opentelemetry-demo',
+          namespace: ENVIRONMENT,
           sdkLanguage: 'java',
           sdkName: 'opentelemetry',
           distro: 'elastic',
@@ -32,18 +38,11 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
       const otelNativeInstance = apm
         .otelService({
           name: 'sendotlp-otel-native-synth',
+          namespace: ENVIRONMENT,
           sdkName: 'otlp',
           sdkLanguage: 'nodejs',
         })
         .instance('otel-native-instance');
-
-      const otelApmServerInstace = apm
-        .service({
-          name: 'apmserver-otel-synth',
-          environment: 'prod',
-          agentName: 'opentelemetry/java',
-        })
-        .instance('otel-apmserver-instance');
 
       const successfulTimestamps = range.interval('1m').rate(180);
       const failedTimestamps = range.interval('1m').rate(40);
@@ -61,10 +60,18 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
             .children(
               instance
                 .dbExitSpan({
-                  name: 'GET /',
+                  name: 'GET apm-*/_search',
                   type: 'elasticsearch',
                 })
                 .duration(1000)
+                .success()
+                .timestamp(timestamp),
+              instance
+                .span({
+                  name: 'custom_operation',
+                  kind: 'Internal',
+                })
+                .duration(100)
                 .success()
                 .timestamp(timestamp)
             )
@@ -89,41 +96,11 @@ const scenario: Scenario<ApmOtelFields> = async (runOptions) => {
         return [successfulTraceEvents, failedTraceEvents];
       };
 
-      const successfulApmServerTraceEvent = successfulTimestamps.generator((timestamp) =>
-        otelApmServerInstace
-          .transaction({ transactionName })
-          .timestamp(timestamp)
-          .defaults({
-            'url.domain': 'foo.bar',
-          })
-          .duration(1000)
-          .success()
-          .children(
-            otelApmServerInstace
-              .span({
-                spanName: 'GET apm-*/_search',
-                spanType: 'db',
-                spanSubtype: 'elasticsearch',
-              })
-              .duration(1000)
-              .success()
-              .destination('elasticsearch')
-              .timestamp(timestamp),
-            otelApmServerInstace
-              .span({ spanName: 'custom_operation', spanType: 'custom' })
-              .duration(100)
-              .success()
-              .timestamp(timestamp)
-          )
-      );
-
       return [
         withClient(
           apmEsClient,
           logger.perf('generating_otel_trace', () =>
-            [otelNativeInstance, edotInstance]
-              .flatMap((instance) => instanceSpans(instance))
-              .concat(successfulApmServerTraceEvent)
+            [otelNativeInstance, edotInstance].flatMap((instance) => instanceSpans(instance))
           )
         ),
       ];

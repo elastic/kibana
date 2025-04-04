@@ -24,7 +24,7 @@ function moveAttributes(
     }, {} as Record<string, any>);
 }
 
-export function getOtelSpanTransform() {
+export function getOtelToApmSpanTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ApmFields, encoding, callback) {
@@ -51,14 +51,20 @@ export function getOtelSpanTransform() {
         ...(document['processor.event'] === 'span'
           ? moveAttributes(document, 'span.', 'attributes', ['span.links'])
           : moveAttributes(document, 'transaction.', 'attributes')),
-        ...moveAttributes(document, 'error.', 'attributes'),
         ...moveAttributes(document, 'http.', 'attributes'),
         ...moveAttributes(document, 'processor.', 'attributes'),
         ...moveAttributes(document, 'url.', 'attributes'),
         ...moveAttributes(document, 'event.', 'attributes'),
         ...moveAttributes(document, 'timestamp.', 'attributes'),
         ...moveAttributes(document, 'host.', 'resource.attributes'),
-
+        'attributes.error.id': document['error.id'],
+        'attributes.error.grouping_key': document['error.grouping_key'],
+        'attributes.exception.type': document['error.type'],
+        'attributes.exception.message': document['error.exception']
+          ?.map((p) => p.message)
+          .join(' '),
+        'attributes.error.stack_trace':
+          document['span.stacktrace']?.join(' ') ?? document['code.stacktrace'],
         'attributes.service.name': serviceName,
         'attributes.service.namespace': serviceEnvironment,
         'resource.attributes.service.name': serviceName,

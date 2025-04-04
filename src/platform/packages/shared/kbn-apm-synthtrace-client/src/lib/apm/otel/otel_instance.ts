@@ -16,7 +16,7 @@ import { HttpMethod } from '../span';
 export class OtelInstance extends Entity<ApmOtelFields> {
   span({
     name,
-    kind = 'Server',
+    kind,
     ...fields
   }: ApmOtelFields & { kind: Extract<SpanKind, 'Internal' | 'Server'> }) {
     return new OtelSpan({

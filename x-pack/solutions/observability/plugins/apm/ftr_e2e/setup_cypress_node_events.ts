@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace';
 import { ApmSynthtraceEsClient, createLogger, LogLevel } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
 // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
@@ -26,10 +27,6 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
     version: config.env.APM_PACKAGE_VERSION,
   });
 
-  synthtraceEsClient.pipeline(
-    synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-  );
-
   initPlugin(on, config);
 
   on('task', {
@@ -40,7 +37,17 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
       return null;
     },
 
-    async 'synthtrace:index'(events: Array<Record<string, any>>) {
+    async 'synthtrace:index'({
+      events,
+      pipeline,
+    }: {
+      events: Array<Record<string, any>>;
+      pipeline: ApmSynthtracePipelines;
+    }) {
+      synthtraceEsClient.pipeline(
+        synthtraceEsClient.getPipeline(pipeline, { includeSerialization: false })
+      );
+
       await synthtraceEsClient.index(Readable.from(events));
       return null;
     },
