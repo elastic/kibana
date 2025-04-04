@@ -186,10 +186,8 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   } = useMemo(() => decodeOrThrow(errorsRT)(errors), [errors]);
 
   const supportedFields = useMemo(() => {
-    // TODO: use await dataViewLazy.getFields({ fieldName: ['*'] })
-    const fields: any = undefined; // resolvedLogView?.fields
-    if (fields) {
-      return fields.filter((field: any) => {
+    if (resolvedLogView?.dataViewReference.fields) {
+      return resolvedLogView.dataViewReference.fields.filter((field) => {
         return (field.type === 'string' || field.type === 'number') && field.searchable;
       });
     } else {
@@ -198,10 +196,8 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   }, [resolvedLogView]);
 
   const groupByFields = useMemo(() => {
-    // TODO: use await dataViewLazy.getFields({ fieldName: ['*'] })
-    const fields: any = undefined; // resolvedLogView?.fields
-    if (fields) {
-      return fields.filter((field: any) => {
+    if (resolvedLogView?.dataViewReference.fields) {
+      return resolvedLogView.dataViewReference.fields.filter((field) => {
         return field.type === 'string' && field.aggregatable;
       });
     } else {

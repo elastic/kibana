@@ -10,7 +10,7 @@ import styled from '@emotion/styled';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MANAGEMENT_APP_LOCATOR } from '@kbn/deeplinks-management/constants';
-import { buildEsQuery, DataViewBase, Filter, Query } from '@kbn/es-query';
+import { buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -156,7 +156,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/platform/plugins/sh
   );
 
   const {
-    derivedDataViewLazy,
+    derivedDataView,
     isLoading: isLoadingLogView,
     load: loadLogView,
     resolvedLogView,
@@ -174,22 +174,20 @@ Read more at https://github.com/elastic/kibana/blob/main/src/platform/plugins/sh
   );
 
   const parsedQuery = useMemo<BuiltEsQuery | undefined>(() => {
-    const dataViewBase: DataViewBase = {
-      id: derivedDataViewLazy?.id,
-      // TODO: Decide which title should be used here
-      title: derivedDataViewLazy?.title || 'DEFAULT_TITLE',
-      // TODO: Fix fields
-      fields: [],
-    };
     if (typeof query === 'object' && 'bool' in query) {
       return mergeBoolQueries(
         query,
-        buildEsQuery(dataViewBase, [], filters ?? [], kibanaQuerySettings)
+        buildEsQuery(derivedDataView, [], filters ?? [], kibanaQuerySettings)
       );
     } else {
-      return buildEsQuery(dataViewBase, coerceToQueries(query), filters ?? [], kibanaQuerySettings);
+      return buildEsQuery(
+        derivedDataView,
+        coerceToQueries(query),
+        filters ?? [],
+        kibanaQuerySettings
+      );
     }
-  }, [derivedDataViewLazy, filters, kibanaQuerySettings, query]);
+  }, [derivedDataView, filters, kibanaQuerySettings, query]);
 
   // Internal state
   const {

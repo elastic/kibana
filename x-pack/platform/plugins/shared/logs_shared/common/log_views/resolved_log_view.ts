@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { DataViewLazy, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewLazy, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
 import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/types';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { defaultLogViewsStaticConfig } from './defaults';
@@ -15,7 +15,8 @@ import { LogViewAttributes, LogViewColumnConfiguration, LogViewsStaticConfig } f
 
 export type ResolvedLogViewField = FieldSpec;
 
-export interface ResolvedLogView {
+// DataViewReference extends DataViewLazy | DataView
+export interface ResolvedLogView<DataViewReference = DataViewLazy> {
   name: string;
   description: string;
   indices: string;
@@ -24,7 +25,7 @@ export interface ResolvedLogView {
   messageField: string[];
   runtimeMappings: estypes.MappingRuntimeFields;
   columns: LogViewColumnConfiguration[];
-  dataViewReference: DataViewLazy;
+  dataViewReference: DataViewReference;
 }
 
 export const resolveLogView = (

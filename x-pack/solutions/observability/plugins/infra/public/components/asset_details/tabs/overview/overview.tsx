@@ -98,7 +98,7 @@ export const Overview = () => {
             assetId={asset.id}
             assetType={asset.type}
             dateRange={dateRange}
-            dataViewLazy={logs.dataViewLazy}
+            dataView={logs.dataView}
           />
         </EuiFlexItem>
       ) : null}
