@@ -28,7 +28,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
       // TODO Keep using service name that needs encoding or add new scenario
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
-          .service({ name: `synth%/node-${index}`, environment: ENVIRONMENT, agentName: 'nodejs' })
+          .service({ name: `synth/node-${index}`, environment: ENVIRONMENT, agentName: 'nodejs' })
           .instance('instance')
       );
       const instanceSpans = (instance: Instance) => {

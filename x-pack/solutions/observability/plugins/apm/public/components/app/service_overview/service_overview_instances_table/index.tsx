@@ -63,6 +63,7 @@ export function ServiceOverviewInstancesTable({
   isNotInitiated,
 }: Props) {
   const {
+    query,
     query: { kuery, latencyAggregationType, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
@@ -125,6 +126,7 @@ export function ServiceOverviewInstancesTable({
     itemIdToOpenActionMenuRowMap,
     shouldShowSparkPlots,
     offset,
+    query,
   });
 
   const pagination = {

@@ -11,6 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { ValuesType } from 'utility-types';
+import type { TypeOf } from '@kbn/typed-react-router-config';
+import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../../common/environment_filter_values';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { MetricOverviewLink } from '../../../../../shared/links/apm/metric_overview_link';
 import { AgentExplorerFieldName } from '../../../../../../../common/agent_explorer';
 import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
@@ -26,6 +29,7 @@ import { ItemsBadge } from '../../../../../shared/item_badge';
 import { PopoverTooltip } from '../../../../../shared/popover_tooltip';
 import { TimestampTooltip } from '../../../../../shared/timestamp_tooltip';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
+import type { ApmRoutes } from '../../../../../routing/apm_route_config';
 
 type AgentExplorerInstance = ValuesType<
   APIReturnType<'GET /internal/apm/services/{serviceName}/agent_instances'>['items']
@@ -41,6 +45,7 @@ enum AgentExplorerInstanceFieldName {
 export function getInstanceColumns(
   serviceName: string,
   agentName: AgentName,
+  query: Omit<TypeOf<ApmRoutes, '/services/{serviceName}/metrics'>['query'], 'kuery'>,
   agentDocsPageUrl?: string
 ): Array<EuiBasicTableColumn<AgentExplorerInstance>> {
   return [
@@ -103,10 +108,10 @@ export function getInstanceColumns(
                 {serviceNode ? (
                   <MetricOverviewLink
                     serviceName={serviceName}
-                    mergeQuery={(query) => ({
+                    query={{
                       ...query,
                       kuery: `service.node.name:"${displayedName}"`,
-                    })}
+                    }}
                   >
                     {displayedName}
                   </MetricOverviewLink>
@@ -178,11 +183,27 @@ export function AgentInstancesDetails({
   items,
   isLoading,
 }: Props) {
+  const {
+    query,
+    query: { environment, rangeFrom, rangeTo, serviceGroup },
+  } = useAnyOfApmParams('/services/{serviceName}/overview', '/services/{serviceName}/metrics');
   return (
     <>
       <EuiInMemoryTable
         items={items}
-        columns={getInstanceColumns(serviceName, agentName, agentDocsPageUrl)}
+        columns={getInstanceColumns(
+          serviceName,
+          agentName,
+          {
+            ...query,
+            environment: environment ?? ENVIRONMENT_NOT_DEFINED.value,
+            rangeFrom,
+            rangeTo,
+            serviceGroup,
+            comparisonEnabled: false,
+          },
+          agentDocsPageUrl
+        )}
         pagination={true}
         sorting={{
           sort: {
