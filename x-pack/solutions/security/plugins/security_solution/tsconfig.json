@@ -17,7 +17,11 @@
     "../../../../../typings/**/*",
     "emotion.d.ts"
   ],
-  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
+  "exclude": [
+    "target/**/*",
+    "**/cypress/**",
+    "public/management/cypress.config.ts"
+  ],
   "kbn_references": [
     "@kbn/core",
     {
@@ -245,6 +249,9 @@
     "@kbn/security-ai-prompts",
     "@kbn/deeplinks-analytics",
     "@kbn/scout-security",
-    "@kbn/inference-endpoint-ui-common"
+    "@kbn/inference-endpoint-ui-common",
+    "@kbn/custom-icons",
+    "@kbn/security-plugin-types-common",
+    "@kbn/management-settings-ids"
   ]
 }
