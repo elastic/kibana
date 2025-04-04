@@ -20,9 +20,12 @@ jest.mock('@kbn/kibana-react-plugin/public');
 
 const dataTestSubj = 'test-id';
 const integration: PackageListItem = {
+  description: '',
+  download: '',
   id: 'splunk',
   icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
   name: 'splunk',
+  path: '',
   status: installationStatuses.NotInstalled,
   title: 'Splunk',
   version: '0.1.0',

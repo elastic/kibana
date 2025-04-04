@@ -24,17 +24,23 @@ jest.mock('@kbn/kibana-react-plugin/public');
 
 const packages: PackageListItem[] = [
   {
+    description: '',
+    download: '',
     id: 'splunk',
     name: 'splunk',
     icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+    path: '',
     status: installationStatuses.Installed,
     title: 'Splunk',
     version: '',
   },
   {
+    description: '',
+    download: '',
     id: 'google_secops',
     name: 'google_secops',
     icons: [{ src: 'icon.svg', path: 'mypath/icon.svg', type: 'image/svg+xml' }],
+    path: '',
     status: installationStatuses.Installed,
     title: 'Google SecOps',
     version: '',

@@ -39,7 +39,7 @@ describe('useIntegrations', () => {
         rules: [
           {
             related_integrations: [{ package: 'splunk' }],
-            name: 'SplunkRuleName',
+            id: 'SplunkRuleId',
           },
         ],
         total: 0,
@@ -67,7 +67,7 @@ describe('useIntegrations', () => {
         {
           checked: 'on',
           'data-test-subj': 'alert-summary-integration-option-Splunk',
-          key: 'SplunkRuleName',
+          key: 'SplunkRuleId',
           label: 'Splunk',
         },
       ],
@@ -88,9 +88,9 @@ describe('useIntegrations', () => {
                     disabled: false,
                     type: 'phrase',
                     key: FILTER_KEY,
-                    params: { query: 'Splunk' },
+                    params: { query: 'SplunkRuleId' },
                   },
-                  query: { match_phrase: { [FILTER_KEY]: 'Splunk' } },
+                  query: { match_phrase: { [FILTER_KEY]: 'SplunkRuleId' } },
                 },
               ]),
             },
@@ -104,7 +104,7 @@ describe('useIntegrations', () => {
         rules: [
           {
             related_integrations: [{ package: 'splunk' }],
-            name: 'SplunkRuleName',
+            id: 'SplunkRuleId',
           },
         ],
         total: 0,
@@ -131,7 +131,7 @@ describe('useIntegrations', () => {
       integrations: [
         {
           'data-test-subj': 'alert-summary-integration-option-Splunk',
-          key: 'SplunkRuleName',
+          key: 'SplunkRuleId',
           label: 'Splunk',
         },
       ],
