@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Check Lens editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
-      expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ??field');
+      expect(editorValue).to.contain('FROM logstash* | STATS COUNT(*) BY ?field');
 
       // run the query to make sure the chart is updated
       await testSubjects.click('ESQLEditor-run-query-button');
