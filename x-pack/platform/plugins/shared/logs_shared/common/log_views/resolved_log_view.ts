@@ -15,7 +15,6 @@ import { LogViewAttributes, LogViewColumnConfiguration, LogViewsStaticConfig } f
 
 export type ResolvedLogViewField = FieldSpec;
 
-// DataViewReference extends DataViewLazy | DataView
 export interface ResolvedLogView<DataViewReference = DataViewLazy> {
   name: string;
   description: string;
