@@ -8,15 +8,9 @@
  */
 
 import { type TabItem, UnifiedTabs, TabStatus } from '@kbn/unified-tabs';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { pick } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import {
-  type HtmlPortalNode,
-  createHtmlPortalNode,
-  InPortal,
-  OutPortal,
-} from 'react-reverse-portal';
 import { DiscoverSessionView, type DiscoverSessionViewProps } from '../session_view';
 import {
   CurrentTabProvider,
@@ -36,78 +30,48 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
   const allTabs = useInternalStateSelector(selectAllTabs);
   const currentTabId = useInternalStateSelector((state) => state.tabs.unsafeCurrentId);
   const [initialItems] = useState<TabItem[]>(() => allTabs.map((tab) => pick(tab, 'id', 'label')));
-  const portalsInitialized = useRef(false);
-  const portalNodes = useRef<Record<string, HtmlPortalNode>>({});
-
-  if (!portalsInitialized.current) {
-    portalsInitialized.current = true;
-    portalNodes.current = updatePortals(portalNodes.current, allTabs);
-  }
 
   return (
-    <>
-      {Object.keys(portalNodes.current).map((tabId) => {
-        return (
-          <InPortal key={tabId} node={portalNodes.current[tabId]}>
-            <CurrentTabProvider currentTabId={tabId}>
-              <DiscoverSessionView {...props} />
-            </CurrentTabProvider>
-          </InPortal>
-        );
-      })}
-      <UnifiedTabs
-        services={services}
-        initialItems={initialItems}
-        onChanged={async (updateState) => {
-          portalNodes.current = updatePortals(portalNodes.current, updateState.items);
-          await dispatch(internalStateActions.updateTabs(updateState));
-        }}
-        createItem={() => createTabItem(allTabs)}
-        getPreviewData={(item) => {
-          const defaultQuery = { language: 'kuery', query: '(Empty query)' };
-          const stateContainer = selectTabRuntimeState(
-            props.runtimeStateManager,
-            item.id
-          ).stateContainer$.getValue();
+    <UnifiedTabs
+      services={services}
+      initialItems={initialItems}
+      onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
+      createItem={() => createTabItem(allTabs)}
+      getPreviewData={(item) => {
+        const defaultQuery = { language: 'kuery', query: '(Empty query)' };
+        const stateContainer = selectTabRuntimeState(
+          props.runtimeStateManager,
+          item.id
+        ).stateContainer$.getValue();
 
-          if (!stateContainer) {
-            return {
-              query: defaultQuery,
-              status: TabStatus.RUNNING,
-            };
-          }
-
-          const fetchStatus = stateContainer.dataState.data$.main$.getValue().fetchStatus;
-          const query = stateContainer.appState.getState().query;
-
+        if (!stateContainer) {
           return {
-            query: isOfAggregateQueryType(query)
-              ? { esql: query.esql.trim() || defaultQuery.query }
-              : query
-              ? { ...query, query: query.query.trim() || defaultQuery.query }
-              : defaultQuery,
-            status: [FetchStatus.UNINITIALIZED, FetchStatus.COMPLETE].includes(fetchStatus)
-              ? TabStatus.SUCCESS
-              : fetchStatus === FetchStatus.ERROR
-              ? TabStatus.ERROR
-              : TabStatus.RUNNING,
+            query: defaultQuery,
+            status: TabStatus.RUNNING,
           };
-        }}
-        renderContent={() =>
-          portalNodes.current[currentTabId] && (
-            <OutPortal node={portalNodes.current[currentTabId]} />
-          )
         }
-      />
-    </>
+
+        const fetchStatus = stateContainer.dataState.data$.main$.getValue().fetchStatus;
+        const query = stateContainer.appState.getState().query;
+
+        return {
+          query: isOfAggregateQueryType(query)
+            ? { esql: query.esql.trim() || defaultQuery.query }
+            : query
+            ? { ...query, query: query.query.trim() || defaultQuery.query }
+            : defaultQuery,
+          status: [FetchStatus.UNINITIALIZED, FetchStatus.COMPLETE].includes(fetchStatus)
+            ? TabStatus.SUCCESS
+            : fetchStatus === FetchStatus.ERROR
+            ? TabStatus.ERROR
+            : TabStatus.RUNNING,
+        };
+      }}
+      renderContent={() => (
+        <CurrentTabProvider currentTabId={currentTabId}>
+          <DiscoverSessionView key={currentTabId} {...props} />
+        </CurrentTabProvider>
+      )}
+    />
   );
 };
-
-const updatePortals = (portals: Record<string, HtmlPortalNode>, tabs: Array<{ id: string }>) =>
-  tabs.reduce<Record<string, HtmlPortalNode>>(
-    (acc, tab) => ({
-      ...acc,
-      [tab.id]: portals[tab.id] || createHtmlPortalNode(),
-    }),
-    {}
-  );
