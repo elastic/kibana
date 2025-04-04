@@ -51599,7 +51599,7 @@ paths:
             oneOf:
               - type: string
               - type: array
-        - description: A free-text query string
+        - description: A free-text query string.
           in: query
           name: query
           schema:
@@ -51649,7 +51649,7 @@ paths:
             application/json:
               examples:
                 getSyntheticMonitorsResponseExample1:
-                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`
+                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`.
                   value: |-
                     {
                         "page": 1,
@@ -51840,7 +51840,7 @@ paths:
   /api/synthetics/monitors/{config_id}:
     delete:
       description: |
-        Delete a monitors from the Synthetics app.
+        Delete a monitor from the Synthetics app.
         You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: delete-synthetic-monitor
       parameters:
@@ -52153,7 +52153,8 @@ paths:
   /api/synthetics/params/_bulk_delete:
     delete:
       description: |
-        Delete parameters from the Synthetics app. You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+        Delete parameters from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: delete-parameters
       requestBody:
         content:
@@ -52206,7 +52207,8 @@ paths:
   /api/synthetics/params/{id}:
     delete:
       description: |
-        Delete a parameter from the Synthetics app. You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+        Delete a parameter from the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: delete-parameter
       parameters:
         - description: The ID for the parameter to delete.
@@ -52219,7 +52221,9 @@ paths:
       tags:
         - synthetics
     get:
-      description: You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      description: |
+        Get a parameter from the Synthetics app.
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: get-parameter
       parameters:
         - description: The unique identifier for the parameter.
@@ -52263,7 +52267,9 @@ paths:
       tags:
         - synthetics
     put:
-      description: You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      description: |
+        Update a parameter in the Synthetics app.
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       operationId: put-parameter
       parameters:
         - description: The unique identifier for the parameter.
@@ -75154,7 +75160,7 @@ components:
             The private locations to which the monitors will be deployed.
             These private locations refer to locations hosted and managed by you, whereas `locations` are hosted by Elastic.
             You can specify a private location using the location's name.
-            To list available privalte locations you can:
+            To list available private locations you can:
 
             - Run the `elastic-synthetics locations` command with the deployment's Kibana URL.
             - Go to *Synthetics > Settings* and click *Private locationsr*. Private locations will be listed in the table.
@@ -75328,7 +75334,6 @@ components:
             ssl:
               description: |
                 The TLS/SSL connection settings for use with the HTTPS endpoint. If you don't specify settings, the system defaults are used.
-                    type:
               type: object
             type:
               description: The monitor type.
