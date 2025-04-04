@@ -31,8 +31,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
-  const alertsAsDataIndex =
-    '.internal.alerts-observability.test.alerts.dynamic.templates.alerts-default-000001';
+  const alertsAsDataIndex = '*alerts-observability.test.alerts.dynamic.templates.*';
 
   describe('alerts as data dynamic templates', function () {
     this.tags('skipFIPS');
@@ -109,7 +108,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
 
       const mapping = await es.indices.getMapping({ index: alertsAsDataIndex });
       const dynamicFiled = get(
-        mapping[alertsAsDataIndex],
+        mapping[Object.keys(mapping)[0]],
         'mappings.properties.kibana.properties.alert.properties.dynamic.properties.host.properties.id.type'
       );
 
