@@ -142,9 +142,13 @@ export function createMergedMappings(
       commonFieldsPerFile: [],
     };
 
-    if (existingIndexMappings?.properties) {
-      existingIndexChecks.existingFields = Object.keys(existingIndexMappings.properties);
-    }
+    const existingFields = getFieldsFromMappings(existingIndexMappings as MappingTypeMapping);
+    const existingFieldMap = existingFields.reduce((acc, field) => {
+      acc.set(field.name, field.value);
+      return acc;
+    }, new Map<string, { type: string }>());
+
+    existingIndexChecks.existingFields = existingFields.map((field) => field.name);
 
     for (const [i, fields] of fieldsPerFile.entries()) {
       const newFieldsPerFile: FieldsPerFile = {
@@ -159,10 +163,11 @@ export function createMergedMappings(
       };
 
       for (const field of fields) {
-        if (existingIndexMappings?.properties && existingIndexMappings?.properties[field.name]) {
+        const existingField = existingFieldMap.get(field.name);
+        if (existingField !== undefined) {
           commonFieldsPerFile.fields.push(field.name);
 
-          const existingType = existingIndexMappings.properties[field.name].type;
+          const existingType = existingField.type;
           if (existingType !== field.value.type) {
             if (existingType === 'text' && field.value.type === 'keyword') {
               // do nothing, is this correct?!!!!!!!!!!!!!!!!!
@@ -356,12 +361,23 @@ export function getFormatClashes(files: FileWrapper[]): FileClash[] {
 }
 
 export function getFieldsFromMappings(mappings: MappingTypeMapping) {
-  if (mappings.properties === undefined) {
-    return [];
+  const fields: Array<{ name: string; value: { type: string } }> = [];
+
+  function traverseProperties(properties: Record<string, any>, parentKey: string = '') {
+    for (const [key, value] of Object.entries(properties)) {
+      const fullKey = parentKey ? `${parentKey}.${key}` : key;
+
+      if (value.properties) {
+        traverseProperties(value.properties, fullKey);
+      } else if (value.type) {
+        fields.push({ name: fullKey, value });
+      }
+    }
   }
-  return Object.entries(mappings.properties)
-    .map(([key, value]) => {
-      return { name: key, value };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+
+  if (mappings.properties) {
+    traverseProperties(mappings.properties);
+  }
+
+  return fields.sort((a, b) => a.name.localeCompare(b.name));
 }
