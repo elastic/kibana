@@ -49,3 +49,5 @@ export type { Locator, CDPSession } from 'playwright/test';
 export { mergeTests, test as playwrightTest } from 'playwright/test';
 
 export { measurePerformance, measurePerformanceAsync } from './src/common';
+
+const tempString = 'remove this later';
