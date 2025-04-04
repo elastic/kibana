@@ -117,7 +117,7 @@ export async function search(
           contextFields
             .map(({ field }) => {
             const value = (source[field as keyof SupportCase] || '').toString()
-            return `$ field}: ${value}`;
+            return `${field}: ${value}`;
             })
             .join('\n')
       };
@@ -176,7 +176,7 @@ export async function get(
           contextFields
             .map(({ field }) => {
             const value = (source[field as keyof SupportCase] || '').toString()
-            return `$ field}: ${value}`;
+            return `${field}: ${value}`;
             })
             .join('\n')
       };
@@ -329,6 +329,7 @@ export async function getCases({
 } catch (error) {
   logger.error(`Search failed: ${error}`);
 
+<<<<<<< HEAD
   return [
     {
       type: 'text' as const,
@@ -336,6 +337,31 @@ export async function getCases({
     },
   ];
 }
+=======
+              // Use the helper function for both nested and non-nested fields
+              value =
+               fieldPath.length > 1
+                  ? getNestedValue(source, fieldPath)
+                  : (source[field as keyof SupportCase] || '').toString();
+
+              return `${field}: ${value}`;
+            })
+            .join('\n') + commentsText,
+      };
+    });
+
+    return contentFragments;
+  } catch (error) {
+    logger.error(`Search failed: ${error}`);
+
+    return [
+      {
+        type: 'text' as const,
+        text: `Error: Search failed: ${error}`,
+      },
+    ];
+  }
+>>>>>>> 47b6b4a5ca2 (fix comment filters and syntax)
 }
 
 /**
@@ -451,6 +477,7 @@ export async function getAccounts({
 } catch (error) {
   logger.error(`Search failed: ${error}`);
 
+<<<<<<< HEAD
   return [
     {
       type: 'text' as const,
@@ -458,6 +485,75 @@ export async function getAccounts({
     },
   ];
 }
+=======
+    const response = await esClient.search<SearchResponse<Account>>(searchRequest);
+
+    // Define fields to include in the response
+    const contextFields = [
+      { field: 'id', type: 'keyword' },
+      { field: 'title', type: 'keyword' },
+      { field: 'url', type: 'keyword' },
+      { field: 'owner.email', type: 'keyword' },
+      { field: 'owner.name', type: 'keyword' },
+      { field: 'created_at', type: 'date' },
+      { field: 'updated_at', type: 'date' },
+    ];
+
+    const contentFragments = response.hits.hits.map((hit) => {
+      const source = hit._source as Account;
+
+      // Format contacts if they exist
+      let contactsText = '';
+      if (source.contacts && source.contacts.length > 0) {
+        const limitedContacts = source.contacts.slice(0, 10);
+        contactsText =
+          '\n\nContacts:\n' +
+          limitedContacts
+            .map((contact, index) => {
+              return (
+                `Contact ${index + 1}:\n` +
+                `Name: ${contact.name || 'Unknown'}\n` +
+                `Email: ${contact.email || 'No email'}\n` +
+                `Phone: ${contact.phone || 'No phone'}\n` +
+                `Title: ${contact.title || 'No title'}\n` +
+                `Department: ${contact.department || 'No department'}\n`
+              );
+            })
+            .join('\n');
+      }
+
+      return {
+        type: 'text' as const,
+        text:
+          contextFields
+            .map(({ field }) => {
+              const fieldPath = field.split('.');
+              let value = '';
+
+              // Use the helper function for both nested and non-nested fields
+              value =
+               fieldPath.length > 1
+                  ? getNestedValue(source, fieldPath)
+                  : (source[field as keyof Account] || '').toString();
+
+              return `${field}: ${value}`;
+            })
+            .join('\n') + contactsText,
+      };
+    });
+
+    return contentFragments;
+  } catch (error) {
+    logger.error(`Account search failed: ${error}`);
+
+    return [
+      {
+        type: 'text' as const,
+        text: `Error: Account search failed: ${error}`,
+      },
+    ];
+  }
+>>>>>>> 47b6b4a5ca2 (fix comment filters and syntax)
 }
 
 // Helper function to safely get nested values
@@ -491,9 +587,9 @@ function addDateRangeClause(mustClauses: any[], field: string, createdAfter?: st
      }
   }
 
-function addCommentFilters(mustClauses: any[], commentAuthorEmail: string, commentCreatedAfter: string, commentCreatedBefore: string) {
+function addCommentFilters(mustClauses: any[], params: Record<string, any>) {
   // Add comment-related queries
-  if (commentAuthorEmail || commentCreatedAfter || commentCreatedBefore) {
+  if (params.commentAuthorEmail || params.commentCreatedAfter || params.commentCreatedBefore) {
     const nestedQuery: any = {
       nested: {
         path: 'comments',
@@ -506,19 +602,19 @@ function addCommentFilters(mustClauses: any[], commentAuthorEmail: string, comme
     };
 
     // Add comment author filter
-    if (commentAuthorEmail && commentAuthorEmail.length > 0) {
+    if (params.commentAuthorEmail && params.commentAuthorEmail.length > 0) {
       nestedQuery.nested.query.bool.must.push({
-        terms: { 'comments.author.email': commentAuthorEmail },
+        terms: { 'comments.author.email': params.commentAuthorEmail },
       });
     }
 
     // Add comment date range filters
-    if (commentCreatedAfter || commentCreatedBefore) {
+    if (params.commentCreatedAfter || params.commentCreatedBefore) {
       const commentDateRange: any = { range: { 'comments.created_at': {} } };
-      if (commentCreatedAfter)
-        commentDateRange.range['comments.created_at'].gte = commentCreatedAfter;
-      if (commentCreatedBefore)
-        commentDateRange.range['comments.created_at'].lte = commentCreatedBefore;
+      if (params.commentCreatedAfter)
+        commentDateRange.range['comments.created_at'].gte = params.commentCreatedAfter;
+      if (params.commentCreatedBefore)
+        commentDateRange.range['comments.created_at'].lte = params.commentCreatedBefore;
       nestedQuery.nested.query.bool.must.push(commentDateRange);
     }
 
@@ -556,7 +652,11 @@ function buildQuery(params: Record<string,any>, objectType: string, mappings: Re
           addDateRangeClause(mustClauses, 'updated_at', params.updatedAfter, params.updatedBefore);
         }
       } else if  (field === 'commentAuthorEmail' || field === 'commentCreatedAfter' || field === 'commentCreatedBefore') {
-        addCommentFilters(mustClauses, params.commentAuthorEmail, params.commentCreatedAfter, params.commentCreatedBefore)
+        addCommentFilters(mustClauses, {
+          commentAuthorEmail: params.commentAuthorEmail,
+          commentCreatedAfter: params.commentCreatedAfter,
+          commentCreatedBefore: params.commentCreatedBefore
+        })
       } else {
         addTermsClause(mustClauses, field, value, mappings);
       }
