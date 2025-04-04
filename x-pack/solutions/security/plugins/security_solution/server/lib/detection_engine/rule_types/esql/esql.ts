@@ -74,7 +74,6 @@ export const esqlExecutor = async ({
 
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
-    const size = tuple.maxSignals;
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
@@ -96,7 +95,7 @@ export const esqlExecutor = async ({
           query: ruleParams.query,
           from: tuple.from.toISOString(),
           to: tuple.to.toISOString(),
-          size,
+          size: tuple.maxSignals,
           filters: dataTiersFilters,
           primaryTimestamp,
           secondaryTimestamp,
@@ -243,9 +242,9 @@ export const esqlExecutor = async ({
         });
 
         // no more results will be found
-        if (response.values.length < size) {
+        if (response.values.length < tuple.maxSignals) {
           ruleExecutionLogger.debug(
-            `End of search: Found ${response.values.length} results with page size ${size}`
+            `End of search: Found ${response.values.length} results with page size ${tuple.maxSignals}`
           );
           break;
         }
