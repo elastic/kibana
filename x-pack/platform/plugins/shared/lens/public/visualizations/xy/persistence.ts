@@ -23,8 +23,6 @@ import {
 import { isAnnotationsLayer, isByReferenceAnnotationsLayer } from './visualization_helpers';
 import { nonNullable } from '../../utils';
 import { annotationLayerHasUnsavedChanges } from './state_helpers';
-import { convertToRuntimeState } from './runtime_state';
-import { FormBasedPersistedState } from '../../datasources/form_based/types';
 
 export const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
@@ -84,14 +82,12 @@ export type XYPersistedState = Omit<XYState, 'layers'> & {
   valuesInLegend?: boolean;
 };
 
-export function convertToRuntime(
+export function convertPersistedState(
   state: XYPersistedState,
-  datasourceState?: FormBasedPersistedState,
   annotationGroups?: AnnotationGroups,
   references?: SavedObjectReference[]
 ) {
-  const newState = cloneDeep(injectReferences(state, annotationGroups, references));
-  return convertToRuntimeState(newState, datasourceState);
+  return cloneDeep(injectReferences(state, annotationGroups, references));
 }
 
 export function convertToPersistable(state: XYState) {

@@ -181,6 +181,10 @@ export const getPieVisualization = ({
     };
   },
 
+  convertToRuntimeState(state, datasourceState) {
+    return convertToRuntimeState(state, datasourceState);
+  },
+
   getMainPalette: (state) => {
     if (!state) {
       return undefined;

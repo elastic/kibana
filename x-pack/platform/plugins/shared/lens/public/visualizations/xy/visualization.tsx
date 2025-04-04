@@ -121,7 +121,7 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import { XYPersistedState, convertToPersistable, convertToRuntime } from './persistence';
+import { XYPersistedState, convertPersistedState, convertToPersistable } from './persistence';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 import {
   ANNOTATION_MISSING_DATE_HISTOGRAM,
@@ -134,6 +134,7 @@ import {
 } from '../../user_messages_ids';
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/annotations_panel';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
+import { convertToRuntimeState } from './runtime_state';
 
 const XY_ID = 'lnsXY';
 
@@ -305,7 +306,8 @@ export const getXyVisualization = ({
     references?: SavedObjectReference[]
   ) {
     if (state) {
-      return convertToRuntime(state, datasourceState, annotationGroups, references);
+      const convertedState = convertPersistedState(state, annotationGroups, references);
+      return convertToRuntimeState(convertedState, datasourceState);
     }
     return {
       title: 'Empty XY chart',
@@ -326,6 +328,10 @@ export const getXyVisualization = ({
         },
       ],
     };
+  },
+
+  convertToRuntimeState(state, datasourceState) {
+    return convertToRuntimeState(state, datasourceState);
   },
 
   getLayerType(layerId, state) {
@@ -1104,8 +1110,10 @@ export const getXyVisualization = ({
     datasourceState2,
     annotationGroups
   ) {
-    const injected1 = convertToRuntime(state1, datasourceState1, annotationGroups, references1);
-    const injected2 = convertToRuntime(state2, datasourceState2, annotationGroups, references2);
+    const convertedState1 = convertPersistedState(state1, annotationGroups, references1);
+    const injected1 = convertToRuntimeState(convertedState1, datasourceState1);
+    const convertedState2 = convertPersistedState(state2, annotationGroups, references2);
+    const injected2 = convertToRuntimeState(convertedState2, datasourceState2);
     return isEqual(injected1, injected2);
   },
 

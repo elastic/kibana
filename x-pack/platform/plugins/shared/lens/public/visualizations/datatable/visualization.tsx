@@ -140,6 +140,10 @@ export const getDatatableVisualization = ({
     };
   },
 
+  convertToRuntimeState(state, datasourceState) {
+    return convertToRuntimeState(state, datasourceState);
+  },
+
   isEqual(state1, references1, datasourceState1, state2, references2, datasourceState2) {
     const convertedState1 = convertToRuntimeState(state1, datasourceState1);
     const convertedState2 = convertToRuntimeState(state2, datasourceState2);

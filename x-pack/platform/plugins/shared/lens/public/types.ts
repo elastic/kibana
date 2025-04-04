@@ -1087,6 +1087,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
     ): T;
   };
 
+  convertToRuntimeState?: (state: T, datasourceState?: FormBasedPersistedState) => T;
+
   getUsedDataView?: (state: T, layerId: string) => string | undefined;
   /**
    * Retrieve the used DataViews in the visualization

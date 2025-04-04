@@ -64,7 +64,6 @@ export function LensEditConfigurationFlyout({
   panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
-  const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
@@ -75,6 +74,20 @@ export function LensEditConfigurationFlyout({
   // use the latest activeId, but fallback to attributes
   const activeVisualization =
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
+  const previousAttributes = useRef<TypedLensSerializedState['attributes']>(
+    activeVisualization.convertToRuntimeState
+      ? {
+          ...attributes,
+          state: {
+            ...attributes.state,
+            visualization: activeVisualization.convertToRuntimeState(
+              attributes.state.visualization,
+              attributes.state.datasourceStates.formBased
+            ),
+          },
+        }
+      : attributes
+  );
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
 
