@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
+import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import {
   updateQueryStringWithVariable,
   getQueryForFields,
   areValuesIntervalsValid,
   getRecurrentVariableName,
   validateVariableName,
+  checkVariableExistence,
 } from './helpers';
 
 describe('helpers', () => {
@@ -112,6 +114,29 @@ describe('helpers', () => {
     it('should not allow more than 2 questiomarks', () => {
       const variable = validateVariableName('???my_variable', '??');
       expect(variable).toBe('??my_variable');
+    });
+  });
+
+  describe('checkVariableExistence', () => {
+    it('should return true if the variable exists', () => {
+      const variables = [
+        { key: 'my_variable', type: ESQLVariableType.VALUES, value: 'value1' },
+        { key: 'my_variable2', type: ESQLVariableType.FIELDS, value: 'value2' },
+      ] as ESQLControlVariable[];
+      const variableName = '?my_variable';
+      const exists = checkVariableExistence(variables, variableName);
+      expect(exists).toBe(true);
+    });
+
+    it('should return false if the variable does not exist', () => {
+      const variables = [
+        { key: 'my_variable', type: ESQLVariableType.VALUES, value: 'value1' },
+        { key: 'my_variable2', type: ESQLVariableType.FIELDS, value: 'value2' },
+      ] as ESQLControlVariable[];
+      // here ?variable2 is different from ??variable2
+      const variableName = '?my_variable2';
+      const exists = checkVariableExistence(variables, variableName);
+      expect(exists).toBe(false);
     });
   });
 });
