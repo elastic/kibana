@@ -9,7 +9,8 @@
     "public/**/*",
     "typings/**/*",
     "public/**/*.json",
-    "server/**/*"
+    "server/**/*",
+    "e2e/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
