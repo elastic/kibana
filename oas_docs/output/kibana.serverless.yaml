@@ -37713,7 +37713,7 @@ paths:
         - Fleet proxies
   /api/fleet/remote_synced_integrations/status:
     get:
-      description: '[Required authorization] Route required privileges: ALL of [fleet-settings-read, integrations-read].'
+      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
       operationId: get-fleet-remote-synced-integrations-status
       parameters: []
       responses:
