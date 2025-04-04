@@ -1558,7 +1558,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // exponential delay.  We will basically keep polling forever until the
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
-      } else if (isTypeof(left, 'wait_for_task_completed_with_error_retry_original')) {
+      } else if (isTypeof(left, 'task_completed_with_retriable_error')) {
         return delayRetryState(
           {
             ...stateP,

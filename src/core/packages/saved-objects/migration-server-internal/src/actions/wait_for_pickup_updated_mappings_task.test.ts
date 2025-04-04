@@ -12,7 +12,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForPickupUpdatedMappingsTask } from './wait_for_pickup_updated_mappings_task';
 import * as Either from 'fp-ts/Either';
-import { WaitForTaskCompletedWithErrorRetryOriginal } from './wait_for_task';
+import { TaskCompletedWithRetriableError } from './wait_for_task';
 
 jest.mock('./catch_retryable_es_client_errors', () => {
   const { catchRetryableEsClientErrors: actualImplementation } = jest.requireActual(
@@ -67,7 +67,7 @@ describe('waitForPickupUpdatedMappingsTask', () => {
     expect(task()).rejects.toThrowError(nonRetryableError);
   });
 
-  it('returns wait_for_task_completed_with_error_retry_original when the client returns a search_phase_execution_exception', async () => {
+  it('returns task_completed_with_retriable_error when the client returns a search_phase_execution_exception', async () => {
     const client = elasticsearchClientMock.createInternalClient();
     client.tasks.get.mockResponse({
       completed: true,
@@ -87,11 +87,10 @@ describe('waitForPickupUpdatedMappingsTask', () => {
     const task = waitForPickupUpdatedMappingsTask({ client, taskId: '4273', timeout: '2m' });
     const result = await task();
     expect(Either.isLeft(result)).toBe(true);
-    expect((result as Either.Left<WaitForTaskCompletedWithErrorRetryOriginal>).left)
-      .toMatchInlineSnapshot(`
+    expect((result as Either.Left<TaskCompletedWithRetriableError>).left).toMatchInlineSnapshot(`
       Object {
         "message": "The task being waited on encountered a search_phase_execution_exception error",
-        "type": "wait_for_task_completed_with_error_retry_original",
+        "type": "task_completed_with_retriable_error",
       }
     `);
   });

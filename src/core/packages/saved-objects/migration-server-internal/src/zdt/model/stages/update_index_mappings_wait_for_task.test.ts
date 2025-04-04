@@ -24,7 +24,7 @@ import { updateIndexMappings } from './update_index_mappings';
 import { updateIndexMappingsWaitForTask } from './update_index_mappings_wait_for_task';
 import { model } from '../model';
 import { RetryableEsClientError } from '../../actions';
-import { WaitForTaskCompletedWithErrorRetryOriginal } from '../../../actions/wait_for_task';
+import { TaskCompletedWithRetriableError } from '../../../actions/wait_for_task';
 import { FatalState } from '../../../state';
 
 describe('Stage: updateIndexMappings', () => {
@@ -35,8 +35,8 @@ describe('Stage: updateIndexMappings', () => {
     message: 'snapshot_in_progress_exception',
   };
 
-  const waitForTaskCompletedWithErrorRetryOriginal: WaitForTaskCompletedWithErrorRetryOriginal = {
-    type: 'wait_for_task_completed_with_error_retry_original' as const,
+  const taskCompletedWithRetriableError: TaskCompletedWithRetriableError = {
+    type: 'task_completed_with_retriable_error' as const,
     message: 'search_phase_execution_exception',
   };
 
@@ -89,10 +89,10 @@ describe('Stage: updateIndexMappings', () => {
     });
   });
 
-  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_INDEX_MAPPINGS in case of wait_for_task_completed_with_error_retry_original', () => {
+  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_INDEX_MAPPINGS in case of task_completed_with_retriable_error', () => {
     const state = createWaitState();
     const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left(
-      waitForTaskCompletedWithErrorRetryOriginal
+      taskCompletedWithRetriableError
     );
 
     const newState = updateIndexMappingsWaitForTask(state, res, context);
@@ -112,7 +112,7 @@ describe('Stage: updateIndexMappings', () => {
       retryCount: 12,
     });
     const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left(
-      waitForTaskCompletedWithErrorRetryOriginal
+      taskCompletedWithRetriableError
     );
 
     const newState = updateIndexMappingsWaitForTask(state, res, context);
@@ -132,12 +132,12 @@ describe('Stage: updateIndexMappings', () => {
     });
   });
 
-  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL in case of  wait_for_task_completed_with_error_retry_original when exceeding retry count', () => {
+  it('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> FATAL in case of  task_completed_with_retriable_error when exceeding retry count', () => {
     const state = createWaitState({
       retryCount: context.maxRetryAttempts,
     });
     const res: StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'> = Either.left(
-      waitForTaskCompletedWithErrorRetryOriginal
+      taskCompletedWithRetriableError
     );
 
     const newState = updateIndexMappingsWaitForTask(state, res, context) as unknown as FatalState;
@@ -169,7 +169,7 @@ describe('Stage: updateIndexMappings', () => {
       // Now we move to UPDATE_TARGET_MAPPINGS_PROPERTIES and retry it (+1 retry)
       const retryingMappingsUpdate = model(
         initialWaitState,
-        Either.left(waitForTaskCompletedWithErrorRetryOriginal),
+        Either.left(taskCompletedWithRetriableError),
         context
       );
       expect(retryingMappingsUpdate.retryCount).toBe(initialRetryCount + 1);

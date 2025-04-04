@@ -13,7 +13,7 @@ import { flow } from 'fp-ts/lib/function';
 import {
   waitForTask,
   WaitForTaskCompletionTimeout,
-  WaitForTaskCompletedWithErrorRetryOriginal,
+  TaskCompletedWithRetriableError,
 } from './wait_for_task';
 import { RetryableEsClientError } from './catch_retryable_es_client_errors';
 
@@ -23,9 +23,7 @@ export const waitForPickupUpdatedMappingsTask = flow(
     (
       res
     ): TaskEither.TaskEither<
-      | RetryableEsClientError
-      | WaitForTaskCompletionTimeout
-      | WaitForTaskCompletedWithErrorRetryOriginal,
+      RetryableEsClientError | WaitForTaskCompletionTimeout | TaskCompletedWithRetriableError,
       'pickup_updated_mappings_succeeded'
     > => {
       // We don't catch or type failures/errors because they should never
@@ -42,7 +40,7 @@ export const waitForPickupUpdatedMappingsTask = flow(
           // This error is normally fixed in the next try, so let's retry
           // the update mappings task instead of throwing
           return TaskEither.left({
-            type: 'wait_for_task_completed_with_error_retry_original' as const,
+            type: 'task_completed_with_retriable_error' as const,
             message: `The task being waited on encountered a ${res.error.value.type} error`,
           });
         }

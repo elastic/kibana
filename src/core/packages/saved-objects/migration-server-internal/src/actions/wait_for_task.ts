@@ -48,9 +48,9 @@ export interface WaitForTaskCompletionTimeout {
  * if there was any error in the original task inside a 200 response. In some cases we might
  * want to retry the original task.
  */
-export interface WaitForTaskCompletedWithErrorRetryOriginal {
+export interface TaskCompletedWithRetriableError {
   /** While waiting, the original task encountered an error. It might need to be retried. */
-  readonly type: 'wait_for_task_completed_with_error_retry_original';
+  readonly type: 'task_completed_with_retriable_error';
   readonly message: string;
   readonly error?: Error;
 }

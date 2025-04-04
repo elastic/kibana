@@ -66,7 +66,7 @@ import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
 import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
-import { WaitForTaskCompletedWithErrorRetryOriginal } from '../actions/wait_for_task';
+import { TaskCompletedWithRetriableError } from '../actions/wait_for_task';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -3042,7 +3042,7 @@ describe('migrations v2 model', () => {
       test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES when there is an error that makes us want to retry the original task', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: 'Some error happened that makes us want to retry the original task',
-          type: 'wait_for_task_completed_with_error_retry_original',
+          type: 'task_completed_with_retriable_error',
         });
         const newState = model(
           updateTargetMappingsWaitForTaskState,
@@ -3059,7 +3059,7 @@ describe('migrations v2 model', () => {
         const state = Object.assign({}, updateTargetMappingsWaitForTaskState, { retryCount: 3 });
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: 'Some error happened that makes us want to retry the original task',
-          type: 'wait_for_task_completed_with_error_retry_original',
+          type: 'task_completed_with_retriable_error',
         });
         const newState = model(state, res) as UpdateTargetMappingsPropertiesWaitForTaskState;
         expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES');
@@ -3084,8 +3084,8 @@ describe('migrations v2 model', () => {
           initialWaitState,
           Either.left({
             message: 'Some error happened that makes us want to retry the original task',
-            type: 'wait_for_task_completed_with_error_retry_original',
-          } as WaitForTaskCompletedWithErrorRetryOriginal)
+            type: 'task_completed_with_retriable_error',
+          } as TaskCompletedWithRetriableError)
         ) as UpdateTargetMappingsPropertiesWaitForTaskState;
         expect(retryingMappingsUpdate.retryCount).toBe(initialRetryCount + 1);
         expect(retryingMappingsUpdate.skipRetryReset).toBe(true);
@@ -3122,14 +3122,14 @@ describe('migrations v2 model', () => {
         expect(postUpdateState.skipRetryReset).toBeFalsy();
       });
 
-      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> FATAL if wait_for_task_completed_with_error_retry_original has no more retry attemps', () => {
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> FATAL if task_completed_with_retriable_error has no more retry attemps', () => {
         const state = Object.assign({}, updateTargetMappingsWaitForTaskState, {
           retryCount: 8,
           retryAttempts: 8,
         });
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: 'some_retryable_error_during_update',
-          type: 'wait_for_task_completed_with_error_retry_original',
+          type: 'task_completed_with_retriable_error',
         });
         const newState = model(state, res) as FatalState;
         expect(newState.controlState).toEqual('FATAL');
