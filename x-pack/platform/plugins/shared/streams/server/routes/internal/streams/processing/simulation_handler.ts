@@ -292,6 +292,10 @@ const prepareIngestSimulationBody = (
         },
       },
     }),
+    // Ideally we should not need to retrieve and merge the mappings from the stream index.
+    // But the ingest simulation API does not validate correctly the mappings unless they are specified in the simulation body.
+    // So we need to merge the mappings from the stream index with the detected fields.
+    // This is a workaround until the ingest simulation API works as expected.
     mapping_addition: {
       ...mappings,
       properties: {
