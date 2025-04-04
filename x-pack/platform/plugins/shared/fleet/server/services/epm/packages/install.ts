@@ -1199,7 +1199,7 @@ export const kibanaAssetsToAssetsRef = (
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  assetRefs: KibanaAssetReference[],
+  assetRefs: KibanaAssetReference[] | null,
   saveAsAdditionnalSpace = false
 ) => {
   auditLoggingService.writeCustomSoAuditLog({
@@ -1236,11 +1236,11 @@ export const saveKibanaAssetsRefs = async (
                   installation?.attributes?.additional_spaces_installed_kibana ?? {},
                   spaceId
                 ),
-                ...(assetRefs.length > 0 ? { [spaceId]: assetRefs } : {}),
+                ...(assetRefs !== null ? { [spaceId]: assetRefs } : {}),
               },
             }
           : {
-              installed_kibana: assetRefs,
+              installed_kibana: assetRefs !== null ? assetRefs : [],
             },
         { refresh: false }
       );
@@ -1248,7 +1248,7 @@ export const saveKibanaAssetsRefs = async (
     { retries: 20 } // Use a number of retries higher than the number of es asset update operations
   );
 
-  return assetRefs;
+  return assetRefs !== null ? assetRefs : [];
 };
 
 export async function ensurePackagesCompletedInstall(

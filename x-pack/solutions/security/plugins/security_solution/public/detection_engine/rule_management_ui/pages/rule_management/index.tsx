@@ -26,8 +26,8 @@ import { AddElasticRulesButton } from '../../../../detections/components/rules/p
 import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
-import { redirectToDetections } from '../../../../detections/pages/detection_engine/rules/helpers';
-import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
+import { redirectToDetections } from '../../../common/helpers';
+import * as i18n from '../../../common/translations';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../../../rule_management/api/hooks/use_fetch_rule_management_filters_query';
 import { useInvalidateFindRulesQuery } from '../../../rule_management/api/hooks/use_find_rules_query';
 import { importRules } from '../../../rule_management/logic';
