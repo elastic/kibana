@@ -81,9 +81,10 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const currentTheme = useObservable(theme.theme$, { darkMode: false, name: 'amsterdam' });
   const { euiTheme } = useEuiTheme();
   const minBreakpointM = useEuiMinBreakpoint('m');
-  const className = classNames(
-    !newsFetchResult?.feedItems?.length && 'kbnOverviewSupplements--noNews'
-  );
+classnames({
+'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length
+})
+
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
   const devToolsHref = share.url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl({});
