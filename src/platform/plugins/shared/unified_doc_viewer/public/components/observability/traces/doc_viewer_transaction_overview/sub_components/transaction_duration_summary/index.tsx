@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Duration } from '@kbn/apm-ui-shared';
-import { useRootTransactionContext } from '../../hooks/use_root_transaction';
+import { useRootTransactionContext } from '../../hooks/use_root_transaction/use_root_transaction';
 
 export interface TransactionDurationSummaryProps {
   duration: number;

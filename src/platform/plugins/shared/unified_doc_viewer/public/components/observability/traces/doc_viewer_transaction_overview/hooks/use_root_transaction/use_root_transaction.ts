@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { PARENT_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_DURATION_FIELD } from '@kbn/discover-utils';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface UseRootTransactionParams {
   traceId: string;

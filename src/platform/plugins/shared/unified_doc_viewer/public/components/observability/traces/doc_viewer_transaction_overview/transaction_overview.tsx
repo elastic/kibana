@@ -21,7 +21,8 @@ import { transactionFields } from './resources/fields';
 import { getTransactionFieldConfiguration } from './resources/get_transaction_field_configuration';
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
-import { RootTransactionProvider } from './hooks/use_root_transaction';
+import { RootTransactionProvider } from './hooks/use_root_transaction/use_root_transaction';
+import { useLatencyChart } from './hooks/use_latency_chart';
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
 };
