@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import fakeDeprecations from '../__fixtures__/fake_deprecations.json';
 import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
@@ -126,7 +126,6 @@ describe('getESUpgradeStatus', () => {
         ],
       },
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -148,7 +147,7 @@ describe('getESUpgradeStatus', () => {
       ...esMigrationsMock.getMockEsDeprecations(),
       ...esMigrationsMock.getMockMlSettingsDeprecations(),
     };
-    // @ts-ignore missing property definitions in ES resolve_during_rolling_upgrade and _meta
+    // @ts-expect-error missing property definitions in ES resolve_during_rolling_upgrade and _meta
     esClient.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, {
@@ -217,7 +216,6 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
           _meta: {
             reindex_required: true,
@@ -228,7 +226,6 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
           _meta: {
             reindex_required: true,
@@ -238,7 +235,6 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -313,7 +309,6 @@ describe('getESUpgradeStatus', () => {
           },
         ],
       },
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -369,7 +364,6 @@ describe('getESUpgradeStatus', () => {
         ],
       },
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -398,7 +392,6 @@ describe('getESUpgradeStatus', () => {
           message: 'Index created before 7.0',
           url: 'https: //www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-8.0.html',
           details: 'This index was created using version: 6.8.13',
-          // @ts-ignore
           resolve_during_rolling_upgrade: false,
           _meta: {
             reindex_required: true,
@@ -408,7 +401,6 @@ describe('getESUpgradeStatus', () => {
       ml_settings: [],
       index_settings: {},
       data_streams: {},
-      // @ts-expect-error not in types yet
       ilm_policies: {},
       templates: {},
     });
@@ -417,7 +409,7 @@ describe('getESUpgradeStatus', () => {
       cluster_name: 'mock',
       indicators: {
         disk: healthIndicatorsMock.diskIndicatorGreen,
-        // @ts-ignore
+        // @ts-expect-error
         shards_capacity: healthIndicatorsMock.shardCapacityIndicatorRed,
       },
     });
