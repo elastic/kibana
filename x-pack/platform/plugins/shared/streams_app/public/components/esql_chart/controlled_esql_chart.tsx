@@ -171,6 +171,7 @@ export function ControlledEsqlChart<T extends string>({
         id="y-axis"
         ticks={3}
         position={Position.Left}
+        hide
         tickFormat={yTickFormat}
         labelFormat={yLabelFormat}
       />
