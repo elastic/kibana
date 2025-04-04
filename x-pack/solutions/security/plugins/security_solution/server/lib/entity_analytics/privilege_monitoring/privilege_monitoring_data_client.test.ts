@@ -51,13 +51,6 @@ describe('Privilege Monitoring Data Client', () => {
   describe('init', () => {
     it('should initialize the privilege monitoring engine successfully', async () => {
       dataClient.createOrUpdateIndex = mockCreateOrUpdateIndex;
-      // // Mock the private engineClient used internally in init()
-      // Object.defineProperty(dataClient, 'engineClient', {
-      //   value: {
-      //     init: jest.fn().mockResolvedValue({ status: 'success' }),
-      //     update: jest.fn(),
-      //   },
-      // });
       const result = await dataClient.init();
 
       expect(mockCreateOrUpdateIndex).toHaveBeenCalled();
@@ -131,23 +124,13 @@ describe('Privilege Monitoring Data Client', () => {
     });
   });
 
-  describe('createOrUpdateIndex', () => {
-    it('should create or update the index successfully', async () => {
-      // Happy path tests
-    });
-
-    it('should handle errors during index creation or update', async () => {
-      // Unhappy path tests
-    });
-  });
-
   describe('audit', () => {
     it('should log audit events successfully', async () => {
-      // Happy path tests
+      // TODO: implement once we have more auditing
     });
 
     it('should handle errors during audit logging', async () => {
-      // Unhappy path tests
+      // TODO: implement once we have more auditing
     });
   });
 });

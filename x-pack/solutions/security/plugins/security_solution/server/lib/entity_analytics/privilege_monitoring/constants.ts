@@ -11,9 +11,6 @@ export const VERSION = '1.0.0';
 export const TIMEOUT = '10m';
 export const INTERVAL = '1m';
 
-// Upgrade this value to force a mappings update on the next Kibana startup
-export const PRIVILEGE_MONITORING_MAPPINGS_VERSIONS = 1;
-
 export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
   INSTALLING: 'installing',
   STARTED: 'started',
