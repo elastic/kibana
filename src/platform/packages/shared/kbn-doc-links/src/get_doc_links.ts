@@ -546,6 +546,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}transforms.html`
         : `${ELASTICSEARCH_DOCS}transforms.html`,
       alertingRules: `${ELASTICSEARCH_DOCS}transform-alerts.html`,
+      overview: `${ELASTICSEARCH_DOCS}transform-overview.html`,
     },
     visualize: {
       guide: `${KIBANA_DOCS}_panels_and_visualizations.html`,
@@ -982,6 +983,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     synonyms: {
       synonymsAPIDocumentation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/synonyms-apis.html`,
+    },
+    queryRules: {
+      queryRulesAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/group/endpoint-query_rules`,
     },
   });
 };

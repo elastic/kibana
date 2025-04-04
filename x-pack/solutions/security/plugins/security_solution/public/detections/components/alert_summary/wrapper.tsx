@@ -17,6 +17,8 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
+import { KPIsSection } from './kpis/kpis_section';
+import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.dataViewError', {
@@ -91,7 +93,11 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
             />
           ) : (
             <div data-test-subj={CONTENT_TEST_ID}>
+              <IntegrationSection packages={packages} />
+              <EuiHorizontalRule />
               <SearchBarSection dataView={dataView} packages={packages} />
+              <EuiSpacer />
+              <KPIsSection dataView={dataView} />
             </div>
           )}
         </>

@@ -337,6 +337,35 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-public.useGetDataStreams",
+        "type": "Function",
+        "tags": [],
+        "label": "useGetDataStreams",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "esUiShared",
+            "scope": "public",
+            "docId": "kibEsUiSharedPluginApi",
+            "section": "def-public.UseRequestResponse",
+            "text": "UseRequestResponse"
+          },
+          "<",
+          "GetDataStreamsResponse",
+          ", ",
+          "RequestError",
+          ">"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/public/hooks/use_request/data_stream.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-public.useGetPackagesQuery",
         "type": "Function",
         "tags": [],
@@ -1323,7 +1352,13 @@
             "label": "datastreams",
             "description": [],
             "signature": [
-              "DataStream",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.DataStream",
+                "text": "DataStream"
+              },
               "[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_input_var_field.tsx",
@@ -4373,6 +4408,28 @@
             "type": "string",
             "tags": [],
             "label": "BULK_UPGRADE_INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.BULK_UNINSTALL_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_INFO_PATTERN",
             "description": [],
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
@@ -21765,6 +21822,150 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.DataStream",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataStream",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.index",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.dataset",
+            "type": "string",
+            "tags": [],
+            "label": "dataset",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.package",
+            "type": "string",
+            "tags": [],
+            "label": "package",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.package_version",
+            "type": "string",
+            "tags": [],
+            "label": "package_version",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.last_activity_ms",
+            "type": "number",
+            "tags": [],
+            "label": "last_activity_ms",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.size_in_bytes",
+            "type": "number",
+            "tags": [],
+            "label": "size_in_bytes",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.size_in_bytes_formatted",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "size_in_bytes_formatted",
+            "description": [],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.dashboards",
+            "type": "Array",
+            "tags": [],
+            "label": "dashboards",
+            "description": [],
+            "signature": [
+              "{ id: string; title: string; }[]"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DataStream.serviceDetails",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serviceDetails",
+            "description": [],
+            "signature": [
+              "{ environment: string; serviceName: string; } | null"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/data_stream.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.DefaultPackagesInstallationError",
         "type": "Interface",
         "tags": [],
@@ -31179,6 +31380,28 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.BULK_UNINSTALL_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "BULK_UNINSTALL_INFO_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.LIST_PATTERN",
             "type": "string",
             "tags": [],
@@ -31672,6 +31895,22 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getBulkUninstallPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getBulkUninstallPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.epmRouteService.getOneBulkUpgradePath",
             "type": "Function",
             "tags": [],
@@ -31687,6 +31926,38 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-common.epmRouteService.getOneBulkUpgradePath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "taskId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getOneBulkUninstallPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getOneBulkUninstallPath",
+            "description": [],
+            "signature": [
+              "(taskId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.epmRouteService.getOneBulkUninstallPath.$1",
                 "type": "string",
                 "tags": [],
                 "label": "taskId",
