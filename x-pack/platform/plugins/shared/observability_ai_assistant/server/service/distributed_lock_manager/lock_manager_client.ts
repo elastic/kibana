@@ -72,8 +72,11 @@ export class LockManager {
               // Get the current time on the ES server.
               long now = System.currentTimeMillis();
               
-              // If creating the document or if the lock is expired, update it.
-              if (ctx.op == 'create' || Instant.parse(ctx._source.expiresAt).toEpochMilli() < now) {
+              // If creating the document, or if the lock is expired,
+              // or if the current document is owned by the same token, then update it.
+              if (ctx.op == 'create' ||
+                  Instant.parse(ctx._source.expiresAt).toEpochMilli() < now ||
+                  ctx._source.token == params.token) {
                 def instantNow = Instant.ofEpochMilli(now);
                 ctx._source.createdAt = instantNow.toString();
                 ctx._source.expiresAt = instantNow.plusMillis(params.ttl).toString();
@@ -83,6 +86,7 @@ export class LockManager {
             `,
           params: {
             ttl,
+            token: this.token,
           },
         },
         // @ts-expect-error
@@ -119,7 +123,6 @@ export class LockManager {
         this.logger.debug(`Lock "${this.lockId}" already held (version conflict)`);
         return false;
       }
-
       this.logger.error(`Failed to acquire lock "${this.lockId}": ${e.message}`);
       this.logger.debug(e);
       return false;
