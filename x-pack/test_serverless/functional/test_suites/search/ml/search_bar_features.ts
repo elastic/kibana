@@ -12,7 +12,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   const allLabels = [
     { label: 'Machine Learning', expected: true },
-    { label: 'Machine Learning / Overview', expected: false },
+    { label: 'Machine Learning / Overview', expected: true },
     { label: 'Machine Learning / Anomaly Detection', expected: false },
     { label: 'Machine Learning / Anomaly Detection / Anomaly explorer', expected: false },
     { label: 'Machine Learning / Anomaly Detection / Single metric viewer', expected: false },
