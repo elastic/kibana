@@ -120,6 +120,7 @@ export class PrivilegeMonitoringDataClient {
         },
       });
     }
+
     return descriptor;
   }
 
