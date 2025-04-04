@@ -19,7 +19,7 @@ Jira Cloud and Jira Data Center are supported. Jira on-premise deployments are n
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}** or as needed when you’re creating a rule. For example:
 
-:::{image} ../../images/jira-connector.png
+:::{image} ../images/jira-connector.png
 :alt: Jira connector
 :class: screenshot
 :::
@@ -49,7 +49,7 @@ API token
 
 You can test connectors as you’re creating or editing the connector in {{kib}}. For example:
 
-:::{image} ../../images/jira-params-test.png
+:::{image} ../images/jira-params-test.png
 :alt: Jira params test
 :class: screenshot
 :::

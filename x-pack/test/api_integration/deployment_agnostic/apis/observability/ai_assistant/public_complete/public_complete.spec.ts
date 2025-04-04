@@ -15,14 +15,12 @@ import {
   type StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { type Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
-import { ChatCompletionStreamParams } from 'openai/lib/ChatCompletionStream';
 import {
   createLlmProxy,
   LlmProxy,
-  ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import { decodeEvents } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
@@ -41,23 +39,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   describe('/api/observability_ai_assistant/chat/complete', function () {
     // Fails on MKI: https://github.com/elastic/kibana/issues/205581
     this.tags(['failsOnMKI']);
-    let proxy: LlmProxy;
+    let llmProxy: LlmProxy;
     let connectorId: string;
 
-    async function addInterceptorsAndCallComplete({
+    async function callPublicChatComplete({
       actions,
       instructions,
       format = 'default',
-      conversationResponse,
+      persist = true,
     }: {
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: Array<string | Instruction>;
       format?: 'openai' | 'default';
-      conversationResponse: string | ToolMessage;
+      persist?: boolean;
     }) {
-      const titleSimulatorPromise = proxy.interceptTitle('My Title');
-      const conversationSimulatorPromise = proxy.interceptConversation(conversationResponse);
-
       const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
         params: {
@@ -65,38 +60,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           body: {
             messages,
             connectorId,
-            persist: true,
+            persist,
             actions,
             instructions,
           },
         },
       });
 
-      await proxy.waitForAllInterceptorsToHaveBeenCalled();
-
-      const titleSimulator = await titleSimulatorPromise;
-      const conversationSimulator = await conversationSimulatorPromise;
-
-      return {
-        titleSimulator,
-        conversationSimulator,
-        responseBody: String(response.body),
-      };
-    }
-
-    function getEventsFromBody(body: string) {
-      return body
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean)
-        .map((line) => JSON.parse(line) as StreamingChatResponseEvent)
-        .slice(2); // ignore context request/response, we're testing this elsewhere
+      return String(response.body);
     }
 
     before(async () => {
-      proxy = await createLlmProxy(log);
+      llmProxy = await createLlmProxy(log);
       connectorId = await observabilityAIAssistantAPIClient.createProxyActionConnector({
-        port: proxy.getPort(),
+        port: llmProxy.getPort(),
       });
     });
 
@@ -104,7 +81,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       await observabilityAIAssistantAPIClient.deleteActionConnector({
         actionId: connectorId,
       });
-      proxy.close();
+      llmProxy.close();
     });
 
     const action = {
@@ -120,27 +97,27 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       },
     } as const;
 
-    const toolCallMock: ChatCompletionChunkToolCall = {
-      toolCallId: 'fake-index',
-      index: 0,
-      function: {
-        name: 'my_action',
-        arguments: JSON.stringify({ foo: 'bar' }),
-      },
-    };
+    afterEach(async () => {
+      llmProxy.clear();
+    });
 
     describe('after executing an action and closing the stream', () => {
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        const { responseBody } = await addInterceptorsAndCallComplete({
-          actions: [action],
-          conversationResponse: {
-            tool_calls: [toolCallMock],
-          },
+        void llmProxy.interceptTitle('My Title');
+        void llmProxy.interceptWithFunctionRequest({
+          name: 'my_action',
+          arguments: () => JSON.stringify({ foo: 'bar' }),
         });
 
-        events = getEventsFromBody(responseBody);
+        const responseBody = await callPublicChatComplete({
+          actions: [action],
+        });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+        events = decodeEvents(responseBody);
       });
 
       it('does not persist the conversation (the last event is not a conversationUpdated event)', () => {
@@ -149,29 +126,31 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(lastEvent.type).to.be('messageAdd');
         expect(lastEvent.message.message.function_call).to.eql({
           name: 'my_action',
-          arguments: toolCallMock.function.arguments,
+          arguments: JSON.stringify({ foo: 'bar' }),
           trigger: MessageRole.Assistant,
         });
       });
     });
 
     describe('after adding an instruction', () => {
-      let body: ChatCompletionStreamParams;
-
       before(async () => {
-        const { conversationSimulator } = await addInterceptorsAndCallComplete({
-          instructions: ['This is a random instruction'],
-          actions: [action],
-          conversationResponse: {
-            tool_calls: [toolCallMock],
-          },
+        void llmProxy.interceptWithFunctionRequest({
+          name: 'my_action',
+          arguments: () => JSON.stringify({ foo: 'bar' }),
         });
 
-        body = conversationSimulator.requestBody;
+        await callPublicChatComplete({
+          instructions: ['This is a random instruction'],
+          actions: [action],
+          persist: false,
+        });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       it('includes the instruction in the system message', async () => {
-        expect(body.messages[0].content).to.contain('This is a random instruction');
+        const { requestBody } = llmProxy.interceptedRequests[0];
+        expect(requestBody.messages[0].content).to.contain('This is a random instruction');
       });
     });
 
@@ -179,10 +158,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let responseBody: string;
 
       before(async () => {
-        ({ responseBody } = await addInterceptorsAndCallComplete({
-          format: 'openai',
-          conversationResponse: 'Hello',
-        }));
+        void llmProxy.interceptTitle('My Title');
+        void llmProxy.interceptConversation('Hello');
+
+        responseBody = await callPublicChatComplete({ format: 'openai' });
+
+        await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
       });
 
       function extractDataParts(lines: string[]) {
@@ -194,12 +175,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       }
 
-      function getLines() {
-        return responseBody.split('\n\n').filter(Boolean);
+      function getLines(str: string) {
+        return str.split('\n\n').filter(Boolean);
       }
 
       it('outputs each line an SSE-compatible format (data: ...)', () => {
-        const lines = getLines();
+        const lines = getLines(responseBody);
 
         lines.forEach((line) => {
           expect(line.match(/^data: /));
@@ -207,14 +188,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('ouputs one chunk, and one [DONE] event', () => {
-        const dataParts = extractDataParts(getLines());
+        const dataParts = extractDataParts(getLines(responseBody));
 
         expect(dataParts[0]).not.to.be.empty();
         expect(dataParts[1]).to.be('[DONE]');
       });
 
       it('outuputs an OpenAI-compatible chunk', () => {
-        const [dataLine] = extractDataParts(getLines());
+        const [dataLine] = extractDataParts(getLines(responseBody));
 
         expect(() => {
           JSON.parse(dataLine);

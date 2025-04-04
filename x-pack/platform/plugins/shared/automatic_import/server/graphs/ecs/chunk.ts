@@ -6,7 +6,7 @@
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { merge } from '../../util/samples';
+import { isUnsafeProperty, merge } from '../../util/samples';
 
 interface NestedObject {
   [key: string]: any;
@@ -40,32 +40,35 @@ function generateChunks(mergedSamples: NestedObject, chunkSize: number): NestedO
 
   function traverse(current: NestedObject, path: string[] = []) {
     for (const [key, value] of Object.entries(current)) {
-      const newPath = [...path, key];
+      if (!isUnsafeProperty(key, current)) {
+        const newPath = [...path, key];
 
-      // If the value is a nested object, recurse into it
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        traverse(value, newPath);
-      } else {
-        // For non-object values, add them to the current chunk
-        let target = currentChunk;
+        // If the value is a nested object, recurse into it
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          traverse(value, newPath);
+        } else {
+          // For non-object values, add them to the current chunk
+          let target = currentChunk;
 
-        // Recreate the nested structure in the current chunk
-        for (let i = 0; i < newPath.length - 1; i++) {
-          if (!(newPath[i] in target)) {
-            target[newPath[i]] = {};
+          // Recreate the nested structure in the current chunk
+          for (let i = 0; i < newPath.length - 1; i++) {
+            const pathSegment = newPath[i];
+            if (isUnsafeProperty(pathSegment, target) || !(pathSegment in target)) {
+              target[pathSegment] = {};
+            }
+            target = target[newPath[i]];
           }
-          target = target[newPath[i]];
-        }
 
-        // Add the value to the deepest level of the structure
-        target[newPath[newPath.length - 1]] = value;
-        currentSize++;
+          // Add the value to the deepest level of the structure
+          target[newPath[newPath.length - 1]] = value;
+          currentSize++;
 
-        // If the chunk is full, add it to the chunks and start a new chunk
-        if (currentSize === chunkSize) {
-          chunks.push(currentChunk);
-          currentChunk = {};
-          currentSize = 0;
+          // If the chunk is full, add it to the chunks and start a new chunk
+          if (currentSize === chunkSize) {
+            chunks.push(currentChunk);
+            currentChunk = {};
+            currentSize = 0;
+          }
         }
       }
     }

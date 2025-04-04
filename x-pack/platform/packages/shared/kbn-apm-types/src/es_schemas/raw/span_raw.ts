@@ -8,6 +8,7 @@
 import { APMBaseDoc } from './apm_base_doc';
 import { EventOutcome } from './fields/event_outcome';
 import { Http } from './fields/http';
+import { Server } from './fields/server';
 import { SpanLink } from './fields/span_links';
 import { Stackframe } from './fields/stackframe';
 import { TimestampUs } from './fields/timestamp_us';
@@ -76,4 +77,5 @@ export interface SpanRaw extends APMBaseDoc {
   };
   http?: Http;
   url?: Url;
+  server?: Server;
 }

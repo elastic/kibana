@@ -24,7 +24,11 @@ describe('getCombinedRefinePrompt', () => {
 Refine prompt
 
 """
-${JSON.stringify(mockAttackDiscoveries, null, 2)}
+\`\`\`json
+{
+  "insights": ${JSON.stringify(mockAttackDiscoveries, null, 2)}
+}
+\`\`\`
 """
 
 `);
@@ -44,7 +48,11 @@ ${JSON.stringify(mockAttackDiscoveries, null, 2)}
 Refine prompt
 
 """
-${JSON.stringify(mockAttackDiscoveries, null, 2)}
+\`\`\`json
+{
+  "insights": ${JSON.stringify(mockAttackDiscoveries, null, 2)}
+}
+\`\`\`
 """
 
 
@@ -72,7 +80,11 @@ Combined refinements
 Refine prompt
 
 """
-null
+\`\`\`json
+{
+  "insights": null
+}
+\`\`\`
 """
 
 `);

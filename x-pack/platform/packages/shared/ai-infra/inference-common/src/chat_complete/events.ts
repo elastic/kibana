@@ -22,16 +22,19 @@ export enum ChatCompletionEventType {
  * the whole text content and potential tool calls of the response.
  */
 export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOptions> =
-  InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionMessage> & {
-    /**
-     * The text content of the LLM response.
-     */
-    content: string;
-    /**
-     * The eventual tool calls performed by the LLM.
-     */
-    toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
-  };
+  InferenceTaskEventBase<
+    ChatCompletionEventType.ChatCompletionMessage,
+    {
+      /**
+       * The text content of the LLM response.
+       */
+      content: string;
+      /**
+       * The eventual tool calls performed by the LLM.
+       */
+      toolCalls: ToolCallsOf<TToolOptions>['toolCalls'];
+    }
+  >;
 
 /**
  * Represent a partial tool call present in a chunk event.
@@ -64,8 +67,9 @@ export interface ChatCompletionChunkToolCall {
  * Chunk event, containing a fragment of the total content,
  * and potentially chunks of tool calls.
  */
-export type ChatCompletionChunkEvent =
-  InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionChunk> & {
+export type ChatCompletionChunkEvent = InferenceTaskEventBase<
+  ChatCompletionEventType.ChatCompletionChunk,
+  {
     /**
      * The content chunk
      */
@@ -74,7 +78,8 @@ export type ChatCompletionChunkEvent =
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
-  };
+  }
+>;
 
 /**
  * Token count structure for the chatComplete API.
@@ -98,13 +103,15 @@ export interface ChatCompletionTokenCount {
  * Token count event, send only once, usually (but not necessarily)
  * before the message event
  */
-export type ChatCompletionTokenCountEvent =
-  InferenceTaskEventBase<ChatCompletionEventType.ChatCompletionTokenCount> & {
+export type ChatCompletionTokenCountEvent = InferenceTaskEventBase<
+  ChatCompletionEventType.ChatCompletionTokenCount,
+  {
     /**
      * The token count structure
      */
     tokens: ChatCompletionTokenCount;
-  };
+  }
+>;
 
 /**
  * Events emitted from the {@link ChatCompleteResponse} observable

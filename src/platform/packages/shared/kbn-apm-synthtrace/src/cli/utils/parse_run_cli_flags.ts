@@ -76,7 +76,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'versionOverride',
       'clean',
       'assume-package-version',
-      'liveBucketSize'
+      'liveBucketSize',
+      'uniqueIds'
     ),
     scenarioOpts: flags.scenarioOpts as unknown as Record<string, any>,
     logLevel: parsedLogLevel,

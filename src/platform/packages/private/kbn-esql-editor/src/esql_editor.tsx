@@ -29,6 +29,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
 import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -55,10 +56,11 @@ import {
   RESIZABLE_CONTAINER_INITIAL_HEIGHT,
   esqlEditorStyles,
 } from './esql_editor.styles';
-import type { ESQLEditorProps, ESQLEditorDeps } from './types';
+import type { ESQLEditorProps, ESQLEditorDeps, ControlsContext } from './types';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
+const DATEPICKER_WIDTH = 373;
 
 const triggerControl = async (
   queryString: string,
@@ -66,8 +68,8 @@ const triggerControl = async (
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
   esqlVariables?: ESQLControlVariable[],
-  onSaveControl?: ESQLEditorProps['onSaveControl'],
-  onCancelControl?: ESQLEditorProps['onCancelControl']
+  onSaveControl?: ControlsContext['onSaveControl'],
+  onCancelControl?: ControlsContext['onCancelControl']
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -99,9 +101,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
-  onSaveControl,
-  onCancelControl,
-  supportsControls,
+  controlsContext,
   esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
@@ -124,9 +124,14 @@ export const ESQLEditor = memo(function ESQLEditor({
     data,
   } = kibana.services;
 
+  const fixedQuery = useMemo(
+    () => fixESQLQueryWithVariables(query.esql, esqlVariables),
+    [esqlVariables, query.esql]
+  );
+
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
-  const [code, setCode] = useState<string>(query.esql ?? '');
+  const [code, setCode] = useState<string>(fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
@@ -213,15 +218,15 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== query.esql) {
-        setCode(query.esql);
+      if (code !== fixedQuery) {
+        setCode(fixedQuery);
       }
     }
-  }, [code, query.esql]);
+  }, [code, fixedQuery]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
-    if (supportsControls) {
+    if (controlsContext?.supportsControls) {
       variablesService?.enableSuggestions();
 
       const variables = variablesService?.esqlVariables;
@@ -234,7 +239,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     } else {
       variablesService?.disableSuggestions();
     }
-  }, [variablesService, supportsControls, esqlVariables]);
+  }, [variablesService, controlsContext, esqlVariables]);
 
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
@@ -257,8 +262,12 @@ export const ESQLEditor = memo(function ESQLEditor({
       const editorLeft = editorCoords.left;
 
       // Calculate the absolute position of the popover
-      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 20;
-      const absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      const absoluteTop = editorTop + (editorPosition?.top ?? 0) + 25;
+      let absoluteLeft = editorLeft + (editorPosition?.left ?? 0);
+      if (absoluteLeft > editorCoords.width) {
+        // date picker is out of the editor
+        absoluteLeft = absoluteLeft - DATEPICKER_WIDTH;
+      }
 
       setPopoverPosition({ top: absoluteTop, left: absoluteLeft });
       datePickerOpenStatusRef.current = true;
@@ -282,52 +291,52 @@ export const ESQLEditor = memo(function ESQLEditor({
   monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.TIME_LITERAL,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
   monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FIELDS,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
   monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.VALUES,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
   monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
     const position = editor1.current?.getPosition();
     await triggerControl(
-      query.esql,
+      fixedQuery,
       ESQLVariableType.FUNCTIONS,
       position,
       uiActions,
       esqlVariables,
-      onSaveControl,
-      onCancelControl
+      controlsContext?.onSaveControl,
+      controlsContext?.onCancelControl
     );
   });
 
@@ -437,7 +446,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const esqlCallbacks: ESQLCallbacks = useMemo(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
-        clearCacheWhenOld(dataSourcesCache, query.esql);
+        clearCacheWhenOld(dataSourcesCache, fixedQuery);
         const sources = await memoizedSources(dataViews, core).result;
         return sources;
       },
@@ -457,7 +466,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               timeRange,
               abortController,
               undefined,
-              esqlVariables
+              variablesService?.esqlVariables
             ).result;
             const columns: ESQLRealField[] =
               table?.columns.map((c) => {
@@ -500,10 +509,9 @@ export const ESQLEditor = memo(function ESQLEditor({
     return callbacks;
   }, [
     fieldsMetadata,
-    esqlVariables,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
     dataSourcesCache,
-    query.esql,
+    fixedQuery,
     memoizedSources,
     dataViews,
     core,
@@ -890,6 +898,8 @@ export const ESQLEditor = memo(function ESQLEditor({
               borderRadius: theme.euiTheme.border.radius.small,
               position: 'absolute',
               overflow: 'auto',
+              zIndex: 1001,
+              border: theme.euiTheme.border.thin,
             }}
             ref={popoverRef}
             data-test-subj="ESQLEditor-timepicker-popover"

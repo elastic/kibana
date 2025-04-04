@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, pairwise } from 'rxjs';
+import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -91,6 +91,23 @@ export const GridLayout = ({
       });
 
     /**
+     * This subscription ensures that rows get re-rendered when their orders change
+     */
+    const rowOrderSubscription = combineLatest([
+      gridLayoutStateManager.proposedGridLayout$,
+      gridLayoutStateManager.gridLayout$,
+    ])
+      .pipe(
+        map(([proposedGridLayout, gridLayout]) =>
+          getRowKeysInOrder(proposedGridLayout ?? gridLayout)
+        ),
+        distinctUntilChanged(deepEqual)
+      )
+      .subscribe((rowKeys) => {
+        setRowIdsInOrder(rowKeys);
+      });
+
+    /**
      * This subscription adds and/or removes the necessary class names related to styling for
      * mobile view and a static (non-interactable) grid layout
      */
@@ -115,6 +132,7 @@ export const GridLayout = ({
 
     return () => {
       onLayoutChangeSubscription.unsubscribe();
+      rowOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,7 +178,7 @@ const styles = {
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
   }),
   hasActivePanel: css({
-    '&:has(.kbnGridPanel--active)': {
+    '&:has(.kbnGridPanel--active), &:has(.kbnGridRowHeader--active)': {
       // disable pointer events and user select on drag + resize
       userSelect: 'none',
       pointerEvents: 'none',

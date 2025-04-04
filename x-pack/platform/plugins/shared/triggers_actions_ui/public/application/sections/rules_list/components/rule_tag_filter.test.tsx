@@ -10,6 +10,7 @@ import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-l
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleTagFilter } from './rule_tag_filter';
+import { getRuleTags } from '@kbn/response-ops-rules-apis/apis/get_rule_tags';
 
 const onChangeMock = jest.fn();
 
@@ -34,11 +35,8 @@ const WithProviders = ({ children }: { children: any }) => (
   </IntlProvider>
 );
 
-jest.mock('../../../lib/rule_api/aggregate', () => ({
-  loadRuleTags: jest.fn(),
-}));
-
-const { loadRuleTags } = jest.requireMock('../../../lib/rule_api/aggregate');
+jest.mock('@kbn/response-ops-rules-apis/apis/get_rule_tags');
+const mockGetRuleTags = jest.mocked(getRuleTags);
 
 const renderWithProviders = (ui: any) => {
   return render(ui, { wrapper: WithProviders });
@@ -56,7 +54,7 @@ describe('rule_tag_filter', () => {
       })),
     });
     jest.clearAllMocks();
-    loadRuleTags.mockResolvedValue({
+    mockGetRuleTags.mockResolvedValue({
       data: tags,
       page: 1,
       perPage: 50,

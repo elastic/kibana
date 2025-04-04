@@ -202,6 +202,7 @@ export function AddDashboardFlyout({
             </EuiFlexItem>
           </EuiFlexGroup>
           <DashboardsTable
+            entityId={entityId}
             dashboards={allDashboards}
             loading={dashboardSuggestionsFetch.loading}
             selectedDashboards={selectedDashboards}

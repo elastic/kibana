@@ -15,7 +15,7 @@
     "xpack.stackAlerts": "platform/plugins/shared/stack_alerts",
     "xpack.stackConnectors": "platform/plugins/shared/stack_connectors",
     "xpack.apm": "solutions/observability/plugins/apm",
-    "xpack.apmDataAccess": "solutions/observability/plugins/apm_data_access",
+    "xpack.apmSourcesAccess": "platform/plugins/shared/apm_sources_access",
     "xpack.banners": "platform/plugins/private/banners",
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",

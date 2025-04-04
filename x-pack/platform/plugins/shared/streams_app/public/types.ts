@@ -21,6 +21,12 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { AppMountParameters } from '@kbn/core/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
+import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
+import {
+  DiscoverSharedPublicSetup,
+  DiscoverSharedPublicStart,
+} from '@kbn/discover-shared-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -33,25 +39,29 @@ export interface StreamsApplicationProps {
 export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
 
 export interface StreamsAppSetupDependencies {
-  streams: StreamsPluginSetup;
   data: DataPublicPluginSetup;
   dataViews: DataViewsPublicPluginSetup;
-  unifiedSearch: {};
+  discoverShared: DiscoverSharedPublicSetup;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicSetup;
   share: SharePublicSetup;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
+  streams: StreamsPluginSetup;
+  unifiedSearch: {};
 }
 
 export interface StreamsAppStartDependencies {
-  streams: StreamsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
-  share: SharePublicStart;
-  savedObjectsTagging: SavedObjectTaggingPluginStart;
-  navigation: NavigationPublicStart;
+  discoverShared: DiscoverSharedPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
-  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   licensing: LicensingPluginStart;
+  indexManagement: IndexManagementPluginStart;
+  ingestPipelines: IngestPipelinesPluginStart;
+  navigation: NavigationPublicStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPublicStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
+  share: SharePublicStart;
+  streams: StreamsPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface StreamsAppPublicSetup {}

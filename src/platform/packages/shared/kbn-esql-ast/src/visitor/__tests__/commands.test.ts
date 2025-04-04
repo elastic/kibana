@@ -115,3 +115,28 @@ test('can visit JOIN ON option', () => {
 
   expect(list).toMatchObject(['xyz']);
 });
+
+test('can visit CHANGE_POINT command', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM k8s
+      | STATS count=COUNT() BY @timestamp=BUCKET(@timestamp, 1 MINUTE)
+      | CHANGE_POINT count ON @timestamp AS type, pvalue
+      | LIMIT 123
+  `);
+  const visitor = new Visitor()
+    .on('visitExpression', (ctx) => {
+      return null;
+    })
+    .on('visitChangePointCommand', (ctx) => {
+      return 'CHANGE_POINT';
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['CHANGE_POINT']);
+});

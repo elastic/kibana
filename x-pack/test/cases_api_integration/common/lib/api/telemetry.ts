@@ -10,7 +10,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
+import type { CasesTelemetry } from '@kbn/cases-plugin/server/telemetry/types';
 import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-plugin/common/constants';
 
 interface CasesTelemetryPayload {

@@ -84,6 +84,7 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
               'searchPlayground',
               'searchInferenceEndpoints',
               'searchSynonyms',
+              'searchQueryRules',
               'appSearch',
               'observabilityAIAssistant',
               'workplaceSearch',

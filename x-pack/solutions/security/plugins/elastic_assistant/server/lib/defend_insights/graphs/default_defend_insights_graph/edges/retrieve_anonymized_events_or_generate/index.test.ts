@@ -39,6 +39,7 @@ const initialGraphState: GraphState = {
   refinePrompt: 'refinePrompt',
   replacements: {},
   unrefinedResults: null,
+  continuePrompt: 'continuePrompt',
 };
 
 describe('getRetrieveAnonymizedEventsOrGenerateEdge', () => {

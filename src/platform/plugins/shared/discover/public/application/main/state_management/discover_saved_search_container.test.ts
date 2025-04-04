@@ -18,14 +18,18 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { VIEW_MODE } from '../../../../common/constants';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createInternalStateStore, createRuntimeStateManager } from './redux';
+import { mockCustomizationContext } from '../../../customizations/__mocks__/customization_context';
 
 describe('DiscoverSavedSearchContainer', () => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-  const globalStateContainer = getDiscoverGlobalStateContainer(createKbnUrlStateStorage());
+  const urlStateStorage = createKbnUrlStateStorage();
+  const globalStateContainer = getDiscoverGlobalStateContainer(urlStateStorage);
   const internalState = createInternalStateStore({
     services,
+    customizationContext: mockCustomizationContext,
     runtimeStateManager: createRuntimeStateManager(),
+    urlStateStorage,
   });
 
   describe('getTitle', () => {
@@ -81,60 +85,6 @@ describe('DiscoverSavedSearchContainer', () => {
 
       container.set(newSavedSearch);
       expect(container.getHasChanged$().getValue()).toBe(false);
-    });
-  });
-
-  describe('new', () => {
-    it('should create a new saved search', async () => {
-      const container = getSavedSearchContainer({
-        services,
-        globalStateContainer,
-
-        internalState,
-      });
-      const result = await container.new(dataViewMock);
-
-      expect(result.title).toBeUndefined();
-      expect(result.id).toBeUndefined();
-      const savedSearchState = container.getState();
-      expect(savedSearchState.id).not.toEqual(savedSearch.id);
-      expect(savedSearchState.searchSource.getField('index')).toEqual(
-        savedSearch.searchSource.getField('index')
-      );
-    });
-
-    it('should create a new saved search with provided DataView', async () => {
-      const container = getSavedSearchContainer({
-        services,
-        globalStateContainer,
-
-        internalState,
-      });
-      const result = await container.new(dataViewMock);
-      expect(result.title).toBeUndefined();
-      expect(result.id).toBeUndefined();
-      expect(result.searchSource.getField('index')).toBe(dataViewMock);
-      expect(container.getHasChanged$().getValue()).toBe(false);
-    });
-  });
-
-  describe('load', () => {
-    discoverServiceMock.data.search.searchSource.create = jest
-      .fn()
-      .mockReturnValue(savedSearchMock.searchSource);
-    discoverServiceMock.savedSearch.get = jest.fn().mockReturnValue(savedSearchMock);
-
-    it('loads a saved search', async () => {
-      const savedSearchContainer = getSavedSearchContainer({
-        services: discoverServiceMock,
-        globalStateContainer,
-
-        internalState,
-      });
-      await savedSearchContainer.load('the-saved-search-id');
-      expect(savedSearchContainer.getInitial$().getValue().id).toEqual('the-saved-search-id');
-      expect(savedSearchContainer.getCurrent$().getValue().id).toEqual('the-saved-search-id');
-      expect(savedSearchContainer.getHasChanged$().getValue()).toEqual(false);
     });
   });
 

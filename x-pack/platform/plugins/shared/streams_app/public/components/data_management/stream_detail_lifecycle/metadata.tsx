@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
   IngestStreamGetResponse,
   isDisabledLifecycle,
@@ -31,17 +29,17 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  formatNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
-import { formatBytes } from './helpers/format_bytes';
+import { formatIngestionRate } from './helpers/format_bytes';
 
 export function RetentionMetadata({
   definition,
-  ilmLocator,
   lifecycleActions,
   openEditModal,
   stats,
@@ -49,7 +47,6 @@ export function RetentionMetadata({
   statsError,
 }: {
   definition: IngestStreamGetResponse;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
@@ -98,7 +95,7 @@ export function RetentionMetadata({
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
-      <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
+      <IlmLink lifecycle={lifecycle} />
     </EuiBadge>
   ) : null;
 
@@ -203,7 +200,7 @@ export function RetentionMetadata({
           ) : isLoadingStats || !stats ? (
             <EuiLoadingSpinner size="s" />
           ) : (
-            stats.totalDocs
+            formatNumber(stats.totalDocs, '0,0')
           )
         }
       />
@@ -242,9 +239,3 @@ function MetadataRow({
     </EuiFlexGroup>
   );
 }
-
-const formatIngestionRate = (bytesPerDay: number) => {
-  const perDay = formatBytes(bytesPerDay);
-  const perMonth = formatBytes(bytesPerDay * 30);
-  return `${perDay} / Day - ${perMonth} / Month`;
-};
