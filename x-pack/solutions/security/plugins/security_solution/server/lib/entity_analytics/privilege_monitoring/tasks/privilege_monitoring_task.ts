@@ -13,11 +13,16 @@ import type {
   TaskRunCreatorFunction,
 } from '@kbn/task-manager-plugin/server';
 
+import moment from 'moment';
 import type { ExperimentalFeatures } from '../../../../../common';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from '../constants';
-import { defaultState, stateSchemaByVersion } from './state';
+import {
+  defaultState,
+  stateSchemaByVersion,
+  type LatestTaskStateSchema as PrivilegeMonitoringTaskState,
+} from './state';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
@@ -105,10 +110,19 @@ const runPrivilegeMonitoringTask = async ({
   telemetry,
   taskInstance,
   experimentalFeatures,
-}: RunParams): Promise<void> => {
+}: RunParams): Promise<{
+  state: PrivilegeMonitoringTaskState;
+}> => {
+  const state = taskInstance.state as PrivilegeMonitoringTaskState;
+  const taskStartTime = moment().utc().toISOString();
+  const updatedState = {
+    lastExecutionTimestamp: taskStartTime,
+    namespace: state.namespace,
+    runs: state.runs + 1,
+  };
   if (isCancelled()) {
     logger.info('[Privilege Monitoring] Task was cancelled.');
-    return;
+    return { state: updatedState };
   }
 
   try {
@@ -116,6 +130,7 @@ const runPrivilegeMonitoringTask = async ({
   } catch (e) {
     logger.error('[Privilege Monitoring] Error running privilege monitoring task', e);
   }
+  return { state: updatedState };
 };
 
 export const startPrivilegeMonitoringTask = async ({
@@ -137,7 +152,7 @@ export const startPrivilegeMonitoringTask = async ({
       params: { version: VERSION },
     });
 
-    logger.info(`Running privilege monitoring task with id ${taskId}`);
+    logger.info(`Starting privilege monitoring task with id ${taskId}`);
   } catch (e) {
     logger.warn(
       `[Privilege Monitoring]  [task ${taskId}]: error scheduling task, received ${e.message}`
