@@ -70,26 +70,27 @@ export const esqlExecutor = async ({
   } = sharedParams;
   const loggedRequests: RulePreviewLoggedRequest[] = [];
   const ruleParams = completeRule.ruleParams;
-  /**
-   * ES|QL returns results as a single page. max size of 10,000
-   * while we try increase size of the request to catch all alerts that might been deduplicated
-   * we don't want to overload ES/Kibana with large responses
-   */
-  const ESQL_PAGE_SIZE_CIRCUIT_BREAKER = tuple.maxSignals * 3;
   const isLoggedRequestsEnabled = state?.isLoggedRequestsEnabled ?? false;
 
   return withSecuritySpan('esqlExecutor', async () => {
     const result = createSearchAfterReturnType();
-    let size = tuple.maxSignals;
+    const size = tuple.maxSignals;
     const dataTiersFilters = await getDataTierFilter({
       uiSettingsClient: services.uiSettingsClient,
     });
 
+    /**
+     * ES|QL returns results as a single page, max size of 10,000
+     * To mitigate this, we will use the maxSignals as a page size
+     * Wll keep track of the earlier found document ids and will exclude them in subsequent requests
+     * to avoid duplicates.
+     * This is a workaround until pagination is supported in ES|QL
+     * Since aggregating queries do not produce event ids, we will not exclude them.
+     * All alerts for aggregating queries are unique anyway
+     */
+    const excludedDocumentIds: string[] = [];
     try {
-      while (
-        result.createdSignalsCount <= tuple.maxSignals &&
-        size <= ESQL_PAGE_SIZE_CIRCUIT_BREAKER
-      ) {
+      while (result.createdSignalsCount <= tuple.maxSignals) {
         const esqlRequest = buildEsqlSearchRequest({
           query: ruleParams.query,
           from: tuple.from.toISOString(),
@@ -99,6 +100,7 @@ export const esqlExecutor = async ({
           primaryTimestamp,
           secondaryTimestamp,
           exceptionFilter,
+          excludedDocumentIds,
         });
         const esqlQueryString = { drop_null_columns: true };
 
@@ -134,10 +136,7 @@ export const esqlExecutor = async ({
 
         const isRuleAggregating = computeIsESQLQueryAggregating(completeRule.ruleParams.query);
 
-        const results = response.values
-          // slicing already processed results in previous iterations
-          .slice(size - tuple.maxSignals)
-          .map((row) => rowToDocument(response.columns, row));
+        const results = response.values.map((row) => rowToDocument(response.columns, row));
         const index = getIndexListFromEsqlQuery(completeRule.ruleParams.query);
 
         const sourceDocuments = await fetchSourceDocuments({
@@ -244,8 +243,7 @@ export const esqlExecutor = async ({
           );
           break;
         }
-        // ES|QL does not support pagination so we need to increase size of response to be able to catch all events
-        size += tuple.maxSignals;
+        excludedDocumentIds.push(...Object.keys(sourceDocuments));
       }
     } catch (error) {
       if (checkErrorDetails(error).isUserError) {

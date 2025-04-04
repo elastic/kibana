@@ -23,6 +23,7 @@ export interface BuildEqlSearchRequestParams {
   primaryTimestamp: TimestampOverride;
   secondaryTimestamp: TimestampOverride | undefined;
   exceptionFilter: Filter | undefined;
+  excludedDocumentIds: string[];
 }
 
 export const buildEsqlSearchRequest = ({
@@ -34,6 +35,7 @@ export const buildEsqlSearchRequest = ({
   secondaryTimestamp,
   exceptionFilter,
   size,
+  excludedDocumentIds,
 }: BuildEqlSearchRequestParams) => {
   const esFilter = getQueryFilter({
     query: '',
@@ -59,6 +61,11 @@ export const buildEsqlSearchRequest = ({
     filter: {
       bool: {
         filter: requestFilter,
+        ...(excludedDocumentIds.length > 0
+          ? {
+              must_not: { ids: { values: excludedDocumentIds } },
+            }
+          : {}),
       },
     },
   };

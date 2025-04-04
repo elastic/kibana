@@ -64,6 +64,7 @@ export const fetchSourceDocuments = async ({
     query: idsQuery.query,
     _source: true,
     fields: ['*'],
+    size: ids.length,
   };
   const ignoreUnavailable = true;
 
