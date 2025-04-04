@@ -16,7 +16,7 @@ import { LOCAL_STORAGE_KEY_PREFIX } from '../constants';
 
 const core = coreMock.createStart();
 jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn(() => <div data-test-subj="alertsTable" />),
+  AlertsTable: jest.fn(() => <div data-test-subj="alertsTableIsLoaded" />),
 }));
 const { AlertsTable: mockAlertsTable } = jest.requireMock('@kbn/response-ops-alerts-table');
 
