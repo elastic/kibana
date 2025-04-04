@@ -74,8 +74,8 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         await urlStateStorage.set('_g', nextTab.globalState);
         await urlStateStorage.set('_a', nextTab.appState);
       } else {
-        await urlStateStorage.set('_g', {});
-        await urlStateStorage.set('_a', {});
+        await urlStateStorage.set('_g', null);
+        await urlStateStorage.set('_a', null);
       }
 
       const nextTabRuntimeState = selectedItem
@@ -101,7 +101,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
           query ?? services.data.query.queryString.getDefaultQuery()
         );
 
-        nextTabStateContainer.actions.initializeAndSync();
+        // nextTabStateContainer.actions.initializeAndSync();
       }
     }
 
