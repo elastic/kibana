@@ -10,25 +10,26 @@
 import { EuiBadge, EuiStat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   fetch$,
-  initializeTimeRange,
+  initializeTimeRangeManager,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
-import { SearchApi, Services, SearchSerializedState, SearchRuntimeState } from './types';
+import { SearchApi, Services, SearchSerializedState } from './types';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
-  const factory: ReactEmbeddableFactory<SearchSerializedState, SearchRuntimeState, SearchApi> = {
+  const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_ID,
-    deserializeState: (state) => state.rawState,
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const timeRange = initializeTimeRange(state);
+    buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+      const timeRangeManager = initializeTimeRangeManager(initialState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
@@ -46,25 +47,44 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         );
       }
 
-      const api = buildApi(
-        {
-          ...timeRange.api,
-          blockingError$,
-          dataViews$,
-          dataLoading$,
-          serializeState: () => {
-            return {
-              rawState: {
-                ...timeRange.serialize(),
-              },
-              references: [],
-            };
-          },
+      const serializeState = (): SearchSerializedState => ({
+        ...timeRangeManager.getLatestState(),
+      });
+
+      const unsavedChangesApi = initializeUnsavedChanges({
+        uuid,
+        parentApi,
+        serializeState,
+        latestRuntimeState$: timeRangeManager.latestState$,
+        getComparators: () => {
+          /**
+           * comparators are provided in a callback to allow embeddables to change how their state is compared based
+           * on the values of other state. For instance, if a saved object ID is present (by reference), the embeddable
+           * may want to skip comparison of certain state.
+           */
+          return timeRangeComparators;
         },
-        {
-          ...timeRange.comparators,
-        }
-      );
+        onReset: (lastSaved) => {
+          /**
+           * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
+           * function here before resetting. onReset can be async so to support a potential async deserialize function.
+           */
+  
+          timeRangeManager.reinitializeState(lastSaved);
+        },
+      });
+  
+      const api = finalizeApi({
+        blockingError$,
+        dataViews$,
+        dataLoading$,
+        ...unsavedChangesApi,
+        ...timeRangeManager.api,
+        serializeState: () => ({
+          rawState: serializeState(),
+          // references: if this embeddable had any references - this is where we would extract them.
+        }),
+      });
 
       const count$ = new BehaviorSubject<number>(0);
       let prevRequestAbortController: AbortController | undefined;
