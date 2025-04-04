@@ -497,7 +497,9 @@
             },
             "<\"POST /internal/streams/{name}/processing/_suggestions\", any, ",
             "StreamsRouteHandlerResources",
-            ", { patterns: string[]; simulations: SimulationWithPattern[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
+            ", { patterns: string[]; simulations: ",
+            "SimulationWithPattern",
+            "[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -539,7 +541,7 @@
             "SimulationDocReport",
             "[]; processors_metrics: Record<string, ",
             "ProcessorMetrics",
-            ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
+            ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -681,7 +683,19 @@
             },
             "<\"GET /internal/streams/{name}/schema/unmapped_fields\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
             "StreamsRouteHandlerResources",
-            ", { unmappedFields: string[]; }, undefined>; \"POST /internal/streams/{name}/_sample\": ",
+            ", { unmappedFields: string[]; }, undefined>; \"GET /internal/streams/{name}/_unmanaged_assets\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams/{name}/_unmanaged_assets\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+            "StreamsRouteHandlerResources",
+            ", ",
+            "UnmanagedElasticsearchAssetDetails",
+            ", undefined>; \"POST /internal/streams/{name}/_sample\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -777,7 +791,19 @@
             "StreamsRouteHandlerResources",
             ", ",
             "StreamDetailsResponse",
-            ", undefined>; \"POST /internal/streams/esql\": ",
+            ", undefined>; \"GET /internal/streams\": ",
+            {
+              "pluginId": "@kbn/server-route-repository-utils",
+              "scope": "common",
+              "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+              "section": "def-common.ServerRoute",
+              "text": "ServerRoute"
+            },
+            "<\"GET /internal/streams\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+            "StreamsRouteHandlerResources",
+            ", { streams: ",
+            "ListStreamDetail",
+            "[]; }, undefined>; \"POST /internal/streams/esql\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1286,7 +1312,9 @@
           },
           "<\"POST /internal/streams/{name}/processing/_suggestions\", any, ",
           "StreamsRouteHandlerResources",
-          ", { patterns: string[]; simulations: SimulationWithPattern[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
+          ", { patterns: string[]; simulations: ",
+          "SimulationWithPattern",
+          "[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1328,7 +1356,7 @@
           "SimulationDocReport",
           "[]; processors_metrics: Record<string, ",
           "ProcessorMetrics",
-          ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
+          ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1470,7 +1498,19 @@
           },
           "<\"GET /internal/streams/{name}/schema/unmapped_fields\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
           "StreamsRouteHandlerResources",
-          ", { unmappedFields: string[]; }, undefined>; \"POST /internal/streams/{name}/_sample\": ",
+          ", { unmappedFields: string[]; }, undefined>; \"GET /internal/streams/{name}/_unmanaged_assets\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams/{name}/_unmanaged_assets\", Zod.ZodObject<{ path: Zod.ZodObject<{ name: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { name: string; }, { name: string; }>; }, \"strip\", Zod.ZodTypeAny, { path: { name: string; }; }, { path: { name: string; }; }>, ",
+          "StreamsRouteHandlerResources",
+          ", ",
+          "UnmanagedElasticsearchAssetDetails",
+          ", undefined>; \"POST /internal/streams/{name}/_sample\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1566,7 +1606,19 @@
           "StreamsRouteHandlerResources",
           ", ",
           "StreamDetailsResponse",
-          ", undefined>; \"POST /internal/streams/esql\": ",
+          ", undefined>; \"GET /internal/streams\": ",
+          {
+            "pluginId": "@kbn/server-route-repository-utils",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryUtilsPluginApi",
+            "section": "def-common.ServerRoute",
+            "text": "ServerRoute"
+          },
+          "<\"GET /internal/streams\", Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, ",
+          "StreamsRouteHandlerResources",
+          ", { streams: ",
+          "ListStreamDetail",
+          "[]; }, undefined>; \"POST /internal/streams/esql\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

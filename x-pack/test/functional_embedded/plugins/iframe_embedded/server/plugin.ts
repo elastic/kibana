@@ -30,6 +30,7 @@ export class IframeEmbeddedPlugin implements Plugin {
       {
         path: '/iframe_embedded',
         validate: false,
+        security: { authz: { enabled: false, reason: '' } },
       },
       async (context, request, response) => {
         const { protocol, port, hostname } = core.http.getServerInfo();

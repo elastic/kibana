@@ -58,6 +58,9 @@ export const applyDataViewIndicesEntityEngineRoute = (
             });
           }
 
+          const apiKeyManager = secSol.getEntityStoreApiKeyManager();
+          await apiKeyManager.generate();
+
           if (errors.length === 0) {
             return response.ok({
               body: {
@@ -75,7 +78,7 @@ export const applyDataViewIndicesEntityEngineRoute = (
             });
           }
         } catch (e) {
-          logger.error('Error in ApplyEntityEngineDataViewIndices:', e);
+          logger.error(`Error in ApplyEntityEngineDataViewIndices: ${e.message}`);
           const error = transformError(e);
           return siemResponse.error({
             statusCode: error.statusCode,

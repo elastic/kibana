@@ -667,6 +667,10 @@
               },
               {
                 "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/routes/epm/kibana_assets_handler.ts"
+              },
+              {
+                "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/routes/app/index.ts"
               },
               {

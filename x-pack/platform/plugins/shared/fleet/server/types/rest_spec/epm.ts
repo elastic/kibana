@@ -369,6 +369,22 @@ export const BulkInstallPackagesFromRegistryResponseSchema = schema.object({
   items: schema.arrayOf(BulkInstallPackagesResponseItemSchema),
 });
 
+export const BulkUpgradePackagesResponseSchema = schema.object({ taskId: schema.string() });
+
+export const GetOneBulkOperationPackagesResponseSchema = schema.object({
+  status: schema.string(),
+  error: schema.maybe(schema.object({ message: schema.string() })),
+  results: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        success: schema.boolean(),
+        error: schema.maybe(schema.object({ message: schema.string() })),
+      })
+    )
+  ),
+});
+
 export const DeletePackageResponseSchema = schema.object({
   items: schema.arrayOf(AssetReferenceSchema),
 });
@@ -543,6 +559,40 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
           prerelease: schema.maybe(schema.boolean()),
         }),
       ]),
+      { minSize: 1 }
+    ),
+    force: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const GetOneBulkOperationPackagesRequestSchema = {
+  params: schema.object({
+    taskId: schema.string(),
+  }),
+};
+
+export const BulkUpgradePackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.maybe(schema.string()),
+      }),
+      { minSize: 1 }
+    ),
+    prerelease: schema.maybe(schema.boolean()),
+    force: schema.boolean({ defaultValue: false }),
+    upgrade_package_policies: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export const BulkUninstallPackagesRequestSchema = {
+  body: schema.object({
+    packages: schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        version: schema.string(),
+      }),
       { minSize: 1 }
     ),
     force: schema.boolean({ defaultValue: false }),

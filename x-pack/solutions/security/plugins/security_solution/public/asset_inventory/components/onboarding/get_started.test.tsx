@@ -30,11 +30,7 @@ describe('GetStarted Component', () => {
 
     expect(screen.getByText(/get started with asset inventory/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /enable asset inventory/i })).toBeInTheDocument();
-
-    expect(screen.getByText(/read documentation/i).closest('a')).toHaveAttribute(
-      'href',
-      'https://ela.st/asset-inventory'
-    );
+    expect(screen.getByText(/need help?/i)).toBeInTheDocument();
   });
 
   it('calls enableAssetInventory when enable asset inventory button is clicked', async () => {

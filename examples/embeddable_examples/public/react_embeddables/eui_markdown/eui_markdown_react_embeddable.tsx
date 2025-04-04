@@ -15,14 +15,14 @@ import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   StateComparators,
   WithAllKeys,
+  getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
-  useInheritedViewMode,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
 
@@ -97,7 +97,9 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
       Component: () => {
         // get state for rendering
         const content = useStateFromPublishingSubject(markdownStateManager.api.content$);
-        const viewMode = useInheritedViewMode(api) ?? 'view';
+        const viewMode = useStateFromPublishingSubject(
+          getViewModeSubject(api) ?? new BehaviorSubject('view')
+        );
         const { euiTheme } = useEuiTheme();
 
         return viewMode === 'edit' ? (

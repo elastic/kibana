@@ -8,7 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { BoolQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useBreadcrumbs, useFetcher } from '@kbn/observability-shared-plugin/public';
+import {
+  ExternalResourceLinks,
+  useBreadcrumbs,
+  useFetcher,
+} from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getColumns } from '../../components/alerts_table/common/get_columns';
 import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_table';
@@ -32,7 +36,6 @@ import { HeaderMenu } from './components/header_menu/header_menu';
 import { getNewsFeed } from './components/news_feed/helpers/get_news_feed';
 import { NewsFeed } from './components/news_feed/news_feed';
 import { ObservabilityOnboardingCallout } from './components/observability_onboarding_callout';
-import { Resources } from './components/resources';
 import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
@@ -54,6 +57,7 @@ export function OverviewPage() {
     observabilityAIAssistant,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
     kibanaVersion,
+    serverless: isServerless,
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -71,10 +75,11 @@ export function OverviewPage() {
     }
   );
 
-  const { data: newsFeed } = useFetcher(
-    () => getNewsFeed({ http, kibanaVersion }),
-    [http, kibanaVersion]
-  );
+  const { data: newsFeed } = useFetcher(() => {
+    if (!Boolean(isServerless)) {
+      return getNewsFeed({ http, kibanaVersion });
+    }
+  }, [http, kibanaVersion, isServerless]);
   const { hasAnyData, isAllRequestsComplete, hasDataMap } = useHasData();
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
@@ -267,12 +272,12 @@ export function OverviewPage() {
       <EuiFlexGroup>
         <EuiFlexItem>
           {/* Resources / What's New sections */}
-          <EuiFlexGroup>
-            <EuiFlexItem grow={4}>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
               {!!newsFeed?.items?.length && <NewsFeed items={newsFeed.items.slice(0, 3)} />}
             </EuiFlexItem>
-            <EuiFlexItem grow={2}>
-              <Resources />
+            <EuiFlexItem>
+              <ExternalResourceLinks />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
