@@ -7,7 +7,11 @@
 
 import { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
 import { AgentRunEvents } from '../types';
-import { EventConverter, getSimpleGraphConverter } from './converters';
+import {
+  EventConverter,
+  getSimpleGraphConverter,
+  getSearchAgentGraphConverter,
+} from './converters';
 import { graphNames } from '../constants';
 
 export type GraphEventConverter = (event: LangchainEvent) => AgentRunEvents[];
@@ -23,6 +27,9 @@ export const buildEventsConverter = (): GraphEventConverter => {
 
   // main graph converter
   converters.push(getSimpleGraphConverter({ graphName: graphNames.mainAgent }));
+
+  // search agent converter
+  converters.push(getSearchAgentGraphConverter({ graphName: graphNames.searchAgent }));
 
   return function graphEventConverter(event: LangchainEvent): AgentRunEvents[] {
     for (const converter of converters) {

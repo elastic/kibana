@@ -7,3 +7,4 @@
 
 export type { EventConverter } from './types';
 export { getSimpleGraphConverter } from './simple_graph';
+export { getSearchAgentGraphConverter } from './search_agent_graph';
