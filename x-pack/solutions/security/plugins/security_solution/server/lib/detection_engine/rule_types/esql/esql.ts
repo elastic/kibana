@@ -89,6 +89,7 @@ export const esqlExecutor = async ({
      * All alerts for aggregating queries are unique anyway
      */
     const excludedDocumentIds: string[] = [];
+    let iteration = 0;
     try {
       while (result.createdSignalsCount <= tuple.maxSignals) {
         const esqlRequest = buildEsqlSearchRequest({
@@ -104,10 +105,14 @@ export const esqlExecutor = async ({
         });
         const esqlQueryString = { drop_null_columns: true };
 
+        const hasLoggedRequestsReachedLimit = iteration >= 2;
         if (isLoggedRequestsEnabled) {
           loggedRequests.push({
-            request: logEsqlRequest(esqlRequest, esqlQueryString),
+            request: hasLoggedRequestsReachedLimit
+              ? undefined
+              : logEsqlRequest(esqlRequest, esqlQueryString),
             description: i18n.ESQL_SEARCH_REQUEST_DESCRIPTION,
+            request_type: 'findMatches',
           });
         }
 
@@ -145,6 +150,7 @@ export const esqlExecutor = async ({
           index,
           isRuleAggregating,
           loggedRequests: isLoggedRequestsEnabled ? loggedRequests : undefined,
+          hasLoggedRequestsReachedLimit,
         });
 
         const isAlertSuppressionActive = await getIsAlertSuppressionActive({
@@ -244,6 +250,7 @@ export const esqlExecutor = async ({
           break;
         }
         excludedDocumentIds.push(...Object.keys(sourceDocuments));
+        iteration++;
       }
     } catch (error) {
       if (checkErrorDetails(error).isUserError) {

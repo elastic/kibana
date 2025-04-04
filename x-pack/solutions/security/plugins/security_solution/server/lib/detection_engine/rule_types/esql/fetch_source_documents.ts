@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
@@ -25,6 +26,7 @@ interface FetchSourceDocumentsArgs {
   index: string[];
   results: Array<Record<string, string | null>>;
   loggedRequests?: RulePreviewLoggedRequest[];
+  hasLoggedRequestsReachedLimit: boolean;
 }
 /**
  * fetches source documents by list of their ids
@@ -37,6 +39,7 @@ export const fetchSourceDocuments = async ({
   esClient,
   index,
   loggedRequests,
+  hasLoggedRequestsReachedLimit,
 }: FetchSourceDocumentsArgs): Promise<Record<string, FetchedDocument>> => {
   const ids = results.reduce<string[]>((acc, doc) => {
     if (doc._id) {
@@ -70,11 +73,14 @@ export const fetchSourceDocuments = async ({
 
   if (loggedRequests) {
     loggedRequests.push({
-      request: logQueryRequest(searchBody, { index, ignoreUnavailable }),
+      request: hasLoggedRequestsReachedLimit
+        ? undefined
+        : logQueryRequest(searchBody, { index, ignoreUnavailable }),
       description: i18n.FIND_SOURCE_DOCUMENTS_REQUEST_DESCRIPTION,
     });
   }
 
+  const searchStart = performance.now();
   const response = await esClient.search<SignalSource>({
     index,
     ...searchBody,
@@ -82,7 +88,9 @@ export const fetchSourceDocuments = async ({
   });
 
   if (loggedRequests) {
-    loggedRequests[loggedRequests.length - 1].duration = response.took;
+    loggedRequests[loggedRequests.length - 1].duration = Math.round(
+      performance.now() - searchStart
+    );
   }
 
   return response.hits.hits.reduce<Record<string, FetchedDocument>>((acc, hit) => {
