@@ -115,13 +115,20 @@ export const Tab: React.FC<TabProps> = (props) => {
   );
 
   const onDoubleClick = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      event.stopPropagation();
+    (event?: MouseEvent<HTMLDivElement>) => {
+      event?.stopPropagation();
       setIsInlineEditActive(true);
       hidePreview();
     },
     [setIsInlineEditActive, hidePreview]
   );
+
+  const onEnterRenaming = useCallback(async () => {
+    if (!isSelected) {
+      await onSelect(item);
+    }
+    onDoubleClick();
+  }, [item, isSelected, onDoubleClick, onSelect]);
 
   const onKeyDownEvent = useCallback(
     async (event: KeyboardEvent<HTMLDivElement>) => {
@@ -186,7 +193,7 @@ export const Tab: React.FC<TabProps> = (props) => {
           onKeyDown={onKeyDownEvent}
         />
       )}
-      <div css={getTabContentCss()}>
+      <div css={getTabContentCss(isInlineEditActive)}>
         {isInlineEditActive ? (
           <EditTabLabel
             item={item}
@@ -213,6 +220,7 @@ export const Tab: React.FC<TabProps> = (props) => {
                       getTabMenuItems={getTabMenuItems}
                       isPopoverOpen={isActionPopoverOpen}
                       setPopover={onToggleActionsMenu}
+                      onEnterRenaming={onEnterRenaming}
                     />
                   </EuiFlexItem>
                 )}
@@ -313,11 +321,11 @@ function getTabContainerCss(
   `;
 }
 
-function getTabContentCss() {
+function getTabContentCss(isInlineEditActive: boolean) {
   return css`
     position: relative;
     width: 100%;
-    pointer-events: none;
+    ${isInlineEditActive ? '' : 'pointer-events: none;'}
   `;
 }
 

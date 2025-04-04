@@ -19,7 +19,7 @@ export interface TabMenuItemWithClick {
   'data-test-subj': string;
   name: string;
   label: string;
-  onClick: () => void;
+  onClick: (() => void) | null; // `null` can be overridden inside tab menu
 }
 
 export interface TabsSizeConfig {

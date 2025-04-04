@@ -18,12 +18,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { TabItem, GetTabMenuItems } from '../../types';
+import { TAB_MENU_ITEM_ENTER_RENAMING } from '../../constants';
 
 export interface TabMenuProps {
   item: TabItem;
   getTabMenuItems: GetTabMenuItems;
   isPopoverOpen: boolean;
   setPopover: (isOpen: boolean) => void;
+  onEnterRenaming: () => void;
 }
 
 export const TabMenu: React.FC<TabMenuProps> = ({
@@ -31,6 +33,7 @@ export const TabMenu: React.FC<TabMenuProps> = ({
   getTabMenuItems,
   isPopoverOpen,
   setPopover,
+  onEnterRenaming,
 }) => {
   const contextMenuPopoverId = useGeneratedHtmlId();
 
@@ -45,17 +48,27 @@ export const TabMenu: React.FC<TabMenuProps> = ({
   const panelItems = useMemo(() => {
     const itemConfigs = getTabMenuItems(item);
 
-    return itemConfigs.map((itemConfig, index) => {
+    const menuItems: React.JSX.Element[] = [];
+
+    itemConfigs.forEach((itemConfig, index) => {
       if (itemConfig === 'divider') {
-        return <EuiHorizontalRule key={`${index}-divider`} margin="none" />;
+        menuItems.push(<EuiHorizontalRule key={`${index}-divider`} margin="none" />);
+        return;
       }
 
-      return (
+      const onClick =
+        itemConfig.name === TAB_MENU_ITEM_ENTER_RENAMING ? onEnterRenaming : itemConfig.onClick;
+
+      if (!onClick) {
+        return;
+      }
+
+      menuItems.push(
         <EuiContextMenuItem
           key={`${index}-${itemConfig.name}`}
           data-test-subj={itemConfig['data-test-subj']}
           onClick={() => {
-            itemConfig.onClick();
+            onClick();
             closePopover();
           }}
         >
@@ -63,7 +76,9 @@ export const TabMenu: React.FC<TabMenuProps> = ({
         </EuiContextMenuItem>
       );
     });
-  }, [item, getTabMenuItems, closePopover]);
+
+    return menuItems;
+  }, [item, getTabMenuItems, closePopover, onEnterRenaming]);
 
   return (
     <EuiPopover

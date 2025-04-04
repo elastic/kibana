@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
 import { isLastTab, hasSingleTab, type TabsState } from './manage_tabs';
+import { TAB_MENU_ITEM_ENTER_RENAMING } from '../constants';
 
 const DividerMenuItem = 'divider';
 
@@ -17,7 +18,7 @@ interface TabMenuItemProps {
   name: string;
   label: string;
   item: TabItem;
-  onClick: (item: TabItem) => void;
+  onClick: ((item: TabItem) => void) | null; // `null` can be overridden inside tab menu
 }
 
 const getTabMenuItem = ({
@@ -29,7 +30,7 @@ const getTabMenuItem = ({
   'data-test-subj': `unifiedTabs_tabMenuItem_${name}`,
   name,
   label,
-  onClick: () => onClick(item),
+  onClick: onClick ? () => onClick(item) : null,
 });
 
 export interface GetTabMenuItemsFnProps {
@@ -70,7 +71,16 @@ export const getTabMenuItemsFn = ({
           onClick: onCloseTabsToTheRight,
         });
 
-    const items: TabMenuItem[] = [];
+    const items: TabMenuItem[] = [
+      getTabMenuItem({
+        item,
+        name: TAB_MENU_ITEM_ENTER_RENAMING,
+        label: i18n.translate('unifiedTabs.tabMenu.renameTabMenuItem', {
+          defaultMessage: 'Rename',
+        }),
+        onClick: null,
+      }),
+    ];
 
     if (!maxItemsCount || tabsState.items.length < maxItemsCount) {
       items.push(
