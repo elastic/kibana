@@ -180,12 +180,7 @@ export const simulateProcessing = async ({
   );
 
   /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
-  const detectedFields = await computeDetectedFields(
-    processorsMetrics,
-    streamsClient,
-    params,
-    streamFields
-  );
+  const detectedFields = await computeDetectedFields(processorsMetrics, params, streamFields);
 
   /* 6. Derive general insights and process final response body */
   return prepareSimulationResponse(docReports, processorsMetrics, detectedFields);
@@ -745,7 +740,6 @@ const getStreamFields = async (
  */
 const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
-  streamsClient: StreamsClient,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition
 ): Promise<DetectedField[]> => {

@@ -159,7 +159,7 @@ const ProcessorsEditor = React.memo(() => {
           });
         }
 
-        if (error.type === 'field_mapping_failure' && mappingFailuresSet.size < 3) {
+        if (error.type === 'field_mapping_failure' && mappingFailuresSet.size < 2) {
           mappingFailuresSet.add(error.message);
         }
       });
@@ -231,16 +231,10 @@ const ProcessorsEditor = React.memo(() => {
           </SortableList>
         )}
         <AddProcessorPanel />
+      </EuiPanel>
+      <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (
-          <EuiPanel
-            paddingSize="s"
-            hasShadow={false}
-            grow={false}
-            color="danger"
-            css={css`
-              margin-top: ${euiTheme.size.m};
-            `}
-          >
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
             <EuiAccordion
               id="ignored-fields-failures-accordion"
               initialIsOpen
@@ -288,15 +282,7 @@ const ProcessorsEditor = React.memo(() => {
           </EuiPanel>
         )}
         {!isEmpty(errors.mappingFailures) && (
-          <EuiPanel
-            paddingSize="s"
-            hasShadow={false}
-            grow={false}
-            color="danger"
-            css={css`
-              margin-top: ${euiTheme.size.m};
-            `}
-          >
+          <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
             <EuiAccordion
               id="mapping-failures-accordion"
               initialIsOpen
@@ -311,16 +297,7 @@ const ProcessorsEditor = React.memo(() => {
                 </strong>
               }
             >
-              <EuiText component="p" size="s">
-                <p>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.description',
-                    {
-                      defaultMessage:
-                        'Some fields in these documents were conflicting with the stream mappings during the ingestion simulation. Review the fields’ data format.',
-                    }
-                  )}
-                </p>
+              <EuiText size="s">
                 <p>
                   <FormattedMessage
                     id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
@@ -329,7 +306,11 @@ const ProcessorsEditor = React.memo(() => {
                 </p>
                 <ul>
                   {errors.mappingFailures.map((failureMessage, id) => (
-                    <li key={id}>{failureMessage}</li>
+                    <li key={id}>
+                      <EuiText css={clampTwoLines} size="s">
+                        {failureMessage}
+                      </EuiText>
+                    </li>
                   ))}
                 </ul>
               </EuiText>
@@ -344,4 +325,12 @@ const ProcessorsEditor = React.memo(() => {
 const verticalFlexCss = css`
   display: flex;
   flex-direction: column;
+`;
+
+const clampTwoLines = css`
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
