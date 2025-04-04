@@ -368,8 +368,8 @@ export function handleFragment(
     return getSuggestionsForIncomplete('');
   } else {
     const rangeToReplace = {
-      start: innerText.length - fragment.length + 1,
-      end: innerText.length + 1,
+      start: innerText.length - fragment.length,
+      end: innerText.length,
     };
     if (isFragmentComplete(fragment)) {
       return getSuggestionsForComplete(fragment, rangeToReplace);

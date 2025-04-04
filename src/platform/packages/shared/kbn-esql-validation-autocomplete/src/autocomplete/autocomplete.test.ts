@@ -665,19 +665,19 @@ describe('autocomplete', () => {
             text: 'foo$bar | ',
             filterText: 'foo$bar',
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
+            rangeToReplace: { start: 5, end: 12 },
           },
           {
             text: 'foo$bar, ',
             filterText: 'foo$bar',
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
+            rangeToReplace: { start: 5, end: 12 },
           },
           {
             text: 'foo$bar METADATA ',
             filterText: 'foo$bar',
             command: TRIGGER_SUGGESTION_COMMAND,
-            rangeToReplace: { start: 6, end: 13 },
+            rangeToReplace: { start: 5, end: 12 },
           },
           ...recommendedQuerySuggestions.map((q) => q.queryString),
         ],
@@ -882,7 +882,7 @@ describe('autocomplete', () => {
           getFieldNamesByType('any')
             .map<PartialSuggestionWithText>((text) => ({
               text,
-              rangeToReplace: { start: 15, end: 16 },
+              rangeToReplace: { start: 14, end: 15 },
             }))
             .map(attachTriggerCommand)
         );
@@ -896,7 +896,7 @@ describe('autocomplete', () => {
             .map((text) => ({
               text,
               filterText: 'doubleField',
-              rangeToReplace: { start: 15, end: 26 },
+              rangeToReplace: { start: 14, end: 25 },
             }))
             .map(attachTriggerCommand)
         );
@@ -909,7 +909,7 @@ describe('autocomplete', () => {
             .map((text) => ({
               text,
               filterText: '@timestamp',
-              rangeToReplace: { start: 15, end: 25 },
+              rangeToReplace: { start: 14, end: 24 },
             }))
             .map(attachTriggerCommand),
           undefined,
@@ -926,7 +926,7 @@ describe('autocomplete', () => {
             .map((text) => ({
               text,
               filterText: 'foo.bar',
-              rangeToReplace: { start: 15, end: 22 },
+              rangeToReplace: { start: 14, end: 21 },
             }))
             .map(attachTriggerCommand),
           undefined,
@@ -1037,21 +1037,21 @@ describe('autocomplete', () => {
     describe('dot-separated field names', () => {
       testSuggestions(
         'FROM a | KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
+        [{ text: 'field.name', rangeToReplace: { start: 14, end: 23 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );
       // multi-line
       testSuggestions(
         'FROM a\n| KEEP field.nam/',
-        [{ text: 'field.name', rangeToReplace: { start: 15, end: 24 } }],
+        [{ text: 'field.name', rangeToReplace: { start: 14, end: 23 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );
       // triple separator
       testSuggestions(
         'FROM a\n| KEEP field.name.f/',
-        [{ text: 'field.name.foo', rangeToReplace: { start: 15, end: 27 } }],
+        [{ text: 'field.name.foo', rangeToReplace: { start: 14, end: 26 } }],
         undefined,
         [[{ name: 'field.name.foo', type: 'double' }]]
       );
@@ -1059,7 +1059,7 @@ describe('autocomplete', () => {
       // we are relying on string checking instead of the AST :(
       testSuggestions.skip(
         'FROM a | KEEP field . n/',
-        [{ text: 'field . name', rangeToReplace: { start: 15, end: 23 } }],
+        [{ text: 'field . name', rangeToReplace: { start: 14, end: 22 } }],
         undefined,
         [[{ name: 'field.name', type: 'double' }]]
       );
