@@ -411,6 +411,7 @@ src/platform/packages/shared/kbn-analytics @elastic/kibana-core
 src/platform/packages/shared/kbn-apm-data-view @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
@@ -2376,7 +2377,6 @@ x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/
 /x-pack/solutions/security/plugins/security_solution/public/common/components/alert_count_by_status @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
-/x-pack/solutions/security/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
 /x-pack/solutions/security/plugins/security_solution/public/common/components/inspect @elastic/security-threat-hunting-explore
