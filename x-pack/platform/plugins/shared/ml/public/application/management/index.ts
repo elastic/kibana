@@ -34,6 +34,9 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     isServerless: boolean,
     mlCapabilities: MlCapabilities
   ) => {
+    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    if (isEsProject) return true;
+
     return (
       // Can see Memory Usage & Notifications
       mlCapabilities.canViewMlNodes ||
@@ -54,6 +57,9 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     isServerless: boolean,
     mlCapabilities: MlCapabilities
   ) => {
+    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    if (isEsProject) return false;
+
     return mlFeatures.dfa && mlCapabilities.isDFAEnabled && mlCapabilities.canGetDataFrameAnalytics;
   },
   [MANAGEMENT_SECTION_IDS.TRAINED_MODELS]: (
@@ -61,7 +67,7 @@ const MANAGED_SECTIONS_SERVERLESS_CHECK: Record<
     isServerless: boolean,
     mlCapabilities: MlCapabilities
   ) => {
-    const isEsProject = !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
+    const isEsProject = isServerless && !mlFeatures.ad && !mlFeatures.dfa && mlFeatures.nlp;
     if (isEsProject) return true;
     return (mlFeatures.nlp || mlFeatures.dfa) && mlCapabilities.canGetTrainedModels;
   },
