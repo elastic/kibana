@@ -383,6 +383,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -401,6 +402,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -425,6 +427,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: outputIdToUuid(defaultDataOutputId),
+      name: originalOutput.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
@@ -712,6 +715,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'create',
       id,
+      name: data.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
@@ -754,6 +758,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -779,6 +784,7 @@ class OutputService {
       auditLoggingService.writeCustomSoAuditLog({
         action: 'get',
         id: output.id,
+        name: output.attributes.name,
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
     }
@@ -800,6 +806,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'get',
       id: outputSO.id,
+      name: outputSO?.attributes?.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
@@ -851,6 +858,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'delete',
       id: outputIdToUuid(id),
+      name: originalOutput.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
@@ -1136,6 +1144,7 @@ class OutputService {
     auditLoggingService.writeCustomSoAuditLog({
       action: 'update',
       id: outputIdToUuid(id),
+      name: originalOutput.name,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
 
