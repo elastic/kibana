@@ -30,17 +30,16 @@ export const EmotionReact = require('@emotion/react');
 export const Moment = require('moment');
 export const MomentTimezone = require('moment-timezone/moment-timezone');
 
-const { option, pipeable, either, taskEither, task, set, ord, array, ...rest } = require('fp-ts');
 export const FpTs = {
-  option,
-  pipeable,
-  either,
-  taskEither,
-  function: rest.function,
-  task,
-  set,
-  ord,
-  array,
+  option: require('fp-ts/Option'),
+  pipeable: require('fp-ts/pipeable'),
+  either: require('fp-ts/Either'),
+  taskEither: require('fp-ts/TaskEither'),
+  function: require('fp-ts/function'),
+  task: require('fp-ts/Task'),
+  set: require('fp-ts/Set'),
+  ord: require('fp-ts/Ord'),
+  array: require('fp-ts/Array'),
 };
 export const IoTs = require('io-ts');
 export const KbnMonaco = require('@kbn/monaco');
