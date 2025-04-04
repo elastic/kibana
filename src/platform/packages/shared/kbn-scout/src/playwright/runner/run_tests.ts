@@ -47,7 +47,7 @@ async function runPlaywrightTest(procs: ProcRunner, cmd: string, args: string[])
   });
 }
 
-async function validatePlaywrightConfig(
+export async function validatePlaywrightConfig(
   log: ToolingLog,
   cmd: string,
   cmdArgs: string[],
@@ -55,9 +55,9 @@ async function validatePlaywrightConfig(
 ) {
   log.info(`scout: Validate Playwright config has tests`);
   try {
-    const result = await execPromise(
-      `SCOUT_REPORTER_ENABLED=false ${cmd} ${cmdArgs.join(' ')} --list`
-    );
+    const validationCmd = `SCOUT_REPORTER_ENABLED=false ${cmd} ${cmdArgs.join(' ')} --list`;
+    log.debug(`scout: running '${validationCmd}'`);
+    const result = await execPromise(validationCmd);
     const lastLine = result.stdout.trim().split('\n').pop();
     log.info(`scout: ${lastLine}`);
   } catch (err) {
@@ -126,8 +126,8 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   const pwBinPath = resolve(REPO_ROOT, './node_modules/.bin/playwright');
   const pwCmdArgs = [
     'test',
-    `--config=${pwGrepTag}`,
-    `--grep=${pwConfigPath}`,
+    `--config=${pwConfigPath}`,
+    `--grep=${pwGrepTag}`,
     `--project=${pwProject}`,
     ...(options.headed ? ['--headed'] : []),
   ];
