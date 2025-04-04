@@ -49,8 +49,6 @@ export type MapSerializedState = SerializedTitles &
     isMovementSynchronized?: boolean;
   };
 
-export type MapRuntimeState = MapSerializedState;
-
 export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
   HasDynamicActions &
   Partial<HasEditCapabilities> &

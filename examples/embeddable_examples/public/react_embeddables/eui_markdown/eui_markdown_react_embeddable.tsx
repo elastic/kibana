@@ -73,6 +73,7 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
         return { ...titleComparators, ...markdownComparators };
       },
       onReset: (lastSaved) => {
+        debugger;
         /**
          * if this embeddable had a difference between its runtime and serialized state, we could run the 'deserializeState'
          * function here before resetting. onReset can be async so to support a potential async deserialize function.

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, debounceTime, filter, map, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, map, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
@@ -57,6 +57,23 @@ function getHiddenLayerIds(state: MapStoreState) {
     .filter((layer) => !layer.visible)
     .map((layer) => layer.id);
 }
+
+export const reduxSyncComparators: StateComparators<Pick<MapSerializedState, 'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'>> = {
+  hiddenLayers: 'deepEquality',
+  isLayerTOCOpen: 'referenceEquality',
+  mapCenter: (a, b) => {
+    if (!a || !b) {
+      return a === b;
+    }
+
+    if (a.lat !== b.lat) return false;
+    if (a.lon !== b.lon) return false;
+    // Map may not restore reset zoom exactly
+    return Math.abs(a.zoom - b.zoom) < 0.05;
+  },
+  mapBuffer: 'skip',
+  openTOCDetails: 'deepEquality',
+};
 
 export function initializeReduxSync({
   savedMap,
@@ -199,48 +216,19 @@ export function initializeReduxSync({
         store.dispatch(setEventHandlers(eventHandlers));
       },
     },
-    comparators: {
-      // mapBuffer comparator intentionally omitted and is not part of unsaved changes check
-      hiddenLayers: [
-        hiddenLayers$,
-        (nextValue: string[]) => {
-          store.dispatch<any>(setHiddenLayers(nextValue));
-        },
-        fastIsEqual,
-      ],
-      isLayerTOCOpen: [
-        isLayerTOCOpen$,
-        (nextValue: boolean) => {
-          store.dispatch(setIsLayerTOCOpen(nextValue));
-        },
-      ],
-      mapCenter: [
-        mapCenterAndZoom$,
-        (nextValue: MapCenterAndZoom) => {
-          store.dispatch(setGotoWithCenter(nextValue));
-        },
-        (a, b) => {
-          if (!a || !b) {
-            return a === b;
-          }
-
-          if (a.lat !== b.lat) return false;
-          if (a.lon !== b.lon) return false;
-          // Map may not restore reset zoom exactly
-          return Math.abs(a.zoom - b.zoom) < 0.05;
-        },
-      ],
-      openTOCDetails: [
-        openTOCDetails$,
-        (nextValue: string[]) => {
-          store.dispatch(setOpenTOCDetails(nextValue));
-        },
-        fastIsEqual,
-      ],
-    } as StateComparators<
-      Pick<MapSerializedState, 'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'openTOCDetails'>
-    >,
-    serialize: () => {
+    latestState$: combineLatest([
+      hiddenLayers$,
+      isLayerTOCOpen$,
+      mapCenterAndZoom$,
+      openTOCDetails$,
+    ]),
+    reinitializeState: (lastSaved: MapSerializedState) => {
+      store.dispatch<any>(setHiddenLayers(lastSaved.hiddenLayers ?? []));
+      store.dispatch(setIsLayerTOCOpen(lastSaved.isLayerTOCOpen ?? true));
+      if (lastSaved.mapCenter) store.dispatch(setGotoWithCenter(lastSaved.mapCenter));
+      store.dispatch(setOpenTOCDetails(lastSaved.openTOCDetails));
+    },
+    getLatestState: () => {
       return {
         hiddenLayers: getHiddenLayerIds(store.getState()),
         isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),

@@ -30,6 +30,11 @@ import { getGeoFieldsLabel } from './get_geo_fields_label';
 import { MapApi, MapSerializedState } from './types';
 import { setOnMapMove } from '../reducers/non_serializable_instances';
 
+export const crossPanelActionComparators: StateComparators<Pick<MapSerializedState, 'isMovementSynchronized' | 'filterByMapExtent'>> = {
+  isMovementSynchronized: 'referenceEquality',
+  filterByMapExtent: 'referenceEquality'
+};
+
 export function initializeCrossPanelActions({
   controlledBy,
   getActionContext,
@@ -213,10 +218,6 @@ export function initializeCrossPanelActions({
       mapEmbeddablesSingleton.unregister(uuid);
       unsubscribeFromStore();
     },
-    comparators: {
-      isMovementSynchronized: [isMovementSynchronized$, setIsMovementSynchronized],
-      filterByMapExtent: [isFilterByMapExtent$, setIsFilterByMapExtent],
-    } as StateComparators<Pick<MapSerializedState, 'isMovementSynchronized' | 'filterByMapExtent'>>,
     getIsFilterByMapExtent,
     serialize: () => {
       return {
