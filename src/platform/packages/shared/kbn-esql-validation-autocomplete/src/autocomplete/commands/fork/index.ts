@@ -92,7 +92,7 @@ const newBranchSuggestion: SuggestionRawDefinition = {
 const getActiveBranch = (command: ESQLCommand<'fork'>) => {
   const finalBranch = command.args[command.args.length - 1];
 
-  if (Array.isArray(finalBranch) || finalBranch.type !== 'fork_branch') {
+  if (Array.isArray(finalBranch) || finalBranch.type !== 'query') {
     // should never happen
     return;
   }

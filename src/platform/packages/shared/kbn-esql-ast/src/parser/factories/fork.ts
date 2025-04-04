@@ -28,12 +28,7 @@ export const createForkCommand = (ctx: ForkCommandContext): ESQLCommand<'fork'> 
 
   for (const subCtx of subQueryContexts) {
     const subCommands = visitForkSubQueryContext(subCtx.forkSubQueryCommand());
-    const branch = Builder.expression.forkBranch(
-      {
-        commands: subCommands,
-      },
-      createParserFields(subCtx)
-    );
+    const branch = Builder.expression.query(subCommands, createParserFields(subCtx));
     command.args.push(branch);
   }
 

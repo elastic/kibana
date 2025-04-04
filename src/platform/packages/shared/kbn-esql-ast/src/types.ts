@@ -16,9 +16,10 @@ export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 /**
  * Represents an *expression* in the AST.
  */
-export type ESQLAstExpression = ESQLSingleAstItem | ESQLAstQueryExpression;
+export type ESQLAstExpression = ESQLSingleAstItem;
 
 export type ESQLSingleAstItem =
+  | ESQLAstQueryExpression
   | ESQLFunction
   | ESQLCommandOption
   | ESQLSource
@@ -31,7 +32,6 @@ export type ESQLSingleAstItem =
   | ESQLInlineCast
   | ESQLOrderExpression
   | ESQLUnknownItem
-  | ESQLForkBranch
   | ESQLMap
   | ESQLMapEntry;
 
@@ -95,11 +95,6 @@ export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
 
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
   commandType: 'lookup' | 'left' | 'right';
-}
-
-export interface ESQLForkBranch extends ESQLAstBaseItem {
-  type: 'fork_branch';
-  commands: Array<ESQLCommand<'where'> | ESQLCommand<'sort'> | ESQLCommand<'limit'>>;
 }
 
 export interface ESQLAstChangePointCommand extends ESQLCommand<'change_point'> {

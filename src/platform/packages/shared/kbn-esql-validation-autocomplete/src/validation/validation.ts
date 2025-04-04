@@ -228,7 +228,7 @@ function validateCommand(
     }
     case 'fork': {
       for (const arg of command.args.flat()) {
-        if (isSingleItem(arg) && arg.type === 'fork_branch') {
+        if (isSingleItem(arg) && arg.type === 'query') {
           // all the args should be commands
           arg.commands.forEach((subCommand) => {
             messages.push(...validateCommand(subCommand, references, ast, currentCommandIndex));
