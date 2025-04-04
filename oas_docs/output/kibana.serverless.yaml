@@ -47774,11 +47774,13 @@ paths:
           name: from
           required: true
           schema:
+            format: date-time
             type: string
         - in: query
           name: to
           required: true
           schema:
+            format: date-time
             type: string
         - in: query
           name: bucketSize
