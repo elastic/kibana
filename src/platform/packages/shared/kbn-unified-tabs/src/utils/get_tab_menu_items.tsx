@@ -8,9 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TabItem, GetTabMenuItems, TabMenuItemWithClick, TabMenuItem } from '../types';
+import {
+  TabItem,
+  GetTabMenuItems,
+  TabMenuItemWithClick,
+  TabMenuItem,
+  TabMenuItemName,
+} from '../types';
 import { isLastTab, hasSingleTab, type TabsState } from './manage_tabs';
-import { TAB_MENU_ITEM_ENTER_RENAMING } from '../constants';
 
 const DividerMenuItem = 'divider';
 
@@ -53,7 +58,7 @@ export const getTabMenuItemsFn = ({
       ? null
       : getTabMenuItem({
           item,
-          name: 'closeOtherTabs',
+          name: TabMenuItemName.closeOtherTabs,
           label: i18n.translate('unifiedTabs.tabMenu.closeOtherTabsMenuItem', {
             defaultMessage: 'Close other tabs',
           }),
@@ -64,7 +69,7 @@ export const getTabMenuItemsFn = ({
       ? null
       : getTabMenuItem({
           item,
-          name: 'closeTabsToTheRight',
+          name: TabMenuItemName.closeTabsToTheRight,
           label: i18n.translate('unifiedTabs.tabMenu.closeTabsToTheRightMenuItem', {
             defaultMessage: 'Close tabs to the right',
           }),
@@ -74,7 +79,7 @@ export const getTabMenuItemsFn = ({
     const items: TabMenuItem[] = [
       getTabMenuItem({
         item,
-        name: TAB_MENU_ITEM_ENTER_RENAMING,
+        name: TabMenuItemName.enterRenamingMode,
         label: i18n.translate('unifiedTabs.tabMenu.renameTabMenuItem', {
           defaultMessage: 'Rename',
         }),
@@ -86,7 +91,7 @@ export const getTabMenuItemsFn = ({
       items.push(
         getTabMenuItem({
           item,
-          name: 'duplicate',
+          name: TabMenuItemName.duplicate,
           label: i18n.translate('unifiedTabs.tabMenu.duplicateMenuItem', {
             defaultMessage: 'Duplicate',
           }),

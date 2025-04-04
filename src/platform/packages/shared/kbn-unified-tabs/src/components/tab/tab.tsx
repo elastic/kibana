@@ -188,6 +188,7 @@ export const Tab: React.FC<TabProps> = (props) => {
             aria-label={tabButtonAriaLabel}
             {...dragHandleProps}
             {...getTabAttributes(item, tabContentId)}
+            data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
             role="tab"
             tabIndex={isSelected ? 0 : -1}
             aria-selected={isSelected}
@@ -196,11 +197,7 @@ export const Tab: React.FC<TabProps> = (props) => {
             onKeyDown={onKeyDownEvent}
           >
             <div css={getTabContentCss(euiTheme)}>
-              <div
-                css={getTabButtonCss(euiTheme)}
-                className="unifiedTabs__tabLabel"
-                data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-              >
+              <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
                 <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                   {item.label}
                 </EuiText>
@@ -322,7 +319,7 @@ function getTabContentCss(euiTheme: EuiThemeComputed) {
   `;
 }
 
-function getTabButtonCss(euiTheme: EuiThemeComputed) {
+function getTabLabelContainerCss(euiTheme: EuiThemeComputed) {
   return css`
     width: 100%;
     height: ${euiTheme.size.l};

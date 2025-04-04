@@ -13,5 +13,3 @@ export const MAX_TAB_WIDTH = 280;
 export const MIN_TAB_WIDTH = 96;
 
 export const PREVIEW_WIDTH = 280;
-
-export const TAB_MENU_ITEM_ENTER_RENAMING = 'enterRenaming';

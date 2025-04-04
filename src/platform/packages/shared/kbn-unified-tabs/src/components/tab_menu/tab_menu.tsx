@@ -17,8 +17,7 @@ import {
   EuiPopover,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { TabItem, GetTabMenuItems } from '../../types';
-import { TAB_MENU_ITEM_ENTER_RENAMING } from '../../constants';
+import { GetTabMenuItems, TabItem, TabMenuItemName } from '../../types';
 
 export interface TabMenuProps {
   item: TabItem;
@@ -57,7 +56,9 @@ export const TabMenu: React.FC<TabMenuProps> = ({
       }
 
       const onClick =
-        itemConfig.name === TAB_MENU_ITEM_ENTER_RENAMING ? onEnterRenaming : itemConfig.onClick;
+        itemConfig.name === TabMenuItemName.enterRenamingMode
+          ? onEnterRenaming
+          : itemConfig.onClick;
 
       if (!onClick) {
         return;

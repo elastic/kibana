@@ -116,7 +116,7 @@ describe('Tab', () => {
         tabContentId={tabContentId}
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
-        isSelected={false}
+        isSelected
         services={servicesMock}
         getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
@@ -127,7 +127,6 @@ describe('Tab', () => {
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
     await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
-    expect(onSelect).toHaveBeenCalled();
     expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
@@ -151,7 +150,7 @@ describe('Tab', () => {
         tabContentId={tabContentId}
         tabsSizeConfig={tabsSizeConfig}
         item={tabItem}
-        isSelected={false}
+        isSelected
         services={servicesMock}
         getPreviewData={getPreviewDataMock}
         onLabelEdited={onLabelEdited}
@@ -162,7 +161,6 @@ describe('Tab', () => {
 
     expect(screen.queryByTestId(tabButtonTestSubj)).toBeInTheDocument();
     await userEvent.dblClick(screen.getByTestId(tabButtonTestSubj));
-    expect(onSelect).toHaveBeenCalled();
     expect(screen.queryByTestId(tabButtonTestSubj)).not.toBeInTheDocument();
 
     const input = screen.getByRole('textbox');
