@@ -216,6 +216,21 @@ function getLensTopNavConfig(options: {
     disableButton: false,
   });
 
+  if (actions.export.visible) {
+    topNavMenu.push({
+      label: i18n.translate('xpack.lens.app.shareTitle', {
+        defaultMessage: 'Export',
+      }),
+      run: actions.export.execute,
+      testId: 'lnsApp_exportButton',
+      description: i18n.translate('xpack.lens.app.shareTitleAria', {
+        defaultMessage: 'Export visualization',
+      }),
+      disableButton: !actions.export.enabled,
+      tooltip: actions.export.tooltip,
+    });
+  }
+
   if (actions.share.visible) {
     topNavMenu.push({
       label: i18n.translate('xpack.lens.app.shareTitle', {
@@ -575,6 +590,126 @@ export const LensTopNavMenu = ({
     );
 
     const showShareMenu = csvEnabled || shareUrlEnabled;
+
+    const shareExecutor = async (anchorElement: HTMLElement, asExport?: boolean) => {
+      if (!share) {
+        return;
+      }
+
+      if (visualization.activeId == null || !visualizationMap[visualization.activeId]) {
+        return;
+      }
+
+      const activeVisualization = visualizationMap[visualization.activeId];
+
+      const configuration: ShareableConfiguration = {
+        filters,
+        query,
+        activeDatasourceId,
+        datasourceStates,
+        datasourceMap,
+        visualizationMap,
+        visualization,
+        currentDoc,
+        adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
+      };
+
+      const { shareURL: shareLocatorParams, reporting: reportingLocatorParams } = getLocatorParams(
+        data,
+        configuration,
+        isCurrentStateDirty
+      );
+
+      const datasourceLayers = getDatasourceLayers(
+        datasourceStates,
+        datasourceMap,
+        dataViews.indexPatterns
+      );
+
+      const exportDatatables =
+        activeVisualization.getExportDatatables?.(
+          visualization.state,
+          datasourceLayers,
+          activeData
+        ) ?? [];
+      const datatables =
+        exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
+      const sharingData = {
+        datatables,
+        csvEnabled,
+        reportingDisabled: !csvEnabled,
+        title: title || defaultLensTitle,
+        locatorParams: {
+          id: LENS_APP_LOCATOR,
+          params: reportingLocatorParams,
+        },
+        layout: {
+          dimensions:
+            activeVisualization.getReportingLayout?.(visualization.state) ??
+            DEFAULT_LENS_LAYOUT_DIMENSIONS,
+        },
+      };
+
+      share.toggleShareContextMenu({
+        asExport,
+        anchorElement,
+        allowShortUrl: false,
+        objectId: currentDoc?.savedObjectId,
+        objectType: 'lens',
+        objectTypeMeta: {
+          title: i18n.translate('xpack.lens.app.shareModal.title', {
+            defaultMessage: 'Share this Lens visualization',
+          }),
+          config: {
+            link: {
+              draftModeCallOut: (
+                <EuiCallOut
+                  color="warning"
+                  title={
+                    <FormattedMessage
+                      id="xpack.lens.app.shareModal.draftModeCallout.title"
+                      defaultMessage="Unsaved changes"
+                    />
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
+                    defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
+                  />
+                </EuiCallOut>
+              ),
+              delegatedShareUrlHandler: async () => {
+                const { shareableUrl, savedObjectURL } = getShareURL(
+                  shortUrlService,
+                  shareLocatorParams,
+                  { application, data },
+                  configuration,
+                  shareUrlEnabled,
+                  isCurrentStateDirty
+                );
+
+                return !currentDoc?.savedObjectId ? (await shareableUrl)! : savedObjectURL.href;
+              },
+              // disable the menu if both shortURL permission and the visualization has not been saved
+              // TODO: improve here the disabling state with more specific checks
+              disabled: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
+            },
+            embed: {
+              disabled: true,
+              showPublicUrlSwitch: () => false,
+            },
+          },
+        },
+        sharingData,
+        // only want to know about changes when savedObjectURL.href
+        isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
+        onClose: () => {
+          anchorElement?.focus();
+        },
+        toasts: notifications.toasts,
+      });
+    };
+
     const baseMenuEntries = getLensTopNavConfig({
       isByValueMode: getIsByValueMode(),
       savingToLibraryPermitted,
@@ -586,6 +721,18 @@ export const LensTopNavMenu = ({
       contextFromEmbeddable,
       actions: {
         inspect: { visible: true, execute: () => lensInspector.inspect({ title }) },
+        export: {
+          visible: true,
+          enabled: showShareMenu,
+          tooltip: () => {
+            if (!showShareMenu) {
+              return i18n.translate('xpack.lens.app.exportButtonDisabledWarning', {
+                defaultMessage: 'The visualization has no data to export.',
+              });
+            }
+          },
+          execute: (anchorElement) => shareExecutor(anchorElement, true),
+        },
         share: {
           visible: true,
           enabled: showShareMenu,
@@ -596,122 +743,7 @@ export const LensTopNavMenu = ({
               });
             }
           },
-          execute: async (anchorElement) => {
-            if (!share) {
-              return;
-            }
-
-            if (visualization.activeId == null || !visualizationMap[visualization.activeId]) {
-              return;
-            }
-
-            const activeVisualization = visualizationMap[visualization.activeId];
-
-            const configuration: ShareableConfiguration = {
-              filters,
-              query,
-              activeDatasourceId,
-              datasourceStates,
-              datasourceMap,
-              visualizationMap,
-              visualization,
-              currentDoc,
-              adHocDataViews: adHocDataViews.map((dataView) => dataView.toSpec()),
-            };
-
-            const { shareURL: shareLocatorParams, reporting: reportingLocatorParams } =
-              getLocatorParams(data, configuration, isCurrentStateDirty);
-
-            const datasourceLayers = getDatasourceLayers(
-              datasourceStates,
-              datasourceMap,
-              dataViews.indexPatterns
-            );
-
-            const exportDatatables =
-              activeVisualization.getExportDatatables?.(
-                visualization.state,
-                datasourceLayers,
-                activeData
-              ) ?? [];
-            const datatables =
-              exportDatatables.length > 0 ? exportDatatables : Object.values(activeData ?? {});
-            const sharingData = {
-              datatables,
-              csvEnabled,
-              reportingDisabled: !csvEnabled,
-              title: title || defaultLensTitle,
-              locatorParams: {
-                id: LENS_APP_LOCATOR,
-                params: reportingLocatorParams,
-              },
-              layout: {
-                dimensions:
-                  activeVisualization.getReportingLayout?.(visualization.state) ??
-                  DEFAULT_LENS_LAYOUT_DIMENSIONS,
-              },
-            };
-
-            share.toggleShareContextMenu({
-              anchorElement,
-              allowShortUrl: false,
-              objectId: currentDoc?.savedObjectId,
-              objectType: 'lens',
-              objectTypeMeta: {
-                title: i18n.translate('xpack.lens.app.shareModal.title', {
-                  defaultMessage: 'Share this Lens visualization',
-                }),
-                config: {
-                  link: {
-                    draftModeCallOut: (
-                      <EuiCallOut
-                        color="warning"
-                        title={
-                          <FormattedMessage
-                            id="xpack.lens.app.shareModal.draftModeCallout.title"
-                            defaultMessage="Unsaved changes"
-                          />
-                        }
-                      >
-                        <FormattedMessage
-                          id="xpack.lens.app.shareModal.draftModeCallout.link.warning"
-                          defaultMessage="The copied link resolves to the current state of this visualization. To get a permanent link, make sure to save your Lens visualization first."
-                        />
-                      </EuiCallOut>
-                    ),
-                    delegatedShareUrlHandler: async () => {
-                      const { shareableUrl, savedObjectURL } = getShareURL(
-                        shortUrlService,
-                        shareLocatorParams,
-                        { application, data },
-                        configuration,
-                        shareUrlEnabled,
-                        isCurrentStateDirty
-                      );
-
-                      return !currentDoc?.savedObjectId
-                        ? (await shareableUrl)!
-                        : savedObjectURL.href;
-                    },
-                    // disable the menu if both shortURL permission and the visualization has not been saved
-                    // TODO: improve here the disabling state with more specific checks
-                    disabled: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
-                  },
-                  embed: {
-                    disabled: true,
-                    showPublicUrlSwitch: () => false,
-                  },
-                },
-              },
-              sharingData,
-              // only want to know about changes when savedObjectURL.href
-              isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
-              onClose: () => {
-                anchorElement?.focus();
-              },
-              toasts: notifications.toasts,
-            });
-          },
+          execute: shareExecutor,
         },
         saveAndReturn: {
           visible: showSaveAndReturn,

@@ -198,7 +198,7 @@ export const useDashboardMenuItems = ({
       export: {
         ...topNavStrings.export,
         id: 'export',
-        testId: 'dashboardExportMenuItem',
+        testId: 'exportTopNavButton',
         disableButton: disableTopNav, // TODO: add logic to disable this button if the user doesn't have export capabilities
         run: (anchorElement) => showShare(anchorElement, true),
       } as TopNavMenuData,
