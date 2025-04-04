@@ -122,17 +122,20 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 7`] = 
   "calls": Array [
     Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.sli-v3*",
         "query": Object {
           "match": Object {
             "slo.id": "irrelevant",
           },
         },
+        "slices": "auto",
         "wait_for_completion": false,
       },
     ],
     Array [
       Object {
+        "conflicts": "proceed",
         "index": ".slo-observability.summary-v3*",
         "query": Object {
           "match": Object {
@@ -140,6 +143,8 @@ exports[`DeleteSLO happy path removes all resources associatde to the slo 7`] = 
           },
         },
         "refresh": true,
+        "slices": "auto",
+        "wait_for_completion": false,
       },
     ],
   ],
