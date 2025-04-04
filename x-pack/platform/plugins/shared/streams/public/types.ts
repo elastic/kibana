@@ -10,13 +10,17 @@ import { Observable } from 'rxjs';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { StreamsRepositoryClient } from './api';
 
+export interface StreamsStatus {
+  status: 'unknown' | 'enabled' | 'disabled';
+}
+
 export interface StreamsPluginSetup {
-  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+  status$: Observable<StreamsStatus>;
 }
 
 export interface StreamsPluginStart {
   streamsRepositoryClient: StreamsRepositoryClient;
-  status$: Observable<{ status: 'unknown' | 'enabled' | 'disabled' }>;
+  status$: Observable<StreamsStatus>;
 }
 
 export interface StreamsPluginSetupDependencies {

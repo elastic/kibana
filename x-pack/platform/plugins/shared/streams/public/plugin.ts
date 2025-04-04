@@ -9,7 +9,7 @@ import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public
 import { Logger } from '@kbn/logging';
 
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
-import { from, shareReplay, startWith } from 'rxjs';
+import { Observable, from, shareReplay, startWith } from 'rxjs';
 import { once } from 'lodash';
 import type { StreamsPublicConfig } from '../common/config';
 import {
@@ -18,6 +18,7 @@ import {
   StreamsPluginSetupDependencies,
   StreamsPluginStart,
   StreamsPluginStartDependencies,
+  StreamsStatus,
 } from './types';
 import { StreamsRepositoryClient } from './api';
 
@@ -49,17 +50,21 @@ export class Plugin implements StreamsPluginClass {
   stop() {}
 }
 
+const ENABLED_STATUS: StreamsStatus = { status: 'enabled' };
+const DISABLED_STATUS: StreamsStatus = { status: 'disabled' };
+const UNKNOWN_STATUS: StreamsStatus = { status: 'unknown' };
+
 const createStreamsStatusObservable = once(
   (
     deps: StreamsPluginSetupDependencies | StreamsPluginStartDependencies,
     repositoryClient: StreamsRepositoryClient,
     logger: Logger
-  ) => {
+  ): Observable<StreamsStatus> => {
     const isObservabilityServerless =
       deps.cloud?.isServerlessEnabled && deps.cloud?.serverless.projectType === 'observability';
 
     if (isObservabilityServerless) {
-      return from([{ status: 'enabled' as const }]);
+      return from([ENABLED_STATUS]);
     }
 
     return from(
@@ -68,14 +73,12 @@ const createStreamsStatusObservable = once(
           signal: new AbortController().signal,
         })
         .then(
-          (response) => ({
-            status: response.enabled ? ('enabled' as const) : ('disabled' as const),
-          }),
+          (response) => (response.enabled ? ENABLED_STATUS : DISABLED_STATUS),
           (error) => {
             logger.error(error);
-            return { status: 'unknown' as const };
+            return UNKNOWN_STATUS;
           }
         )
-    ).pipe(startWith({ status: 'unknown' as const }), shareReplay(1));
+    ).pipe(startWith(UNKNOWN_STATUS), shareReplay(1));
   }
 );
