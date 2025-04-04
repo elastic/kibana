@@ -126,6 +126,7 @@ export const SettingsPage: React.FC<Props> = memo(
     const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+    const [isBreakingChangeUnderstood, setIsBreakingChangeUnderstood] = useState(false);
 
     const toggleChangelogModal = useCallback(() => {
       setIsChangelogModalOpen(!isChangelogModalOpen);
@@ -336,7 +337,11 @@ export const SettingsPage: React.FC<Props> = memo(
                       <EuiSpacer size="l" />
                       {breakingChanges.length > 0 && (
                         <>
-                          <BreakingChangesCallout />
+                          <BreakingChangesCallout
+                            changes={breakingChanges}
+                            isUnderstood={isBreakingChangeUnderstood}
+                            onChange={() => setIsBreakingChangeUnderstood((prev) => !prev)}
+                          />
                           <EuiSpacer size="l" />
                         </>
                       )}

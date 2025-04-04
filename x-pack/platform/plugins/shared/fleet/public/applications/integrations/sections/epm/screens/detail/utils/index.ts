@@ -11,4 +11,5 @@ export {
   formatChangelog,
   getBreakingChanges,
   type ChangelogEntry,
+  type ChangelogChange,
 } from './changelog_utils';
