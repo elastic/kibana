@@ -119,6 +119,7 @@ export const HOST_NOT_ENROLLED = i18n.translate(
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
   esClient: ElasticsearchClient;
+  spaceId: string;
   casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
@@ -487,9 +488,17 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
 
     const doc: LogsEndpointAction<TParameters, TOutputContent, TMeta> = {
       '@timestamp': new Date().toISOString(),
+      // Need to suppress this TS error around `agent.policy` not supporting `undefined`.
+      // It will be removed once we enable the feature and delete the feature flag checks.
+      // @ts-expect-error
       agent: {
         id: actionRequest.endpoint_ids,
-        policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
+        // add the `policy` info if space awareness is enabled
+        ...(this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled
+          ? {
+              policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
+            }
+          : {}),
       },
       EndpointActions: {
         action_id: actionRequest.actionId || uuidv4(),

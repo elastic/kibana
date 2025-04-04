@@ -22,6 +22,7 @@ import type { AttachmentsSubClient } from '@kbn/cases-plugin/server/client/attac
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { ResponseActionsClient } from '../..';
 import { NormalizedExternalConnectorClient } from '../..';
 import type { KillOrSuspendProcessRequestBody } from '../../../../../common/endpoint/types';
@@ -121,6 +122,7 @@ const createConstructorOptionsMock = (): Required<ResponseActionsClientOptionsMo
     esClient,
     casesClient,
     endpointService,
+    spaceId: DEFAULT_SPACE_ID,
     username: 'foo',
     isAutomated: false,
   };

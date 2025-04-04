@@ -48,9 +48,11 @@ export const getActionFileInfoRouteHandler = (
       const user = coreContext.security.authc.getCurrentUser();
       const casesClient = await endpointContext.service.getCasesClient(req);
       const connectorActions = (await context.actions).getActionsClient();
+      const spaceId = (await context.securitySolution).getSpaceId();
       const responseActionsClient: ResponseActionsClient = getResponseActionsClient(agentType, {
         esClient,
         casesClient,
+        spaceId,
         endpointService: endpointContext.service,
         username: user?.username || 'unknown',
         connectorActions: new NormalizedExternalConnectorClient(connectorActions, logger),
