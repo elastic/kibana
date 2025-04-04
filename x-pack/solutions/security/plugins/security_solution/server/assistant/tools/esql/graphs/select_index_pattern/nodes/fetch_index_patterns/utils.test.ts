@@ -46,6 +46,7 @@ describe('convertIndicesToIndexPatterns', () => {
   it('should convert indices to index patterns', async () => {
     const tree = await buildTree(indices);
     const result = getIndexPatterns(tree, { ignoreDigitParts: true });
-    console.log(result);
+    expect(result.indexPatterns).toEqual(["employees-*", "logs-*", "metricbeat-*", "metrics-*", "metrics-apm-*", "metrics-apm-development.evaluations.*", "metrics-apm-production.evaluations.*", "metrics-apm-staging.evaluations.*", "nyc_taxis-*", "packetbeat-*", "postgres-logs-*", "traces-apm-*", "traces-apm-production.evlauations.*", "traces-apm-staging.evlauations.*"]);
+    expect(result.remainingIndices).toContain('traches-aapm-staging.evlauations.2029.06.14');
   });
 });

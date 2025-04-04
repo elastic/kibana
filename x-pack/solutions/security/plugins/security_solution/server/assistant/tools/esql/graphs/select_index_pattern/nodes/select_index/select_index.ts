@@ -38,10 +38,8 @@ export const getSelectIndexPattern = ({
   const llm = createLlmInstance();
 
   return async (state: typeof SelectIndexPatternAnnotation.State) => {
-    const { indexPatternAnalysis } = state;
-
-    const analysis = Object.values(indexPatternAnalysis);
-    const candidateIndexPatterns = analysis.filter(
+    const indexPatternAnalysis = Object.values(state.indexPatternAnalysis);
+    const candidateIndexPatterns = indexPatternAnalysis.filter(
       ({ containsRequiredData }) => containsRequiredData
     );
 
