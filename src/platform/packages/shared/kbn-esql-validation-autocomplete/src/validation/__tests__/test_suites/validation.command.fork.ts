@@ -13,6 +13,17 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
       describe('FORK', () => {
+        test('requires at least two branches', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index
+| FORK
+    (WHERE keywordField != "")`,
+            [`[FORK] Must include at least two branches.`]
+          );
+        });
+
         describe('... (SUBCOMMAND ...) ...', () => {
           test('no errors for valid command', async () => {
             const { expectErrors } = await setup();
@@ -22,6 +33,15 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
 | FORK
     (WHERE keywordField != "" | LIMIT 100)
     (SORT doubleField ASC NULLS LAST)`,
+              []
+            );
+
+            await expectErrors(
+              `FROM index
+| FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+    (LIMIT 100)`,
               []
             );
           });

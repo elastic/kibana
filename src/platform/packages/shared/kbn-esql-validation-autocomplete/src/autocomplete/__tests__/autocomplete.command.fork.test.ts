@@ -31,10 +31,7 @@ describe('autocomplete.suggest', () => {
       });
 
       test('suggests pipe and new branch after complete branch', async () => {
-        await assertSuggestions('FROM a | FORK (LIMIT 100) /', [
-          { text: '($0)', asSnippet: true },
-          '| ',
-        ]);
+        await assertSuggestions('FROM a | FORK (LIMIT 100) /', [{ text: '($0)', asSnippet: true }]);
         await assertSuggestions('FROM a | FORK (LIMIT 100) (SORT keywordField ASC) /', [
           { text: '($0)', asSnippet: true },
           '| ',

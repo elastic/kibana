@@ -34,11 +34,13 @@ export async function suggest(
     activeBranch &&
     activeBranch.location.min <= params.innerText.length &&
     activeBranch.location.max >= params.innerText.length;
-  if (!withinActiveBranch) {
-    // not within a branch
-    if (/\)\s+$/i.test(params.innerText)) {
-      return [newBranchSuggestion, pipeCompleteItem];
+
+  if (!withinActiveBranch && /\)\s+$/i.test(params.innerText)) {
+    const suggestions = [newBranchSuggestion];
+    if (params.command.args.length > 1) {
+      suggestions.push(pipeCompleteItem);
     }
+    return suggestions;
   }
 
   // within a branch

@@ -685,5 +685,24 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     declaration: `TODO`,
     examples: [],
     suggest: suggestForFork,
+    validate: (command) => {
+      const messages: ESQLMessage[] = [];
+
+      if (command.args.length < 2) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.forkTooFewBranches',
+            {
+              defaultMessage: '[FORK] Must include at least two branches.',
+            }
+          ),
+          type: 'error',
+          code: 'forkTooFewBranches',
+        });
+      }
+
+      return messages;
+    },
   },
 ];
