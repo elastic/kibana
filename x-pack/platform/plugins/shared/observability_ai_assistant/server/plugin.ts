@@ -138,11 +138,7 @@ export class ObservabilityAIAssistantPlugin
           config: this.config,
         })
       )
-      .catch((e) =>
-        this.logger.error(
-          `Knowledge base semantic_text migration task could not be registered: ${e.message}`
-        )
-      );
+      .catch((e) => this.logger.error(`Error while setting up the AI Assistant: ${e.message}`));
 
     service.register(registerFunctions);
 
