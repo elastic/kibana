@@ -189,8 +189,7 @@ const ProcessorsEditor = React.memo(() => {
         borderRadius="none"
         grow={false}
         css={css`
-          z-index: ${euiTheme.levels.maskBelowHeader};
-          ${useEuiShadow('xs')};
+          border-bottom: ${euiTheme.border.thin};
         `}
       >
         <EuiTitle size="xxs">
