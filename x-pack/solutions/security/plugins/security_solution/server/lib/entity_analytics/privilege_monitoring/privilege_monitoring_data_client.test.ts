@@ -46,7 +46,7 @@ describe('Privilege Monitoring Data Client', () => {
     soClient: mockSavedObjectClient,
     kibanaVersion: '8.0.0',
     taskManager: {} as TaskManagerStartContract,
-    auditLogger: auditMock as AuditLogger,
+    auditLogger: auditMock as unknown as AuditLogger,
   };
 
   let dataClient: PrivilegeMonitoringDataClient;
