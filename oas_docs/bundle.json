@@ -53881,6 +53881,7 @@
             "name": "from",
             "required": true,
             "schema": {
+              "format": "date-time",
               "type": "string"
             }
           },
@@ -53889,6 +53890,7 @@
             "name": "to",
             "required": true,
             "schema": {
+              "format": "date-time",
               "type": "string"
             }
           },
