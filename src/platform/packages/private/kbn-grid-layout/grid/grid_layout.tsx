@@ -103,6 +103,13 @@ export const GridLayout = ({
         }
       });
 
+    return () => {
+      onLayoutChangeSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onLayoutChange]);
+
+  useEffect(() => {
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
      * mobile view and a static (non-interactable) grid layout
@@ -127,8 +134,7 @@ export const GridLayout = ({
     });
 
     return () => {
-      rowCountSubscription.unsubscribe();
-      onLayoutChangeSubscription.unsubscribe();
+      rowOrderSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
