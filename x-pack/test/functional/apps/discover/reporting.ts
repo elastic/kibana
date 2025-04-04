@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     const res = await es.bulk({
       index,
-      operations: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
+      body: docs.map((d) => `{"index": {}}\n${JSON.stringify(d)}\n`),
     });
 
     log.info(`Indexed ${res.items.length} test data docs into ${index}.`);
