@@ -39,12 +39,11 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       ${showBorder
         ? css`
             .embPanel {
+              outline: var(--internalBorderStyle);
+
               ${highContrastModeStyles(euiThemeContext, {
-                none: `
-                  outline: var(--internalBorderStyle);
-                `,
                 preferred: `
-                  border: var(--internalBorderStyle);
+                  border: none;
                 `,
               })},
             }
