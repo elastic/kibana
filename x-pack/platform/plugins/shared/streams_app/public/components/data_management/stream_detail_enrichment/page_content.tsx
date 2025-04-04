@@ -297,7 +297,7 @@ const ProcessorsEditor = React.memo(() => {
                 <p>
                   <FormattedMessage
                     id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
-                    defaultMessage="These are some mapping failures occurred during the simulation:"
+                    defaultMessage="These are some mapping failures that occurred during the simulation:"
                   />
                 </p>
                 <ul>
