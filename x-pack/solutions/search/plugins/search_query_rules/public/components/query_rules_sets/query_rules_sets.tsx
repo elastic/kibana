@@ -10,15 +10,10 @@ import React, { useState } from 'react';
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../../hooks/use_kibana';
-import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
 
 export const QueryRulesSets = () => {
-  const {
-    services: { application, http },
-  } = useKibana();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
@@ -45,9 +40,9 @@ export const QueryRulesSets = () => {
         <div data-test-subj="query-rules-set-item-name">
           <EuiLink
             data-test-subj="searchQueryRulesColumnsLink"
-            onClick={() =>
-              application.navigateToUrl(http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/sets/${name}`))
-            }
+            onClick={() => {
+              // Navigate to the ruleset details page
+            }}
           >
             {name}
           </EuiLink>
@@ -62,43 +57,6 @@ export const QueryRulesSets = () => {
       render: (ruleCount: number) => (
         <div data-test-subj="query-rules-set-item-rule-count">{ruleCount}</div>
       ),
-    },
-    {
-      actions: [
-        {
-          name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.delete', {
-            defaultMessage: 'Delete',
-          }),
-          description: (queryRuleSet: QueryRulesListRulesetsQueryRulesetListItem) =>
-            i18n.translate('xpack.queryRules.queryRulesSetTable.actions.deleteDescription', {
-              defaultMessage: 'Delete query rule set with {name}',
-              values: { name: queryRuleSet.ruleset_id },
-            }),
-          icon: 'trash',
-          color: 'danger',
-          type: 'icon',
-          onClick: (queryRuleSet: QueryRulesListRulesetsQueryRulesetListItem) => {
-            // Delete logic here
-          },
-        },
-        {
-          name: i18n.translate('xpack.queryRules.queryRulesSetTable.actions.edit', {
-            defaultMessage: 'Edit',
-          }),
-          description: (queryRuleSet: QueryRulesListRulesetsQueryRulesetListItem) =>
-            i18n.translate('xpack.queryRules.queryRulesSetTable.actions.editDescription', {
-              defaultMessage: 'Edit query rule set {name}',
-              values: { name: queryRuleSet.ruleset_id },
-            }),
-          icon: 'pencil',
-          color: 'text',
-          type: 'icon',
-          onClick: (queryRuleSet: QueryRulesListRulesetsQueryRulesetListItem) =>
-            application.navigateToUrl(
-              http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/sets/${queryRuleSet.ruleset_id}`)
-            ),
-        },
-      ],
     },
   ];
 
