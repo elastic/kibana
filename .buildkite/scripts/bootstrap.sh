@@ -23,6 +23,10 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
   fi
+  if [[ -d ~/.moon/cache ]]; then
+    echo "Using ~/.moon/cache as a starting point"
+    mv ~/.moon/cache ./.moon/
+  fi
 fi
 
 if ! yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}"; then
