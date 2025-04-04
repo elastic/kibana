@@ -49,7 +49,7 @@ const RULE_TYPE = i18n.translate('xpack.securitySolution.detections.alerts.ruleT
 });
 
 /** Always show these fields */
-const alwaysDisplayedFields: EventSummaryField[] = [
+export const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
 
   // Add all fields used to identify the agent ID in alert events and override them to
@@ -66,8 +66,6 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'Endpoint.policy.applied.artifacts.global.channel' },
   { id: 'user.name' },
   { id: 'rule.name' },
-  { id: 'cloud.provider' },
-  { id: 'cloud.region' },
   { id: 'cloud.provider' },
   { id: 'cloud.region' },
   { id: 'orchestrator.cluster.id' },

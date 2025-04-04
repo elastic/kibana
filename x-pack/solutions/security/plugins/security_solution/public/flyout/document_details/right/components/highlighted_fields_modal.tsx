@@ -26,9 +26,11 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { DataViewFieldBase } from '@kbn/es-query';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { RuleResponse, RuleUpdateProps } from '../../../../../common/api/detection_engine';
+import { getDefineStepsData } from '../../../../detection_engine/common/helpers';
+import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
+import { useDefaultIndexPattern } from '../../../../detection_engine/rule_management/hooks/use_default_index_pattern';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useUpdateRule } from '../../../../detection_engine/rule_management/logic/use_update_rule';
 import {
@@ -81,11 +83,12 @@ const schema: FormSchema<InvestigationFieldsFormData> = {
   },
 };
 
-interface HighlighedFieldsModalProps {
-  /**
-   * Available fields to select from
-   */
-  fieldOptions: DataViewFieldBase[];
+const formConfig = {
+  ...schema.customHighlightedFields,
+  label: ADD_CUSTOM_FIELD_LABEL,
+};
+
+interface HighlightedFieldsModalProps {
   /**
    * The data formatted for field browser
    */
@@ -111,14 +114,22 @@ interface HighlighedFieldsModalProps {
 /**
  * Modal for editing the highlighted fields of a rule.
  */
-export const HighlighedFieldsModal: FC<HighlighedFieldsModalProps> = ({
-  fieldOptions,
+export const HighlightedFieldsModal: FC<HighlightedFieldsModalProps> = ({
   rule,
   customHighlightedFields,
   dataFormattedForFieldBrowser,
   setIsEditLoading,
   setIsModalVisible,
 }) => {
+  const defaultIndexPattern = useDefaultIndexPattern();
+  const { dataSourceType, index, dataViewId } = useMemo(() => getDefineStepsData(rule), [rule]);
+  const { indexPattern: dataView } = useRuleIndexPattern({
+    dataSourceType,
+    index: index.length > 0 ? index : defaultIndexPattern, // fallback to default index pattern if rule has no index patterns
+    dataViewId,
+  });
+  const fieldOptions = useMemo(() => dataView.fields, [dataView]);
+
   const { addSuccess } = useAppToasts();
   const { euiTheme } = useEuiTheme();
   const { mutateAsync: updateRule } = useUpdateRule();
@@ -168,6 +179,22 @@ export const HighlighedFieldsModal: FC<HighlighedFieldsModalProps> = ({
     setIsEditLoading(false);
     setIsModalVisible(false);
   }, [updateRule, addSuccess, rule, setIsModalVisible, setIsEditLoading, selectedOptions]);
+
+  const componentProps = useMemo(
+    () => ({
+      idAria: 'customizeHighlightedFields',
+      'data-test-subj': HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID,
+      euiFieldProps: {
+        fullWidth: true,
+        noSuggestions: false,
+        onChange: (fields: Array<{ label: string }>) => setSelectedOptions(fields),
+        options,
+        placeholder: SELECT_PLACEHOLDER,
+        selectedOptions,
+      },
+    }),
+    [options, selectedOptions]
+  );
 
   return (
     <EuiModal
@@ -221,19 +248,8 @@ export const HighlighedFieldsModal: FC<HighlighedFieldsModalProps> = ({
         <Form form={form}>
           <CommonUseField
             path="customHighlightedFields"
-            config={{ ...schema.customHighlightedFields, label: ADD_CUSTOM_FIELD_LABEL }}
-            componentProps={{
-              idAria: 'customizeHighlightedFields',
-              'data-test-subj': HIGHLIGHTED_FIELDS_MODAL_CUSTOM_FIELDS_TEST_ID,
-              euiFieldProps: {
-                fullWidth: true,
-                noSuggestions: false,
-                onChange: (fields: Array<{ label: string }>) => setSelectedOptions(fields),
-                options,
-                placeholder: SELECT_PLACEHOLDER,
-                selectedOptions,
-              },
-            }}
+            config={formConfig}
+            componentProps={componentProps}
           />
         </Form>
       </EuiModalBody>

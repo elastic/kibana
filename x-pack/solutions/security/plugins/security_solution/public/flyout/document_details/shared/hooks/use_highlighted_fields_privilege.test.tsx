@@ -7,6 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useHighlightedFieldsPrivilege } from './use_highlighted_fields_privilege';
+import type { UseHighlightedFieldsPrivilegeParams } from './use_highlighted_fields_privilege';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../detection_engine/rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
@@ -30,7 +31,7 @@ const defaultProps = {
   isExistingRule: true,
 };
 
-const renderUseHighlightedFieldsPrivilege = (props = defaultProps) =>
+const renderUseHighlightedFieldsPrivilege = (props: UseHighlightedFieldsPrivilegeParams) =>
   renderHook(() => useHighlightedFieldsPrivilege(props));
 
 describe('useHighlightedFieldsPrivilege', () => {
@@ -42,6 +43,16 @@ describe('useHighlightedFieldsPrivilege', () => {
     (usePrebuiltRuleCustomizationUpsellingMessage as jest.Mock).mockReturnValue(undefined);
   });
 
+  it('should return isDisabled as true when rule is null', () => {
+    const { result } = renderUseHighlightedFieldsPrivilege({
+      ...defaultProps,
+      rule: null,
+    });
+
+    expect(result.current.isDisabled).toBe(true);
+    expect(result.current.tooltipContent).toBe('Deleted rule cannot be edited.');
+  });
+
   it('should return isDisabled as true when rule does not exist', () => {
     const { result } = renderUseHighlightedFieldsPrivilege({
       ...defaultProps,
@@ -49,12 +60,12 @@ describe('useHighlightedFieldsPrivilege', () => {
     });
 
     expect(result.current.isDisabled).toBe(true);
-    expect(result.current.tooltipContent).toBe('Edit highlighted fields');
+    expect(result.current.tooltipContent).toBe('Deleted rule cannot be edited.');
   });
 
   it('should return isDisabled as true when user does not have CRUD privileges', () => {
     (useUserData as jest.Mock).mockReturnValue([{ canUserCRUD: false }]);
-    const { result } = renderUseHighlightedFieldsPrivilege();
+    const { result } = renderUseHighlightedFieldsPrivilege(defaultProps);
     expect(result.current.isDisabled).toBe(true);
     expect(result.current.tooltipContent).toContain(LACK_OF_KIBANA_SECURITY_PRIVILEGES);
   });

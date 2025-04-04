@@ -19,11 +19,11 @@ import { useUserData } from '../../../../detections/components/user_info';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
-interface UseHighlightedFieldsPrivilegeParams {
+export interface UseHighlightedFieldsPrivilegeParams {
   /**
    * The rule to be edited
    */
-  rule: RuleResponse;
+  rule: RuleResponse | null;
   /**
    * Whether the rule exists
    */
@@ -53,6 +53,7 @@ export const useHighlightedFieldsPrivilege = ({
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
   const isEditRuleDisabled =
+    !rule ||
     !isExistingRule ||
     !hasUserCRUDPermission(canUserCRUD) ||
     (isMlRule(rule?.type) && !hasMlPermissions);
@@ -61,7 +62,7 @@ export const useHighlightedFieldsPrivilege = ({
     'prebuilt_rule_customization'
   );
 
-  const isDisabled = isEditRuleDisabled || (Boolean(upsellingMessage) && rule.immutable);
+  const isDisabled = isEditRuleDisabled || (Boolean(upsellingMessage) && rule?.immutable);
 
   const tooltipContent = useMemo(() => {
     const explanation = explainLackOfPermission(
@@ -74,7 +75,13 @@ export const useHighlightedFieldsPrivilege = ({
     if (isEditRuleDisabled && explanation) {
       return explanation;
     }
-    if (upsellingMessage && rule.immutable) {
+    if (isEditRuleDisabled && (!isExistingRule || !rule)) {
+      return i18n.translate(
+        'xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsDeletedRuleTooltip',
+        { defaultMessage: 'Deleted rule cannot be edited.' }
+      );
+    }
+    if (upsellingMessage && rule?.immutable) {
       return i18n.translate(
         'xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsButtonUpsellingTooltip',
         {
@@ -87,10 +94,13 @@ export const useHighlightedFieldsPrivilege = ({
       'xpack.securitySolution.flyout.right.investigation.highlightedFields.editHighlightedFieldsButtonTooltip',
       { defaultMessage: 'Edit highlighted fields' }
     );
-  }, [canUserCRUD, hasMlPermissions, isEditRuleDisabled, rule, upsellingMessage]);
+  }, [canUserCRUD, hasMlPermissions, isEditRuleDisabled, isExistingRule, rule, upsellingMessage]);
 
-  return {
-    isDisabled,
-    tooltipContent,
-  };
+  return useMemo(
+    () => ({
+      isDisabled,
+      tooltipContent,
+    }),
+    [isDisabled, tooltipContent]
+  );
 };

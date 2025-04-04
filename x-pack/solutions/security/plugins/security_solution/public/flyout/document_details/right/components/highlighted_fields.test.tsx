@@ -20,13 +20,15 @@ import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
+import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 jest.mock('../../shared/hooks/use_highlighted_fields');
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 jest.mock('../../../../detection_engine/rule_creation_ui/pages/form');
 jest.mock('../../../../common/hooks/use_experimental_features');
 jest.mock('../../shared/hooks/use_highlighted_fields_privilege');
-
+jest.mock('../../../rule_details/hooks/use_rule_details');
 const mockAddSuccess = jest.fn();
 jest.mock('../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({
@@ -57,6 +59,11 @@ describe('<HighlightedFields />', () => {
       (useRuleIndexPattern as jest.Mock).mockReturnValue({
         indexPattern: { fields: ['field'] },
         isIndexPatternLoading: false,
+      });
+      (useRuleDetails as jest.Mock).mockReturnValue({
+        rule: null,
+        isExistingRule: true,
+        loading: false,
       });
     });
 
@@ -95,6 +102,11 @@ describe('<HighlightedFields />', () => {
         indexPattern: { fields: ['field'] },
         isIndexPatternLoading: false,
       });
+      (useRuleDetails as jest.Mock).mockReturnValue({
+        rule: { id: '123' } as RuleResponse,
+        isExistingRule: true,
+        loading: false,
+      });
     });
 
     it('should render the component', () => {
@@ -120,10 +132,12 @@ describe('<HighlightedFields />', () => {
     });
 
     it('should not render edit button if rule is null', () => {
-      const { queryByTestId } = renderHighlightedFields({
-        ...mockContextValue,
+      (useRuleDetails as jest.Mock).mockReturnValue({
         rule: null,
+        isExistingRule: true,
+        loading: false,
       });
+      const { queryByTestId } = renderHighlightedFields(mockContextValue);
       expect(queryByTestId(HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID)).not.toBeInTheDocument();
     });
   });

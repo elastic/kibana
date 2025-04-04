@@ -16,7 +16,7 @@ import { CellActions } from '../../shared/components/cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
-import { EditHighlighedFieldsButton } from './highlighted_fields_button';
+import { EditHighlightedFieldsButton } from './highlighted_fields_button';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 export interface HighlightedFieldsTableRow {
@@ -97,9 +97,10 @@ export const HighlightedFields: FC = () => {
     scopeId,
     isPreview,
     investigationFields,
-    rule,
-    isExistingRule,
+    // rule,
+    // isExistingRule,
   } = useDocumentDetailsContext();
+
   const [isEditLoading, setIsEditLoading] = useState(false);
   const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(
     'editHighlightedFieldsEnabled'
@@ -108,7 +109,6 @@ export const HighlightedFields: FC = () => {
   const highlightedFields = useHighlightedFields({
     dataFormattedForFieldBrowser,
     investigationFields,
-    type: 'all',
   });
   const items = useMemo(
     () => convertHighlightedFieldsToTableRow(highlightedFields, scopeId, isPreview),
@@ -129,13 +129,11 @@ export const HighlightedFields: FC = () => {
               </h5>
             </EuiTitle>
           </EuiFlexItem>
-          {rule && editHighlightedFieldsEnabled && (
+          {editHighlightedFieldsEnabled && (
             <EuiFlexItem grow={false}>
-              <EditHighlighedFieldsButton
+              <EditHighlightedFieldsButton
                 customHighlightedFields={investigationFields}
                 dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-                isExistingRule={isExistingRule}
-                rule={rule}
                 setIsEditLoading={setIsEditLoading}
               />
             </EuiFlexItem>

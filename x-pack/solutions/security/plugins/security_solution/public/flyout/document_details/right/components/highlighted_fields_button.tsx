@@ -4,39 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { FC } from 'react';
-import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
-import { getDefineStepsData } from '../../../../detection_engine/common/helpers';
-import { useRuleIndexPattern } from '../../../../detection_engine/rule_creation_ui/pages/form';
-import { useDefaultIndexPattern } from '../../../../detection_engine/rule_management/hooks/use_default_index_pattern';
 import { useHighlightedFieldsPrivilege } from '../../shared/hooks/use_highlighted_fields_privilege';
-import { HighlighedFieldsModal } from './highlighted_fields_modal';
+import { useBasicDataFromDetailsData } from '../../shared/hooks/use_basic_data_from_details_data';
+import { useRuleDetails } from '../../../rule_details/hooks/use_rule_details';
+import { HighlightedFieldsModal } from './highlighted_fields_modal';
 import {
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TEST_ID,
   HIGHLIGHTED_FIELDS_EDIT_BUTTON_TOOLTIP_TEST_ID,
+  HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID,
 } from './test_ids';
 
-interface EditHighlighedFieldsButtonProps {
+interface EditHighlightedFieldsButtonProps {
   /**
-   * The default highlighted fields
+   * Preselected custom highlighted fields
    */
   customHighlightedFields: string[];
   /**
    * The data formatted for field browser
    */
   dataFormattedForFieldBrowser: TimelineEventsDetailsItem[];
-  /**
-   * The rule
-   */
-  rule: RuleResponse;
-  /**
-   * Whether the rule exists
-   */
-  isExistingRule: boolean;
   /**
    * The function to set the edit loading state
    */
@@ -46,28 +37,31 @@ interface EditHighlighedFieldsButtonProps {
 /**
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
-export const EditHighlighedFieldsButton: FC<EditHighlighedFieldsButtonProps> = ({
+export const EditHighlightedFieldsButton: FC<EditHighlightedFieldsButtonProps> = ({
   customHighlightedFields,
   dataFormattedForFieldBrowser,
-  rule,
-  isExistingRule,
   setIsEditLoading,
 }) => {
+  const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
+  const { rule, isExistingRule, loading: isRuleLoading } = useRuleDetails({ ruleId });
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const onClick = useCallback(() => setIsModalVisible(true), []);
-
-  const defaultIndexPattern = useDefaultIndexPattern();
-  const { dataSourceType, index, dataViewId } = useMemo(() => getDefineStepsData(rule), [rule]);
-  const { indexPattern: dataView } = useRuleIndexPattern({
-    dataSourceType,
-    index: index.length > 0 ? index : defaultIndexPattern, // fallback to default index pattern if rule has no index patterns
-    dataViewId,
-  });
 
   const { isDisabled, tooltipContent } = useHighlightedFieldsPrivilege({
     rule,
     isExistingRule,
   });
+
+  if (isRuleLoading) {
+    return (
+      <EuiLoadingSpinner size="m" data-test-subj={HIGHLIGHTED_FIELDS_EDIT_BUTTON_LOADING_TEST_ID} />
+    );
+  }
+
+  if (!rule) {
+    return null;
+  }
 
   return (
     <>
@@ -88,10 +82,9 @@ export const EditHighlighedFieldsButton: FC<EditHighlighedFieldsButtonProps> = (
         </EuiButtonEmpty>
       </EuiToolTip>
       {isModalVisible && (
-        <HighlighedFieldsModal
+        <HighlightedFieldsModal
           customHighlightedFields={customHighlightedFields}
           dataFormattedForFieldBrowser={dataFormattedForFieldBrowser}
-          fieldOptions={dataView.fields}
           rule={rule}
           setIsEditLoading={setIsEditLoading}
           setIsModalVisible={setIsModalVisible}
