@@ -146,7 +146,7 @@ const ProcessorsEditor = React.memo(() => {
 
   const errors = useMemo(() => {
     if (!simulation) {
-      return null;
+      return { ignoredFields: [], mappingFailures: [] };
     }
 
     const ignoredFieldsSet = new Set<string>();
@@ -166,14 +166,10 @@ const ProcessorsEditor = React.memo(() => {
       });
     });
 
-    const ignoredFields = Array.from(ignoredFieldsSet);
-    const mappingFailures = Array.from(mappingFailuresSet);
-
-    if (isEmpty(ignoredFields) && isEmpty(mappingFailures)) {
-      return null;
-    }
-
-    return { ignoredFields, mappingFailures };
+    return {
+      ignoredFields: Array.from(ignoredFieldsSet),
+      mappingFailures: Array.from(mappingFailuresSet),
+    };
   }, [simulation]);
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
@@ -237,101 +233,112 @@ const ProcessorsEditor = React.memo(() => {
           </SortableList>
         )}
         <AddProcessorPanel />
+        {!isEmpty(errors.ignoredFields) && (
+          <EuiPanel
+            paddingSize="s"
+            hasShadow={false}
+            grow={false}
+            color="danger"
+            css={css`
+              margin-top: ${euiTheme.size.m};
+            `}
+          >
+            <EuiAccordion
+              id="ignored-fields-failures-accordion"
+              initialIsOpen
+              buttonContent={
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
+                    { defaultMessage: 'Some fields were ignored during the simulation.' }
+                  )}
+                </strong>
+              }
+            >
+              <EuiText component="p" size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
+                    {
+                      defaultMessage:
+                        'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
+                    }
+                  )}
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
+                    defaultMessage="The ignored fields are: {fields}"
+                    values={{
+                      fields: (
+                        <EuiFlexGroup
+                          gutterSize="s"
+                          css={css`
+                            margin-top: ${euiTheme.size.s};
+                          `}
+                        >
+                          {errors.ignoredFields.map((field) => (
+                            <EuiCode>{field}</EuiCode>
+                          ))}
+                        </EuiFlexGroup>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
+        )}
+        {!isEmpty(errors.mappingFailures) && (
+          <EuiPanel
+            paddingSize="s"
+            hasShadow={false}
+            grow={false}
+            color="danger"
+            css={css`
+              margin-top: ${euiTheme.size.m};
+            `}
+          >
+            <EuiAccordion
+              id="mapping-failures-accordion"
+              initialIsOpen
+              buttonContent={
+                <strong>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+                    {
+                      defaultMessage: 'Some fields mapping were conflicting during the simulation.',
+                    }
+                  )}
+                </strong>
+              }
+            >
+              <EuiText component="p" size="s">
+                <p>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.description',
+                    {
+                      defaultMessage:
+                        'Some fields in these documents were conflicting with the stream mappings during the ingestion simulation. Review the fields’ data format.',
+                    }
+                  )}
+                </p>
+                <p>
+                  <FormattedMessage
+                    id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
+                    defaultMessage="These are some mapping failures occurred during the simulation:"
+                  />
+                </p>
+                <ul>
+                  {errors.mappingFailures.map((failureMessage, id) => (
+                    <li key={id}>{failureMessage}</li>
+                  ))}
+                </ul>
+              </EuiText>
+            </EuiAccordion>
+          </EuiPanel>
+        )}
       </EuiPanel>
-      {errors && (
-        <EuiPanel paddingSize="m" hasShadow={false} borderRadius="none" grow={false}>
-          {!isEmpty(errors.ignoredFields) && (
-            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-              <EuiAccordion
-                id="ignored-fields-failures-accordion"
-                initialIsOpen
-                buttonContent={
-                  <strong>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.title',
-                      { defaultMessage: 'Some fields were ignored during the simulation.' }
-                    )}
-                  </strong>
-                }
-              >
-                <EuiText component="p" size="s">
-                  <p>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.description',
-                      {
-                        defaultMessage:
-                          'Some fields in these documents were ignored during the ingestion simulation. Review the fields’ mapping limits.',
-                      }
-                    )}
-                  </p>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.streams.streamDetailView.managementTab.enrichment.ignoredFieldsFailure.fieldsList"
-                      defaultMessage="The ignored fields are: {fields}"
-                      values={{
-                        fields: (
-                          <EuiFlexGroup
-                            gutterSize="s"
-                            css={css`
-                              margin-top: ${euiTheme.size.s};
-                            `}
-                          >
-                            {errors.ignoredFields.map((field) => (
-                              <EuiCode>{field}</EuiCode>
-                            ))}
-                          </EuiFlexGroup>
-                        ),
-                      }}
-                    />
-                  </p>
-                </EuiText>
-              </EuiAccordion>
-            </EuiPanel>
-          )}
-          {!isEmpty(errors.mappingFailures) && (
-            <EuiPanel paddingSize="s" hasShadow={false} grow={false} color="danger">
-              <EuiAccordion
-                id="mapping-failures-accordion"
-                initialIsOpen
-                buttonContent={
-                  <strong>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
-                      {
-                        defaultMessage:
-                          'Some fields mapping were conflicting during the simulation.',
-                      }
-                    )}
-                  </strong>
-                }
-              >
-                <EuiText component="p" size="s">
-                  <p>
-                    {i18n.translate(
-                      'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.description',
-                      {
-                        defaultMessage:
-                          'Some fields in these documents were conflicting with the stream mappings during the ingestion simulation. Review the fields’ data format.',
-                      }
-                    )}
-                  </p>
-                  <p>
-                    <FormattedMessage
-                      id="xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.fieldsList"
-                      defaultMessage="These are some mapping failures occurred during the simulation:"
-                    />
-                  </p>
-                  <ul>
-                    {errors.mappingFailures.map((failureMessage, id) => (
-                      <li key={id}>{failureMessage}</li>
-                    ))}
-                  </ul>
-                </EuiText>
-              </EuiAccordion>
-            </EuiPanel>
-          )}
-        </EuiPanel>
-      )}
     </>
   );
 });
