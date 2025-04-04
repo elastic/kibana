@@ -86,7 +86,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         it('should render different data in response to filter change', async function () {
-          await vegaChart.typeInSpec('"config": { "kibana": {"renderer": "svg"} },');
+          const { spec, isValid } = await vegaChart.getSpecAsJSON();
+          expect(isValid).to.be(true);
+          // add SVG renderer to read the Y axis labels
+          const updatedSpec = { ...spec, config: { kibana: { renderer: 'svg' } } };
+          await vegaChart.fillSpec(JSON.stringify(updatedSpec, null, 2));
           await visEditor.clickGo();
           await visChart.waitForVisualizationRenderingStabilized();
           const fullDataLabels = await vegaChart.getYAxisLabels();
