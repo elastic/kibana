@@ -43,6 +43,8 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-server-utils",
     "@kbn/core-elasticsearch-server",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-deprecations-server"
   ],
   "exclude": [
     "target/**/*",

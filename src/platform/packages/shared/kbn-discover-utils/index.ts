@@ -30,6 +30,7 @@ export {
   buildDataTableRecord,
   buildDataTableRecordList,
   createLogsContextService,
+  createTracesContextService,
   createDegradedDocsControl,
   createStacktraceControl,
   fieldConstants,
@@ -58,7 +59,7 @@ export {
   LogLevelBadge,
 } from './src';
 
-export type { LogsContextService } from './src';
+export type { LogsContextService, TracesContextService } from './src';
 
 export * from './src/types';
 

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
-import { mutationKeys } from '../constants';
+import { mutationKeys } from '../mutation_keys';
 import type { ServerError, ToggleAlertParams } from '../types';
 import { unmuteAlertInstance } from '../apis/unmute_alert_instance';
 
@@ -25,6 +25,8 @@ export interface UseUnmuteAlertInstanceParams {
   notifications: NotificationsStart;
 }
 
+export const getKey = mutationKeys.unmuteAlertInstance;
+
 export const useUnmuteAlertInstance = ({
   http,
   notifications: { toasts },
@@ -33,7 +35,7 @@ export const useUnmuteAlertInstance = ({
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       unmuteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
-      mutationKey: mutationKeys.unmuteAlertInstance(),
+      mutationKey: getKey(),
       context: AlertsQueryContext,
       onSuccess() {
         toasts.addSuccess(

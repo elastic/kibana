@@ -32,6 +32,7 @@ export interface FleetConfigType {
   };
   agentless?: {
     enabled: boolean;
+    isDefault?: boolean;
     api?: {
       url?: string;
       tls?: {
@@ -87,6 +88,7 @@ export interface FleetConfigType {
   autoUpgrades?: {
     retryDelays?: string[];
   };
+  integrationsHomeOverride?: string;
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

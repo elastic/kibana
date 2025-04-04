@@ -35,7 +35,7 @@ import type {
 } from '../state_management/discover_data_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import { fetchEsql } from './fetch_esql';
-import type { InternalStateStore } from '../state_management/redux';
+import { type InternalStateStore, type TabState } from '../state_management/redux';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -59,12 +59,12 @@ export function fetchAll(
   dataSubjects: SavedSearchData,
   reset = false,
   fetchDeps: FetchDeps,
+  getCurrentTab: () => TabState,
   onFetchRecordsComplete?: () => Promise<void>
 ): Promise<void> {
   const {
     initialFetchStatus,
     getAppState,
-    internalState,
     services,
     inspectorAdapters,
     savedSearch,
@@ -78,6 +78,7 @@ export function fetchAll(
     const query = getAppState().query;
     const prevQuery = dataSubjects.documents$.getValue().query;
     const isEsqlQuery = isOfAggregateQueryType(query);
+    const currentTab = getCurrentTab();
 
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
@@ -89,7 +90,7 @@ export function fetchAll(
         dataView,
         services,
         sort: getAppState().sort as SortOrder[],
-        inputTimeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
+        inputTimeRange: currentTab.dataRequestParams.timeRangeAbsolute,
       });
     }
 
@@ -110,7 +111,7 @@ export function fetchAll(
           data,
           expressions,
           profilesManager,
-          timeRange: internalState.getState().dataRequestParams.timeRangeAbsolute,
+          timeRange: currentTab.dataRequestParams.timeRangeAbsolute,
         })
       : fetchDocuments(searchSource, fetchDeps);
     const fetchType = isEsqlQuery ? 'fetchTextBased' : 'fetchDocuments';

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { Spaces } from '../../../../../scenarios';
-import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

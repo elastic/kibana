@@ -13,10 +13,17 @@ import { TestFailures } from '#pipeline-utils';
   try {
     await TestFailures.annotateTestFailures();
   } catch (ex) {
-    console.error('Annotate test failures error', ex.message);
+    console.error(
+      'Annotate test failures error',
+      ex.message,
+      ex?.stack || 'no stacktrace information'
+    );
     if (ex.response) {
-      console.error('HTTP Error Response Status', ex.response.status);
-      console.error('HTTP Error Response Body', ex.response.data);
+      const requestUrl = ex.response?.url || ex.response?.config?.url || '';
+      console.error(
+        `HTTP Error ${ex.response.status}/${ex.response.statusText} (${requestUrl})`,
+        ex.response.data
+      );
     }
     process.exit(1);
   }

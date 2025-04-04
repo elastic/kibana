@@ -14,6 +14,7 @@ import {
   isAWSLambdaAgentName,
   isAzureFunctionsAgentName,
   isElasticAgentName,
+  isEDOTAgentName,
   isIosAgentName,
   isJavaAgentName,
   isJRubyAgentName,
@@ -54,6 +55,12 @@ describe('Agents guards', () => {
     expect(isElasticAgentName('node-js')).toBe(false);
     expect(isElasticAgentName('opentelemetry/nodejs/elastic')).toBe(false);
     expect(isElasticAgentName('not-an-agent')).toBe(false);
+  });
+
+  it('isEDOTAgentName should guard if the passed agent is an EDOT SDK one.', () => {
+    expect(isEDOTAgentName('opentelemetry/java/elastic')).toBe(true);
+    expect(isEDOTAgentName('opentelemetry/java/opentelemetry-java-instrumentation')).toBe(false);
+    expect(isEDOTAgentName('opentelemetry/java')).toBe(false);
   });
 
   it('isJavaAgentName should guard if the passed agent is an Java one.', () => {

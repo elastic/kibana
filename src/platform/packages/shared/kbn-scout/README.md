@@ -9,6 +9,7 @@
 3. Key Components
 4. How to Use
 5. Contributing
+6. Running tests on CI
 
 ### Overview
 
@@ -211,20 +212,17 @@ Install dependencies by running the following commands:
 
 Move to the `src/platform/packages/shared/kbn-scout` directory to begin development.
 
-#### Adding or Modifying Features
+### Adding or Modifying Components
 
-Contributions to sharable fixtures and page objects are highly encouraged to promote reusability, stability, and ease of adoption. Follow these steps:
-
-Create a New Page Object: Add your Page Object to the `src/playwright/page_objects` directory. For instance:
+Contributions to sharable `Fixtures`, `API services` and `Page Objects` are highly encouraged to promote reusability, stability, and ease of adoption. Follow these steps:
 
 #### Adding Page Objects
 
-1. **Create a New Page Object:** Add your Page Object to the src/playwright/page_objects directory. For instance:
+1. **Create a New Page Object:** Add a new file to the `src/playwright/page_objects` directory. For instance:
 
 ```ts
 export class NewPage {
   constructor(private readonly page: ScoutPage) {}
-
   // implementation
 }
 ```
@@ -237,7 +235,48 @@ export function createCorePageObjects(page: ScoutPage): PageObjects {
   };
 }
 ```
-#### Adding Fixtures
+#### Adding API service
+
+1. **Create a New API service:** Add your service to the `src/playwright/fixtures/worker/apis` directory. For instance:
+
+```ts
+export interface FleetApiService {
+  integration: {
+    install: (name: string) => Promise<void>;
+    delete: (name: string) => Promise<void>;
+  };
+}
+
+export const getFleetApiHelper = (log: ScoutLogger, kbnClient: KbnClient): FleetApiService => {
+  return {
+    integration: {
+      install: async (name: string) => {
+        // implementation
+      },
+      delete: async (name: string) => {
+        // implementation
+      },
+    },
+  };
+};
+```
+2. **Register the API service:** Update the index file to include the new service:
+```ts
+export const apiServicesFixture = coreWorkerFixtures.extend<
+  {},
+  { apiServices: ApiServicesFixture }
+>({
+  apiServices: [
+    async ({ kbnClient, log }, use) => {
+      const services = {
+        // add new service
+        fleet: getFleetApiHelper(log, kbnClient),
+      };
+      ...
+  ],
+});
+```
+#### Adding Fixture
 1. **Determine Fixture Scope:** Decide if your fixture should apply to the `test` (per-test) or `worker` (per-worker) scope.
 
 2. **Implement the Fixture:** Add the implementation to `src/playwright/fixtures/test` or `src/playwright/fixtures/worker`.
@@ -260,7 +299,28 @@ export const scoutTestFixtures = mergeTests(
 ```
 
 #### Best Practices
-- **Reusable Code:** When creating Page Objects or Fixtures that apply to more than one plugin, ensure they are added to the kbn-scout package.
+- **Reusable Code:** When creating Page Objects, API services or Fixtures that apply to more than one plugin, ensure they are added to the `kbn-scout` package.
 - **Adhere to Existing Structure:** Maintain consistency with the project's architecture.
+- **Keep the Scope of Components Clear** When designing test components, keep in naming conventions, scope, maintainability and performance.
+  - `Page Objects` should focus exclusively on UI interactions (clicking buttons, filling forms, navigating page). They should not make API calls directly.
+  - `API Services` should handle server interactions, such as sending API requests and processing responses.
+  - `Fixtures` can combine browser interactions with API requests, but they should be used wisely, especially with the `test` scope: a new instance of the fixture is created for **every test block**. If a fixture performs expensive operations (API setup, data ingestion), excessive usage can **slow down** the test suite runtime. Consider using `worker` scope when appropriate to reuse instances across tests within a worker.
 - **Add Unit Tests:** Include tests for new logic where applicable, ensuring it works as expected.
 - **Playwright documentation:** [Official best practices](https://playwright.dev/docs/best-practices)
+
+
+### Running tests on CI
+Scout is still in active development, which means frequent code changes may sometimes cause test failures. To maintain stability, we currently do not run Scout tests for every PR and encourage teams to limit the number of tests they add for now.
+
+If a test is difficult to stabilize within a reasonable timeframe, we reserve the right to disable it or even all tests for particular plugin.
+
+To manage Scout test execution, we use the `.buildkite/scout_ci_config.yml` file, where Kibana plugins with Scout tests are registered. If you're unsure about the stability of your tests, please add your plugin under the `disabled` section.
+
+You can check whether your plugin is already registered by running:
+```bash
+node scripts/scout discover-playwright-configs --validate
+```
+On CI we run Scout tests only for `enabled` plugins:
+
+For PRs, Scout tests run only if there are changes to registered plugins or Scout-related packages.
+On merge commits, Scout tests run in a non-blocking mode.
