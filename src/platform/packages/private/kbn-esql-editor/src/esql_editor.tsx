@@ -713,6 +713,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         verticalScrollbarSize: 6,
       },
       scrollBeyondLastLine: false,
+      tabSize: 2,
       theme: ESQL_LANG_ID,
       wordWrap: 'on',
       wrappingIndent: 'none',
