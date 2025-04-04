@@ -198,6 +198,8 @@ function getStorageSizeForTimeRange(
   if (!storageSize || !totalCount || !countForTimeRange) {
     return 0;
   }
-  const bytesPerDoc = totalCount ? storageSize / totalCount : 0;
-  return bytesPerDoc * countForTimeRange;
+  if (!totalCount) {
+    return 0;
+  }
+  return storageSize * (countForTimeRange / totalCount);
 }
