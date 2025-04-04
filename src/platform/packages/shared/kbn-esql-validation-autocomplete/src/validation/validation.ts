@@ -227,6 +227,11 @@ function validateCommand(
       break;
     }
     case 'fork': {
+      references.fields.set('_fork', {
+        name: '_fork',
+        type: 'keyword',
+      });
+
       for (const arg of command.args.flat()) {
         if (isSingleItem(arg) && arg.type === 'query') {
           // all the args should be commands

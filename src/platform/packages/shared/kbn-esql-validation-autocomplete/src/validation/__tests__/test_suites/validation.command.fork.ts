@@ -13,6 +13,27 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
   describe('validation', () => {
     describe('command', () => {
       describe('FORK', () => {
+        test('no errors for valid command', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index
+| FORK
+  (WHERE keywordField != "" | LIMIT 100)
+  (SORT doubleField ASC NULLS LAST)`,
+            []
+          );
+
+          await expectErrors(
+            `FROM index
+| FORK
+  (WHERE keywordField != "" | LIMIT 100)
+  (SORT doubleField ASC NULLS LAST)
+  (LIMIT 100)`,
+            []
+          );
+        });
+
         test('requires at least two branches', async () => {
           const { expectErrors } = await setup();
 
@@ -24,28 +45,35 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
           );
         });
 
-        describe('... (SUBCOMMAND ...) ...', () => {
-          test('no errors for valid command', async () => {
+        describe('_fork field', () => {
+          test('does NOT recognize _fork field BEFORE FORK', async () => {
             const { expectErrors } = await setup();
 
             await expectErrors(
               `FROM index
-| FORK
+  | KEEP _fork
+  | FORK
     (WHERE keywordField != "" | LIMIT 100)
     (SORT doubleField ASC NULLS LAST)`,
-              []
-            );
-
-            await expectErrors(
-              `FROM index
-| FORK
-    (WHERE keywordField != "" | LIMIT 100)
-    (SORT doubleField ASC NULLS LAST)
-    (LIMIT 100)`,
-              []
+              ['Unknown column [_fork]']
             );
           });
 
+          test('DOES recognize _fork field AFTER FORK', async () => {
+            const { expectErrors } = await setup();
+
+            await expectErrors(
+              `FROM index
+  | FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+  | KEEP _fork`,
+              []
+            );
+          });
+        });
+
+        describe('... (SUBCOMMAND ...) ...', () => {
           test('validates within subcommands', async () => {
             const { expectErrors } = await setup();
 
