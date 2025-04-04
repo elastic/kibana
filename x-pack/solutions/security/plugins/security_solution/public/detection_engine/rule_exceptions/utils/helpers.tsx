@@ -315,7 +315,7 @@ export const getFileCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrU
         field: 'file.code_signature.trusted',
         operator: 'included' as const,
         type: 'match' as const,
-        value: file?.code_signature?.trusted.toString() ?? '',
+        value: file.code_signature.trusted.toString(),
       },
     ];
   }
@@ -343,7 +343,7 @@ export const getProcessCodeSignature = (alertData: Flattened<Ecs>): EntriesArray
         field: 'process.code_signature.trusted',
         operator: 'included' as const,
         type: 'match' as const,
-        value: process?.code_signature?.trusted.toString() ?? '',
+        value: process.code_signature.trusted.toString(),
       },
     ];
   }
@@ -371,7 +371,7 @@ export const getDllCodeSignature = (alertData: Flattened<Ecs>): EntriesArrayOrUn
         field: 'dll.code_signature.trusted',
         operator: 'included' as const,
         type: 'match' as const,
-        value: dll?.code_signature?.trusted.toString() ?? '',
+        value: dll.code_signature.trusted.toString(),
       },
     ];
   }
@@ -386,10 +386,10 @@ export const getCodeSignatureValue = (
 ): EntryNested[] | undefined => {
   if (Array.isArray(codeSignature) && codeSignature.length > 0) {
     const codeSignatureEntries: EntryNested[] = [];
-    const noDuplicates = new Set<string>();
+    const noDuplicates = new Map<string, boolean>();
     return codeSignature.reduce((acc, signature) => {
       if (signature?.trusted === true && !noDuplicates.has(signature?.subject_name)) {
-        noDuplicates.add(signature.subject_name);
+        noDuplicates.set(signature.subject_name, signature.trusted);
         acc.push({
           field,
           type: 'nested',
@@ -404,7 +404,7 @@ export const getCodeSignatureValue = (
               field: 'trusted',
               operator: 'included',
               type: 'match',
-              value: signature?.trusted?.toString() ?? '',
+              value: signature.trusted.toString(),
             },
           ],
         });
@@ -431,7 +431,7 @@ export const getCodeSignatureValue = (
               field: 'trusted',
               operator: 'included',
               type: 'match',
-              value: signature?.trusted?.toString() ?? '',
+              value: signature.trusted.toString(),
             },
           ],
         },
@@ -828,7 +828,6 @@ export const defaultEndpointExceptionItems = (
   alertEcsData: Flattened<Ecs> & { 'event.code'?: string }
 ): ExceptionsBuilderExceptionItem[] => {
   const eventCode = alertEcsData['event.code'] ?? alertEcsData.event?.code;
-
   switch (eventCode) {
     case 'behavior':
       return [

@@ -261,8 +261,8 @@ describe('Exception helpers', () => {
 
     test('it should not return duplicate code signature entries', () => {
       const payload = [
-        { subject_name: 'asdf', trusted: 'true' },
-        { subject_name: 'asdf', trusted: 'true' },
+        { subject_name: 'asdf', trusted: true },
+        { subject_name: 'asdf', trusted: true },
       ];
       expect(getCodeSignatureValue(payload, 'field')).toEqual([
         {
@@ -461,7 +461,7 @@ describe('Exception helpers', () => {
           Ext: {
             code_signature: {
               subject_name: 'some_subject',
-              trusted: 'true',
+              trusted: true,
             },
           },
         },
@@ -495,8 +495,8 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'true' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
         },
@@ -546,7 +546,7 @@ describe('Exception helpers', () => {
       const codeSignature = getFileCodeSignature({
         _id: '123',
         file: {
-          code_signature: { subject_name: 'some_subject', trusted: 'true' },
+          code_signature: { subject_name: 'some_subject', trusted: true },
         },
       });
 
@@ -572,8 +572,8 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'false' },
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: false },
             ],
           },
         },
@@ -581,7 +581,7 @@ describe('Exception helpers', () => {
       const codeSignature = getFileCodeSignature({
         _id: '123',
         file: {
-          code_signature: { subject_name: 'some_subject', trusted: 'false' },
+          code_signature: { subject_name: 'some_subject', trusted: false },
         },
       });
 
@@ -593,9 +593,7 @@ describe('Exception helpers', () => {
       const codeSignatures = getFileCodeSignature({
         _id: '123',
         file: {
-          Ext: {
-            code_signature: { subject_name: '', trusted: '' },
-          },
+          Ext: {},
         },
       });
 
@@ -632,7 +630,7 @@ describe('Exception helpers', () => {
           Ext: {
             code_signature: {
               subject_name: 'some_subject',
-              trusted: 'true',
+              trusted: true,
             },
           },
         },
@@ -666,8 +664,8 @@ describe('Exception helpers', () => {
         process: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'true' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
         },
@@ -717,7 +715,7 @@ describe('Exception helpers', () => {
       const codeSignature = getProcessCodeSignature({
         _id: '123',
         process: {
-          code_signature: { subject_name: 'some_subject', trusted: 'true' },
+          code_signature: { subject_name: 'some_subject', trusted: true },
         },
       });
 
@@ -743,8 +741,8 @@ describe('Exception helpers', () => {
         process: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'false' },
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: false },
             ],
           },
         },
@@ -752,7 +750,7 @@ describe('Exception helpers', () => {
       const codeSignature = getProcessCodeSignature({
         _id: '123',
         file: {
-          code_signature: { subject_name: 'some_subject', trusted: 'false' },
+          code_signature: { subject_name: 'some_subject', trusted: false },
         },
       });
 
@@ -764,9 +762,7 @@ describe('Exception helpers', () => {
       const codeSignatures = getProcessCodeSignature({
         _id: '123',
         process: {
-          Ext: {
-            code_signature: { subject_name: '', trusted: '' },
-          },
+          Ext: {},
         },
       });
 
@@ -803,7 +799,7 @@ describe('Exception helpers', () => {
           Ext: {
             code_signature: {
               subject_name: 'some_subject',
-              trusted: 'true',
+              trusted: true,
             },
           },
         },
@@ -837,8 +833,8 @@ describe('Exception helpers', () => {
         dll: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'true' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
         },
@@ -888,7 +884,7 @@ describe('Exception helpers', () => {
       const codeSignature = getDllCodeSignature({
         _id: '123',
         dll: {
-          code_signature: { subject_name: 'some_subject', trusted: 'true' },
+          code_signature: { subject_name: 'some_subject', trusted: true },
         },
       });
 
@@ -914,8 +910,8 @@ describe('Exception helpers', () => {
         dll: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'false' },
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: false },
             ],
           },
         },
@@ -923,7 +919,7 @@ describe('Exception helpers', () => {
       const codeSignature = getDllCodeSignature({
         _id: '123',
         file: {
-          code_signature: { subject_name: 'some_subject', trusted: 'false' },
+          code_signature: { subject_name: 'some_subject', trusted: false },
         },
       });
 
@@ -935,9 +931,7 @@ describe('Exception helpers', () => {
       const codeSignatures = getDllCodeSignature({
         _id: '123',
         dll: {
-          Ext: {
-            code_signature: { subject_name: '', trusted: '' },
-          },
+          Ext: {},
         },
       });
 
@@ -973,8 +967,8 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
           path: 'some file path',
@@ -1033,7 +1027,7 @@ describe('Exception helpers', () => {
         _id: '123',
         file: {
           Ext: {
-            code_signature: [{ subject_name: 'some_subject', trusted: 'false' }],
+            code_signature: [{ subject_name: 'some_subject', trusted: false }],
           },
           path: '',
           hash: {
@@ -1075,8 +1069,8 @@ describe('Exception helpers', () => {
         file: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'true' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: true },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
           path: 'some file path',
@@ -1122,8 +1116,8 @@ describe('Exception helpers', () => {
         process: {
           Ext: {
             code_signature: [
-              { subject_name: 'some_subject', trusted: 'false' },
-              { subject_name: 'some_subject_2', trusted: 'true' },
+              { subject_name: 'some_subject', trusted: false },
+              { subject_name: 'some_subject_2', trusted: true },
             ],
           },
           executable: 'some file path',
@@ -1192,7 +1186,7 @@ describe('Exception helpers', () => {
         _id: '123',
         process: {
           Ext: {
-            code_signature: [{ subject_name: 'some_subject', trusted: 'false' }],
+            code_signature: [{ subject_name: 'some_subject', trusted: false }],
           },
           executable: 'some file path',
           hash: {
@@ -1243,7 +1237,7 @@ describe('Exception helpers', () => {
         },
         process: {
           Ext: {
-            code_signature: [{ subject_name: 'some_subject', trusted: 'true' }],
+            code_signature: [{ subject_name: 'some_subject', trusted: true }],
           },
           executable: 'some file path',
           hash: {
@@ -1548,7 +1542,7 @@ describe('Exception helpers', () => {
           },
           code_signature: {
             subject_name: 'subject-name',
-            trusted: 'true',
+            trusted: true,
           },
         },
         event: {
@@ -1576,7 +1570,7 @@ describe('Exception helpers', () => {
           path: 'dll-path',
           code_signature: {
             subject_name: 'dll-code-signature-subject-name',
-            trusted: 'true',
+            trusted: true,
           },
           pe: {
             original_file_name: 'dll-pe-original-file-name',
@@ -1750,7 +1744,7 @@ describe('Exception helpers', () => {
           },
           code_signature: {
             subject_name: 'subject-name',
-            trusted: 'true',
+            trusted: true,
           },
         },
         event: {
@@ -1779,7 +1773,7 @@ describe('Exception helpers', () => {
           path: 'dll-path',
           code_signature: {
             subject_name: 'dll-code-signature-subject-name',
-            trusted: 'false',
+            trusted: false,
           },
           pe: {
             original_file_name: 'dll-pe-original-file-name',
@@ -1910,7 +1904,7 @@ describe('Exception helpers', () => {
           },
           code_signature: {
             subject_name: 'subject-name',
-            trusted: 'true',
+            trusted: true,
           },
         },
         event: {
@@ -1938,7 +1932,7 @@ describe('Exception helpers', () => {
           path: 'dll-path',
           code_signature: {
             subject_name: 'dll-code-signature-subject-name',
-            trusted: 'true',
+            trusted: true,
           },
           pe: {
             original_file_name: 'dll-pe-original-file-name',
