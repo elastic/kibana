@@ -7,15 +7,11 @@
 
 import { newContentReferencesStore } from './content_references_store';
 import { securityAlertsPageReference } from '../references';
-import { ContentReferencesStore } from '../types';
 
 describe('newContentReferencesStore', () => {
-  let contentReferencesStore: ContentReferencesStore;
-  beforeEach(() => {
-    contentReferencesStore = newContentReferencesStore();
-  });
-
   it('adds multiple content reference', async () => {
+    const contentReferencesStore = newContentReferencesStore();
+
     const alertsPageReference1 = contentReferencesStore.add((p) =>
       securityAlertsPageReference(p.id)
     );
@@ -31,18 +27,35 @@ describe('newContentReferencesStore', () => {
     const keys = Object.keys(store);
 
     expect(keys.length).toEqual(3);
-    expect(store[alertsPageReference1.id]).toEqual(alertsPageReference1);
-    expect(store[alertsPageReference2.id]).toEqual(alertsPageReference2);
-    expect(store[alertsPageReference3.id]).toEqual(alertsPageReference3);
+    expect(store[alertsPageReference1!.id]).toEqual(alertsPageReference1);
+    expect(store[alertsPageReference2!.id]).toEqual(alertsPageReference2);
+    expect(store[alertsPageReference3!.id]).toEqual(alertsPageReference3);
+  });
+
+  it('disabled content reference store', async () => {
+    const contentReferencesStore = newContentReferencesStore({
+      disabled: true,
+    });
+    const alertsPageReference1 = contentReferencesStore.add((p) =>
+      securityAlertsPageReference(p.id)
+    );
+
+    const store = contentReferencesStore.getStore();
+
+    const keys = Object.keys(store);
+
+    expect(keys.length).toEqual(0);
+    expect(alertsPageReference1).toBeUndefined();
   });
 
   it('referenceIds are unique', async () => {
+    const contentReferencesStore = newContentReferencesStore();
     const numberOfReferencesToCreate = 50;
 
     const referenceIds = new Set(
       [...new Array(numberOfReferencesToCreate)]
         .map(() => contentReferencesStore.add((p) => securityAlertsPageReference(p.id)))
-        .map((alertsPageReference) => alertsPageReference.id)
+        .map((alertsPageReference) => alertsPageReference!.id)
     );
 
     const store = contentReferencesStore.getStore();

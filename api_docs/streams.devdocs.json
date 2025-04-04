@@ -497,7 +497,9 @@
             },
             "<\"POST /internal/streams/{name}/processing/_suggestions\", any, ",
             "StreamsRouteHandlerResources",
-            ", { patterns: string[]; simulations: SimulationWithPattern[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
+            ", { patterns: string[]; simulations: ",
+            "SimulationWithPattern",
+            "[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -539,7 +541,7 @@
             "SimulationDocReport",
             "[]; processors_metrics: Record<string, ",
             "ProcessorMetrics",
-            ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
+            ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1310,7 +1312,9 @@
           },
           "<\"POST /internal/streams/{name}/processing/_suggestions\", any, ",
           "StreamsRouteHandlerResources",
-          ", { patterns: string[]; simulations: SimulationWithPattern[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
+          ", { patterns: string[]; simulations: ",
+          "SimulationWithPattern",
+          "[]; }, undefined>; \"POST /internal/streams/{name}/processing/_simulate\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -1352,7 +1356,7 @@
           "SimulationDocReport",
           "[]; processors_metrics: Record<string, ",
           "ProcessorMetrics",
-          ">; failure_rate: number; skipped_rate: number; success_rate: number; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
+          ">; documents_metrics: { failed_rate: number; partially_parsed_rate: number; skipped_rate: number; parsed_rate: number; }; is_non_additive_simulation: boolean; }, undefined>; \"GET /internal/streams/{name}/lifecycle/_explain\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
