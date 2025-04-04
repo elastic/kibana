@@ -44,6 +44,7 @@ import {
 import { SideBarColumn } from '../../../components/side_bar_column';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
+import { getBreakingChanges } from '../utils';
 import { useChangelog } from '../hooks';
 
 import { InstallButton } from './install_button';
@@ -51,6 +52,7 @@ import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
+import { BreakingChangesCallout } from './breaking_changes_callout';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -141,6 +143,8 @@ export const SettingsPage: React.FC<Props> = memo(
       isLoading: isChangelogLoading,
       error: changelogError,
     } = useChangelog(name, latestVersion, version);
+
+    const breakingChanges = getBreakingChanges(changelog);
 
     const packagePolicyIds = useMemo(
       () => packagePoliciesData?.items.map(({ id }) => id),
@@ -330,6 +334,12 @@ export const SettingsPage: React.FC<Props> = memo(
                         toggleChangelogModal={toggleChangelogModal}
                       />
                       <EuiSpacer size="l" />
+                      {breakingChanges.length > 0 && (
+                        <>
+                          <BreakingChangesCallout />
+                          <EuiSpacer size="l" />
+                        </>
+                      )}
                       <p>
                         <UpdateButton
                           {...packageInfo}

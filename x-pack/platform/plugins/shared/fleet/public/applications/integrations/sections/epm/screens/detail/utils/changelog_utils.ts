@@ -9,13 +9,21 @@ import { load } from 'js-yaml';
 import semverGte from 'semver/functions/gte';
 import semverLte from 'semver/functions/lte';
 
+enum ChangelogChangeType {
+  Enhancement = 'enhancement',
+  BreakingChange = 'breaking-change',
+  BugFix = 'bugfix',
+}
+
+export interface ChangelogChange {
+  description: string;
+  link: string;
+  type: ChangelogChangeType;
+}
+
 export interface ChangelogEntry {
   version: string;
-  changes: Array<{
-    description: string;
-    link: string;
-    type: string;
-  }>;
+  changes: ChangelogChange[];
 }
 
 export const formatChangelog = (parsedChangelog: ChangelogEntry[]) => {
@@ -39,4 +47,13 @@ export const parseYamlChangelog = (
   return parsedChangelog.filter(
     (e) => semverLte(e.version, latestVersion) && semverGte(e.version, currentVersion)
   );
+};
+
+export const getBreakingChanges = (changelog: ChangelogEntry[]) => {
+  return changelog.reduce<ChangelogChange[]>((acc, { changes }) => {
+    const entryBreakingChanges = changes.filter(
+      (change) => change.type === ChangelogChangeType.BreakingChange
+    );
+    return [...acc, ...entryBreakingChanges];
+  }, []);
 };

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export { getInstallPkgRouteOptions } from './get_install_route_options';
-export {
-  parseYamlChangelog,
-  formatChangelog,
-  getBreakingChanges,
-  type ChangelogEntry,
-} from './changelog_utils';
+import React from 'react';
+
+import { EuiCallOut } from '@elastic/eui';
+
+export const BreakingChangesCallout = () => {
+  return <EuiCallOut color="warning" iconType="warning" title="Review breaking changes" />;
+};
