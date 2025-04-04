@@ -245,5 +245,6 @@
     "@kbn/esql-ast",
     "@kbn/inference-langchain",
     "@kbn/scout-security",
+    "@kbn/security-solution-plugin",
   ]
 }
