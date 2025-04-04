@@ -12,9 +12,11 @@ import {
   isUserMessageItem,
   isAssistantMessageItem,
   isToolCallItem,
+  isProgressionItem,
 } from '../../utils/conversation_items';
 import { ChatConversationMessage } from './chat_conversation_message';
 import { ChatConversationToolCall } from './chat_conversation_tool_call';
+import { ChatConversationProgression } from './chat_conversation_progression';
 
 interface ChatConversationItemProps {
   item: ConversationItem;
@@ -30,6 +32,9 @@ export const ChatConversationItem: React.FC<ChatConversationItemProps> = ({
   }
   if (isToolCallItem(item)) {
     return <ChatConversationToolCall toolCall={item} />;
+  }
+  if (isProgressionItem(item)) {
+    return <ChatConversationProgression progress={item} />;
   }
   return undefined;
 };
