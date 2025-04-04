@@ -9,6 +9,7 @@
 
 import { ContainerModule } from 'inversify';
 import { isPromise } from '@kbn/std';
+import { AppUnmount } from '@kbn/core-application-browser';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import { Global, OnSetup } from '@kbn/core-di';
 
@@ -22,16 +23,15 @@ export const application = new ContainerModule(
           scope.bind(ApplicationParameters).toConstantValue(params);
           scope.bind(Global).toConstantValue(ApplicationParameters);
           const unmount = scope.get(definition).mount();
+          const wrap = (callback: AppUnmount) => () => {
+            try {
+              return callback();
+            } finally {
+              scope.unbindAll();
+            }
+          };
 
-          return isPromise(unmount)
-            ? unmount.finally(() => scope.unbindAll())
-            : () => {
-                try {
-                  return unmount();
-                } finally {
-                  scope.unbindAll();
-                }
-              };
+          return isPromise(unmount) ? unmount.then(wrap) : wrap(unmount);
         },
       });
 
