@@ -81,12 +81,12 @@ export const getIndexPatterns = (
 
   while (stack.length > 0) {
     let indexPatternAdded = false;
-    const next = stack.pop()
+    const next = stack.pop();
 
     if (!next) {
       break;
     }
-    
+
     const { node, prefix, indexPatternAdded: parendIndexPatternAdded } = next;
 
     if (

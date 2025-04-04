@@ -36,20 +36,21 @@ export const getSelectIndexPattern = ({
       });
     }
 
-        if (!childGraphOutput.selectedIndexPattern) {
-            return new Command({
-                update: {
-                    selectedIndexPattern: null,
-                    messages: [
-                        new HumanMessage({
-                            content: `We were unable to find an index pattern that is suitable for this query. Please provide a specific index pattern and the fields you want to query. These are some index patterns that could be used: \n\n${childGraphOutput.indexPatterns
-                                .join('\n')}`,
-                        }),
-                    ],
-                },
-            });
-        }
-        
+    if (!childGraphOutput.selectedIndexPattern) {
+      return new Command({
+        update: {
+          selectedIndexPattern: null,
+          messages: [
+            new HumanMessage({
+              content: `We were unable to find an index pattern that is suitable for this query. Please provide a specific index pattern and the fields you want to query. These are some index patterns that could be used: \n\n${childGraphOutput.indexPatterns.join(
+                '\n'
+              )}`,
+            }),
+          ],
+        },
+      });
+    }
+
     const analysis =
       childGraphOutput.selectedIndexPattern in childGraphOutput.indexPatternAnalysis
         ? childGraphOutput.indexPatternAnalysis[childGraphOutput.selectedIndexPattern].analysis
