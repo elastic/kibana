@@ -23,7 +23,6 @@ import {
   UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
-import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
 import {
@@ -81,9 +80,9 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const currentTheme = useObservable(theme.theme$, { darkMode: false, name: 'amsterdam' });
   const { euiTheme } = useEuiTheme();
   const minBreakpointM = useEuiMinBreakpoint('m');
-classnames({
-'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length
-})
+  classnames({
+    'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length,
+  });
 
   // Home does not have a locator implemented, so hard-code it here.
   const addDataHref = addBasePath('/app/integrations/browse');
