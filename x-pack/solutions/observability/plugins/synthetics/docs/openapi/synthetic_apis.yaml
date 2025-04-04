@@ -121,7 +121,7 @@ paths:
                 type: object
               examples:
                 getSyntheticMonitorsResponseExample1:
-                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`
+                  description: A successful response from `GET /api/synthetics/monitors?tags=prod&monitorTypes=http&locations=us-east-1&projects=project1&status=up`.
                   value: |-
                     {
                         "page": 1,
