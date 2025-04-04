@@ -9,6 +9,8 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { matchers } from '@emotion/jest';
+expect.extend(matchers);
 
 import { ToolbarPopover } from './popover';
 
@@ -31,17 +33,13 @@ describe('<ToolbarPopover />', () => {
     expect(mockHandler).toHaveBeenCalled();
   });
 
-  // TODO: fails after adding emotion css prop babel preset at button.prop('css')
-  test.skip('defaults to a bordered empty button', () => {
+  test('defaults to a bordered empty button', () => {
     const isOpen = true;
     const component = mountWithIntl(<ToolbarPopover label="test" children={() => !isOpen} />);
     const button = component.find('EuiButton');
-    expect(button.prop('color')).toBe('text');
-    expect(button.prop('css')).toMatchObject({
-      backgroundColor: '#FFFFFF',
-      border: '1px solid #E3E8F2',
-      color: '#1D2A3E',
-    });
+    expect(button).toHaveStyleRule('background-color', '#FFFFFF');
+    expect(button).toHaveStyleRule('border', '1px solid #E3E8F2');
+    expect(button).toHaveStyleRule('color', '#1D2A3E');
   });
 
   test('accepts a button type', () => {
