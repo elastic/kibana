@@ -78,7 +78,7 @@ export class LockManager {
                 ctx._source.createdAt = instantNow.toString();
                 ctx._source.expiresAt = instantNow.plusMillis(params.ttl).toString();
               } else {
-                ctx.op = 'noop'
+                ctx.op = 'noop';
               }
             `,
           params: {
@@ -101,7 +101,7 @@ export class LockManager {
         return true;
       } else if (response.result === 'updated') {
         this.logger.debug(
-          ` Lock "${this.lockId}" was expired and re-acquired with ttl = ${prettyMilliseconds(
+          `Lock "${this.lockId}" was expired and re-acquired with ttl = ${prettyMilliseconds(
             ttl
           )} and token = ${this.token}`
         );

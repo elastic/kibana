@@ -75,9 +75,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('it sets expiresAt according to the ttl', async () => {
-        await lockManager.acquire({ ttl: ms(8, 'minutes') });
+        await lockManager.acquire({ ttl: durationAsMs(8, 'minutes') });
         const lock = await getLockById(es, LOCK_ID);
-        const ttl = new Date(lock!.expiresAt).getTime() - new Date(lock!.createdAt).getTime();
+        const ttl = dateAsTimestamp(lock!.expiresAt) - dateAsTimestamp(lock!.createdAt);
         expect(prettyMilliseconds(ttl)).to.be('8m');
       });
 
@@ -321,8 +321,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(lockExpiryAfter).not.to.be(undefined);
 
           // Verify that the new expiration is later than before.
-          expect(new Date(lockExpiryAfter!).getTime()).to.be.greaterThan(
-            new Date(lockExpiryBefore!).getTime()
+          expect(dateAsTimestamp(lockExpiryAfter!)).to.be.greaterThan(
+            dateAsTimestamp(lockExpiryBefore!)
           );
         });
 
@@ -352,7 +352,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('has initial `expiresAt` value', async () => {
         const lock = (await getLockById(es, LOCK_ID))!;
-        expect(new Date(lock.expiresAt).getTime()).to.be(new Date(lock.createdAt).getTime() + ttl);
+        expect(dateAsTimestamp(lock.expiresAt)).to.be(dateAsTimestamp(lock.createdAt) + ttl);
       });
 
       it('update `expiresAt` to be greater than before', async () => {
@@ -361,8 +361,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(res).to.be(true);
 
         const lockAfterExtension = (await getLockById(es, LOCK_ID))!;
-        expect(new Date(lockAfterExtension.expiresAt).getTime()).to.be.greaterThan(
-          new Date(lockBeforeExtending.expiresAt).getTime()
+        expect(dateAsTimestamp(lockAfterExtension.expiresAt)).to.be.greaterThan(
+          dateAsTimestamp(lockBeforeExtending.expiresAt)
         );
       });
 
@@ -532,7 +532,10 @@ async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocume
   return res._source;
 }
 
-// convert a value in a unit of time to milliseconds
-function ms(value: number, unit: unitOfTime.DurationConstructor) {
+function durationAsMs(value: number, unit: unitOfTime.DurationConstructor) {
   return duration(value, unit).asMilliseconds();
+}
+
+function dateAsTimestamp(value: string) {
+  return new Date(value).getTime();
 }
