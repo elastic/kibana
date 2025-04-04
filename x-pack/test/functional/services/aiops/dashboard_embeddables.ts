@@ -35,18 +35,29 @@ export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderCon
       });
     },
 
-    async assertChangePointChartInitializerNotExists() {
+    async assertChangePointChartInitializerExists(expectExists = true) {
       await retry.tryForTime(10 * 1000, async () => {
-        await testSubjects.missingOrFail('aiopsChangePointChartEmbeddableInitializer', {
-          timeout: 1000,
-        });
+        if (expectExists) {
+          await testSubjects.existOrFail('aiopsChangePointChartEmbeddableInitializer', {
+            timeout: 1000,
+          });
+        } else {
+          await testSubjects.missingOrFail('aiopsChangePointChartEmbeddableInitializer', {
+            timeout: 1000,
+          });
+        }
       });
     },
 
-    async assertInitializerConfirmButtonEnabled(subj: string) {
+    async assertInitializerConfirmButtonEnabled(subj: string, expectEnabled = true) {
       await retry.tryForTime(60 * 1000, async () => {
         await testSubjects.existOrFail(subj);
-        await testSubjects.isEnabled(subj);
+        const isEnabled = await testSubjects.isEnabled(subj);
+        if (expectEnabled) {
+          expect(isEnabled).to.be(true);
+        } else {
+          expect(isEnabled).to.be(false);
+        }
       });
     },
 
@@ -78,12 +89,11 @@ export function AiopsDashboardEmbeddablesProvider({ getService }: FtrProviderCon
       });
     },
 
-    async clickChangePointChartInitializerConfirmButtonEnabled() {
+    async submitChangePointInitForm() {
       const subj = 'aiopsChangePointChartsInitializerConfirmButton';
       await retry.tryForTime(60 * 1000, async () => {
-        await this.assertInitializerConfirmButtonEnabled(subj);
         await testSubjects.clickWhenNotDisabledWithoutRetry(subj);
-        await this.assertChangePointChartInitializerNotExists();
+        await this.assertChangePointChartInitializerExists(false);
       });
     },
 

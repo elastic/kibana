@@ -60,10 +60,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         EMBEDDABLE_CHANGE_POINT_CHART_TYPE
       );
 
+      await aiops.dashboardEmbeddables.assertInitializerConfirmButtonEnabled(
+        'aiopsChangePointChartsInitializerConfirmButton',
+        false
+      );
       await aiops.dashboardEmbeddables.assertChangePointChartEmbeddableDataViewSelectorExists();
       await aiops.dashboardEmbeddables.selectChangePointChartEmbeddableDataView('ft_ecommerce');
 
-      await aiops.dashboardEmbeddables.clickChangePointChartInitializerConfirmButtonEnabled();
+      await aiops.dashboardEmbeddables.assertInitializerConfirmButtonEnabled(
+        'aiopsChangePointChartsInitializerConfirmButton'
+      );
+      await aiops.dashboardEmbeddables.submitChangePointInitForm();
       await aiops.dashboardEmbeddables.assertChangePointPanelExists();
       await PageObjects.dashboard.saveDashboard(dashboardTitle);
     });
