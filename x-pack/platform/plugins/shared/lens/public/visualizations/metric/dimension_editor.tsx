@@ -35,9 +35,10 @@ import { PalettePanelContainer, getAccessorType } from '../../shared_components'
 import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { MetricVisualizationState } from './types';
 import { metricIconsSet } from '../../shared_components/icon_set';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
+import { GROUP_ID } from './constants';
 
 export type SupportingVisType = 'none' | 'bar' | 'trendline';
 
@@ -113,15 +114,6 @@ function BreakdownByEditor({ setState, state }: SubProps) {
           onChange={({ target: { value } }) => handleMaxColsChange(value)}
         />
       </EuiFormRow>
-      <CollapseSetting
-        value={state.collapseFn || ''}
-        onChange={(collapseFn) => {
-          setState({
-            ...state,
-            collapseFn,
-          });
-        }}
-      />
     </>
   );
 }
@@ -602,5 +594,28 @@ export function DimensionEditorAdditionalSection({
         )}
       </>
     </div>
+  );
+}
+
+export function DimensionEditorDataExtraComponent({
+  groupId,
+  datasource,
+  state,
+  setState,
+}: Omit<Props, 'paletteService'>) {
+  const { isNumeric: isMetricNumeric } = getAccessorType(datasource, state.metricAccessor);
+  if (!isMetricNumeric || groupId !== GROUP_ID.BREAKDOWN_BY) {
+    return null;
+  }
+  return (
+    <CollapseSetting
+      value={state.collapseFn || ''}
+      onChange={(collapseFn) => {
+        setState({
+          ...state,
+          collapseFn,
+        });
+      }}
+    />
   );
 }

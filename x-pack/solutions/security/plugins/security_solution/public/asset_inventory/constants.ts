@@ -31,6 +31,8 @@ export const TEST_SUBJ_ONBOARDING_GET_STARTED = 'asset-inventory-onboarding-get-
 export const TEST_SUBJ_ONBOARDING_INITIALIZING = 'asset-inventory-onboarding-initializing';
 export const TEST_SUBJ_ONBOARDING_NO_DATA_FOUND = 'asset-inventory-onboarding-no-data-found';
 export const TEST_SUBJ_ONBOARDING_SUCCESS_CALLOUT = 'asset-inventory-onboarding-success-callout';
+export const TEST_SUBJ_ONBOARDING_PERMISSION_DENIED =
+  'asset-inventory-onboarding-permission-denied';
 export const TEST_SUBJ_GROUPING = 'asset-inventory-grouping';
 export const TEST_SUBJ_GROUPING_LOADING = 'asset-inventory-grouping-loading';
 export const TEST_SUBJ_GROUPING_COUNTER = 'asset-inventory-grouping-counter';
