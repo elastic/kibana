@@ -10,6 +10,7 @@ export enum OnboardingHubEventTypes {
   OnboardingHubStepOpen = 'Onboarding Hub Step Open',
   OnboardingHubStepFinished = 'Onboarding Hub Step Finished',
   OnboardingHubStepLinkClicked = 'Onboarding Hub Step Link Clicked',
+  OnboardingHubStepSelectorClicked = 'Onboarding Hub Step Selector Clicked',
 }
 
 type OnboardingHubStepOpenTrigger = 'navigation' | 'click';
@@ -24,6 +25,11 @@ export interface OnboardingHubStepLinkClickedParams {
   stepLinkId: string;
 }
 
+export interface OnboardingHubSelectorCardClickedParams {
+  originStepId: string;
+  selectorId: string;
+}
+
 export type OnboardingHubStepFinishedTrigger = 'auto_check' | 'click';
 
 export interface OnboardingHubStepFinishedParams {
@@ -36,6 +42,7 @@ export interface OnboardingHubTelemetryEventsMap {
   [OnboardingHubEventTypes.OnboardingHubStepOpen]: OnboardingHubStepOpenParams;
   [OnboardingHubEventTypes.OnboardingHubStepFinished]: OnboardingHubStepFinishedParams;
   [OnboardingHubEventTypes.OnboardingHubStepLinkClicked]: OnboardingHubStepLinkClickedParams;
+  [OnboardingHubEventTypes.OnboardingHubStepSelectorClicked]: OnboardingHubSelectorCardClickedParams;
 }
 
 export interface OnboardingHubTelemetryEvent {
