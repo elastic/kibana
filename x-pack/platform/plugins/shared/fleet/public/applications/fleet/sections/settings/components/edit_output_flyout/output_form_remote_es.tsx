@@ -232,6 +232,19 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           {inputs.syncIntegrationsInput.value === true && (
             <>
               <EuiSpacer size="m" />
+              <EuiFormRow>
+                <EuiSwitch
+                  {...inputs.syncUninstalledIntegrationsInput.props}
+                  data-test-subj="syncUninstalledIntegrationsSwitch"
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.settings.editOutputFlyout.syncUninstalledIntegrationsSwitchLabel"
+                      defaultMessage="Uninstall integrations on remote"
+                    />
+                  }
+                />
+              </EuiFormRow>
+              <EuiSpacer size="m" />
               <EuiCallOut
                 iconType="iInCircle"
                 title={
