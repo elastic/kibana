@@ -19,6 +19,7 @@ import {
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
+import { duration, unitOfTime } from 'moment';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
 
@@ -74,7 +75,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('it sets expiresAt according to the ttl', async () => {
-        await lockManager.acquire({ ttl: 8 * 60 * 1000 });
+        await lockManager.acquire({ ttl: ms(8, 'minutes') });
         const lock = await getLockById(es, LOCK_ID);
         const ttl = new Date(lock!.expiresAt).getTime() - new Date(lock!.createdAt).getTime();
         expect(prettyMilliseconds(ttl)).to.be('8m');
@@ -294,43 +295,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           await preAcquirer.release();
         });
       });
-    });
 
-    describe('TTL extension', () => {
-      let lockManager: LockManager;
-
-      const LOCK_ID = 'my_lock_with_ttl_extension';
-
-      beforeEach(async () => {
-        lockManager = new LockManager(LOCK_ID, es, logger);
-      });
-
-      describe('when the lock is manually handled', () => {
-        afterEach(async () => {
-          await lockManager.release();
-        });
-
-        it('should extend the TTL when `extendTtl` is called', async () => {
-          // Acquire the lock with a very short TTL (e.g. 1 second).
-          const acquired = await lockManager.acquire({ ttl: 1000 });
-          expect(acquired).to.be(true);
-
-          const lockExpiryBefore = (await getLockById(es, LOCK_ID))!.expiresAt;
-
-          // Extend the TTL
-          const extended = await lockManager.extendTtl();
-          expect(extended).to.be(true);
-
-          const lockExpiryAfter = (await getLockById(es, LOCK_ID))!.expiresAt;
-
-          // Verify that the new expiration is later than before.
-          expect(new Date(lockExpiryAfter).getTime()).to.be.greaterThan(
-            new Date(lockExpiryBefore).getTime()
-          );
-        });
-      });
-
-      describe('withLock', () => {
+      describe('Extending TTL', () => {
         let lockExpiryBefore: string | undefined;
         let lockExpiryAfter: string | undefined;
         let result: string | undefined;
@@ -338,9 +304,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         before(async () => {
           // Use a very short TTL (1 second) so that without extension the lock would expire.
           // The withLock helper extends the TTL periodically.
-          result = await withLock({ lockId: LOCK_ID, esClient: es, logger, ttl: 100 }, async () => {
+          result = await withLock({ lockId: LOCK_ID, esClient: es, logger, ttl: 500 }, async () => {
             lockExpiryBefore = (await getLockById(es, LOCK_ID))?.expiresAt;
-            await sleep(500); // Simulate a long-running operation
+            await sleep(600); // Simulate a long-running operation
             lockExpiryAfter = (await getLockById(es, LOCK_ID))?.expiresAt;
             return 'done';
           });
@@ -366,6 +332,44 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const lock = await getLockById(es, LOCK_ID);
           expect(lock).to.be(undefined);
         });
+      });
+    });
+
+    describe('extendTtl', () => {
+      let lockManager: LockManager;
+      const ttl = 1000;
+
+      const LOCK_ID = 'my_lock_extend_ttl';
+
+      beforeEach(async () => {
+        lockManager = new LockManager(LOCK_ID, es, logger);
+        await lockManager.acquire({ ttl });
+      });
+
+      afterEach(async () => {
+        await lockManager.release();
+      });
+
+      it('has initial `expiresAt` value', async () => {
+        const lock = (await getLockById(es, LOCK_ID))!;
+        expect(new Date(lock.expiresAt).getTime()).to.be(new Date(lock.createdAt).getTime() + ttl);
+      });
+
+      it('update `expiresAt` to be greater than before', async () => {
+        const lockBeforeExtending = (await getLockById(es, LOCK_ID))!;
+        const res = await lockManager.extendTtl(2000);
+        expect(res).to.be(true);
+
+        const lockAfterExtension = (await getLockById(es, LOCK_ID))!;
+        expect(new Date(lockAfterExtension.expiresAt).getTime()).to.be.greaterThan(
+          new Date(lockBeforeExtending.expiresAt).getTime()
+        );
+      });
+
+      it('does not extend lock if already released', async () => {
+        await lockManager.release();
+        const res = await lockManager.extendTtl(2000);
+        expect(res).to.be(false);
       });
     });
 
@@ -478,8 +482,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   });
 }
 
-function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function sleep(value: number) {
+  return new Promise((resolve) => setTimeout(resolve, value));
 }
 
 function clearAllLocks(es: Client) {
@@ -526,4 +530,9 @@ async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocume
   );
 
   return res._source;
+}
+
+// convert a value in a unit of time to milliseconds
+function ms(value: number, unit: unitOfTime.DurationConstructor) {
+  return duration(value, unit).asMilliseconds();
 }

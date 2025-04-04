@@ -33,7 +33,7 @@ export interface AcquireOptions {
    */
   metadata?: Record<string, any>;
   /**
-   * Time to live (TTL) for the lock in milliseconds. Default is 5 minutes.
+   * Time to live (TTL) for the lock in milliseconds. Default is 30 seconds.
    * When a lock expires it can be acquired by another process
    */
   ttl?: number;
@@ -56,15 +56,10 @@ export class LockManager {
    */
   public async acquire({
     metadata = {},
-    ttl = duration(5, 'minutes').asMilliseconds(),
+    ttl = duration(30, 'seconds').asMilliseconds(),
   }: AcquireOptions = {}): Promise<boolean> {
     await createLocksWriteIndexOnce(this.esClient);
     this.token = uuid();
-    this.logger.debug(
-      `Acquiring lock "${this.lockId}" with ttl = ${prettyMilliseconds(ttl)} and token = ${
-        this.token
-      }`
-    );
 
     try {
       const response = await this.esClient.update<LockDocument>({
@@ -99,9 +94,9 @@ export class LockManager {
 
       if (response.result === 'created') {
         this.logger.debug(
-          `Lock "${this.lockId}" acquired with ttl = ${prettyMilliseconds(ttl)} and token = ${
+          `Lock "${this.lockId}" with token = ${
             this.token
-          }`
+          } acquired with ttl = ${prettyMilliseconds(ttl)}`
         );
         return true;
       } else if (response.result === 'updated') {
@@ -113,7 +108,7 @@ export class LockManager {
         return true;
       } else if (response.result === 'noop') {
         this.logger.debug(
-          `Lock "${this.lockId}" could not be acquired with token ${this.token} because it is already held`
+          `Lock "${this.lockId}" with token = ${this.token} could not be acquired. It is already held`
         );
         return false;
       } else {
@@ -158,17 +153,14 @@ export class LockManager {
         return true;
       } else if (response.result === 'noop') {
         this.logger.debug(
-          `Lock "${this.lockId}" was not released. Token ${this.token} does not match.`
+          `Lock "${this.lockId}" with token = ${this.token} could not be released. Token does not match.`
         );
         return false;
       } else {
         throw new Error(`Unexpected response: ${response.result}`);
       }
     } catch (error: any) {
-      if (
-        error instanceof errors.ResponseError &&
-        error.body?.error?.type === 'document_missing_exception'
-      ) {
+      if (isDocumentMissingException(error)) {
         this.logger.debug(`Lock "${this.lockId}" already released.`);
         return false;
       }
@@ -216,7 +208,7 @@ export class LockManager {
     }, retryOptions ?? { forever: true, maxTimeout: 10_000 });
   }
 
-  public async extendTtl(ttl = 300000): Promise<boolean> {
+  public async extendTtl(ttl: number): Promise<boolean> {
     try {
       await this.esClient.update<LockDocument>({
         index: LOCKS_CONCRETE_INDEX_NAME,
@@ -239,7 +231,7 @@ export class LockManager {
       this.logger.debug(`Lock "${this.lockId}" extended ttl with ${prettyMilliseconds(ttl)}.`);
       return true;
     } catch (error) {
-      if (isVersionConflictException(error)) {
+      if (isVersionConflictException(error) || isDocumentMissingException(error)) {
         this.logger.debug(`Lock "${this.lockId}" was released concurrently. Not extending TTL.`);
         return false;
       }
@@ -257,7 +249,7 @@ export async function withLock<T>(
     logger,
     lockId,
     metadata,
-    ttl = duration(5, 'minutes').asMilliseconds(),
+    ttl = duration(30, 'seconds').asMilliseconds(),
     waitForLock = false,
     retryOptions,
   }: {
@@ -281,7 +273,7 @@ export async function withLock<T>(
   }
 
   // extend the ttl periodically
-  const extendInterval = Math.floor(ttl / 2);
+  const extendInterval = Math.floor(ttl / 4);
   logger.debug(
     `Lock "${lockId}" acquired. Extending TTL every ${prettyMilliseconds(extendInterval)}`
   );
@@ -290,7 +282,7 @@ export async function withLock<T>(
   const intervalId = setInterval(() => {
     // wait for the previous extendTtl request to finish before sending the next one. This is to avoid flooding ES with extendTtl requests in cases where ES is slow to respond.
     extendTTlPromise = extendTTlPromise
-      .then(() => lockManager.extendTtl())
+      .then(() => lockManager.extendTtl(ttl))
       .catch((err) => {
         logger.error(`Failed to extend lock "${lockId}":`, err);
         return false;
@@ -353,6 +345,10 @@ function isVersionConflictException(e: Error): boolean {
   return (
     e instanceof errors.ResponseError && e.body?.error?.type === 'version_conflict_engine_exception'
   );
+}
+
+function isDocumentMissingException(e: Error): boolean {
+  return e instanceof errors.ResponseError && e.body?.error?.type === 'document_missing_exception';
 }
 
 export class LockAcquisitionError extends Error {
