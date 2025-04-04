@@ -9,11 +9,16 @@
 
 /* eslint-disable no-restricted-syntax */
 
-import axios from 'axios';
-import semver from 'semver';
+// import axios from 'axios';
+// import semver from 'semver';
+// import { Octokit } from '@octokit/rest';
 
-import core from '@actions/core';
-import github from '@actions/github';
+require('dotenv').config();
+
+
+const { Octokit } = require('@octokit/rest');
+const axios = require('axios');
+const semver = require('semver');
 
 const SNYK_REST_API_BASE = 'https://api.snyk.io/rest';
 const SNYK_API_VERSION = '2025-01-22';
@@ -36,16 +41,15 @@ const INTERNAL_PACKAGE_PREFIX = '@kbn/';
 const TARGET_FILE = 'package.json';
 
 const run = async () => {
-  const context = github.context;
   const snykToken = process.env.SNYK_TOKEN;
   const snykOrgId = process.env.SNYK_ORG_ID;
-  const githubToken = process.env.GITHUB_TOKEN;
-  const octokit = github.getOctokit(githubToken);
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+  const event = process.env.EVENT_NAME;
 
   async function getFileContent(owner, repo, path, ref) {
-    core.info(`Workspaceing content for ${path} at ref ${ref}`);
+    console.info(`Workspaceing content for ${path} at ref ${ref}`);
     try {
-      const response = await octokit.rest.repos.getContent({
+      const response = await octokit.repos.getContent({
         owner,
         repo,
         path,
@@ -56,11 +60,7 @@ const run = async () => {
 
       return content;
     } catch (error) {
-      if (error.status === 404) {
-        core.info(`File ${path} not found at ref ${ref}. Assuming empty content.`);
-        return null;
-      }
-      core.error(`Error fetching file ${path} at ref ${ref}: ${error.message}`);
+      console.error(`Error fetching file ${path} at ref ${ref}: ${error.message}`);
       throw error;
     }
   }
@@ -73,7 +73,7 @@ const run = async () => {
       const devDependencies = data.devDependencies || {};
       return { ...dependencies, ...devDependencies };
     } catch (error) {
-      core.warning(`Error parsing package.json content: ${error.message}`);
+      console.warn(`Error parsing package.json content: ${error.message}`);
       return {}
     }
   }
@@ -93,12 +93,12 @@ const run = async () => {
     // Use 'latest' as default if range is invalid or empty, though package.json usually has valid ranges.
     const validRange = semver.validRange(range) ? range : 'latest';
     const url = NPM_REGISTRY_URL.replace('{packageName}', encodeURIComponent(packageName));
-    core.info(`Querying npm registry for ${packageName} versions: ${url}`);
+    console.info(`Querying npm registry for ${packageName} versions: ${url}`);
 
     try {
       const response = await axios.get(url, { timeout: 15000 });
       if (!response.data || !response.data.versions) {
-        core.warning(`No version information found on npm registry for ${packageName}.`);
+        console.warn(`No version information found on npm registry for ${packageName}.`);
         return null;
       }
 
@@ -106,25 +106,25 @@ const run = async () => {
       const maxSatisfying = semver.maxSatisfying(availableVersions, validRange);
 
       if (maxSatisfying) {
-        core.info(
+        console.info(
           `Resolved ${packageName} range '${range}' to latest satisfying version: ${maxSatisfying}`
         );
         return maxSatisfying;
       } else {
         // If range is specific like '1.2.3' and exists, maxSatisfying finds it.
         // If range is like '>5.0.0' and no version satisfies it, this occurs.
-        core.warning(
+        console.warn(
           `No version found on npm registry for ${packageName} that satisfies range '${validRange}'.`
         );
         // Maybe fallback to 'latest' tag?
         const latestVersion = response.data['dist-tags']?.latest;
         if (latestVersion && semver.satisfies(latestVersion, validRange)) {
-          core.info(
+          console.info(
             `Falling back to 'latest' tag version: ${latestVersion} which satisfies range.`
           );
           return latestVersion;
         } else if (latestVersion) {
-          core.warning(
+          console.warn(
             `'latest' tag version ${latestVersion} does not satisfy range '${validRange}'.`
           );
           return null;
@@ -133,9 +133,9 @@ const run = async () => {
       }
     } catch (error) {
       if (error.response?.status === 404) {
-        core.warning(`Package ${packageName} not found on npm registry.`);
+        console.warn(`Package ${packageName} not found on npm registry.`);
       } else {
-        core.error(
+        console.error(
           `Error querying npm registry for ${packageName}: ${error.response?.status} ${
             error.message || error
           }`
@@ -147,7 +147,7 @@ const run = async () => {
 
   async function fetchNpmsScore(packageName) {
     const url = NPMS_IO_API_URL.replace('{packageName}', encodeURIComponent(packageName));
-    core.info(`Workspaceing npms.io score for ${packageName} from ${url}`);
+    console.info(`Workspaceing npms.io score for ${packageName} from ${url}`);
     try {
       const response = await axios.get(url, { timeout: 15000 });
       const details = response.data?.score?.detail;
@@ -163,28 +163,28 @@ const run = async () => {
           maintenance: parseFloat(details.maintenance),
         };
       } else {
-        core.warning(`Incomplete score details from npms.io for ${packageName}`);
+        console.warn(`Incomplete score details from npms.io for ${packageName}`);
         return null;
       }
     } catch (error) {
       if (error.response?.status === 404) {
-        core.warning(`Package ${packageName} not found on npms.io.`);
+        console.warn(`Package ${packageName} not found on npms.io.`);
       } else {
-        core.error(`Error fetching npms.io data for ${packageName}: ${error.message || error}`);
+        console.error(`Error fetching npms.io data for ${packageName}: ${error.message || error}`);
       }
       return null;
     }
   }
 
   async function fetchSnykSecurityScore(packageName, packageVersion, token, orgId) {
-    core.info(`Workspaceing Snyk REST API data for ${packageName}@${packageVersion}...`);
+    console.info(`Workspaceing Snyk REST API data for ${packageName}@${packageVersion}...`);
 
     if (!token) {
-      core.warning('SNYK_TOKEN not provided. Skipping Snyk analysis.');
+      console.warn('SNYK_TOKEN not provided. Skipping Snyk analysis.');
       return null;
     }
     if (!orgId) {
-      core.warning('SNYK_ORG_ID not provided. Skipping Snyk REST API analysis.');
+      console.warn('SNYK_ORG_ID not provided. Skipping Snyk REST API analysis.');
       return null;
     }
 
@@ -198,7 +198,7 @@ const run = async () => {
     let packageId = null;
 
     const findPackageUrl = `${SNYK_REST_API_BASE}/orgs/${orgId}/packages/${purl}/issues?version=${SNYK_API_VERSION}`;
-    core.info(`Querying Snyk for package: pkg:npm/${packageName}@${packageVersion}`);
+    console.info(`Querying Snyk for package: pkg:npm/${packageName}@${packageVersion}`);
 
     try {
       const packageResponse = (await axios.get(findPackageUrl, {
@@ -209,9 +209,9 @@ const run = async () => {
 
       if (packageResponse && packageResponse?.meta?.package?.name) {
         packageId = packageResponse?.meta?.package?.name;
-        core.info(`Found Snyk package ID for ${packageName}@${packageVersion}: ${packageId}`);
+        console.info(`Found Snyk package ID for ${packageName}@${packageVersion}: ${packageId}`);
       } else {
-        core.warning(
+        console.warn(
           `Package ${packageName}@${packageVersion} not found in Snyk organization. Cannot fetch issues.`
         );
 
@@ -221,7 +221,7 @@ const run = async () => {
 
       if (packageResponse && packageResponse.data) {
         const issues = packageResponse.data;
-        core.info(
+        console.info(
           `Snyk found ${issues.length} vulnerability issues for ${packageName}@${packageVersion}.`
         );
 
@@ -244,11 +244,11 @@ const run = async () => {
 
         score = parseFloat(score.toFixed(3));
 
-        core.info(`Calculated weighted security score for ${packageName}@${packageVersion}: ${score} (Cost Sum: ${score})`);
+        console.info(`Calculated weighted security score for ${packageName}@${packageVersion}: ${score} (Cost Sum: ${score})`);
 
         return score
       } else {
-        core.warning(
+        console.warn(
           `Unexpected response structure from Snyk issues endpoint for ${packageName}@${packageVersion}. Assuming OK.`
         );
 
@@ -259,11 +259,11 @@ const run = async () => {
         const status = error.response.status;
         const errorData = error.response.data;
         const detail = errorData?.errors?.[0]?.detail || JSON.stringify(errorData);
-        core.error(
+        console.error(
           `Error finding Snyk package ${packageName}@${packageVersion} (Status ${status}): ${detail}`
         );
       } else {
-        core.error(
+        console.error(
           `Network error finding Snyk package ${packageName}@${packageVersion}: ${error.message}`
         );
       }
@@ -322,31 +322,36 @@ const run = async () => {
   }
 
   try {
-    // const pr = context.payload.pull_request;
-    // if (!pr) {
-    //   core.warning('Not a pull request context. Skipping analysis.');
-    //   return { commentBody: '', analysisPerformed: false };
-    // }
-
-    const owner = context.repo.owner;
-    const repo = context.repo.repo;
-    // const baseSha = pr.base.sha;
-    // const headSha = pr.head.sha;
-    const { data: mainBranch } = await octokit.rest.repos.getBranch({
-      owner,
-      repo,
-      branch: 'main',
-    });
-    const baseSha = mainBranch.commit.sha;
-    const headSha = context.sha;
-
+    const owner = process.env.REPO_OWNER;
+    const repo = process.env.REPO_NAME;
     const packageJsonPath = TARGET_FILE;
+
+    let baseSha;
+    let headSha;
+
+    if (event === 'pull_request') {
+      baseSha = process.env.BASE_SHA;
+      headSha = process.env.HEAD_SHA;
+    } else if (event === 'push') {
+      const { data: mainBranch } = await octokit.repos.getBranch({
+        owner,
+        repo,
+        branch: 'main',
+      });
+      baseSha = mainBranch.commit.sha;
+      headSha = process.env.AFTER_SHA;
+    }
+
+    if (!baseSha || !headSha) {
+      console.warn('Not a pull request or push context. Skipping analysis.');
+      return { commentBody: '', analysisPerformed: false };
+    }
 
     const oldContent = await getFileContent(owner, repo, packageJsonPath, baseSha);
     const newContent = await getFileContent(owner, repo, packageJsonPath, headSha);
 
     if (newContent === null) {
-      core.info(`'${packageJsonPath}' not found in the head branch. Skipping.`);
+      console.info(`'${packageJsonPath}' not found in the head branch. Skipping.`);
       return { commentBody: '', analysisPerformed: false };
     }
 
@@ -357,19 +362,19 @@ const run = async () => {
     const addedPackageNames = Object.keys(addedPackages);
 
     if (addedPackageNames.length === 0) {
-      core.info('No new third-party dependencies found.');
+      console.info('No new third-party dependencies found.');
       // Optionally post a comment saying nothing was found, or just exit cleanly
       // return { commentBody: 'No new third-party dependencies found.', analysisPerformed: true };
       return { commentBody: '', analysisPerformed: false }; // Don't comment if nothing found
     }
 
-    core.info(`Found new dependencies: ${addedPackageNames.join(', ')}`);
+    console.info(`Found new dependencies: ${addedPackageNames.join(', ')}`);
 
     const analysisResults = {};
     const promises = addedPackageNames.map(async (name) => {
       const version = addedPackages[name];
       const notes = [];
-      core.info(`Analyzing ${name}@${version}...`);
+      console.info(`Analyzing ${name}@${version}...`);
 
       const exactVersion = await resolveVersionFromRegistry(name, version);
       if (!exactVersion) {
@@ -397,20 +402,21 @@ const run = async () => {
     await Promise.all(promises);
 
     const report = formatReport(analysisResults);
-    core.info('Analysis complete.');
-    core.setOutput('comment_body', report);
+    console.info('Analysis complete.');
+    console.log(report);
 
-    await octokit.rest.repos.createCommitComment({
-      owner,
-      repo,
-      commit_sha: headSha, // Comment on the commit that triggered the workflow
-      body: report,
-  });
+  //   await octokit.rest.repos.createCommitComment({
+  //     owner,
+  //     repo,
+  //     commit_sha: headSha,
+  //     body: report,
+  // });
 
-    return { commentBody: report, analysisPerformed: false };
+    return { commentBody: report, analysisPerformed: false, breachesDependencySLO: false };
   } catch (error) {
-    core.setFailed(`Action failed with error: ${error.message}\n${error.stack}`);
-    return { commentBody: '', analysisPerformed: false };
+
+    console.error(`Action failed with error: ${error.message}\n${error.stack}`);
+    return { commentBody: '', analysisPerformed: false, breachesDependencySLO: false };
   }
 };
 

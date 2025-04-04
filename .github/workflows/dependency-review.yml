@@ -26,28 +26,20 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies for Script
-        run: npm install axios @actions/core @actions/github semver
+        run: npm install axios semver
         working-directory: ./.github/scripts
 
       - name: Run Dependency Analysis Script
         id: analysis
         run: node .github/scripts/check_dependency_health.mjs
         env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO_OWNER: ${{ github.repository_owner }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
           GITHUB_TOKEN: ${{ secrets.KIBANAMACHINE_TOKEN }}
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
-
-      - name: Post Comment to PR
-        if: steps.analysis.outputs.analysis_performed == 'true'
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7.0.1
-        with:
-          github-token: ${{ secrets.KIBANAMACHINE_TOKEN }}
-          script: |
-            const commentBody = `${{ steps.analysis.outputs.comment_body }}`;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: commentBody
-            });
-            console.log(`Posted comment to PR #${context.issue.number}`);
+          EVENT_NAME: ${{ github.event_name }}
+          AFTER_SHA: ${{ github.event.after }}
