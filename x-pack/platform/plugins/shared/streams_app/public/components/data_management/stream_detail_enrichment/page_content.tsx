@@ -286,16 +286,12 @@ const ProcessorsEditor = React.memo(() => {
             <EuiAccordion
               id="mapping-failures-accordion"
               initialIsOpen
-              buttonContent={
-                <strong>
-                  {i18n.translate(
-                    'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
-                    {
-                      defaultMessage: 'Some fields mapping were conflicting during the simulation.',
-                    }
-                  )}
-                </strong>
-              }
+              buttonContent={i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.fieldMappingsFailure.title',
+                {
+                  defaultMessage: 'Field conflicts during simulation',
+                }
+              )}
             >
               <EuiText size="s">
                 <p>
