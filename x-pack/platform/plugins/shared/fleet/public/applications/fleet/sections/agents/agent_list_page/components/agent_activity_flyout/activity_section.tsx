@@ -51,6 +51,7 @@ export const ActivitySection: React.FunctionComponent<{
             action={currentAction}
             key={currentAction.actionId}
             onClickViewAgents={onClickViewAgents}
+            onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           />
         )
       )}

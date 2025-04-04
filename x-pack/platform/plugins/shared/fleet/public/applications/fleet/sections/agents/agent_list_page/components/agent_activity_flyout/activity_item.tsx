@@ -18,7 +18,9 @@ import {
   EuiSpacer,
   useEuiTheme,
   EuiIconTip,
+  EuiButtonEmpty,
 } from '@elastic/eui';
+import styled from '@emotion/styled';
 
 import type { ActionStatus } from '../../../../../types';
 
@@ -27,12 +29,23 @@ import { ViewErrors } from '../view_errors';
 import { formattedTime, getAction, inProgressDescription, inProgressTitle } from './helpers';
 import { ViewAgentsButton } from './view_agents_button';
 
+const Divider = styled.div`
+  width: 0;
+  height: 50%;
+  border-left: ${(props) => props.theme.euiTheme.border.thin};
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+`;
+
 export const ActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   onClickViewAgents: (action: ActionStatus) => void;
-}> = ({ action, onClickViewAgents }) => {
+  onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
+}> = ({ action, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
   const theme = useEuiTheme();
 
+  const isAutomaticUpgrade = action.is_automatic;
   const completeTitle =
     action.type === 'POLICY_CHANGE' && action.nbAgentsActioned === 0 ? (
       <EuiText>
@@ -265,7 +278,31 @@ export const ActivityItem: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
+        </EuiFlexItem>
+
+        {isAutomaticUpgrade && (
+          <>
+            <EuiFlexItem grow={false}>
+              <Divider />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="manageAutoUpgradesButton"
+                onClick={() => onClickManageAutoUpgradeAgents(action)}
+                size="m"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentActivityFlyout.manageAutoUpgradeAgents"
+                  defaultMessage="Manage auto-upgrade agents"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </>
+        )}
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };

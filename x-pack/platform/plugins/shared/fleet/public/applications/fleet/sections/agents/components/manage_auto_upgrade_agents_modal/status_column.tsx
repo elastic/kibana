@@ -137,7 +137,7 @@ export const StatusColumn: React.FunctionComponent<{
         {statusButton}
       </EuiToolTip>
     );
-  }, [agentVersionCounts, percentage, calcPercentage, getAgentsHref, autoUpgradeAgentsStatus]);
+  }, [agentVersionCounts, percentage, calcPercentage, getAgentsHref]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" justifyContent="flexStart">
