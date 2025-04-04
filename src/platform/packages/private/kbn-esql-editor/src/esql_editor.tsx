@@ -681,7 +681,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         above: false,
       },
       accessibilitySupport: 'off',
-      autoIndent: 'none',
+      autoIndent: 'keep',
       automaticLayout: true,
       fixedOverflowWidgets: true,
       folding: false,
