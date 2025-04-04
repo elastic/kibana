@@ -20,7 +20,7 @@ RUN apk --no-cache add curl
 
 {{#usePublicArtifact}}
 RUN cd /tmp && \
-  curl --retry 8 -s -L \
+  curl -f --retry 8 -s -L \
     --output kibana.tar.gz \
      https://{{publicArtifactSubdomain}}.elastic.co/downloads/kibana/{{artifactPrefix}}-$(arch).tar.gz && \
   cd -
@@ -54,8 +54,8 @@ RUN set -e ; \
         *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
     esac ; \
   TINI_VERSION='v0.19.0' ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
-  curl --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
+  curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
+  curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}.sha256sum" ; \
   sha256sum -c "${TINI_BIN}.sha256sum" ; \
   rm "${TINI_BIN}.sha256sum" ; \
   mv "${TINI_BIN}" /bin/tini ; \
@@ -85,14 +85,9 @@ FROM {{{baseImageName}}}
 EXPOSE 5601
 
 {{#ubi}}
-RUN for iter in {1..10}; do \
-      microdnf update --setopt=tsflags=nodocs -y && \
-      microdnf install --setopt=tsflags=nodocs -y \
+RUN microdnf install --setopt=tsflags=nodocs -y \
       fontconfig liberation-fonts-common freetype shadow-utils nss findutils && \
-      microdnf clean all && exit_code=0 && break || exit_code=$? && echo "microdnf error: retry $iter in 10s" && \
-      sleep 10; \
-    done; \
-    (exit $exit_code)
+      microdnf clean all
 {{/ubi}}
 {{#wolfi}}
 RUN apk --no-cache add bash curl fontconfig font-liberation libstdc++ libnss findutils shadow ca-certificates
@@ -171,14 +166,6 @@ LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.opencontainers.image.version="{{version}}"
 
 {{#ubi}}
-LABEL name="Kibana" \
-  maintainer="infra@elastic.co" \
-  vendor="Elastic" \
-  version="{{version}}" \
-  release="1" \
-  summary="Kibana" \
-  description="Your window into the Elastic Stack."
-
 RUN mkdir /licenses && \
     cp LICENSE.txt /licenses/LICENSE
 {{/ubi}}
