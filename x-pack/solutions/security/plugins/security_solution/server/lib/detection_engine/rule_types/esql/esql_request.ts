@@ -52,7 +52,11 @@ export const performEsqlRequest = async ({
     query: string;
     filter: QueryDslQueryContainer;
   };
-  requestQueryParams?: { drop_null_columns?: boolean };
+  requestQueryParams?: {
+    drop_null_columns?: boolean;
+    wait_for_completion_timeout?: string;
+    keep_alive?: string;
+  };
   shouldStopExecution: () => boolean;
   loggedRequests?: RulePreviewLoggedRequest[];
 }): Promise<EsqlTable> => {
@@ -83,6 +87,8 @@ export const performEsqlRequest = async ({
 
     // Poll for long-executing query
     while (true) {
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
+
       loggedRequests?.push({
         request: `GET /_query/async/${queryId}`,
         description: i18n.ESQL_POLL_REQUEST_DESCRIPTION,
@@ -113,7 +119,6 @@ export const performEsqlRequest = async ({
       if (isCancelled) {
         throw new Error('Rule execution cancelled due to timeout');
       }
-      await new Promise((resolve) => setTimeout(resolve, pollInterval));
       ruleExecutionLogger?.debug(`Query is still running for query ID: ${queryId}`);
     }
   } catch (error) {

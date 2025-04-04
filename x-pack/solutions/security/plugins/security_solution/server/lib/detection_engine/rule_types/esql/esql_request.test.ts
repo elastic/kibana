@@ -52,6 +52,7 @@ describe('performEsqlRequest', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
   });
 
   it('returns results immediately when the async query completed', async () => {
@@ -104,12 +105,16 @@ describe('performEsqlRequest', () => {
       .mockResolvedValueOnce(mockSubmitResponse)
       .mockResolvedValueOnce(mockPollResponse);
 
-    const result = await performEsqlRequest({
+    const waitForPerformEsql = performEsqlRequest({
       esClient,
       requestBody,
       requestQueryParams,
       shouldStopExecution,
     });
+
+    await jest.advanceTimersByTimeAsync(15000);
+
+    const result = await waitForPerformEsql;
 
     expect(result).toEqual(mockPollResponse);
     expect(esClient.transport.request).toHaveBeenCalledTimes(3);
@@ -140,14 +145,18 @@ describe('performEsqlRequest', () => {
     esClient.transport.request.mockResolvedValue(mockSubmitResponse);
     shouldStopExecution.mockReturnValue(true);
 
-    await expect(
-      performEsqlRequest({
-        esClient,
-        requestBody,
-        requestQueryParams,
-        shouldStopExecution,
-      })
-    ).rejects.toThrow('Rule execution cancelled due to timeout');
+    const waitForPerformEsql = performEsqlRequest({
+      esClient,
+      requestBody,
+      requestQueryParams,
+      shouldStopExecution,
+    }).catch((error) => {
+      expect(error.message).toBe('Rule execution cancelled due to timeout');
+    });
+
+    await jest.advanceTimersByTimeAsync(15000);
+    await waitForPerformEsql;
+    expect.assertions(1);
   });
 
   it('deletes query if error happens during polling', async () => {
@@ -162,20 +171,23 @@ describe('performEsqlRequest', () => {
       .mockResolvedValueOnce(mockSubmitResponse)
       .mockRejectedValueOnce(new Error('Test error'));
 
-    shouldStopExecution.mockReturnValue(false);
+    const waitForPerformEsql = performEsqlRequest({
+      esClient,
+      requestBody,
+      requestQueryParams: {},
+      shouldStopExecution,
+    }).catch((error) => {
+      expect(error.message).toBe('Test error');
+    });
 
-    await expect(
-      performEsqlRequest({
-        esClient,
-        requestBody,
-        requestQueryParams: {},
-        shouldStopExecution,
-      })
-    ).rejects.toThrow('Test error');
+    await jest.advanceTimersByTimeAsync(15000);
+    await waitForPerformEsql;
 
     expect(esClient.transport.request).toHaveBeenCalledWith({
       method: 'DELETE',
       path: '/_query/async/QUERY-ID',
     });
+
+    expect.assertions(2);
   });
 });
