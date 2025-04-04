@@ -52347,6 +52347,54 @@ paths:
       summary: Create an SLO
       tags:
         - slo
+  /s/{spaceId}/api/observability/slos/_bulk_delete:
+    post:
+      description: |
+        You must have `all` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
+      operationId: deleteSlosOp
+      parameters:
+        - $ref: '#/components/parameters/SLOs_kbn_xsrf'
+        - $ref: '#/components/parameters/SLOs_space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SLOs_create_slo_request'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_create_slo_response'
+          description: Successful request
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_400_response'
+          description: Bad request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_401_response'
+          description: Unauthorized response
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_403_response'
+          description: Unauthorized response
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SLOs_409_response'
+          description: Conflict - The SLO id already exists
+      summary: Delete multiple SLOs
+      tags:
+        - slo
   /s/{spaceId}/api/observability/slos/_delete_instances:
     post:
       description: |
