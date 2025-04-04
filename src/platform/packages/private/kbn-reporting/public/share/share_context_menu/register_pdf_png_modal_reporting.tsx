@@ -159,6 +159,7 @@ export const reportingPDFExportProvider = ({
       name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabel', {
         defaultMessage: 'PDF',
       }),
+      icon: 'document',
       toolTipContent: licenseToolTipContent,
       disabled: licenseDisabled || sharingData.reportingDisabled,
       label: 'PDF' as const,
@@ -297,6 +298,7 @@ export const reportingPNGExportProvider = ({
       name: i18n.translate('reporting.shareContextMenu.ExportsButtonLabelPNG', {
         defaultMessage: 'PNG export',
       }),
+      icon: 'image',
       toolTipContent: licenseToolTipContent,
       disabled: licenseDisabled || sharingData.reportingDisabled,
       label: 'PNG' as const,

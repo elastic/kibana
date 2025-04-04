@@ -16,6 +16,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiText,
   EuiTitle,
   EuiButton,
   EuiButtonEmpty,
@@ -23,6 +24,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
+  type EuiSwitchEvent,
+  EuiSwitch,
+  EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { ShareMenuProvider, type IShareContext, useShareTabsContext } from './context';
@@ -40,8 +44,44 @@ interface ExportMenuProps {
   intl: InjectedIntl;
 }
 
+interface LayoutOptionsProps {
+  usePrintLayout: boolean;
+  printLayoutChange: (evt: EuiSwitchEvent) => void;
+}
+
+function LayoutOptionsSwitch({ usePrintLayout, printLayoutChange }: LayoutOptionsProps) {
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiSwitch
+          label={
+            <EuiText size="s" css={{ textWrap: 'nowrap' }}>
+              <FormattedMessage
+                id="share.screenCapturePanelContent.optimizeForPrintingLabel"
+                defaultMessage="For print"
+              />
+            </EuiText>
+          }
+          checked={usePrintLayout}
+          onChange={printLayoutChange}
+          data-test-subj="usePrintLayout"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <FormattedMessage
+            id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
+            defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
+          />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
 function ExportMenuPopover({ intl }: ExportMenuProps) {
-  const { onClose, anchorElement, shareMenuItems } = useShareTabsContext('integration', 'export');
+  const { onClose, anchorElement, shareMenuItems, isDirty, publicAPIEnabled, objectType } =
+    useShareTabsContext('integration', 'export');
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [selectedMenuItemId, setSelectedMenuItemId] = useState<string>();
@@ -80,12 +120,12 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
               key={menuItem.id}
             >
               <EuiListGroupItem
+                iconType={menuItem.config.icon}
                 key={menuItem.id}
                 label={menuItem.config.label}
                 onClick={() => {
                   setSelectedMenuItemId(menuItem.id);
                   setIsFlyoutVisible(true);
-                  // onClose();
                 }}
               />
             </EuiToolTip>
@@ -96,13 +136,87 @@ function ExportMenuPopover({ intl }: ExportMenuProps) {
         <EuiFlyout size="s" onClose={() => setIsFlyoutVisible(false)} ownFocus>
           <EuiFlyoutHeader hasBorder>
             <EuiTitle>
-              <h2>{selectedMenuItem?.config.label}</h2>
+              <h2>
+                <FormattedMessage
+                  id="share.export.flyoutTitle"
+                  defaultMessage="Export {objectType} as {type}"
+                  values={{ objectType, type: selectedMenuItem?.config.label }}
+                />
+              </h2>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <EuiCodeBlock language="json">
-              {JSON.stringify(selectedMenuItem?.config, null, 2)}
-            </EuiCodeBlock>
+            <EuiFlexGroup direction="column" gutterSize="m">
+              <EuiFlexItem>
+                <Fragment>
+                  {selectedMenuItem?.config.renderLayoutOptionSwitch && (
+                    <LayoutOptionsSwitch
+                      usePrintLayout={usePrintLayout}
+                      printLayoutChange={(evt) => setPrintLayout(evt.target.checked)}
+                    />
+                  )}
+                </Fragment>
+              </EuiFlexItem>
+              <Fragment>
+                {selectedMenuItem?.config.renderCopyURIButton && publicAPIEnabled && (
+                  <EuiFlexItem>
+                    <EuiFlexGroup gutterSize="s" direction="column">
+                      <EuiFlexItem>
+                        <EuiTitle size="xxs">
+                          <h4>
+                            <FormattedMessage
+                              id="share.export.postURLHeading"
+                              defaultMessage="Post URL"
+                            />
+                          </h4>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText size="s">
+                          <FormattedMessage
+                            id="share.export.postURLDescription"
+                            defaultMessage="Allows to generate selected file format programmatically outside Kibana or in Watcher."
+                          />
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiCodeBlock
+                          css={{ overflowWrap: 'break-word' }}
+                          language="json"
+                          isCopyable
+                        >
+                          {selectedMenuItem?.config.generateAssetURIValue({
+                            intl,
+                            optimizedForPrinting: usePrintLayout,
+                          })}
+                        </EuiCodeBlock>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                )}
+              </Fragment>
+              <Fragment>
+                {publicAPIEnabled && isDirty && (
+                  <EuiFlexItem>
+                    <EuiCallOut
+                      color="warning"
+                      iconType="warning"
+                      title={
+                        <FormattedMessage
+                          id="share.link.warning.title"
+                          defaultMessage="Unsaved changes"
+                        />
+                      }
+                    >
+                      <FormattedMessage
+                        id="share.postURLWatcherMessage.unsavedChanges"
+                        defaultMessage="URL may change if you upgrade Kibana."
+                      />
+                    </EuiCallOut>
+                  </EuiFlexItem>
+                )}
+              </Fragment>
+            </EuiFlexGroup>
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">

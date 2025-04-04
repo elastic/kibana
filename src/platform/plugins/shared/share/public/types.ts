@@ -112,9 +112,6 @@ export interface ExportShare
      * @deprecated only kept around for legacy reasons
      */
     name?: string;
-    /**
-     * @deprecated only kept around for legacy reasons
-     */
     icon?: EuiIconProps['type'];
     /**
      * @deprecated only kept around for legacy reasons
