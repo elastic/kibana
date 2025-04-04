@@ -154,6 +154,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
             control={control}
             render={({ field }) => (
               <EuiComboBox
+                data-test-subj="workchatAppIntegrationEditViewIndex"
                 placeholder="Select an index"
                 isLoading={isLoading}
                 selectedOptions={selectedOptions}
