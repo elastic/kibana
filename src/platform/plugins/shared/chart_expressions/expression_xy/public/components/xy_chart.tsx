@@ -873,7 +873,7 @@ export function XYChart({
               onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
               onElementClick={interactive ? clickHandler : undefined}
               legendAction={
-                interactive
+                interactive && !isEsqlMode
                   ? getLegendAction(
                       dataLayers,
                       onClickValue,
