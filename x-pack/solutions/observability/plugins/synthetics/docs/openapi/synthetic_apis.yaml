@@ -763,6 +763,7 @@ paths:
       operationId: delete-parameters
       description: >
         Delete parameters from the Synthetics app.
+        
         You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       tags:
         - synthetics
