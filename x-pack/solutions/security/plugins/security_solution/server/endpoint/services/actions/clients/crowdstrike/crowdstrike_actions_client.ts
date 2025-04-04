@@ -64,6 +64,13 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(CROWDSTRIKE_CONNECTOR_ID);
   }
 
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    // TODO: implement crowdstrike agent policy info.
+    return [];
+  }
+
   protected async writeActionRequestToEndpointIndex<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,

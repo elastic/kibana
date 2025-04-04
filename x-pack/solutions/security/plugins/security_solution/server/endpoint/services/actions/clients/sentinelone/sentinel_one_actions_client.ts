@@ -124,6 +124,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     connectorActions.setup(SENTINELONE_CONNECTOR_ID);
   }
 
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    // TODO: implement sentinelone agent policy info.
+    return [];
+  }
+
   private async handleResponseActionCreation<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,

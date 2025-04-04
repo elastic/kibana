@@ -68,6 +68,13 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     connectorActions.setup(MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID);
   }
 
+  protected async fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']> {
+    // TODO: implement microsoft agent policy info.
+    return [];
+  }
+
   protected async handleResponseActionCreation<
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
     TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,

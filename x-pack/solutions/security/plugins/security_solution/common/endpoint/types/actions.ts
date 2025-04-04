@@ -140,6 +140,15 @@ export interface LogsEndpointAction<
   '@timestamp': string;
   agent: {
     id: string | string[];
+    /**
+     * Policy information for each of the agents that the response action was sent to.
+     * Added in support of space awareness.
+     */
+    policy: Array<{
+      agentId: string;
+      integrationPolicyId: string;
+      agentPolicyId: string;
+    }>;
   };
   EndpointActions: EndpointActionFields<TParameters, TOutputContent> & ActionRequestFields;
   error?: EcsError;

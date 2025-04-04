@@ -210,6 +210,16 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
   }
 
   /**
+   * Fetches information about the policies for each agent id.
+   * Must be implemented by each subclass.
+   * @param agentIds
+   * @protected
+   */
+  protected abstract fetchAgentPolicyInfo(
+    agentIds: string[]
+  ): Promise<LogsEndpointAction['agent']['policy']>;
+
+  /**
    * Update cases with information about the hosts that received a response action.
    *
    * **NOTE:** Failures during update will not cause this operation to fail - it will only log the errors
@@ -479,6 +489,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       '@timestamp': new Date().toISOString(),
       agent: {
         id: actionRequest.endpoint_ids,
+        policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
       },
       EndpointActions: {
         action_id: actionRequest.actionId || uuidv4(),
