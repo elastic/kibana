@@ -50,6 +50,15 @@ describe('Secondary metric', () => {
       const el = screen.getByText(formattedValue);
       expect(el).toBeInTheDocument();
     });
+
+    it('should return the N/A string if no value is provided', () => {
+      renderSecondaryMetric({
+        row: { [id]: undefined },
+        getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
+      });
+      const el = screen.getByText('N/A');
+      expect(el).toBeInTheDocument();
+    });
   });
 
   describe('with badge', () => {
@@ -64,6 +73,22 @@ describe('Secondary metric', () => {
         expect(el).toBeInTheDocument();
         expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
         expect(screen.getByText(formattedValue)).toBeInTheDocument();
+      });
+
+      it('should return the N/A string if no value is provided', () => {
+        const color = faker.internet.color();
+
+        renderSecondaryMetric({
+          color,
+          row: { [id]: undefined },
+          getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
+        });
+
+        const el = screen.getByTitle('N/A');
+
+        expect(el).toBeInTheDocument();
+        expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${color}`);
+        expect(screen.getByText('N/A')).toBeInTheDocument();
       });
     });
 
@@ -105,6 +130,85 @@ describe('Secondary metric', () => {
             ).not.toBeInTheDocument();
           }
         );
+
+        it('should compute the delta value correctly with undefined baseline', () => {
+          renderSecondaryMetric({
+            trendConfig: {
+              icon: true,
+              value: true,
+              palette,
+              baselineValue: undefined,
+            },
+          });
+
+          const icon = 'minus';
+
+          const trendLabel = trendLabels[icon];
+          const el = screen.getByTitle(formattedValue);
+
+          expect(el).toBeInTheDocument();
+          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[1]}`);
+          expect(screen.getByText(formattedValue)).toBeInTheDocument();
+          // unfortuantely the icon is not rendered, so check for the wrapper for now
+          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
+          expect(
+            screen.queryByLabelText(`Value: ${formattedValue} - trend ${trendLabel}`)
+          ).not.toBeInTheDocument();
+        });
+
+        it('should compute the delta value correctly with undefined rawValue', () => {
+          renderSecondaryMetric({
+            row: { [id]: undefined },
+            getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
+            trendConfig: {
+              icon: true,
+              value: true,
+              palette,
+              baselineValue: 1,
+            },
+          });
+
+          const icon = 'minus';
+
+          const trendLabel = trendLabels[icon];
+          const el = screen.getByTitle('N/A');
+
+          expect(el).toBeInTheDocument();
+          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[1]}`);
+          expect(screen.getByText('N/A')).toBeInTheDocument();
+          // unfortuantely the icon is not rendered, so check for the wrapper for now
+          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
+          expect(
+            screen.queryByLabelText(`Value: 'N/A' - trend ${trendLabel}`)
+          ).not.toBeInTheDocument();
+        });
+
+        it('should compute the delta value correctly with both baseline and rawValue undefined', () => {
+          renderSecondaryMetric({
+            row: { [id]: undefined },
+            getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
+            trendConfig: {
+              icon: true,
+              value: true,
+              palette,
+              baselineValue: 0,
+            },
+          });
+
+          const icon = 'minus';
+
+          const trendLabel = trendLabels[icon];
+          const el = screen.getByTitle('N/A');
+
+          expect(el).toBeInTheDocument();
+          expect(el).toHaveStyle(`--euiBadgeBackgroundColor: ${palette[1]}`);
+          expect(screen.getByText('N/A')).toBeInTheDocument();
+          // unfortuantely the icon is not rendered, so check for the wrapper for now
+          expect(el.firstChild?.firstChild).toHaveAttribute('data-euiicon-type', icon);
+          expect(
+            screen.queryByLabelText(`Value: N/A - trend ${trendLabel}`)
+          ).not.toBeInTheDocument();
+        });
       });
 
       describe('with icon only', () => {

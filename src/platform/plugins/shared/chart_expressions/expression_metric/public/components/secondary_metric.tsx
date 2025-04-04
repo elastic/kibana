@@ -20,8 +20,19 @@ export interface TrendConfig {
   icon: boolean;
   value: boolean;
   palette: [string, string, string];
-  baselineValue: number;
+  baselineValue: number | undefined;
   borderColor?: string;
+}
+
+const notAvailable = i18n.translate('expressioMetricVis.secondaryMetric.notAvailable', {
+  defaultMessage: 'N/A',
+});
+
+function getDeltaValue(rawValue: number | undefined, baselineValue: number | undefined) {
+  if (rawValue == null || baselineValue == null || Number.isNaN(baselineValue)) {
+    return 0;
+  }
+  return rawValue - baselineValue;
 }
 
 function getBadgeConfiguration(trendConfig: TrendConfig, deltaValue: number) {
@@ -90,9 +101,7 @@ function SecondaryMetricValue({
   fontSize: number;
 }) {
   const { euiTheme } = useEuiTheme();
-  if (rawValue == null) {
-    return null;
-  }
+  const safeFormattedValue = formattedValue ?? notAvailable;
 
   const badgeCss = css(`
     font-size:  inherit;
@@ -108,8 +117,8 @@ function SecondaryMetricValue({
     }
   `);
 
-  if (trendConfig && typeof rawValue === 'number') {
-    const deltaValue = rawValue - trendConfig.baselineValue;
+  if (trendConfig && (typeof rawValue === 'number' || rawValue == null)) {
+    const deltaValue = getDeltaValue(rawValue, trendConfig.baselineValue);
     const { icon, color: trendColor, iconLabel } = getBadgeConfiguration(trendConfig, deltaValue);
     const translatedColor = getBadgeColor(trendColor, euiTheme);
     return (
@@ -132,7 +141,7 @@ function SecondaryMetricValue({
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
-        {trendConfig.value ? formattedValue : null}
+        {trendConfig.value ? safeFormattedValue : null}
       </EuiBadge>
     );
   }
@@ -143,11 +152,11 @@ function SecondaryMetricValue({
         data-test-subj={`expressionMetricVis-secondaryMetric-badge-${rawValue}`}
         css={badgeCss}
       >
-        {formattedValue}
+        {safeFormattedValue}
       </EuiBadge>
     );
   }
-  return formattedValue;
+  return safeFormattedValue;
 }
 
 export interface SecondaryMetricProps {
