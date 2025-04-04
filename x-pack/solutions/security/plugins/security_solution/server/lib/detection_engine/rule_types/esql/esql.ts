@@ -193,7 +193,7 @@ export const esqlExecutor = async ({
 
           const bulkCreateResult = await bulkCreateSuppressedAlertsInMemory({
             sharedParams,
-            enrichedEvents: syntheticHits.slice(0, tuple.maxSignals),
+            enrichedEvents: syntheticHits,
             toReturn: result,
             services,
             alertSuppression: completeRule.ruleParams.alertSuppression,
@@ -215,7 +215,7 @@ export const esqlExecutor = async ({
         } else {
           const wrappedAlerts = wrapEsqlAlerts({
             sharedParams,
-            events: syntheticHits.slice(0, tuple.maxSignals),
+            events: syntheticHits,
             isRuleAggregating,
             expandedFields,
           });

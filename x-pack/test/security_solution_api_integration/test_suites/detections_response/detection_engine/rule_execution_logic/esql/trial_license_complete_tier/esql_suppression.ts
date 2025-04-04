@@ -1909,7 +1909,7 @@ export default ({ getService }: FtrProviderContext) => {
               value: 'agent-a',
             },
           ],
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 199,
+          [ALERT_SUPPRESSION_DOCS_COUNT]: 200,
         });
       });
 
