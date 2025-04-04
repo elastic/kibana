@@ -32,6 +32,10 @@ fi
 echo " -- Running on OS: $OS"
 
 NODE_VARIANT=""
+if [[ "${CI_FORCE_NODE_POINTER_COMPRESSION:-}" = "true" ]]; then
+  echo ' -- Using Node.js variant with pointer compression enabled'
+  NODE_VARIANT="node-pointer-compression/"
+fi
 nodeUrl="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/${NODE_VARIANT}dist/v$NODE_VERSION/node-v$NODE_VERSION-${OS}-${classifier}"
 
 echo " -- node: version=v${NODE_VERSION} dir=$NODE_DIR"
