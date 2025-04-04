@@ -33,8 +33,8 @@ node scripts/build \
   --skip-docker-serverless \
   --skip-docker-contexts
 
-CLOUD_FIPS_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-cloud-fips)
-cat <<EOF | buildkite-agent annotate --style "info" --context kibana-cloud-fips-image
+CLOUD_FIPS_IMAGE=$(docker images --format "{{.Repository}}:{{.Tag}}" docker.elastic.co/kibana-ci/kibana-fips)
+cat <<EOF | buildkite-agent annotate --style "info" --context kibana-fips-image
 
   Kibana cloud FIPS image: \`$CLOUD_FIPS_IMAGE\`
 EOF
