@@ -20,7 +20,7 @@ function createDeepLinks(
 ) {
   return {
     getOverviewLinkDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isADEnabled && !mlCapabilities.isDFAEnabled) return null;
+      if (!isFullLicense) return null;
 
       return {
         id: 'overview',
@@ -32,7 +32,7 @@ function createDeepLinks(
     },
 
     getAnomalyDetectionDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isADEnabled) return null;
+      if (!isFullLicense || !mlCapabilities.isADEnabled) return null;
 
       return {
         id: 'anomalyDetection',
@@ -68,7 +68,7 @@ function createDeepLinks(
     },
 
     getDataFrameAnalyticsDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isDFAEnabled) return null;
+      if (!isFullLicense || !mlCapabilities.isDFAEnabled) return null;
 
       return {
         id: 'dataFrameAnalytics',
@@ -112,8 +112,6 @@ function createDeepLinks(
 
     getMemoryUsageDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!isFullLicense) return null;
-      // Not supported on es serverless
-      if (isServerless && !mlCapabilities.isADEnabled && !mlCapabilities.isDFAEnabled) return null;
 
       return {
         id: 'memoryUsage',
@@ -163,8 +161,6 @@ function createDeepLinks(
 
     getNotificationsDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!isFullLicense) return null;
-      // Not supported on es serverless
-      if (isServerless && !mlCapabilities.isADEnabled && !mlCapabilities.isDFAEnabled) return null;
 
       return {
         id: 'notifications',
