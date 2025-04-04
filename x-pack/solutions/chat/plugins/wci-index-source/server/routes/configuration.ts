@@ -64,28 +64,29 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
 
   router.get(
     {
-      path: '/internal/wci-index-source/indices-autocomplete/{query}',
+      path: '/internal/wci-index-source/indices-autocomplete',
       security: {
         authz: {
           requiredPrivileges: [apiCapabilities.manageWorkchat],
         },
       },
       validate: {
-        params: schema.object({
-          query: schema.maybe(schema.string())
+        query: schema.object({
+          index: schema.maybe(schema.string())
         })
       }
     },
     async (ctx, request, res) => {
       try {
         const { elasticsearch } = await ctx.core;
-        const pattern  = request.params.query;
+        const pattern  = request.query.index || "";
 
         const esClient = elasticsearch.client.asCurrentUser
 
         const response = await esClient.cat.indices({
           index: [`${pattern}*`],
           h: 'index',
+          expand_wildcards: "open",
           format: 'json'
         });
 

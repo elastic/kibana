@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useFieldArray, Controller } from 'react-hook-form';
 import {
   EuiTextArea,
@@ -23,12 +23,12 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiButtonEmpty,
+  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import type { IndexSourceDefinition } from '@kbn/wci-common';
 import { IntegrationConfigurationFormProps } from '@kbn/wci-browser';
 import type { WCIIndexSourceFilterField, WCIIndexSourceContextField } from '../../common/types';
 import { useGenerateSchema } from '../hooks/use_generate_schema';
-import type { SearchIndicesResponse } from '../../common/http_api/configuration';
 import { useIndexNameAutocomplete } from '../hooks/use_index_name_autocomplete';
 
 export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationFormProps> = ({
@@ -39,9 +39,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     control,
     name: 'configuration.fields.filterFields',
   });
-  const [query, setQuery] = useState<{
-    searchValue: string;
-  }>();
+  const [query, setQuery] = useState("");
   const [options, setOptions] = useState([] as string[]);
   
   let searchTimeout;
@@ -60,32 +58,35 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   ];
 
   const { generateSchema } = useGenerateSchema();
-  const { isLoading, data } = useIndexNameAutocomplete();
+  const { isLoading, autocompleteQuery } = useIndexNameAutocomplete();
 
-  const [selectedOption, setSelected] = useState([]);
+  const [selectedOptions, setSelected] = useState([] as EuiComboBoxOptionOption[]);
 
-  const onChange = (selectedOption) => {
-    setSelected(selectedOption);
+  const onChange = (selectedOptions) => {
+    setSelected(selectedOptions);
   };
 
-  const onSearchChange = (searchValue: string) => {
-    console.log(`onSearchChange with ${searchValue}`);
-    let result: string[] = [];
+  useDebounce(() => {let result: string[] = [];
     setOptions(result);
 
-    if (data) {
-      data({ indexName: searchValue}).then(
+    if (autocompleteQuery) {
+      autocompleteQuery({ indexName: query}).then(
         (indexNames: string[]) => {
-          console.log("Got response");
           if (indexNames) { 
-            console.log("Setting index names");
-            console.log(indexNames);
             setOptions(indexNames);
           }
         }
       )
     }
-  };
+    },
+    250,
+    [query]
+    );
+
+  const onSearchChange = (searchValue: string) => {
+    setQuery(searchValue);
+    console.log(`onSearchChange with ${searchValue}`);
+  }
 
   const onSchemaGenerated = useCallback(
     (definition: IndexSourceDefinition) => {
@@ -155,11 +156,25 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
               <EuiComboBox
                 placeholder="Select an index"
                 isLoading={isLoading}
-                selectedOptions={selectedOption}
+                selectedOptions={selectedOptions}
                 singleSelection={{ asPlainText: true }}
                 options={options.map((option) => ({ label: option, key: option }))}
                 onChange={onChange}
                 onSearchChange={onSearchChange}
+                append={
+                  <EuiButtonEmpty
+                    size="xs"
+                    iconType="gear"
+                    onClick={() => {
+                      if (selectedOptions.length == 0) return;
+                      if (!selectedOptions[0].key) return;
+
+                      generateSchema({ indexName: selectedOptions[0].key }, { onSuccess: onSchemaGenerated });
+                    }}
+                  >
+                    Generate configuration
+                  </EuiButtonEmpty>
+                }
               />
             )}
           />
