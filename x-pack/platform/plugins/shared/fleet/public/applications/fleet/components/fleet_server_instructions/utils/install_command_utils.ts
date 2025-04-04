@@ -70,6 +70,13 @@ function getArtifact(
         `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
       ].join(`\n`),
     },
+    windows_msi: {
+      downloadCommand: [
+        `$ProgressPreference = 'SilentlyContinue'`,
+        `Invoke-WebRequest -Uri ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.msi -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.msi${appendWindowsDownloadSourceProxyArgs}`,
+        `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
+      ].join(`\n`),
+    },
     deb_aarch64: {
       downloadCommand: [
         `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-arm64.deb${appendCurlDownloadSourceProxyArgs}`,
@@ -127,7 +134,7 @@ export function getInstallCommandForPlatform({
   downloadSource?: DownloadSource;
   downloadSourceProxy?: FleetProxy;
 }): string {
-  const newLineSeparator = platform === 'windows' ? '`\n' : '\\\n';
+  const newLineSeparator = platform === 'windows' || platform === 'windows_msi' ? '`\n' : '\\\n';
 
   const artifact = getArtifact(platform, kibanaVersion ?? '', downloadSource, downloadSourceProxy);
 
@@ -195,6 +202,7 @@ export function getInstallCommandForPlatform({
     mac_aarch64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     mac_x86_64: `${artifact.downloadCommand}\nsudo ./elastic-agent install ${commandArgumentsStr}`,
     windows: `${artifact.downloadCommand}\n.\\elastic-agent.exe install ${commandArgumentsStr}`,
+    windows_msi: `${artifact.downloadCommand}\n.\\elastic-agent.msi install --% INSTALLARGS="${commandArgumentsStr}"`,
     deb_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     deb_x86_64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
     rpm_aarch64: `${artifact.downloadCommand}\nsudo systemctl enable elastic-agent\nsudo systemctl start elastic-agent\nsudo elastic-agent enroll ${commandArgumentsStr}`,
