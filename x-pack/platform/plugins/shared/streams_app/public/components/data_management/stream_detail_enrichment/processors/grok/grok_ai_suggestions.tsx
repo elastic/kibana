@@ -279,7 +279,7 @@ function InnerGrokAiSuggestions({
     content = null;
   }
 
-  const isManagedAIConnector = !INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
+  const isManagedAIConnector = INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
   const [isManagedAiConnectorCalloutDismissed, setManagedAiConnectorCalloutDismissed] =
     useLocalStorage('streams:managedAiConnectorCalloutDismissed', false);
 
