@@ -135,7 +135,6 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
               getLogsStep({
                 isComplete: isStepComplete('logs'),
                 setIsComplete: setCompletedStep.bind(null, 'logs'),
-                navigateToEsDeprecationLogs: () => history.push('/es_deprecation_logs'),
               }),
               getUpgradeStep(),
             ].filter(Boolean) as EuiStepProps[]

@@ -66,12 +66,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES deprecations logs page', () => {
+    describe('ES deprecations logs flyout', () => {
       beforeEach(async () => {
-        await PageObjects.upgradeAssistant.navigateToEsDeprecationLogs();
+        await PageObjects.upgradeAssistant.navigateToPage();
       });
 
       it('with logs collection disabled', async () => {
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
@@ -84,6 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('with logs collection enabled', async () => {
+        await PageObjects.upgradeAssistant.clickOpenEsDeprecationsFlyoutButton();
         const loggingEnabled = await PageObjects.upgradeAssistant.isDeprecationLoggingEnabled();
         if (!loggingEnabled) {
           await PageObjects.upgradeAssistant.clickDeprecationLoggingToggle();
