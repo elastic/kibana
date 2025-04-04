@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiPanel } from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SelectLogLevel } from '../agent_logs/select_log_level';
 
@@ -24,21 +24,10 @@ export const AgentSettings: React.FunctionComponent<AgentSettingsProps> = ({
   return (
     <EuiFlexGroup alignItems="flexStart">
       <EuiFlexItem>
-        <EuiPanel grow={false}>
-          <EuiTitle size="s">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.agentDetails.settingsSectionTitle"
-                defaultMessage="Log Level Setting"
-              />
-            </p>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          <SelectLogLevel
-            agent={agent}
-            agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
-          />
-        </EuiPanel>
+        <SelectLogLevel
+          agent={agent}
+          agentPolicyLogLevel={agentPolicy?.advanced_settings?.agent_logging_level}
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
