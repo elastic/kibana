@@ -22,9 +22,21 @@ export enum OpenAiProviderType {
 }
 
 export interface GenAiConfig {
-  apiProvider?: OpenAiProviderType;
+  apiProvider?: string;
   apiUrl?: string;
   defaultModel?: string;
+}
+
+export interface AiConfigCatchAll {
+  apiProvider?: OpenAiProviderType | string;
+  apiUrl?: string;
+  defaultModel?: string;
+  // inference fields
+  providerConfig?: {
+    model_id?: string;
+  };
+  model_id?: string;
+  url?: string;
 }
 
 /**
@@ -34,15 +46,25 @@ export interface GenAiConfig {
  * @param connector
  */
 export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiConfig => {
-  const config = (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
-  const { apiProvider, apiUrl, defaultModel } = config ?? {};
-  return {
+  const config = (connector as ActionConnectorProps<AiConfigCatchAll, unknown>)?.config;
+  const {
     apiProvider,
     apiUrl,
+    defaultModel,
+    providerConfig,
+    model_id: modelId,
+    url,
+  } = config ?? {};
+
+  return {
+    apiProvider,
+    apiUrl: apiUrl ?? url,
     defaultModel:
-      apiProvider === OpenAiProviderType.AzureAi
+      (apiProvider === OpenAiProviderType.AzureAi
         ? getAzureApiVersionParameter(apiUrl ?? '')
-        : defaultModel,
+        : defaultModel) ??
+      providerConfig?.model_id ??
+      modelId,
   };
 };
 
