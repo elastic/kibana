@@ -1218,6 +1218,17 @@
             "path": "src/platform/plugins/shared/navigation/common/constants.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "navigation",
+            "id": "def-common.DEFAULT_ROUTES.chat",
+            "type": "string",
+            "tags": [],
+            "label": "chat",
+            "description": [],
+            "path": "src/platform/plugins/shared/navigation/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

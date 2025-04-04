@@ -10,3 +10,7 @@ xpack.features.overrides:
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
 
+## Agentless deployment by default
+xpack.fleet.agentless.isDefault: true
+# Override integrations home
+xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations' 
