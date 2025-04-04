@@ -31,9 +31,9 @@ export {
 } from './interfaces/can_lock_hover_actions';
 export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
 export {
-  initializeTimeRange,
+  initializeTimeRangeManager,
   type SerializedTimeRange,
-} from './interfaces/fetch/initialize_time_range';
+} from './interfaces/fetch/time_range_manager';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';
 export {
   apiPublishesFilters,
