@@ -43,6 +43,39 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-server",
+        "id": "def-server.unwindNestedSecurityPrivileges",
+        "type": "Function",
+        "tags": [],
+        "label": "unwindNestedSecurityPrivileges",
+        "description": [],
+        "signature": [
+          "<T extends (string | { allOf?: string[] | undefined; anyOf?: string[] | undefined; })[]>(privileges: T) => string[]"
+        ],
+        "path": "src/core/packages/security/server/src/authz.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-server",
+            "id": "def-server.unwindNestedSecurityPrivileges.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "privileges",
+            "description": [],
+            "signature": [
+              "T"
+            ],
+            "path": "src/core/packages/security/server/src/authz.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
