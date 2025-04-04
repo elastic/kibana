@@ -5,14 +5,20 @@
  * 2.0.
  */
 
-export { alertDeletePreviewQuerySchema } from './preview/schemas/latest';
-export { alertDeletePreviewQuerySchema as alertDeletePreviewQuerySchemaV1 } from './preview/schemas/v1';
+export { alertDeletePreviewQuerySchema } from './schemas/latest';
+export { alertDeletePreviewQuerySchema as alertDeletePreviewQuerySchemaV1 } from './schemas/v1';
 
-export { alertDeletePreviewResponseSchema } from './preview/schemas/latest';
-export { alertDeletePreviewResponseSchema as alertDeletePreviewResponseSchemaV1 } from './preview/schemas/v1';
+export { alertDeletePreviewResponseSchema } from './schemas/latest';
+export { alertDeletePreviewResponseSchema as alertDeletePreviewResponseSchemaV1 } from './schemas/v1';
 
-export type { AlertDeletePreviewQuery } from './preview/types/latest';
-export type { AlertDeletePreviewQuery as AlertDeletePreviewQueryV1 } from './preview/types/v1';
+export type { AlertDeletePreviewQuery } from './types/latest';
+export type { AlertDeletePreviewQuery as AlertDeletePreviewQueryV1 } from './types/v1';
 
-export type { AlertDeletePreviewResponse } from './preview/types/latest';
-export type { AlertDeletePreviewResponse as AlertDeletePreviewResponseV1 } from './preview/types/v1';
+export type { AlertDeletePreviewResponse } from './types/latest';
+export type { AlertDeletePreviewResponse as AlertDeletePreviewResponseV1 } from './types/v1';
+
+export { alertDeleteScheduleQuerySchema } from './schemas/latest';
+export { alertDeleteScheduleQuerySchema as alertDeleteScheduleQuerySchemaV1 } from './schemas/v1';
+
+export type { AlertDeleteScheduleQuery } from './types/latest';
+export type { AlertDeleteScheduleQuery as AlertDeleteScheduleQueryV1 } from './types/v1';

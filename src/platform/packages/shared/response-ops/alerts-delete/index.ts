@@ -19,3 +19,12 @@ export {
   type GetAlertDeletePreviewResponse,
   getAlertDeletePreview,
 } from './api/preview/get_alert_delete_preview';
+
+export {
+  type UseAlertDeleteScheduleParams,
+  useAlertDeleteSchedule,
+} from './api/schedule/use_alert_delete_schedule';
+export {
+  type PostAlertDeleteScheduleParams,
+  postAlertDeleteSchedule,
+} from './api/schedule/post_alert_delete_schedule';
