@@ -28,7 +28,7 @@ import { AGENT_LOG_LEVELS, DEFAULT_LOG_LEVEL } from '../../../../../../../../com
 export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: string }> = memo(
   ({ agent, agentPolicyLogLevel = DEFAULT_LOG_LEVEL }) => {
     const authz = useAuthz();
-    const { notifications, docLinks } = useStartServices();
+    const { notifications } = useStartServices();
     const [isSetLevelLoading, setIsSetLevelLoading] = useState(false);
     const [isResetLevelLoading, setIsResetLevelLoading] = useState(false);
     const canResetLogLevel = semverGte(

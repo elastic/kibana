@@ -5,55 +5,12 @@
  * 2.0.
  */
 
-import React, { type ReactNode } from 'react';
+import React from 'react';
 
 import { useAuthz, useStartServices } from '../../../../../hooks';
 import { createFleetTestRendererMock } from '../../../../../../../mock';
 
-import { AgentLogsUI } from './agent_logs';
-
-jest.mock('@kbn/kibana-utils-plugin/public', () => {
-  return {
-    ...jest.requireActual('@kbn/kibana-utils-plugin/public'),
-    createStateContainerReactHelpers: jest.fn().mockReturnValue({
-      useTransitions: jest.fn().mockReturnValue({ update: jest.fn() }),
-    }),
-  };
-});
-
-jest.mock('@kbn/logs-shared-plugin/public', () => {
-  return {
-    LogStream: () => <div />,
-  };
-});
-
-jest.mock('@kbn/logs-shared-plugin/common', () => {
-  const originalModule = jest.requireActual('@kbn/logs-shared-plugin/common');
-  return {
-    ...originalModule,
-    getLogsLocatorFromUrlService: jest
-      .fn()
-      .mockReturnValue({ getRedirectUrl: jest.fn(() => 'https://discover-redirect-url') }),
-  };
-});
-
-jest.mock('@kbn/shared-ux-link-redirect-app', () => {
-  return {
-    RedirectAppLinks: ({ children }: { children: ReactNode }) => <div>{children}</div>,
-  };
-});
-
-jest.mock('./query_bar', () => {
-  return {
-    LogQueryBar: () => <div />,
-  };
-});
-
-jest.mock('./filter_dataset', () => {
-  return {
-    DatasetFilter: () => <div />,
-  };
-});
+import { AgentSettings } from '.';
 
 jest.mock('../../../../../hooks', () => {
   return {
@@ -72,7 +29,7 @@ jest.mock('../../../../../hooks', () => {
 
 const mockUseStartServices = useStartServices as jest.Mock;
 
-describe('AgentLogsUI', () => {
+describe.only('AgentSettings', () => {
   beforeEach(() => {
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
@@ -91,14 +48,20 @@ describe('AgentLogsUI', () => {
       id: 'agent1',
       local_metadata: { elastic: { agent: { version: opts.agentVersion, log_level: 'debug' } } },
     } as any;
-    const state = {
-      datasets: ['elastic_agent'],
-      logLevels: ['info', 'error'],
-      start: '2023-20-04T14:00:00.340Z',
-      end: '2023-20-04T14:20:00.340Z',
-      query: '',
+    const agentPolicy = {
+      id: 'policy1',
+      name: 'policy1',
+      revision: 1,
+      namespace: 'default',
+      updated_at: '2023-10-04T13:08:53.340Z',
+      updated_by: 'elastic',
+      data_streams: [],
+      is_managed: false,
+      is_default: false,
+      is_preconfigured: false,
     } as any;
-    return renderer.render(<AgentLogsUI agent={agent} state={state} />);
+
+    return renderer.render(<AgentSettings agent={agent} agentPolicy={agentPolicy} />);
   };
 
   const mockStartServices = (isServerlessEnabled?: boolean) => {
@@ -127,24 +90,26 @@ describe('AgentLogsUI', () => {
       },
     });
   };
-
-  it('should render Open in Logs button if privileges are set', () => {
+  it('should show log level dropdown with correct value', () => {
     mockStartServices();
     const result = renderComponent();
-    expect(result.getByTestId('viewInLogsBtn')).toHaveAttribute(
-      'href',
-      `https://discover-redirect-url`
-    );
+    const logLevelDropdown = result.getByTestId('selectAgentLogLevel');
+    expect(logLevelDropdown.getElementsByTagName('option').length).toBe(4);
+    expect(logLevelDropdown).toHaveDisplayValue('debug');
   });
 
-  it('should not render Open in Logs button if privileges are not set', () => {
-    jest.mocked(useAuthz).mockReturnValue({
-      fleet: {
-        readAgents: false,
-      },
-    } as any);
+  it('should hide reset log level button for agents version < 8.15.0', () => {
     mockStartServices();
     const result = renderComponent();
-    expect(result.queryByTestId('viewInLogsBtn')).not.toBeInTheDocument();
+    const resetLogLevelBtn = result.queryByTestId('resetLogLevelBtn');
+    expect(resetLogLevelBtn).not.toBeInTheDocument();
+  });
+
+  it('should show reset log level button for agents version >= 8.15.0', () => {
+    mockStartServices();
+    const result = renderComponent({ agentVersion: '8.15.0' });
+    const resetLogLevelBtn = result.getByTestId('resetLogLevelBtn');
+    expect(resetLogLevelBtn).toBeInTheDocument();
+    expect(resetLogLevelBtn).not.toHaveAttribute('disabled');
   });
 });
