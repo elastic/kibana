@@ -17,6 +17,12 @@ export function defineRoutes(router: IRouter, logger: Logger) {
     .get({
       path: '/internal/sse_examples/clock',
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out of authorization since it is an example sse route',
+        },
+      },
     })
     .addVersion(
       {

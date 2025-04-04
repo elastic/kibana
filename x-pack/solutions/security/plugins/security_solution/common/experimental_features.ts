@@ -256,6 +256,9 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables banner for informing users about changes in data collection.
    */
   eventCollectionDataReductionBannerEnabled: true,
+
+  /** Enables new Data View Picker */
+  newDataViewPickerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

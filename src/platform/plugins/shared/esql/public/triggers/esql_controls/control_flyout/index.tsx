@@ -69,6 +69,7 @@ export function ESQLControlsFlyout({
         onCreateControl={onCreateControl}
         onEditControl={onEditControl}
         search={search}
+        cursorPosition={cursorPosition}
       />
     );
   } else if (

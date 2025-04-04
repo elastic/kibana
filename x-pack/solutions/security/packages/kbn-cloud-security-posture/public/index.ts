@@ -19,3 +19,5 @@ export {
 export { getSeverityText } from './src/utils/get_vulnerability_text';
 export { getVulnerabilityStats, hasVulnerabilitiesData } from './src/utils/vulnerability_helpers';
 export { CVSScoreBadge, SeverityStatusBadge } from './src/components/vulnerability_badges';
+export { getNormalizedSeverity } from './src/utils/get_normalized_severity';
+export { createMisconfigurationFindingsQuery } from './src/utils/findings_query_builders';

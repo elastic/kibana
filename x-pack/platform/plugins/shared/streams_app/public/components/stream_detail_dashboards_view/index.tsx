@@ -17,7 +17,7 @@ import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
 }) {
   const [query, setQuery] = useState('');
 

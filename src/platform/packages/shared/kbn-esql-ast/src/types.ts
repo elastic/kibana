@@ -30,7 +30,9 @@ export type ESQLSingleAstItem =
   | ESQLCommandMode
   | ESQLInlineCast
   | ESQLOrderExpression
-  | ESQLUnknownItem;
+  | ESQLUnknownItem
+  | ESQLMap
+  | ESQLMapEntry;
 
 export type ESQLAstField = ESQLFunction | ESQLColumn;
 
@@ -88,8 +90,6 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
 
 export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
   sources: ESQLSource[];
-  aggregates?: ESQLAstField[];
-  grouping?: ESQLAstField[];
 }
 
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
@@ -334,6 +334,24 @@ export interface ESQLColumn extends ESQLAstBaseItem {
 export interface ESQLList extends ESQLAstBaseItem {
   type: 'list';
   values: ESQLLiteral[];
+}
+
+/**
+ * Represents a ES|QL "map" object, normally used as the last argument of a
+ * function.
+ */
+export interface ESQLMap extends ESQLAstBaseItem {
+  type: 'map';
+  entries: ESQLMapEntry[];
+}
+
+/**
+ * Represents a key-value pair in a ES|QL map object.
+ */
+export interface ESQLMapEntry extends ESQLAstBaseItem {
+  type: 'map-entry';
+  key: ESQLStringLiteral;
+  value: ESQLAstExpression;
 }
 
 export type ESQLNumericLiteralType = 'double' | 'integer';

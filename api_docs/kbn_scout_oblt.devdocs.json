@@ -1070,7 +1070,13 @@
             "text": "KbnClient"
           },
           "; samlAuth: ",
-          "SamlAuth",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & ",
@@ -1106,7 +1112,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1170,7 +1182,13 @@
             "text": "KbnClient"
           },
           "; samlAuth: ",
-          "SamlAuth",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
           "; } & { apiServices: ",
@@ -1240,7 +1258,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1314,7 +1338,13 @@
             "text": "KbnClient"
           },
           "; samlAuth: ",
-          "SamlAuth",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
           "; } & { esArchiver: ",
           "EsArchiverFixture",
           "; } & { uiSettings: ",

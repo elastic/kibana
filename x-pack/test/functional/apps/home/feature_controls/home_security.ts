@@ -74,7 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows the management section', async () => {
-        await testSubjects.existOrFail('homDataManage', { timeout: 2000 });
+        await testSubjects.existOrFail('homeDataManage', { timeout: 2000 });
       });
 
       it('shows the "Manage" action item', async () => {
@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show the management section', async () => {
-        await testSubjects.missingOrFail('homDataManage', { timeout: 2000 });
+        await testSubjects.missingOrFail('homeDataManage', { timeout: 2000 });
       });
 
       it('does not show the "Manage" action item', async () => {

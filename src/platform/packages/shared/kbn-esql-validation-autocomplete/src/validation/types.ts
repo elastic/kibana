@@ -121,11 +121,11 @@ export interface ValidationErrors {
   };
   unsupportedColumnTypeForCommand: {
     message: string;
-    type: { command: string; type: string; typeCount: number; givenType: string; column: string };
+    type: { command: string; type: string; givenType: string; column: string };
   };
-  unknownOption: {
+  unknownDissectKeyword: {
     message: string;
-    type: { command: string; option: string };
+    type: { keyword: string };
   };
   wrongOptionArgumentType: {
     message: string;
