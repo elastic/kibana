@@ -66,7 +66,7 @@ export interface APMQueryParams {
   waterfallItemId?: string;
   spanId?: string;
   page?: string | number;
-  pageSize?: string;
+  pageSize?: string | number;
   sortDirection?: string;
   sortField?: string;
   kuery?: string;
