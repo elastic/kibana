@@ -7,8 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FILTERS } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { FILTERS } from '@kbn/es-query';
 export const getEmptyValue = () => '—';
+
+export const checkIsFlattenResults = (groupByField: string, fields: string[] = []): boolean =>
+  fields.includes(groupByField);
 
 type StrictFilter = Filter & {
   query: Record<string, any>;
@@ -16,9 +20,11 @@ type StrictFilter = Filter & {
 
 export const createGroupFilter = (
   selectedGroup: string,
-  values?: string[] | null
-): StrictFilter[] =>
-  values != null && values.length > 0
+  values?: string[] | null,
+  multiValueFields?: string[]
+): StrictFilter[] => {
+  const shouldIgnoreFieldSize = checkIsFlattenResults(selectedGroup, multiValueFields);
+  return values != null && values.length > 0
     ? values.reduce(
         (acc: StrictFilter[], query) => [
           ...acc,
@@ -42,32 +48,35 @@ export const createGroupFilter = (
             },
           },
         ],
-        [
-          {
-            meta: {
-              alias: null,
-              disabled: false,
-              type: FILTERS.CUSTOM,
-              negate: false,
-              key: selectedGroup,
-            },
-            query: {
-              script: {
-                script: {
-                  // this will give us an exact match for events with multiple values on the group field
-                  // for example, when values === ['a'], we match events with ['a'], but not ['a', 'b', 'c']
-                  source: "doc[params['field']].size()==params['size']",
-                  params: {
-                    field: selectedGroup,
-                    size: values.length,
+        shouldIgnoreFieldSize
+          ? []
+          : [
+              {
+                meta: {
+                  alias: null,
+                  disabled: false,
+                  type: FILTERS.CUSTOM,
+                  negate: false,
+                  key: selectedGroup,
+                },
+                query: {
+                  script: {
+                    script: {
+                      // this will give us an exact match for events with multiple values on the group field
+                      // for example, when values === ['a'], we match events with ['a'], but not ['a', 'b', 'c']
+                      source: "doc[params['field']].size()==params['size']",
+                      params: {
+                        field: selectedGroup,
+                        size: values.length,
+                      },
+                    },
                   },
                 },
               },
-            },
-          },
-        ]
+            ]
       )
     : [];
+};
 
 export const getNullGroupFilter = (selectedGroup: string): StrictFilter[] => [
   {

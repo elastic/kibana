@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EcsEvent } from '@kbn/core/server';
-import { AuditEvent } from '@kbn/security-plugin/server';
+import type { EcsEvent } from '@kbn/core/server';
+import type { AuditEvent } from '@kbn/security-plugin/server';
 import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server';
-import { ArrayElement } from '@kbn/utility-types';
+import type { ArrayElement } from '@kbn/utility-types';
 
 export enum AlertAuditAction {
   GET = 'alert_get',

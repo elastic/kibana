@@ -23,7 +23,7 @@ import { StreamStatsPanel } from './components/stream_stats_panel';
 import { StreamChartPanel } from './components/stream_chart_panel';
 import { TabsPanel } from './components/tabs_panel';
 
-export function StreamDetailOverview({ definition }: { definition?: IngestStreamGetResponse }) {
+export function StreamDetailOverview({ definition }: { definition: IngestStreamGetResponse }) {
   const {
     dependencies: {
       start: {
@@ -160,7 +160,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
 
   return (
     <>
-      <EuiFlexGroup direction="column">
+      <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
             <EuiFlexItem grow>
@@ -207,7 +207,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
         </EuiFlexItem>
 
         <EuiFlexItem grow>
-          <EuiFlexGroup direction="row">
+          <EuiFlexGroup direction="row" gutterSize="m">
             <EuiFlexItem grow={4}>{definition && <TabsPanel tabs={tabs} />}</EuiFlexItem>
             <EuiFlexItem grow={8}>
               <StreamChartPanel

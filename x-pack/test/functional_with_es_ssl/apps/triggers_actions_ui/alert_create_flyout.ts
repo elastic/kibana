@@ -64,7 +64,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector(
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
       );
-      await testSubjects.click('create-connector-flyout-save-btn');
     });
 
     const toastTitle = await toasts.getTitleAndDismiss();
@@ -178,8 +177,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rulesTab');
     });
 
-    // Failing: See https://github.com/elastic/kibana/issues/202328
-    it.skip('should delete the right action when the same action has been added twice', async () => {
+    it('should delete the right action when the same action has been added twice', async () => {
       // create a new rule
       const ruleName = generateUniqueKey();
       await rules.common.defineIndexThresholdAlert(ruleName);
