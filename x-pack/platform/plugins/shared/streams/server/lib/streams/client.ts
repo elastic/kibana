@@ -619,6 +619,7 @@ export class StreamsClient {
     if (!isElasticsearch404(dataStream) && isElasticsearch404(streamDefinition)) {
       // stream definition does not exist, but data stream does - create an empty stream definition
       await this.updateStoredStream(this.getDataStreamAsIngestStream(dataStream));
+      return;
     }
     // if both do not exist, the stream does not exist, so this should be a 404
     throw streamDefinition;

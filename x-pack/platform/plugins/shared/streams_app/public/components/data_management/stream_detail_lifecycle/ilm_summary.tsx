@@ -190,7 +190,7 @@ function IlmPhase({
           >
             <EuiText size="xs">
               <p>
-                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 b')}
+                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 ib')}
               </p>
             </EuiText>
           </EuiPanel>
