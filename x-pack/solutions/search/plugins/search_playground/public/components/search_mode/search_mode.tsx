@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiImage,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -26,7 +25,6 @@ import { ChatForm, ChatFormFields, Pagination } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
 import { useIndexMappings } from '../../hooks/use_index_mappings';
-import heroImage from '../../assets/hero_image.svg';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -118,15 +116,6 @@ export const SearchMode: React.FC = () => {
                     />
                   ) : (
                     <EuiEmptyPrompt
-                      icon={
-                        <EuiImage
-                          size="fullWidth"
-                          src={heroImage}
-                          alt={i18n.translate('xpack.searchPlayground.searchMode.readyToSearch', {
-                            defaultMessage: 'Hero image icon',
-                          })}
-                        />
-                      }
                       title={
                         <h2>
                           {i18n.translate('xpack.searchPlayground.searchMode.readyToSearch', {
