@@ -95,7 +95,6 @@ export class LockManager {
           metadata,
           token: this.token,
         },
-        refresh: true,
       });
 
       if (response.result === 'created') {
@@ -152,7 +151,6 @@ export class LockManager {
           `,
           params: { token: this.token },
         },
-        refresh: true,
       });
 
       if (response.result === 'deleted') {
@@ -183,20 +181,24 @@ export class LockManager {
 
   /**
    * Retrieves the lock document for a given lockId.
-   * If the lock is expired, it will be released.
+   * If the lock is expired, it will not be returned
    */
   public async get(): Promise<LockDocument | undefined> {
-    const result = await this.esClient.search<LockDocument>({
-      index: LOCKS_CONCRETE_INDEX_NAME,
-      query: {
-        bool: {
-          filter: [{ term: { _id: this.lockId } }, { range: { expiresAt: { gt: 'now' } } }],
-        },
-      },
-    });
+    const result = await this.esClient.get<LockDocument>(
+      { index: LOCKS_CONCRETE_INDEX_NAME, id: this.lockId },
+      { ignore: [404] }
+    );
 
-    const hits = result.hits.hits;
-    return hits[0]?._source;
+    if (!result._source) {
+      return undefined;
+    }
+
+    const isExpired = new Date(result._source?.expiresAt).getTime() < Date.now();
+    if (isExpired) {
+      return undefined;
+    }
+
+    return result._source;
   }
 
   public async acquireWithRetry({
@@ -233,7 +235,6 @@ export class LockManager {
             token: this.token,
           },
         },
-        refresh: true,
       });
       this.logger.debug(`Lock "${this.lockId}" extended ttl with ${prettyMilliseconds(ttl)}.`);
       return true;

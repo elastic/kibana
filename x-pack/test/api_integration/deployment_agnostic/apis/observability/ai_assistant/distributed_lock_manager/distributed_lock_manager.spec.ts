@@ -520,15 +520,10 @@ async function outputLocks(es: Client, log: ToolingLog, name?: string) {
 }
 
 async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocument | undefined> {
-  const res = await esClient.search<LockDocument>(
-    {
-      index: LOCKS_CONCRETE_INDEX_NAME,
-      query: {
-        bool: { filter: [{ term: { _id: lockId } }] },
-      },
-    },
+  const res = await esClient.get<LockDocument>(
+    { index: LOCKS_CONCRETE_INDEX_NAME, id: lockId },
     { ignore: [404] }
   );
 
-  return res.hits.hits[0]?._source;
+  return res._source;
 }

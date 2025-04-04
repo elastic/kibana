@@ -29,7 +29,7 @@ export default function aiAssistantApiIntegrationTests({
     loadTestFile(require.resolve('./knowledge_base/knowledge_base_setup.spec.ts'));
     loadTestFile(
       require.resolve(
-        './knowledge_base/knowledge_base_populate_missing_semantic_text_fields.spec.ts'
+        './knowledge_base/knowledge_base_reindex_and_populate_missing_semantic_text_fields.spec.ts'
       )
     );
     loadTestFile(
