@@ -655,7 +655,10 @@ paths:
     get:
       summary: Get a parameter
       operationId: get-parameter
-      description: You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      description: >
+        Get a parameter from the Synthetics app.
+        
+        You must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       tags:
         - synthetics
       parameters:
@@ -699,7 +702,10 @@ paths:
     put:
       summary: Update a parameter
       operationId: put-parameter
-      description: You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
+      description: >
+        Update a parameter in the Synthetics app.
+
+        You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       tags:
         - synthetics
       parameters:
@@ -1243,7 +1249,6 @@ components:
               description: >
                 The TLS/SSL connection settings for use with the HTTPS endpoint.
                 If you don't specify settings, the system defaults are used.
-                    type:
             type:
               type: string
               description: The monitor type.
