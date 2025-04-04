@@ -4,10 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export enum ApiOperation {
-  Read = 'read',
-  Create = 'create',
-  Update = 'update',
-  Delete = 'delete',
-  Manage = 'manage',
-}
+
+export const QUERY_RULES_SETS_QUERY_KEY = 'query-rules-sets-fetch';
