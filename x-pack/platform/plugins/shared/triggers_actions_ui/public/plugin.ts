@@ -84,6 +84,7 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -152,6 +153,7 @@ interface PluginsStart {
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  uiActions: UiActionsStart;
 }
 
 export class Plugin
@@ -410,6 +412,45 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const alertRulesDefinition = {
+      type: 'alertRule',
+      id: 'alertRule',
+      shouldAutoExecute: async () => true,
+      execute: async (context: unknown) => {
+        const { timeField, query, sourceField, value, splitValues } = context.data;
+        const thresholdQueryComment = i18n.translate(
+          'xpack.triggersActionsUi.alertRuleFromVis.thresholdComment',
+          {
+            defaultMessage:
+              'Threshold automatically generated from the selected value on the chart. This rule will fire if {sourceField} is >= {value}; to change this, modify the following line:',
+            values: { value, sourceField },
+          }
+        );
+        const thresholdQuery = `${sourceField} >= ${value}`;
+        const splitValueQueries = splitValues.map(([fieldName, values]) =>
+          values.length === 1
+            ? `${fieldName} == "${values[0]}"`
+            : `(${values.map((value) => `${fieldName} == "${value}"`).join(' OR ')})`
+        );
+        const conditionsQuery = [thresholdQuery, ...splitValueQueries].join(' AND ');
+        const initialValues = {
+          params: {
+            searchType: 'esqlQuery',
+            esqlQuery: {
+              esql: `${query}\n// ${thresholdQueryComment}\n| WHERE ${conditionsQuery}`,
+            },
+            timeField,
+          },
+        };
+        context.embeddable.createAlertRule(
+          initialValues,
+          this.ruleTypeRegistry,
+          this.actionTypeRegistry
+        );
+      },
+    };
+    plugins.uiActions.addTriggerAction('alertRule', alertRulesDefinition);
+
     return {
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,

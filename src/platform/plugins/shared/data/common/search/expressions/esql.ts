@@ -354,9 +354,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                         appliedTimeRange,
                         params: {},
                         indexPattern,
+                        sourceField: name,
                       }
                     : {
                         indexPattern,
+                        sourceField: name,
                       },
               },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,

@@ -66,6 +66,10 @@ import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { RuleFormData, RuleTypeModel } from '@kbn/response-ops-rule-form';
+import type { BehaviorSubject } from 'rxjs';
+import { ActionTypeModel } from '@kbn/alerts-ui-shared';
+import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -426,6 +430,12 @@ export type LensInternalApi = Simplify<
       dataLoading$: PublishingSubject<boolean | undefined>;
       hasRenderCompleted$: PublishingSubject<boolean>;
       isNewlyCreated$: PublishingSubject<boolean>;
+      isRuleFormVisible$: BehaviorSubject<boolean>;
+      alertRuleInitialValues$: BehaviorSubject<Partial<RuleFormData>>;
+      alertingTypeRegistries$: BehaviorSubject<{
+        ruleTypeRegistry?: TypeRegistry<RuleTypeModel>;
+        actionTypeRegistry?: TypeRegistry<ActionTypeModel>;
+      }>;
       setAsCreated: () => void;
       dispatchRenderStart: () => void;
       dispatchRenderComplete: () => void;
@@ -445,6 +455,7 @@ export type LensInternalApi = Simplify<
       updateBlockingError: (newBlockingError: Error | undefined) => void;
       resetAllMessages: () => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
+      createAlertRule: (initialValues: Partial<RuleFormData>) => void;
     }
 >;
 

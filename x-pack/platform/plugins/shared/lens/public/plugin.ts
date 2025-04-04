@@ -67,6 +67,7 @@ import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -149,6 +150,7 @@ import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_ac
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import { deserializeState } from './react_embeddable/helper';
 import { ACTION_CREATE_ESQL_CHART } from './trigger_actions/open_lens_config/constants';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export type { SaveProps } from './app_plugin';
 
@@ -193,6 +195,8 @@ export interface LensPluginStartDependencies {
   serverless?: ServerlessPluginStart;
   licensing?: LicensingPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export interface LensPublicSetup {
@@ -670,19 +674,6 @@ export class LensPlugin {
         })
       )(core.application)
     );
-
-
-  const alertRulesDefinition = {
-      type: 'alertRule',
-      id: 'alertRule',
-      shouldAutoExecute: async () => true,
-      execute: async (context: unknown) => {
-      console.log('open the flyout and execute the action here', context);
-      }
-  }
-
-
-    startDependencies.uiActions.addTriggerAction('alertRule', alertRulesDefinition);
 
     // Allows the Lens embeddable to easily open the inline editing flyout
     const editLensEmbeddableAction = new EditLensEmbeddableAction(core, async () => {

@@ -9,6 +9,7 @@ import { BehaviorSubject } from 'rxjs';
 import { initializeTitleManager } from '@kbn/presentation-publishing';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
   ExpressionWrapperProps,
@@ -71,6 +72,13 @@ export function initializeInternalApi(
     apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
   );
 
+  // Handles visibility of the alerting rule flyout if the user uses the Create Alert Rule action
+  const isRuleFormVisible$ = new BehaviorSubject<boolean>(false);
+  const alertRuleInitialValues$ = new BehaviorSubject<Partial<RuleFormData>>({});
+  const alertingTypeRegistries$: LensInternalApi['alertingTypeRegistries$'] = new BehaviorSubject(
+    {}
+  );
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
@@ -88,6 +96,13 @@ export function initializeInternalApi(
     blockingError$,
     messages$,
     validationMessages$,
+    isRuleFormVisible$,
+    alertRuleInitialValues$,
+    alertingTypeRegistries$,
+    createAlertRule: (initialValues: Partial<RuleFormData>) => {
+      alertRuleInitialValues$.next(initialValues);
+      isRuleFormVisible$.next(true);
+    },
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);

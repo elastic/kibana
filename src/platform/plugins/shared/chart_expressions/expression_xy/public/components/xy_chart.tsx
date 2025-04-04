@@ -116,7 +116,6 @@ import { XYCurrentTime } from './xy_current_time';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
-import { on } from 'events';
 import { GlobalXYChartStyles } from './xy_chart.styles';
 
 declare global {
@@ -233,6 +232,7 @@ export function XYChart({
     singleTable,
     annotations,
   } = args;
+
   const chartRef = useRef<Chart>(null);
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
   const darkMode = chartsThemeService.useDarkMode();
@@ -795,7 +795,8 @@ export function XYChart({
                 formattedDatatables,
                 xAxisFormatter,
                 formatFactory,
-                interactive && !args.detailedTooltip && !isEsqlMode
+                isEsqlMode,
+                interactive && !args.detailedTooltip
               )}
               customTooltip={
                 args.detailedTooltip
