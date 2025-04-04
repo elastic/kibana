@@ -11,6 +11,7 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -33,6 +34,7 @@ import { sloPaths } from '../../../../common';
 import { paths } from '../../../../common/locators/paths';
 import { SloManagementSearchBar } from './slo_management_search_bar';
 import { SloDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloBulkDeleteModal } from '../../../components/slo/delete_confirmation_modal/slo_bulk_delete_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
 import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
@@ -60,10 +62,10 @@ export function SloManagementTable() {
   const { data: permissions } = usePermissions();
 
   const [selectedItems, setSelectedItems] = useState<SLODefinitionResponse[]>([]);
-  const onSelectionChange = (newSelectedItems: SLODefinitionResponse[]) => {
-    setSelectedItems(newSelectedItems);
-  };
 
+  const [slosToDelete, setSlosToDelete] = useState<Array<{ id: string; name: string }> | undefined>(
+    undefined
+  );
   const [sloToDelete, setSloToDelete] = useState<SLODefinitionResponse | undefined>(undefined);
   const [sloToReset, setSloToReset] = useState<SLODefinitionResponse | undefined>(undefined);
   const [sloToEnable, setSloToEnable] = useState<SLODefinitionResponse | undefined>(undefined);
@@ -72,6 +74,18 @@ export function SloManagementTable() {
   const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
   const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
   const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
+
+  const onSelectionChange = (newSelectedItems: SLODefinitionResponse[]) => {
+    setSelectedItems(newSelectedItems);
+  };
+
+  const handleBulkDeleteConfirm = () => {
+    setSlosToDelete(undefined);
+  };
+
+  const handleBulkDeleteCancel = () => {
+    setSlosToDelete(undefined);
+  };
 
   const handleDeleteConfirm = () => {
     setSloToDelete(undefined);
@@ -187,12 +201,11 @@ export function SloManagementTable() {
         defaultMessage: 'Delete',
       }),
       'data-test-subj': 'sloActionsDelete',
-      enabled: (slo: SLODefinitionResponse) => !!permissions?.hasAllWriteRequested,
+      enabled: () => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => {
         setSloToDelete(slo);
       },
     },
-
     {
       type: 'icon',
       icon: 'refresh',
@@ -302,7 +315,34 @@ export function SloManagementTable() {
   return (
     <>
       <EuiPanel hasBorder={true}>
-        <SloManagementSearchBar onRefresh={refetch} />
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="s">
+          {!!selection.selected?.length && (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="sloBulkDeleteButton"
+                color="danger"
+                iconType="trash"
+                onClick={() => {
+                  const newSlosToDelete = selection.selected?.map((slo) => {
+                    return {
+                      id: slo.id,
+                      name: slo.name,
+                    };
+                  });
+                  setSlosToDelete(newSlosToDelete);
+                }}
+              >
+                {i18n.translate('xpack.slo.sloManagementTable.deleteButtonLabel', {
+                  defaultMessage: 'Delete {amount} SLOs',
+                  values: { amount: selection.selected.length },
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <SloManagementSearchBar onRefresh={refetch} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <EuiBasicTable<SLODefinitionResponse>
           tableCaption={TABLE_CAPTION}
@@ -323,6 +363,13 @@ export function SloManagementTable() {
           loading={isLoading}
         />
       </EuiPanel>
+      {slosToDelete ? (
+        <SloBulkDeleteModal
+          slos={slosToDelete}
+          onCancel={handleBulkDeleteCancel}
+          onSuccess={handleBulkDeleteConfirm}
+        />
+      ) : null}
       {sloToDelete ? (
         <SloDeleteModal
           slo={sloToDelete}

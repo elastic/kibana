@@ -53,7 +53,7 @@ describe('DeleteSLO', () => {
       });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
-      await deleteSLO.execute(slo.id);
+      await deleteSLO.execute({ ids: [slo.id] });
 
       expect(mockRepository.findById).toMatchSnapshot();
       expect(mockSummaryTransformManager.stop).toMatchSnapshot();
