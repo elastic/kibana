@@ -9,10 +9,6 @@
 
 import getopts from 'getopts';
 import { ServerlessProjectType } from '@kbn/es';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-
-export const execPromise = promisify(exec);
 
 export const formatCurrentDate = () => {
   const now = new Date();
