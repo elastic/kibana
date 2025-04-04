@@ -27,7 +27,6 @@ import {
 } from '@kbn/observability-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { MonitorSummary, UptimeAlertTypeFactory } from './types';
 import {
   StatusCheckFilters,

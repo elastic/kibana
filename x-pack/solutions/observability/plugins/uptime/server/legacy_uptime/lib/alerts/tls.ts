@@ -22,7 +22,6 @@ import { asyncForEach } from '@kbn/std';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeTLSRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_tls';
 
-import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { formatFilterString } from './status_check';
 import { UptimeAlertTypeFactory } from './types';
 import {
