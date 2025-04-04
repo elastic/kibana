@@ -207,6 +207,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           ignore_malformed: 'true',
           total_fields: {
             limit: '2500',
+            ignore_dynamic_beyond_limit: 'true',
           },
         });
 
