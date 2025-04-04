@@ -28,6 +28,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     const urlBeforeAlertDetails = page.url();
     expect(urlBeforeAlertDetails).not.toContain(RIGHT);
 
+    await pageObjects.alertsTablePage.detectionsAlertsContainer.waitFor({ state: 'visible' });
     await pageObjects.alertsTablePage.expandAlertDetailsFlyout(ruleName);
 
     const urlAfterAlertDetails = page.url();
@@ -37,7 +38,7 @@ spaceTest.describe('Expandable flyout state sync', { tag: ['@ess', '@svlSecurity
     await expect(headerTitle).toHaveText(ruleName);
 
     await page.reload();
-    await page.waitForLoadingIndicatorHidden();
+    await pageObjects.alertsTablePage.detectionsAlertsContainer.waitFor({ state: 'visible' });
 
     const urlAfterReload = page.url();
     expect(urlAfterReload).toContain(RIGHT);

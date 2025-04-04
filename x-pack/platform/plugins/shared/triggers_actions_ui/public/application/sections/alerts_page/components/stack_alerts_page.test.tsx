@@ -52,7 +52,7 @@ describe('StackAlertsPage', () => {
     appMockRender.render(<StackAlertsPage />);
 
     expect(await screen.findByTestId('stackAlertsPageContent')).toBeInTheDocument();
-    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertsTableIsLoaded')).toBeInTheDocument();
     expect(await screen.findByTestId('urlSyncedAlertsSearchBar')).toBeInTheDocument();
   });
 

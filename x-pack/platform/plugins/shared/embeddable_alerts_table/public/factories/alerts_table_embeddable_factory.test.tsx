@@ -47,7 +47,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
 
     render(<Component />);
 
-    expect(screen.getByTestId('alertsTable')).toBeInTheDocument();
+    expect(screen.getByTestId('alertsTableIsLoaded')).toBeInTheDocument();
     expect(mockAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: `${LOCAL_STORAGE_KEY_PREFIX}-${uuid}`,
