@@ -57,6 +57,9 @@ const externals = {
   // this is how plugins/consumers from npm load monaco
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
   'io-ts': '__kbnSharedDeps__.IoTs',
+  'io-ts/lib/Reporter': '__kbnSharedDeps__.IoTs.Reporter',
+  'io-ts/lib/PathReporter': '__kbnSharedDeps__.IoTs.PathReporter',
+  'io-ts/lib/ThrowReporter': '__kbnSharedDeps__.IoTs.ThrowReporter',
   '@reduxjs/toolkit': '__kbnSharedDeps__.ReduxjsToolkit',
   'react-redux': '__kbnSharedDeps__.ReactRedux',
   redux: '__kbnSharedDeps__.Redux',
