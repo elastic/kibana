@@ -2,10 +2,10 @@
 
 exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
-  className="eui-scrollBar"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}
@@ -86,10 +86,10 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 
 exports[`Clear btns enabled when there are values 1`] = `
 <div
-  className="eui-scrollBar"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}
@@ -170,10 +170,10 @@ exports[`Clear btns enabled when there are values 1`] = `
 
 exports[`Renders list control 1`] = `
 <div
-  className="eui-scrollBar"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}
@@ -254,10 +254,10 @@ exports[`Renders list control 1`] = `
 
 exports[`Renders range control 1`] = `
 <div
-  className="eui-scrollBar"
+  css="unknown styles"
 >
   <div
-    css={[Function]}
+    css="unknown styles"
   >
     <EuiFlexGroup
       wrap={true}

@@ -165,7 +165,7 @@ describe('GridLayout', () => {
       renderGridLayout();
       const panelHandle = getPanelHandle('panel1');
       expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-        'kbnGridPanel css-1b4mq21-initialStyles',
+        'kbnGridPanel css-c5ixg-initialStyles',
         {
           exact: true,
         }
@@ -173,12 +173,12 @@ describe('GridLayout', () => {
       mouseStartDragging(panelHandle);
       mouseMoveTo({ clientX: 256, clientY: 128 });
       expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-        'kbnGridPanel css-1b4mq21-initialStyles kbnGridPanel--active',
+        'kbnGridPanel css-c5ixg-initialStyles kbnGridPanel--active',
         { exact: true }
       );
       mouseDrop(panelHandle);
       expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
-        'kbnGridPanel css-1b4mq21-initialStyles',
+        'kbnGridPanel css-c5ixg-initialStyles',
         {
           exact: true,
         }
