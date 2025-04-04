@@ -131,13 +131,7 @@ export function getColumns({
       render: (_, { name, transactionType: type }) => {
         return (
           <TransactionDetailLink
-            serviceName={serviceName}
             transactionName={name}
-            transactionType={type}
-            latencyAggregationType={latencyAggregationType}
-            comparisonEnabled={comparisonEnabled}
-            offset={offset}
-            overflowCount={transactionOverflowCount}
             href={link('/services/{serviceName}/transactions/view', {
               path: { serviceName },
               query: {

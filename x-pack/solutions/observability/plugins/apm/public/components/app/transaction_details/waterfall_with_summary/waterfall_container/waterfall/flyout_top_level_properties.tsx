@@ -35,23 +35,9 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
     LatencyAggregationType.avg;
   const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
 
-  const { comparisonEnabled, offset } = query;
-
   if (!transaction) {
     return null;
   }
-
-  const transactionViewLink = transaction
-    ? link('/services/{serviceName}/transactions/view', {
-        path: { serviceName: transaction?.service.name },
-        query: {
-          ...query,
-          serviceGroup,
-          latencyAggregationType,
-          transactionName: transaction.transaction.name,
-        },
-      })
-    : undefined;
 
   const nextEnvironment = getNextEnvironmentUrlParam({
     requestedEnvironment: transaction.service.environment,
@@ -90,16 +76,16 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
       fieldName: TRANSACTION_NAME,
       val: (
         <TransactionDetailLink
-          serviceName={transaction.service.name}
-          transactionId={transaction.transaction.id}
-          traceId={transaction.trace.id}
           transactionName={transaction.transaction.name}
-          transactionType={transaction.transaction.type}
-          environment={nextEnvironment}
-          latencyAggregationType={latencyAggregationType}
-          comparisonEnabled={comparisonEnabled}
-          offset={offset}
-          href={transactionViewLink}
+          href={link('/services/{serviceName}/transactions/view', {
+            path: { serviceName: transaction?.service.name },
+            query: {
+              ...query,
+              serviceGroup,
+              latencyAggregationType,
+              transactionName: transaction.transaction.name,
+            },
+          })}
         >
           {transaction.transaction.name}
         </TransactionDetailLink>
