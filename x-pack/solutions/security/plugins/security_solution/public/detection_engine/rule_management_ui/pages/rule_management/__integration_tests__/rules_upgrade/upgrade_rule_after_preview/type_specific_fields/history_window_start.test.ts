@@ -8,42 +8,35 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "history_window_start" field', () => {
-  describe.each([
-    {
-      ruleType: 'new_terms',
-      fieldName: 'history_window_start',
-      humanizedFieldName: 'History Window Size',
-      initial: 'now-1h',
-      customized: 'now-2h',
-      upgrade: 'now-3h',
-      resolvedValue: 'now-5h',
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "history_window_start" (new_terms rule type) after preview in flyout', () => {
+  const ruleType = 'new_terms';
+  const fieldName = 'history_window_start';
+  const humanizedFieldName = 'History Window Size';
+  const initial = 'now-1h';
+  const customized = 'now-2h';
+  const upgrade = 'now-3h';
+  const resolvedValue = 'now-5h';
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

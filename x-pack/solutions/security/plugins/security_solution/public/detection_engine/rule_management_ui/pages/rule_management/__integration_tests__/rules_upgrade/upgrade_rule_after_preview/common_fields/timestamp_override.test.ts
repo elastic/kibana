@@ -9,7 +9,7 @@ import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "timestamp_override" field', () => {
+describe('Upgrade diffable rule "timestamp_override" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
     mockAvailableDataViews([], {
       resolvedDate: {
@@ -21,41 +21,34 @@ describe('Upgrade rule after preview - "timestamp_override" field', () => {
     });
   });
 
-  describe.each([
-    {
-      ruleType: 'query',
-      fieldName: 'timestamp_override',
-      humanizedFieldName: 'Timestamp override',
-      initial: { field_name: 'fieldA', fallback_disabled: false },
-      customized: { field_name: 'fieldB', fallback_disabled: false },
-      upgrade: { field_name: 'fieldC', fallback_disabled: false },
-      resolvedValue: { field_name: 'resolvedDateField', fallback_disabled: false },
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  const ruleType = 'query';
+  const fieldName = 'timestamp_override';
+  const humanizedFieldName = 'Timestamp override';
+  const initial = { field_name: 'fieldA', fallback_disabled: false };
+  const customized = { field_name: 'fieldB', fallback_disabled: false };
+  const upgrade = { field_name: 'fieldC', fallback_disabled: false };
+  const resolvedValue = { field_name: 'resolvedDateField', fallback_disabled: false };
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

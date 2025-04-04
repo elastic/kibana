@@ -8,42 +8,35 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "building_block" field', () => {
-  describe.each([
-    {
-      ruleType: 'query',
-      fieldName: 'building_block',
-      humanizedFieldName: 'Building Block',
-      initial: undefined,
-      customized: { type: 'default' },
-      upgrade: { type: 'default' },
-      resolvedValue: undefined,
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "building_block" (query rule type) after preview in flyout', () => {
+  const ruleType = 'query';
+  const fieldName = 'building_block';
+  const humanizedFieldName = 'Building Block';
+  const initial = undefined;
+  const customized = { type: 'default' };
+  const upgrade = { type: 'default' };
+  const resolvedValue = undefined;
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

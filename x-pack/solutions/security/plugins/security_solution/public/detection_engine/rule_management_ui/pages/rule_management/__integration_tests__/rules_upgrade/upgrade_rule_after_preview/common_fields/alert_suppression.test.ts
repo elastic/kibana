@@ -9,7 +9,7 @@ import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "alert_suppression" field', () => {
+describe('Upgrade diffable rule "alert_suppression" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
     mockAvailableDataViews([], {
       resolvedString: {
@@ -21,41 +21,34 @@ describe('Upgrade rule after preview - "alert_suppression" field', () => {
     });
   });
 
-  describe.each([
-    {
-      ruleType: 'query',
-      fieldName: 'alert_suppression',
-      humanizedFieldName: 'Alert suppression',
-      initial: { group_by: ['fieldA'] },
-      customized: { group_by: ['fieldB'] },
-      upgrade: { group_by: ['fieldC'] },
-      resolvedValue: { group_by: ['resolvedStringField'] },
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  const ruleType = 'query';
+  const fieldName = 'alert_suppression';
+  const humanizedFieldName = 'Alert suppression';
+  const initial = { group_by: ['fieldA'] };
+  const customized = { group_by: ['fieldB'] };
+  const upgrade = { group_by: ['fieldC'] };
+  const resolvedValue = { group_by: ['resolvedStringField'] };
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

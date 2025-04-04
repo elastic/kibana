@@ -10,7 +10,7 @@ import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "data_source" field', () => {
+describe('Upgrade diffable rule "data_source" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
     mockAvailableDataViews(
       [
@@ -31,50 +31,45 @@ describe('Upgrade rule after preview - "data_source" field', () => {
     );
   });
 
+  const ruleType = 'query';
+  const fieldName = 'data_source';
+  const humanizedFieldName = 'Data source';
+
   describe.each([
     {
-      ruleType: 'query',
-      fieldName: 'data_source',
-      humanizedFieldName: 'Data source',
       initial: { type: DataSourceType.index_patterns, index_patterns: ['indexA'] },
       customized: { type: DataSourceType.index_patterns, index_patterns: ['indexB'] },
       upgrade: { type: DataSourceType.index_patterns, index_patterns: ['indexC'] },
       resolvedValue: { type: DataSourceType.index_patterns, index_patterns: ['resolved'] },
     },
     {
-      ruleType: 'query',
-      fieldName: 'data_source',
-      humanizedFieldName: 'Data source',
       initial: { type: DataSourceType.data_view, data_view_id: 'data_view_A' },
       customized: { type: DataSourceType.data_view, data_view_id: 'data_view_B' },
       upgrade: { type: DataSourceType.data_view, data_view_id: 'data_view_C' },
       resolvedValue: { type: DataSourceType.data_view, data_view_id: 'resolved' },
     },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  ] as const)('$resolvedValue.type', ({ initial, customized, upgrade, resolvedValue }) => {
+    assertRuleUpgradePreview({
+      ruleType,
+      fieldName,
+      humanizedFieldName,
+      fieldVersions: {
+        initial,
+        customized,
+        upgrade,
+        resolvedValue,
+      },
+    });
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+    assertRuleUpgradeAfterReview({
+      ruleType,
+      fieldName,
+      fieldVersions: {
+        initial,
+        customized,
+        upgrade,
+        resolvedValue,
+      },
+    });
+  });
 });

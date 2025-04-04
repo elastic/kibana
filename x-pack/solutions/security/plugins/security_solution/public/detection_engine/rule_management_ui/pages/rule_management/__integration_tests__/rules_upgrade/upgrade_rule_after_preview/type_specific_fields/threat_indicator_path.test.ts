@@ -8,42 +8,35 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "threat_indicator_path" field', () => {
-  describe.each([
-    {
-      ruleType: 'threat_match',
-      fieldName: 'threat_indicator_path',
-      humanizedFieldName: 'Indicator prefix override',
-      initial: 'fieldA',
-      customized: 'fieldB',
-      upgrade: 'fieldC',
-      resolvedValue: 'resolvedStringField',
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "threat_indicator_path" (threat_match rule type) after preview in flyout', () => {
+  const ruleType = 'threat_match';
+  const fieldName = 'threat_indicator_path';
+  const humanizedFieldName = 'Indicator prefix override';
+  const initial = 'fieldA';
+  const customized = 'fieldB';
+  const upgrade = 'fieldC';
+  const resolvedValue = 'resolvedStringField';
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

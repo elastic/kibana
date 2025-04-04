@@ -8,42 +8,35 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "false_positives" field', () => {
-  describe.each([
-    {
-      ruleType: 'query',
-      fieldName: 'false_positives',
-      humanizedFieldName: 'False Positives',
-      initial: ['exampleA'],
-      customized: ['exampleB'],
-      upgrade: ['exampleC'],
-      resolvedValue: ['resolved'],
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "false_positives" (query rule type) after preview in flyout', () => {
+  const ruleType = 'query';
+  const fieldName = 'false_positives';
+  const humanizedFieldName = 'False Positives';
+  const initial = ['exampleA'];
+  const customized = ['exampleB'];
+  const upgrade = ['exampleC'];
+  const resolvedValue = ['resolved'];
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

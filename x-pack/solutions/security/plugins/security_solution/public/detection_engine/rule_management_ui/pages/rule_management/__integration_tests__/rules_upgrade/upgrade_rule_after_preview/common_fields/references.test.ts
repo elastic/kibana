@@ -8,42 +8,35 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "references" field', () => {
-  describe.each([
-    {
-      ruleType: 'query',
-      fieldName: 'references',
-      humanizedFieldName: 'Reference URLs',
-      initial: ['http://url-1'],
-      customized: ['http://url-2'],
-      upgrade: ['http://url-3'],
-      resolvedValue: ['http://resolved'],
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "references" (query rule type) after preview in flyout', () => {
+  const ruleType = 'query';
+  const fieldName = 'references';
+  const humanizedFieldName = 'Reference URLs';
+  const initial = ['http://url-1'];
+  const customized = ['http://url-2'];
+  const upgrade = ['http://url-3'];
+  const resolvedValue = ['http://resolved'];
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

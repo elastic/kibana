@@ -9,7 +9,7 @@ import { mockRelatedIntegrations } from '../../mock/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "related_integrations" field', () => {
+describe('Upgrade diffable rule "related_integrations" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
     mockRelatedIntegrations([
       {
@@ -19,61 +19,54 @@ describe('Upgrade rule after preview - "related_integrations" field', () => {
     ]);
   });
 
-  describe.each([
+  const ruleType = 'query';
+  const fieldName = 'related_integrations';
+  const humanizedFieldName = 'Related Integrations';
+  const initial = [
     {
-      ruleType: 'query',
-      fieldName: 'related_integrations',
-      humanizedFieldName: 'Related Integrations',
-      initial: [
-        {
-          package: 'packageA',
-          version: '^1.0.0',
-        },
-      ],
-      customized: [
-        {
-          package: 'packageB',
-          version: '^1.0.0',
-        },
-      ],
-      upgrade: [
-        {
-          package: 'packageC',
-          version: '^1.0.0',
-        },
-      ],
-      resolvedValue: [
-        {
-          package: 'packageResolved',
-          version: '^9.0.0',
-        },
-      ],
+      package: 'packageA',
+      version: '^1.0.0',
     },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  ];
+  const customized = [
+    {
+      package: 'packageB',
+      version: '^1.0.0',
+    },
+  ];
+  const upgrade = [
+    {
+      package: 'packageC',
+      version: '^1.0.0',
+    },
+  ];
+  const resolvedValue = [
+    {
+      package: 'packageResolved',
+      version: '^9.0.0',
+    },
+  ];
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

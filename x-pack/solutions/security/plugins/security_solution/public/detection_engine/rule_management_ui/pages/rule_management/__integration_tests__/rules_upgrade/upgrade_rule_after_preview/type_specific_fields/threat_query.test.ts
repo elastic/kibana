@@ -9,62 +9,55 @@ import { KqlQueryType } from '../../../../../../../../../common/api/detection_en
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "threat_query" field', () => {
-  describe.each([
-    {
-      ruleType: 'threat_match',
-      fieldName: 'threat_query',
-      humanizedFieldName: 'Indicator index query',
-      initial: {
-        type: KqlQueryType.inline_query,
-        query: 'process.name:*.exe',
-        language: 'kuery',
-        filters: [],
-      },
-      customized: {
-        type: KqlQueryType.inline_query,
-        query: 'process.name:*.sys',
-        language: 'kuery',
-        filters: [],
-      },
-      upgrade: {
-        type: KqlQueryType.inline_query,
-        query: 'process.name:*.com',
-        language: 'kuery',
-        filters: [],
-      },
-      resolvedValue: {
-        type: KqlQueryType.inline_query,
-        query: 'process.name:*.sys',
-        language: 'kuery',
-        filters: [],
-      },
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "threat_query" (threat_match rule type) after preview in flyout', () => {
+  const ruleType = 'threat_match';
+  const fieldName = 'threat_query';
+  const humanizedFieldName = 'Indicator index query';
+  const initial = {
+    type: KqlQueryType.inline_query,
+    query: 'process.name:*.exe',
+    language: 'kuery',
+    filters: [],
+  };
+  const customized = {
+    type: KqlQueryType.inline_query,
+    query: 'process.name:*.sys',
+    language: 'kuery',
+    filters: [],
+  };
+  const upgrade = {
+    type: KqlQueryType.inline_query,
+    query: 'process.name:*.com',
+    language: 'kuery',
+    filters: [],
+  };
+  const resolvedValue = {
+    type: KqlQueryType.inline_query,
+    query: 'process.name:*.sys',
+    language: 'kuery',
+    filters: [],
+  };
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

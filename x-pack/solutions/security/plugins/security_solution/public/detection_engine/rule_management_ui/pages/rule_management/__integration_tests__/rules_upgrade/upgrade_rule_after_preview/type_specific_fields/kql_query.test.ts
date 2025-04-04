@@ -9,62 +9,55 @@ import { KqlQueryType } from '../../../../../../../../../common/api/detection_en
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "kql_query" field', () => {
-  describe.each([
-    {
-      ruleType: 'query',
-      fieldName: 'kql_query',
-      humanizedFieldName: 'KQL query',
-      initial: {
-        query: '*:*',
-        language: 'kuery',
-        type: KqlQueryType.inline_query,
-        filters: [],
-      },
-      customized: {
-        query: '*:*',
-        language: 'kuery',
-        type: KqlQueryType.inline_query,
-        filters: [],
-      },
-      upgrade: {
-        query: 'process.name:*.sys',
-        language: 'kuery',
-        type: KqlQueryType.inline_query,
-        filters: [],
-      },
-      resolvedValue: {
-        query: '*:resolved',
-        language: 'kuery',
-        type: KqlQueryType.inline_query,
-        filters: [],
-      },
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "kql_query" (query rule type) after preview in flyout', () => {
+  const ruleType = 'query';
+  const fieldName = 'kql_query';
+  const humanizedFieldName = 'KQL query';
+  const initial = {
+    query: '*:*',
+    language: 'kuery',
+    type: KqlQueryType.inline_query,
+    filters: [],
+  };
+  const customized = {
+    query: '*:*',
+    language: 'kuery',
+    type: KqlQueryType.inline_query,
+    filters: [],
+  };
+  const upgrade = {
+    query: 'process.name:*.sys',
+    language: 'kuery',
+    type: KqlQueryType.inline_query,
+    filters: [],
+  };
+  const resolvedValue = {
+    query: '*:resolved',
+    language: 'kuery',
+    type: KqlQueryType.inline_query,
+    filters: [],
+  };
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

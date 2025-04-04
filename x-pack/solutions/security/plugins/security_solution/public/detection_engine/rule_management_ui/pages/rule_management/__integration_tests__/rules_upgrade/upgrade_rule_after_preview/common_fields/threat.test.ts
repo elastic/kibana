@@ -8,78 +8,71 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "threat" field', () => {
-  describe.each([
+describe('Upgrade diffable rule "threat" (query rule type) after preview in flyout', () => {
+  const ruleType = 'query';
+  const fieldName = 'threat';
+  const humanizedFieldName = 'MITRE ATT&CK\u2122';
+  const initial = [
     {
-      ruleType: 'query',
-      fieldName: 'threat',
-      humanizedFieldName: 'MITRE ATT&CK\u2122',
-      initial: [
-        {
-          framework: 'MITRE ATT&CK',
-          tactic: {
-            name: 'tacticA',
-            id: 'tacticA',
-            reference: 'reference',
-          },
-        },
-      ],
-      customized: [
-        {
-          framework: 'MITRE ATT&CK',
-          tactic: {
-            name: 'tacticB',
-            id: 'tacticB',
-            reference: 'reference',
-          },
-        },
-      ],
-      upgrade: [
-        {
-          framework: 'MITRE ATT&CK',
-          tactic: {
-            name: 'tacticC',
-            id: 'tacticC',
-            reference: 'reference',
-          },
-        },
-      ],
-      resolvedValue: [
-        {
-          framework: 'MITRE ATT&CK',
-          tactic: {
-            name: 'Credential Access',
-            id: 'TA0006',
-            reference: 'https://attack.mitre.org/tactics/TA0006/',
-          },
-        },
-      ],
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        name: 'tacticA',
+        id: 'tacticA',
+        reference: 'reference',
+      },
     },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  ];
+  const customized = [
+    {
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        name: 'tacticB',
+        id: 'tacticB',
+        reference: 'reference',
+      },
+    },
+  ];
+  const upgrade = [
+    {
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        name: 'tacticC',
+        id: 'tacticC',
+        reference: 'reference',
+      },
+    },
+  ];
+  const resolvedValue = [
+    {
+      framework: 'MITRE ATT&CK',
+      tactic: {
+        name: 'Credential Access',
+        id: 'TA0006',
+        reference: 'https://attack.mitre.org/tactics/TA0006/',
+      },
+    },
+  ];
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

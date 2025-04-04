@@ -8,42 +8,35 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "anomaly_threshold" field', () => {
-  describe.each([
-    {
-      ruleType: 'machine_learning',
-      fieldName: 'anomaly_threshold',
-      humanizedFieldName: 'Anomaly score threshold',
-      initial: 10,
-      customized: 20,
-      upgrade: 30,
-      resolvedValue: 40,
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "anomaly_threshold" (machine_learning rule type) after preview in flyout', () => {
+  const ruleType = 'machine_learning';
+  const fieldName = 'anomaly_threshold';
+  const humanizedFieldName = 'Anomaly score threshold';
+  const initial = 10;
+  const customized = 20;
+  const upgrade = 30;
+  const resolvedValue = 40;
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

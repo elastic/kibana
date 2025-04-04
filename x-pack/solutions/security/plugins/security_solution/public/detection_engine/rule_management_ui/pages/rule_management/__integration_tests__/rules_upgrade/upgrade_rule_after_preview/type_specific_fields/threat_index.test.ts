@@ -8,42 +8,35 @@
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "threat_index" field', () => {
-  describe.each([
-    {
-      ruleType: 'threat_match',
-      fieldName: 'threat_index',
-      humanizedFieldName: 'Indicator index patterns',
-      initial: ['indexA'],
-      customized: ['indexB'],
-      upgrade: ['indexC'],
-      resolvedValue: ['resolved'],
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+describe('Upgrade diffable rule "threat_index" (threat_match rule type) after preview in flyout', () => {
+  const ruleType = 'threat_match';
+  const fieldName = 'threat_index';
+  const humanizedFieldName = 'Indicator index patterns';
+  const initial = ['indexA'];
+  const customized = ['indexB'];
+  const upgrade = ['indexC'];
+  const resolvedValue = ['resolved'];
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

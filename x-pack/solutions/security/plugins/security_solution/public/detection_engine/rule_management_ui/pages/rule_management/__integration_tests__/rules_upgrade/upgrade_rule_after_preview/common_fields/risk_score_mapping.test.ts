@@ -9,7 +9,7 @@ import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "risk_score_mapping" field', () => {
+describe('Upgrade diffable rule "risk_score_mapping" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
     mockAvailableDataViews([], {
       resolvedNumber: {
@@ -21,67 +21,60 @@ describe('Upgrade rule after preview - "risk_score_mapping" field', () => {
     });
   });
 
-  describe.each([
+  const ruleType = 'query';
+  const fieldName = 'risk_score_mapping';
+  const humanizedFieldName = 'Risk score override';
+  const initial = [
     {
-      ruleType: 'query',
-      fieldName: 'risk_score_mapping',
-      humanizedFieldName: 'Risk score override',
-      initial: [
-        {
-          field: 'fieldA',
-          operator: 'equals',
-          value: '10',
-          risk_score: 10,
-        },
-      ],
-      customized: [
-        {
-          field: 'fieldB',
-          operator: 'equals',
-          value: '30',
-          risk_score: 30,
-        },
-      ],
-      upgrade: [
-        {
-          field: 'fieldC',
-          operator: 'equals',
-          value: '50',
-          risk_score: 50,
-        },
-      ],
-      resolvedValue: [
-        {
-          field: 'resolvedNumberField',
-          operator: 'equals',
-        },
-      ],
+      field: 'fieldA',
+      operator: 'equals',
+      value: '10',
+      risk_score: 10,
     },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  ];
+  const customized = [
+    {
+      field: 'fieldB',
+      operator: 'equals',
+      value: '30',
+      risk_score: 30,
+    },
+  ];
+  const upgrade = [
+    {
+      field: 'fieldC',
+      operator: 'equals',
+      value: '50',
+      risk_score: 50,
+    },
+  ];
+  const resolvedValue = [
+    {
+      field: 'resolvedNumberField',
+      operator: 'equals',
+    },
+  ];
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

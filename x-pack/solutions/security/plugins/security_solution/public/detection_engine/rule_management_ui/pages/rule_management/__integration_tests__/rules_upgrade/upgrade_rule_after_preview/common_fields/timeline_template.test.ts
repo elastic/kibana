@@ -9,7 +9,7 @@ import { mockTimelines } from '../../mock/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "timeline_template" field', () => {
+describe('Upgrade diffable rule "timeline_template" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
     mockTimelines([
       {
@@ -19,41 +19,34 @@ describe('Upgrade rule after preview - "timeline_template" field', () => {
     ]);
   });
 
-  describe.each([
-    {
-      ruleType: 'query',
-      fieldName: 'timeline_template',
-      humanizedFieldName: 'Timeline template',
-      initial: { timeline_id: 'A', timeline_title: 'timelineA' },
-      customized: { timeline_id: 'B', timeline_title: 'timelineB' },
-      upgrade: { timeline_id: 'C', timeline_title: 'timelineC' },
-      resolvedValue: { timeline_id: 'resolved', timeline_title: 'timelineResolved' },
-    },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  const ruleType = 'query';
+  const fieldName = 'timeline_template';
+  const humanizedFieldName = 'Timeline template';
+  const initial = { timeline_id: 'A', timeline_title: 'timelineA' };
+  const customized = { timeline_id: 'B', timeline_title: 'timelineB' };
+  const upgrade = { timeline_id: 'C', timeline_title: 'timelineC' };
+  const resolvedValue = { timeline_id: 'resolved', timeline_title: 'timelineResolved' };
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });

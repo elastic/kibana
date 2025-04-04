@@ -9,7 +9,7 @@ import { mockAvailableDataViews } from '../../mock/rule_upgrade_flyout';
 import { assertRuleUpgradePreview } from '../../mock/assert_rule_upgrade_preview';
 import { assertRuleUpgradeAfterReview } from '../../mock/assert_rule_upgrade_after_review';
 
-describe('Upgrade rule after preview - "severity_mapping" field', () => {
+describe('Upgrade diffable rule "severity_mapping" (query rule type) after preview in flyout', () => {
   beforeAll(() => {
     mockAvailableDataViews([], {
       resolvedString: {
@@ -21,69 +21,62 @@ describe('Upgrade rule after preview - "severity_mapping" field', () => {
     });
   });
 
-  describe.each([
+  const ruleType = 'query';
+  const fieldName = 'severity_mapping';
+  const humanizedFieldName = 'Severity override';
+  const initial = [
     {
-      ruleType: 'query',
-      fieldName: 'severity_mapping',
-      humanizedFieldName: 'Severity override',
-      initial: [
-        {
-          field: 'fieldA',
-          operator: 'equals',
-          severity: 'low',
-          value: '10',
-        },
-      ],
-      customized: [
-        {
-          field: 'fieldB',
-          operator: 'equals',
-          severity: 'medium',
-          value: '30',
-        },
-      ],
-      upgrade: [
-        {
-          field: 'fieldC',
-          operator: 'equals',
-          severity: 'high',
-          value: '50',
-        },
-      ],
-      resolvedValue: [
-        {
-          field: 'resolvedStringField',
-          value: '70',
-          operator: 'equals',
-          severity: 'critical',
-        },
-      ],
+      field: 'fieldA',
+      operator: 'equals',
+      severity: 'low',
+      value: '10',
     },
-  ] as const)(
-    '$fieldName ($ruleType rule)',
-    ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade, resolvedValue }) => {
-      assertRuleUpgradePreview({
-        ruleType,
-        fieldName,
-        humanizedFieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
+  ];
+  const customized = [
+    {
+      field: 'fieldB',
+      operator: 'equals',
+      severity: 'medium',
+      value: '30',
+    },
+  ];
+  const upgrade = [
+    {
+      field: 'fieldC',
+      operator: 'equals',
+      severity: 'high',
+      value: '50',
+    },
+  ];
+  const resolvedValue = [
+    {
+      field: 'resolvedStringField',
+      value: '70',
+      operator: 'equals',
+      severity: 'critical',
+    },
+  ];
 
-      assertRuleUpgradeAfterReview({
-        ruleType,
-        fieldName,
-        fieldVersions: {
-          initial,
-          customized,
-          upgrade,
-          resolvedValue,
-        },
-      });
-    }
-  );
+  assertRuleUpgradePreview({
+    ruleType,
+    fieldName,
+    humanizedFieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
+
+  assertRuleUpgradeAfterReview({
+    ruleType,
+    fieldName,
+    fieldVersions: {
+      initial,
+      customized,
+      upgrade,
+      resolvedValue,
+    },
+  });
 });
