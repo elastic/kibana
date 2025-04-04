@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -33,6 +34,7 @@ const isQueryFieldSelected = (
 };
 
 export interface QueryFieldsPanelProps {
+  customizedQuery: boolean;
   index: string;
   indexFields: QuerySourceFields;
   updateFields: (index: string, fieldName: string, checked: boolean) => void;
@@ -40,6 +42,7 @@ export interface QueryFieldsPanelProps {
 }
 
 export const QueryFieldsPanel = ({
+  customizedQuery,
   index,
   indexFields,
   updateFields,
@@ -103,6 +106,29 @@ export const QueryFieldsPanel = ({
               ),
               align: 'right',
               render: (checked, field) => {
+                if (customizedQuery) {
+                  return (
+                    <EuiToolTip
+                      content={i18n.translate(
+                        'xpack.searchPlayground.viewQuery.sidePanel.fieldSelection.customized.warning.tooltip',
+                        {
+                          defaultMessage:
+                            'Field selection is not supported with a user-customized query',
+                        }
+                      )}
+                    >
+                      <EuiSwitch
+                        showLabel={false}
+                        label={field.name}
+                        disabled
+                        checked={false}
+                        onChange={() => {}}
+                        compressed
+                        data-test-subj={`field-${field.name}-${checked}`}
+                      />
+                    </EuiToolTip>
+                  );
+                }
                 return (
                   <EuiSwitch
                     showLabel={false}

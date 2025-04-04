@@ -55,8 +55,6 @@ export function IlmSummary({
 
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition) return;
-
       return streamsRepositoryClient.fetch('GET /internal/streams/{name}/lifecycle/_stats', {
         params: { path: { name: definition.stream.name } },
         signal,
@@ -196,7 +194,7 @@ function IlmPhase({
           >
             <EuiText size="xs">
               <p>
-                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 b')}
+                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 ib')}
               </p>
             </EuiText>
           </EuiPanel>

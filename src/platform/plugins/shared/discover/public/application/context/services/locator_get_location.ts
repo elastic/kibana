@@ -11,6 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { ContextHistoryLocationState, DiscoverContextAppLocatorGetLocation } from './locator';
+import { APP_STATE_URL_KEY } from '../../../../common';
 
 export const contextAppLocatorGetLocation = async (
   { useHash }: { useHash: boolean },
@@ -43,7 +44,7 @@ export const contextAppLocatorGetLocation = async (
   }
 
   if (Object.keys(appState).length) {
-    path = setStateToKbnUrl('_a', appState, { useHash }, path);
+    path = setStateToKbnUrl(APP_STATE_URL_KEY, appState, { useHash }, path);
   }
 
   return {

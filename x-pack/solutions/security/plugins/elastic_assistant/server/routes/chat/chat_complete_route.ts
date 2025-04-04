@@ -18,6 +18,7 @@ import {
   ConversationResponse,
   newContentReferencesStore,
   pruneContentReferences,
+  ChatCompleteRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
@@ -60,12 +61,14 @@ export const chatCompleteRoute = (
         validate: {
           request: {
             body: buildRouteValidationWithZod(ChatCompleteProps),
+            query: buildRouteValidationWithZod(ChatCompleteRequestQuery),
           },
         },
       },
       async (context, request, response) => {
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
         const assistantResponse = buildResponse(response);
+        const { content_references_disabled: contentReferencesDisabled } = request.query;
         let telemetry;
         let actionTypeId;
         const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
@@ -182,7 +185,9 @@ export const chatCompleteRoute = (
             ? existingConversationId ?? newConversation?.id
             : undefined;
 
-          const contentReferencesStore = newContentReferencesStore();
+          const contentReferencesStore = newContentReferencesStore({
+            disabled: contentReferencesDisabled ?? false,
+          });
 
           const onLlmResponse = async (
             content: string,

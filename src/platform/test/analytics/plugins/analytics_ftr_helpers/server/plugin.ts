@@ -25,6 +25,12 @@ export class AnalyticsFTRHelpers implements Plugin {
     router.post(
       {
         path: '/internal/analytics_ftr_helpers/opt_in',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             consent: schema.boolean(),
@@ -43,6 +49,12 @@ export class AnalyticsFTRHelpers implements Plugin {
     router.get(
       {
         path: '/internal/analytics_ftr_helpers/events',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             takeNumberOfEvents: schema.number({ min: 1 }),
@@ -77,6 +89,12 @@ export class AnalyticsFTRHelpers implements Plugin {
     router.get(
       {
         path: '/internal/analytics_ftr_helpers/count_events',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           query: schema.object({
             eventTypes: schema.arrayOf(schema.string()),

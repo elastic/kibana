@@ -31,7 +31,7 @@ export function getConnectorType(): InferenceConnector {
     iconClass: 'sparkles',
     isExperimental: true,
     selectMessage: i18n.translate('xpack.stackConnectors.components.inference.selectMessageText', {
-      defaultMessage: 'Send requests to AI providers such as Amazon Bedrock, OpenAI and more.',
+      defaultMessage: 'Use the Elastic LLM for your chat and RAG usecases.',
     }),
     actionTypeTitle: INFERENCE_CONNECTOR_TITLE,
     validateParams: async (

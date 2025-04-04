@@ -10,7 +10,7 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import type {
   SecuritySharedParams,
   SearchAfterAndBulkCreateReturnType,
-  RuleServices,
+  SecurityRuleServices,
 } from '../../types';
 import type { UnifiedQueryRuleParams } from '../../../rule_schema';
 
@@ -23,7 +23,7 @@ type BulkCreateUnsuppressedAlerts = (params: {
   size: number;
   groupByFields: string[];
   buildReasonMessage: BuildReasonMessage;
-  services: RuleServices;
+  services: SecurityRuleServices;
   filter: QueryDslQueryContainer;
   eventsTelemetry: ITelemetryEventsSender | undefined;
 }) => Promise<SearchAfterAndBulkCreateReturnType>;
