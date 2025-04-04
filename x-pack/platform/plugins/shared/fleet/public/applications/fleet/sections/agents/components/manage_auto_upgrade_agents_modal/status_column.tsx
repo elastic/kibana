@@ -105,11 +105,7 @@ export const StatusColumn: React.FunctionComponent<{
       statusButton = notStartedStatus;
     } else {
       const currPercentage = calcPercentage(agentVersionCounts.agents);
-      if (
-        currPercentage >= percentage ||
-        autoUpgradeAgentsStatus?.totalAgents ===
-          autoUpgradeAgentsStatus?.currentVersions.reduce((acc, curr) => acc + curr.agents, 0) // This handles when the total agents is equal to the sum of all the agents that have upgraded. We know theyre complete
-      ) {
+      if (currPercentage >= percentage) {
         statusButton = completedStatus;
       } else {
         statusButton = inProgressStatus;
@@ -122,10 +118,9 @@ export const StatusColumn: React.FunctionComponent<{
           agentVersionCounts.agents > 0 ? (
             <FormattedMessage
               id="xpack.fleet.manageAutoUpgradeAgents.currentStatusTooltip"
-              defaultMessage="{agents} {agentsText} on target version"
+              defaultMessage="{agents, plural, one {# agent} other {# agents}} on target version"
               values={{
                 agents: agentVersionCounts.agents,
-                agentsText: agentVersionCounts.agents === 1 ? 'agent' : 'agents',
               }}
             />
           ) : agentVersionCounts.failedUpgradeAgents > 0 ? (

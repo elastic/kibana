@@ -37,7 +37,7 @@ export const ActivitySection: React.FunctionComponent<{
           </EuiFlexGroup>
         </EuiText>
       </EuiPanel>
-      {actions.map((currentAction, index) =>
+      {actions.map((currentAction) =>
         currentAction.type === 'UPGRADE' && currentAction.status === 'IN_PROGRESS' ? (
           <UpgradeInProgressActivityItem
             action={currentAction}
