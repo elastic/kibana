@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
@@ -123,25 +123,26 @@ export function ESQLControlsFlyout({
       ) {
         setControlFlyoutType(EsqlControlType.STATIC_VALUES);
       }
-
-      const variableNameWithoutQuestionmark = text.replace(/^\?+/, '');
-      const variableExists = checkVariableExistence(esqlVariables, text);
-      setFormIsInvalid(
-        !variableNameWithoutQuestionmark ||
-          variableExists ||
-          !areValuesValid ||
-          !controlState?.availableOptions.length
-      );
     },
-    [
-      controlFlyoutType,
-      areValuesValid,
-      controlState?.availableOptions.length,
-      esqlVariables,
-      variableNamePrefix,
-      variableType,
-    ]
+    [controlFlyoutType, variableNamePrefix, variableType]
   );
+
+  useEffect(() => {
+    const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
+    const variableExists = checkVariableExistence(esqlVariables, variableName);
+    setFormIsInvalid(
+      !variableNameWithoutQuestionmark ||
+        variableExists ||
+        !areValuesValid ||
+        !controlState?.availableOptions.length
+    );
+  }, [
+    areValuesValid,
+    controlState?.availableOptions.length,
+    esqlVariables,
+    variableName,
+    variableType,
+  ]);
 
   const onFlyoutTypeChange = useCallback((controlType: EsqlControlType) => {
     setControlFlyoutType(controlType);

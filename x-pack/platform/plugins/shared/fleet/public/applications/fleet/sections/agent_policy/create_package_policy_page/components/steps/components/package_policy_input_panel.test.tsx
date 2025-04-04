@@ -360,6 +360,7 @@ describe('PackagePolicyInputPanel', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: true,
+        isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
       });
@@ -392,6 +393,7 @@ describe('PackagePolicyInputPanel', () => {
     beforeEach(() => {
       useAgentlessMock.mockReturnValue({
         isAgentlessEnabled: false,
+        isAgentlessDefault: false,
         isAgentlessAgentPolicy: jest.fn(),
         isAgentlessIntegration: jest.fn(),
       });

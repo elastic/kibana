@@ -14,4 +14,5 @@ export const DEFAULT_ROUTES = {
   es: '/app/elasticsearch/overview',
   oblt: '/app/observabilityOnboarding',
   security: '/app/security/get_started',
+  chat: '/app/workchat',
 };

@@ -22,6 +22,7 @@ import {
 } from '../hooks/use_asset_inventory_url_state/use_asset_inventory_url_state';
 
 import { LOCAL_STORAGE_COLUMNS_KEY, LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../constants';
+import { OnboardingSuccessCallout } from '../components/onboarding/onboarding_success_callout';
 
 const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
   query,
@@ -53,6 +54,7 @@ export const AllAssets = () => {
       <AssetInventorySearchBar query={urlQuery} setQuery={setUrlQuery} />
       <EuiPageTemplate.Section>
         <AssetInventoryTitle />
+        <OnboardingSuccessCallout />
         <AssetInventoryFilters setQuery={setUrlQuery} />
         <AssetInventoryBarChart
           isLoading={isLoadingChartData}
