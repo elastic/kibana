@@ -22,7 +22,6 @@ import { AssetInventoryTitle } from '../asset_inventory_title';
 import { AssetInventoryLoading } from '../asset_inventory_loading';
 import illustration from '../../../common/images/integrations_light.png';
 import { IntegrationsCardGridTabs } from '../../../onboarding/components/onboarding_body/cards/integrations/integration_card_grid_tabs';
-import { OnboardingSuccessCallout } from './onboarding_success_callout';
 import { TEST_SUBJ_ONBOARDING_NO_DATA_FOUND } from '../../constants';
 
 export const NoDataFound = () => {
@@ -36,7 +35,6 @@ export const NoDataFound = () => {
     <>
       <AssetInventoryTitle />
       <EuiSpacer size="l" />
-      <OnboardingSuccessCallout />
       <EuiPanel data-test-subj={TEST_SUBJ_ONBOARDING_NO_DATA_FOUND}>
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -44,7 +42,7 @@ export const NoDataFound = () => {
               <h3>
                 <FormattedMessage
                   id="xpack.securitySolution.onboarding.startOnboardingAssets"
-                  defaultMessage="Start onboarding your assets"
+                  defaultMessage="Connect Sources to Discover Assets"
                 />
               </h3>
             </EuiTitle>
