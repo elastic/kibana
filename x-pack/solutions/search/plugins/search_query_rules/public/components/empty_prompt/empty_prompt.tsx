@@ -71,7 +71,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <h2>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.title"
-                    defaultMessage="Enhance your search with targeted business logic"
+                    defaultMessage="Improve your search experience with targeted business logic"
                   />
                 </h2>
               </EuiTitle>
@@ -80,7 +80,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                 <p>
                   <FormattedMessage
                     id="xpack.queryRules.emptyPrompt.subtitle"
-                    defaultMessage="Include your unique business logic within your query to provide conditional results."
+                    defaultMessage="Add business logic to your queries to get customized results under different conditions."
                   />
                 </p>
               </EuiText>
@@ -124,7 +124,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                             <p>
                               <FormattedMessage
                                 id="xpack.queryRules.emptyPrompt.feature1.description"
-                                defaultMessage="Choose documents across indices for a customized results list."
+                                defaultMessage="Build a customized results list by selecting documents from different indices."
                               />
                             </p>
                           </EuiText>
@@ -153,7 +153,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                             <p>
                               <FormattedMessage
                                 id="xpack.queryRules.emptyPrompt.feature2.description"
-                                defaultMessage="Expand upon your existing RAG or BM25 search results by including your query parameters to help influence your search relevance."
+                                defaultMessage="Improve relevance for your search or RAG system by adding custom query parameters to your retrieval pipeline."
                               />
                             </p>
                           </EuiText>
@@ -182,7 +182,7 @@ export const EmptyPrompt: React.FC<EmptyPromptProps> = ({ getStartedAction }) =>
                             <p>
                               <FormattedMessage
                                 id="xpack.queryRules.emptyPrompt.feature3.description"
-                                defaultMessage="Update your query rule logic and export the updates to code for easy developer handoff."
+                                defaultMessage="Update query rules and export as code for seamless developer handoff."
                               />
                             </p>
                           </EuiText>
