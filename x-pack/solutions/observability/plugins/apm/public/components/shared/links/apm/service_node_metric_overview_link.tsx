@@ -31,9 +31,8 @@ export function useServiceNodeMetricOverviewHref({
   serviceNodeName: string;
 }) {
   return useAPMHref({
-    path: `/services/${encodeURIComponent(serviceName)}/metrics/${encodeURIComponent(
-      serviceNodeName
-    )}`,
+    path: '/services/{serviceName}/metrics/{serviceNodeName}',
+    pathParams: { serviceName, serviceNodeName },
     persistedFilters,
   });
 }

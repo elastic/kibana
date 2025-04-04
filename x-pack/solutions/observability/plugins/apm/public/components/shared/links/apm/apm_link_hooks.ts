@@ -10,6 +10,7 @@ import type { IBasePath } from '@kbn/core/public';
 import { pick } from 'lodash';
 import { useLocation } from 'react-router-dom';
 import url from 'url';
+import { encodePath } from '@kbn/typed-react-router-config';
 import { pickKeys } from '../../../../../common/utils/pick_keys';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
@@ -43,10 +44,12 @@ export function useAPMHref({
   path,
   persistedFilters,
   query,
+  pathParams = undefined,
 }: {
   path: string;
   persistedFilters?: Array<keyof APMQueryParams>;
   query?: APMQueryParams;
+  pathParams?: Record<string, string>;
 }) {
   const { urlParams } = useLegacyUrlParams();
   const { basePath } = useApmPluginContext().core.http;
@@ -56,7 +59,9 @@ export function useAPMHref({
     ...query,
   };
 
-  return getLegacyApmHref({ basePath, path, query: nextQuery, search });
+  const encodedPath = encodePath(path, pathParams);
+
+  return getLegacyApmHref({ basePath, path: encodedPath, query: nextQuery, search });
 }
 
 /**

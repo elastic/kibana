@@ -23,7 +23,8 @@ const persistedFilters: Array<keyof APMQueryParams> = [
 
 export function useMetricOverviewHref(serviceName: string) {
   return useAPMHref({
-    path: `/services/${encodeURIComponent(serviceName)}/metrics`,
+    path: `/services/{serviceName}/metrics`,
+    pathParams: { serviceName },
     persistedFilters,
   });
 }
