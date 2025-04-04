@@ -145,7 +145,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-          const contentReferencesStore = newContentReferencesStore()
+          const contentReferencesStore = newContentReferencesStore();
 
           const assistantToolParams = getAssistantToolParams({
             endpointIds,
