@@ -19,6 +19,7 @@ import type {
   ESQLAstExpression,
   ESQLAstItem,
   ESQLAstJoinCommand,
+  ESQLAstQueryExpression,
   ESQLAstRenameExpression,
   ESQLColumn,
   ESQLCommandOption,
@@ -189,6 +190,11 @@ export class CommandVisitorContext<
 > extends VisitorContext<Methods, Data, Node> {
   public name(): string {
     return this.node.name.toUpperCase();
+  }
+
+  public visitQuery(queryNode: ESQLAstQueryExpression) {
+    this.ctx.assertMethodExists('visitQuery');
+    return this.ctx.visitQuery(this, queryNode, undefined as any);
   }
 
   public *options(): Iterable<ESQLCommandOption> {
@@ -480,6 +486,12 @@ export class JoinCommandVisitorContext<
 
 // CHANGE_POINT <value> [ ON <key> ] [ AS <targetType>, <targetPvalue> ]
 export class ChangePointCommandVisitorContext<
+  Methods extends VisitorMethods = VisitorMethods,
+  Data extends SharedData = SharedData
+> extends CommandVisitorContext<Methods, Data, ESQLAstChangePointCommand> {}
+
+// FORK (COMMAND ... [| COMMAND ...]) [(COMMAND ... [| COMMAND ...])]
+export class ForkCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
 > extends CommandVisitorContext<Methods, Data, ESQLAstChangePointCommand> {}
