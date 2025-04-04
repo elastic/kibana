@@ -34,20 +34,28 @@ function addMessagingConnections(
   connections: Connection[],
   destinationServices: ExitSpanDestination[]
 ): Connection[] {
-  const serviceMap = new Map(
-    destinationServices.map(({ from, to }) => [from[SPAN_DESTINATION_SERVICE_RESOURCE], to])
-  );
+  const servicesByDestination = destinationServices.reduce((acc, { from, to }) => {
+    const key = from[SPAN_DESTINATION_SERVICE_RESOURCE];
+
+    const currentDestinations = acc.get(key) ?? [];
+    currentDestinations.push(to);
+
+    acc.set(key, currentDestinations);
+
+    return acc;
+  }, new Map<string, ServiceConnectionNode[]>());
 
   const messagingConnections = connections.reduce<Connection[]>((acc, connection) => {
     const destination = connection.destination;
     if (isExitSpan(destination) && destination[SPAN_TYPE] === 'messaging') {
-      const matchedService = serviceMap.get(destination[SPAN_DESTINATION_SERVICE_RESOURCE]);
-      if (matchedService) {
+      const matchedServices =
+        servicesByDestination.get(destination[SPAN_DESTINATION_SERVICE_RESOURCE]) ?? [];
+      matchedServices.forEach((matchedService) => {
         acc.push({
           source: destination,
           destination: matchedService,
         });
-      }
+      });
     }
     return acc;
   }, []);
@@ -208,9 +216,9 @@ function mapEdges({
       return acc;
     }
 
-    const label = `${sourceData[SERVICE_NAME]} to ${
-      targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]
-    }`;
+    const label = `${
+      sourceData[SERVICE_NAME] || sourceData[SPAN_DESTINATION_SERVICE_RESOURCE]
+    } to ${targetData[SERVICE_NAME] || targetData[SPAN_DESTINATION_SERVICE_RESOURCE]}`;
     const id = getEdgeId(sourceData.id, targetData.id);
 
     acc.set(id, {

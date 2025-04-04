@@ -265,8 +265,7 @@
                 "docId": "kibKbnElasticAssistantCommonPluginApi",
                 "section": "def-common.ContentReferencesStore",
                 "text": "ContentReferencesStore"
-              },
-              " | undefined"
+              }
             ],
             "path": "x-pack/solutions/security/plugins/elastic_assistant/server/types.ts",
             "deprecated": false,

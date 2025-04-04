@@ -20,7 +20,11 @@ import { arePanelLayoutsEqual } from '../../dashboard_api/are_panel_layouts_equa
 import { DashboardLayout } from '../../dashboard_api/types';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
-import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from './constants';
+import { 
+  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
+  DASHBOARD_GRID_HEIGHT,
+  DASHBOARD_MARGIN_SIZE
+} from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
 
@@ -136,6 +140,9 @@ export const DashboardGrid = ({
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
+          keyboardDragTopLimit:
+            dashboardContainerRef?.current?.getBoundingClientRect().top ||
+            DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
@@ -152,6 +159,7 @@ export const DashboardGrid = ({
     onLayoutChange,
     expandedPanelId,
     viewMode,
+    dashboardContainerRef,
   ]);
 
   const { dashboardClasses, dashboardStyles } = useMemo(() => {

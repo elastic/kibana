@@ -13,6 +13,9 @@ import { ReadyToHelp as Component } from '../ready_to_help';
 export default {
   title: 'Layout/Call to Action/Types',
   component: Component,
+  args: {
+    type: 'stack',
+  },
   argTypes: {
     type: {
       control: 'radio',

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CommandSuggestParams } from '../../../definitions/types';
+import { CommandSuggestParams, Location } from '../../../definitions/types';
 import { noCaseCompare } from '../../../shared/helpers';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
@@ -111,8 +111,7 @@ export async function suggest({
   });
   const functionSuggestions = await getFieldsOrFunctionsSuggestions(
     ['any'],
-    'sort',
-    undefined,
+    Location.SORT,
     getColumnsByType,
     {
       functions: true,

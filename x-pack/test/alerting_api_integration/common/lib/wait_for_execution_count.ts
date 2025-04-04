@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import supertest from 'supertest';
+import type supertest from 'supertest';
 import { getUrlPrefix } from './space_test_utils';
 
 async function delay(millis: number): Promise<void> {

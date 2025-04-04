@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { GetService } from '../../types';
-import { User } from '../authentication/types';
+import type { GetService } from '../../types';
+import type { User } from '../authentication/types';
 import { getAlertsTargetIndices } from './get_alerts_target_indices';
 
 export const cleanupTargetIndices = async (getService: GetService, user: User, spaceId: string) => {

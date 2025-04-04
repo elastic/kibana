@@ -155,7 +155,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
           </>
         ) : (
           <div>
-            <EuiLoadingChart size="l" mono />
+            <EuiLoadingChart size="l" />
           </div>
         )}
       </div>
