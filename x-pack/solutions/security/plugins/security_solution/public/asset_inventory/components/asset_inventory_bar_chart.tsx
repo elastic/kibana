@@ -9,7 +9,8 @@ import { EuiProgress, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import type { AggregationResult } from '../hooks/use_fetch_chart_data';
+import { css } from '@emotion/react';
+import type { AssetInventoryChartData } from '../hooks/use_fetch_chart_data/types';
 import { ASSET_FIELDS } from '../constants';
 
 const chartTitle = i18n.translate(
@@ -31,18 +32,24 @@ const chartStyles = { height: '260px' };
 export interface AssetInventoryBarChartProps {
   isLoading: boolean;
   isFetching: boolean;
-  entities: AggregationResult[];
+  assetInventoryChartData: AssetInventoryChartData[];
 }
 
 export const AssetInventoryBarChart = ({
   isLoading,
   isFetching,
-  entities,
+  assetInventoryChartData,
 }: AssetInventoryBarChartProps) => {
   const baseTheme = useElasticChartsTheme();
   return (
     <div css={chartStyles}>
-      <EuiProgress size="xs" color="accent" style={{ opacity: isFetching ? 1 : 0 }} />
+      <EuiProgress
+        size="xs"
+        color="accent"
+        css={css`
+          opacity: ${isFetching ? 1 : 0};
+        `}
+      />
       {isLoading ? (
         <EuiFlexGroup
           justifyContent="center"
@@ -81,7 +88,7 @@ export const AssetInventoryBarChart = ({
             splitSeriesAccessors={[ASSET_FIELDS.ENTITY_SUB_TYPE]}
             stackAccessors={[ASSET_FIELDS.ENTITY_TYPE]}
             minBarHeight={1}
-            data={entities}
+            data={assetInventoryChartData}
           />
         </Chart>
       )}
