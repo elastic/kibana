@@ -243,6 +243,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    describe('on class stream that has not been touched yet', () => {
+      before(async () => {
+        await esClient.indices.createDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      after(async () => {
+        await esClient.indices.deleteDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      it('does not list any dashboards but returns 200', async () => {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: { path: { name: 'logs-testlogs-default' } },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.dashboards.length).to.eql(0);
+      });
+    });
+
     describe('suggestions', () => {
       before(async () => {
         await loadDashboards();
