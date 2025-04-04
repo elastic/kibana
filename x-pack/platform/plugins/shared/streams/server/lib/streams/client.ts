@@ -61,6 +61,7 @@ export class StreamsClient {
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
+      isDev: boolean;
     }
   ) {}
 

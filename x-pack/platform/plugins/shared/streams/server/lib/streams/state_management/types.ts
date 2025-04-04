@@ -24,10 +24,11 @@ interface StreamDeleteChange {
 export type StreamChange = StreamUpsertChange | StreamDeleteChange;
 
 export interface StateDependencies {
+  logger: Logger;
+  streamsClient: StreamsClient;
+  storageClient: StreamsStorageClient;
   scopedClusterClient: IScopedClusterClient;
   assetClient: AssetClient;
-  storageClient: StreamsStorageClient;
-  logger: Logger;
   isServerless: boolean;
-  streamsClient: StreamsClient;
+  isDev: boolean;
 }

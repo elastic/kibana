@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { difference, intersection } from 'lodash';
+import { difference, intersection, isEqual } from 'lodash';
 import { StatusError } from '../errors/status_error';
 import { FailedToApplyRequestedChangesError } from './errors/failed_to_apply_requested_changes_error';
 import { FailedToDetermineElasticsearchActionsError } from './errors/failed_to_determine_elasticsearch_actions_error';
@@ -35,11 +35,24 @@ type AttemptChangesResult =
   | { status: 'success'; changes: Changes }
   | { status: 'failed_with_rollback'; error: any };
 
+/**
+ * The State class is responsible for moving from the current state to the desired state
+ * Based on the requested bulk changes. It follows the following phases to achieve this:
+ * 1. Load the current state by reading all the stored Stream definitions
+ * 2. Applying the requested changes to a clone of the current state (by showing the change to each Stream instance)
+ * 3. Applying cascading changes that the Stream instances return in response to a requested change
+ * 4. Validating the desired state by asking each Stream if it is valid in this state
+ * 5. If the state is valid, State asks each Stream to determine the required Elasticsearch actions needed to reach the desired state
+ * 6. If it is a dry run, it returns the affected streams and the Elasticsearch actions that would have happened
+ * 7. If it is a real run, it commits the changes by updating the various Elasticsearch resources (delegated to the ExecutionPlan class)
+ * 8. If this fails, it attempts to rollback to the starting state
+ */
 export class State {
   private streamsByName: Map<string, StreamActiveRecord>;
   private dependencies: StateDependencies;
 
-  // Usage of State should only happen via static State.attemptChanges
+  // Changes to state should only happen via static State.attemptChanges or  State.resync
+  // State.currentState can be used to simply read the state
   private constructor(streams: StreamActiveRecord[], dependencies: StateDependencies) {
     this.streamsByName = new Map();
     streams.forEach((stream) => this.streamsByName.set(stream.definition.name, stream));
@@ -83,9 +96,13 @@ export class State {
 
   static async resync(dependencies: StateDependencies) {
     const currentState = await State.currentState(dependencies);
-    currentState.all().map((stream) => stream.markAsCreated());
+
     // This way all current streams will look like they have been added
+    currentState.all().map((stream) => stream.markAsCreated());
     const emptyState = new State([], dependencies);
+
+    // We skip validation since we assume the stored state to be correct
+    // And we don't attempt rollback since if it fails we can simply invoke resync again
     await currentState.commitChanges(emptyState);
   }
 
@@ -96,6 +113,10 @@ export class State {
         sort: [{ name: 'asc' }],
         track_total_hits: false,
       });
+
+      if (streamsSearchResponse.hits.total.value > 10000) {
+        throw new Error('Stored state contains more than 10 000 streams');
+      }
 
       const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
         streamFromDefinition(definition, dependencies)
@@ -113,9 +134,20 @@ export class State {
     try {
       const desiredState = this.clone();
 
+      let checkingState;
+      if (this.dependencies.isDev) {
+        checkingState = this.clone();
+      }
+
       for (const requestedChange of requestedChanges) {
         // Apply one change and any cascading changes from that change
         await this.applyRequestedChange(requestedChange, desiredState, this);
+      }
+
+      if (this.dependencies.isDev) {
+        if (!isEqual(this.toPrintable(), checkingState!.toPrintable())) {
+          throw new Error('applyChanges resulted in the starting state being modified');
+        }
       }
 
       return desiredState;
@@ -167,7 +199,8 @@ export class State {
     desiredState: State,
     startingState: State
   ): Promise<StreamChange[]> {
-    if (change.type !== 'delete' && !desiredState.has(change.definition.name)) {
+    // Add new streams if they haven't already been added by a previous (cascading) change
+    if (change.type === 'upsert' && !desiredState.has(change.definition.name)) {
       const newStream = streamFromDefinition(change.definition, this.dependencies);
       desiredState.set(newStream.definition.name, newStream);
     }
@@ -216,6 +249,7 @@ export class State {
   async attemptRollback(startingState: State, originalError: any) {
     try {
       const rollbackTargets = this.changedStreams().map((stream) => {
+        // Bring streams back to their starting state or delete newly added streams
         if (startingState.has(stream.definition.name)) {
           const changedStreamToRevert = stream.clone();
           changedStreamToRevert.markAsCreated();
@@ -262,7 +296,6 @@ export class State {
     }
   }
 
-  // Should this include the definitions, or are the names enough?
   changes(startingState: State): Changes {
     const startingStreams = startingState.all().map((stream) => stream.definition.name);
     const desiredStreams = this.all().map((stream) => stream.definition.name);

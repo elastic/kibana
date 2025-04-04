@@ -24,6 +24,11 @@ type UnwiredStreamPipelineAction =
   | AppendProcessorToIngestPipelineAction
   | DeleteProcessorFromIngestPipelineAction;
 
+/**
+ * UnwiredStreams sometimes share index templates and ingest pipelines (user managed or Streams managed)
+ * In order to modify this pipelines in an atomic way and be able to clean up any Streams managed pipeline when no longer needed
+ * We need to translate some actions
+ */
 export async function translateUnwiredStreamPipelineActions(
   actionsByType: ActionsByType,
   scopedClusterClient: IScopedClusterClient

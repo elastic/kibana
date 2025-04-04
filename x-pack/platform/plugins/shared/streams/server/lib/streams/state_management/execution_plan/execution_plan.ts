@@ -43,6 +43,12 @@ import type {
   UpsertWriteIndexOrRolloverAction,
 } from './types';
 
+/**
+ * This class takes a list of ElasticsearchActions and groups them by type.
+ * It then tries to plan these actions to make the least amount of changes to Elasticsearch resources
+ * The execution of the plan aims to be as parallel as possible while still respecting the order of operations
+ * to avoid any data loss
+ */
 export class ExecutionPlan {
   private dependencies: StateDependencies;
   private actionsByType: ActionsByType;
@@ -72,9 +78,6 @@ export class ExecutionPlan {
     try {
       this.actionsByType = Object.assign(this.actionsByType, groupBy(elasticsearchActions, 'type'));
 
-      // UnwiredStreams sometimes share index templates and ingest pipelines (user managed or Streams managed)
-      // In order to modify this pipelines in an atomic way and be able to clean up any Streams managed pipeline when no longer needed
-      // We need to translate some actions
       await translateUnwiredStreamPipelineActions(
         this.actionsByType,
         this.dependencies.scopedClusterClient
@@ -112,10 +115,10 @@ export class ExecutionPlan {
       assertEmptyObject(rest);
 
       if (append_processor_to_ingest_pipeline.length !== 0) {
-        throw new Error('append_processor_to_ingest_pipeline actions have not been merged');
+        throw new Error('append_processor_to_ingest_pipeline actions have not been translated');
       }
       if (delete_processor_from_ingest_pipeline.length !== 0) {
-        throw new Error('delete_processor_from_ingest_pipeline actions have not been merged');
+        throw new Error('delete_processor_from_ingest_pipeline actions have not been translated');
       }
 
       // This graph is parallelizing as much as possible
