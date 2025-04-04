@@ -110,7 +110,7 @@ export const searchAfterAndBulkCreateFactory = async ({
           to: tuple.to.toISOString(),
           runtimeMappings,
           filter,
-          size: pageSize,
+          size: Math.ceil(Math.min(maxSignals, pageSize)),
           sortOrder,
           searchAfterSortIds: sortIds,
           primaryTimestamp,
