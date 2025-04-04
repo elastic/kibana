@@ -14,7 +14,7 @@ applies_to:
 
 ## Configuring product documentation for air-gapped environments [configuring-product-doc-for-airgap]
 
-Installing product documentation requires network access to its artifact repository. For air-gapped environments, or environments where remote network traffic is blocked or filtered, the artifact repository must be manually deployed somewhere accessible by the Kibana deployment.
+Installing product documentation requires network access to its artifact repository. In air-gapped environments, or environments where remote network traffic is blocked or filtered, you can use a local artifact repository by specifying the path with the `file://` URI scheme.
 
 Deploying a custom product documentation repository can be done in 2 ways: using a S3 bucket, or using a CDN.
 

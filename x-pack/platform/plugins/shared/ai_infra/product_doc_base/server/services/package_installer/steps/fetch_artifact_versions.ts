@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { DocumentationProduct, parseArtifactName, type ProductName } from '@kbn/product-doc-common';
 import * as fs from 'fs';
-import { URL } from 'url';
 import fetch from 'node-fetch';
+import Path from 'path';
+import { URL } from 'url';
 import { parseString } from 'xml2js';
-import { type ProductName, DocumentationProduct, parseArtifactName } from '@kbn/product-doc-common';
+import { resolveLocalArtifactsPath } from '../utils/local_artifacts';
 
 type ArtifactAvailableVersions = Record<ProductName, string[]>;
 
@@ -21,14 +23,12 @@ export const fetchArtifactVersions = async ({
   const parsedUrl = new URL(artifactRepositoryUrl);
 
   let xml: string;
-  if (parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:') {
-    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
-    xml = await res.text();
-  } else if (parsedUrl.protocol === 'file:') {
+  if (parsedUrl.protocol === 'file:') {
     const file = await fetchLocalFile(parsedUrl);
     xml = file.toString();
   } else {
-    throw new Error(`Unsupported URL scheme for artifact repository: ${parsedUrl.protocol}`);
+    const res = await fetch(`${artifactRepositoryUrl}?max-keys=1000`);
+    xml = await res.text();
   }
 
   return new Promise((resolve, reject) => {
@@ -65,15 +65,15 @@ export const fetchArtifactVersions = async ({
 
 function fetchLocalFile(parsedUrl: URL): Promise<Buffer> {
   return new Promise((resolve, reject) => {
-    const filePath = parsedUrl.pathname;
+    const normalizedPath = resolveLocalArtifactsPath(parsedUrl);
+    const xmlFilePath = Path.join(normalizedPath, 'index.xml');
 
-    // On Windows, remove leading "/" (e.g., file:///C:/path should be C:/path)
-    const normalizedPath =
-      process.platform === 'win32' && filePath.startsWith('/') ? filePath.substring(1) : filePath;
-
-    fs.readFile(normalizedPath, (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
+    fs.readFile(xmlFilePath, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
+      }
     });
   });
 }
