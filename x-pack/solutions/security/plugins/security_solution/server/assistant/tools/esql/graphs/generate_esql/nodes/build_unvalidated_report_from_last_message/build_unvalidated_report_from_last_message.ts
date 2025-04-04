@@ -6,11 +6,11 @@
  */
 
 import { Command } from '@langchain/langgraph';
-import type { EsqlSelfHealingAnnotation } from '../../state';
+import type { GenerateEsqlAnnotation } from '../../state';
 import { lastMessageWithUnvalidatedReport } from './utils';
 
 export const getBuildUnvalidatedReportFromLastMessageNode = () => {
-  return async (state: typeof EsqlSelfHealingAnnotation.State) => {
+  return async (state: typeof GenerateEsqlAnnotation.State) => {
     const { messages } = state;
     const lastMessage = messages[messages.length - 1];
 

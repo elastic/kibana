@@ -31,7 +31,7 @@ const toolDetails = {
 - asks for ES|QL best practices
 - asks for ES|QL optimization
 
-Never use this tool when they user wants to generate a ES|QL for their data.`,
+Never use this tool when the user wants to generate a ES|QL for their data.`,
 };
 
 export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {

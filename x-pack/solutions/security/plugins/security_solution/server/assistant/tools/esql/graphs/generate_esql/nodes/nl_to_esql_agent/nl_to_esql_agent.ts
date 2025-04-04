@@ -17,7 +17,7 @@ import {
   messagesToInference,
   toolDefinitionToInference,
 } from '@kbn/inference-langchain/src/chat_model/to_inference';
-import type { EsqlSelfHealingAnnotation } from '../../state';
+import type { GenerateEsqlAnnotation } from '../../state';
 
 export const getNlToEsqlAgent = ({
   connectorId,
@@ -32,7 +32,7 @@ export const getNlToEsqlAgent = ({
   request: KibanaRequest;
   tools: StructuredToolInterface[];
 }) => {
-  return async (state: typeof EsqlSelfHealingAnnotation.State) => {
+  return async (state: typeof GenerateEsqlAnnotation.State) => {
     const { messages: stateMessages } = state;
 
     const inferenceMessages = messagesToInference(stateMessages);

@@ -36,8 +36,8 @@ export const NL_TO_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
   isSupported: (params: ESQLToolParams): params is ESQLToolParams => {
-    const { inference, connectorId } = params;
-    return inference != null && connectorId != null;
+    const { inference, connectorId, assistantContext } = params;
+    return inference != null && connectorId != null && !assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration;
   },
   getTool(params: ESQLToolParams) {
     if (!this.isSupported(params)) return null;

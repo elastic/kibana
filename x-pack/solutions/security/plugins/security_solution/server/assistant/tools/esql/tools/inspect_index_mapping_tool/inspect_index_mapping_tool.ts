@@ -20,47 +20,23 @@ export const toolDetails = {
   description: `Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index. Call this tool repeatedly to inspect nested fields.
 This is an example of the fields in logs-*:
 \`\`\`
-${JSON.stringify({
-  field1: {
-    type: 'keyword',
-  },
-  field2: {
-    nested_field: {
-      type: 'keyword',
-    },
-  },
-})}
+{"field1":{"type":"keyword"},"field2":{"nested_field":{"type":"keyword"}}}
 \`\`\`
 To get the properties of the root object, call the tool with an empty string as the key. For example:
 \`\`\`
-{
-    "indexName": "logs-*",
-    "key": "" // empty string to get the root object. The first time you call the tool, always use an empty string to get the root object.
-}
+{"indexName":"logs-*","key":""}
 \`\`\`
 Output:
 \`\`\`
-{
-    "field1": {
-      "type": "keyword",
-    },
-    "field2": {
-      "nested_field": "Object" // shallow view of the nested object
-    }
-}
+{"field1":{"type":"keyword"},"field2":{"nested_field":"Object"}}
 \`\`\
 The tool can be called repeatedly to explore the nested fields. For example:
 \`\`\`
-${JSON.stringify({
-  indexName: 'logs-*',
-  key: 'field2.nested_field',
-})}
+{"indexName":"logs-*","key":"field2.nested_field"}
 \`\`\`
 Output:
 \`\`\`
-${JSON.stringify({
-  type: 'keyword',
-})}
+{"type":"keyword"}
 \`\`\``,
 };
 
@@ -80,7 +56,7 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
       const nestedObject = mapFieldDescriptorToNestedObject(fields);
       const value = getNestedValue(nestedObject, key);
       const shallowObjectView = shallowObjectViewTruncated(value, 30000);
-      const message = `'${key}' in the index pattern '${indexPattern}' looks like this:\n${JSON.stringify(
+      const message = `The key '${key}' in the index pattern '${indexPattern}' has the following fields:\n${JSON.stringify(
         shallowObjectView,
         null,
         2

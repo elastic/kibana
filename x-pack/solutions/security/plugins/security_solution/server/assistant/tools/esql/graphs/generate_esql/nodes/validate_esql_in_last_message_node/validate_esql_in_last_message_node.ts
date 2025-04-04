@@ -8,14 +8,14 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { Command } from '@langchain/langgraph';
 import { extractEsqlFromContent, validateEsql } from './utils';
-import type { EsqlSelfHealingAnnotation } from '../../state';
+import type { GenerateEsqlAnnotation } from '../../state';
 
 export const getValidateEsqlInLastMessageNode = ({
   esClient,
 }: {
   esClient: ElasticsearchClient;
 }) => {
-  return async (state: typeof EsqlSelfHealingAnnotation.State) => {
+  return async (state: typeof GenerateEsqlAnnotation.State) => {
     const { messages } = state;
     const lastMessage = messages[messages.length - 1];
 

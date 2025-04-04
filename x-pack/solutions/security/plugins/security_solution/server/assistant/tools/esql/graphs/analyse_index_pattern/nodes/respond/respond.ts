@@ -6,14 +6,14 @@
  */
 
 import { Command } from '@langchain/langgraph';
-import { SystemMessage } from '@langchain/core/messages';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type {
   ActionsClientChatBedrockConverse,
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
 } from '@kbn/langchain/server';
 import { z } from '@kbn/zod';
-import type { CheckIfIndexContainsRequiredFieldsAnnotation } from '../../state';
+import type { AnalyseIndexPatternAnnotation } from '../../state';
 
 const IndexPatternAnalysis = z
   .object({
@@ -32,7 +32,7 @@ export const getRespond = ({
 }) => {
   const llm = createLlmInstance();
 
-  return async (state: typeof CheckIfIndexContainsRequiredFieldsAnnotation.State) => {
+  return async (state: typeof AnalyseIndexPatternAnnotation.State) => {
     const lastMessage = state.messages[state.messages.length - 1];
 
     const result = await llm
@@ -41,7 +41,9 @@ export const getRespond = ({
         new SystemMessage({
           content: `You are an expert in parsing text into the correct format. Don't add any additional information to the response.`,
         }),
-        lastMessage,
+        new HumanMessage({
+          content: lastMessage.content,
+        }),
       ]);
 
     return new Command({

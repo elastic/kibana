@@ -7,6 +7,7 @@
 
 import type {
   ActionsClientChatOpenAI,
+  ActionsClientChatVertexAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
@@ -18,6 +19,10 @@ import { getRuleMigrationAgent } from '../../server/lib/siem_migrations/rules/ta
 import type { RuleMigrationsRetriever } from '../../server/lib/siem_migrations/rules/task/retrievers';
 import type { EsqlKnowledgeBase } from '../../server/lib/siem_migrations/rules/task/util/esql_knowledge_base';
 import type { SiemMigrationTelemetryClient } from '../../server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client';
+import { getGenerateEsqlGraph as getGenerateEsqlAgent } from '@kbn/security-solution-plugin/server/assistant/tools/esql/graphs/generate_esql/generate_esql';
+import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { ActionsClientChatBedrockConverse } from '@kbn/langchain/server';
 
 interface Drawable {
   drawMermaidPng: () => Promise<Blob>;
@@ -47,6 +52,22 @@ async function getSiemMigrationGraph(logger: Logger): Promise<Drawable> {
   return graph.getGraphAsync({ xray: true });
 }
 
+async function getGenerateEsqlGraph(logger: Logger): Promise<Drawable> {
+  const graph = getGenerateEsqlAgent({
+    esClient: {} as unknown as ElasticsearchClient,
+    connectorId: "test-connector-id",
+    inference: {} as unknown as InferenceServerStart,
+    logger,
+    request: {} as unknown as KibanaRequest,
+    createLlmInstance: () => ({bindTools: () => null}) as unknown as ActionsClientChatBedrockConverse
+        | ActionsClientChatVertexAI
+        | ActionsClientChatOpenAI,
+  });
+  return graph.getGraphAsync({ xray: true });
+}
+
+
+
 export const drawGraph = async ({
   getGraphAsync,
   outputFilename,
@@ -69,6 +90,10 @@ export const drawGraph = async ({
 };
 
 export const draw = async () => {
+  await drawGraph({
+    getGraphAsync: getGenerateEsqlGraph,
+    outputFilename: '../../docs/generate_esql/img/generate_esql_graph.png',
+  });
   await drawGraph({
     getGraphAsync: getSiemMigrationGraph,
     outputFilename: '../../docs/siem_migration/img/agent_graph.png',

@@ -11,7 +11,7 @@ import { z } from '@kbn/zod';
 import { HumanMessage } from '@langchain/core/messages';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
-import { getEsqlSelfHealingGraph } from './graphs/generate_esql/esql_self_healing_graph';
+import { getGenerateEsqlGraph } from './graphs/generate_esql/generate_esql';
 
 export type GenerateEsqlParams = AssistantToolParams;
 
@@ -48,7 +48,7 @@ export const GENERATE_ESQL_TOOL: AssistantTool = {
       params;
     if (inference == null || connectorId == null) return null;
 
-    const selfHealingGraph = getEsqlSelfHealingGraph({
+    const selfHealingGraph = getGenerateEsqlGraph({
       esClient,
       connectorId,
       inference,

@@ -8,7 +8,7 @@
 import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 
-export const IdentityIndexAnnotation = Annotation.Root({
+export const SelectIndexPatternAnnotation = Annotation.Root({
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
@@ -21,10 +21,6 @@ export const IdentityIndexAnnotation = Annotation.Root({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => '',
   }),
-  availableIndices: Annotation<string[]>({
-    reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => [],
-  }),
   indexPatterns: Annotation<string[]>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => [],
@@ -33,14 +29,14 @@ export const IdentityIndexAnnotation = Annotation.Root({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => [],
   }),
-  shortlistedIndexPatternAnalysis: Annotation<
+  indexPatternAnalysis: Annotation<
     Record<string, { analysis: string; containsRequiredData: boolean; indexPattern: string }>
   >({
     reducer: (currentValue, newValue) => ({ ...currentValue, ...newValue }),
     default: () => ({}),
   }),
-  selectedIndexPattern: Annotation<string | undefined>({
-    reducer: (currentValue, newValue) => newValue ?? currentValue,
+  selectedIndexPattern: Annotation<string | undefined | null>({
+    reducer: (currentValue, newValue) => newValue === undefined ? currentValue : newValue,
     default: () => undefined,
   }),
 });

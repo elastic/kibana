@@ -12,7 +12,7 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { ChatCompletionMessageEvent } from '@kbn/inference-common';
 import { Command } from '@langchain/langgraph';
 import { responseToLangchainMessage } from '@kbn/inference-langchain/src/chat_model/from_inference';
-import type { EsqlSelfHealingAnnotation } from '../../state';
+import type { GenerateEsqlAnnotation } from '../../state';
 
 export const getNlToEsqlAgentWithoutValidation = ({
   connectorId,
@@ -25,7 +25,7 @@ export const getNlToEsqlAgentWithoutValidation = ({
   logger: Logger;
   request: KibanaRequest;
 }) => {
-  return async (state: typeof EsqlSelfHealingAnnotation.State) => {
+  return async (state: typeof GenerateEsqlAnnotation.State) => {
     const { input } = state;
 
     const result = (await lastValueFrom(

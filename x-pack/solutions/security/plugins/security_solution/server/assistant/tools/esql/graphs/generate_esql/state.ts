@@ -9,7 +9,7 @@ import type { BaseMessage } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 import type { ValidateEsqlResult } from './nodes/validate_esql_in_last_message_node/utils';
 
-export const EsqlSelfHealingAnnotation = Annotation.Root({
+export const GenerateEsqlAnnotation = Annotation.Root({
   input: Annotation<string>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => '',
@@ -34,12 +34,8 @@ export const EsqlSelfHealingAnnotation = Annotation.Root({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
     default: () => 5,
   }),
-  indexPatternIdentified: Annotation<boolean>({
-    reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => false,
-  }),
-  selectedIndexPattern: Annotation<string>({
-    reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => '',
+  selectedIndexPattern: Annotation<string | undefined | null>({
+    reducer: (currentValue, newValue) => newValue === undefined ? currentValue : newValue,
+    default: () => undefined,
   }),
 });

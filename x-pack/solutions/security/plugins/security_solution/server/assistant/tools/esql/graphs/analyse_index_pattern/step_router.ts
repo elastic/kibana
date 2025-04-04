@@ -7,10 +7,10 @@
 
 import { messageContainsToolCalls } from '../generate_esql/step_router';
 import { AGENT, RESPOND, TOOLS } from './constants';
-import type { CheckIfIndexContainsRequiredFieldsAnnotation } from './state';
+import type { AnalyseIndexPatternAnnotation } from './state';
 
 export const startStepRouter = (
-  state: typeof CheckIfIndexContainsRequiredFieldsAnnotation.State
+  state: typeof AnalyseIndexPatternAnnotation.State
 ): string => {
   const { messages } = state;
   const lastMessage = messages[messages.length - 1];
@@ -22,7 +22,7 @@ export const startStepRouter = (
 };
 
 export const agentStepRouter = (
-  state: typeof CheckIfIndexContainsRequiredFieldsAnnotation.State
+  state: typeof AnalyseIndexPatternAnnotation.State
 ): string => {
   const { messages } = state;
   const lastMessage = messages[messages.length - 1];

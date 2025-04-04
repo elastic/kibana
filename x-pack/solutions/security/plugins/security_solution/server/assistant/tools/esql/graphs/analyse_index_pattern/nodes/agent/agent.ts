@@ -9,10 +9,10 @@ import { Command } from '@langchain/langgraph';
 import type { Runnable } from '@langchain/core/runnables';
 import type { AIMessage } from '@langchain/core/messages';
 import { SystemMessage } from '@langchain/core/messages';
-import type { CheckIfIndexContainsRequiredFieldsAnnotation } from '../../state';
+import type { AnalyseIndexPatternAnnotation } from '../../state';
 
 export const getAgent = ({ llm }: { llm: Runnable }) => {
-  return async (state: typeof CheckIfIndexContainsRequiredFieldsAnnotation.State) => {
+  return async (state: typeof AnalyseIndexPatternAnnotation.State) => {
     const result: AIMessage = await llm.invoke([
       new SystemMessage({
         content: `You are a security analyst and an expert in Elastic Search. You are examining the index '${state.indexPattern}' and need to determine if it contains the fields required to answer the user's question. 

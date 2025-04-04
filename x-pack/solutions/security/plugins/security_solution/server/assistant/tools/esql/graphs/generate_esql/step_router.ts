@@ -7,7 +7,7 @@
 
 import type { AIMessage, BaseMessage } from '@langchain/core/messages';
 import { END } from '@langchain/langgraph';
-import type { EsqlSelfHealingAnnotation } from './state';
+import type { GenerateEsqlAnnotation } from './state';
 
 import {
   BUILD_ERROR_REPORT_FROM_LAST_MESSAGE_NODE,
@@ -15,8 +15,8 @@ import {
   NL_TO_ESQL_AGENT_NODE,
   NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE,
   TOOLS_NODE,
-} from './nodes/contants';
-import { VALIDATE_ESQL_IN_LAST_MESSAGE_NODE } from './constants';
+  VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE,
+} from './contants';
 
 export const messageContainsToolCalls = (message: BaseMessage): message is AIMessage => {
   return (
@@ -25,7 +25,7 @@ export const messageContainsToolCalls = (message: BaseMessage): message is AIMes
 };
 
 export const validateEsqlFromLastMessageStepRouter = (
-  state: typeof EsqlSelfHealingAnnotation.State
+  state: typeof GenerateEsqlAnnotation.State
 ): string => {
   const { validateEsqlResults, maximumEsqlGenerationAttempts, maximumValidationAttempts } = state;
 
@@ -49,17 +49,17 @@ export const validateEsqlFromLastMessageStepRouter = (
   return NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE;
 };
 
-export const selectIndexStepRouter = (state: typeof EsqlSelfHealingAnnotation.State): string => {
-  const { indexPatternIdentified } = state;
+export const selectIndexStepRouter = (state: typeof GenerateEsqlAnnotation.State): string => {
+  const { selectedIndexPattern } = state;
 
-  if (indexPatternIdentified) {
-    return NL_TO_ESQL_AGENT_NODE;
+  if (selectedIndexPattern == null) {
+    return END;
   }
 
-  return END;
+  return NL_TO_ESQL_AGENT_NODE;
 };
 
-export const nlToEsqlAgentStepRouter = (state: typeof EsqlSelfHealingAnnotation.State): string => {
+export const nlToEsqlAgentStepRouter = (state: typeof GenerateEsqlAnnotation.State): string => {
   const { messages } = state;
   const lastMessage = messages[messages.length - 1];
 
@@ -67,5 +67,5 @@ export const nlToEsqlAgentStepRouter = (state: typeof EsqlSelfHealingAnnotation.
     return TOOLS_NODE;
   }
 
-  return VALIDATE_ESQL_IN_LAST_MESSAGE_NODE;
+  return VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE;
 };

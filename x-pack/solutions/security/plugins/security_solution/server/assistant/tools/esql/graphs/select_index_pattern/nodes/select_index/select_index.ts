@@ -14,7 +14,7 @@ import { HumanMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 
 import { z } from '@kbn/zod';
-import type { IdentityIndexAnnotation } from '../../state';
+import type { SelectIndexPatternAnnotation } from '../../state';
 
 const SelectedIndexPattern = z
   .object({
@@ -37,10 +37,10 @@ export const getSelectIndexPattern = ({
 }) => {
   const llm = createLlmInstance();
 
-  return async (state: typeof IdentityIndexAnnotation.State) => {
-    const { shortlistedIndexPatternAnalysis } = state;
+  return async (state: typeof SelectIndexPatternAnnotation.State) => {
+    const { indexPatternAnalysis } = state;
 
-    const analysis = Object.values(shortlistedIndexPatternAnalysis);
+    const analysis = Object.values(indexPatternAnalysis);
     const candidateIndexPatterns = analysis.filter(
       ({ containsRequiredData }) => containsRequiredData
     );
@@ -49,7 +49,7 @@ export const getSelectIndexPattern = ({
       // Non of the analyzed index patterns contained the required data
       return new Command({
         update: {
-          selectedIndexPattern: undefined,
+          selectedIndexPattern: null,
         },
       });
     }
@@ -67,7 +67,9 @@ export const getSelectIndexPattern = ({
     const humanMessage = new HumanMessage({
       content: `We have analyzed multiple index patterns to see if they contain the data required for the query. Using the analysis, please suggest an a single index pattern that is most appropriate for our query.
 
-Query: ${state.input}
+Query: 
+
+${state.input}
 
 Analysis: 
 

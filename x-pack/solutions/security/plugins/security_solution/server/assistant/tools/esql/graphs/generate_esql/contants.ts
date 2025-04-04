@@ -10,6 +10,8 @@ export const BUILD_SUCCESS_REPORT_FROM_LAST_MESSAGE_NODE = 'buildSuccessReportFr
 export const BUILD_UNVALIDATED_REPORT_FROM_LAST_MESSAGE_NODE =
   'buildUnvalidatedReportFromLastMessage';
 export const NL_TO_ESQL_AGENT_WITHOUT_VALIDATION_NODE = 'nlToEsqlAgentWithoutValidation';
-export const NL_TO_ESQL_AGENT_NODE = 'nlToEsqlAgent';
 export const VALIDATE_ESQL_FROM_LAST_MESSAGE_NODE = 'validateEsqlFromLastMessageNode';
-export const TOOLS_NODE = 'tools';
+export const SELECT_INDEX_PATTERN_GRAPH = 'selectIndexPatternGraph';
+export const SUMMARIZE_OBJECTIVE = 'summarizeObjective';
+export const NL_TO_ESQL_AGENT_NODE = 'nlToEsqlAgent';
+export const TOOLS_NODE = 'toolsNode';

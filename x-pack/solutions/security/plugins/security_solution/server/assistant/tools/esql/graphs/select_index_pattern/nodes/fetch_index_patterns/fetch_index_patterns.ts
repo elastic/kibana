@@ -7,11 +7,11 @@
 
 import { Command } from '@langchain/langgraph';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { IdentityIndexAnnotation } from '../../state';
+import type { SelectIndexPatternAnnotation } from '../../state';
 import { buildTree, getIndexPatterns } from './utils';
 
 export const fetchIndexPatterns = ({ esClient }: { esClient: ElasticsearchClient }) => {
-  return async (state: typeof IdentityIndexAnnotation.State) => {
+  return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const indicesResolveIndexResponse = await esClient.indices.resolveIndex({
       name: '*',
       expand_wildcards: 'open',

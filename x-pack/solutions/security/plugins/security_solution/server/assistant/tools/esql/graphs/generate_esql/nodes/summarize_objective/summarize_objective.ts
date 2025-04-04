@@ -12,7 +12,7 @@ import type {
 } from '@kbn/langchain/server';
 import { HumanMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
-import type { EsqlSelfHealingAnnotation } from '../../state';
+import type { GenerateEsqlAnnotation } from '../../state';
 
 export const getSummarizeObjective = ({
   createLlmInstance,
@@ -24,7 +24,7 @@ export const getSummarizeObjective = ({
 }) => {
   const llm = createLlmInstance();
 
-  return async (state: typeof EsqlSelfHealingAnnotation.State) => {
+  return async (state: typeof GenerateEsqlAnnotation.State) => {
     const humanMessage = new HumanMessage({
       content: `This is the user's input:
 

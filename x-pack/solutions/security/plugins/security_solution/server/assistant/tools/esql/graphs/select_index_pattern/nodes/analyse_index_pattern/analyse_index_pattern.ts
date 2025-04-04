@@ -6,37 +6,25 @@
  */
 
 import { AIMessage, HumanMessage } from '@langchain/core/messages';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
 import { Command } from '@langchain/langgraph';
 import { v4 as uuidv4 } from 'uuid';
 import { toolDetails } from '../../../../tools/inspect_index_mapping_tool/inspect_index_mapping_tool';
-import { getCheckIfIndexContainsRequiredFieldsForQueryGraph } from '../../../check_if_index_pattern_contains_required_fields_for_query/check_if_index_pattern_contains_required_fields_for_query';
+import { getAnalyseIndexPatternGraph } from '../../../analyse_index_pattern/analyse_index_pattern';
 
-export const getCheckIfIndexContainsRequiredFields = ({
-  esClient,
-  createLlmInstance,
+export const getAnalyseIndexPattern = ({
+  analyseIndexPatternGraph
 }: {
-  esClient: ElasticsearchClient;
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  analyseIndexPatternGraph: ReturnType<typeof getAnalyseIndexPatternGraph>;
 }) => {
-  const graph = getCheckIfIndexContainsRequiredFieldsForQueryGraph({ esClient, createLlmInstance });
 
   return async (input: { objectiveSummary: string; indexPattern: string }) => {
     const { objectiveSummary, indexPattern } = input;
 
-    const result = await graph.invoke({
+    const result = await analyseIndexPatternGraph.invoke({
       indexPattern,
       messages: [
         new HumanMessage({
-          content: `Does the index pattern '${indexPattern}' contain the fields required to answer the following question: \n\n${objectiveSummary}`,
+          content: `Does the index pattern '${indexPattern}' contain the fields required to answer the following: \n\n${objectiveSummary}`,
         }),
         new AIMessage({
           content: '',
@@ -57,7 +45,7 @@ export const getCheckIfIndexContainsRequiredFields = ({
 
     return new Command({
       update: {
-        shortlistedIndexPatternAnalysis: {
+        indexPatternAnalysis: {
           [indexPattern]: {
             indexPattern,
             analysis: result.analysis,

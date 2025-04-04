@@ -15,13 +15,13 @@ import type {
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredToolInterface } from '@langchain/core/tools';
 import { getInspectIndexMappingTool } from '../../tools/inspect_index_mapping_tool/inspect_index_mapping_tool';
-import { CheckIfIndexContainsRequiredFieldsAnnotation } from './state';
+import { AnalyseIndexPatternAnnotation } from './state';
 import { AGENT, RESPOND, TOOLS } from './constants';
 import { agentStepRouter, startStepRouter } from './step_router';
 import { getAgent } from './nodes/agent/agent';
 import { getRespond } from './nodes/respond/respond';
 
-export const getCheckIfIndexContainsRequiredFieldsForQueryGraph = ({
+export const getAnalyseIndexPatternGraph = ({
   esClient,
   createLlmInstance,
 }: {
@@ -37,7 +37,7 @@ export const getCheckIfIndexContainsRequiredFieldsForQueryGraph = ({
   const llm = createLlmInstance();
   const llmWithTools = llm.bindTools(tools);
 
-  const graph = new StateGraph(CheckIfIndexContainsRequiredFieldsAnnotation)
+  const graph = new StateGraph(AnalyseIndexPatternAnnotation)
     .addNode(AGENT, getAgent({ llm: llmWithTools }), { retryPolicy: { maxAttempts: 3 } })
     .addNode(RESPOND, getRespond({ createLlmInstance }), { retryPolicy: { maxAttempts: 3 } })
     .addNode(TOOLS, toolNode)

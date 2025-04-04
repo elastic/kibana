@@ -13,7 +13,7 @@ import type {
 import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { z } from '@kbn/zod';
-import type { IdentityIndexAnnotation } from '../../state';
+import type { SelectIndexPatternAnnotation } from '../../state';
 
 const ShortlistedIndexPatterns = z
   .object({
@@ -33,7 +33,7 @@ export const getShortlistIndexPatterns = ({
 }) => {
   const llm = createLlmInstance();
 
-  return async (state: typeof IdentityIndexAnnotation.State) => {
+  return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const systemMessage = new SystemMessage({
       content: `You are a security analyst who is an expert in Elasticsearch and particularly writing Elastic Search queries. You have been given a list of index patterns and a summary of the query that we are trying to generate. 
 To generate the query we first need to identify which index pattern should be used. To do this you short list a maximum of 3 index patterns that are the most likily to contain the fields required to write the query. Select a variety index patterns.`,
@@ -56,9 +56,7 @@ To generate the query we first need to identify which index pattern should be us
         hypothesisMessages: [
           humanMessage,
           new AIMessage({
-            content: `The shortlisted index patterns are: ${result.shortlistedIndexPatterns.join(
-              ', '
-            )}`,
+            content: `The shortlisted index patterns are: ${result.shortlistedIndexPatterns.join(', ')}`,
           }),
         ],
       },
