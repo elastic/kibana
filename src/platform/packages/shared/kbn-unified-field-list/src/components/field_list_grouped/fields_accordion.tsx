@@ -72,7 +72,8 @@ function InnerFieldsAccordion<T extends FieldListItem = DataViewField>({
         <strong
           className={titleClassname}
           aria-label={i18n.translate('unifiedFieldList.fieldsAccordion.accordionButtonAriaLabel', {
-            defaultMessage: '{label}: {fieldsCount} items',
+            defaultMessage:
+              '{label}: {fieldsCount} {fieldsCount, plural, one {item} other {items}}',
             values: { label, fieldsCount },
           })}
         >
