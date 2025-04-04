@@ -59,6 +59,8 @@ export const useAlertDeletePreview = ({
     inactiveAlertDeleteThreshold,
   });
 
+  // Will allow users to change the params without calling the API
+  // on each update. Instead, it will wait for 500ms after the last change.
   const updateStableParams = useRef(
     debounce((params) => {
       setStableParams(params);
