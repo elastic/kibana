@@ -87,7 +87,6 @@ export const DiscoverSessionView = ({
     runtimeStateManager,
     (tab) => tab.customizationService$
   );
-  const [isInitialized] = useState(Boolean(currentStateContainer && currentCustomizationService));
   const initializeSessionAction = useCurrentTabAction(internalStateActions.initializeSession);
   const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
     async ({ dataViewSpec, defaultUrlState } = {}) => {
@@ -215,7 +214,7 @@ export const DiscoverSessionView = ({
     <DiscoverCustomizationProvider value={currentCustomizationService}>
       <DiscoverMainProvider value={currentStateContainer}>
         <RuntimeStateProvider currentDataView={currentDataView} adHocDataViews={adHocDataViews}>
-          <DiscoverMainApp stateContainer={currentStateContainer} isInitialized={isInitialized} />
+          <DiscoverMainApp stateContainer={currentStateContainer} />
         </RuntimeStateProvider>
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>

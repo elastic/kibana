@@ -101,7 +101,7 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
           query ?? services.data.query.queryString.getDefaultQuery()
         );
 
-        // nextTabStateContainer.actions.initializeAndSync();
+        nextTabStateContainer.actions.initializeAndSync();
       }
     }
 

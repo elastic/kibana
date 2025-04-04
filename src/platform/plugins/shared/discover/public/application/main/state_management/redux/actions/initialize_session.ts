@@ -251,6 +251,10 @@ export const initializeSession: InternalStateThunkActionCreator<
     stateContainer.appState.resetInitialState();
     stateContainer$.next(stateContainer);
     customizationService$.next(customizationService);
+
+    // Begin syncing the state and trigger the initial fetch
+    stateContainer.actions.initializeAndSync();
+    stateContainer.actions.fetchData(true);
     discoverSessionLoadTracker.reportEvent();
 
     return { showNoDataPage: false };

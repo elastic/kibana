@@ -19,7 +19,6 @@ import { useSavedSearchAliasMatchRedirect } from '../../../../hooks/saved_search
 import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useAdHocDataViews } from '../../hooks/use_adhoc_data_views';
 import { useEsqlMode } from '../../hooks/use_esql_mode';
-import { addLog } from '../../../../utils/add_log';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -28,10 +27,9 @@ export interface DiscoverMainProps {
    * Central state container
    */
   stateContainer: DiscoverStateContainer;
-  isInitialized?: boolean;
 }
 
-export function DiscoverMainApp({ stateContainer, isInitialized }: DiscoverMainProps) {
+export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
@@ -50,18 +48,6 @@ export function DiscoverMainApp({ stateContainer, isInitialized }: DiscoverMainP
     dataViews: services.dataViews,
     stateContainer,
   });
-
-  /**
-   * Start state syncing and fetch data if necessary
-   */
-  useEffect(() => {
-    stateContainer.actions.initializeAndSync();
-    if (!isInitialized) {
-      addLog('[DiscoverMainApp] state container initialization triggers data fetching');
-      stateContainer.actions.fetchData(true);
-    }
-    return () => stateContainer.actions.stopSyncing();
-  }, [isInitialized, stateContainer]);
 
   /**
    * SavedSearch dependent initializing
