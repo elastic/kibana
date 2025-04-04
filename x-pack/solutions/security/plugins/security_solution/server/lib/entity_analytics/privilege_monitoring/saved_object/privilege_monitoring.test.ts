@@ -43,7 +43,7 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
     soClient.create.mockResolvedValue({
       id: `privilege-monitoring-${namespace}`,
       type: privilegeMonitoringTypeName,
-      attributes: { status: 'installing' as unknown, apiKey: '' as unknown },
+      attributes: { status: 'installing' as unknown },
       references: [],
     });
 
@@ -51,10 +51,10 @@ describe('PrivilegeMonitoringEngineDescriptorClient', () => {
 
     expect(soClient.create).toHaveBeenCalledWith(
       privilegeMonitoringTypeName,
-      { status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING, apiKey: '' },
+      { status: PRIVILEGE_MONITORING_ENGINE_STATUS.INSTALLING },
       { id: `privilege-monitoring-${namespace}` }
     );
-    expect(result).toEqual({ status: 'installing', apiKey: '' });
+    expect(result).toEqual({ status: 'installing' });
   });
 
   it('should update an existing descriptor if one exists', async () => {
