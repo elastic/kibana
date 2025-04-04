@@ -304,7 +304,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     });
   });
 
-  it('should return errors for single integrations to cover for different cases', async () => {
+  it('should return errors for single integrations', async () => {
     esClientMock.search.mockResolvedValueOnce({
       hits: {
         hits: [
@@ -338,11 +338,20 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       total: 2,
       saved_objects: [
         {
+          package_name: 'elastic_agent',
+          package_version: '2.2.0',
+          updated_at: '2025-03-20T14:18:40.076Z',
+          attributes: {
+            version: '2.2.0',
+            install_status: 'installing',
+          },
+        },
+        {
           type: 'epm-packages',
           id: 'system',
           attributes: {
             version: '1.67.2',
-            install_status: 'installed',
+            install_status: 'install',
           },
           updated_at: '2025-03-26T14:06:27.611Z',
         },
@@ -366,10 +375,9 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     expect(res).toEqual({
       integrations: [
         {
-          error: 'Installation not found on remote',
           package_name: 'elastic_agent',
           package_version: '2.2.0',
-          sync_status: 'failed',
+          sync_status: 'synchronizing',
           updated_at: expect.any(String),
         },
         {
