@@ -1536,7 +1536,7 @@ describe('XYChart component', () => {
     expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
   });
 
-  test('legendAction is not triggering event on ES|QL charts', () => {
+  test('legendAction is not triggering event on ES|QL charts when unified search is on KQL/Lucene mode', () => {
     const { args } = sampleArgs();
 
     const newArgs = {
@@ -1546,9 +1546,57 @@ describe('XYChart component', () => {
         table: dataFromESQL,
       })),
     };
-    const wrapper = mountWithIntl(<XYChart {...defaultProps} args={newArgs} interactive={true} />);
+    const dataMock = dataPluginMock.createStartContract();
+    const newProps = {
+      ...defaultProps,
+      data: {
+        ...dataMock,
+        query: {
+          ...dataMock.query,
+          queryString: {
+            ...dataMock.query.queryString,
+            getQuery: () => ({
+              language: 'kuery',
+              query: 'field:value',
+            }),
+          },
+        },
+      },
+    };
+    const wrapper = mountWithIntl(<XYChart {...newProps} args={newArgs} interactive={true} />);
 
     expect(wrapper.find(Settings).first().prop('legendAction')).toBeUndefined();
+  });
+
+  test('legendAction is triggering event on ES|QL charts when unified search is on ES|QL mode', () => {
+    const { args } = sampleArgs();
+
+    const newArgs = {
+      ...args,
+      layers: args.layers.map((l) => ({
+        ...l,
+        table: dataFromESQL,
+      })),
+    };
+    const dataMock = dataPluginMock.createStartContract();
+    const newProps = {
+      ...defaultProps,
+      data: {
+        ...dataMock,
+        query: {
+          ...dataMock.query,
+          queryString: {
+            ...dataMock.query.queryString,
+            getQuery: () => ({
+              esql: 'FROM "index-pattern" WHERE "field" = "value"',
+            }),
+          },
+        },
+      },
+    };
+    const wrapper = mountWithIntl(<XYChart {...newProps} args={newArgs} interactive={true} />);
+
+    expect(wrapper.find(Settings).first().prop('legendAction')).toBeDefined();
   });
 
   test('it renders stacked bar', () => {
