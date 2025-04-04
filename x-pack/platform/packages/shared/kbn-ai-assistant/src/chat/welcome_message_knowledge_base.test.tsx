@@ -95,7 +95,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "We are setting up your knowledge base" with the inspect button', () => {
     const kb = createMockKnowledgeBase({
-      isLoading: false,
+      isLoading: true,
       installError: undefined,
       status: {
         value: {
@@ -126,7 +126,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "Base setup failed" with inspect issues', () => {
     const kb = createMockKnowledgeBase({
-      isLoading: false,
+      isLoading: true,
       installError: undefined,
       status: {
         value: {
@@ -186,6 +186,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // This could happen if the user manually stopped the model in ML,
     // so we have no install error, but ready = false
     const kb = createMockKnowledgeBase({
+      isLoading: true,
       status: {
         value: {
           endpoint: { inference_id: 'inference_id' },
