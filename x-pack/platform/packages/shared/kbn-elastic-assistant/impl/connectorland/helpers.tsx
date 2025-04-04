@@ -22,13 +22,13 @@ export enum OpenAiProviderType {
 }
 
 export interface GenAiConfig {
-  apiProvider?: string;
+  apiProvider?: OpenAiProviderType;
   apiUrl?: string;
   defaultModel?: string;
 }
 
 export interface AiConfigCatchAll {
-  apiProvider?: OpenAiProviderType | string;
+  apiProvider?: OpenAiProviderType;
   apiUrl?: string;
   defaultModel?: string;
   // inference fields
