@@ -13,10 +13,10 @@ export interface SecretElasticDoc {
   value: string;
 }
 // this replaces a var value with a reference to a secret
-export interface VarSecretReference {
-  id: string;
+export type VarSecretReference = {
   isSecretRef: true;
-}
+} & ({ id: string } | { ids: string[] });
+
 export interface SecretPath {
   path: string[];
   value: PackagePolicyConfigRecordEntry;
