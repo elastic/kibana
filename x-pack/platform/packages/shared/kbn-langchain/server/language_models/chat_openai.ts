@@ -130,7 +130,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   async betaParsedCompletionWithRetry(
     request: OpenAI.ChatCompletionCreateParamsNonStreaming
   ): Promise<ReturnType<OpenAIClient['beta']['chat']['completions']['parse']>> {
-    return await this.completionWithRetry(request).then((response) =>
+    return this.completionWithRetry(request).then((response) =>
       parseChatCompletion(
         response,
         this.constructBody(request, this.llmType) as ChatCompletionCreateParams
