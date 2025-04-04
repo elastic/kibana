@@ -49,7 +49,7 @@ const createActions = (testBed: TestBed) => {
       component.update();
     },
     clickReindexColumnAt: async (
-      columnType: 'isCritical' | 'message' | 'type' | 'index' | 'correctiveAction',
+      columnType: 'level' | 'message' | 'type' | 'index' | 'correctiveAction',
       index: number
     ) => {
       await act(async () => {

@@ -274,7 +274,7 @@ export interface EnrichedDeprecationInfo
     | 'health_indicator'
     | 'ilm_policies'
     | 'templates';
-  isCritical: boolean;
+  level: MIGRATION_DEPRECATION_LEVEL;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?: CorrectiveAction;
