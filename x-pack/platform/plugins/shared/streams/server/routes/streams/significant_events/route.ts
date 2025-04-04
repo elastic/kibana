@@ -8,7 +8,6 @@
 import { badRequest } from '@hapi/boom';
 import { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { dateFromString } from '@kbn/zod-helpers';
 import { createServerRoute } from '../../create_server_route';
 import { readSignificantEvents } from './read_significant_events';
 
@@ -16,7 +15,7 @@ export const readSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
+    query: z.object({ from: z.coerce.date(), to: z.coerce.date(), bucketSize: z.string() }),
   }),
 
   options: {
