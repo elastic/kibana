@@ -28,7 +28,7 @@ import { useIndexMappings } from '../../hooks/use_index_mappings';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { control, handleSubmit } = useFormContext<ChatForm>();
+  const { control } = useFormContext<ChatForm>();
   const {
     field: { value: searchBarValue },
     formState: { isSubmitting },
@@ -75,7 +75,12 @@ export const SearchMode: React.FC = () => {
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiForm component="form" onSubmit={handleSubmit(() => handleSearch())}>
+              <EuiForm
+                component="form"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                }}
+              >
                 <Controller
                   control={control}
                   name={ChatFormFields.searchQuery}
@@ -90,6 +95,9 @@ export const SearchMode: React.FC = () => {
                         { defaultMessage: 'Search for documents' }
                       )}
                       isLoading={isSubmitting}
+                      isClearable
+                      incremental
+                      onSearch={handleSearch}
                     />
                   )}
                 />
