@@ -35,7 +35,7 @@ export function useBulkDeleteSlo() {
     {
       onError: (error) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
-          title: i18n.translate('xpack.slo.slo.delete.errorNotification', {
+          title: i18n.translate('xpack.slo.slo.bulkDelete.errorNotification', {
             defaultMessage: 'Failed to delete SLOs',
           }),
         });
@@ -45,7 +45,7 @@ export function useBulkDeleteSlo() {
         queryClient.invalidateQueries({ queryKey: sloKeys.allDefinitions(), exact: false });
 
         toasts.addSuccess(
-          i18n.translate('xpack.slo.slo.delete.successNotification', {
+          i18n.translate('xpack.slo.slo.bulkDelete.successNotification', {
             defaultMessage: 'Deleted SLOs',
           })
         );

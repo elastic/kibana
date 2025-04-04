@@ -45,7 +45,7 @@ export function SloBulkDeleteModal({ slos, onCancel, onSuccess }: Props) {
       </EuiModalHeader>
       <EuiModalBody>
         <FormattedMessage
-          id="xpack.slo.deleteConfirmationModal.descriptionText"
+          id="xpack.slo.bulkDeleteConfirmationModal.descriptionText"
           defaultMessage="You can't recover these SLOs after deleting them."
         />
         <EuiSpacer size="xs" />
@@ -64,7 +64,7 @@ export function SloBulkDeleteModal({ slos, onCancel, onSuccess }: Props) {
           disabled={isDeleteLoading}
         >
           <FormattedMessage
-            id="xpack.slo.deleteConfirmationModal.cancelButtonLabel"
+            id="xpack.slo.bulkDeleteConfirmationModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
@@ -78,7 +78,7 @@ export function SloBulkDeleteModal({ slos, onCancel, onSuccess }: Props) {
           fill
         >
           <FormattedMessage
-            id="xpack.slo.deleteConfirmationModal.deleteButtonLabel"
+            id="xpack.slo.bulkDeleteConfirmationModal.deleteButtonLabel"
             defaultMessage="Delete"
           />
         </EuiButton>
@@ -88,7 +88,7 @@ export function SloBulkDeleteModal({ slos, onCancel, onSuccess }: Props) {
 }
 
 function getTitleLabel(amount: number): React.ReactNode {
-  return i18n.translate('xpack.slo.deleteConfirmationModal.title', {
+  return i18n.translate('xpack.slo.bulkDeleteConfirmationModal.title', {
     defaultMessage: 'Delete {amount} SLOs?',
     values: { amount },
   });
