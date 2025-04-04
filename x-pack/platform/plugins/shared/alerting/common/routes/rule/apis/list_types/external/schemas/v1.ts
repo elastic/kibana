@@ -7,13 +7,13 @@
 
 import { schema } from '@kbn/config-schema';
 
-const actionVariableSchema = schema.object({
+export const actionVariableSchema = schema.object({
   name: schema.string(),
   description: schema.string(),
   usesPublicBaseUrl: schema.maybe(schema.boolean()),
 });
 
-const actionGroupSchema = schema.object(
+export const actionGroupSchema = schema.object(
   {
     id: schema.string(),
     name: schema.string(),
@@ -136,6 +136,12 @@ export const typesRulesSchema = schema.object({
   has_alerts_mappings: schema.boolean({
     meta: {
       description: 'Indicates whether the rule type has custom mappings for the alert data.',
+    },
+  }),
+  has_fields_for_a_a_d: schema.boolean({
+    meta: {
+      description:
+        'Indicates whether the rule type has fields for alert as data for the alert data.  ',
     },
   }),
   id: schema.string({

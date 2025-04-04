@@ -545,7 +545,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
     return { state: updateState(state, downMonitorsByLocation.length > 0) };
   },
   alerts: UptimeRuleTypeAlertDefinition,
-  fieldsForAAD: Object.keys(uptimeRuleFieldMap),
   getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
     observabilityPaths.ruleDetails(rule.id),
 });

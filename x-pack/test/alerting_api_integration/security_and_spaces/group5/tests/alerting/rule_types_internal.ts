@@ -71,7 +71,7 @@ export default function listInternalRuleTypes({ getService }: FtrProviderContext
     solution: 'stack',
   };
 
-  describe('_rule_types', () => {
+  describe('_rule_types_internal', () => {
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {

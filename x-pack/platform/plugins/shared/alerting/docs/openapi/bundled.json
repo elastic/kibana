@@ -433,6 +433,9 @@
                         "type": "boolean",
                         "description": "Indicates whether the rule type has custom mappings for the alert data."
                       },
+                      "has_fields_for_a_a_d": {
+                        "type": "boolean"
+                      },
                       "id": {
                         "description": "The unique identifier for the rule type.",
                         "type": "string"
@@ -749,7 +752,8 @@
               }
             },
             "does_set_recovery_context": true,
-            "has_alerts_mappings": true
+            "has_alerts_mappings": true,
+            "has_fields_for_a_a_d": true
           },
           {
             "id": "xpack.ml.anomaly_detection_jobs_health",
@@ -836,7 +840,8 @@
               }
             },
             "does_set_recovery_context": true,
-            "has_alerts_mappings": false
+            "has_alerts_mappings": false,
+            "has_fields_for_a_a_d": false
           }
         ]
       }

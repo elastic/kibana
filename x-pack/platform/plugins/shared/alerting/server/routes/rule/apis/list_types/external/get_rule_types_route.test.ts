@@ -67,7 +67,10 @@ describe('ruleTypesRoute', () => {
       } as RegistryAlertTypeWithAuth,
     ];
     const expectedResult: Array<
-      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers' | 'solution'>>
+      AsApiContract<Omit<RegistryAlertTypeWithAuth, 'validLegacyConsumers' | 'solution'>> & {
+        fieldsForAAD: [];
+        has_fields_for_a_a_d: boolean;
+      }
     > = [
       {
         id: '1',
@@ -93,7 +96,9 @@ describe('ruleTypesRoute', () => {
         category: 'test',
         producer: 'test',
         enabled_in_license: true,
+        fieldsForAAD: [],
         has_alerts_mappings: true,
+        has_fields_for_a_a_d: true,
       },
     ];
     rulesClient.listRuleTypes.mockResolvedValueOnce(listTypes);
@@ -120,7 +125,9 @@ describe('ruleTypesRoute', () => {
             "default_schedule_interval": "10m",
             "does_set_recovery_context": false,
             "enabled_in_license": true,
+            "fieldsForAAD": Array [],
             "has_alerts_mappings": true,
+            "has_fields_for_a_a_d": true,
             "id": "1",
             "is_exportable": true,
             "minimum_license_required": "basic",

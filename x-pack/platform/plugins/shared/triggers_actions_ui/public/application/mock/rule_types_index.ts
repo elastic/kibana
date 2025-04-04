@@ -1089,7 +1089,6 @@ export const ruleTypesIndex = new Map([
       name: 'Metric threshold',
       category: 'observability',
       producer: 'infrastructure',
-      fieldsForAAD: ['cloud.*', 'host.*', 'orchestrator.*', 'container.*', 'labels.*', 'tags'],
       isExportable: true,
     },
   ],
