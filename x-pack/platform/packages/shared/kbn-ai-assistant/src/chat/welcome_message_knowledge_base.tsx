@@ -27,31 +27,7 @@ export function WelcomeMessageKnowledgeBase({
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
 }) {
-  const isPolling = !!knowledgeBase.status.value?.endpoint && !knowledgeBase.status.value?.ready;
-
-  // poll the status if isPolling (inference endpoint is created but deployment is not ready)
-  // stop when ready === true or some error
-  useEffect(() => {
-    if (!isPolling) {
-      return;
-    }
-
-    const interval = setInterval(knowledgeBase.status.refresh, 5000);
-
-    if (knowledgeBase.status.value?.ready) {
-      // done installing
-      clearInterval(interval);
-      return;
-    }
-
-    // cleanup the interval if unmount
-    return () => {
-      clearInterval(interval);
-    };
-  }, [knowledgeBase, isPolling]);
-
-  const isLoading = knowledgeBase.isInstalling || isPolling;
-  const prevIsInstalling = usePrevious(isLoading);
+  const prevIsInstalling = usePrevious(knowledgeBase.isLoading);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   // track whether the "inspect issues" popover is open
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -60,7 +36,7 @@ export function WelcomeMessageKnowledgeBase({
     if (prevIsInstalling) {
       setShowSuccessBanner(true);
     }
-  }, [isLoading, prevIsInstalling]);
+  }, [knowledgeBase.isLoading, prevIsInstalling]);
 
   const handleInstall = async () => {
     setIsPopoverOpen(false);
@@ -68,7 +44,7 @@ export function WelcomeMessageKnowledgeBase({
   };
 
   // If we are installing at any step (POST /setup + model deployment)
-  if (isLoading) {
+  if (knowledgeBase.isLoading) {
     return (
       <>
         {!!knowledgeBase.status.value?.endpoint &&

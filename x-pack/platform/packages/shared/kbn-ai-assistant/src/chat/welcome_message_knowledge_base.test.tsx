@@ -20,7 +20,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     partial: Partial<UseKnowledgeBaseResult> = {}
   ): UseKnowledgeBaseResult {
     return {
-      isInstalling: partial.isInstalling ?? false,
+      isLoading: partial.isLoading ?? false,
       setupKb: partial.setupKb ?? jest.fn(),
       installError: partial.installError,
       status: partial.status ?? {
@@ -39,9 +39,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
     return render(<WelcomeMessageKnowledgeBase knowledgeBase={kb} />);
   }
 
-  it('renders install message if isInstalling', () => {
+  it('renders install message if isLoading', () => {
     const kb = createMockKnowledgeBase({
-      isInstalling: true,
+      isLoading: true,
       status: {
         value: { ready: false, enabled: true, endpoint: { inference_id: 'inference_id' } },
         loading: false,
@@ -57,7 +57,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
   it('renders the success banner after a transition from installing to not installing with no error', async () => {
     // 1) Start in an installing state
     let kb = createMockKnowledgeBase({
-      isInstalling: true,
+      isLoading: true,
       status: {
         value: { ready: false, enabled: true },
         loading: false,
@@ -71,7 +71,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
     kb = {
       ...kb,
-      isInstalling: false,
+      isLoading: false,
       status: {
         ...kb.status,
         value: {
@@ -95,7 +95,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "We are setting up your knowledge base" with the inspect button', () => {
     const kb = createMockKnowledgeBase({
-      isInstalling: false,
+      isLoading: false,
       installError: undefined,
       status: {
         value: {
@@ -126,7 +126,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "Base setup failed" with inspect issues', () => {
     const kb = createMockKnowledgeBase({
-      isInstalling: false,
+      isLoading: false,
       installError: undefined,
       status: {
         value: {
@@ -164,7 +164,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // which can happen for on prem users with preconfigured connector where /setup is not
     // automatically called
     const kb = createMockKnowledgeBase({
-      isInstalling: false,
+      isLoading: false,
       status: {
         value: {
           ready: false,

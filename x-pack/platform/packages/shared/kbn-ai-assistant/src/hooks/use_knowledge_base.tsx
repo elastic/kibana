@@ -17,7 +17,7 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
-  isInstalling: boolean;
+  isLoading: boolean;
   installError?: Error;
   setupKb: () => Promise<void>;
 }
@@ -32,8 +32,10 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     },
     [service]
   );
+
   const [isInstalling, setIsInstalling] = useState(false);
   const [installError, setInstallError] = useState<Error>();
+  const isPolling = !!statusRequest.value?.endpoint && !statusRequest.value?.ready;
 
   useEffect(() => {
     if (isInstalling && !!statusRequest.value?.endpoint) {
@@ -73,10 +75,31 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     }
   }, [ml, service, notifications, statusRequest]);
 
+  // poll the status if isPolling (inference endpoint is created but deployment is not ready)
+  // stop when ready === true or some error
+  useEffect(() => {
+    if (!isPolling) {
+      return;
+    }
+
+    const interval = setInterval(statusRequest.refresh, 5000);
+
+    if (statusRequest.value?.ready) {
+      // done installing
+      clearInterval(interval);
+      return;
+    }
+
+    // cleanup the interval if unmount
+    return () => {
+      clearInterval(interval);
+    };
+  }, [statusRequest, isPolling]);
+
   return {
     status: statusRequest,
     setupKb,
-    isInstalling,
+    isLoading: isInstalling || isPolling,
     installError,
   };
 }
