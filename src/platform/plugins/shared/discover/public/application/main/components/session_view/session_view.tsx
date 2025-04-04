@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { useParams } from 'react-router-dom';
@@ -90,8 +90,6 @@ export const DiscoverSessionView = ({
   const initializeSessionAction = useCurrentTabAction(internalStateActions.initializeSession);
   const [initializeSessionState, initializeSession] = useAsyncFunction<InitializeSession>(
     async ({ dataViewSpec, defaultUrlState } = {}) => {
-      currentStateContainer?.actions.stopSyncing();
-
       const stateContainer = getDiscoverStateContainer({
         tabId: currentTabId,
         services,

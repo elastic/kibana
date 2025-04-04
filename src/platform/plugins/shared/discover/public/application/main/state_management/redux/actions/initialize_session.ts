@@ -36,6 +36,7 @@ import { updateSavedSearch } from '../../utils/update_saved_search';
 import { APP_STATE_URL_KEY } from '../../../../../../common';
 import { selectTabRuntimeState } from '../runtime_state';
 import type { ConnectedCustomizationService } from '../../../../../customizations';
+import { disconnectTab } from './tabs';
 
 export interface InitializeSessionParams {
   stateContainer: DiscoverStateContainer;
@@ -64,6 +65,7 @@ export const initializeSession: InternalStateThunkActionCreator<
     getState,
     { services, customizationContext, runtimeStateManager, urlStateStorage }
   ) => {
+    dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
     /**

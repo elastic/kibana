@@ -14,6 +14,7 @@ import { selectAllTabs, selectTab } from '../selectors';
 import {
   defaultTabState,
   internalStateSlice,
+  type TabActionPayload,
   type InternalStateThunkActionCreator,
 } from '../internal_state';
 import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
@@ -28,11 +29,7 @@ export const setTabs: InternalStateThunkActionCreator<
     const addedTabs = differenceBy(params.allTabs, previousTabs, (tab) => tab.id);
 
     for (const tab of removedTabs) {
-      const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tab.id);
-
-      tabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
-      tabRuntimeState.customizationService$.getValue()?.cleanup();
-
+      dispatch(disconnectTab({ tabId: tab.id }));
       delete runtimeStateManager.tabs.byId[tab.id];
     }
 
@@ -111,4 +108,14 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         selectedTabId: selectedItem?.id ?? currentTab.id,
       })
     );
+  };
+
+export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
+  ({ tabId }) =>
+  (_, __, { runtimeStateManager }) => {
+    const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, tabId);
+    const stateContainer = tabRuntimeState.stateContainer$.getValue();
+    stateContainer?.dataState.cancel();
+    stateContainer?.actions.stopSyncing();
+    tabRuntimeState.customizationService$.getValue()?.cleanup();
   };

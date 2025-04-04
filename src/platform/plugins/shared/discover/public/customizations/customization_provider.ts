@@ -50,6 +50,7 @@ export const getConnectedCustomizationService = async ({
   );
   const initialize = () => Promise.all(callbacks).then((result) => result.filter(isFunction));
 
+  // TODO: Race condition?
   await initialize();
 
   return {

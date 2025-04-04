@@ -106,9 +106,8 @@ export const DiscoverMainRoute = ({
   }, [initializeMainRoute, rootProfileState]);
 
   useUnmount(() => {
-    for (const tabRuntimeState of Object.values(runtimeStateManager.tabs.byId)) {
-      tabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
-      tabRuntimeState.customizationService$.getValue()?.cleanup();
+    for (const tabId of Object.keys(runtimeStateManager.tabs.byId)) {
+      internalState.dispatch(internalStateActions.disconnectTab({ tabId }));
     }
   });
 
