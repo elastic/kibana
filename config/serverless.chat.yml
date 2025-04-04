@@ -49,3 +49,5 @@ xpack.cloudSecurityPosture.enabled: false
 xpack.securitySolution.enabled: false
 xpack.securitySolutionEss.enabled: false
 xpack.securitySolutionServerless.enabled: false
+## Search Connectors in stack management
+xpack.searchConnectors.enabled: false

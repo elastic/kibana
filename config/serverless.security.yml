@@ -177,6 +177,3 @@ xpack.task_manager.capacity: 20
 
 ## Enable uiSettings validations
 xpack.securitySolution.enableUiSettingsValidations: true
-
-## Search Connectors in stack management
-xpack.searchConnectors.enabled: true

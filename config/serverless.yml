@@ -273,4 +273,4 @@ xpack.dataUsage.enabled: true
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 
 ## Search Connectors in stack management
-xpack.searchConnectors.enabled: false
+xpack.searchConnectors.enabled: true
