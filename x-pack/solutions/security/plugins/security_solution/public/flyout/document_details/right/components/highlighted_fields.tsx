@@ -92,14 +92,8 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
  * Component that displays the highlighted fields in the right panel under the Investigation section.
  */
 export const HighlightedFields: FC = () => {
-  const {
-    dataFormattedForFieldBrowser,
-    scopeId,
-    isPreview,
-    investigationFields,
-    // rule,
-    // isExistingRule,
-  } = useDocumentDetailsContext();
+  const { dataFormattedForFieldBrowser, scopeId, isPreview, investigationFields } =
+    useDocumentDetailsContext();
 
   const [isEditLoading, setIsEditLoading] = useState(false);
   const editHighlightedFieldsEnabled = useIsExperimentalFeatureEnabled(

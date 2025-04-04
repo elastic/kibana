@@ -128,7 +128,6 @@ export const HighlightedFieldsModal: FC<HighlightedFieldsModalProps> = ({
     index: index.length > 0 ? index : defaultIndexPattern, // fallback to default index pattern if rule has no index patterns
     dataViewId,
   });
-  const fieldOptions = useMemo(() => dataView.fields, [dataView]);
 
   const { addSuccess } = useAppToasts();
   const { euiTheme } = useEuiTheme();
@@ -142,17 +141,19 @@ export const HighlightedFieldsModal: FC<HighlightedFieldsModalProps> = ({
   });
   const defaultFieldsArray = useMemo(() => Object.keys(defaultFields), [defaultFields]);
 
+  const options = useMemo(() => {
+    const allFields = dataView.fields;
+    return allFields
+      .filter((field) => !defaultFieldsArray.includes(field.name))
+      .map((field) => ({ label: field.name }));
+  }, [dataView, defaultFieldsArray]);
+
   const customFields = useMemo(
     () => customHighlightedFields.map((field: string) => ({ label: field })),
     [customHighlightedFields]
   );
 
   const [selectedOptions, setSelectedOptions] = useState(customFields);
-
-  const options = useMemo(
-    () => fieldOptions.map((field) => ({ label: field.name })),
-    [fieldOptions]
-  );
 
   const { form } = useForm({
     defaultValue: { customHighlightedFields: [] },

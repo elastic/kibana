@@ -52,7 +52,7 @@ export interface UseHighlightedFieldsResult {
 export const useHighlightedFields = ({
   dataFormattedForFieldBrowser,
   investigationFields,
-  type = 'all',
+  type,
 }: UseHighlightedFieldsParams): UseHighlightedFieldsResult => {
   const responseActionsSupport = useAlertResponseActionsSupport(dataFormattedForFieldBrowser);
   const eventCategories = getEventCategoriesFromData(dataFormattedForFieldBrowser);
