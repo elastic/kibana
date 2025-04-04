@@ -89,7 +89,8 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
           test('errors on unknown index', async () => {
             const { expectErrors } = await setup();
 
-            await expectErrors(`FROM index, missingIndex`, ['Unknown index [missingIndex]']);
+            // commented out till ES fixes the bug https://github.com/elastic/elasticsearch/issues/126275
+            // await expectErrors(`FROM index, missingIndex`, ['Unknown index [missingIndex]']);
             await expectErrors(`from average()`, ['Unknown index [average()]']);
             await expectErrors(`fRom custom_function()`, ['Unknown index [custom_function()]']);
             await expectErrors(`FROM indexes*`, ['Unknown index [indexes*]']);

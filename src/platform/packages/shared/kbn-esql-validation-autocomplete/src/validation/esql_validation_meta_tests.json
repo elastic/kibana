@@ -9700,13 +9700,6 @@
       "warning": []
     },
     {
-      "query": "FROM index, missingIndex",
-      "error": [
-        "Unknown index [missingIndex]"
-      ],
-      "warning": []
-    },
-    {
       "query": "from average()",
       "error": [
         "Unknown index [average()]"
