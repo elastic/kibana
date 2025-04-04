@@ -16,15 +16,28 @@ import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 
 interface Props {
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  isDarkMode: boolean;
 }
 
-export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
+export function HeaderBreadcrumbs({ breadcrumbs$, isDarkMode }: Props) {
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0) {
     crumbs = [{ text: 'Kibana' }];
   }
+
+  // Modify last breadcrumb's text color to comply with A11y contrast ratio (AAA)
+  // https://github.com/elastic/kibana/issues/214597
+  const getBreadcrumbStyle = (isLast: boolean, darkMode: boolean) => {
+    if (isLast && !darkMode) {
+      return { color: '#4a4f5c' };
+    }
+    if (isLast && darkMode) {
+      return { color: '#d1d1d1' };
+    }
+    return undefined;
+  };
 
   crumbs = crumbs.map((breadcrumb, i) => {
     const isLast = i === breadcrumbs.length - 1;
@@ -41,6 +54,7 @@ export function HeaderBreadcrumbs({ breadcrumbs$ }: Props) {
         i === 0 && 'first',
         isLast && 'last'
       ),
+      style: getBreadcrumbStyle(isLast, isDarkMode),
     };
   });
 

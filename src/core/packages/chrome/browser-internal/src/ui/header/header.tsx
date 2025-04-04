@@ -78,6 +78,7 @@ export interface HeaderProps {
   onIsLockedUpdate: OnIsLockedUpdate;
   customBranding$: Observable<CustomBranding>;
   isServerless: boolean;
+  isDarkMode: boolean;
 }
 
 export function Header({
@@ -92,6 +93,7 @@ export function Header({
   globalHelpExtensionMenuLinks$,
   customBranding$,
   isServerless,
+  isDarkMode,
   ...observables
 }: HeaderProps) {
   const [isNavOpen, setIsNavOpen] = useState(false);
@@ -102,7 +104,9 @@ export function Header({
   const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
 
-  const Breadcrumbs = <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />;
+  const Breadcrumbs = (
+    <HeaderBreadcrumbs isDarkMode={isDarkMode} breadcrumbs$={observables.breadcrumbs$} />
+  );
 
   return (
     <>
