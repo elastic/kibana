@@ -903,8 +903,7 @@ export class TaskStore {
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
     try {
-      const // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584 types complain because the body should not be there.
-        // However, we can't use this API without the body because it fails to claim the tasks.
+      const // However, we can't use this API without the body because it fails to claim the tasks.
         // eslint-disable-next-line @typescript-eslint/naming-convention
         { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
           {
@@ -912,11 +911,11 @@ export class TaskStore {
             ignore_unavailable: true,
             refresh: true,
             conflicts: 'proceed',
-            body: {
-              ...opts,
-              max_docs,
-              query,
-            },
+            ...opts,
+            max_docs,
+            query,
+            // Being explicit to work around an ES client type issue.
+            sort: opts.sort as string[] | undefined,
           },
           { requestTimeout: this.requestTimeouts.update_by_query }
         );
