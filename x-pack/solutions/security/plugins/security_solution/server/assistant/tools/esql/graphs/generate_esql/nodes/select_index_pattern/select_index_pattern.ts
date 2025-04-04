@@ -22,7 +22,6 @@ export const getSelectIndexPattern = ({
                     messages: [
                         new HumanMessage({
                             content: `We were unable to find an index pattern that is suitable for this query. Please provide a specific index pattern and the fields you want to query. These are some index patterns that could be used: \n\n${childGraphOutput.indexPatterns
-                                .map((i) => `**${i}**`)
                                 .join('\n')}`,
                         }),
                     ],
