@@ -69,7 +69,7 @@ paths:
               - type: string
               - type: array
         - name: query
-          description: A free-text query string
+          description: A free-text query string.
           in: query
           schema:
             type: string
