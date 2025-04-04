@@ -155,6 +155,8 @@ export function initializeUnsavedChangesManager({
       getLastSavedState: () => lastSavedState$.value,
       onSave: (savedState: DashboardState) => {
         lastSavedState$.next(savedState);
+        // sync panels manager with latest saved state
+        panelsManager.internalApi.setPanels(savedState.panels);
         saveNotification$.next();
       },
     },

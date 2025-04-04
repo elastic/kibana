@@ -27,7 +27,6 @@ describe('group selector', () => {
         bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
         alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
         rulesCountAggregation: { cardinality: { field: 'kibana.alert.rule.rule_id' } },
-        countSeveritySubAggregation: { cardinality: { field: 'kibana.alert.severity' } },
         severitiesSubAggregation: { terms: { field: 'kibana.alert.severity' } },
         usersCountAggregation: { cardinality: { field: 'user.name' } },
       });

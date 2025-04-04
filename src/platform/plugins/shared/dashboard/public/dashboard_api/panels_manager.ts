@@ -367,6 +367,7 @@ export function initializePanelsManager(
           [api.uuid]: api,
         });
       },
+      setPanels,
       reset: (lastSavedState: DashboardState) => {
         setPanels(lastSavedState.panels);
         restoredRuntimeState = {};
