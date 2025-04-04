@@ -61,6 +61,6 @@ export const buildEsqlSearchRequest = ({
         filter: requestFilter,
       },
     },
-    wait_for_completion_timeout: '4m', // hard limit request timeout is 5m set by ES proxy and alerting framework. So, we should be fine to wait 4m for async query completion. If rule execution is shorter than 4m and query did not complete beofre, it will be aborted.
+    wait_for_completion_timeout: '4m', // hard limit request timeout is 5m set by ES proxy and alerting framework. So, we should be fine to wait 4m for async query completion. If rule execution is shorter than 4m and query was not completed, it will be aborted.
   };
 };
