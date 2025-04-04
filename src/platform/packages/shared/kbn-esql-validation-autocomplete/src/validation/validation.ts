@@ -173,15 +173,23 @@ async function validateAst(
   messages.push(...validateFieldsShadowing(availableFields, variables));
   messages.push(...validateUnsupportedTypeFields(availableFields, ast));
 
+  const references: ReferenceMaps = {
+    sources,
+    fields: availableFields,
+    policies: availablePolicies,
+    variables,
+    query: queryString,
+    joinIndices: joinIndices?.indices || [],
+  };
+  let seenFork = false;
   for (const [index, command] of ast.entries()) {
-    const references: ReferenceMaps = {
-      sources,
-      fields: availableFields,
-      policies: availablePolicies,
-      variables,
-      query: queryString,
-      joinIndices: joinIndices?.indices || [],
-    };
+    if (command.name === 'fork') {
+      if (seenFork) {
+        messages.push(errors.tooManyForks(command));
+      } else {
+        seenFork = true;
+      }
+    }
     const commandMessages = validateCommand(command, references, ast, index);
     messages.push(...commandMessages);
   }

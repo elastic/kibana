@@ -45,6 +45,22 @@ export const validationForkCommandTestSuite = (setup: helpers.Setup) => {
           );
         });
 
+        test('enforces only one fork command', async () => {
+          const { expectErrors } = await setup();
+
+          await expectErrors(
+            `FROM index
+| FORK
+    (WHERE keywordField != "" | LIMIT 100)
+    (SORT doubleField ASC NULLS LAST)
+| KEEP keywordField
+| FORK 
+    (WHERE keywordField != "foo")
+    (WHERE keywordField != "bar")`,
+            ['[FORK] a query cannot have more than one FORK command.']
+          );
+        });
+
         describe('_fork field', () => {
           test('does NOT recognize _fork field BEFORE FORK', async () => {
             const { expectErrors } = await setup();
