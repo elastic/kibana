@@ -7,6 +7,7 @@
 
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import { BulkDeleteSLOParams } from '@kbn/slo-schema';
 import {
   getSLOPipelineId,
   getSLOSummaryPipelineId,
@@ -30,32 +31,36 @@ export class DeleteSLO {
     private rulesClient: RulesClientApi
   ) {}
 
-  public async execute(sloId: string): Promise<void> {
-    const slo = await this.repository.findById(sloId);
+  public async execute(params: BulkDeleteSLOParams): Promise<void> {
+    await Promise.all(
+      params.ids.map(async (sloId) => {
+        const slo = await this.repository.findById(sloId);
 
-    await Promise.all([this.deleteSummaryTransform(slo), this.deleteRollupTransform(slo)]);
+        await Promise.all([this.deleteSummaryTransform(slo), this.deleteRollupTransform(slo)]);
 
-    await Promise.all([
-      retryTransientEsErrors(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: getSLOPipelineId(slo.id, slo.revision) },
-          { ignore: [404] }
-        )
-      ),
-      retryTransientEsErrors(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-          { ignore: [404] }
-        )
-      ),
-    ]);
+        await Promise.all([
+          retryTransientEsErrors(() =>
+            this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+              { id: getSLOPipelineId(slo.id, slo.revision) },
+              { ignore: [404] }
+            )
+          ),
+          retryTransientEsErrors(() =>
+            this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+              { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+              { ignore: [404] }
+            )
+          ),
+        ]);
 
-    await Promise.all([
-      this.deleteRollupData(slo.id),
-      this.deleteSummaryData(slo.id),
-      this.deleteAssociatedRules(slo.id),
-      this.repository.deleteById(slo.id),
-    ]);
+        await Promise.all([
+          this.deleteRollupData(slo.id),
+          this.deleteSummaryData(slo.id),
+          this.deleteAssociatedRules(slo.id),
+          this.repository.deleteById(slo.id),
+        ]);
+      })
+    );
   }
 
   private async deleteRollupTransform(slo: SLODefinition) {

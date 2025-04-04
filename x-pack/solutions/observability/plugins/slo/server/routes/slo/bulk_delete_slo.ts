@@ -16,7 +16,7 @@ import { createTransformGenerators } from '../../services/transform_generators';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { getSpaceId } from './utils/get_space_id';
-import { BulkDeleteSLO } from '../../services/bulk_delete_slo';
+import { DeleteSLO } from '../../services/delete_slo';
 
 export const bulkDeleteSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/bulk-delete 2023-10-31',
@@ -62,7 +62,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
       logger
     );
 
-    const bulkDeleteSLO = new BulkDeleteSLO(
+    const deleteSLO = new DeleteSLO(
       repository,
       transformManager,
       summaryTransformManager,
@@ -71,8 +71,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
       rulesClient
     );
 
-    // todo request type doesn't include ids
-    await bulkDeleteSLO.execute(params.body);
+    await deleteSLO.execute({ ids: params.body.ids });
     return response.noContent();
   },
 });

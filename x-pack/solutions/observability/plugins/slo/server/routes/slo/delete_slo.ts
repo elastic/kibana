@@ -71,7 +71,7 @@ export const deleteSLORoute = createSloServerRoute({
       rulesClient
     );
 
-    await deleteSLO.execute(params.path.id);
+    await deleteSLO.execute({ ids: [params.path.id] });
     return response.noContent();
   },
 });
