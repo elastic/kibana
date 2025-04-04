@@ -343,6 +343,10 @@ export function ValueControlForm({
             css={css`
               max-height: 200px;
               overflow-y: auto;
+              .euiFormControlLayoutIcons {
+                align-items: flex-start;
+                padding-block-start: 1ch;
+              }
             `}
           />
         </EuiFormRow>

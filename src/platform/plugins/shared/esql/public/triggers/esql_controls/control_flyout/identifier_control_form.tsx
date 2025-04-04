@@ -9,6 +9,7 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import {
@@ -208,6 +209,12 @@ export function IdentifierControlForm({
           fullWidth
           compressed
           isClearable
+          css={css`
+            .euiFormControlLayoutIcons {
+              align-items: flex-start;
+              padding-block-start: 1ch;
+            }
+          `}
         />
       </EuiFormRow>
 
