@@ -15,8 +15,9 @@ import {
   IngestPipelineSimulation,
   IngestSimulateDocumentResult,
   SimulateIngestRequest,
-  ErrorCause,
   IndicesIndexState,
+  SimulateIngestResponse,
+  SimulateIngestSimulateIngestDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
@@ -107,24 +108,8 @@ export type SuccessfulPipelineSimulateDocumentResult = WithRequired<
   'processor_results'
 >;
 
-// TODO: update type once Kibana updates to elasticsearch-js 9.0.0-alpha4
-export interface SuccessfulIngestSimulateDocumentResult {
-  doc?: {
-    _id: string;
-    _index: string;
-    _source: Record<string, any>;
-    executed_pipelines: string[];
-    ignored_fields?: Array<Record<string, string>>;
-    error?: ErrorCause;
-  };
-}
-
 export interface SuccessfulPipelineSimulateResponse {
   docs: SuccessfulPipelineSimulateDocumentResult[];
-}
-
-export interface SuccessfulIngestSimulateResponse {
-  docs: SuccessfulIngestSimulateDocumentResult[];
 }
 
 export type PipelineSimulationResult =
@@ -140,7 +125,7 @@ export type PipelineSimulationResult =
 export type IngestSimulationResult =
   | {
       status: 'success';
-      simulation: SuccessfulIngestSimulateResponse;
+      simulation: SimulateIngestResponse;
     }
   | {
       status: 'failure';
@@ -368,7 +353,7 @@ const executeIngestSimulation = async (
 
     return {
       status: 'success',
-      simulation: simulation as SuccessfulIngestSimulateResponse,
+      simulation: simulation as SimulateIngestResponse,
     };
   } catch (error) {
     if (error instanceof esErrors.ResponseError) {
@@ -405,7 +390,7 @@ const executeIngestSimulation = async (
  */
 const computePipelineSimulationResult = (
   pipelineSimulationResult: SuccessfulPipelineSimulateResponse,
-  ingestSimulationResult: SuccessfulIngestSimulateResponse,
+  ingestSimulationResult: SimulateIngestResponse,
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: ProcessorDefinitionWithId[],
   streamFields: FieldDefinition
@@ -640,7 +625,7 @@ const computeSimulationDocDiff = (
   return diffResult;
 };
 
-const collectIngestDocumentErrors = (docResult: SuccessfulIngestSimulateDocumentResult) => {
+const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocumentResult) => {
   const errors: SimulationError[] = [];
 
   if (isMappingFailure(docResult)) {
@@ -811,8 +796,7 @@ const isSkippedProcessor = (
   // @ts-expect-error Looks like the IngestPipelineSimulation.status is not typed correctly and misses the 'skipped' status
 ): processor is WithRequired<IngestPipelineSimulation, 'tag'> => processor.status === 'skipped';
 
-// TODO: update type once Kibana updates to elasticsearch-js 9.0.0-alpha4
-const isMappingFailure = (entry: SuccessfulIngestSimulateDocumentResult) =>
+const isMappingFailure = (entry: SimulateIngestSimulateIngestDocumentResult) =>
   entry.doc?.error?.type === 'document_parsing_exception';
 
 const isNonAdditiveSimulationError = (error: SimulationError) =>
