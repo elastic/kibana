@@ -39,9 +39,9 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     control,
     name: 'configuration.fields.filterFields',
   });
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
   const [options, setOptions] = useState([] as string[]);
-  
+
   let searchTimeout;
 
   const contextFieldsArray = useFieldArray({
@@ -66,27 +66,27 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     setSelected(selectedOptions);
   };
 
-  useDebounce(() => {let result: string[] = [];
-    setOptions(result);
+  useDebounce(
+    () => {
+      const result: string[] = [];
+      setOptions(result);
 
-    if (autocompleteQuery) {
-      autocompleteQuery({ indexName: query}).then(
-        (indexNames: string[]) => {
-          if (indexNames) { 
+      if (autocompleteQuery) {
+        autocompleteQuery({ indexName: query }).then((indexNames: string[]) => {
+          if (indexNames) {
             setOptions(indexNames);
           }
-        }
-      )
-    }
+        });
+      }
     },
     250,
     [query]
-    );
+  );
 
   const onSearchChange = (searchValue: string) => {
     setQuery(searchValue);
     console.log(`onSearchChange with ${searchValue}`);
-  }
+  };
 
   const onSchemaGenerated = useCallback(
     (definition: IndexSourceDefinition) => {
@@ -170,7 +170,10 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                       if (selectedOptions.length == 0) return;
                       if (!selectedOptions[0].key) return;
 
-                      generateSchema({ indexName: selectedOptions[0].key }, { onSuccess: onSchemaGenerated });
+                      generateSchema(
+                        { indexName: selectedOptions[0].key },
+                        { onSuccess: onSchemaGenerated }
+                      );
                     }}
                   >
                     Generate configuration

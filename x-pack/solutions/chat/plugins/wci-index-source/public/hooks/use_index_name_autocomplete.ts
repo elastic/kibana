@@ -16,18 +16,20 @@ export const useIndexNameAutocomplete = () => {
   } = useKibana<CoreStart>();
 
   const { isLoading, data } = useQuery({
-    queryKey: ["index-name-autocomplete"],
-    queryFn: () => async ({ indexName }: { indexName: string }) => {
-      const response = await http.get<SearchIndicesResponse>(
-        `/internal/wci-index-source/indices-autocomplete`,
-        {
+    queryKey: ['index-name-autocomplete'],
+    queryFn:
+      () =>
+      async ({ indexName }: { indexName: string }) => {
+        const response = await http.get<SearchIndicesResponse>(
+          `/internal/wci-index-source/indices-autocomplete`,
+          {
             query: {
-                index: indexName
-            }
-        }
-      );
-      return response.indexNames;
-    },
+              index: indexName,
+            },
+          }
+        );
+        return response.indexNames;
+      },
     onError: (err: any) => {
       notifications.toasts.addError(err, { title: 'Error fetching indices' });
     },
