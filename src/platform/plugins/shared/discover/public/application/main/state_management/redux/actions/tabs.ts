@@ -8,7 +8,7 @@
  */
 
 import type { TabbedContentState } from '@kbn/unified-tabs/src/components/tabbed_content/tabbed_content';
-import { differenceBy } from 'lodash';
+import { cloneDeep, differenceBy } from 'lodash';
 import type { TabState } from '../types';
 import { selectAllTabs, selectTab } from '../selectors';
 import {
@@ -45,7 +45,7 @@ export const setTabs: InternalStateThunkActionCreator<
 
 export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], Promise<void>> =
   ({ items, selectedItem }) =>
-  async (dispatch, getState, { runtimeStateManager, urlStateStorage }) => {
+  async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
     const currentState = getState();
     const currentTab = selectTab(currentState, currentState.tabs.unsafeCurrentId);
     let updatedTabs = items.map<TabState>((item) => {
@@ -54,9 +54,9 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
     });
 
     if (selectedItem?.id !== currentTab.id) {
-      const currentTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+      const previousTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
 
-      currentTabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
+      previousTabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
 
       updatedTabs = updatedTabs.map((tab) =>
         tab.id === currentTab.id
@@ -68,14 +68,40 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
           : tab
       );
 
-      const existingTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
+      const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
 
-      if (existingTab) {
-        await urlStateStorage.set('_g', existingTab.globalState);
-        await urlStateStorage.set('_a', existingTab.appState);
+      if (nextTab) {
+        await urlStateStorage.set('_g', nextTab.globalState);
+        await urlStateStorage.set('_a', nextTab.appState);
       } else {
         await urlStateStorage.set('_g', {});
         await urlStateStorage.set('_a', {});
+      }
+
+      const nextTabRuntimeState = selectedItem
+        ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
+        : undefined;
+      const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
+
+      if (nextTabStateContainer) {
+        const {
+          time,
+          refreshInterval,
+          filters: globalFilters,
+        } = nextTabStateContainer.globalState.get() ?? {};
+        const { filters: appFilters, query } = nextTabStateContainer.appState.getState();
+
+        services.timefilter.setTime(time ?? services.timefilter.getTimeDefaults());
+        services.timefilter.setRefreshInterval(
+          refreshInterval ?? services.timefilter.getRefreshIntervalDefaults()
+        );
+        services.filterManager.setGlobalFilters(globalFilters ?? []);
+        services.filterManager.setAppFilters(cloneDeep(appFilters ?? []));
+        services.data.query.queryString.setQuery(
+          query ?? services.data.query.queryString.getDefaultQuery()
+        );
+
+        nextTabStateContainer.actions.initializeAndSync();
       }
     }
 
