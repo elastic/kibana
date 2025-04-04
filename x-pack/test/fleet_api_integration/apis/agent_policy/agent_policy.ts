@@ -2015,7 +2015,7 @@ export default function (providerContext: FtrProviderContext) {
         await generateAgent(
           providerContext,
           'uninstalled',
-          'agent-1',
+          'agent-3',
           policyWithAgents.id,
           '8.16.1'
         );
