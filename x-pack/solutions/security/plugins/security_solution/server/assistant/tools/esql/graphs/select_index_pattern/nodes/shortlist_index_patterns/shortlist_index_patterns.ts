@@ -56,7 +56,9 @@ To generate the query we first need to identify which index pattern should be us
         hypothesisMessages: [
           humanMessage,
           new AIMessage({
-            content: `The shortlisted index patterns are: ${result.shortlistedIndexPatterns.join(', ')}`,
+            content: `The shortlisted index patterns are: ${result.shortlistedIndexPatterns.join(
+              ', '
+            )}`,
           }),
         ],
       },

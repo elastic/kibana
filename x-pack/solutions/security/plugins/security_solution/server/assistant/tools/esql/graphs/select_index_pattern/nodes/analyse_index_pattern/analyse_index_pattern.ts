@@ -9,14 +9,13 @@ import { AIMessage, HumanMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 import { v4 as uuidv4 } from 'uuid';
 import { toolDetails } from '../../../../tools/inspect_index_mapping_tool/inspect_index_mapping_tool';
-import { getAnalyseIndexPatternGraph } from '../../../analyse_index_pattern/analyse_index_pattern';
+import type { getAnalyseIndexPatternGraph } from '../../../analyse_index_pattern/analyse_index_pattern';
 
 export const getAnalyseIndexPattern = ({
-  analyseIndexPatternGraph
+  analyseIndexPatternGraph,
 }: {
   analyseIndexPatternGraph: ReturnType<typeof getAnalyseIndexPatternGraph>;
 }) => {
-
   return async (input: { objectiveSummary: string; indexPattern: string }) => {
     const { objectiveSummary, indexPattern } = input;
 

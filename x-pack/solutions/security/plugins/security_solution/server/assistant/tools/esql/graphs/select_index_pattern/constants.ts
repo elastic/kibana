@@ -7,6 +7,5 @@
 
 export const GET_INDEX_PATTERNS = 'getIndexPatterns';
 export const SHORTLIST_INDEX_PATTERNS = 'shortlistIndexPatterns';
-export const ANALYSE_INDEX_PATTERN =
-  'analyseIndexPattern';
+export const ANALYSE_INDEX_PATTERN = 'analyseIndexPattern';
 export const SELECT_INDEX_PATTERN = 'selectIndexPattern';

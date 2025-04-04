@@ -35,9 +35,8 @@ export const getSelectIndexPatternGraph = ({
     | ActionsClientChatOpenAI;
   esClient: ElasticsearchClient;
 }) => {
-
   const analyseIndexPatternGraph = getAnalyseIndexPatternGraph({ esClient, createLlmInstance });
-  
+
   const graph = new StateGraph(SelectIndexPatternAnnotation)
     .addNode(GET_INDEX_PATTERNS, fetchIndexPatterns({ esClient }), {
       retryPolicy: { maxAttempts: 3 },
@@ -48,7 +47,7 @@ export const getSelectIndexPatternGraph = ({
     .addNode(
       ANALYSE_INDEX_PATTERN,
       getAnalyseIndexPattern({
-        analyseIndexPatternGraph
+        analyseIndexPatternGraph,
       }),
       { retryPolicy: { maxAttempts: 3 }, subgraphs: [analyseIndexPatternGraph] }
     )
@@ -70,8 +69,7 @@ export const getSelectIndexPatternGraph = ({
         );
       },
       {
-        [ANALYSE_INDEX_PATTERN]:
-          ANALYSE_INDEX_PATTERN,
+        [ANALYSE_INDEX_PATTERN]: ANALYSE_INDEX_PATTERN,
       }
     )
     .addEdge(ANALYSE_INDEX_PATTERN, SELECT_INDEX_PATTERN)

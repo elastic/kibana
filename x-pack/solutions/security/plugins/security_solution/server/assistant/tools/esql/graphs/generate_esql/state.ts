@@ -35,7 +35,7 @@ export const GenerateEsqlAnnotation = Annotation.Root({
     default: () => 5,
   }),
   selectedIndexPattern: Annotation<string | undefined | null>({
-    reducer: (currentValue, newValue) => newValue === undefined ? currentValue : newValue,
+    reducer: (currentValue, newValue) => (newValue === undefined ? currentValue : newValue),
     default: () => undefined,
   }),
 });
