@@ -103,7 +103,6 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly telemetryReceiver: TelemetryReceiver;
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
-
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
   private policyWatcher?: PolicyWatcher;
