@@ -145,8 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'average',
         field: 'bytes',
       });
-
-      await testSubjects.click('lnsSuggestion-barVerticalStacked > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-areaChart > lnsSuggestion');
       await a11y.testAppSnapshot();
     });
 
