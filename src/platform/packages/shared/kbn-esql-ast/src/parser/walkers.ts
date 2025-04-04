@@ -29,7 +29,6 @@ import {
   type FieldContext,
   type FieldsContext,
   type AggFieldsContext,
-  type FromCommandContext,
   FunctionContext,
   IntegerLiteralContext,
   IsNullContext,
