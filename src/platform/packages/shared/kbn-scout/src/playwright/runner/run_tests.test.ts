@@ -40,8 +40,16 @@ describe('hasTestsInPlaywrightConfig', () => {
       })
     );
 
-    const result = await hasTestsInPlaywrightConfig(mockLog, 'playwright', ['test'], 'configPath');
+    const result = await hasTestsInPlaywrightConfig(
+      mockLog,
+      'playwright',
+      ['test pwArgs'],
+      'configPath/playwright.config.ts'
+    );
 
+    expect(mockLog.debug).toHaveBeenCalledWith(
+      `scout: running 'SCOUT_REPORTER_ENABLED=false playwright test pwArgs --list'`
+    );
     expect(mockLog.info).toHaveBeenCalledTimes(2);
     expect(mockLog.info).toHaveBeenNthCalledWith(1, 'scout: Validate Playwright config has tests');
     expect(mockLog.info).toHaveBeenNthCalledWith(2, 'scout: Total: 1 test in 1 file');
@@ -54,7 +62,7 @@ describe('hasTestsInPlaywrightConfig', () => {
     const result = await hasTestsInPlaywrightConfig(
       mockLog,
       'playwright',
-      ['test'],
+      ['test pwArgs'],
       'configPath/playwright.config.ts'
     );
 
