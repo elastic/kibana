@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-export const PLUGIN_ROUTE_ROOT = '/app/elasticsearch/query_rules';
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { AppServicesContext } from '../types';
 
-export enum APIRoutes {
-  QUERY_RULES_SETS = '/internal/search_query_rules/query_rules_sets',
-}
+export const useKibana = () => _useKibana<AppServicesContext>();

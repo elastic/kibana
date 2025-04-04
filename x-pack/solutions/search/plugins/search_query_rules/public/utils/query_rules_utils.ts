@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export const PLUGIN_ROUTE_ROOT = '/app/elasticsearch/query_rules';
+import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
-export enum APIRoutes {
-  QUERY_RULES_SETS = '/internal/search_query_rules/query_rules_sets',
-}
+export const isPermissionError = (error: { body: KibanaServerError }) => {
+  return error.body.statusCode === 403;
+};
