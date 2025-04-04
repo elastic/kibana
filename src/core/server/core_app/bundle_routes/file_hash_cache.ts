@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import LruCache from 'lru-cache';
+import { LRUCache as LruCache } from 'lru-cache';
 
 /** @internal */
 export interface IFileHashCache {
@@ -21,8 +21,8 @@ export interface IFileHashCache {
 export class FileHashCache implements IFileHashCache {
   private lru: LruCache<string, Promise<string>>;
 
-  constructor(maxSize: number = 250) {
-    this.lru = new LruCache(maxSize);
+  constructor(maxItems: number = 250) {
+    this.lru = new LruCache({ max: maxItems });
   }
 
   get(key: string) {
@@ -34,6 +34,6 @@ export class FileHashCache implements IFileHashCache {
   }
 
   del(key: string) {
-    this.lru.del(key);
+    this.lru.delete(key);
   }
 }

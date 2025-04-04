@@ -8,11 +8,11 @@
 
 const { statSync } = require('fs');
 
-const LRU = require('lru-cache');
+const LRU = require('lru-cache').LRUCache;
 
 const DIR = Symbol('dir');
 const FILE = Symbol('file');
-const cache = process.env.KIBANA_RESOLVER_HARD_CACHE ? new Map() : new LRU({ maxAge: 1000 });
+const cache = process.env.KIBANA_RESOLVER_HARD_CACHE ? new Map() : new LRU({ ttl: 1000 });
 
 function getPathType(path) {
   const cached = cache.get(path);

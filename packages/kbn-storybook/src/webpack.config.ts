@@ -78,7 +78,10 @@ export default function ({ config: storybookConfig }: { config: Configuration })
       // no parse rules for a few known large packages which have no require() statements
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary dependencies
-      noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
+      noParse: [
+        /[\/\\]node_modules[\/\\]lru-cache[\/\\]dist[\/\\]commonjs[\/\\]index\.js$/,
+        /[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/,
+      ],
       rules: [
         {
           test: /\.(html|md|txt|tmpl)$/,

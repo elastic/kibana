@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import LRU from 'lru-cache';
+import { LRUCache as LRU } from 'lru-cache';
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { Logger } from 'src/core/server';
 import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
@@ -72,7 +72,7 @@ export const buildManifestManagerMockOptions = (
 ): ManifestManagerMockOptions => {
   const savedObjectMock = savedObjectsClientMock.create();
   return {
-    cache: new LRU<string, Buffer>({ max: 10, maxAge: 1000 * 60 * 60 }),
+    cache: new LRU<string, Buffer>({ max: 10, ttl: 1000 * 60 * 60 }),
     exceptionListClient: listMock.getExceptionListClient(savedObjectMock),
     packagePolicyService: createPackagePolicyServiceMock(),
     savedObjectsClient: savedObjectMock,
