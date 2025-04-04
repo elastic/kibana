@@ -274,7 +274,7 @@ export function MachineLearningNavigationProvider({
       await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlNodesTableContainer');
     },
 
-    async navigateToDataVisualizer(nav: boolean = false) {
+    async navigateToDataVisualizer() {
       await this.navigateToMl();
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },

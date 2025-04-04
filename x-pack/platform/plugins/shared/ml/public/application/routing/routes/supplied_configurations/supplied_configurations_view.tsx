@@ -39,14 +39,6 @@ export const suppliedConfigurationsRouteFactory = (navigateToApp: NavigateToApp)
     getStackManagementBreadcrumb(navigateToApp),
     getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
     getMlManagementBreadcrumb('SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB', navigateToApp),
-    // {
-    //   text: i18n.translate(
-    //     'xpack.ml.suppliedConfigurationsBreadcrumbs.suppliedConfigurationsLabel',
-    //     {
-    //       defaultMessage: 'Supplied Configurations',
-    //     }
-    //   ),
-    // },
   ],
   enableDatePicker: false,
   'data-test-subj': 'mlPageSuppliedConfigurations',

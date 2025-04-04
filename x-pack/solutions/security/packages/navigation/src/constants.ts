@@ -54,7 +54,7 @@ export enum ExternalPageName {
   mlNodesOverview = 'ml:nodesOverview',
   mlNodes = 'ml:nodes',
   mlFileUpload = 'ml:fileUpload',
-  mlIndexDataVisualizer = 'ml:indexDataVisualizer', // TODO: confirm if this is needed for deep search links before removing
+  mlIndexDataVisualizer = 'ml:indexDataVisualizer',
   mlESQLdataVisualizer = 'ml:esqlDataVisualizer',
   mlDataDrift = 'ml:dataDrift',
   mlExplainLogRateSpikes = 'ml:logRateAnalysis',
