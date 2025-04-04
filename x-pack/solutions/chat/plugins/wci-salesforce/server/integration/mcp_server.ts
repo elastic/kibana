@@ -182,8 +182,6 @@ export async function createMcpServer({
 
       logger.info(`Retrieved ${caseContent.length} support cases`);
 
-      logger.info(`Case content: ${JSON.stringify(caseContent)}`);
-
       return {
         content: caseContent,
       };
@@ -315,7 +313,7 @@ async function getSortableFields(
       for (const [fieldName, fieldConfig] of Object.entries(properties)) {
         if (sortableFieldTypes.includes(fieldConfig.type)) {
           const sortableField = { field: fieldName, type: fieldConfig.type };
-          sortableFields.push(sortableField);
+          sortableFields.push(sortableField.field);
         }
       }
       return sortableFields;
