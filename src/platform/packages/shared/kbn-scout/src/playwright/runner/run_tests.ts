@@ -8,10 +8,6 @@
  */
 
 import { resolve } from 'path';
-import { exec } from 'child_process';
-import { promisify } from 'util';
-const execPromise = promisify(exec);
-
 import { ToolingLog } from '@kbn/tooling-log';
 import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
@@ -21,7 +17,7 @@ import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
 import { RunTestsOptions } from './flags';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
-import { getPlaywrightGrepTag } from '../utils';
+import { getPlaywrightGrepTag, execPromise } from '../utils';
 import { ScoutPlaywrightProjects } from '../types';
 
 export const getPlaywrightProject = (
@@ -47,22 +43,25 @@ async function runPlaywrightTest(procs: ProcRunner, cmd: string, args: string[])
   });
 }
 
-export async function validatePlaywrightConfig(
+export async function hasTestsInPlaywrightConfig(
   log: ToolingLog,
   cmd: string,
   cmdArgs: string[],
   configPath: string
-) {
+): Promise<boolean> {
   log.info(`scout: Validate Playwright config has tests`);
   try {
     const validationCmd = `SCOUT_REPORTER_ENABLED=false ${cmd} ${cmdArgs.join(' ')} --list`;
     log.debug(`scout: running '${validationCmd}'`);
+
     const result = await execPromise(validationCmd);
-    const lastLine = result.stdout.trim().split('\n').pop();
+    const lastLine = result.stdout.trim().split('\n').pop() || '';
+
     log.info(`scout: ${lastLine}`);
+    return true; // success
   } catch (err) {
     log.error(`scout: No tests found in [${configPath}]`);
-    process.exit(2); // code "2" means no tests found
+    return false; // failure
   }
 }
 
@@ -133,7 +132,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
   ];
 
   await withProcRunner(log, async (procs) => {
-    await validatePlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    const hasTests = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+
+    if (!hasTests) {
+      process.exit(2); // code "2" means no tests found
+    }
 
     if (pwProject === 'local') {
       await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs);
