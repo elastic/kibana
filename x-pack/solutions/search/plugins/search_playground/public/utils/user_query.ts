@@ -13,7 +13,7 @@ export const validateUserElasticSearchQuery = (
   userQuery: ChatForm[ChatFormFields.userElasticsearchQuery],
   elasticsearchQuery: ChatForm[ChatFormFields.elasticsearchQuery]
 ): UserQueryValidations => {
-  if (userQuery === null) {
+  if (userQuery === null || userQuery === undefined || typeof userQuery !== 'string') {
     return { isValid: false, isUserCustomized: false };
   }
   let userQueryErrors: string[] | undefined;
@@ -49,11 +49,12 @@ export const validateUserElasticSearchQuery = (
 
 export const disableExecuteQuery = (
   validations: UserQueryValidations | undefined,
-  query: string
+  query: string | null | undefined
 ): boolean => {
   return (
-    query.trim().length === 0 ||
-    (validations?.isUserCustomized === true && validations?.isValid === false)
+    (validations?.isUserCustomized === true && validations?.isValid === false) ||
+    !query ||
+    query.trim().length === 0
   );
 };
 

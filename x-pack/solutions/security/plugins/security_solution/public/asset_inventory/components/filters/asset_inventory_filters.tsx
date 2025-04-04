@@ -69,15 +69,20 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
     [dataView]
   );
 
-  if (!spaceId || !dataViewSpec) {
+  if (!spaceId) {
+    // TODO Add error handling if no spaceId is found
     return null;
   }
 
   if (dataViewIsLoading) {
     return (
-      <EuiFlexItem grow={true}>
-        <FilterGroupLoading />
-      </EuiFlexItem>
+      <>
+        <EuiSpacer size="l" />
+        <EuiFlexItem grow={true}>
+          <FilterGroupLoading />
+        </EuiFlexItem>
+        <EuiSpacer size="l" />
+      </>
     );
   }
 
