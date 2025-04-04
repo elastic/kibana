@@ -541,19 +541,18 @@ export const RulesListTable = (props: RulesListTableProps) => {
           }
 
           return (
-            rule.isEditable && (
-              <RulesListNotifyBadge
-                showOnHover
-                snoozeSettings={rule}
-                loading={!!isLoadingMap[rule.id]}
-                disabled={!rule.isEditable}
-                onRuleChanged={onRuleChanged}
-                snoozeRule={async (snoozeSchedule) => {
-                  await onSnoozeRule(rule, snoozeSchedule);
-                }}
-                unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
-              />
-            )
+            <RulesListNotifyBadge
+              showOnHover
+              snoozeSettings={rule}
+              loading={!!isLoadingMap[rule.id]}
+              disabled={!rule.isEditable}
+              onRuleChanged={onRuleChanged}
+              snoozeRule={async (snoozeSchedule) => {
+                await onSnoozeRule(rule, snoozeSchedule);
+              }}
+              unsnoozeRule={async (scheduleIds) => await onUnsnoozeRule(rule, scheduleIds)}
+              isRuleEditable={rule.isEditable}
+            />
           );
         },
       },

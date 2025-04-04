@@ -73,11 +73,13 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   unsnoozeRule,
   showOnHover = false,
   showTooltipInline = false,
+  isRuleEditable = true,
 }) => {
   const [requestInFlight, setRequestInFlightLoading] = useState(false);
   const isLoading = loading || requestInFlight;
   const isDisabled = Boolean(disabled) || !snoozeSettings;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   const togglePopover = useCallback(() => {
     setIsPopoverOpen((prev) => {
       const newState = !prev;
@@ -323,7 +325,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     if (isSnoozed) {
       return snoozedButton;
     }
-    return unsnoozedButton;
+    if (isRuleEditable) {
+      return unsnoozedButton;
+    }
+    return null;
   }, [
     isSnoozeValid,
     isScheduled,
@@ -337,14 +342,17 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     scheduledSnoozeButton,
     indefiniteSnoozeButton,
     snoozedButton,
+    isRuleEditable,
   ]);
 
   const buttonWithToolTip = useMemo(() => {
     if (!isSnoozeValid) {
       return (
-        <EuiToolTip title={INVALID_SNOOZE_TOOLTIP_TITLE} content={INVALID_SNOOZE_TOOLTIP_CONTENT}>
-          {button}
-        </EuiToolTip>
+        button && (
+          <EuiToolTip title={INVALID_SNOOZE_TOOLTIP_TITLE} content={INVALID_SNOOZE_TOOLTIP_CONTENT}>
+            {button}
+          </EuiToolTip>
+        )
       );
     }
 
@@ -356,21 +364,23 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         : snoozeTimeLeft;
 
     return (
-      <EuiToolTip
-        title={
-          tooltipContent
-            ? i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
-                {
-                  defaultMessage: 'Time remaining',
-                }
-              )
-            : undefined
-        }
-        content={tooltipContent}
-      >
-        {button}
-      </EuiToolTip>
+      button && (
+        <EuiToolTip
+          title={
+            tooltipContent
+              ? i18n.translate(
+                  'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.timeRemaining',
+                  {
+                    defaultMessage: 'Time remaining',
+                  }
+                )
+              : undefined
+          }
+          content={tooltipContent}
+        >
+          {button}
+        </EuiToolTip>
+      )
     );
   }, [isSnoozeValid, disabled, isPopoverOpen, showTooltipInline, snoozeTimeLeft, button]);
 
