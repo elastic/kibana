@@ -133,8 +133,7 @@ export default function ({ getService }: FtrProviderContext) {
       await Promise.allSettled(afterEachDataCleanup.splice(0).map((data) => data.cleanup()));
     });
 
-    // FIXME:PT DO NOT COMMIT - test only
-    const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS).slice(0, 1);
+    const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
 
     for (const artifactList of artifactLists) {
       const listInfo =
