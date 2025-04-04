@@ -580,8 +580,6 @@ describe('autocomplete.suggest', () => {
         });
 
         test('suggests `Create control` option when ? is being typed', async () => {
-          const { suggest } = await setup();
-
           const suggestions = await suggest('FROM a | STATS PERCENTILE(bytes, ?/)', {
             callbacks: {
               canSuggestVariables: () => true,
