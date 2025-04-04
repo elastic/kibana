@@ -19,6 +19,7 @@ import {
   pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { getPrompt } from '../lib/prompt';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
@@ -135,6 +136,7 @@ export const postActionsConnectorExecuteRoute = (
               });
             }
           };
+          const promptIds = request.body.promptIds;
           let systemPrompt;
           if (conversationsDataClient && promptsDataClient && conversationId) {
             systemPrompt = await getSystemPromptFromUserConversation({
@@ -142,6 +144,20 @@ export const postActionsConnectorExecuteRoute = (
               conversationId,
               promptsDataClient,
             });
+          }
+          if (promptIds) {
+            const additionalSystemPrompt = await getPrompt({
+              actionsClient,
+              connectorId,
+              // promptIds is promptId and promptGroupId
+              ...promptIds,
+              savedObjectsClient,
+            });
+
+            systemPrompt =
+              systemPrompt && systemPrompt.length
+                ? `${systemPrompt}\n\n${additionalSystemPrompt}`
+                : additionalSystemPrompt;
           }
           return await langChainExecute({
             abortSignal,

@@ -10,6 +10,7 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
   EuiText,
@@ -37,14 +38,20 @@ export const AlertSummary: FunctionComponent<Props> = ({
   promptContext,
   showAnonymizedValues,
 }) => {
-  const { alertSummary, hasAlertSummary, fetchAISummary, isLoading, messageAndReplacements } =
-    useAlertSummary({
-      alertId,
-      defaultConnectorId,
-      isContextReady,
-      promptContext,
-      showAnonymizedValues,
-    });
+  const {
+    alertSummary,
+    recommendedActions,
+    hasAlertSummary,
+    fetchAISummary,
+    isLoading,
+    messageAndReplacements,
+  } = useAlertSummary({
+    alertId,
+    defaultConnectorId,
+    isContextReady,
+    promptContext,
+    showAnonymizedValues,
+  });
   return (
     <>
       <EuiTitle size={'s'}>
@@ -70,6 +77,18 @@ export const AlertSummary: FunctionComponent<Props> = ({
             <MessageText content={alertSummary} contentReferences={null} />
 
             <EuiSpacer size="m" />
+            {recommendedActions && (
+              <>
+                <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+                  <EuiText size="xs" color="subdued">
+                    {i18n.RECOMMENDED_ACTIONS}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <MessageText content={recommendedActions} contentReferences={null} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+              </>
+            )}
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiButton

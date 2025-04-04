@@ -29,6 +29,7 @@ export const transformESToAlertSummary = (
       summary: alertSummarySchema.summary,
       alertId: alertSummarySchema.alert_id,
       updatedAt: alertSummarySchema.updated_at,
+      recommendedActions: alertSummarySchema.recommended_actions,
       namespace: alertSummarySchema.namespace,
       id: alertSummarySchema.id,
       createdBy: alertSummarySchema.created_by,
@@ -60,6 +61,7 @@ export const transformESSearchToAlertSummary = (
             name: user.name,
           })) ?? [],
         summary: alertSummarySchema.summary,
+        recommendedActions: alertSummarySchema.recommended_actions,
         updatedAt: alertSummarySchema.updated_at,
         namespace: alertSummarySchema.namespace,
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -80,13 +82,14 @@ export const transformESSearchToAlertSummary = (
 export const transformToUpdateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { summary, replacements, id }: AlertSummaryUpdateProps
+  { summary, recommendedActions, replacements, id }: AlertSummaryUpdateProps
 ): UpdateAlertSummarySchema => {
   return {
     id,
     updated_at: updatedAt,
     updated_by: user.username,
     ...(summary ? { summary } : {}),
+    ...(recommendedActions ? { recommended_actions: recommendedActions } : {}),
     ...(replacements
       ? {
           replacements: Object.keys(replacements).map((key) => ({
@@ -101,7 +104,7 @@ export const transformToUpdateScheme = (
 export const transformToCreateScheme = (
   user: AuthenticatedUser,
   updatedAt: string,
-  { summary, alertId, replacements }: AlertSummaryCreateProps
+  { summary, alertId, recommendedActions, replacements }: AlertSummaryCreateProps
 ): CreateAlertSummarySchema => {
   return {
     '@timestamp': updatedAt,
@@ -110,6 +113,7 @@ export const transformToCreateScheme = (
     created_at: updatedAt,
     created_by: user.username,
     summary: summary ?? '',
+    ...(recommendedActions ? { recommended_actions: recommendedActions } : {}),
     alert_id: alertId,
     users: [
       {
@@ -136,6 +140,9 @@ export const getUpdateScript = ({
       source: `
     if (params.assignEmpty == true || params.containsKey('summary')) {
       ctx._source.summary = params.summary;
+    }
+    if (params.assignEmpty == true || params.containsKey('recommended_actions')) {
+      ctx._source.recommended_actions = params.recommended_actions;
     }
     ctx._source.updated_at = params.updated_at;
   `,

@@ -24,7 +24,8 @@ import {
   BEDROCK_CHAT_TITLE,
   GEMINI_CHAT_TITLE,
   DEFAULT_CHAT_TITLE,
-  ALERT_SUMMARY_220,
+  ALERT_SUMMARY_500,
+  ALERT_SUMMARY_SYSTEM_PROMPT,
 } from './prompts';
 
 export const promptGroupId = {
@@ -35,6 +36,7 @@ export const promptGroupId = {
 
 export const promptDictionary = {
   alertSummary: `alertSummary`,
+  alertSummarySystemPrompt: `alertSummarySystemPrompt`,
   systemPrompt: `systemPrompt`,
   userPrompt: `userPrompt`,
   chatTitle: `chatTitle`,
@@ -188,7 +190,14 @@ export const localPrompts: Prompt[] = [
     promptId: promptDictionary.alertSummary,
     promptGroupId: promptGroupId.aiForSoc,
     prompt: {
-      default: ALERT_SUMMARY_220,
+      default: ALERT_SUMMARY_500,
+    },
+  },
+  {
+    promptId: promptDictionary.alertSummarySystemPrompt,
+    promptGroupId: promptGroupId.aiForSoc,
+    prompt: {
+      default: ALERT_SUMMARY_SYSTEM_PROMPT,
     },
   },
 ];

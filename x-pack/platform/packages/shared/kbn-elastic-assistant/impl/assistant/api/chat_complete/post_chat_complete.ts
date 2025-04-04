@@ -6,7 +6,12 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { API_VERSIONS, MessageMetadata, Replacements } from '@kbn/elastic-assistant-common';
+import {
+  API_VERSIONS,
+  MessageMetadata,
+  PromptIds,
+  Replacements,
+} from '@kbn/elastic-assistant-common';
 import { TraceOptions } from '../../types';
 import { API_ERROR } from '../../translations';
 
@@ -16,6 +21,7 @@ export interface PostChatCompleteParams {
   connectorId: string;
   http: HttpSetup;
   message: string;
+  promptIds?: PromptIds;
   replacements: Replacements;
   signal?: AbortSignal | undefined;
   traceOptions?: TraceOptions;
@@ -35,7 +41,9 @@ export const postChatComplete = async ({
   connectorId,
   http,
   message,
+  promptIds,
   replacements,
+  // TODO add query arg content_references_disabled=true once main is merged in
   signal,
   traceOptions,
 }: PostChatCompleteParams): Promise<ChatCompleteResponse> => {
@@ -50,6 +58,7 @@ export const postChatComplete = async ({
       langSmithApiKey:
         traceOptions?.langSmithApiKey === '' ? undefined : traceOptions?.langSmithApiKey,
       message,
+      promptIds,
       replacements,
       subAction: 'invokeAI',
     };

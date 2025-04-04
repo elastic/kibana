@@ -14,6 +14,7 @@ export interface EsAlertSummarySchema {
   created_at: string;
   created_by: string;
   summary: string;
+  recommended_actions?: string;
   replacements: EsReplacementSchema[];
   users?: Array<{
     id?: string;
@@ -28,6 +29,7 @@ export interface UpdateAlertSummarySchema {
   id: string;
   '@timestamp'?: string;
   summary?: string;
+  recommended_actions?: string;
   replacements?: EsReplacementSchema[];
   updated_at?: string;
   updated_by?: string;
@@ -42,6 +44,7 @@ export interface CreateAlertSummarySchema {
   alert_id: string;
   summary: string;
   replacements: EsReplacementSchema[];
+  recommended_actions?: string;
   updated_at?: string;
   updated_by?: string;
   created_at?: string;
