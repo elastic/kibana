@@ -15,6 +15,7 @@ import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-inte
 import { SavedObjectsImportError } from '@kbn/core-saved-objects-import-export-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { InternalSavedObjectRouter } from '../internal_types';
+import { badResponseSchema } from './shared_schemas';
 import { catchAndReturnBoomErrors, createSavedObjectsStreamFromNdJson } from './utils';
 
 interface RouteDependencies {
@@ -106,12 +107,10 @@ export const registerImportRoute = (
         response: {
           200: {
             description: 'Indicates a successful call.',
+            bodyContentType: 'application/json',
             body: okResponseSchema,
           },
-          400: {
-            description: 'Bad request.',
-            body: badResponseSchema,
-          },
+          400: badResponseSchema(),
         },
       },
     },
@@ -202,11 +201,4 @@ NOTE: One object may result in multiple errors, which requires separate steps to
 NOTE: Objects are created only when all resolvable errors are addressed, including conflicts and missing references. If objects are created as new copies, each entry in the \`successResults\` array includes a \`destinationId\` attribute.`,
       },
     }),
-  });
-
-const badResponseSchema = () =>
-  schema.object({
-    error: schema.string(),
-    message: schema.string(),
-    statusCode: schema.literal(400),
   });
