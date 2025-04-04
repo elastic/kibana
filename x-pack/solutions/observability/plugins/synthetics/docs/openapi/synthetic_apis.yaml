@@ -252,7 +252,7 @@ paths:
       summary: Delete a monitor
       operationId: delete-synthetic-monitor
       description: >
-        Delete a monitors from the Synthetics app.
+        Delete a monitor from the Synthetics app.
 
         You must have `all` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.
       tags:
