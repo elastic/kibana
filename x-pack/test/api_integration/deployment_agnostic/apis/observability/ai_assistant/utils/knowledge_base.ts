@@ -11,6 +11,7 @@ import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-pl
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
 import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
 import { MachineLearningProvider } from '../../../../../services/ml';
@@ -35,8 +36,22 @@ export async function importTinyElserModel(ml: ReturnType<typeof MachineLearning
 }
 
 export async function setupKnowledgeBase(
-  observabilityAIAssistantAPIClient: ObservabilityAIAssistantApiClient
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  {
+    deployModel: deployModel = true,
+  }: {
+    deployModel?: boolean;
+  } = {}
 ) {
+  const log = getService('log');
+  const ml = getService('ml');
+  const retry = getService('retry');
+  const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
+
+  if (deployModel) {
+    await importTinyElserModel(ml);
+  }
+
   const { status, body } = await observabilityAIAssistantAPIClient.admin({
     endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
     params: {
@@ -45,6 +60,10 @@ export async function setupKnowledgeBase(
       },
     },
   });
+
+  if (deployModel) {
+    await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+  }
 
   return { status, body };
 }
@@ -68,21 +87,51 @@ export async function waitForKnowledgeBaseReady({
   });
 }
 
-export async function deleteKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
-  await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
-  await ml.api.deleteTrainedModelES(TINY_ELSER.id);
-  await ml.testResources.cleanMLSavedObjects();
+export async function deleteKnowledgeBaseModel(
+  getService: DeploymentAgnosticFtrProviderContext['getService'],
+  {
+    shouldDeleteInferenceEndpoint = true,
+  }: {
+    shouldDeleteInferenceEndpoint?: boolean;
+  } = {}
+) {
+  const log = getService('log');
+  const ml = getService('ml');
+  const es = getService('es');
+
+  try {
+    await ml.api.stopTrainedModelDeploymentES(TINY_ELSER.id, true);
+    await ml.api.deleteTrainedModelES(TINY_ELSER.id);
+    await ml.testResources.cleanMLSavedObjects();
+
+    if (shouldDeleteInferenceEndpoint) {
+      await deleteInferenceEndpoint({ es });
+    }
+  } catch (e) {
+    if (e.message.includes('resource_not_found_exception')) {
+      log.debug(`Knowledge base model was already deleted.`);
+      return;
+    }
+
+    log.error(`Could not delete knowledge base model: ${e}`);
+  }
 }
 
 export async function clearKnowledgeBase(es: Client) {
-  const KB_INDEX = '.kibana-observability-ai-assistant-kb-*';
-
   return es.deleteByQuery({
-    index: KB_INDEX,
+    index: resourceNames.indexPatterns.kb,
     conflicts: 'proceed',
     query: { match_all: {} },
     refresh: true,
   });
+}
+
+export async function getAllKbEntries(es: Client) {
+  const response = await es.search({
+    index: resourceNames.indexPatterns.kb,
+    query: { match_all: {} },
+  });
+  return response.hits.hits;
 }
 
 export async function deleteInferenceEndpoint({
@@ -99,14 +148,7 @@ export async function addSampleDocsToInternalKb(
   getService: DeploymentAgnosticFtrProviderContext['getService'],
   sampleDocs: Array<Instruction & { title: string }>
 ) {
-  const log = getService('log');
-  const ml = getService('ml');
-  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-
-  await importTinyElserModel(ml);
-  await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-  await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
 
   await observabilityAIAssistantAPIClient.editor({
     endpoint: 'POST /internal/observability_ai_assistant/kb/entries/import',
@@ -157,4 +199,34 @@ export async function addSampleDocsToCustomIndex(
   await setAdvancedSettings(supertest, {
     'observability:aiAssistantSearchConnectorIndexPattern': customSearchConnectorIndex,
   });
+}
+
+export async function getKbIndices(es: Client) {
+  const res = await es.cat.indices({
+    index: resourceNames.indexPatterns.kb,
+    format: 'json',
+    h: 'index',
+  });
+
+  return res.map(({ index }) => index!);
+}
+
+export async function deleteKbIndices(es: Client) {
+  const index = await getKbIndices(es);
+  if (index.length > 0) {
+    await es.indices.delete({ index, ignore_unavailable: true });
+  }
+}
+
+export async function getConcreteWriteIndexFromAlias(es: Client) {
+  const response = await es.indices.getAlias({ index: resourceNames.aliases.kb });
+  return Object.entries(response).find(
+    ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.aliases.kb]?.is_write_index
+  )?.[0];
+}
+
+export async function hasIndexWriteBlock(es: Client, index: string) {
+  const response = await es.indices.getSettings({ index });
+  const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
+  return writeBlockSetting === 'true' || writeBlockSetting === true;
 }

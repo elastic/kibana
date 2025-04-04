@@ -23,7 +23,7 @@ import { StreamStatsPanel } from './components/stream_stats_panel';
 import { StreamChartPanel } from './components/stream_chart_panel';
 import { TabsPanel } from './components/tabs_panel';
 
-export function StreamDetailOverview({ definition }: { definition?: IngestStreamGetResponse }) {
+export function StreamDetailOverview({ definition }: { definition: IngestStreamGetResponse }) {
   const {
     dependencies: {
       start: {
@@ -166,6 +166,7 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
             <EuiFlexItem grow>
               <StreamsAppSearchBar
                 onQuerySubmit={({ dateRange }, isUpdate) => {
+                  dataStreamStats.refresh();
                   if (!isUpdate) {
                     if (!refreshAbsoluteTimeRange()) {
                       // if absolute time range didn't change, we need to manually refresh the histogram

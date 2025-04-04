@@ -19276,7 +19276,7 @@ paths:
               properties:
                 file:
                   description: |
-                    A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.
+                    A file exported using the export API. Changing the contents of the exported file in any way before importing it can cause errors, crashes or data loss. NOTE: The `savedObjects.maxImportExportSize` configuration setting limits the number of saved objects which may be included in this file. Similarly, the `savedObjects.maxImportPayloadBytes` setting limits the overall size of the file that can be imported.
         required: true
       responses:
         '200':
@@ -21231,7 +21231,7 @@ paths:
       x-state: Technical Preview
   /api/spaces/_copy_saved_objects:
     post:
-      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
+      description: 'It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.'
       operationId: post-spaces-copy-saved-objects
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -21394,7 +21394,7 @@ paths:
         - spaces
   /api/spaces/_resolve_copy_saved_objects_errors:
     post:
-      description: 'Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: ALL of [copySavedObjectsToSpaces].'
+      description: 'Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.'
       operationId: post-spaces-resolve-copy-saved-objects-errors
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -41457,6 +41457,16 @@ components:
           type: integer
         error:
           type: object
+          properties:
+            action:
+              enum:
+                - init
+              type: string
+            message:
+              type: string
+          required:
+            - message
+            - action
         fieldHistoryLength:
           type: integer
         filter:
