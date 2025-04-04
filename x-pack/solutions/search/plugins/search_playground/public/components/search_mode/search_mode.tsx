@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiImage,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -25,6 +26,7 @@ import { ChatForm, ChatFormFields, Pagination } from '../../types';
 import { useSearchPreview } from '../../hooks/use_search_preview';
 import { getPaginationFromPage } from '../../utils/pagination_helper';
 import { useIndexMappings } from '../../hooks/use_index_mappings';
+import heroImage from '../../assets/hero_image.svg';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();
@@ -116,12 +118,19 @@ export const SearchMode: React.FC = () => {
                     />
                   ) : (
                     <EuiEmptyPrompt
-                      iconType={'checkInCircleFilled'}
-                      iconColor="success"
+                      icon={
+                        <EuiImage
+                          size="fullWidth"
+                          src={heroImage}
+                          alt={i18n.translate('xpack.searchPlayground.searchMode.readyToSearch', {
+                            defaultMessage: 'Hero image icon',
+                          })}
+                        />
+                      }
                       title={
                         <h2>
                           {i18n.translate('xpack.searchPlayground.searchMode.readyToSearch', {
-                            defaultMessage: 'Ready to search',
+                            defaultMessage: 'We are ready to search!',
                           })}
                         </h2>
                       }
@@ -129,7 +138,7 @@ export const SearchMode: React.FC = () => {
                         <p>
                           {i18n.translate('xpack.searchPlayground.searchMode.searchPrompt', {
                             defaultMessage:
-                              'Type in a query in the search bar above or view the query we automatically created for you.',
+                              'Fine tune a traditional search with your data. Start by entering a query above to see what results you get and go from there!',
                           })}
                         </p>
                       }
