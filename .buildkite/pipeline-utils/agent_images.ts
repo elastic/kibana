@@ -8,31 +8,34 @@
  */
 
 import { dump } from 'js-yaml';
-import { BuildkiteClient, BuildkiteCommandStep } from './buildkite';
+import { BuildkiteClient, BuildkiteAgentTargetingRule } from './buildkite';
 
-type AgentImageConfig = BuildkiteCommandStep['agents'];
+const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
+const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
 
-const DEFAULT_AGENT_IMAGE_CONFIG: AgentImageConfig = {
+// constrain AgentImageConfig to the type that doesn't have the `queue` property
+const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-ubuntu-2004',
-  imageProject: 'elastic-images-prod',
+  imageProject: ELASTIC_IMAGES_PROD_PROJECT,
 };
 
-const FIPS_AGENT_IMAGE_CONFIG: AgentImageConfig = {
+const FIPS_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
   image: 'family/kibana-fips-ubuntu-2004',
-  imageProject: 'elastic-images-prod',
+  imageProject: ELASTIC_IMAGES_PROD_PROJECT,
 };
 
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
+const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
 
 // Narrow the return type with overloads
-function getAgentImageConfig(): AgentImageConfig;
+function getAgentImageConfig(): BuildkiteAgentTargetingRule;
 function getAgentImageConfig(options: { returnYaml: true }): string;
-function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageConfig {
+function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAgentTargetingRule {
   const bk = new BuildkiteClient();
-  let config: AgentImageConfig;
+  let config: BuildkiteAgentTargetingRule;
 
   if (FTR_ENABLE_FIPS_AGENT || GITHUB_PR_LABELS.includes('ci:enable-fips-agent')) {
     config = FIPS_AGENT_IMAGE_CONFIG;
@@ -44,6 +47,10 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | AgentImageCo
     );
   } else {
     config = DEFAULT_AGENT_IMAGE_CONFIG;
+  }
+
+  if (USE_QA_IMAGE_FOR_PR || GITHUB_PR_LABELS.includes('ci:use-qa-image')) {
+    config.imageProject = ELASTIC_IMAGES_QA_PROJECT;
   }
 
   if (returnYaml) {
