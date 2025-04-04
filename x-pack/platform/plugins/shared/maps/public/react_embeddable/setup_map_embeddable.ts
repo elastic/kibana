@@ -27,9 +27,9 @@ export function setupMapEmbeddable(embeddableSetup: EmbeddableSetup) {
     onAdd: (container, savedObject) => {
       container.addNewPanel<MapSerializedState>({
         panelType: MAP_SAVED_OBJECT_TYPE,
-        serializedState: { 
+        serializedState: {
           rawState: {
-            savedObjectId: savedObject.id
+            savedObjectId: savedObject.id,
           },
         },
       });

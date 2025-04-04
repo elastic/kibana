@@ -58,7 +58,12 @@ function getHiddenLayerIds(state: MapStoreState) {
     .map((layer) => layer.id);
 }
 
-export const reduxSyncComparators: StateComparators<Pick<MapSerializedState, 'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'>> = {
+export const reduxSyncComparators: StateComparators<
+  Pick<
+    MapSerializedState,
+    'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'
+  >
+> = {
   hiddenLayers: 'deepEquality',
   isLayerTOCOpen: 'referenceEquality',
   mapCenter: (a, b) => {
@@ -222,11 +227,11 @@ export function initializeReduxSync({
       mapCenterAndZoom$,
       openTOCDetails$,
     ]),
-    reinitializeState: (lastSaved: MapSerializedState) => {
-      store.dispatch<any>(setHiddenLayers(lastSaved.hiddenLayers ?? []));
-      store.dispatch(setIsLayerTOCOpen(lastSaved.isLayerTOCOpen ?? true));
-      if (lastSaved.mapCenter) store.dispatch(setGotoWithCenter(lastSaved.mapCenter));
-      store.dispatch(setOpenTOCDetails(lastSaved.openTOCDetails));
+    reinitializeState: (lastSaved?: MapSerializedState) => {
+      store.dispatch<any>(setHiddenLayers(lastSaved?.hiddenLayers ?? []));
+      store.dispatch(setIsLayerTOCOpen(lastSaved?.isLayerTOCOpen ?? true));
+      if (lastSaved?.mapCenter) store.dispatch(setGotoWithCenter(lastSaved.mapCenter));
+      store.dispatch(setOpenTOCDetails(lastSaved?.openTOCDetails));
     },
     getLatestState: () => {
       return {
