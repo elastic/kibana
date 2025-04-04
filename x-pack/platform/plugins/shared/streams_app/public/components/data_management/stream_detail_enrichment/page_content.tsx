@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiTitle,
   euiDragDropReorder,
-  useEuiShadow,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
