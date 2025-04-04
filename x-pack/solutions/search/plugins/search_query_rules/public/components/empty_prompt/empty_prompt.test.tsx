@@ -19,12 +19,13 @@ jest.mock('../../../common/doc_links', () => ({
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 );
+const mockGetStartedAction = jest.fn();
 
 describe('Query Rules Overview Empty Prompt', () => {
   it('renders', () => {
     render(
       <Wrapper>
-        <EmptyPrompt getStartedAction={() => {}} />
+        <EmptyPrompt getStartedAction={mockGetStartedAction} />
       </Wrapper>
     );
     expect(screen.getByTestId('searchQueryRulesEmptyPromptGetStartedButton')).toBeInTheDocument();
