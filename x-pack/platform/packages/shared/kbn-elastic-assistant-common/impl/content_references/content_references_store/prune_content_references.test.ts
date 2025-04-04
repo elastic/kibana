@@ -35,9 +35,9 @@ describe('pruneContentReferences', () => {
     const prunedContentReferences = pruneContentReferences(content, contentReferencesStore);
 
     const keys = Object.keys(prunedContentReferences.prunedContentReferencesStore);
-    expect(keys.sort()).toEqual([alertsPageReference1.id, alertsPageReference2.id].sort());
+    expect(keys.sort()).toEqual([alertsPageReference1!.id, alertsPageReference2!.id].sort());
     expect(prunedContentReferences.prunedContent).toEqual(
-      `Example {reference(${alertsPageReference1.id})} example {reference(${alertsPageReference2.id})}  `
+      `Example {reference(${alertsPageReference1!.id})} example {reference(${alertsPageReference2!.id})}  `
     );
   });
 });
