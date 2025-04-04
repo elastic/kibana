@@ -402,7 +402,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     [closePopover, snoozeRule, onRuleChanged, toasts]
   );
 
-  const popover = (
+  const popover = buttonWithToolTip && (
     <EuiPopover
       data-test-subj="rulesListNotifyBadge"
       isOpen={isPopoverOpen && !isDisabled}
