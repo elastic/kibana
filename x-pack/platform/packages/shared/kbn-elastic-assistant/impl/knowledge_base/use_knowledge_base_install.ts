@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { useKnowledgeBaseStatus } from '../assistant/api/knowledge_base/use_knowledge_base_status';
 import { useAssistantContext } from '../assistant_context';
 import { useSetupKnowledgeBase } from '../assistant/api/knowledge_base/use_setup_knowledge_base';
@@ -24,21 +24,9 @@ export const useKnowledgeBaseInstall = () => {
 
   const { mutate: setupKB, isLoading: isSettingUpKB } = useSetupKnowledgeBase({ http, toasts });
 
-  const [isSetupInProgress, setIsSetupInProgress] = useState(
-    kbStatus?.is_setup_in_progress || isSettingUpKB
-  );
-
-  const [isSetupComplete, setIsSetupComplete] = useState(
-    kbStatus?.elser_exists && kbStatus?.security_labs_exists
-  );
-
-  const [isSetupAvailable, setIsSetupAvailable] = useState(kbStatus?.is_setup_available);
-
-  useEffect(() => {
-    setIsSetupInProgress(kbStatus?.is_setup_in_progress || isSettingUpKB);
-    setIsSetupComplete(kbStatus?.elser_exists && kbStatus?.security_labs_exists);
-    setIsSetupAvailable(kbStatus?.is_setup_available);
-  }, [kbStatus, isSettingUpKB]);
+  const isSetupInProgress = kbStatus?.is_setup_in_progress || isSettingUpKB;
+  const isSetupComplete = kbStatus?.elser_exists && kbStatus?.security_labs_exists;
+  const isSetupAvailable = kbStatus?.is_setup_available;
 
   const onInstallKnowledgeBase = useCallback(() => {
     setupKB();
