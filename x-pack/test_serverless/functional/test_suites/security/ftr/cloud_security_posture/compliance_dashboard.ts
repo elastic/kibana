@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     },
   ];
 
-  describe.skip('Cloud Posture Dashboard Page', function () {
+  describe('Cloud Posture Dashboard Page', function () {
     // TODO: we need to check if the tests are running on MKI. There is a suspicion that installing csp package via Kibana server args is not working on MKI.
     this.tags(['skipMKI', 'cloud_security_posture_compliance_dashboard']);
     let cspDashboard: typeof pageObjects.cloudPostureDashboard;
