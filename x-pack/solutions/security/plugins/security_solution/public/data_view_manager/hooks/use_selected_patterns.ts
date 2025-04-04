@@ -13,5 +13,5 @@ export const useSelectedPatterns = (scope: DataViewManagerScopeName): string[] =
   const { dataView } = useDataView(scope);
   const indexPattern = dataView?.getIndexPattern() ?? '';
 
-  return useMemo(() => indexPattern.split(','), [indexPattern]);
+  return useMemo(() => (indexPattern.length ? indexPattern.split(',') : []), [indexPattern]);
 };
