@@ -134,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 for unsupported time units', async () => {
-        for (const unit of ['s', 'm', 'H', 'h']) {
+        for (const unit of ['s']) {
           const res = await executeSystemConnector({
             supertest,
             connectorId,

@@ -39,7 +39,7 @@ const TimeWindowSchema = schema.string({
      * Acceptable format:
      * - First character should be a digit from 1 to 9
      * - All next characters should be a digit from 0 to 9
-     * - The last character should be d (day) or w (week)
+     * - The last character should be d (day), w (week), h (hour), m (minute)
      *
      * Example: 20d, 2w, etc
      */
