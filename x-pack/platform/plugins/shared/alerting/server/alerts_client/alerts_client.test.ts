@@ -459,23 +459,25 @@ describe('Alerts Client', () => {
           );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
-            query: {
-              bool: {
-                filter: [
-                  { term: { [ALERT_RULE_UUID]: '1' } },
-                  { terms: { [ALERT_UUID]: ['abc', 'def', 'xyz'] } },
-                ],
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    { term: { [ALERT_RULE_UUID]: '1' } },
+                    { terms: { [ALERT_UUID]: ['abc', 'def', 'xyz'] } },
+                  ],
+                },
+              },
+              seq_no_primary_term: true,
+              size: 3,
+              sort: {
+                'kibana.alert.start': 'desc',
               },
             },
-            seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
             ignore_unavailable: true,
-            sort: {
-              'kibana.alert.start': 'desc',
-            },
-            size: 3,
           });
 
           spy.mockRestore();
@@ -498,18 +500,20 @@ describe('Alerts Client', () => {
           });
 
           expect(clusterClient.search).toHaveBeenCalledWith({
-            query: {
-              bool: {
-                must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
-                filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['1234'] } }],
+            body: {
+              query: {
+                bool: {
+                  must: [{ term: { [ALERT_RULE_UUID]: '1' } }],
+                  filter: [{ terms: { [ALERT_RULE_EXECUTION_UUID]: ['1234'] } }],
+                },
               },
+              seq_no_primary_term: true,
+              size: 2000,
             },
-            seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
             ignore_unavailable: true,
-            size: 2000,
           });
 
           spy.mockRestore();
