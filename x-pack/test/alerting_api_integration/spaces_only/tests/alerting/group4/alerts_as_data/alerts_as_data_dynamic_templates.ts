@@ -46,8 +46,6 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
     });
 
     it(`should add the dynamic fields`, async () => {
-      const initialMapping = await es.indices.getMapping({ index: alertsAsDataIndex });
-
       const ruleParameters = {
         dynamic_fields: { 'host.id': '1', 'host.name': 'host-1' },
       };
