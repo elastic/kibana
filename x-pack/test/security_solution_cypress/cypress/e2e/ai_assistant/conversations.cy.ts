@@ -45,6 +45,7 @@ import {
   CONNECTOR_MISSING_CALLOUT,
   PROMPT_CONTEXT_BUTTON,
   USER_PROMPT,
+  WELCOME_SETUP,
 } from '../../screens/ai_assistant';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
 
@@ -72,7 +73,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     it('Shows welcome setup when no connectors or conversations exist', () => {
       visitGetStartedPage();
       openAssistant();
-      assertNewConversation(true, 'New chat');
+      cy.get(WELCOME_SETUP).should('be.visible');
     });
   });
   describe('When no conversations exist but connectors do exist, show empty convo', () => {
@@ -82,7 +83,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     it('When invoked on AI Assistant click', () => {
       visitGetStartedPage();
       openAssistant();
-      assertNewConversation(false, 'New chat');
+      assertNewConversation('New chat');
       assertConnectorSelected(azureConnectorAPIPayload.name);
       cy.get(USER_PROMPT).should('not.have.text');
     });
@@ -92,7 +93,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         cy.log('NEW RULE', createdRule);
         selectRule(createdRule?.body?.id);
         openAssistant('rule');
-        assertNewConversation(false, `Detection Rules - Rule 1`);
+        assertNewConversation(`Detection Rules - Rule 1`);
         assertConnectorSelected(azureConnectorAPIPayload.name);
         cy.get(USER_PROMPT).should('have.text', EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS);
         cy.get(PROMPT_CONTEXT_BUTTON(0)).should('have.text', RULE_MANAGEMENT_CONTEXT_DESCRIPTION);

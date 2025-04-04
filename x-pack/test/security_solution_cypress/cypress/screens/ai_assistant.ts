@@ -5,6 +5,12 @@
  * 2.0.
  */
 
+import {
+  DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON,
+  DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON,
+  DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON,
+} from '@kbn/ai-assistant-cta';
+
 export const ADD_NEW_CONNECTOR = '[data-test-subj="addNewConnectorButton"]';
 export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
 export const ASSISTANT_SETTINGS_BUTTON = 'button[data-test-subj="settings"]';
@@ -30,7 +36,7 @@ export const CONVERSATION_TITLE_SAVE_BUTTON = '[data-test-subj="euiInlineEditMod
 export const CREATE_SYSTEM_PROMPT = '[data-test-subj="addSystemPrompt"]';
 export const EMPTY_CONVO = '[data-test-subj="emptyConvo"]';
 export const FLYOUT_NAV_TOGGLE = '[data-test-subj="aiAssistantFlyoutNavigationToggle"]';
-export const KNOWLEDGE_BASE_INSTALL_BUTTON = '[data-test-subj="install-knowledge-base-button"]';
+export const KNOWLEDGE_BASE_INSTALL_BUTTON = `[data-test-subj="${DATA_TEST_SUBJ_INSTALL_KNOWLEDGE_BASE_BUTTON}"]`;
 export const MODAL_SAVE_BUTTON = '[data-test-subj="save-button"]';
 export const NEW_CHAT = '[data-test-subj="newChatFromOverlay"]';
 export const PROMPT_CONTEXT_SELECTOR =
@@ -48,6 +54,6 @@ export const SYSTEM_PROMPT_BODY_INPUT = '[data-test-subj="systemPromptModalPromp
 export const SYSTEM_PROMPT_TITLE_INPUT =
   '[data-test-subj="systemPromptSelector"] [data-test-subj="comboBoxSearchInput"]';
 export const SYSTEM_PROMPT_SELECT = (c: string) => `[data-test-subj="systemPrompt-${c}"]`;
-export const UPGRADE_CTA = '[data-test-subj="upgradeLicenseCallToAction"]';
+export const UPGRADE_CTA = `[data-test-subj="${DATA_TEST_SUBJ_MANAGE_LICENSE_BUTTON}"]`;
 export const USER_PROMPT = '[data-test-subj="prompt-textarea"]';
-export const WELCOME_SETUP = '[data-test-subj="welcome-setup"]';
+export const WELCOME_SETUP = `[data-test-subj="${DATA_TEST_SUBJ_ADD_CONNECTOR_BUTTON}"]`;
