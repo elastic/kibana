@@ -7,57 +7,35 @@
 
 import { EuiLink } from '@elastic/eui';
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
+import type { TypeOf } from '@kbn/typed-react-router-config/src/types';
+import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { removeUndefinedProps } from '../../../../context/url_params_context/helpers';
-import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { APMLinkExtendProps } from './apm_link_hooks';
-import { getLegacyApmHref } from './apm_link_hooks';
+import type { ApmRoutes } from '../../../routing/apm_route_config';
 
 interface Props extends APMLinkExtendProps {
   serviceName: string;
-  latencyAggregationType?: string;
+  latencyAggregationType?: LatencyAggregationType;
   transactionType?: string;
-}
-
-// TODO remove legacy and refactor
-export function useTransactionsOverviewHref({
-  serviceName,
-  latencyAggregationType,
-  transactionType,
-}: Props) {
-  const { core } = useApmPluginContext();
-  const location = useLocation();
-  const { search } = location;
-
-  const query = { latencyAggregationType, transactionType };
-
-  return getLegacyApmHref({
-    basePath: core.http.basePath,
-    path: `/services/${serviceName}/transactions`,
-    query: removeUndefinedProps(query),
-    search,
-  });
+  query: TypeOf<ApmRoutes, '/services/{serviceName}/transactions'>['query'];
 }
 
 export function TransactionOverviewLink({
   serviceName,
   latencyAggregationType,
   transactionType,
+  query,
   ...rest
 }: Props) {
-  const { query } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions',
-    '/services/{serviceName}/overview',
-    '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/overview'
-  );
-  const apmRouter = useApmRouter();
+  const { link } = useApmRouter();
 
-  const href = apmRouter.link('/services/{serviceName}/transactions', {
+  const href = link('/services/{serviceName}/transactions', {
     path: { serviceName },
-    query,
+    query: {
+      ...query,
+      latencyAggregationType,
+      transactionType: transactionType ?? query.transactionType,
+    },
   });
 
   return <EuiLink data-test-subj="apmTransactionOverviewLinkLink" href={href} {...rest} />;
