@@ -45,12 +45,13 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { EnvironmentBadge } from '../../../shared/environment_badge';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
-import {
+import type {
   ITableColumn,
-  ManagedTable,
   SortFunction,
   TableSearchBar,
+  VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { ColumnHeaderWithTooltip } from './column_header_with_tooltip';
 import { HealthBadge } from './health_badge';
 
@@ -297,8 +298,9 @@ interface Props {
   sortFn: SortFunction<ServiceListItem>;
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
-  onChangeSearchQuery: (searchQuery: string) => void;
-  onChangeRenderedItems: (renderedItems: ServiceListItem[]) => void;
+  onChangeSearchQuery?: (searchQuery: string) => void;
+  onChangeRenderedItems?: (renderedItems: ServiceListItem[]) => void;
+  onChangeItemIndices?: (range: VisibleItemsStartEnd) => void;
 }
 export function ApmServicesTable({
   status,
@@ -316,6 +318,7 @@ export function ApmServicesTable({
   maxCountExceeded,
   onChangeSearchQuery,
   onChangeRenderedItems,
+  onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { core } = useApmPluginContext();
@@ -426,6 +429,7 @@ export function ApmServicesTable({
           initialPageSize={initialPageSize}
           sortFn={sortFn}
           onChangeRenderedItems={onChangeRenderedItems}
+          onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
         />
       </EuiFlexItem>

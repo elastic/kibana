@@ -19,12 +19,13 @@ import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import {
+import type {
   ITableColumn,
-  ManagedTable,
   TableOptions,
   TableSearchBar,
+  VisibleItemsStartEnd,
 } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { ErrorGroupItem, useErrorGroupListData } from './use_error_group_list_data';
@@ -84,9 +85,8 @@ export function ErrorGroupList({
 
   const { offset } = query;
 
-  const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
-
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
+  const [renderedItemIndices, setRenderedItemIndices] = useState<VisibleItemsStartEnd>([0, 0]);
 
   const {
     setDebouncedSearchQuery,
@@ -94,7 +94,7 @@ export function ErrorGroupList({
     mainStatisticsStatus,
     detailedStatistics,
     detailedStatisticsStatus,
-  } = useErrorGroupListData({ renderedItems, sorting });
+  } = useErrorGroupListData({ renderedItemIndices, sorting });
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
@@ -299,10 +299,10 @@ export function ErrorGroupList({
       initialPageSize={initialPageSize}
       isLoading={isMainStatsLoading}
       tableSearchBar={tableSearchBar}
-      onChangeRenderedItems={setRenderedItems}
       onChangeSorting={setSorting}
       saveTableOptionsToUrl={saveTableOptionsToUrl}
       showPerPageOptions={showPerPageOptions}
+      onChangeItemIndices={setRenderedItemIndices}
     />
   );
 }
