@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { buildRouteValidation } from './utils/route_validation';
-import { RacRequestHandlerContext } from '../types';
+import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 
 export const bulkUpdateAlertsRoute = (router: IRouter<RacRequestHandlerContext>) => {

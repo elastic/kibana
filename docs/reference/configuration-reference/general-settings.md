@@ -107,7 +107,7 @@ $$$elasticsearch-pingTimeout$$$ `elasticsearch.pingTimeout`
 :   Time in milliseconds to wait for {{es}} to respond to pings. **Default: the value of the [`elasticsearch.requestTimeout`](#elasticsearch-requestTimeout) setting**
 
 $$$elasticsearch-requestHeadersWhitelist$$$ `elasticsearch.requestHeadersWhitelist`
-:   List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/user-authentication.md#basic-authentication) in {{kib}}. **Default: `[ 'authorization', 'es-client-authentication' ]`**
+:   List of {{kib}} client-side headers to send to {{es}}. To send **no** client-side headers, set this value to [] (an empty list). Removing the `authorization` header from being whitelisted means that you cannot use [basic authentication](docs-content://deploy-manage/users-roles/cluster-or-deployment-auth/kibana-authentication.md#basic-authentication) in {{kib}}. **Default: `[ 'authorization', 'es-client-authentication' ]`**
 
 $$$elasticsearch-requestTimeout$$$ `elasticsearch.requestTimeout`
 :   Time in milliseconds to wait for responses from the back end or {{es}}. This value must be a positive integer. **Default: `30000`**
@@ -199,7 +199,7 @@ $$$logging-root-level$$$ `logging.root.level` ![logo cloud](https://doc-icons.s3
 :   Level at which a log record should be logged. Supported levels are: *all*, *fatal*, *error*, *warn*, *info*, *debug*, *trace*, *off*. Levels are ordered from *all* (highest) to *off* and a log record will be logged it its level is higher than or equal to the level of its logger, otherwise the log record is ignored. Use this value to [change the overall log level](docs-content://deploy-manage/monitor/logging-configuration/kibana-log-settings-examples.md#change-overall-log-level). **Default: `info`**.
 
     ::::{tip}
-    Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging [cli commands](docs-content://deploy-manage/monitor/logging-configuration/kibana-logging-cli-configuration.md#logging-cli-migration) to set log level to `verbose` or silence all logs.
+    Set to `all` to log all events, including system usage information and all requests. Set to `off` to silence all logs.  You can also use the logging [cli commands](docs-content://deploy-manage/monitor/logging-configuration/kib-advanced-logging.md#logging-cli-migration) to set log level to `verbose` or silence all logs.
     ::::
 
 
@@ -257,7 +257,7 @@ $$$tilemap-url$$$ `map.tilemap.url` ![logo cloud](https://doc-icons.s3.us-east-2
 `migrations.discardCorruptObjects` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Discard corrupt saved objects, as well as those that cause transform errors during a migration. Must be set to the target version, for example: `8.4.0`. Default: undefined.
     It is available in {{ecloud}} 8.4.0 and later versions.
-% TBD: Supported only in Elastic Cloud? 
+% TBD: Supported only in Elastic Cloud?
 
 `migrations.maxBatchSizeBytes`
 :   Defines the maximum payload size for indexing batches of upgraded saved objects to avoid migrations failing due to a 413 Request Entity Too Large response from Elasticsearch. This value should be lower than or equal to your Elasticsearch cluster’s `http.max_content_length` configuration option. **Default: `100mb`**

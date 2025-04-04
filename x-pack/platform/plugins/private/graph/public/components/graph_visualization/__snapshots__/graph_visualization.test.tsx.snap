@@ -110,11 +110,12 @@ exports[`graph_visualization should render to svg elements 1`] = `
             },
             Object {
               "map": undefined,
-              "name": "1e54f3",
+              "name": "1tbq19o",
               "next": undefined,
               "styles": "
                           stroke-width: 4px;
-                          stroke: rgba(11,100,221,0.25);
+                          stroke: #BFDBFF;
+                          paint-order: stroke;
                         ",
               "toString": [Function],
             },

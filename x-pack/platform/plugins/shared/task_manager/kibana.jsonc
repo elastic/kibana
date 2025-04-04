@@ -16,7 +16,8 @@
     ],
     "optionalPlugins": [
       "cloud",
-      "usageCollection"
+      "usageCollection",
+      "spaces"
     ]
   }
 }

@@ -51,7 +51,7 @@ export const useInsightQuery = ({
         const parsedCombinedQueries = combineQueries({
           config: esQueryConfig,
           dataProviders,
-          indexPattern: sourcererDataView,
+          dataViewSpec: sourcererDataView,
           browserFields,
           filters,
           kqlQuery: {
