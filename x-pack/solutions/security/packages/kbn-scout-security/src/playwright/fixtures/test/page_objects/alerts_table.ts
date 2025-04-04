@@ -10,12 +10,12 @@ import { ScoutPage, Locator, expect } from '@kbn/scout';
 const PAGE_URL = 'security/alerts';
 
 export class AlertsTablePage {
-  public detectionsAlertsPage: Locator;
+  public detectionsAlertsContainer: Locator;
   public alertRow: Locator;
   public alertsTableBody: Locator;
 
   constructor(private readonly page: ScoutPage) {
-    this.detectionsAlertsPage = this.page.testSubj.locator('detectionsAlertsPage');
+    this.detectionsAlertsContainer = this.page.testSubj.locator('detectionsAlertsPage');
     this.alertRow = this.page.locator('div.euiDataGridRow');
     this.alertsTableBody = this.page.testSubj
       .locator('alertsTable')
@@ -24,7 +24,6 @@ export class AlertsTablePage {
 
   async navigate() {
     await this.page.gotoApp(PAGE_URL);
-    await this.detectionsAlertsPage.waitFor({ state: 'visible' });
   }
 
   async expandAlertDetailsFlyout(ruleName: string) {
