@@ -90,7 +90,7 @@ describe('State', () => {
       },
     }));
 
-    expect(async () => await State.currentState(stateDependenciesMock)).rejects.toThrowError(
+    await expect(async () => await State.currentState(stateDependenciesMock)).rejects.toThrowError(
       'Failed to load current Streams state: Unsupported stream type'
     );
   });
@@ -112,7 +112,7 @@ describe('State', () => {
         streamThatModifiesStartingState(definition.name, stateDependenciesMock)
       );
 
-    expect(
+    await expect(
       async () =>
         await State.attemptChanges(
           [
@@ -143,7 +143,7 @@ describe('State', () => {
       .spyOn(streamFromDefinition, 'streamFromDefinition')
       .mockImplementationOnce(() => streamThatCascadesTooMuch(stateDependenciesMock));
 
-    expect(
+    await expect(
       async () =>
         await State.attemptChanges(
           [

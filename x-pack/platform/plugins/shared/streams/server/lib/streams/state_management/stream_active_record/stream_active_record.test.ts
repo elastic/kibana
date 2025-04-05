@@ -170,7 +170,7 @@ describe('StreamActiveRecord', () => {
 
   it('fails to determine Elasticsearch actions for an unchanged stream', async () => {
     const stream = new TestStream({ name: 'test_stream' }, stateDependenciesMock);
-    expect(async () => {
+    await expect(async () => {
       await stream.determineElasticsearchActions(stateMock, stateMock, undefined);
     }).rejects.toThrow('Cannot determine Elasticsearch actions for an unchanged stream');
   });
