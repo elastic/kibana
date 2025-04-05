@@ -114,12 +114,8 @@ export class State {
       const streamsSearchResponse = await dependencies.storageClient.search({
         size: 10000,
         sort: [{ name: 'asc' }],
-        track_total_hits: true,
+        track_total_hits: false,
       });
-
-      if (streamsSearchResponse.hits.total.value > 10000) {
-        throw new Error('Stored state contains more than 10 000 streams');
-      }
 
       const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
         streamFromDefinition(definition, dependencies)
