@@ -186,6 +186,16 @@ export function initializeReduxSync({
     });
   }
 
+  function getLatestState() {
+    return {
+      hiddenLayers: getHiddenLayerIds(store.getState()),
+      isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),
+      mapBuffer: getMapBuffer(store.getState()),
+      mapCenter: getMapCenterAndZoom(store.getState()),
+      openTOCDetails: getOpenTOCDetails(store.getState()),
+    };
+  }
+
   return {
     cleanup: () => {
       if (syncColorsSubscription) syncColorsSubscription.unsubscribe();
@@ -226,22 +236,16 @@ export function initializeReduxSync({
       isLayerTOCOpen$,
       mapCenterAndZoom$,
       openTOCDetails$,
-    ]),
+    ]).pipe(
+      map(() => getLatestState())
+    ),
     reinitializeState: (lastSaved?: MapSerializedState) => {
       store.dispatch<any>(setHiddenLayers(lastSaved?.hiddenLayers ?? []));
       store.dispatch(setIsLayerTOCOpen(lastSaved?.isLayerTOCOpen ?? true));
       if (lastSaved?.mapCenter) store.dispatch(setGotoWithCenter(lastSaved.mapCenter));
       store.dispatch(setOpenTOCDetails(lastSaved?.openTOCDetails));
     },
-    getLatestState: () => {
-      return {
-        hiddenLayers: getHiddenLayerIds(store.getState()),
-        isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),
-        mapBuffer: getMapBuffer(store.getState()),
-        mapCenter: getMapCenterAndZoom(store.getState()),
-        openTOCDetails: getOpenTOCDetails(store.getState()),
-      };
-    },
+    getLatestState,
   };
 }
 

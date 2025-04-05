@@ -19,7 +19,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject, combineLatest, skip } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
@@ -160,6 +160,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       parentApi,
       serializeState: getLatestState,
       latestRuntimeState$: combineLatest([
+        ...(dynamicActionsManager ? [dynamicActionsManager.latestState$] : []),
         crossPanelActions.latestState$,
         reduxSync.latestState$,
         titleManager.latestState$,

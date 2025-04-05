@@ -117,7 +117,9 @@ export class EmbeddableEnhancedPlugin
           return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
         }
       } as StateComparators<DynamicActionsSerializedState>,
-      latestState$: dynamicActionsState$.pipe(map(() => getLatestState())),
+      latestState$: dynamicActionsState$.pipe(
+        map(() => getLatestState())
+      ),
       getLatestState,
       reinitializeState: (lastState: DynamicActionsSerializedState) => {
         api.setDynamicActions(lastState.enhancements);
