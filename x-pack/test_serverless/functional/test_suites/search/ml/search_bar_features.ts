@@ -16,6 +16,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     { label: 'Machine Learning / Anomaly Detection', expected: false },
     { label: 'Machine Learning / Anomaly Detection / Anomaly explorer', expected: false },
     { label: 'Machine Learning / Anomaly Detection / Single metric viewer', expected: false },
+    { label: 'Machine Learning / Notifications', expected: true },
+    { label: 'Machine Learning / Memory Usage', expected: true },
     { label: 'Machine Learning / Data Frame Analytics', expected: false },
     { label: 'Machine Learning / Data Frame Analytics / Results explorer', expected: false },
     { label: 'Machine Learning / Data Frame Analytics / Analytics map', expected: false },
