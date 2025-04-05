@@ -15,6 +15,7 @@ import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { TABS_ENABLED } from '../../discover_main_route';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   container: HTMLElement | null;
@@ -51,9 +52,12 @@ export const DiscoverHistogramLayout = ({
 
   // Initialized when the first search has been requested or
   // when in ES|QL mode since search sessions are not supported
-  // if (!searchSessionId && !isEsqlMode) {
-  //   return null;
-  // }
+  // TODO: Handle this for tabs
+  if (!TABS_ENABLED) {
+    if (!searchSessionId && !isEsqlMode) {
+      return null;
+    }
+  }
 
   return (
     <UnifiedHistogramContainer
