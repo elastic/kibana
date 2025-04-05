@@ -130,10 +130,10 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
       await use({ savedObjects, uiSettings, id: spaceId });
 
       // Cleanup space after tests via API call
-      // await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {
-      //   log.debug(`Deleting space ${spaceId}`);
-      //   return kbnClient.spaces.delete(spaceId);
-      // });
+      await measurePerformanceAsync(log, `space.delete(${spaceId})`, async () => {
+        log.debug(`Deleting space ${spaceId}`);
+        return kbnClient.spaces.delete(spaceId);
+      });
     },
     { scope: 'worker', auto: true },
   ],
