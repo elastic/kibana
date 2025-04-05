@@ -113,6 +113,9 @@ describe('createPlaywrightConfig', () => {
     expect(config.projects![2].name).toEqual('setup-ech');
     expect(config.projects![3].name).toEqual('ech');
     expect(config.projects![3]).toHaveProperty('dependencies', ['setup-ech']);
+    expect(config.projects![4].name).toEqual('setup-mki');
+    expect(config.projects![5].name).toEqual('mki');
+    expect(config.projects![5]).toHaveProperty('dependencies', ['setup-mki']);
   });
 
   it('should generate and cache runId in process.env.TEST_RUN_ID', () => {

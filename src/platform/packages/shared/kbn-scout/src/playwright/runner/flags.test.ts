@@ -58,7 +58,7 @@ describe('parseTestFlags', () => {
     );
   });
 
-  it(`should parse with correct config and serverless flags`, async () => {
+  it(`should parse with serverless flag for local target`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
       stateful: false,
@@ -80,7 +80,7 @@ describe('parseTestFlags', () => {
     });
   });
 
-  it(`should parse with correct config and stateful flags`, async () => {
+  it(`should parse with stateful flag for local target`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
       testTarget: 'local',
@@ -118,7 +118,30 @@ describe('parseTestFlags', () => {
     );
   });
 
-  it(`should throw an error with incorrect '--testTarget' flag set to 'cloud'`, async () => {
+  it(`should parse with serverless flag for cloud target`, async () => {
+    const flags = new FlagsReader({
+      config: '/path/to/config',
+      testTarget: 'cloud',
+      serverless: 'oblt',
+      logToFile: false,
+      headed: true,
+      esFrom: 'snapshot',
+    });
+    validatePlaywrightConfigMock.mockResolvedValueOnce();
+    const result = await parseTestFlags(flags);
+
+    expect(result).toEqual({
+      mode: 'serverless=oblt',
+      configPath: '/path/to/config',
+      testTarget: 'cloud',
+      headed: true,
+      esFrom: 'snapshot',
+      installDir: undefined,
+      logsDir: undefined,
+    });
+  });
+
+  it(`should parse with stateful flag for cloud target`, async () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
       testTarget: 'cloud',
