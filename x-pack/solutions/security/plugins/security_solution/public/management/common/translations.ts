@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
-import type { ServerApiError } from '../../common/types';
 
 export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab', {
   defaultMessage: 'Endpoints',
@@ -37,7 +36,7 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   }),
 };
 
-export const getLoadPoliciesError = (error: ServerApiError) => {
+export const getLoadPoliciesError = (error: Error) => {
   return i18n.translate('xpack.securitySolution.exceptions.failedLoadPolicies', {
     defaultMessage: 'There was an error loading policies: "{error}"',
     values: { error: error.message },
