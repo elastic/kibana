@@ -85,7 +85,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         dynamic: false,
       });
 
-      const updatedRule = await supertestWithoutAuth
+      await supertestWithoutAuth
         .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
         .set('kbn-xsrf', 'foo')
         .send(
