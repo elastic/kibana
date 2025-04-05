@@ -84,12 +84,12 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     const controlledBy = getControlledBy(uuid);
     const titleManager = initializeTitleManager(mapSerializedState);
     const timeRangeManager = initializeTimeRangeManager(mapSerializedState);
-    const dynamicActionsApi = getEmbeddableEnhanced()?.initializeReactEmbeddableDynamicActions(
+    const dynamicActionsManager = getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
       mapSerializedState
     );
-    const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
@@ -111,19 +111,19 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       uuid,
     });
 
-    function getState() {
+    function getLatestState() {
       return {
         ...mapSerializedState,
         ...timeRangeManager.getLatestState(),
         ...titleManager.getLatestState(),
-        ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
+        ...(dynamicActionsManager?.getLatestState() ?? {}),
         ...crossPanelActions.getLatestState(),
         ...reduxSync.getLatestState(),
       };
     }
 
     function serializeState() {
-      const rawState = getState();
+      const rawState = getLatestState();
 
       // by-reference embeddable
       if (rawState.savedObjectId) {
@@ -158,7 +158,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
     const unsavedChangesApi = initializeUnsavedChanges<MapSerializedState>({
       uuid,
       parentApi,
-      serializeState: getState,
+      serializeState: getLatestState,
       latestRuntimeState$: combineLatest([
         crossPanelActions.latestState$,
         reduxSync.latestState$,
@@ -168,6 +168,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       getComparators: () => {
         return {
           ...crossPanelActionsComparators,
+          ...(dynamicActionsManager?.comparators ?? {}),
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,
@@ -181,6 +182,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         attributes$.next(lastSaved?.attributes);
         mapSettings$.next(lastSaved?.mapSettings);
         savedObjectId$.next(lastSaved?.savedObjectId);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
         reduxSync.reinitializeState(lastSaved);
         titleManager.reinitializeState(lastSaved);
       },
@@ -191,10 +193,10 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       defaultDescription$,
       ...unsavedChangesApi,
       ...timeRangeManager.api,
-      ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
+      ...(dynamicActionsManager?.api ?? {}),
       ...titleManager.api,
       ...reduxSync.api,
-      ...initializeEditApi(uuid, getState, parentApi, mapSerializedState.savedObjectId),
+      ...initializeEditApi(uuid, getLatestState, parentApi, mapSerializedState.savedObjectId),
       ...initializeLibraryTransforms(savedMap, serializeState),
       ...initializeDataViews(savedMap.getStore()),
       serializeState,
