@@ -17,12 +17,12 @@ import { State } from './state';
 import { GroupStream } from './streams/group_stream';
 import { UnwiredStream } from './streams/unwired_stream';
 import { WiredStream } from './streams/wired_stream';
-import * as streamFromDefinition from './streams/stream_from_definition';
+import * as streamFromDefinition from './stream_active_record/stream_from_definition';
 import {
   StreamActiveRecord,
   StreamChangeStatus,
   ValidationResult,
-} from './streams/stream_active_record';
+} from './stream_active_record/stream_active_record';
 import { StreamChange } from './types';
 import { ElasticsearchAction } from './execution_plan/types';
 import { ExecutionPlan } from './execution_plan/execution_plan';
@@ -267,7 +267,7 @@ describe('State', () => {
 
 function streamThatModifiesStartingState(name: string, stateDependenciesMock: any) {
   class StartingStateModifyingStream extends StreamActiveRecord<any> {
-    protected doHandleUpsertChange(
+    protected async doHandleUpsertChange(
       definition: StreamDefinition,
       desiredState: State,
       startingState: State
@@ -275,28 +275,28 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
       if (this.definition.name === 'test_stream') {
         startingState.get('other_test_stream')?.markAsDeleted();
       }
-      return Promise.resolve({ cascadingChanges: [], changeStatus: 'unchanged' });
+      return { cascadingChanges: [], changeStatus: 'unchanged' };
     }
 
     clone(): StreamActiveRecord<StreamDefinition> {
       return new StartingStateModifyingStream(this.definition, this.dependencies);
     }
-    protected doHandleDeleteChange(): Promise<any> {
+    protected async doHandleDeleteChange(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doValidateUpsertion(): Promise<any> {
+    protected async doValidateUpsertion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doValidateDeletion(): Promise<any> {
+    protected async doValidateDeletion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doDetermineCreateActions(): Promise<any> {
+    protected async doDetermineCreateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doDetermineUpdateActions(): Promise<any> {
+    protected async doDetermineUpdateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doDetermineDeleteActions(): Promise<any> {
+    protected async doDetermineDeleteActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
   }
@@ -311,12 +311,12 @@ function streamThatModifiesStartingState(name: string, stateDependenciesMock: an
 
 function streamThatCascadesTooMuch(stateDependenciesMock: any) {
   class CascadingStream extends StreamActiveRecord<any> {
-    protected doHandleUpsertChange(
+    protected async doHandleUpsertChange(
       definition: StreamDefinition,
       desiredState: State,
       startingState: State
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-      return Promise.resolve({
+      return {
         cascadingChanges: [
           {
             type: 'upsert',
@@ -329,28 +329,28 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
           },
         ],
         changeStatus: 'unchanged',
-      });
+      };
     }
 
     clone(): StreamActiveRecord<StreamDefinition> {
       return new CascadingStream(this.definition, this.dependencies);
     }
-    protected doHandleDeleteChange(): Promise<any> {
+    protected async doHandleDeleteChange(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doValidateUpsertion(): Promise<any> {
+    protected async doValidateUpsertion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doValidateDeletion(): Promise<any> {
+    protected async doValidateDeletion(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doDetermineCreateActions(): Promise<any> {
+    protected async doDetermineCreateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doDetermineUpdateActions(): Promise<any> {
+    protected async doDetermineUpdateActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
-    protected doDetermineDeleteActions(): Promise<any> {
+    protected async doDetermineDeleteActions(): Promise<any> {
       throw new Error('Method not implemented.');
     }
   }
@@ -365,48 +365,48 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
 
 function rollbackStream(name: string, stateDependenciesMock: any) {
   class SimpleStream extends StreamActiveRecord<any> {
-    protected doHandleUpsertChange(
+    protected async doHandleUpsertChange(
       definition: StreamDefinition
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-      return Promise.resolve({
+      return {
         cascadingChanges: [],
         changeStatus: definition.name === this.definition.name ? 'upserted' : this.changeStatus,
-      });
+      };
     }
-    protected doHandleDeleteChange(target: string): Promise<any> {
-      return Promise.resolve({
+    protected async doHandleDeleteChange(target: string): Promise<any> {
+      return {
         cascadingChanges: [],
         changeStatus: target === this.definition.name ? 'deleted' : this.changeStatus,
-      });
+      };
     }
-    protected doValidateUpsertion(): Promise<ValidationResult> {
-      return Promise.resolve({ isValid: true, errors: [] });
+    protected async doValidateUpsertion(): Promise<ValidationResult> {
+      return { isValid: true, errors: [] };
     }
-    protected doValidateDeletion(): Promise<ValidationResult> {
-      return Promise.resolve({ isValid: true, errors: [] });
+    protected async doValidateDeletion(): Promise<ValidationResult> {
+      return { isValid: true, errors: [] };
     }
-    protected doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
-      return Promise.resolve([
+    protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+      return [
         {
           type: 'upsert_dot_streams_document',
           request: this.definition,
         },
-      ]);
+      ];
     }
-    protected doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
-      return Promise.resolve([
+    protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
+      return [
         {
           type: 'delete_dot_streams_document',
           request: {
             name: this.definition.name,
           },
         },
-      ]);
+      ];
     }
     clone(): StreamActiveRecord<StreamDefinition> {
       return new SimpleStream(this.definition, this.dependencies);
     }
-    protected doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
+    protected async doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
       throw new Error('Not implemented');
     }
   }
@@ -421,34 +421,34 @@ function rollbackStream(name: string, stateDependenciesMock: any) {
 
 function flowStream() {
   class FlowStream extends StreamActiveRecord<any> {
-    protected doHandleUpsertChange(
+    protected async doHandleUpsertChange(
       definition: StreamDefinition
     ): Promise<{ cascadingChanges: StreamChange[]; changeStatus: StreamChangeStatus }> {
-      return Promise.resolve({
+      return {
         cascadingChanges: [],
         changeStatus: definition.name === this.definition.name ? 'upserted' : this.changeStatus,
-      });
+      };
     }
-    protected doHandleDeleteChange(target: string): Promise<any> {
-      return Promise.resolve({
+    protected async doHandleDeleteChange(target: string): Promise<any> {
+      return {
         cascadingChanges: [],
         changeStatus: target === this.definition.name ? 'upserted' : this.changeStatus,
-      });
+      };
     }
-    protected doValidateUpsertion(): Promise<ValidationResult> {
-      return Promise.resolve({ isValid: true, errors: [] });
+    protected async doValidateUpsertion(): Promise<ValidationResult> {
+      return { isValid: true, errors: [] };
     }
-    protected doValidateDeletion(): Promise<ValidationResult> {
-      return Promise.resolve({ isValid: true, errors: [] });
+    protected async doValidateDeletion(): Promise<ValidationResult> {
+      return { isValid: true, errors: [] };
     }
-    protected doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
-      return Promise.resolve([]);
+    protected async doDetermineCreateActions(): Promise<ElasticsearchAction[]> {
+      return [];
     }
-    protected doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
-      return Promise.resolve([]);
+    protected async doDetermineUpdateActions(): Promise<ElasticsearchAction[]> {
+      return [];
     }
-    protected doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
-      return Promise.resolve([]);
+    protected async doDetermineDeleteActions(): Promise<ElasticsearchAction[]> {
+      return [];
     }
     clone(): StreamActiveRecord<StreamDefinition> {
       return new FlowStream(this.definition, this.dependencies);

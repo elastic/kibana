@@ -20,8 +20,11 @@ import { getUnmanagedElasticsearchAssets } from '../../stream_crud';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
-import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
-import { StreamActiveRecord, PrintableStream } from './stream_active_record';
+import type {
+  StreamChangeStatus,
+  ValidationResult,
+} from '../stream_active_record/stream_active_record';
+import { StreamActiveRecord, PrintableStream } from '../stream_active_record/stream_active_record';
 
 export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
   private _processingChanged: boolean = false;

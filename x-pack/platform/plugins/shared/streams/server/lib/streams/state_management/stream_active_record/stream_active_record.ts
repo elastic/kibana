@@ -23,6 +23,11 @@ export interface PrintableStream {
 
 export type StreamChangeStatus = 'unchanged' | 'upserted' | 'deleted';
 
+/**
+ * The StreamActiveRecord is responsible for maintaining the change status of a stream
+ * And routing change requests (with cascading changes), validation requests and requests to determine Elasticsearch actions
+ * to the right hook based on this state
+ */
 export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = StreamDefinition> {
   protected dependencies: StateDependencies;
   protected _definition: TDefinition;
@@ -46,7 +51,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
   }
 
   // Used only when we try to rollback an existing stream or resync the stored State
-  markAsCreated(): void {
+  markAsUpserted(): void {
     this._changeStatus = 'upserted';
   }
 
@@ -64,6 +69,11 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return this.changeStatus === 'deleted';
   }
 
+  // Apply change asks the stream to consider an incoming change
+  // If the change targets the stream it should update itself and fire any cascading changes
+  // That might affect its children or its parent
+  // In some cases the stream may mark itself as changed in order to perform further validation
+  // Or follow up Elasticsearch changes based on a parent or child changing
   async applyChange(
     change: StreamChange,
     desiredState: State,
@@ -76,7 +86,11 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
-  async delete(target: string, desiredState: State, startingState: State): Promise<StreamChange[]> {
+  private async delete(
+    target: string,
+    desiredState: State,
+    startingState: State
+  ): Promise<StreamChange[]> {
     const { cascadingChanges, changeStatus } = await this.doHandleDeleteChange(
       target,
       desiredState,
@@ -86,7 +100,7 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return cascadingChanges;
   }
 
-  async upsert(
+  private async upsert(
     definition: StreamDefinition,
     desiredState: State,
     startingState: State
@@ -100,6 +114,9 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     return cascadingChanges;
   }
 
+  // The validate method should have the stream consider, that given this desired state
+  // Is the stream in a valid state (also based on the state of its parent and children)
+  // And depending on if the stream was deleted or changed
   async validate(desiredState: State, startingState: State): Promise<ValidationResult> {
     try {
       if (this._changeStatus === 'upserted') {
@@ -114,7 +131,13 @@ export abstract class StreamActiveRecord<TDefinition extends StreamDefinition = 
     }
   }
 
-  determineElasticsearchActions(
+  // If the stream has changed, what actions are needed to change the Elasticsearch
+  // resources to match the desired state?
+  // If the stream as newly created or deleted we expect all the actions that are needed to
+  // create or delete the required resources
+  // If the stream was changed, we aim to only update those resources that would be impacted by
+  // that particular type of change
+  async determineElasticsearchActions(
     desiredState: State,
     startingState: State,
     startingStateStream?: StreamActiveRecord<TDefinition>

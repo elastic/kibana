@@ -17,8 +17,11 @@ import { StatusError } from '../../errors/status_error';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
-import type { StreamChangeStatus, ValidationResult } from './stream_active_record';
-import { StreamActiveRecord } from './stream_active_record';
+import type {
+  StreamChangeStatus,
+  ValidationResult,
+} from '../stream_active_record/stream_active_record';
+import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 
 export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
   constructor(definition: GroupStreamDefinition, dependencies: StateDependencies) {

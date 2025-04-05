@@ -13,9 +13,9 @@ import {
 import type { StreamDefinition } from '@kbn/streams-schema';
 import type { StateDependencies } from '../types';
 import type { StreamActiveRecord } from './stream_active_record';
-import { UnwiredStream } from './unwired_stream';
-import { WiredStream } from './wired_stream';
-import { GroupStream } from './group_stream';
+import { UnwiredStream } from '../streams/unwired_stream';
+import { WiredStream } from '../streams/wired_stream';
+import { GroupStream } from '../streams/group_stream';
 
 // This should be the only thing that knows about the various stream types
 export function streamFromDefinition(

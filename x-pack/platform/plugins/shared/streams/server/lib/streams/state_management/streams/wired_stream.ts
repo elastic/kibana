@@ -42,8 +42,12 @@ import { getProcessingPipelineName, getReroutePipelineName } from '../../ingest_
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
 import type { StateDependencies, StreamChange } from '../types';
-import type { PrintableStream, StreamChangeStatus, ValidationResult } from './stream_active_record';
-import { StreamActiveRecord } from './stream_active_record';
+import type {
+  PrintableStream,
+  StreamChangeStatus,
+  ValidationResult,
+} from '../stream_active_record/stream_active_record';
+import { StreamActiveRecord } from '../stream_active_record/stream_active_record';
 import { hasSupportedStreamsRoot } from '../../root_stream_definition';
 
 export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {

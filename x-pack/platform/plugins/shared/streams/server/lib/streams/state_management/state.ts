@@ -14,8 +14,11 @@ import { FailedToRollbackError } from './errors/failed_to_rollback_error';
 import { InvalidStateError } from './errors/invalid_state_error';
 import { ExecutionPlan } from './execution_plan/execution_plan';
 import type { ActionsByType } from './execution_plan/types';
-import type { PrintableStream, StreamActiveRecord } from './streams/stream_active_record';
-import { streamFromDefinition } from './streams/stream_from_definition';
+import type {
+  PrintableStream,
+  StreamActiveRecord,
+} from './stream_active_record/stream_active_record';
+import { streamFromDefinition } from './stream_active_record/stream_from_definition';
 import type { StateDependencies, StreamChange } from './types';
 
 interface Changes {
@@ -98,7 +101,7 @@ export class State {
     const currentState = await State.currentState(dependencies);
 
     // This way all current streams will look like they have been added
-    currentState.all().map((stream) => stream.markAsCreated());
+    currentState.all().map((stream) => stream.markAsUpserted());
     const emptyState = new State([], dependencies);
 
     // We skip validation since we assume the stored state to be correct
@@ -252,7 +255,7 @@ export class State {
         // Bring streams back to their starting state or delete newly added streams
         if (startingState.has(stream.definition.name)) {
           const changedStreamToRevert = stream.clone();
-          changedStreamToRevert.markAsCreated();
+          changedStreamToRevert.markAsUpserted();
           return changedStreamToRevert;
         } else {
           const createdStreamToCleanUp = stream.clone();
