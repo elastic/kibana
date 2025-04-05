@@ -47,10 +47,6 @@ servers:
     variables:
       kibana_url:
         default: localhost:5601
-  - url: https://{kibana_url}
-    variables:
-      kibana_url:
-        default: localhost:5601
 security:
   - apiKeyAuth: []
   - basicAuth: []
