@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import type { IKbnUrlStateStorage, StateContainer } from '@kbn/kibana-utils-plugin/public';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -71,9 +70,9 @@ export interface DiscoverStateContainerParams {
    */
   customizationContext: DiscoverCustomizationContext;
   /**
-   * a custom url state storage
+   * URL state storage
    */
-  stateStorageContainer?: IKbnUrlStateStorage;
+  stateStorageContainer: IKbnUrlStateStorage;
   /**
    * Internal shared state that's used at several places in the UI
    */
@@ -240,26 +239,12 @@ export function getDiscoverStateContainer({
   tabId,
   services,
   customizationContext,
-  stateStorageContainer,
+  stateStorageContainer: stateStorage,
   internalState,
   runtimeStateManager,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
-  const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
-  const toasts = services.core.notifications.toasts;
   const injectCurrentTab = createTabActionInjector(tabId);
   const getCurrentTab = () => selectTab(internalState.getState(), tabId);
-
-  /**
-   * state storage for state in the URL
-   */
-  const stateStorage =
-    stateStorageContainer ??
-    createKbnUrlStateStorage({
-      useHash: storeInSessionStorage,
-      history: services.history,
-      useHashQuery: customizationContext.displayMode !== 'embedded',
-      ...(toasts && withNotifyOnErrors(toasts)),
-    });
 
   /**
    * Search session logic
