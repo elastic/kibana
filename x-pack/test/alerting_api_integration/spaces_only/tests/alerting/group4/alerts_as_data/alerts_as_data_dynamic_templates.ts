@@ -33,7 +33,8 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
-  const alertsAsDataIndex = '.internal.alerts-observability.test.alerts.dynamic.templates.*';
+  const alertsAsDataIndex =
+    '.internal.alerts-observability.test.alerts.dynamic.templates.alerts-default-000001';
 
   describe('alerts as data dynamic templates', function () {
     this.tags('skipFIPS');
