@@ -19,7 +19,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject, combineLatest, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
@@ -169,12 +169,11 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
       getComparators: () => {
         return {
           ...crossPanelActionsComparators,
-          ...(dynamicActionsManager?.comparators ?? {}),
+          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
           ...reduxSyncComparators,
           ...titleComparators,
           ...timeRangeComparators,
           attributes: 'referenceEquality',
-          enhancements: 'skip',
           mapSettings: 'referenceEquality',
           savedObjectId: 'referenceEquality',
         };

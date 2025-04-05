@@ -188,11 +188,11 @@ export function initializeReduxSync({
 
   function getLatestState() {
     return {
-      hiddenLayers: getHiddenLayerIds(store.getState()),
-      isLayerTOCOpen: getIsLayerTOCOpen(store.getState()),
+      hiddenLayers: hiddenLayers$.value,
+      isLayerTOCOpen: isLayerTOCOpen$.value,
       mapBuffer: getMapBuffer(store.getState()),
-      mapCenter: getMapCenterAndZoom(store.getState()),
-      openTOCDetails: getOpenTOCDetails(store.getState()),
+      mapCenter: mapCenterAndZoom$.value,
+      openTOCDetails: openTOCDetails$.value,
     };
   }
 
@@ -236,9 +236,7 @@ export function initializeReduxSync({
       isLayerTOCOpen$,
       mapCenterAndZoom$,
       openTOCDetails$,
-    ]).pipe(
-      map(() => getLatestState())
-    ),
+    ]).pipe(map(() => getLatestState())),
     reinitializeState: (lastSaved?: MapSerializedState) => {
       store.dispatch<any>(setHiddenLayers(lastSaved?.hiddenLayers ?? []));
       store.dispatch(setIsLayerTOCOpen(lastSaved?.isLayerTOCOpen ?? true));
