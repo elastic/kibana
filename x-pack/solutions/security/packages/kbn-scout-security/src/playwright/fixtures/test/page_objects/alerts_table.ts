@@ -12,7 +12,7 @@ const PAGE_URL = 'security/alerts';
 export class AlertsTablePage {
   public detectionsAlertsContainer: Locator;
   public alertRow: Locator;
-  public alertsTableBody: Locator;
+  public alertsTable: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsContainer = this.page.testSubj.locator('detectionsAlertsPage');
