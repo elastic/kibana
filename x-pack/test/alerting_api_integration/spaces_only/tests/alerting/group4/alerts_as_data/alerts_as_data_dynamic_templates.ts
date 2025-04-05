@@ -11,8 +11,6 @@ import type {
   PropertyName,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
-import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { alertFieldMap, type Alert } from '@kbn/alerts-as-data-utils';
 import { TOTAL_FIELDS_LIMIT } from '@kbn/alerting-plugin/server';
 import { get } from 'lodash';
@@ -24,7 +22,6 @@ import {
   getUrlPrefix,
   ObjectRemover,
 } from '../../../../../common/lib';
-import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataDynamicTemplatesTest({ getService }: FtrProviderContext) {
