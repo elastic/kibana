@@ -16,7 +16,7 @@ import { LOCAL_STORAGE_KEY_PREFIX } from '../constants';
 
 const core = coreMock.createStart();
 jest.mock('@kbn/response-ops-alerts-table', () => ({
-  AlertsTable: jest.fn(() => <div data-test-subj="alertsTableIsLoaded" />),
+  AlertsTable: jest.fn(() => <div data-test-subj="alertsTable" />),
 }));
 const { AlertsTable: mockAlertsTable } = jest.requireMock('@kbn/response-ops-alerts-table');
 
@@ -47,7 +47,7 @@ describe('getEmbeddableAlertsTableFactory', () => {
 
     render(<Component />);
 
-    expect(screen.getByTestId('alertsTableIsLoaded')).toBeInTheDocument();
+    expect(screen.getByTestId('alertsTable')).toBeInTheDocument();
     expect(mockAlertsTable).toHaveBeenCalledWith(
       expect.objectContaining({
         id: `${LOCAL_STORAGE_KEY_PREFIX}-${uuid}`,

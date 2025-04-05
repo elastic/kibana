@@ -64,7 +64,7 @@ export const testSubjectIds = {
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID: 'cloudSecurityGraphGraphInvestigationToggleSearch',
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
     'cloudSecurityGraphGraphInvestigationInvestigateInTimeline',
-  ALERT_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="alertsTable"] .euiDataGridRow',
+  ALERT_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow',
   SETUP_TECHNOLOGY_SELECTOR: 'setup-technology-selector',
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',

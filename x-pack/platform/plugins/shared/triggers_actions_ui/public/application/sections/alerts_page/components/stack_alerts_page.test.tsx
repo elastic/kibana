@@ -32,7 +32,7 @@ jest.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => ({
 // Not using `jest.mocked` here because the `AlertsTable` component is manually typed to ensure
 // correct type inference, but it's actually a `memo(forwardRef())` component, which is hard to mock
 jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
-  AlertsTable: () => <div data-test-subj="alertsTableIsLoaded">{'Alerts table'}</div>,
+  AlertsTable: () => <div data-test-subj="alertsTable">{'Alerts table'}</div>,
 }));
 
 jest.mock('../../../../common/get_experimental_features');
@@ -52,7 +52,7 @@ describe('StackAlertsPage', () => {
     appMockRender.render(<StackAlertsPage />);
 
     expect(await screen.findByTestId('stackAlertsPageContent')).toBeInTheDocument();
-    expect(await screen.findByTestId('alertsTableIsLoaded')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
     expect(await screen.findByTestId('urlSyncedAlertsSearchBar')).toBeInTheDocument();
   });
 
