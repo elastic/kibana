@@ -122,10 +122,10 @@ describe('parseTestFlags', () => {
     const flags = new FlagsReader({
       config: '/path/to/config',
       testTarget: 'cloud',
+      stateful: false,
       serverless: 'oblt',
       logToFile: false,
-      headed: true,
-      esFrom: 'snapshot',
+      headed: false,
     });
     validatePlaywrightConfigMock.mockResolvedValueOnce();
     const result = await parseTestFlags(flags);
@@ -134,8 +134,8 @@ describe('parseTestFlags', () => {
       mode: 'serverless=oblt',
       configPath: '/path/to/config',
       testTarget: 'cloud',
-      headed: true,
-      esFrom: 'snapshot',
+      headed: false,
+      esFrom: undefined,
       installDir: undefined,
       logsDir: undefined,
     });
