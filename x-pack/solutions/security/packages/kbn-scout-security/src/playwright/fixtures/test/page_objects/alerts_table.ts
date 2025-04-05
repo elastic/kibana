@@ -12,12 +12,12 @@ const PAGE_URL = 'security/alerts';
 export class AlertsTablePage {
   public detectionsAlertsContainer: Locator;
   public alertRow: Locator;
-  public alertsTable: Locator;
+  public alertsTableBody: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.detectionsAlertsContainer = this.page.testSubj.locator('detectionsAlertsPage');
     this.alertRow = this.page.locator('div.euiDataGridRow');
-    this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Table state is loaded
+    this.alertsTable = this.page.testSubj.locator('alertsTableIsLoaded'); // Search for loaded Alerts table
   }
 
   async navigate() {
