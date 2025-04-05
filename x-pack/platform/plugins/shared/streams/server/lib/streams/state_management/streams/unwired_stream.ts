@@ -13,6 +13,7 @@ import type {
 } from '@kbn/streams-schema';
 import { isDslLifecycle, isInheritLifecycle, isUnwiredStreamDefinition } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
+import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
@@ -100,6 +101,34 @@ export class UnwiredStream extends StreamActiveRecord<UnwiredStreamDefinition> {
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
+    // Check for conflicts
+    if (this._lifeCycleChanged || this._processingChanged) {
+      try {
+        const dataStreamResult =
+          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+            name: this._definition.name,
+          });
+
+        if (dataStreamResult.data_streams.length === 0) {
+          // There is an index but no data stream
+          return {
+            isValid: false,
+            errors: [`Cannot create Unwired stream ${this.definition.name} due to existing index`],
+          };
+        }
+      } catch (error) {
+        if (isNotFoundError(error)) {
+          return {
+            isValid: false,
+            errors: [
+              `Cannot create Unwired stream ${this.definition.name} due to missing backing Data Stream`,
+            ],
+          };
+        }
+        throw error;
+      }
+    }
+
     if (this._lifeCycleChanged && isDslLifecycle(this.getLifeCycle())) {
       const dataStream = await this.dependencies.streamsClient.getDataStream(this._definition.name);
       if (dataStream.ilm_policy !== undefined) {

@@ -98,16 +98,26 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
     const existsInStartingState = startingState.has(this._definition.name);
 
     if (!existsInStartingState) {
-      // Check for data stream conflict
+      // Check for conflicts
       try {
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-          name: this._definition.name,
-        });
+        const dataStreamResponse =
+          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+            name: this._definition.name,
+          });
+
+        if (dataStreamResponse.data_streams.length === 0) {
+          return {
+            isValid: false,
+            errors: [
+              `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`,
+            ],
+          };
+        }
 
         return {
           isValid: false,
           errors: [
-            `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream or index`,
+            `Cannot create group stream "${this._definition.name}" due to conflict caused by existing data stream`,
           ],
         };
       } catch (error) {
@@ -115,24 +125,6 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
           throw error;
         }
       }
-
-      // Check for index conflict
-      // await this.dependencies.scopedClusterClient.asCurrentUser.indices
-      //   .get({
-      //     index: this._definition.name,
-      //   })
-      //   .catch((error) => {
-      //     if (!(isResponseError(error) && error.statusCode === 404)) {
-      //       throw error;
-      //     }
-      //   });
-
-      // return {
-      //   isValid: false,
-      //   errors: [
-      //     `Cannot create group stream "${this._definition.name}" due to conflict caused by existing index`,
-      //   ],
-      // };
     }
 
     // validate members

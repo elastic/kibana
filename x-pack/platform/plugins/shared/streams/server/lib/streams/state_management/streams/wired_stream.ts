@@ -278,18 +278,26 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
     const existsInStartingState = startingState.has(this._definition.name);
 
     if (!existsInStartingState) {
-      // TODO in this check, make sure the existing data stream is not a stream-created one (if it is, state might be out of sync, but we can fix it)
-
-      // Check for data stream conflict
+      // Check for conflicts
       try {
-        await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
-          name: this._definition.name,
-        });
+        const dataStreamResponse =
+          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+            name: this._definition.name,
+          });
+
+        if (dataStreamResponse.data_streams.length === 0) {
+          return {
+            isValid: false,
+            errors: [
+              `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing index`,
+            ],
+          };
+        }
 
         return {
           isValid: false,
           errors: [
-            `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream or index`,
+            `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing data stream`,
           ],
         };
       } catch (error) {
@@ -297,24 +305,6 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
           throw error;
         }
       }
-
-      // Check for index conflict (seems covered by the above check, but why?)
-      // try {
-      //   await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
-      //     index: this._definition.name,
-      //   });
-
-      //   return {
-      //     isValid: false,
-      //     errors: [
-      //       `Cannot create wired stream "${this._definition.name}" due to conflict caused by existing index`,
-      //     ],
-      //   };
-      // } catch (error) {
-      //   if (!isNotFoundError(error)) {
-      //     throw error;
-      //   }
-      // }
     }
 
     // validate routing
