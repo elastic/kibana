@@ -112,9 +112,9 @@ export class State {
   static async currentState(dependencies: StateDependencies): Promise<State> {
     try {
       const streamsSearchResponse = await dependencies.storageClient.search({
-        size: 10000, // Paginate if there are more...
+        size: 10000,
         sort: [{ name: 'asc' }],
-        track_total_hits: false,
+        track_total_hits: true,
       });
 
       if (streamsSearchResponse.hits.total.value > 10000) {
