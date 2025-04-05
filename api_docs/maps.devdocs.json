@@ -740,7 +740,8 @@
             "label": "mbFeature",
             "description": [],
             "signature": [
-              "GeoJSONFeature & { layer: (Omit<",
+              "GeoJSONFeature",
+              " & { layer: (Omit<",
               "FillLayerSpecification",
               ", \"source\"> | Omit<",
               "LineLayerSpecification",
