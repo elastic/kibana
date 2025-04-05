@@ -270,7 +270,7 @@ tags:
       url: https://www.elastic.co/guide/en/kibana/current/task-manager-production-considerations.html
     name: task manager
     x-displayName: Task manager
-  - description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
+  - description: The assistant helps you prepare for the next major version of Elasticsearch.
     name: upgrade
     x-displayName: Upgrade assistant
   - externalDocs:

@@ -8,7 +8,7 @@ info:
     url: https://www.elastic.co/licensing/elastic-license
 tags:
   - name: upgrade
-    description: Check the upgrade status of your Elasticsearch cluster and reindex indices that were created in the previous major version. The assistant helps you prepare for the next major version of Elasticsearch.
+    description: The assistant helps you prepare for the next major version of Elasticsearch.
     x-displayName: Upgrade assistant
 servers:
   - url: /
