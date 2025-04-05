@@ -29,14 +29,9 @@ export function HeaderBreadcrumbs({ breadcrumbs$, isDarkMode }: Props) {
 
   // Modify last breadcrumb's text color to comply with A11y contrast ratio (AAA)
   // https://github.com/elastic/kibana/issues/214597
-  const getBreadcrumbStyle = (isLast: boolean, darkMode: boolean) => {
-    if (isLast && !darkMode) {
-      return { color: '#4a4f5c' };
-    }
-    if (isLast && darkMode) {
-      return { color: '#d1d1d1' };
-    }
-    return undefined;
+  const getLastBreadcrumbColor = (isLast: boolean, darkMode: boolean) => {
+    if (!isLast) return;
+    return !darkMode ? { color: '#4a4f5c' } : { color: '#d1d1d1' };
   };
 
   crumbs = crumbs.map((breadcrumb, i) => {
@@ -54,7 +49,7 @@ export function HeaderBreadcrumbs({ breadcrumbs$, isDarkMode }: Props) {
         i === 0 && 'first',
         isLast && 'last'
       ),
-      style: getBreadcrumbStyle(isLast, isDarkMode),
+      style: getLastBreadcrumbColor(isLast, isDarkMode),
     };
   });
 
