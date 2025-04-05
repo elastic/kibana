@@ -1,0 +1,114 @@
+{
+  "id": "wciSalesforce",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "wciSalesforce",
+      "id": "def-public.WCISalesforcePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCISalesforcePluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-salesforce/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "wciSalesforce",
+      "id": "def-public.WCISalesforcePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCISalesforcePluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-salesforce/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "wciSalesforce",
+      "id": "def-server.WCISalesforcePluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCISalesforcePluginSetup",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-salesforce/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "wciSalesforce",
+      "id": "def-server.WCISalesforcePluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "WCISalesforcePluginStart",
+      "description": [],
+      "path": "x-pack/solutions/chat/plugins/wci-salesforce/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "wciSalesforce",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"wciSalesforce\""
+        ],
+        "path": "x-pack/solutions/chat/plugins/wci-salesforce/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "wciSalesforce",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"wciSalesforce\""
+        ],
+        "path": "x-pack/solutions/chat/plugins/wci-salesforce/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
