@@ -8,10 +8,11 @@
  */
 
 import { LogRecord, Logger, LogMeta, LogLevelId } from '@kbn/logging';
+import { Transferable, kSerialize } from '@kbn/core-base-common';
 import { GlobalContext, mergeGlobalContext } from './global_context';
 
 /** @internal */
-export class LoggerAdapter implements Logger {
+export class LoggerAdapter implements Logger, Transferable<{ context: string }> {
   constructor(private logger: Logger, private globalContext: GlobalContext = {}) {}
 
   /**
@@ -72,5 +73,13 @@ export class LoggerAdapter implements Logger {
 
   public get(...contextParts: string[]): Logger {
     return this.logger.get(...contextParts);
+  }
+
+  async [kSerialize]() {
+    const result = await this.logger[kSerialize]!();
+    return {
+      ...result,
+      _as: 'Logger',
+    };
   }
 }

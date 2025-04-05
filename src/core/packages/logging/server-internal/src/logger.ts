@@ -8,15 +8,23 @@
  */
 
 import apmAgent from 'elastic-apm-node';
-import { LogLevel, LogRecord, LogMeta } from '@kbn/logging';
+import { LogLevel, LogRecord, LogMeta, LoggerFactory } from '@kbn/logging';
 import { AbstractLogger } from '@kbn/core-logging-common-internal';
+import { Transferable, kDeserialize, kSerialize } from '@kbn/core-base-common';
 
 function isError(x: any): x is Error {
   return x instanceof Error;
 }
 
+interface TransferableBaseLoggerState {
+  context: string;
+}
+
 /** @internal */
-export class BaseLogger extends AbstractLogger {
+export class BaseLogger
+  extends AbstractLogger
+  implements Transferable<TransferableBaseLoggerState>
+{
   protected createLogRecord<Meta extends LogMeta>(
     level: LogLevel,
     errorOrMessage: string | Error,
@@ -52,5 +60,18 @@ export class BaseLogger extends AbstractLogger {
       traceId: apmAgent.currentTraceIds['trace.id'],
       transactionId: apmAgent.currentTraceIds['transaction.id'],
     };
+  }
+
+  [kSerialize]() {
+    return {
+      context: this.context,
+    };
+  }
+
+  static [kDeserialize]({
+    context,
+    loggerFactory,
+  }: TransferableBaseLoggerState & { loggerFactory: LoggerFactory }) {
+    return loggerFactory.get(context);
   }
 }

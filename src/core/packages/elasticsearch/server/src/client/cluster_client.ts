@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { IAuthHeadersStorage } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from './client';
+import { ElasticsearchClientConfig } from './client_config';
 import type { ScopeableRequest } from './scopeable_request';
 import type { IScopedClusterClient } from './scoped_cluster_client';
 
@@ -40,4 +42,10 @@ export interface ICustomClusterClient extends IClusterClient {
    * create a new client instance to be able to interact with Elasticsearch API.
    */
   close: () => Promise<void>;
+}
+
+export interface ICustomClusterClientConfig {
+  config: ElasticsearchClientConfig;
+  authHeaders: IAuthHeadersStorage | undefined;
+  kibanaVersion: string;
 }

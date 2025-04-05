@@ -15,6 +15,7 @@ import type { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-serv
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 import type { UserProfileRequestHandlerContext } from '@kbn/core-user-profile-server';
 import type { FeatureFlagsRequestHandlerContext } from '@kbn/core-feature-flags-server';
+import type { WorkerThreadsRequestHandlerContext } from '@kbn/core-worker-threads-server';
 
 /**
  * The `core` context provided to route handler.
@@ -59,6 +60,8 @@ export interface CoreRequestHandlerContext {
    * {@link UserProfileRequestHandlerContext}
    */
   userProfile: UserProfileRequestHandlerContext;
+
+  workerThreads: WorkerThreadsRequestHandlerContext;
 }
 
 /**

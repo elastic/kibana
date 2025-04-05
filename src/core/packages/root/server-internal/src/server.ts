@@ -56,6 +56,7 @@ import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-inte
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
+import { WorkerThreadsService } from '@kbn/core-worker-threads-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -96,6 +97,7 @@ export class Server {
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly workerThreads: WorkerThreadsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -148,6 +150,7 @@ export class Server {
     this.userSettingsService = new UserSettingsService(core);
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
+    this.workerThreads = new WorkerThreadsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -359,6 +362,10 @@ export class Server {
       rendering: renderingSetup,
     });
 
+    const workerThreadsSetup = this.workerThreads.setup({
+      elasticsearch: elasticsearchServiceSetup,
+    });
+
     const coreSetup: InternalCoreSetup = {
       analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
@@ -383,6 +390,7 @@ export class Server {
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
       userProfile: userProfileSetup,
+      workerThreads: workerThreadsSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -458,6 +466,10 @@ export class Server {
       featureFlags: featureFlagsStart,
     });
 
+    const workerThreadsStart = await this.workerThreads.start({
+      elasticsearch: elasticsearchStart,
+    });
+
     this.coreStart = {
       analytics: analyticsStart,
       capabilities: capabilitiesStart,
@@ -474,9 +486,14 @@ export class Server {
       deprecations: deprecationsStart,
       security: securityStart,
       userProfile: userProfileStart,
+      workerThreads: workerThreadsStart,
     };
 
     this.coreApp.start(this.coreStart);
+
+    await this.workerThreads.start({
+      elasticsearch: elasticsearchStart,
+    });
 
     await this.plugins.start(this.coreStart);
 

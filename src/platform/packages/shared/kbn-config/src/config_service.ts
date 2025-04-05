@@ -11,12 +11,13 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SchemaTypeError, Type, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable, identity, of } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs';
 import { Logger, LoggerFactory } from '@kbn/logging';
 import { getDocLinks, DocLinks } from '@kbn/doc-links';
 
 import { getFlattenedObject } from '@kbn/std';
+import { ValidTransferable, kDeserialize, kSerialize } from '@kbn/core-base-common';
 import { Config, ConfigPath, Env } from '..';
 import { hasConfigPathIntersection } from './config';
 import { RawConfigurationProvider } from './raw';
@@ -42,8 +43,16 @@ export interface ConfigValidateParameters {
   logDeprecations: boolean;
 }
 
+interface ConfigServiceTransferableState {
+  config: Record<string, any>;
+  env: Env;
+  logger: Logger;
+}
+
+type ConfigServiceTransferable = ValidTransferable<ConfigServiceTransferableState>;
+
 /** @internal */
-export class ConfigService {
+export class ConfigService implements ConfigServiceTransferable {
   private readonly log: Logger;
   private readonly deprecationLog: Logger;
   private readonly docLinks: DocLinks;
@@ -402,6 +411,25 @@ export class ConfigService {
       version: this.env.packageInfo.version,
       docLinks: this.docLinks,
     };
+  }
+
+  async [kSerialize](): Promise<ConfigServiceTransferableState> {
+    const config = await firstValueFrom(this.rawConfigProvider.getConfig$());
+    return {
+      config,
+      env: this.env,
+      logger: this.log,
+    };
+  }
+
+  static [kDeserialize]({ config, env, logger }: ConfigServiceTransferableState) {
+    return new ConfigService(
+      {
+        getConfig$: () => of(config),
+      },
+      env,
+      logger
+    );
   }
 }
 

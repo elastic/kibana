@@ -40,5 +40,6 @@ module.exports = (_, options = {}) => {
       ],
       [require('./common_preset'), options],
     ],
+    plugins: [require('./worker_thread')],
   };
 };

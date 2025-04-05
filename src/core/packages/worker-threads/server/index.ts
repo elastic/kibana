@@ -7,16 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { PluginOpaqueId, PluginName, DiscoveredPlugin } from './src/plugins';
-export { PluginType } from './src/plugins';
-export { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from './src/eui';
-
-export {
-  type Transferable,
-  type TransferableConstructor,
-  type TransferableStateOf,
-  type ValidTransferable,
-  type ExtractTransferableState,
-  kDeserialize,
-  kSerialize,
-} from './src/transferable';
+export type { WorkerThreadsRequestHandlerContext } from './src/request_handler_context';
+export type { RouteWorker } from './src/types';

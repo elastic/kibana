@@ -24,6 +24,17 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
   return {
     bootstrap: async ({ streamsClient }) => {
       await streamsClient.enable();
+
+      await streamsClient.forkStream('logs', {
+        if: {
+          field: 'filepath',
+          operator: 'eq',
+          value: 'zookeeper',
+        },
+        stream: {
+          name: 'logs.zookeeper',
+        },
+      });
     },
     generate: ({ range, clients: { streamsClient } }) => {
       return withClient(

@@ -75,8 +75,20 @@ export const listStreamsRoute = createServerRoute({
     },
   },
   params: z.object({}),
-  handler: async ({ request, getScopedClients }): Promise<{ streams: StreamDefinition[] }> => {
+  handler: async ({
+    request,
+    context,
+    getScopedClients,
+    logger,
+  }): Promise<{ streams: StreamDefinition[] }> => {
     const { streamsClient } = await getScopedClients({ request });
+
+    const stuffFromAWorker = await (
+      await context.core
+    ).workerThreads.client.run(import('./read_stream.worker'), { input: {} });
+
+    logger.info(JSON.stringify(stuffFromAWorker));
+
     return {
       streams: await streamsClient.listStreams(),
     };

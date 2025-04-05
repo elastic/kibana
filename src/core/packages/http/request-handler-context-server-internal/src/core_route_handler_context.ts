@@ -33,6 +33,10 @@ import {
   CoreUserProfileRouteHandlerContext,
   type InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-server-internal';
+import {
+  CoreWorkerThreadsRouteHandlerContext,
+  type InternalWorkerThreadsServiceStart,
+} from '@kbn/core-worker-threads-server-internal';
 import { CoreFeatureFlagsRouteHandlerContext } from '@kbn/core-feature-flags-server-internal';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 
@@ -48,6 +52,7 @@ export interface CoreRouteHandlerContextParams {
   deprecations: InternalDeprecationsServiceStart;
   security: InternalSecurityServiceStart;
   userProfile: InternalUserProfileServiceStart;
+  workerThreads: InternalWorkerThreadsServiceStart;
 }
 
 /**
@@ -63,6 +68,7 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   #deprecations?: CoreDeprecationsRouteHandlerContext;
   #security?: CoreSecurityRouteHandlerContext;
   #userProfile?: CoreUserProfileRouteHandlerContext;
+  #workerThreads?: CoreWorkerThreadsRouteHandlerContext;
 
   constructor(
     private readonly coreStart: CoreRouteHandlerContextParams,
@@ -133,5 +139,15 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
       );
     }
     return this.#userProfile;
+  }
+
+  public get workerThreads() {
+    if (!this.#workerThreads) {
+      this.#workerThreads = new CoreWorkerThreadsRouteHandlerContext(
+        this.coreStart.workerThreads,
+        this.request
+      );
+    }
+    return this.#workerThreads;
   }
 }

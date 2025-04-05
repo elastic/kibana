@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Transferable } from '@kbn/core-base-common';
 import type { LogMeta } from './log_meta';
 import type { LogRecord } from './log_record';
 import type { LogLevelId } from './log_level';
@@ -22,7 +23,7 @@ export type LogMessageSource = string | (() => string);
  *
  * @public
  */
-export interface Logger {
+export interface Logger extends Transferable<{ context: string }> {
   /**
    * Log messages at the most detailed log level
    *

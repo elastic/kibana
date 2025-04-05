@@ -11,6 +11,7 @@ import { resolve, join } from 'path';
 import loadJsonFile from 'load-json-file';
 import { getPluginSearchPaths } from '@kbn/repo-packages';
 import type { Package } from '@kbn/repo-packages';
+import { Transferable, kDeserialize, kSerialize } from '@kbn/core-base-common';
 import { PackageInfo, EnvironmentMode } from './types';
 
 /** @internal */
@@ -51,7 +52,16 @@ export interface RawPackageInfo {
   };
 }
 
-export class Env {
+interface EnvTransferableState {
+  homeDir: string;
+  options: {
+    configs: string[];
+    cliArgs: CliArgs;
+  };
+  pkg: RawPackageInfo;
+}
+
+export class Env implements Transferable<EnvTransferableState> {
   /**
    * @internal
    */
@@ -98,7 +108,11 @@ export class Env {
   /**
    * @internal
    */
-  constructor(public readonly homeDir: string, pkg: RawPackageInfo, options: EnvOptions) {
+  constructor(
+    public readonly homeDir: string,
+    private readonly pkg: RawPackageInfo,
+    options: EnvOptions
+  ) {
     this.configDir = resolve(this.homeDir, 'config');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
@@ -129,5 +143,20 @@ export class Env {
       buildDate: isKibanaDistributable ? new Date(pkg.build.date) : new Date(),
       buildFlavor: this.cliArgs.serverless ? 'serverless' : 'traditional',
     });
+  }
+
+  [kSerialize]() {
+    return {
+      homeDir: this.homeDir,
+      options: {
+        configs: this.configs.concat(),
+        cliArgs: this.cliArgs,
+      },
+      pkg: this.pkg,
+    };
+  }
+
+  static [kDeserialize]({ homeDir, pkg, options }: EnvTransferableState) {
+    return new Env(homeDir, pkg, options);
   }
 }

@@ -207,22 +207,31 @@ export class ElasticsearchService
     }
   }
 
-  private createClusterClient(
-    type: string,
+  private getClusterClientConfig(
     baseConfig: ElasticsearchClientConfig,
     clientConfig: Partial<ElasticsearchClientConfig> = {}
   ) {
     const config = mergeConfig(baseConfig, clientConfig);
 
-    return new ClusterClient({
+    return {
       config,
-      logger: this.coreContext.logger.get('elasticsearch'),
-      type,
       authHeaders: this.authHeaders,
+      kibanaVersion: this.kibanaVersion,
+    };
+  }
+
+  private createClusterClient(
+    type: string,
+    baseConfig: ElasticsearchClientConfig,
+    clientConfig: Partial<ElasticsearchClientConfig> = {}
+  ) {
+    return new ClusterClient({
+      ...this.getClusterClientConfig(baseConfig, clientConfig),
+      type,
+      logger: this.coreContext.logger.get('elasticsearch'),
       getExecutionContext: () => this.executionContextClient?.getAsHeader(),
       getUnauthorizedErrorHandler: () => this.unauthorizedErrorHandler,
       agentFactoryProvider: this.getAgentManager(baseConfig),
-      kibanaVersion: this.kibanaVersion,
     });
   }
 
