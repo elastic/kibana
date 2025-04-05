@@ -8,24 +8,16 @@
 import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { WiredStreamGetResponse, IngestUpsertRequest } from '@kbn/streams-schema';
+import { IngestUpsertRequest } from '@kbn/streams-schema';
 import React from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { emptyEqualsToAlways } from '../../../util/condition';
-import { useRoutingState } from './hooks/routing_state';
+import { useRoutingStateContext } from './hooks/routing_state';
 import { getFormattedError } from '../../../util/errors';
 
-export function ControlBar({
-  definition,
-  routingAppState,
-  refreshDefinition,
-}: {
-  definition: WiredStreamGetResponse;
-  routingAppState: ReturnType<typeof useRoutingState>;
-  refreshDefinition: () => void;
-}) {
+export function ControlBar() {
   const {
     core,
     dependencies: {
@@ -37,6 +29,8 @@ export function ControlBar({
 
   const { notifications } = core;
   const router = useStreamsAppRouter();
+
+  const { definition, routingAppState, refreshDefinition } = useRoutingStateContext();
 
   const { signal } = useAbortController();
 
@@ -169,10 +163,10 @@ export function ControlBar({
   }
 
   return (
-    <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       {routingAppState.childUnderEdit && !routingAppState.childUnderEdit.isNew && (
-        <>
-          <EuiButton
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
             color="danger"
             size="s"
             disabled={routingAppState.saveInProgress}
@@ -184,35 +178,36 @@ export function ControlBar({
             {i18n.translate('xpack.streams.streamDetailRouting.remove', {
               defaultMessage: 'Remove',
             })}
-          </EuiButton>
-          <EuiFlexItem grow />
-        </>
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       )}
-      <EuiButtonEmpty
-        size="s"
-        data-test-subj="streamsAppRoutingStreamEntryCancelButton"
-        disabled={routingAppState.saveInProgress}
-        onClick={() => {
-          routingAppState.cancelChanges();
-        }}
-      >
-        {i18n.translate('xpack.streams.streamDetailRouting.cancel', {
-          defaultMessage: 'Cancel',
-        })}
-      </EuiButtonEmpty>
-      <EuiButton
-        isLoading={routingAppState.saveInProgress}
-        onClick={saveOrUpdateChildren}
-        data-test-subj="streamsAppStreamDetailRoutingSaveButton"
-      >
-        {routingAppState.childUnderEdit && routingAppState.childUnderEdit.isNew
-          ? i18n.translate('xpack.streams.streamDetailRouting.add', {
-              defaultMessage: 'Save',
-            })
-          : i18n.translate('xpack.streams.streamDetailRouting.change', {
-              defaultMessage: 'Change routing',
-            })}
-      </EuiButton>
+      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+        <EuiButtonEmpty
+          size="s"
+          data-test-subj="streamsAppRoutingStreamEntryCancelButton"
+          disabled={routingAppState.saveInProgress}
+          onClick={() => {
+            routingAppState.cancelChanges();
+          }}
+        >
+          {i18n.translate('xpack.streams.streamDetailRouting.cancel', {
+            defaultMessage: 'Cancel',
+          })}
+        </EuiButtonEmpty>
+        <EuiButton
+          isLoading={routingAppState.saveInProgress}
+          onClick={saveOrUpdateChildren}
+          data-test-subj="streamsAppStreamDetailRoutingSaveButton"
+        >
+          {routingAppState.childUnderEdit && routingAppState.childUnderEdit.isNew
+            ? i18n.translate('xpack.streams.streamDetailRouting.add', {
+                defaultMessage: 'Save',
+              })
+            : i18n.translate('xpack.streams.streamDetailRouting.change', {
+                defaultMessage: 'Change routing',
+              })}
+        </EuiButton>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }
