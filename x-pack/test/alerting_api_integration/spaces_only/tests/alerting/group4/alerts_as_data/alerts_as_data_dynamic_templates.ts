@@ -48,10 +48,21 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
     });
 
     it(`should add the dynamic fields`, async () => {
-      await setTimeoutAsync(TEST_CACHE_EXPIRATION_TIME);
-      const ruleParameters = {
-        dynamic_fields: { 'host.id': '1', 'host.name': 'host-1' },
-      };
+      const createdRule = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            rule_type_id: 'test.always-firing-alert-as-data-with-dynamic-templates',
+            schedule: { interval: '1d' },
+            throttle: null,
+            params: {},
+            actions: [],
+          })
+        );
+      expect(createdRule.status).to.eql(200);
+      const ruleId = createdRule.body.id;
+      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
       const existingFields = alertFieldMap;
 
@@ -77,31 +88,30 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         dynamic: false,
       });
 
-      const createdRule = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+      const updatedRule = await supertestWithoutAuth
+        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
         .set('kbn-xsrf', 'foo')
         .send(
           getTestRuleData({
-            rule_type_id: 'test.always-firing-alert-as-data-with-dynamic-templates',
             schedule: { interval: '1d' },
             throttle: null,
-            params: ruleParameters,
+            params: {
+              dynamic_fields: { 'host.id': '1', 'host.name': 'host-1' },
+            },
             actions: [],
+            enabled: undefined,
+            rule_type_id: undefined,
+            consumer: undefined,
           })
-        );
+        )
+        .expect(200);
 
-      expect(createdRule.status).to.eql(200);
-      const ruleId = createdRule.body.id;
-      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+      const runSoon = await supertestWithoutAuth
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+        .set('kbn-xsrf', 'foo');
+      expect(runSoon.status).to.eql(204);
 
-      // Wait for the event log execute doc so we can get the execution UUID
-      const events: IValidatedEvent[] = await waitForEventLogDocs(
-        ruleId,
-        new Map([['execute', { equal: 1 }]])
-      );
-      const executeEvent = events[0];
-      const executionUuid = executeEvent?.kibana?.alert?.rule?.execution?.uuid;
-      expect(executionUuid).not.to.be(undefined);
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
 
       // Query for alerts
       const alerts = await queryForAlertDocs<Alert>();
