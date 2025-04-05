@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ReactElement, ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
@@ -32,7 +32,7 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
    * The title of the share action
    */
   draftModeCallOut?: ReactNode;
-  helpText?: ReactElement;
+  helpText?: ReactNode;
   CTAButtonConfig?: {
     id: string;
     dataTestSubj: string;
@@ -130,8 +130,8 @@ export interface ExportShare
      * allows disabling the export action based on there factors, for instance licensing
      */
     disabled?: boolean;
-    helpText?: ReactElement;
-    generateExportButton?: ReactElement;
+    helpText?: ReactNode;
+    generateExportButton?: ReactNode;
     generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
     generateAssetURIValue: (args: ExportGenerationOpts) => string | undefined;
     renderCopyURIButton?: boolean;
