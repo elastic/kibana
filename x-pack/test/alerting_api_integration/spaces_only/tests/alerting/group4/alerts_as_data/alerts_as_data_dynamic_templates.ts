@@ -45,6 +45,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
     });
 
     it(`should add the dynamic fields`, async () => {
+      // First run doesn't add the dynamic fields
       const createdRule = await supertestWithoutAuth
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
@@ -61,8 +62,9 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
       const ruleId = createdRule.body.id;
       objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
 
-      const existingFields = alertFieldMap;
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
 
+      const existingFields = alertFieldMap;
       const numberOfExistingFields = Object.keys(existingFields).length;
       // there is no way to get the real number of fields from ES.
       // Eventhough we have only as many as alertFieldMap fields,
@@ -108,7 +110,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
         .set('kbn-xsrf', 'foo');
       expect(runSoon.status).to.eql(204);
 
-      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
 
       // Query for alerts
       const alerts = await queryForAlertDocs<Alert>();
