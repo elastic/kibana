@@ -210,7 +210,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(waitResult).to.be(true);
       });
 
-      it('throws an Error when the wait times out', async () => {
+      it('throws an error when the retry times out', async () => {
         await blockingManager.acquire();
 
         let error: Error | undefined;
@@ -346,6 +346,80 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         // After the withLock call completes, the lock should be released.
         it('should release the lock after the callback', async () => {
           const lock = await getLockById(es, LOCK_ID);
+          expect(lock).to.be(undefined);
+        });
+      });
+
+      describe('with retry that times out', () => {
+        const RETRY_LOCK_ID = 'my_lock_with_retry';
+        let retries = 0;
+        let error: Error | undefined;
+
+        before(async () => {
+          const acquired = await new LockManager(RETRY_LOCK_ID, es, logger).acquire();
+          expect(acquired).to.be(true);
+
+          try {
+            await pRetry(
+              async () => {
+                retries++;
+                await withLock(
+                  { lockId: RETRY_LOCK_ID, esClient: es, logger },
+                  async () => 'should not execute'
+                );
+              },
+              { minTimeout: 50, maxTimeout: 50, retries: 2 }
+            );
+          } catch (err) {
+            error = err;
+          }
+        });
+
+        it('invokes withLock 3 times', async () => {
+          expect(retries).to.be(3);
+        });
+
+        it('throws a LockAcquisitionError', () => {
+          expect(error?.name).to.be('LockAcquisitionError');
+        });
+
+        it('throws a LockAcquisitionError with a message', () => {
+          expect(error?.message).to.contain(`Lock "${RETRY_LOCK_ID}" not acquired`);
+        });
+      });
+
+      describe('with retry that does not times out', () => {
+        const RETRY_LOCK_ID = 'my_lock_with_retry';
+        let retries = 0;
+        let res: string | undefined;
+
+        before(async () => {
+          const lm = new LockManager(RETRY_LOCK_ID, es, logger);
+          await lm.acquire();
+          setTimeout(() => lm.release(), 100);
+
+          await pRetry(
+            async () => {
+              retries++;
+              res = await withLock(
+                { lockId: RETRY_LOCK_ID, esClient: es, logger },
+                async () => 'should execute'
+              );
+            },
+            { minTimeout: 50, maxTimeout: 50, retries: 5 }
+          );
+        });
+
+        it('invokes withLock multiple times', async () => {
+          expect(retries).to.be.greaterThan(1);
+        });
+
+        it('returns the result', () => {
+          expect(res).to.be('should execute');
+        });
+
+        it('releases the lock', async () => {
+          const lock = await getLockById(es, RETRY_LOCK_ID);
           expect(lock).to.be(undefined);
         });
       });
