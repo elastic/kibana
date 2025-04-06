@@ -20,6 +20,7 @@ import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { duration, unitOfTime } from 'moment';
+import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
 
@@ -173,7 +174,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('acquireWithRetry', () => {
+    describe('with retries', () => {
       let blockingManager: LockManager;
       let waitingManager: LockManager;
 
@@ -195,7 +196,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const acquired = await blockingManager.acquire();
         expect(acquired).to.be(true);
 
-        const waitPromise = waitingManager.acquireWithRetry({ minTimeout: 50, maxTimeout: 50 });
+        const waitPromise = pRetry(async () => {
+          const hasLock = await waitingManager.acquire();
+          if (!hasLock) {
+            throw new Error(`Lock "${RETRY_LOCK_ID}" not available yet`);
+          }
+          return hasLock;
+        });
         await sleep(100);
         await blockingManager.release();
 
@@ -208,7 +215,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         let error: Error | undefined;
         try {
-          await waitingManager.acquireWithRetry({ minTimeout: 100, maxRetryTime: 100, retries: 2 });
+          await pRetry(
+            async () => {
+              const hasLock = await waitingManager.acquire();
+              if (!hasLock) {
+                throw new Error(`Lock "${RETRY_LOCK_ID}" not available yet`);
+              }
+              return hasLock;
+            },
+            { minTimeout: 100, maxTimeout: 100, retries: 2 }
+          );
         } catch (err) {
           error = err;
         }
