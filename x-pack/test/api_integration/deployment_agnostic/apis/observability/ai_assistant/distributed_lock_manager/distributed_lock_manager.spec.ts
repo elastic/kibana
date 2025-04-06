@@ -354,9 +354,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const RETRY_LOCK_ID = 'my_lock_with_retry';
         let retries = 0;
         let error: Error | undefined;
+        let lm: LockManager;
 
         before(async () => {
-          const acquired = await new LockManager(RETRY_LOCK_ID, es, logger).acquire();
+          lm = new LockManager(RETRY_LOCK_ID, es, logger);
+          const acquired = await lm.acquire();
           expect(acquired).to.be(true);
 
           try {
@@ -373,6 +375,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           } catch (err) {
             error = err;
           }
+        });
+
+        after(async () => {
+          await lm.release();
         });
 
         it('invokes withLock 3 times', async () => {
@@ -395,7 +401,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         before(async () => {
           const lm = new LockManager(RETRY_LOCK_ID, es, logger);
-          await lm.acquire();
+          const acquired = await lm.acquire();
+          expect(acquired).to.be(true);
+
           setTimeout(() => lm.release(), 100);
 
           await pRetry(
@@ -410,7 +418,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           );
         });
 
-        it('invokes withLock multiple times', async () => {
+        it('retries calling withLock multiple times', async () => {
           expect(retries).to.be.greaterThan(1);
         });
 
