@@ -11,5 +11,4 @@
 export const perfomanceMarkers = {
   startPageChange: 'start::pageChange',
   endPageReady: 'end::pageReady',
-  startPageRefresh: 'start::pageRefresh',
 };

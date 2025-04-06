@@ -13,15 +13,13 @@ import { useLocation } from 'react-router-dom';
 import { PerformanceApi, PerformanceContext } from './use_performance_context';
 import { PerformanceMetricEvent } from '../../performance_metric_events';
 import { measureInteraction } from './measure_interaction';
-import { DescriptionWithPrefix } from './types';
+
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
 export interface Meta {
-  rangeFrom?: string;
-  rangeTo?: string;
-  description?: DescriptionWithPrefix;
+  rangeFrom: string;
+  rangeTo: string;
 }
-
 export interface EventData {
   customMetrics?: CustomMetrics;
   meta?: Meta;
@@ -30,8 +28,7 @@ export interface EventData {
 export function PerformanceContextProvider({ children }: { children: React.ReactElement }) {
   const [isRendered, setIsRendered] = useState(false);
   const location = useLocation();
-
-  const interaction = useMemo(() => measureInteraction(location.pathname), [location.pathname]);
+  const interaction = measureInteraction();
 
   React.useEffect(() => {
     afterFrame(() => {
@@ -47,14 +44,11 @@ export function PerformanceContextProvider({ children }: { children: React.React
     () => ({
       onPageReady(eventData) {
         if (isRendered) {
-          interaction.pageReady(eventData);
+          interaction.pageReady(location.pathname, eventData);
         }
       },
-      onPageRefreshStart() {
-        interaction.pageRefreshStart();
-      },
     }),
-    [isRendered, interaction]
+    [isRendered, location.pathname, interaction]
   );
 
   return <PerformanceContext.Provider value={api}>{children}</PerformanceContext.Provider>;

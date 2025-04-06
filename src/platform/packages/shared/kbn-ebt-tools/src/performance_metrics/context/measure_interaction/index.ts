@@ -12,32 +12,28 @@ import {
   getOffsetFromNowInSeconds,
   getTimeDifferenceInSeconds,
 } from '@kbn/timerange';
-import { EventData } from '../performance_context';
 import { perfomanceMarkers } from '../../performance_markers';
-import { DescriptionWithPrefix } from '../types';
+import { EventData } from '../performance_context';
 
 interface PerformanceMeta {
-  queryRangeSecs?: number;
-  queryFromOffsetSecs?: number;
-  queryToOffsetSecs?: number;
-  isInitialLoad?: boolean;
-  description?: DescriptionWithPrefix;
+  queryRangeSecs: number;
+  queryOffsetSecs: number;
 }
 
-export function measureInteraction(pathname: string) {
+export function measureInteraction() {
   performance.mark(perfomanceMarkers.startPageChange);
-
+  const trackedRoutes: string[] = [];
   return {
     /**
      * Marks the end of the page ready state and measures the performance between the start of the page change and the end of the page ready state.
      * @param pathname - The pathname of the page.
      * @param customMetrics - Custom metrics to be included in the performance measure.
      */
-    pageReady(eventData?: EventData) {
-      const performanceMeta: PerformanceMeta = {};
+    pageReady(pathname: string, eventData?: EventData) {
+      let performanceMeta: PerformanceMeta | undefined;
       performance.mark(perfomanceMarkers.endPageReady);
 
-      if (eventData?.meta?.rangeFrom && eventData?.meta?.rangeTo) {
+      if (eventData?.meta) {
         const { rangeFrom, rangeTo } = eventData.meta;
 
         // Convert the date range  to epoch timestamps (in milliseconds)
@@ -46,59 +42,26 @@ export function measureInteraction(pathname: string) {
           to: rangeTo,
         });
 
-        performanceMeta.queryRangeSecs = getTimeDifferenceInSeconds(dateRangesInEpoch);
-        performanceMeta.queryFromOffsetSecs =
-          rangeFrom === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.startDate);
-        performanceMeta.queryToOffsetSecs =
-          rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate);
+        performanceMeta = {
+          queryRangeSecs: getTimeDifferenceInSeconds(dateRangesInEpoch),
+          queryOffsetSecs:
+            rangeTo === 'now' ? 0 : getOffsetFromNowInSeconds(dateRangesInEpoch.endDate),
+        };
       }
 
-      if (eventData?.meta?.description) {
-        performanceMeta.description = eventData.meta.description;
-      }
-
-      if (
-        performance.getEntriesByName(perfomanceMarkers.startPageChange).length > 0 &&
-        performance.getEntriesByName(perfomanceMarkers.endPageReady).length > 0
-      ) {
-        performance.measure(`[ttfmp:initial] - ${pathname}`, {
+      if (!trackedRoutes.includes(pathname)) {
+        performance.measure(pathname, {
           detail: {
             eventName: 'kibana:plugin_render_time',
             type: 'kibana:performance',
             customMetrics: eventData?.customMetrics,
-            meta: { ...performanceMeta, isInitialLoad: true },
+            meta: performanceMeta,
           },
           start: perfomanceMarkers.startPageChange,
           end: perfomanceMarkers.endPageReady,
         });
-
-        // Clean up the marks once the measure is done
-        performance.clearMarks(perfomanceMarkers.startPageChange);
-        performance.clearMarks(perfomanceMarkers.endPageReady);
+        trackedRoutes.push(pathname);
       }
-
-      if (
-        performance.getEntriesByName(perfomanceMarkers.startPageRefresh).length > 0 &&
-        performance.getEntriesByName(perfomanceMarkers.endPageReady).length > 0
-      ) {
-        performance.measure(`[ttfmp:refresh] - ${pathname}`, {
-          detail: {
-            eventName: 'kibana:plugin_render_time',
-            type: 'kibana:performance',
-            customMetrics: eventData?.customMetrics,
-            meta: { ...performanceMeta, isInitialLoad: false },
-          },
-          start: perfomanceMarkers.startPageRefresh,
-          end: perfomanceMarkers.endPageReady,
-        });
-
-        // // Clean up the marks once the measure is done
-        performance.clearMarks(perfomanceMarkers.startPageRefresh);
-        performance.clearMarks(perfomanceMarkers.endPageReady);
-      }
-    },
-    pageRefreshStart() {
-      performance.mark(perfomanceMarkers.startPageRefresh);
     },
   };
 }
