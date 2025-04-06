@@ -9,7 +9,6 @@
 import { errors } from '@elastic/elasticsearch';
 import { Logger } from '@kbn/logging';
 import { v4 as uuid } from 'uuid';
-import pRetry from 'p-retry';
 import prettyMilliseconds from 'pretty-ms';
 import { once } from 'lodash';
 import { duration } from 'moment';
@@ -196,21 +195,6 @@ export class LockManager {
     return result._source;
   }
 
-  public async acquireWithRetry({
-    metadata,
-    ttl,
-    ...retryOptions
-  }: AcquireOptions & pRetry.Options = {}): Promise<boolean> {
-    return pRetry(async () => {
-      const acquired = await this.acquire({ metadata, ttl });
-      if (!acquired) {
-        this.logger.debug(`Lock "${this.lockId}" not available yet.`);
-        throw new Error(`Lock "${this.lockId}" not available yet`);
-      }
-      return acquired;
-    }, retryOptions ?? { forever: true, maxTimeout: 10_000 });
-  }
-
   public async extendTtl(ttl: number): Promise<boolean> {
     try {
       await this.esClient.update<LockDocument>({
@@ -253,22 +237,15 @@ export async function withLock<T>(
     lockId,
     metadata,
     ttl = duration(30, 'seconds').asMilliseconds(),
-    waitForLock = false,
-    retryOptions,
   }: {
     esClient: ElasticsearchClient;
     logger: Logger;
     lockId: LockId;
-    waitForLock?: boolean;
-    retryOptions?: pRetry.Options;
   } & AcquireOptions,
   callback: () => Promise<T>
 ): Promise<T> {
   const lockManager = new LockManager(lockId, esClient, logger);
-  const acquired =
-    waitForLock ?? retryOptions
-      ? await lockManager.acquireWithRetry({ metadata, ttl, ...retryOptions })
-      : await lockManager.acquire({ metadata, ttl });
+  const acquired = await lockManager.acquire({ metadata, ttl });
 
   if (!acquired) {
     logger.debug(`Lock "${lockId}" not acquired. Exiting.`);
@@ -301,6 +278,7 @@ export async function withLock<T>(
       await lockManager.release();
     } catch (error) {
       logger.error(`Failed to release lock "${lockId}" in withLock: ${error.message}`);
+      logger.debug(error);
     }
   }
 }
