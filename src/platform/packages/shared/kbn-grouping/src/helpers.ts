@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EMPTY_GROUP_BY_ID, GroupModel, GroupsById, Storage } from './hooks/types';
+import type { GroupModel, GroupsById, Storage } from './hooks/types';
+import { EMPTY_GROUP_BY_ID } from './hooks/types';
 import * as i18n from './components/translations';
 
 /**

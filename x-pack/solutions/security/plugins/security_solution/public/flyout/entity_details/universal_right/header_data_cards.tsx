@@ -135,7 +135,7 @@ export const HeaderDataCards = ({
         description: <EuiTextTruncate text={subType || ''} />,
       },
     ],
-    [criticality, id, type, subType, assignCriticality]
+    [selectValue, id, subType, type, assignCriticality, criticality]
   );
 
   return <ResponsiveDataCards cards={cards} collapseWidth={750} />;

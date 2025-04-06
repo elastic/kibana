@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { GENERIC_FLYOUT_STORAGE_KEYS } from './constants';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
 import { FieldsTable } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
@@ -27,11 +28,11 @@ export const UniversalEntityFlyoutContent = ({ source }: UniversalEntityFlyoutCo
           />
         }
         expanded
-        localStorageKey={'universal_flyout:overview:fields_section'}
+        localStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_SECTION}
       >
         <FieldsTable
           document={source || {}}
-          tableStorageKey={'universal_flyout:overview:fields_table_pins'}
+          tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
         />
       </ExpandableSection>
     </FlyoutBody>

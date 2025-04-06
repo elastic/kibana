@@ -61,7 +61,7 @@ function SparkPlotItem({
   if (isLoading) {
     return (
       <div style={commonStyle}>
-        <EuiLoadingChart mono />
+        <EuiLoadingChart />
       </div>
     );
   }

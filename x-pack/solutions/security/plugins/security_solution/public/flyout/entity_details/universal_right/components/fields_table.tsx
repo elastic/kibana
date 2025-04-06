@@ -49,7 +49,7 @@ const getSortedFlattenedItems = (
     value,
   }));
 
-  const sortedItems = [...flattenedItems].sort((a, b) => {
+  const sortedItems = flattenedItems.sort((a, b) => {
     const isAPinned = pinnedFields.includes(a.key);
     const isBPinned = pinnedFields.includes(b.key);
 

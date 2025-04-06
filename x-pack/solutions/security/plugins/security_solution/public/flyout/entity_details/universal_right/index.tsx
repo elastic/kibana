@@ -14,9 +14,9 @@ import {
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
+import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 
@@ -64,6 +64,7 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
   }, [getGenericEntity.data?._id]);
 
   console.log(getGenericEntity.data?._source?.entity.id);
+
 
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (

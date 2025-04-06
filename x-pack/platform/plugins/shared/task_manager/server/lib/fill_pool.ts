@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { ClaimOwnershipResult } from '../queries/task_claiming';
-import { ConcreteTaskInstance } from '../task';
-import { WithTaskTiming, startTaskTimer } from '../task_events';
+import type { ClaimOwnershipResult } from '../queries/task_claiming';
+import type { ConcreteTaskInstance } from '../task';
+import type { WithTaskTiming } from '../task_events';
+import { startTaskTimer } from '../task_events';
 import { TaskPoolRunResult } from '../task_pool';
-import { TaskManagerRunner } from '../task_running';
-import { Result, isOk } from './result_type';
+import type { TaskManagerRunner } from '../task_running';
+import type { Result } from './result_type';
+import { isOk } from './result_type';
 
 export enum FillPoolResult {
   Failed = 'Failed',
