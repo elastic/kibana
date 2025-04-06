@@ -8,18 +8,18 @@
  */
 
 import { workerData } from 'piscina';
-import { RouteWorker } from '@kbn/core-worker-threads-server/src/types';
-import { InternalRouteWorkerData, InternalRouteWorkerParams } from './types';
+import type { RouteWorker } from '@kbn/core-worker-threads-server/src/types';
+import type { InternalRouteWorkerData, InternalRouteWorkerParams } from './types';
 import { initialize } from './initialize_worker';
 
 const { services } = workerData as InternalRouteWorkerData;
 
 // eslint-disable-next-line import/no-default-export
-export default initialize({ services }).then((cb) => {
-  return async ({ filename, input, request, signal, port }: InternalRouteWorkerParams) => {
-    const { elasticsearch, logger } = await cb({ port });
-
+export default initialize({ services }).then(({ elasticsearch, logger }) => {
+  return async ({ filename, input, request, signal }: InternalRouteWorkerParams) => {
     const worker = (await import(filename)) as RouteWorker<any, any>;
+
+    logger.info('Worker started');
 
     return worker.run({
       input,
@@ -30,7 +30,6 @@ export default initialize({ services }).then((cb) => {
       },
       signal,
       logger,
-      port,
     });
   };
 });

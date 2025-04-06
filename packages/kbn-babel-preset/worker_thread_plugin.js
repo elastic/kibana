@@ -24,8 +24,6 @@ module.exports = function ({ types: t }) {
         if (!t.isStringLiteral(arg.node)) return;
         const filename = arg.node.value;
 
-        console.log(filename);
-
         // If the filename does not end with '_worker', do nothing
         if (!filename.endsWith('.worker')) return;
 

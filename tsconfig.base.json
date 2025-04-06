@@ -2166,8 +2166,6 @@
       "@kbn/whereis-pkg-cli/*": ["packages/kbn-whereis-pkg-cli/*"],
       "@kbn/workchat-app": ["x-pack/solutions/chat/plugins/workchat-app"],
       "@kbn/workchat-app/*": ["x-pack/solutions/chat/plugins/workchat-app/*"],
-      "@kbn/workers": ["src/platform/packages/shared/kbn-workers"],
-      "@kbn/workers/*": ["src/platform/packages/shared/kbn-workers/*"],
       "@kbn/xstate-utils": ["src/platform/packages/shared/kbn-xstate-utils"],
       "@kbn/xstate-utils/*": ["src/platform/packages/shared/kbn-xstate-utils/*"],
       "@kbn/yarn-lock-validator": ["packages/kbn-yarn-lock-validator"],

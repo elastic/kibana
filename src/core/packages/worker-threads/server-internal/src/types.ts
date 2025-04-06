@@ -9,7 +9,6 @@
 
 import { FakeRawRequest } from '@kbn/core-http-server';
 import { Worker, WorkerParams } from '@kbn/core-worker-threads-server/src/types';
-import { MessagePort } from 'worker_threads';
 
 export type TransferableWorkerService = 'ConfigService' | 'Env' | 'Logger';
 export type WorkerService = 'ConfigService' | 'Env';
@@ -24,7 +23,6 @@ export interface InternalWorkerParams {
   filename: string;
   input: WorkerParams;
   signal: AbortSignal;
-  port: MessagePort;
 }
 
 export interface InternalRouteWorkerParams extends InternalWorkerParams {

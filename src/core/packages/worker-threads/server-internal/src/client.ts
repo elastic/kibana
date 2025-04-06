@@ -20,7 +20,6 @@ import { isPromise } from 'util/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
 import { Logger } from '@kbn/logging';
-import { MessageChannel } from 'worker_threads';
 import { InternalRouteWorkerParams } from './types';
 
 export interface InternalWorkerThreadsClientConfig {
@@ -28,7 +27,6 @@ export interface InternalWorkerThreadsClientConfig {
   request: KibanaRequest;
   pool: Piscina;
   logger: Logger;
-  messageChannel: MessageChannel;
 }
 
 export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
@@ -44,7 +42,7 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
     filenameOrImport: string | Promise<RouteWorker<TInput, TOutput>>,
     { input, signal }: { input: TInput; signal?: AbortSignal }
   ) {
-    const { request, pool, messageChannel } = this.config;
+    const { request, pool } = this.config;
     const controller = new AbortController();
 
     merge(request.events.aborted$, signal ? fromEvent(signal, 'abort') : of()).subscribe({
@@ -67,7 +65,6 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
           },
         },
         logger: this.config.logger,
-        port: messageChannel.port1,
       });
     }
 
@@ -79,11 +76,9 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
           headers: request.headers,
           path: request.url.pathname,
         },
-        port: messageChannel.port1,
       } satisfies Omit<InternalRouteWorkerParams, 'signal'>,
       {
         signal: controller.signal,
-        transferList: [messageChannel.port1],
       }
     );
   }

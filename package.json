@@ -1053,7 +1053,6 @@
     "@kbn/wci-salesforce": "link:x-pack/solutions/chat/plugins/wci-salesforce",
     "@kbn/wci-server": "link:x-pack/solutions/chat/packages/wci-server",
     "@kbn/workchat-app": "link:x-pack/solutions/chat/plugins/workchat-app",
-    "@kbn/workers": "link:src/platform/packages/shared/kbn-workers",
     "@kbn/xstate-utils": "link:src/platform/packages/shared/kbn-xstate-utils",
     "@kbn/zod": "link:src/platform/packages/shared/kbn-zod",
     "@kbn/zod-helpers": "link:src/platform/packages/shared/kbn-zod-helpers",

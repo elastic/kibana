@@ -491,10 +491,6 @@ export class Server {
 
     this.coreApp.start(this.coreStart);
 
-    await this.workerThreads.start({
-      elasticsearch: elasticsearchStart,
-    });
-
     await this.plugins.start(this.coreStart);
 
     await this.http.start();

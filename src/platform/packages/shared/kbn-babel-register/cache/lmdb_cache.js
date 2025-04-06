@@ -125,11 +125,7 @@ directory and report this error to the Operations team.\n`);
       this.#debug(value === undefined ? 'MISS' : 'HIT', db, key);
       return value;
     } catch (error) {
-      if (
-        error.message.includes('No transaction to renew') ||
-        error.message.includes('No current read transaction available') ||
-        error.message.includes('No transaction to renew')
-      ) {
+      if (error.message.includes('No transaction to renew')) {
         // this happens on errors very early in the process
         return undefined;
       }

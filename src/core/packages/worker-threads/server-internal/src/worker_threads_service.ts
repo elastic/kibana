@@ -13,12 +13,12 @@ import {
 } from '@kbn/core-elasticsearch-server-internal';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { WorkerThreadsRequestClient } from '@kbn/core-worker-threads-server/src/types';
-import { LogRecord, Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
+import Fs from 'fs';
 import Path from 'path';
+import Os from 'os';
 import Piscina from 'piscina';
-import { Observable, Subject } from 'rxjs';
-import { MessageChannel } from 'worker_threads';
-import { unsafeConsole } from '@kbn/security-hardening';
+import { finished } from 'stream/promises';
 import { InternalWorkerThreadsClient } from './client';
 import { InternalRouteWorkerData } from './types';
 import { serialize } from './utils';
@@ -70,27 +70,37 @@ export class WorkerThreadsService
       workerData: {
         services,
       } satisfies InternalRouteWorkerData,
-    })).on('error', (err) => {
-      this.log.error(err);
-    });
+      minThreads: 4,
+      idleTimeout: 2000,
+    }));
 
+    setTimeout(() => {
+      const workers = routeWorkerPool.threads;
+
+      const tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'worker-heap-snapshot'));
+      Promise.allSettled(
+        workers.map(async (w) => {
+          const snapshotStream = await w.getHeapSnapshot();
+          const filePath = Path.join(tmpDir, `worker-${w.threadId}-heap.heapsnapshot`);
+          const fileStream = Fs.createWriteStream(filePath);
+
+          snapshotStream.pipe(fileStream);
+
+          this.log.info(`Writing heap snapshot for ${w.threadId}`);
+
+          await finished(fileStream);
+
+          this.log.info(`Wrote heap snapshot for ${w.threadId} to ${filePath}`);
+        })
+      ).then((results) => {});
+    }, 5000);
     return {
       getClientWithRequest: (request: KibanaRequest) => {
-        const messageChannel = new MessageChannel();
-
-        messageChannel.port2.unref();
-
-        messageChannel.port2.on('message', (msg) => {
-          // eslint-disable-next-line @kbn/eslint/no_unsafe_console
-          unsafeConsole.log(msg);
-        });
-
         return new InternalWorkerThreadsClient({
           request,
           pool: routeWorkerPool,
           elasticsearch,
           logger: this.log,
-          messageChannel,
         });
       },
     };

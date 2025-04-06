@@ -8,7 +8,7 @@
  */
 
 // The following require statements MUST be executed before any others - BEGIN
-require('./exit_on_warning');
+// require('./exit_on_warning');
 require('./harden');
 // The following require statements MUST be executed before any others - END
 

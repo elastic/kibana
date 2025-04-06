@@ -25,5 +25,3 @@ export type {
 export { appendersSchema } from './src/appenders/appenders';
 export { LoggerAdapter } from './src/logger_adapter';
 export { getNextRollingTime } from './src/appenders/rolling_file/policies/time_interval';
-
-export { MessageChannelAppender } from './src/appenders/message_channel/message_channel_appender';

@@ -8,7 +8,6 @@
  */
 import { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { MessagePort } from 'worker_threads';
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -24,9 +23,7 @@ export interface Worker<
   TOutput extends WorkerParams = WorkerParams,
   TContext extends Record<string, any> = {}
 > {
-  run: (
-    options: { input: TInput; signal?: AbortSignal; port: MessagePort } & TContext
-  ) => Promise<TOutput>;
+  run: (options: { input: TInput; signal?: AbortSignal } & TContext) => Promise<TOutput>;
 }
 
 export type RouteWorker<

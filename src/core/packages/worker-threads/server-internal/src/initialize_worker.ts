@@ -7,26 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ConfigService, Env } from '@kbn/config';
-import { registerServiceConfig } from '@kbn/core-root-server-internal';
-import { AnalyticsService } from '@kbn/core-analytics-server-internal';
-import { TransferableConstructor, kDeserialize } from '@kbn/core-base-common';
-import { CoreContext } from '@kbn/core-base-server-internal';
-import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal';
-import { ExecutionContextService } from '@kbn/core-execution-context-server-internal';
-import { ContextService } from '@kbn/core-http-context-server-internal';
-import { HttpService } from '@kbn/core-http-server-internal';
-import {
-  LoggingConfigType,
-  LoggingSystem,
-  MessageChannelAppender,
-} from '@kbn/core-logging-server-internal';
+import { ConfigService } from '@kbn/config/src/config_service';
+import { Env } from '@kbn/config/src/env';
+import { registerServiceConfig } from '@kbn/core-root-server-internal/src/register_service_config';
+import { AnalyticsService } from '@kbn/core-analytics-server-internal/src/analytics_service';
+import { TransferableConstructor, kDeserialize } from '@kbn/core-base-common/src/transferable';
+import { CoreContext } from '@kbn/core-base-server-internal/src/core_context';
+import { ElasticsearchService } from '@kbn/core-elasticsearch-server-internal/src/elasticsearch_service';
+import { ExecutionContextService } from '@kbn/core-execution-context-server-internal/src/execution_context_service';
+import { ContextService } from '@kbn/core-http-context-server-internal/src/context_service';
+import { HttpService } from '@kbn/core-http-server-internal/src/http_service';
+import type { LoggingConfigType } from '@kbn/core-logging-server-internal/src/logging_config';
+import { LoggingSystem } from '@kbn/core-logging-server-internal/src/logging_system';
 import { isPrimitive } from 'utility-types';
-import { isArray } from 'lodash';
-import { Appenders } from '@kbn/core-logging-server-internal/src/appenders/appenders';
+import isArray from 'lodash/isArray';
 import { firstValueFrom } from 'rxjs';
-import { MessagePort } from 'worker_threads';
-import { InternalWorkerData, TransferableWorkerService, WorkerService } from './types';
+import type { InternalWorkerData, TransferableWorkerService, WorkerService } from './types';
 import { isPlainObject, isTransferableState } from './utils';
 import { TRANSFERABLE_OBJECT_KEY } from './constants';
 
@@ -66,8 +62,6 @@ export async function initialize({ services }: InternalWorkerData) {
       return loggerFactory.get(context);
     }
   }
-
-  const create = Appenders.create.bind(Appenders);
 
   const ctorMap = {
     ConfigService,
@@ -123,20 +117,12 @@ export async function initialize({ services }: InternalWorkerData) {
 
   const elasticsearchStart = await elasticsearch.start();
 
-  return async ({ port }: { port: MessagePort }) => {
-    Appenders.create = (config) => {
-      if (config.type === 'console') {
-        return new MessageChannelAppender(config.layout, port);
-      }
-      return create(config);
-    };
-    const config = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
+  const config = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
 
-    await loggingSystem.upgrade(config);
+  await loggingSystem.upgrade(config);
 
-    return {
-      elasticsearch: elasticsearchStart,
-      logger: loggerFactory,
-    };
+  return {
+    elasticsearch: elasticsearchStart,
+    logger: loggerFactory,
   };
 }

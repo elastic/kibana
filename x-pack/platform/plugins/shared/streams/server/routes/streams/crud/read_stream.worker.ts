@@ -16,6 +16,12 @@ const worker: RouteWorker<
 > = {
   run: async ({ input, core, signal, logger }) => {
     logger.warn('Hi from a worker thread!');
+
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 5000);
+    });
     return {
       isWorkerThread,
     };
