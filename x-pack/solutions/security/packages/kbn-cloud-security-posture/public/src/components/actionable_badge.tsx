@@ -8,23 +8,26 @@
 import React, { useState, useRef } from 'react';
 import {
   EuiBadge,
-  EuiToolTip,
   EuiText,
-  copyToClipboard,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiCopy,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { v4 } from 'uuid';
-import { css } from '@emotion/react';
 import { createPortal } from 'react-dom';
+import { css } from '@emotion/react';
+
+const copyItem = i18n.translate('securitySolutionPackages.csp.actionableBadge.copy', {
+  defaultMessage: 'Copy',
+});
 
 export interface MultiValueCellAction {
   iconType: string;
   onClick?: () => void;
   ariaLabel: string;
+  title?: string;
 }
 
 interface ActionableBadgeProps {
@@ -34,12 +37,10 @@ interface ActionableBadgeProps {
 }
 
 export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgeProps) => {
-  const [isTextCopied, setIsTextCopied] = useState(false);
   const [showActions, setShowActions] = useState(false);
-  const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
   const { euiTheme } = useEuiTheme();
-  const buttonRef = useRef<HTMLDivElement>(null);
-  const iconsContainerRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement | null>(null);
+  const iconsContainerRef = useRef<HTMLDivElement | null>(null);
 
   const [buttonPosition, setButtonPosition] = useState({ bottom: 0, left: 0 });
 
@@ -55,23 +56,20 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
     }
   };
 
+  const buttonIconCss = css`
+    color: ${euiTheme.colors.plainLight};
+    inline-size: ${euiTheme.base}px;
+    block-size: ${euiTheme.base}px;
+    svg {
+      width: ${euiTheme.size.m};
+      height: ${euiTheme.size.m};
+  `;
+
   React.useEffect(() => {
     if (showActions) {
       updatePosition();
     }
   }, [showActions]);
-
-  const onCopyClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    copyToClipboard(item);
-
-    if (copiedTextToolTipCleanupIdRef.current) {
-      clearTimeout(copiedTextToolTipCleanupIdRef.current);
-    }
-
-    setIsTextCopied(true);
-    copiedTextToolTipCleanupIdRef.current = setTimeout(() => setIsTextCopied(false), 2000);
-  };
 
   const handleMouseLeave = () => {
     setShowActions(false);
@@ -85,15 +83,16 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
     <EuiFlexGroup
       ref={iconsContainerRef}
       gutterSize="xs"
-      alignItems="center"
+      alignItems="flexEnd"
       onMouseEnter={handleMouseEnter}
+      responsive={false}
       onMouseLeave={handleMouseLeave}
       css={css`
         position: fixed;
-        z-index: 9000;
+        z-index: ${euiTheme.levels.modal};
         background-color: ${euiTheme.colors.primary};
-        border-radius: 4px;
-        padding: 2px;
+        border-radius: ${euiTheme.size.xs};
+        padding: ${euiTheme.size.xxs};
       `}
       style={{
         bottom: buttonPosition.bottom,
@@ -101,38 +100,31 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
       }}
     >
       {actions.map((action, actionIndex) => (
-        <EuiFlexItem grow={false} key={actionIndex}>
+        <EuiFlexItem grow={false} key={`${action.iconType}-${actionIndex}`}>
           <EuiButtonIcon
-            css={css`
-              color: ${euiTheme.colors.vis.euiColorVisCool0};
-            `}
-            size="xs"
+            css={buttonIconCss}
             onClick={action.onClick}
             iconType={action.iconType}
             aria-label={action.ariaLabel}
+            title={action.title}
           />
         </EuiFlexItem>
       ))}
       <EuiFlexItem grow={false}>
-        <EuiToolTip
-          content={
-            isTextCopied
-              ? i18n.translate('securitySolutionPackages.csp.actionableBadge.itemCopied', {
-                  defaultMessage: 'Item copied',
-                })
-              : null
-          }
-        >
-          <EuiButtonIcon
-            css={css`
-              color: ${euiTheme.colors.vis.euiColorVisCool0};
-            `}
-            size="xs"
-            onClick={onCopyClick}
-            iconType="copy"
-            aria-label="Copy to clipboard"
-          />
-        </EuiToolTip>
+        <EuiCopy textToCopy={item}>
+          {(copy) => (
+            <EuiButtonIcon
+              onClick={(event: React.MouseEvent<HTMLAnchorElement>) => {
+                event.stopPropagation();
+                copy();
+              }}
+              iconType="copy"
+              css={buttonIconCss}
+              aria-label={copyItem}
+              title={copyItem}
+            />
+          )}
+        </EuiCopy>
       </EuiFlexItem>
     </EuiFlexGroup>,
     document.body
@@ -151,7 +143,7 @@ export const ActionableBadge = ({ item, index, actions = [] }: ActionableBadgePr
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         color="hollow"
-        key={`${item}-${v4()}`}
+        key={`${item}-${index}`}
         data-test-subj={`multi-value-copy-badge-${index}`}
       >
         <EuiText

@@ -38,6 +38,7 @@ import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 import { EMPTY_VALUE } from '../configurations/findings_flyout/findings_flyout';
+import { AddFieldFilterHandler } from './types';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
@@ -118,9 +119,9 @@ export const LatestVulnerabilitiesTable = ({
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
 
-  const onAddFilter = useCallback(
-    (clickedField: string, values: string | string[], operation: '+' | '-') => {
-      const newFilters = generateFilters(filterManager, clickedField, values, operation, dataView);
+  const onAddFilter = useCallback<AddFieldFilterHandler>(
+    (clickedField, value, operation) => {
+      const newFilters = generateFilters(filterManager, clickedField, value, operation, dataView);
       filterManager.addFilters(newFilters);
       setUrlQuery({
         filters: filterManager.getFilters(),
@@ -129,7 +130,7 @@ export const LatestVulnerabilitiesTable = ({
     [dataView, filterManager, setUrlQuery]
   );
 
-  const renderItem = useCallback(
+  const renderActionableBadge = useCallback(
     (item: string, i: number, field: string, object: CspVulnerabilityFinding) => {
       const references = Array.isArray(object.vulnerability.reference)
         ? object.vulnerability.reference
@@ -142,12 +143,20 @@ export const LatestVulnerabilitiesTable = ({
           ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.addFilter', {
             defaultMessage: 'Add filter',
           }),
+          title: i18n.translate('xpack.csp.latestVulnerabilities.table.filterForTitle', {
+            defaultMessage: 'Filter for this {value}',
+            values: { value: field },
+          }),
         },
         {
           onClick: () => onAddFilter(field, item, '-'),
           iconType: 'minusInCircle',
           ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.removeFilter', {
             defaultMessage: 'Remove filter',
+          }),
+          title: i18n.translate('xpack.csp.latestVulnerabilities.table.filterOutTitle', {
+            defaultMessage: 'Filter out this {value}',
+            values: { value: field },
           }),
         },
         ...(field === 'vulnerability.id' && findReferenceLink(references, item)
@@ -156,11 +165,14 @@ export const LatestVulnerabilitiesTable = ({
                 onClick: () => window.open(findReferenceLink(references, item)!, '_blank'),
                 iconType: 'popout',
                 ariaLabel: i18n.translate(
-                  'xpack.csp.latestVulnerabilities.table.openReferenceURL',
+                  'xpack.csp.latestVulnerabilities.table.openUrlInWindow',
                   {
-                    defaultMessage: 'Open reference URL',
+                    defaultMessage: 'Open URL in window',
                   }
                 ),
+                title: i18n.translate('xpack.csp.latestVulnerabilities.table.openUrlInWindow', {
+                  defaultMessage: 'Open URL in window',
+                }),
               },
             ]
           : []),
@@ -183,7 +195,7 @@ export const LatestVulnerabilitiesTable = ({
         items={value}
         field={field}
         object={finding}
-        renderItem={renderItem}
+        renderItem={renderActionableBadge}
         firstItemRenderer={(item) => <EuiText size="s">{item}</EuiText>}
       />
     );
