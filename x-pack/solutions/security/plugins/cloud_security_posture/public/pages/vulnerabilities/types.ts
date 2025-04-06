@@ -19,3 +19,9 @@ export interface Vector {
   vector: string;
   score: number | undefined;
 }
+
+export type AddFieldFilterHandler = (
+  field: string,
+  value: unknown,
+  type: '+' | '-'
+) => void;

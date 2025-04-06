@@ -6,20 +6,21 @@
  */
 
 import React from 'react';
-import { EuiCopy, EuiIcon } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+export const COPY_ARIA_LABEL = i18n.translate('xpack.csp.clipboard.copy', {
+  defaultMessage: 'Copy',
+});
 
 export const CopyButton: React.FC<{ copyText: string }> = ({ copyText }) => (
   <EuiCopy textToCopy={copyText}>
     {(copy) => (
-      <EuiIcon
-        css={css`
-          :hover {
-            cursor: pointer;
-          }
-        `}
+      <EuiButtonIcon
+        color="text"
+        aria-label={COPY_ARIA_LABEL}
+        iconType="copy"
         onClick={copy}
-        type="copy"
       />
     )}
   </EuiCopy>
