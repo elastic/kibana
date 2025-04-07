@@ -208,7 +208,7 @@ export function StreamDetailLifecycle({
             </EuiFlexItem>
           )}
 
-          {isIlmLifecycle(definition.effective_lifecycle) ? (
+          {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
             <EuiFlexItem grow={3}>
               <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
                 <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />

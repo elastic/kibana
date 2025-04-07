@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { IngestUpsertRequest } from '@kbn/streams-schema';
@@ -194,20 +194,30 @@ export function ControlBar() {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton
-          isLoading={routingAppState.saveInProgress}
-          disabled={routingAppState.saveInProgress || !definition.privileges.manage}
-          onClick={saveOrUpdateChildren}
-          data-test-subj="streamsAppStreamDetailRoutingSaveButton"
+        <EuiToolTip
+          content={
+            !definition.privileges.manage
+              ? i18n.translate('xpack.streams.streamDetailRouting.onlySimulate', {
+                  defaultMessage: "You don't have sufficient privileges to save changes.",
+                })
+              : undefined
+          }
         >
-          {routingAppState.childUnderEdit && routingAppState.childUnderEdit.isNew
-            ? i18n.translate('xpack.streams.streamDetailRouting.add', {
-                defaultMessage: 'Save',
-              })
-            : i18n.translate('xpack.streams.streamDetailRouting.change', {
-                defaultMessage: 'Change routing',
-              })}
-        </EuiButton>
+          <EuiButton
+            isLoading={routingAppState.saveInProgress}
+            disabled={routingAppState.saveInProgress || !definition.privileges.manage}
+            onClick={saveOrUpdateChildren}
+            data-test-subj="streamsAppStreamDetailRoutingSaveButton"
+          >
+            {routingAppState.childUnderEdit && routingAppState.childUnderEdit.isNew
+              ? i18n.translate('xpack.streams.streamDetailRouting.add', {
+                  defaultMessage: 'Save',
+                })
+              : i18n.translate('xpack.streams.streamDetailRouting.change', {
+                  defaultMessage: 'Change routing',
+                })}
+          </EuiButton>
+        </EuiToolTip>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );

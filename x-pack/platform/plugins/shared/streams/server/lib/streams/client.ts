@@ -733,6 +733,7 @@ export class StreamsClient {
             privileges: [
               'read',
               'write',
+              'create',
               'manage',
               'monitor',
               'manage_data_stream_lifecycle',
@@ -749,7 +750,7 @@ export class StreamsClient {
       monitor: privileges.index[name].monitor,
       lifecycle:
         privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
-      simulate: privileges.cluster.read_pipeline,
+      simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
     };
   }
 

@@ -29,6 +29,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiToolTip,
   formatNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -62,17 +63,30 @@ export function RetentionMetadata({
     lifecycleActions.length === 0 ? null : (
       <EuiPopover
         button={
-          <EuiButton
-            data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
-            size="s"
-            fullWidth
-            onClick={toggleMenu}
-            disabled={!definition.privileges.lifecycle}
+          <EuiToolTip
+            content={
+              !definition.privileges.manage
+                ? i18n.translate(
+                    'xpack.streams.entityDetailViewWithoutParams.editDataRetention.insufficientPrivileges',
+                    {
+                      defaultMessage: "You don't have sufficient privileges to change retention.",
+                    }
+                  )
+                : undefined
+            }
           >
-            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
-              defaultMessage: 'Edit data retention',
-            })}
-          </EuiButton>
+            <EuiButton
+              data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
+              size="s"
+              fullWidth
+              onClick={toggleMenu}
+              disabled={!definition.privileges.lifecycle}
+            >
+              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
+                defaultMessage: 'Edit data retention',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         }
         isOpen={isMenuOpen}
         closePopover={closeMenu}

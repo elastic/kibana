@@ -71,6 +71,9 @@ export function StreamDetailEnrichmentContentImpl() {
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamsEnrichmentSelector(
+    (state) => state.context.definition.privileges.manage
+  );
   const isSavingChanges = useStreamsEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
@@ -124,6 +127,7 @@ export function StreamDetailEnrichmentContentImpl() {
           onConfirm={saveChanges}
           isLoading={isSavingChanges}
           disabled={!hasChanges}
+          insufficientPrivileges={!canManage}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -232,7 +236,7 @@ const ProcessorsEditor = React.memo(() => {
             ))}
           </SortableList>
         )}
-        {definition.privileges.manage && <AddProcessorPanel />}
+        {definition.privileges.simulate && <AddProcessorPanel />}
       </EuiPanel>
       <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (
