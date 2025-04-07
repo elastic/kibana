@@ -66,6 +66,7 @@ export function RelatedAlertsTable({ alertData }: Props) {
         columns={columns}
         ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
         minScore={1.5}
+        trackScores={true}
         initialSort={initialSort}
         casesConfiguration={caseConfiguration}
         additionalContext={{

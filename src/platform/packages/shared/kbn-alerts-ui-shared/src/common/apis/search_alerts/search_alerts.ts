@@ -72,6 +72,10 @@ export interface SearchAlertsParams {
    * The minimum score to apply to the query
    */
   minScore?: number;
+  /**
+   * Whether to track the score of the query
+   */
+  trackScores?: boolean;
 }
 
 export interface SearchAlertsResult {
@@ -97,6 +101,7 @@ export const searchAlerts = ({
   pageIndex,
   pageSize,
   minScore,
+  trackScores,
 }: SearchAlertsParams): Promise<SearchAlertsResult> =>
   lastValueFrom(
     data.search
@@ -110,6 +115,7 @@ export const searchAlerts = ({
           sort,
           runtimeMappings,
           minScore,
+          trackScores,
         },
         {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',

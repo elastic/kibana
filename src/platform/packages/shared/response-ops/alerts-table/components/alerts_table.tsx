@@ -171,6 +171,7 @@ const AlertsTableContent = typedForwardRef(
       consumers,
       query,
       minScore,
+      trackScores = false,
       initialSort = DEFAULT_SORT,
       initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
       leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
@@ -279,6 +280,7 @@ const AlertsTableContent = typedForwardRef(
       pageIndex: 0,
       pageSize: initialPageSize,
       minScore,
+      trackScores,
     });
 
     useEffect(() => {
@@ -290,6 +292,7 @@ const AlertsTableContent = typedForwardRef(
         sort,
         runtimeMappings,
         minScore,
+        trackScores,
         // Go back to the first page if the query changes
         pageIndex: !deepEqual(prevQueryParams, {
           ruleTypeIds,
@@ -303,7 +306,7 @@ const AlertsTableContent = typedForwardRef(
           : oldPageIndex,
         pageSize: oldPageSize,
       }));
-    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore]);
+    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore, trackScores]);
 
     const {
       data: alertsData,
