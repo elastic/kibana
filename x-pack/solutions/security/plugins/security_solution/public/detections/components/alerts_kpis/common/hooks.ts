@@ -105,7 +105,7 @@ export const useStackByFields = (useLensCompatibleFields?: boolean) => {
 
   let { browserFields } = useSourcererDataView(sourcererScope);
 
-  const experimentalBrowserFields = useBrowserFields();
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
   if (newDataViewPickerEnabled) {

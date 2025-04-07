@@ -53,8 +53,8 @@ export const useRuleFromTimeline = (setRuleQuery: SetRuleQuery): RuleFromTimelin
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const experimentalSelectedPatterns = useSelectedPatterns();
-  const experimentalBrowserFields = useBrowserFields();
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.timeline);
   const { dataView } = useDataView(SourcererScopeName.timeline);
 
   if (newDataViewPickerEnabled) {

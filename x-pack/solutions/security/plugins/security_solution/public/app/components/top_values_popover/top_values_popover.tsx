@@ -19,12 +19,13 @@ import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_f
 
 export const TopValuesPopover = React.memo(() => {
   const { pathname } = useLocation();
-  let { browserFields, sourcererDataView } = useSourcererDataView(getScopeFromPath(pathname));
+  const sourcererScope = getScopeFromPath(pathname);
+  let { browserFields, sourcererDataView } = useSourcererDataView(sourcererScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataViewSpec } = useDataViewSpec();
-  const experimentalBrowserFields = useBrowserFields();
+  const { dataViewSpec } = useDataViewSpec(sourcererScope);
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
   if (newDataViewPickerEnabled) {
     sourcererDataView = dataViewSpec;

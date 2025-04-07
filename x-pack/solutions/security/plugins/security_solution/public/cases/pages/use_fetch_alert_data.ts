@@ -21,7 +21,7 @@ export const useFetchAlertData = (alertIds: string[]): [boolean, Record<string, 
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
   if (newDataViewPickerEnabled) {
     selectedPatterns = experimentalSelectedPatterns;
   }

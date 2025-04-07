@@ -41,8 +41,8 @@ export const useLensAttributes = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView } = useDataView(scopeId);
+  const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 
   if (newDataViewPickerEnabled) {
     dataViewId = dataView?.id ?? '';

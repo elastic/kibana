@@ -42,7 +42,7 @@ const VisualizationEmbeddableComponent: React.FC<VisualizationEmbeddableProps> =
   let { indicesExist } = useSourcererDataView(lensProps.scopeId);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView } = useDataView();
+  const { dataView } = useDataView(lensProps.scopeId);
 
   if (newDataViewPickerEnabled) {
     indicesExist = !!dataView?.matchedIndices.length;

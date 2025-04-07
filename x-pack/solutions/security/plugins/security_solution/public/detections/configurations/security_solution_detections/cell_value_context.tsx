@@ -41,7 +41,7 @@ export const AlertTableCellContextProvider = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const experimentalBrowserFields = useBrowserFields();
+  const experimentalBrowserFields = useBrowserFields(sourcererScope);
 
   if (newDataViewPickerEnabled) {
     browserFields = experimentalBrowserFields;
