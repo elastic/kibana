@@ -124,7 +124,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
       }
 
-      it('and eventually succeeds', async () => {
+      it('eventually succeeds', async () => {
         addElasticsearchMock({ numberOfMocks: 3 });
 
         const acquired = await lockManager.acquire();
