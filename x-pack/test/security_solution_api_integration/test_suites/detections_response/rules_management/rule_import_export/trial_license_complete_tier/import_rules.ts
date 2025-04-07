@@ -11,7 +11,10 @@ import { range } from 'lodash';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_IMPORT_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type {
+  RuleAction,
+  RuleToImport,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   getImportExceptionsListItemSchemaMock,
   getImportExceptionsListSchemaMock,
@@ -31,18 +34,7 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 import { createConnector } from '../../../utils/connectors';
 
-const getBaseRuleWithActions = (
-  actions: RuleAction[] = [
-    {
-      group: 'default',
-      id: 'default-id',
-      params: {
-        message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
-      },
-      action_type_id: '.slack',
-    },
-  ]
-) => ({
+const getRuleImportWithActions = (actions: RuleAction[]): RuleToImport => ({
   id: '53aad690-544e-11ec-a349-11361cc441c4',
   updated_at: '2021-12-03T15:33:13.271Z',
   updated_by: 'elastic',
@@ -90,7 +82,7 @@ const getBaseRuleWithActions = (
 });
 
 const getImportRuleBuffer = (connectorId: string) => {
-  const rule1 = getBaseRuleWithActions([
+  const rule1 = getRuleImportWithActions([
     {
       group: 'default',
       id: connectorId,
@@ -105,7 +97,7 @@ const getImportRuleBuffer = (connectorId: string) => {
   return Buffer.from(ndjson);
 };
 const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
-  const rule1 = getBaseRuleWithActions([
+  const rule1 = getRuleImportWithActions([
     {
       group: 'default',
       id: connectorId,

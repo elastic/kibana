@@ -26,7 +26,7 @@ import {
 } from '../../../../routes/utils';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { importRuleActionConnectors } from '../../../logic/import/action_connectors/import_rule_action_connectors';
-import { checkRuleActions } from '../../../logic/import/action_connectors/check_rule_actions';
+import { validateRuleActions } from '../../../logic/import/action_connectors/validate_rule_actions';
 import { createRuleSourceImporter } from '../../../logic/import/rule_source_importer';
 import { importRules } from '../../../logic/import/import_rules';
 
@@ -124,8 +124,10 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             maxExceptionsImportSize: objectLimit,
           });
           // report on duplicate rules
-          const [duplicateIdErrors, parsedObjectsWithoutDuplicateErrors] =
-            getTupleDuplicateErrorsAndUniqueRules(rules, request.query.overwrite);
+          const [duplicateIdErrors, rulesToImportOrErrors] = getTupleDuplicateErrorsAndUniqueRules(
+            rules,
+            request.query.overwrite
+          );
 
           // import actions-connectors
           const {
@@ -140,8 +142,8 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             overwrite: request.query.overwrite_action_connectors,
           });
 
-          const rulesAndErrors = await migrateLegacyActionsIds(
-            parsedObjectsWithoutDuplicateErrors,
+          const migratedRulesToImportOrErrors = await migrateLegacyActionsIds(
+            rulesToImportOrErrors,
             actionSOClient,
             actionsClient
           );
@@ -153,12 +155,15 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             prebuiltRuleObjectsClient: createPrebuiltRuleObjectsClient(rulesClient),
           });
 
-          const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, rulesAndErrors);
+          const [parsedRules, parsedRuleErrors] = partition(
+            isRuleToImport,
+            migratedRulesToImportOrErrors
+          );
 
           // After importing the actions and migrating action IDs on rules to import,
           // validate that all actions referenced by rules exist
           // Filter out rules that reference non-existent actions
-          const { validatedActionRules, missingActionErrors } = await checkRuleActions({
+          const { validatedActionRules, missingActionErrors } = await validateRuleActions({
             actionsClient,
             rules: parsedRules,
           });
