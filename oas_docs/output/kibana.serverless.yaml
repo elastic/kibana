@@ -61152,6 +61152,13 @@ components:
         '@timestamp':
           format: date-time
           type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevel'
+          required:
+            - criticality
         entity:
           type: object
           properties:
