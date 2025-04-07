@@ -467,7 +467,6 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   createdSignalsCount: createdSignals.length,
                   suppressedAlertsCount: runResult.suppressedAlertsCount,
                   errors: result.errors.concat(runResult.errors),
-                  lastLookbackDate: runResult.lastLookBackDate,
                   searchAfterTimes: result.searchAfterTimes.concat(runResult.searchAfterTimes),
                   state: runResult.state,
                   success: result.success && runResult.success,

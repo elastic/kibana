@@ -14,6 +14,7 @@ import { useBreakpoints } from './use_breakpoints';
 const wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
   <EuiProvider
     theme={EuiThemeAmsterdam}
+    highContrastMode={false}
     modify={{
       // set in apm/public/application/index.tsx
       breakpoint: {

@@ -37,7 +37,7 @@ export default function (providerContext: FtrProviderContext) {
             await cisIntegration.inputUniqueIntegrationName();
             await pageObjects.header.waitUntilLoadingHasFinished();
             await cisIntegration.clickSaveButton();
-            await pageObjects.header.waitUntilLoadingHasFinished();
+            await cisIntegration.waitUntilLaunchCloudFormationButtonAppears();
             expect(
               (await cisIntegration.getUrlOnPostInstallModal()) ===
                 'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'

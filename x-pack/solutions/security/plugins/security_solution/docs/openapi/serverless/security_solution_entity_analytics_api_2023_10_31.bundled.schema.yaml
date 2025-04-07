@@ -1072,6 +1072,16 @@ components:
           type: integer
         error:
           type: object
+          properties:
+            action:
+              enum:
+                - init
+              type: string
+            message:
+              type: string
+          required:
+            - message
+            - action
         fieldHistoryLength:
           type: integer
         filter:

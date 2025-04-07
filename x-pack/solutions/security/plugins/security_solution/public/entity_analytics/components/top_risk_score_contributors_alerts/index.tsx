@@ -9,10 +9,14 @@ import React, { useCallback, useMemo } from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import {
+  defaultGroupingOptions,
+  defaultGroupStatsAggregations,
+  defaultGroupStatsRenderer,
+  defaultGroupTitleRenderers,
+} from '../../../detections/components/alerts_table/grouping_settings';
 import { HeaderSection } from '../../../common/components/header_section';
-
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
 import type { EntityRiskScore } from '../../../../common/search_strategy';
@@ -95,6 +99,16 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
     [inputFilters, filters]
   );
 
+  const defaultFilters = useMemo(() => [...inputFilters, ...filters], [filters, inputFilters]);
+
+  const accordionExtraActionGroupStats = useMemo(
+    () => ({
+      aggregations: defaultGroupStatsAggregations,
+      renderer: defaultGroupStatsRenderer,
+    }),
+    []
+  );
+
   return (
     <EuiPanel hasBorder data-test-subj="topRiskScoreContributorsAlerts">
       <EuiFlexGroup gutterSize={'none'}>
@@ -117,7 +131,10 @@ export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
         >
           <EuiFlexItem grow={1}>
             <GroupedAlertsTable
-              defaultFilters={[...inputFilters, ...filters]}
+              accordionButtonContent={defaultGroupTitleRenderers}
+              accordionExtraActionGroupStats={accordionExtraActionGroupStats}
+              defaultFilters={defaultFilters}
+              defaultGroupingOptions={defaultGroupingOptions}
               from={from}
               globalFilters={filters}
               globalQuery={query}
