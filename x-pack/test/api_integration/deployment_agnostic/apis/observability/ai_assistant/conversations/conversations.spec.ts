@@ -8,39 +8,16 @@
 import expect from '@kbn/expect';
 import { merge, omit } from 'lodash';
 import {
-  type ConversationCreateRequest,
   type ConversationUpdateRequest,
-  MessageRole,
   Conversation,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { SupertestReturnType } from '../../../../services/observability_ai_assistant_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import { clearConversations } from '../utils/conversation';
+import { clearConversations, conversationCreate, createConversation } from '../utils/conversation';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-
-  const conversationCreate: ConversationCreateRequest = {
-    '@timestamp': new Date().toISOString(),
-    conversation: {
-      title: 'My title',
-    },
-    labels: {},
-    numeric_labels: {},
-    systemMessage: 'this is a system message',
-    messages: [
-      {
-        '@timestamp': new Date().toISOString(),
-        message: {
-          role: MessageRole.User,
-          content: 'My message',
-        },
-      },
-    ],
-    public: false,
-    archived: false,
-  };
 
   const conversationUpdate: ConversationUpdateRequest = merge({}, conversationCreate, {
     conversation: {
@@ -93,15 +70,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let createResponse: Awaited<
         SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
       >;
+
       before(async () => {
-        createResponse = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/conversation',
-          params: {
-            body: {
-              conversation: conversationCreate,
-            },
-          },
-        });
+        createResponse = await createConversation({ observabilityAIAssistantAPIClient });
         expect(createResponse.status).to.be(200);
       });
 
@@ -586,15 +557,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         let createResponse: Awaited<
           SupertestReturnType<'POST /internal/observability_ai_assistant/conversation'>
         >;
+
         before(async () => {
-          createResponse = await observabilityAIAssistantAPIClient.editor({
-            endpoint: 'POST /internal/observability_ai_assistant/conversation',
-            params: {
-              body: {
-                conversation: conversationCreate,
-              },
-            },
-          });
+          createResponse = await createConversation({ observabilityAIAssistantAPIClient });
           expect(createResponse.status).to.be(200);
         });
 
@@ -611,13 +576,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
 
         it('POST /internal/observability_ai_assistant/conversation', async () => {
-          const { status } = await observabilityAIAssistantAPIClient.viewer({
-            endpoint: 'POST /internal/observability_ai_assistant/conversation',
-            params: {
-              body: {
-                conversation: conversationCreate,
-              },
-            },
+          const { status } = await createConversation({
+            observabilityAIAssistantAPIClient,
+            user: 'viewer',
           });
 
           expect(status).to.be(403);
@@ -679,14 +640,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         'PATCH /internal/observability_ai_assistant/conversation/{conversationId}';
 
       before(async () => {
-        const { status, body } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/conversation',
-          params: {
-            body: {
-              conversation: conversationCreate,
-            },
-          },
-        });
+        const { status, body } = await createConversation({ observabilityAIAssistantAPIClient });
 
         expect(status).to.be(200);
         createdConversationId = body.conversation.id;
@@ -754,14 +708,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       before(async () => {
         // Create a conversation to delete
-        const { status, body } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/conversation',
-          params: {
-            body: {
-              conversation: conversationCreate,
-            },
-          },
-        });
+        const { status, body } = await createConversation({ observabilityAIAssistantAPIClient });
 
         expect(status).to.be(200);
         createdConversationId = body.conversation.id;
@@ -790,15 +737,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('does not allow a different user (admin) to delete a conversation they do not own', async () => {
         // Create another conversation (editor)
-        const { body } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/conversation',
-          params: {
-            body: {
-              conversation: conversationCreate,
-            },
-          },
-        });
-
+        const { body } = await createConversation({ observabilityAIAssistantAPIClient });
         const unauthorizedConversationId = body.conversation.id;
 
         // try deleting as an admin
@@ -827,13 +766,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let createdConversationId: string;
 
       before(async () => {
-        const { status, body } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/conversation',
-          params: {
-            body: {
-              conversation: conversationCreate,
-            },
-          },
+        const { status, body } = await createConversation({
+          observabilityAIAssistantAPIClient,
+          isPublic: true,
         });
 
         expect(status).to.be(200);
@@ -868,6 +803,18 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(unarchiveResponse.status).to.be(200);
         expect(unarchiveResponse.body.archived).to.be(false);
+      });
+
+      it('does not allow a different user (admin) to archive a conversation they do not own', async () => {
+        const updateResponse = await observabilityAIAssistantAPIClient.admin({
+          endpoint: 'PATCH /internal/observability_ai_assistant/conversation/{conversationId}',
+          params: {
+            path: { conversationId: createdConversationId },
+            body: { archived: true },
+          },
+        });
+
+        expect(updateResponse.status).to.be(403);
       });
 
       it('returns 404 when trying to archive a non-existing conversation', async () => {
