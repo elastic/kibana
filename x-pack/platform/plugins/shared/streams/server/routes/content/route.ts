@@ -8,6 +8,7 @@
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
 import { createListStream } from '@kbn/utils';
+import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { generateArchive, parseArchive } from '../../lib/content';
@@ -75,6 +76,7 @@ const importContentRoute = createServerRoute({
     description: 'Links content objects to a stream.',
     body: {
       accepts: 'multipart/form-data',
+      maxBytes: 2000000,
       output: 'stream',
     },
   },
@@ -101,6 +103,12 @@ const importContentRoute = createServerRoute({
     const contentPack = await parseArchive(params.body.content);
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
+
+    await installManagedIndexPattern({
+      savedObjectsClient: soClient,
+      savedObjectsImporter: importer,
+    });
+
     const { successResults, errors } = await importer.import({
       readStream: createListStream(
         contentPack.entries.filter((entry) => entry.type === 'dashboard')

@@ -8,13 +8,11 @@
 import YAML from 'yaml';
 import {
   ContentPack,
-  ContentPackDashboard,
   ContentPackEntry,
   ContentPackManifest,
   contentPackManifestSchema,
 } from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
-import { compact } from 'lodash';
 import path from 'path';
 import { Readable } from 'stream';
 import { createConcatStream, createPromiseFromStreams } from '@kbn/utils';
@@ -33,44 +31,48 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
     archive.on('error', (error) => reject(error));
   });
 
-  const manifestFile = zip.getEntry('manifest.yml');
-  if (!manifestFile) {
+  let manifestEntry: AdmZip.IZipEntry | undefined;
+  const entries: ContentPackEntry[] = [];
+  zip.forEach((entry) => {
+    const filepath = path.join(...entry.entryName.split(path.sep).slice(1));
+    if (filepath === 'manifest.yml') {
+      manifestEntry = entry;
+    }
+
+    if (path.dirname(filepath) === path.join('kibana', 'dashboard')) {
+      entries.push(JSON.parse(entry.getData().toString()));
+    }
+  });
+
+  if (!manifestEntry) {
     throw new Error('Missing content pack manifest');
   }
 
   const { data: manifestData, success } = contentPackManifestSchema.safeParse(
-    YAML.parse(manifestFile.getData().toString())
+    YAML.parse(manifestEntry.getData().toString())
   );
   if (!success) {
     throw new Error('Invalid content pack manifest format');
   }
-
-  const entries = compact(
-    zip.getEntries().map((entry) => {
-      if (path.dirname(entry.entryName) === 'kibana/dashboard') {
-        const data: ContentPackDashboard = JSON.parse(entry.getData().toString());
-        return data;
-      }
-    })
-  );
 
   return { ...manifestData, entries };
 }
 
 export async function generateArchive(manifest: ContentPackManifest, readStream: Readable) {
   const zip = new AdmZip();
+  const rootDir = `${manifest.name}-${manifest.version}`;
   const objects: any[] = await createPromiseFromStreams([readStream, createConcatStream([])]);
 
   objects.forEach((object: ContentPackEntry) => {
     if (object.type === 'dashboard') {
       zip.addFile(
-        `kibana/dashboard/${object.id}.json`,
+        path.join(rootDir, 'kibana', 'dashboard', `${object.id}.json`),
         Buffer.from(JSON.stringify(object, null, 2))
       );
     }
   });
 
-  zip.addFile('manifest.yml', Buffer.from(YAML.stringify(manifest)));
+  zip.addFile(path.join(rootDir, 'manifest.yml'), Buffer.from(YAML.stringify(manifest)));
 
   return zip.toBuffer();
 }

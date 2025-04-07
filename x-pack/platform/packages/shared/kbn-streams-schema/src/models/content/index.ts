@@ -12,6 +12,7 @@ import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_m
 interface ContentPackManifest {
   name: string;
   description: string;
+  version: string;
 }
 
 const contentPackManifestSchema: z.Schema<ContentPackManifest> = z.object({
