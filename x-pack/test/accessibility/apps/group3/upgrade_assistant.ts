@@ -21,6 +21,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Upgrade Assistant Accessibility', () => {
+    // Only run this test in 8 as the deprecation we are testing is only available in 8
+    this.onlyEsVersion('8');
+
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
 
