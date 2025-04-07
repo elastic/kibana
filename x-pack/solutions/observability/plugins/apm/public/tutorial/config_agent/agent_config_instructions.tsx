@@ -67,7 +67,7 @@ export function AgentConfigInstructions({
         copyAriaLabel={i18n.translate(
           'xpack.apm.tutorial.apmAgents.agentConfigurationInstructions.copyAriaLabel',
           {
-            defaultMessage: 'Click to copy {variantId} agent configuration code',
+            defaultMessage: 'Copy {variantId} agent configuration code',
             values: { variantId },
           }
         )}
