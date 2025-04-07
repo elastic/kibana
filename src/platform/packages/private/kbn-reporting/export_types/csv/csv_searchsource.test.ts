@@ -84,9 +84,9 @@ beforeEach(() => {
 });
 
 test('gets the csv content from job parameters', async () => {
-  const payload = await mockCsvSearchSourceExportType.runTask(
-    'cool-job-id',
-    {
+  const payload = await mockCsvSearchSourceExportType.runTask({
+    jobId: 'cool-job-id',
+    payload: {
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',
       searchSource: {},
@@ -95,9 +95,9 @@ test('gets the csv content from job parameters', async () => {
       version: '7.13.0',
     },
     taskInstanceFields,
-    new CancellationToken(),
-    stream
-  );
+    cancellationToken: new CancellationToken(),
+    stream,
+  });
 
   expect(payload).toMatchInlineSnapshot(`
         Object {
@@ -110,9 +110,9 @@ test('gets the csv content from job parameters', async () => {
 test('uses the provided logger', async () => {
   const logSpy = jest.spyOn(mockLogger, 'get');
 
-  await mockCsvSearchSourceExportType.runTask(
-    'cool-job-id',
-    {
+  await mockCsvSearchSourceExportType.runTask({
+    jobId: 'cool-job-id',
+    payload: {
       headers: encryptedHeaders,
       browserTimezone: 'US/Alaska',
       searchSource: {},
@@ -121,9 +121,9 @@ test('uses the provided logger', async () => {
       version: '7.13.0',
     },
     taskInstanceFields,
-    new CancellationToken(),
-    stream
-  );
+    cancellationToken: new CancellationToken(),
+    stream,
+  });
 
   expect(logSpy).toHaveBeenCalledWith('execute-job:cool-job-id');
 });

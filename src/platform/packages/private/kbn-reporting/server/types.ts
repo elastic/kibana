@@ -36,13 +36,18 @@ export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload
   req: KibanaRequest
 ) => Promise<Omit<JobPayloadType, 'headers' | 'spaceId'>>;
 
+export interface RunTaskOpts<TaskPayloadType = BasePayload> {
+  jobId: string;
+  payload: TaskPayloadType;
+  fakeRequest?: KibanaRequest;
+  taskInstanceFields: TaskInstanceFields;
+  cancellationToken: CancellationToken;
+  stream: Writable;
+}
+
 // standard type for run task function of any ExportType implementation
 export type RunTaskFn<TaskPayloadType = BasePayload> = (
-  jobId: string,
-  payload: TaskPayloadType,
-  taskInstanceFields: TaskInstanceFields,
-  cancellationToken: CancellationToken,
-  stream: Writable
+  opts: RunTaskOpts<TaskPayloadType>
 ) => Promise<TaskRunResult>;
 
 export interface TimeRangeParams {

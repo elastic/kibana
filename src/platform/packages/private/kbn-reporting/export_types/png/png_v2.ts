@@ -19,11 +19,9 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { Writable } from 'stream';
 
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -31,7 +29,7 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
-import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
   JobParamsPNGV2,
   PNG_JOB_TYPE_V2,
@@ -43,6 +41,7 @@ import {
   ExportType,
   getFullRedirectAppUrl,
   REPORTING_TRANSACTION_TYPE,
+  RunTaskOpts,
 } from '@kbn/reporting-server';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
@@ -86,13 +85,14 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
    * @param cancellationToken
    * @param stream
    */
-  public runTask = (
-    jobId: string,
-    payload: TaskPayloadPNGV2,
-    taskInstanceFields: TaskInstanceFields,
-    cancellationToken: CancellationToken,
-    stream: Writable
-  ) => {
+  public runTask = ({
+    jobId,
+    payload,
+    fakeRequest: requestFromTask,
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  }: RunTaskOpts<TaskPayloadPNGV2>) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
@@ -100,8 +100,19 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
     const { encryptionKey } = this.config;
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
-      mergeMap((headers) => {
+      mergeMap(async () => {
+        let requestToUse = requestFromTask;
+        if (!requestToUse) {
+          const headers = await decryptJobHeaders(encryptionKey, payload.headers, logger);
+          requestToUse = this.getFakeRequest(headers, payload.spaceId, logger);
+          logger.info(`Using fakeRequest from headers for job ${jobId}`);
+        } else {
+          logger.info(`Using fakeRequest from taskInstance for job ${jobId}`);
+        }
+        logger.info(`request headers ${JSON.stringify(requestToUse.headers)}`);
+        return requestToUse;
+      }),
+      mergeMap((requestToUse) => {
         const url = getFullRedirectAppUrl(
           this.config,
           this.getServerInfo(),
@@ -126,8 +137,8 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           .screenshotting!.getScreenshots({
             format: 'png',
             browserTimezone: payload.browserTimezone,
-            headers,
             layout,
+            request: requestToUse,
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
             taskInstanceFields,
             logger,

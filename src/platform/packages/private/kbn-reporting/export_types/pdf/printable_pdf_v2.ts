@@ -10,11 +10,8 @@
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
-import { Writable } from 'stream';
 
-import { Headers } from '@kbn/core/server';
 import {
-  CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
@@ -22,8 +19,8 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
 } from '@kbn/reporting-common';
-import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
-import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
+import { REPORTING_TRANSACTION_TYPE, RunTaskOpts } from '@kbn/reporting-server';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import {
   JobParamsPDFV2,
@@ -76,13 +73,14 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
    * @param cancellationToken
    * @param stream
    */
-  public runTask = (
-    jobId: string,
-    payload: TaskPayloadPDFV2,
-    taskInstanceFields: TaskInstanceFields,
-    cancellationToken: CancellationToken,
-    stream: Writable
-  ) => {
+  public runTask = ({
+    jobId,
+    payload,
+    fakeRequest: requestFromTask,
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  }: RunTaskOpts<TaskPayloadPDFV2>) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
@@ -90,13 +88,21 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     const { encryptionKey } = this.config;
 
     const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
-      mergeMap(async (headers: Headers) => {
-        const fakeRequest = this.getFakeRequest(headers, payload.spaceId, logger);
-        const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-        return await getCustomLogo(uiSettingsClient, headers);
+      mergeMap(async () => {
+        let requestToUse = requestFromTask;
+        if (!requestToUse) {
+          const headers = await decryptJobHeaders(encryptionKey, payload.headers, logger);
+          requestToUse = this.getFakeRequest(headers, payload.spaceId, logger);
+          logger.info(`Using fakeRequest from headers for job ${jobId}`);
+        } else {
+          logger.info(`Using fakeRequest from taskInstance for job ${jobId}`);
+        }
+        logger.info(`request headers ${JSON.stringify(requestToUse.headers)}`);
+        const uiSettingsClient = await this.getUiSettingsClient(requestToUse);
+        const logo = await getCustomLogo(uiSettingsClient);
+        return { logo, requestToUse };
       }),
-      mergeMap(({ logo, headers }) => {
+      mergeMap(({ logo, requestToUse }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
 
         apmGetAssets?.end();
@@ -124,8 +130,8 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
             format: 'pdf',
             title,
             logo,
+            request: requestToUse,
             browserTimezone,
-            headers,
             layout,
             urls: urls.map((url) =>
               typeof url === 'string'

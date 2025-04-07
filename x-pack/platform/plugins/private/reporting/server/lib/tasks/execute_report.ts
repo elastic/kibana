@@ -13,7 +13,7 @@ import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   CancellationToken,
   KibanaShuttingDownError,
@@ -59,6 +59,13 @@ import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
+interface PerformJobOpts {
+  task: ReportTaskParams;
+  taskInstanceFields: TaskInstanceFields;
+  fakeRequest?: KibanaRequest;
+  cancellationToken: CancellationToken;
+  stream: Writable;
+}
 interface ReportingExecuteTaskInstance {
   state: object;
   taskType: string;
@@ -327,12 +334,13 @@ export class ExecuteReportTask implements ReportingTask {
     return docOutput;
   }
 
-  private async _performJob(
-    task: ReportTaskParams,
-    taskInstanceFields: TaskInstanceFields,
-    cancellationToken: CancellationToken,
-    stream: Writable
-  ): Promise<TaskRunResult> {
+  private async _performJob({
+    task,
+    fakeRequest,
+    taskInstanceFields,
+    cancellationToken,
+    stream,
+  }: PerformJobOpts): Promise<TaskRunResult> {
     const exportType = this.exportTypesRegistry.getByJobType(task.jobtype);
 
     if (!exportType) {
@@ -343,7 +351,14 @@ export class ExecuteReportTask implements ReportingTask {
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
       Rx.from(
-        exportType.runTask(task.id, task.payload, taskInstanceFields, cancellationToken, stream)
+        exportType.runTask({
+          jobId: task.id,
+          payload: task.payload,
+          fakeRequest,
+          taskInstanceFields,
+          cancellationToken,
+          stream,
+        })
       ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
     );
   }
@@ -409,7 +424,7 @@ export class ExecuteReportTask implements ReportingTask {
    */
   private getTaskRunner(): TaskRunCreatorFunction {
     // Keep a separate local stack for each task run
-    return ({ taskInstance }: RunContext) => {
+    return ({ taskInstance, fakeRequest }: RunContext) => {
       let jobId: string;
       const cancellationToken = new CancellationToken();
       const {
@@ -496,12 +511,13 @@ export class ExecuteReportTask implements ReportingTask {
             eventLog.logExecutionStart();
 
             const output = await Promise.race<TaskRunResult>([
-              this._performJob(
+              this._performJob({
                 task,
-                { retryAt: taskRetryAt, startedAt: taskStartedAt },
+                fakeRequest,
+                taskInstanceFields: { retryAt: taskRetryAt, startedAt: taskStartedAt },
                 cancellationToken,
-                stream
-              ),
+                stream,
+              }),
               this.throwIfKibanaShutsDown(),
             ]);
 
@@ -583,14 +599,14 @@ export class ExecuteReportTask implements ReportingTask {
     };
   }
 
-  public async scheduleTask(params: ReportTaskParams) {
+  public async scheduleTask(request: KibanaRequest, params: ReportTaskParams) {
     const taskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params,
     };
 
-    return await this.getTaskManagerStart().schedule(taskInstance);
+    return await this.getTaskManagerStart().schedule(taskInstance, { request });
   }
 
   public getStatus() {

@@ -75,9 +75,9 @@ beforeEach(async () => {
 
 test(`passes browserTimezone to getScreenshots`, async () => {
   const browserTimezone = 'UTC';
-  await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    payload: getBasePayload({
       forceNow: 'test',
       layout: { dimensions: {} },
       locatorParams: [],
@@ -86,8 +86,8 @@ test(`passes browserTimezone to getScreenshots`, async () => {
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(getScreenshotsSpy).toHaveBeenCalledWith(
     expect.objectContaining({ browserTimezone: 'UTC' })
@@ -95,32 +95,32 @@ test(`passes browserTimezone to getScreenshots`, async () => {
 });
 
 test(`returns content_type of application/png`, async () => {
-  const { content_type: contentType } = await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  const { content_type: contentType } = await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
   expect(contentType).toBe('image/png');
 });
 
 test(`returns buffer content base64 encoded`, async () => {
-  await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(content).toEqual(testContent);
 });
@@ -128,17 +128,17 @@ test(`returns buffer content base64 encoded`, async () => {
 test(`screenshotting plugin uses the logger provided by the PNG export-type`, async () => {
   const logSpy = jest.spyOn(mockLogger, 'get');
 
-  await mockPngExportType.runTask(
-    'pngJobId',
-    getBasePayload({
+  await mockPngExportType.runTask({
+    jobId: 'pngJobId',
+    payload: getBasePayload({
       layout: { dimensions: {} },
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });

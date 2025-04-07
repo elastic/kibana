@@ -74,17 +74,17 @@ test(`passes browserTimezone to getScreenshots`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
   const browserTimezone = 'UTC';
-  await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({
+  await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    payload: getBasePayload({
       browserTimezone,
       headers: encryptedHeaders,
       objects: [{ relativeUrl: '/app/kibana#/something' }],
     }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(getScreenshotsSpy).toHaveBeenCalledWith(
     expect.objectContaining({ browserTimezone: 'UTC' })
@@ -94,25 +94,25 @@ test(`passes browserTimezone to getScreenshots`, async () => {
 test(`returns content_type of application/pdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
-  const { content_type: contentType } = await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({ objects: [], headers: encryptedHeaders }),
+  const { content_type: contentType } = await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
   expect(contentType).toBe('application/pdf');
 });
 
 test(`returns buffer content base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({ objects: [], headers: encryptedHeaders }),
+  await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(content).toEqual(testContent);
 });
@@ -121,13 +121,13 @@ test(`screenshotting plugin uses the logger provided by the PDF export-type`, as
   const logSpy = jest.spyOn(mockLogger, 'get');
 
   const encryptedHeaders = await encryptHeaders({});
-  await mockPdfExportType.runTask(
-    'pdfJobId',
-    getBasePayload({ objects: [], headers: encryptedHeaders }),
+  await mockPdfExportType.runTask({
+    jobId: 'pdfJobId',
+    payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
-    stream
-  );
+    stream,
+  });
 
   expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });
