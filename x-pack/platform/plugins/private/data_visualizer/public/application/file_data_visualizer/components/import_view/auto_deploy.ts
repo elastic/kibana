@@ -8,6 +8,8 @@
 import type {
   InferenceInferenceEndpointInfo,
   InferenceCompletionResponse,
+  InferenceSparseEmbeddingResult,
+  InferenceTextEmbeddingResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpSetup } from '@kbn/core/public';
 
@@ -43,14 +45,13 @@ export class AutoDeploy {
   }
 
   private async infer() {
-    return this.http.fetch<InferenceCompletionResponse>(
-      `/internal/data_visualizer/inference/${this.inferenceId}`,
-      {
-        method: 'POST',
-        version: '1',
-        body: JSON.stringify({ input: '' }),
-      }
-    );
+    return this.http.fetch<
+      InferenceCompletionResponse | InferenceSparseEmbeddingResult | InferenceTextEmbeddingResponse
+    >(`/internal/data_visualizer/inference/${this.inferenceId}`, {
+      method: 'POST',
+      version: '1',
+      body: JSON.stringify({ input: '' }),
+    });
   }
 
   private async isDeployed() {
