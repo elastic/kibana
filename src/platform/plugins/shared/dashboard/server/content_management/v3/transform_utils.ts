@@ -21,10 +21,10 @@ import {
   transformOptionsOut,
   transformPanelsIn,
   transformPanelsOut,
+  transformSectionsIn,
   transformSearchSourceIn,
   transformSearchSourceOut,
 } from './transforms';
-import { transformSectionsIn } from './transforms/in/sections_in_transforms';
 import type {
   DashboardAttributes,
   DashboardGetOut,
