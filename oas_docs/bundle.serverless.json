@@ -52667,22 +52667,24 @@
           "content": {
             "application/json": {
               "schema": {
-                "anyOf": [
-                  {
-                    "additionalProperties": false,
-                    "properties": {},
-                    "type": "object"
+                "additionalProperties": false,
+                "properties": {
+                  "description": {
+                    "type": "string"
                   },
-                  {
-                    "enum": [
-                      "null"
-                    ],
-                    "nullable": true
+                  "name": {
+                    "type": "string"
                   },
-                  {
-                    "not": {}
+                  "version": {
+                    "type": "string"
                   }
-                ]
+                },
+                "required": [
+                  "name",
+                  "description",
+                  "version"
+                ],
+                "type": "object"
               }
             }
           }
