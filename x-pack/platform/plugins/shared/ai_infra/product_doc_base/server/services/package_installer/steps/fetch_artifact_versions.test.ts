@@ -44,7 +44,7 @@ const createResponse = ({
 };
 
 const artifactRepositoryUrl = 'https://lost.com';
-const localArtifactRepositoryUrl = 'file://usr/local/file.xml';
+const localArtifactRepositoryUrl = 'file://usr/local/local_artifacts';
 
 const expectVersions = (
   versions: Partial<Record<ProductName, string[]>>
@@ -97,6 +97,11 @@ describe('fetchArtifactVersions', () => {
     const result = await fetchArtifactVersions({
       artifactRepositoryUrl: localArtifactRepositoryUrl,
     });
+
+    expect(fs.readFile as unknown as jest.Mock).toHaveBeenCalledWith(
+      '/local/local_artifacts/index.xml',
+      expect.any(Function)
+    );
 
     expect(result).toEqual({
       elasticsearch: ['8.16'],

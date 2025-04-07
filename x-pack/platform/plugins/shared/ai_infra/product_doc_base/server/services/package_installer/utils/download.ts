@@ -18,12 +18,13 @@ export const downloadToDisk = async (fileUrl: string, filePath: string) => {
   let readStream: ReadStream | NodeJS.ReadableStream;
 
   const parsedUrl = new URL(fileUrl);
-  const path = resolveLocalArtifactsPath(parsedUrl);
 
   if (parsedUrl.protocol === 'file:') {
+    const path = resolveLocalArtifactsPath(parsedUrl);
     readStream = createReadStream(path);
   } else {
     const res = await fetch(fileUrl);
+
     readStream = res.body;
   }
 
