@@ -196,6 +196,11 @@ describe('createInitialState', () => {
               },
               Object {
                 "term": Object {
+                  "type": "investigation",
+                },
+              },
+              Object {
+                "term": Object {
                   "type": "maps-telemetry",
                 },
               },
