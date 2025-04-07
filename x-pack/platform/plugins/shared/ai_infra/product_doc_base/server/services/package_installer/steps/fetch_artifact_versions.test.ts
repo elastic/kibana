@@ -62,6 +62,7 @@ const expectVersions = (
 describe('fetchArtifactVersions', () => {
   beforeEach(() => {
     fetchMock.mockReset();
+    jest.clearAllMocks();
   });
 
   const mockResponse = (responseText: string) => {
@@ -108,6 +109,32 @@ describe('fetchArtifactVersions', () => {
       kibana: ['8.16'],
       observability: [],
       security: [],
+    });
+  });
+
+  it('support win32 env', async () => {
+    const artifactNames = [
+      getArtifactName({ productName: 'kibana', productVersion: '8.16' }),
+      getArtifactName({ productName: 'elasticsearch', productVersion: '8.16' }),
+    ];
+    mockFileResponse(createResponse({ artifactNames }));
+
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, 'platform', {
+      value: 'win32',
+    });
+
+    await fetchArtifactVersions({
+      artifactRepositoryUrl: 'file:///C:/path/local_artifacts',
+    });
+
+    expect(fs.readFile as unknown as jest.Mock).toHaveBeenCalledWith(
+      'C:/path/local_artifacts/index.xml',
+      expect.any(Function)
+    );
+
+    Object.defineProperty(process, 'platform', {
+      value: originalPlatform,
     });
   });
 
