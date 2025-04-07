@@ -137,7 +137,6 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             errors: actionConnectorErrors,
           } = await importRuleActionConnectors({
             actionConnectors,
-            actionsClient,
             actionsImporter,
             overwrite: request.query.overwrite_action_connectors,
           });
