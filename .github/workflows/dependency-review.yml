@@ -31,7 +31,7 @@ jobs:
 
       - name: Run Dependency Analysis Script
         id: analysis
-        run: node .github/scripts/check_dependency_health.mjs
+        run: node .github/scripts/check_dependency_health.js
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO_OWNER: ${{ github.repository_owner }}
