@@ -972,28 +972,8 @@
         }
       },
       "sections": {
-        "properties": {
-          "collapsed": {
-            "doc_values": false,
-            "index": false,
-            "type": "boolean"
-          },
-          "id": {
-            "doc_values": false,
-            "index": false,
-            "type": "keyword"
-          },
-          "order": {
-            "doc_values": false,
-            "index": false,
-            "type": "integer"
-          },
-          "title": {
-            "doc_values": false,
-            "index": false,
-            "type": "keyword"
-          }
-        }
+        "dynamic": false,
+        "properties": {}
       },
       "timeFrom": {
         "doc_values": false,
