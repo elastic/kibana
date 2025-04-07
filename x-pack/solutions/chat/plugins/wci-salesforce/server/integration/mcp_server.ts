@@ -61,7 +61,7 @@ export async function createMcpServer({
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
 
   const getCasesTool: McpServerTool = {
-    name: 'get_cases',
+    name: 'search_cases',
     description: 'Retrieves Salesforce support cases with flexible filtering options',
     schema: {
       caseNumber: z
@@ -196,7 +196,7 @@ export async function createMcpServer({
   };
 
   const getAccountsTool: McpServerTool = {
-    name: 'get_accounts',
+    name: 'search_accounts',
     description: 'Retrieves Salesforce accounts with flexible filtering options',
     schema: {
       id: z.array(z.string()).optional().describe('Salesforce internal IDs of the accounts'),
