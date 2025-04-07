@@ -902,6 +902,7 @@ export class TaskStore {
     { max_docs: max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
+    const { sort, ...rest } = opts;
     try {
       const // However, we can't use this API without the body because it fails to claim the tasks.
         // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -911,11 +912,12 @@ export class TaskStore {
             ignore_unavailable: true,
             refresh: true,
             conflicts: 'proceed',
-            ...opts,
+            ...rest,
             max_docs,
             query,
-            // Being explicit to work around an ES client type issue.
-            sort: opts.sort as string[] | undefined,
+            // @ts-expect-error According to the docs, sort should be a comma-separated list of fields and goes in the querystring.
+            // However, this one is using a "body" format?
+            body: { sort },
           },
           { requestTimeout: this.requestTimeouts.update_by_query }
         );
