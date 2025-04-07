@@ -43,3 +43,24 @@ jobs:
           SNYK_ORG_ID: ${{ secrets.SNYK_ORG_ID }}
           EVENT_NAME: ${{ github.event_name }}
           AFTER_SHA: ${{ github.event.after }}
+      - name: Notify Slack on Low Score
+        if: steps.analysis.outputs.breaches_dependency_slo == 'true'
+        uses: slackapi/slack-github-action@v2.0.0
+        with:
+          method: chat.postMessage
+          token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
+          payload: |
+            channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
+            text: ":warning: *Low Dependency Score Alert!* :warning:"
+            blocks: |
+              - type: section
+                text:
+                  type: mrkdwn
+                  text: "One or more newly added dependencies scored below the threshold (0.65)."
+              - type: actions
+                elements:
+                  - type: button
+                    text:
+                      type: plain_text
+                      text: "View Pull Request"
+                    url: ${{ github.event.pull_request.html_url }}
