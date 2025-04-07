@@ -18,6 +18,7 @@ import {
   ContentPackEntry,
   INDEX_PLACEHOLDER,
   contentPackIncludedObjectsSchema,
+  findIndexPatterns,
   isIncludeAll,
   replaceIndexPatterns,
 } from '@kbn/content-packs-schema';
@@ -89,7 +90,18 @@ const exportContentRoute = createServerRoute({
       exportStream,
       createMapStream((object: ContentPackEntry) => {
         if (object.type === 'dashboard') {
-          return replaceIndexPatterns(object, { [INDEX_PLACEHOLDER]: params.path.name });
+          const patterns = findIndexPatterns(object);
+          const replacements = {
+            ...params.body.pattern_replacements,
+            ...patterns
+              .filter((pattern) => pattern.startsWith(params.path.name))
+              .reduce((acc, pattern) => {
+                acc[pattern] = pattern.replace(params.path.name, INDEX_PLACEHOLDER);
+                return acc;
+              }, {} as Record<string, string>),
+          };
+
+          return replaceIndexPatterns(object, replacements);
         }
         return object;
       }),
@@ -160,7 +172,17 @@ const importContentRoute = createServerRoute({
               (entry.type === 'dashboard' &&
                 params.body.include.objects.dashboards.includes(entry.id))
           )
-          .map((entry) => replaceIndexPatterns(entry, { [INDEX_PLACEHOLDER]: params.path.name }))
+          .map((entry) => {
+            const patterns = findIndexPatterns(entry);
+            const replacements = patterns
+              .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
+              .reduce((acc, pattern) => {
+                acc[pattern] = pattern.replace(INDEX_PLACEHOLDER, params.path.name);
+                return acc;
+              }, {} as Record<string, string>);
+
+            return replaceIndexPatterns(entry, replacements);
+          })
       ),
       createNewCopies: true,
       overwrite: true,

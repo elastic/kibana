@@ -144,9 +144,10 @@ function replaceESQLIndexPattern(esql: string, replacements: Record<string, stri
   const sourceCommand = query.ast.commands.find(({ name }) => ['from', 'metrics'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   args.forEach((arg) => {
-    if (arg.sourceType === 'index' && arg.index && replacements[arg.index.value]) {
-      arg.index.value = replacements[arg.index.value];
+    if (arg.sourceType === 'index' && arg.index && replacements[arg.index.valueUnquoted]) {
+      arg.index.valueUnquoted = replacements[arg.index.valueUnquoted];
     }
   });
+
   return query.print();
 }
