@@ -93,14 +93,16 @@ describe('DashboardView', () => {
   });
 
   test('render dashboard view with height', () => {
-    const { queryByTestId } = render(
+    const result = render(
       <Router history={mockHistory}>
         <DashboardView initialViewMode={'view'} />
       </Router>,
       { wrapper: TestProviders }
     );
 
-    expect(queryByTestId(`dashboard-view-wrapper`)).toHaveStyle({
+    result.debug(undefined, 999999);
+
+    expect(result.queryByTestId(`dashboard-view-wrapper`)).toHaveStyle({
       'min-height': `calc(100vh - 140px)`,
     });
   });
