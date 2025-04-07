@@ -576,6 +576,10 @@ Object {
                   "breadcrumbStatus": "hidden",
                   "link": "management:data_usage",
                 },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:search_connectors",
+                },
               ],
               "title": "Data",
             },
@@ -944,6 +948,10 @@ Object {
                 Object {
                   "breadcrumbStatus": "hidden",
                   "link": "management:data_usage",
+                },
+                Object {
+                  "breadcrumbStatus": "hidden",
+                  "link": "management:search_connectors",
                 },
               ],
               "title": "Data",
