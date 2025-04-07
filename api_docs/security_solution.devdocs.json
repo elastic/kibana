@@ -2045,24 +2045,6 @@
             }
           ],
           "returnComment": []
-        },
-        {
-          "parentPluginId": "securitySolution",
-          "id": "def-public.PluginStart.getSolutionNavigation",
-          "type": "Function",
-          "tags": [],
-          "label": "getSolutionNavigation",
-          "description": [],
-          "signature": [
-            "() => Promise<",
-            "SolutionNavigation",
-            ">"
-          ],
-          "path": "x-pack/solutions/security/plugins/security_solution/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "children": [],
-          "returnComment": []
         }
       ],
       "lifecycle": "start",
