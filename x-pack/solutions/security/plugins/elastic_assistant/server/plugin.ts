@@ -66,7 +66,7 @@ export class ElasticAssistantPlugin
       .getStartServices()
       .then(([{ elasticsearch, featureFlags }, { productDocBase }]) => {
         // read all feature flags:
-        Promise.all([
+        void Promise.all([
           featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
           // add more feature flags here
         ]).then(() => {
