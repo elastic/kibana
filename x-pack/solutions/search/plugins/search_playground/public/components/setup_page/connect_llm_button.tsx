@@ -50,14 +50,14 @@ export const ConnectLLMButton: React.FC = () => {
     <>
       {connectors?.length ? (
         <EuiButtonEmpty
-          iconType="check"
+          iconType="checkInCircleFilled"
           color="success"
           onClick={handleSetupGenAiConnector}
           data-test-subj="successConnectLLMButton"
         >
           <FormattedMessage
             id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
-            defaultMessage="LLM connected"
+            defaultMessage="Elastic LLM connected"
           />
         </EuiButtonEmpty>
       ) : (
