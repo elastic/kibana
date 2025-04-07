@@ -20,6 +20,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiOverlayMask,
   EuiSpacer,
   EuiSteps,
 } from '@elastic/eui';
@@ -617,6 +618,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
               </>
             )}
             <StepsWithLessPadding steps={steps} />
+            {formState === 'LOADING' ? (
+              <EuiOverlayMask headerZindexLocation="below">
+                <Loading />
+              </EuiOverlayMask>
+            ) : null}
             <EuiSpacer size="xl" />
             <EuiSpacer size="xl" />
             <CustomEuiBottomBar data-test-subj="integrationsBottomBar">
