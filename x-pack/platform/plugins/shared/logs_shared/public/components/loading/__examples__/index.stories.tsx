@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react/types-6-0';
+import { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { LogsSharedLoadingPanel } from '..';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
@@ -18,6 +18,6 @@ export default {
   ],
 } as Meta;
 
-export const LoadingPanel: Story = () => (
+export const LoadingPanel: StoryFn = () => (
   <LogsSharedLoadingPanel text="test" width={200} height={200} />
 );

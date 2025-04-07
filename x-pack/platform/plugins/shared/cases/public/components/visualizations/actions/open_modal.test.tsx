@@ -93,24 +93,23 @@ describe('openModal', () => {
 
     await waitFor(() => {
       expect(mockOpenModal).toHaveBeenCalled();
-
-      const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
-      const res = getAttachments();
-
-      expect(res).toEqual([
-        {
-          persistableStateAttachmentState: {
-            attributes: mockLensAttributes,
-            timeRange: {
-              from: '2023-12-31T00:00:00.000Z',
-              to: '2024-01-01T00:00:00.000Z',
-            },
-          },
-          persistableStateAttachmentTypeId: '.lens',
-          type: 'persistableState',
-        },
-      ]);
     });
+
+    const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
+    const res = getAttachments();
+    expect(res).toEqual([
+      {
+        persistableStateAttachmentState: {
+          attributes: mockLensAttributes,
+          timeRange: {
+            from: '2023-12-31T00:00:00.000Z',
+            to: '2024-01-01T00:00:00.000Z',
+          },
+        },
+        persistableStateAttachmentTypeId: '.lens',
+        type: 'persistableState',
+      },
+    ]);
   });
 
   it('should have correct onClose handler - when close modal clicked', async () => {
@@ -183,24 +182,23 @@ describe('openModal', () => {
 
     await waitFor(() => {
       expect(mockOpenModal).toHaveBeenCalled();
-
-      const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
-      const res = getAttachments();
-
-      expect(res).toEqual([
-        {
-          persistableStateAttachmentState: {
-            attributes: mockLensAttributes,
-            timeRange: {
-              from: '2024-01-09T00:00:00.000Z',
-              to: '2024-01-10T00:00:00.000Z',
-            },
-          },
-          persistableStateAttachmentTypeId: '.lens',
-          type: 'persistableState',
-        },
-      ]);
     });
+
+    const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
+    const res = getAttachments();
+    expect(res).toEqual([
+      {
+        persistableStateAttachmentState: {
+          attributes: mockLensAttributes,
+          timeRange: {
+            from: '2024-01-09T00:00:00.000Z',
+            to: '2024-01-10T00:00:00.000Z',
+          },
+        },
+        persistableStateAttachmentTypeId: '.lens',
+        type: 'persistableState',
+      },
+    ]);
   });
 
   it('should open modal with an attachment with the time range in absolute and relative values', async () => {
@@ -213,23 +211,23 @@ describe('openModal', () => {
 
     await waitFor(() => {
       expect(mockOpenModal).toHaveBeenCalled();
-
-      const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
-      const res = getAttachments();
-
-      expect(res).toEqual([
-        {
-          persistableStateAttachmentState: {
-            attributes: mockLensAttributes,
-            timeRange: {
-              from: '2023-12-01T00:00:00.000Z',
-              to: '2024-01-01T00:00:00.000Z',
-            },
-          },
-          persistableStateAttachmentTypeId: '.lens',
-          type: 'persistableState',
-        },
-      ]);
     });
+
+    const getAttachments = mockOpenModal.mock.calls[0][0].getAttachments;
+    const res = getAttachments();
+
+    expect(res).toEqual([
+      {
+        persistableStateAttachmentState: {
+          attributes: mockLensAttributes,
+          timeRange: {
+            from: '2023-12-01T00:00:00.000Z',
+            to: '2024-01-01T00:00:00.000Z',
+          },
+        },
+        persistableStateAttachmentTypeId: '.lens',
+        type: 'persistableState',
+      },
+    ]);
   });
 });

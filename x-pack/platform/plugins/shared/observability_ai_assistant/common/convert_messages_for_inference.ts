@@ -66,6 +66,7 @@ export function convertMessagesForInference(
           msg.role === InferenceMessageRole.Assistant &&
           msg.toolCalls?.[0]?.function.name === message.message.name
       ) as AssistantMessage | undefined;
+
       if (!toolCallRequest) {
         throw new Error(`Could not find tool call request for ${message.message.name}`);
       }

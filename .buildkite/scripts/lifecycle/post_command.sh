@@ -25,7 +25,7 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'test/**/screenshots/diff/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'test/**/screenshots/session/*.png'
-  buildkite-agent artifact upload 'test/functional/failure_debug/html/*.html'
+  buildkite-agent artifact upload 'src/platform/test/functional/failure_debug/html/*.html'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/diff/*.png'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/failure/*.png'
   buildkite-agent artifact upload 'x-pack/test/**/screenshots/session/*.png'

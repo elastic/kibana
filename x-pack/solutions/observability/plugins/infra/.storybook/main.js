@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-const defaultConfig = require('@kbn/storybook').defaultConfig;
-
-module.exports = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.mdx', ...defaultConfig.stories],
-};
+module.exports = require('@kbn/storybook').defaultConfig;

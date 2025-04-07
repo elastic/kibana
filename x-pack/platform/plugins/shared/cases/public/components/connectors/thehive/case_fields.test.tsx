@@ -11,8 +11,8 @@ import { screen } from '@testing-library/react';
 import Fields from './case_fields';
 import { theHiveConnector as connector } from '../mock';
 import { MockFormWrapperComponent } from '../test_utils';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
+
+import { renderWithTestingProviders } from '../../../common/mock';
 import { TheHiveTLP } from './types';
 
 describe('TheHive Cases Fields', () => {
@@ -20,15 +20,12 @@ describe('TheHive Cases Fields', () => {
     TLP: 1,
   };
 
-  let appMockRenderer: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRenderer = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
   it('all params fields are rendered', () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
@@ -38,7 +35,7 @@ describe('TheHive Cases Fields', () => {
   });
 
   it('sets TLP correctly', async () => {
-    appMockRenderer.render(
+    renderWithTestingProviders(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>

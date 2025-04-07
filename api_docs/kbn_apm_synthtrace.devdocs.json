@@ -1437,12 +1437,12 @@
             "pluginId": "@kbn/apm-synthtrace-client",
             "scope": "common",
             "docId": "kibKbnApmSynthtraceClientPluginApi",
-            "section": "def-common.OtelDocument",
-            "text": "OtelDocument"
+            "section": "def-common.ApmOtelFields",
+            "text": "ApmOtelFields"
           },
           ">"
         ],
-        "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+        "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1456,7 +1456,7 @@
             "signature": [
               "any"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1481,7 +1481,7 @@
                   "; } & ",
                   "OtelSynthtraceEsClientOptions"
                 ],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1502,7 +1502,7 @@
               ") => ",
               "Transform"
             ],
-            "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+            "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1513,7 +1513,7 @@
                 "tags": [],
                 "label": "{\n      includeSerialization,\n    }",
                 "description": [],
-                "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+                "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1527,7 +1527,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/otel/otel_synthtrace_es_client.ts",
+                    "path": "src/platform/packages/shared/kbn-apm-synthtrace/src/lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }

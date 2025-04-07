@@ -1,0 +1,20 @@
+import { Canvas, Meta, Story, Controls } from '@storybook/blocks';
+import * as EsqlEditorStories from './esql_editor.stories';
+
+<Meta of={EsqlEditorStories} />
+
+# Overview
+
+The ESQLEditor component is a reusable component and can be used to support text based languages in your application (SQL, ESQL):
+
+<Canvas of={EsqlEditorStories.ExpandedMode} />
+
+When there are errors to the query the UI displays the errors to the editor:
+
+<Canvas of={EsqlEditorStories.WithErrors} />
+
+## Component props
+
+The component exposes the following properties:
+
+<Controls />../esql\_editor

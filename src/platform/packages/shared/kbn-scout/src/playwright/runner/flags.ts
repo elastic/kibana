@@ -19,6 +19,7 @@ export interface RunTestsOptions {
   configPath: string;
   headed: boolean;
   mode: CliSupportedServerModes;
+  testTarget: 'local' | 'cloud';
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
   logsDir: string | undefined;
@@ -27,11 +28,12 @@ export interface RunTestsOptions {
 export const TEST_FLAG_OPTIONS: FlagOptions = {
   ...SERVER_FLAG_OPTIONS,
   boolean: [...(SERVER_FLAG_OPTIONS.boolean || []), 'headed'],
-  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config'],
-  default: { headed: false },
+  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testTarget'],
+  default: { headed: false, testTarget: 'local' },
   help: `${SERVER_FLAG_OPTIONS.help}
     --config             Playwright config file path
     --headed             Run Playwright with browser head
+    --testTarget         Run tests agaist locally started servers or Cloud deployment / MKI project
   `,
 };
 
@@ -39,6 +41,11 @@ export async function parseTestFlags(flags: FlagsReader) {
   const options = parseServerFlags(flags);
   const configPath = flags.string('config');
   const headed = flags.boolean('headed');
+  const testTarget = flags.enum('testTarget', ['local', 'cloud']) || 'local';
+
+  if (testTarget === 'cloud') {
+    throw createFlagError(`Running tests against Cloud / MKI is not supported yet`);
+  }
 
   if (!configPath) {
     throw createFlagError(`Path to playwright config is required: --config <file path>`);
@@ -51,5 +58,6 @@ export async function parseTestFlags(flags: FlagsReader) {
     ...options,
     configPath,
     headed,
+    testTarget,
   };
 }

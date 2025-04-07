@@ -4,34 +4,34 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { expect } from '@kbn/scout';
-import { test } from '../../fixtures';
-
-const start = '2021-10-10T00:00:00.000Z';
-const end = '2021-10-10T00:15:00.000Z';
+import { expect } from '@kbn/scout-oblt';
+import { test, testData } from '../../fixtures';
 
 test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
-  test.beforeEach(async ({ browserAuth, page, pageObjects: { serviceInventoryPage } }) => {
+  test.beforeEach(async ({ browserAuth, pageObjects: { serviceInventoryPage } }) => {
     await browserAuth.loginAsViewer();
-    await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(start, end);
-    await serviceInventoryPage.waitForPageToLoad();
+    await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(
+      testData.OPBEANS_START_DATE,
+      testData.OPBEANS_END_DATE
+    );
   });
 
-  test('shows the service inventory', async ({ page, pageObjects: { serviceInventoryPage } }) => {
-    await serviceInventoryPage.gotoDetailedServiceInventoryWithDateSelected(start, end);
-    expect(page.url()).toContain('/app/apm/services');
-    await expect(page.getByRole('heading', { name: 'Services', level: 1 })).toBeVisible();
-  });
+  test('renders page with selected date range', async ({ page }) => {
+    await test.step('shows correct heading', async () => {
+      expect(page.url()).toContain('/app/apm/services');
+      await expect(page.getByRole('heading', { name: 'Services', level: 1 })).toBeVisible();
+    });
 
-  test('shows a list of services', async ({ page }) => {
-    await expect(page.getByText('opbeans-node')).toBeVisible();
-    await expect(page.getByText('opbeans-java')).toBeVisible();
-    await expect(page.getByText('opbeans-rum')).toBeVisible();
-  });
+    await test.step('shows a list of services', async () => {
+      await expect(page.getByText('opbeans-node')).toBeVisible();
+      await expect(page.getByText('opbeans-java')).toBeVisible();
+      await expect(page.getByText('opbeans-rum')).toBeVisible();
+    });
 
-  test('shows a list of environments', async ({ page }) => {
-    const environmentEntrySelector = page.locator('td:has-text("production")');
-    await expect(environmentEntrySelector).toHaveCount(3);
+    await test.step('shows a list of environments', async () => {
+      const environmentEntrySelector = page.locator('td:has-text("production")');
+      await expect(environmentEntrySelector).toHaveCount(3);
+    });
   });
 
   test('loads the service overview for a service when clicking on it', async ({ page }) => {
@@ -41,15 +41,9 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('shows the correct environment when changing the environment', async ({ page }) => {
+    await page.testSubj.click('environmentFilter > comboBoxSearchInput');
     await page
-      .locator('[data-test-subj="environmentFilter"]')
-      .locator('[data-test-subj="comboBoxSearchInput"]')
-      .click();
-    await expect(
-      page.getByTestId('comboBoxOptionsList environmentFilter-optionsList')
-    ).toBeVisible();
-    await page
-      .locator('[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]')
+      .getByTestId('comboBoxOptionsList environmentFilter-optionsList')
       .locator('button:has-text("production")')
       .click();
     await expect(page.getByTestId('comboBoxSearchInput')).toHaveValue('production');

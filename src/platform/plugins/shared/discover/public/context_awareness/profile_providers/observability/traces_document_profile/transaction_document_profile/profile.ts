@@ -11,28 +11,31 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
 import type { DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType } from '../../../../profiles';
+import { createGetDocViewer } from './accessors';
+import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
-import { getDocViewer } from './accessors';
 
 const OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID =
   'observability-traces-transaction-document-profile';
 
-export const createObservabilityTracesTransactionDocumentProfileProvider = (
-  services: ProfileProviderServices
-): DocumentProfileProvider => ({
+export const createObservabilityTracesTransactionDocumentProfileProvider = ({
+  tracesContextService,
+}: ProfileProviderServices): DocumentProfileProvider => ({
   isExperimental: true,
   profileId: OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID,
   profile: {
-    getDocViewer,
+    getDocViewer: createGetDocViewer(tracesContextService.getAllTracesIndexPattern() || ''),
   },
-  resolve: ({ record }) => {
-    const isApmEnabled = services.application.capabilities.apm?.show;
+  resolve: ({ record, rootContext }) => {
+    const isObservabilitySolutionView = rootContext.profileId === OBSERVABILITY_ROOT_PROFILE_ID;
 
-    if (!isApmEnabled) {
+    if (!isObservabilitySolutionView) {
       return { isMatch: false };
     }
 
-    const isTransactionRecord = getIsTransactionRecord(record);
+    const isTransactionRecord = getIsTransactionRecord({
+      record,
+    });
 
     if (!isTransactionRecord) {
       return { isMatch: false };
@@ -47,9 +50,7 @@ export const createObservabilityTracesTransactionDocumentProfileProvider = (
   },
 });
 
-const getIsTransactionRecord = (record: DataTableRecord) => {
-  // TODO add condition to check on the document _index against APM configured indexes, currently blocked by https://github.com/elastic/kibana/issues/211414
-  // this will be handled in https://github.com/elastic/kibana/issues/213112
+const getIsTransactionRecord = ({ record }: { record: DataTableRecord }) => {
   return isTransactionDocument(record);
 };
 

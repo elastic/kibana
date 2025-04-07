@@ -10,11 +10,13 @@
 const SERVERLESS_ONLY = ['@svlSecurity', '@svlOblt', '@svlSearch'];
 const ESS_ONLY = ['@ess'];
 const DEPLOYMENT_AGNOSTIC = SERVERLESS_ONLY.concat(ESS_ONLY);
+const PERFORMANCE = ['@perf'];
 
 export const tags = {
   ESS_ONLY,
   SERVERLESS_ONLY,
   DEPLOYMENT_AGNOSTIC,
+  PERFORMANCE,
 };
 
 export const tagsByMode = {

@@ -9,6 +9,7 @@
 
 import * as contexts from './contexts';
 import type {
+  ESQLAstChangePointCommand,
   ESQLAstCommand,
   ESQLAstJoinCommand,
   ESQLAstRenameExpression,
@@ -103,9 +104,9 @@ export class GlobalVisitorContext<
         return this.visitRowCommand(parent, commandNode, input as any);
       }
       // TODO: uncomment this when the command is implemented
-      // case 'metrics': {
-      //   if (!this.methods.visitMetricsCommand) break;
-      //   return this.visitMetricsCommand(parent, commandNode, input as any);
+      // case 'ts': {
+      //   if (!this.methods.visitTimeseriesCommand) break;
+      //   return this.visitTimeseriesCommand(parent, commandNode, input as any);
       // }
       case 'show': {
         if (!this.methods.visitShowCommand) break;
@@ -171,6 +172,14 @@ export class GlobalVisitorContext<
         if (!this.methods.visitJoinCommand) break;
         return this.visitJoinCommand(parent, commandNode as ESQLAstJoinCommand, input as any);
       }
+      case 'change_point': {
+        if (!this.methods.visitChangePointCommand) break;
+        return this.visitChangePointCommand(
+          parent,
+          commandNode as ESQLAstChangePointCommand,
+          input as any
+        );
+      }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
   }
@@ -211,13 +220,13 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitRowCommand', context, input);
   }
 
-  public visitMetricsCommand(
+  public visitTimeseriesCommand(
     parent: contexts.VisitorContext | null,
     node: ESQLAstCommand,
-    input: types.VisitorInput<Methods, 'visitMetricsCommand'>
-  ): types.VisitorOutput<Methods, 'visitMetricsCommand'> {
-    const context = new contexts.MetricsCommandVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitMetricsCommand', context, input);
+    input: types.VisitorInput<Methods, 'visitTimeseriesCommand'>
+  ): types.VisitorOutput<Methods, 'visitTimeseriesCommand'> {
+    const context = new contexts.TimeseriesCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitTimeseriesCommand', context, input);
   }
 
   public visitShowCommand(
@@ -362,6 +371,15 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitJoinCommand'> {
     const context = new contexts.JoinCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitJoinCommand', context, input);
+  }
+
+  public visitChangePointCommand(
+    parent: contexts.VisitorContext | null,
+    node: ESQLAstChangePointCommand,
+    input: types.VisitorInput<Methods, 'visitChangePointCommand'>
+  ): types.VisitorOutput<Methods, 'visitChangePointCommand'> {
+    const context = new contexts.ChangePointCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitChangePointCommand', context, input);
   }
 
   // Expression visiting -------------------------------------------------------

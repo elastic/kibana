@@ -20,6 +20,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
+import { SubItemTitle } from './subitem_title';
 import { useNavigation as useServices } from '../../services';
 import { isAbsoluteLink, isActiveFromUrl, isAccordionNode } from '../../utils';
 import type { BasePathService, NavigateToUrlFn } from '../../types';
@@ -117,7 +118,6 @@ const serializeNavNode = (
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
   };
-
   serialized.renderAs = getRenderAs(serialized, { isSideNavCollapsed });
   serialized.spaceBefore = getSpaceBefore(serialized, {
     isSideNavCollapsed,
@@ -257,7 +257,7 @@ const getEuiProps = (
   // if it is the highest match in the URL, not if one of its children is also active.
   const onlyIfHighestMatch = isAccordion && !isCollapsible;
   const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
-  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
+  const isExternal = Boolean(href) && navNode.isExternalLink && isAbsoluteLink(href!);
   const isAccordionExpanded = !getIsCollapsed(path);
 
   let isSelected = isActive;
@@ -283,6 +283,16 @@ const getEuiProps = (
         })
         .flat();
 
+  /**
+   * Check if the click event is a special click (e.g. right click, click with modifier key)
+   * We do not want to prevent the default behavior in these cases.
+   */
+  const isSpecialClick = (e: React.MouseEvent<HTMLElement | HTMLButtonElement>) => {
+    const isModifiedEvent = !!(e.metaKey || e.altKey || e.ctrlKey || e.shiftKey);
+    const isLeftClickEvent = e.button === 0;
+    return isModifiedEvent || !isLeftClickEvent;
+  };
+
   const linkProps: EuiCollapsibleNavItemProps['linkProps'] | undefined = hasLink
     ? {
         href,
@@ -298,6 +308,10 @@ const getEuiProps = (
 
           if (customOnClick) {
             customOnClick(e);
+            return;
+          }
+
+          if (isSpecialClick(e)) {
             return;
           }
 
@@ -326,6 +340,10 @@ const getEuiProps = (
     // Do not navigate if it is a collapsible accordion, if there is a "link" defined it
     // will be used in the breadcrumb navigation.
     if (isAccordion && isCollapsible) return;
+
+    if (isSpecialClick(e)) {
+      return;
+    }
 
     if (href !== undefined) {
       e.preventDefault();
@@ -368,7 +386,7 @@ function nodeToEuiCollapsibleNavProps(
     _navNode,
     deps
   );
-  const { id, path, href, renderAs, isCollapsible, spaceBefore } = navNode;
+  const { id, path, href, renderAs, isCollapsible, spaceBefore, isExternalLink } = navNode;
 
   if (navNode.renderItem) {
     // Leave the rendering to the consumer
@@ -402,14 +420,17 @@ function nodeToEuiCollapsibleNavProps(
       isSelected,
       onClick,
       icon: navNode.icon,
-      title: navNode.title,
+      // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
+      title: !subItems && navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
       // Render as an accordion or a link (handled by EUI) depending if
       // "items" is undefined or not. If it is undefined --> a link, otherwise an
       // accordion is rendered.
-      ...(subItems ? { items: subItems, isCollapsible } : { href, linkProps }),
+      ...(subItems
+        ? { items: subItems, isCollapsible }
+        : { href, ...linkProps, external: isExternalLink }),
     },
   ];
 

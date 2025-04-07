@@ -79,7 +79,7 @@ const scenario: Scenario<LogDocument | ApmFields> = async ({ logger, ...runOptio
               .containerId(containerId)
               .hostName(hostName)
               .defaults({
-                'trace.id': generateShortId(),
+                'trace.id': generateLongId(),
                 'agent.name': 'synth-agent',
                 'orchestrator.cluster.name': clusterName,
                 'orchestrator.cluster.id': clusterId,

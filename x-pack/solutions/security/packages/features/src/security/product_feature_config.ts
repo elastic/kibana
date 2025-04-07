@@ -42,6 +42,30 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
     },
   },
+  [ProductFeatureSecurityKey.alertsSummary]: {
+    privileges: {
+      all: {
+        ui: ['alerts_summary'],
+        api: [`${APP_ID}-alert-summary`],
+      },
+      read: {
+        ui: ['alerts_summary_read'],
+        api: [`${APP_ID}-alert-summary`],
+      },
+    },
+  },
+  [ProductFeatureSecurityKey.configurations]: {
+    privileges: {
+      all: {
+        ui: ['configurations'],
+        api: [],
+      },
+      read: {
+        ui: [],
+        api: [],
+      },
+    },
+  },
   [ProductFeatureSecurityKey.investigationGuideInteractions]: {
     privileges: {
       all: {

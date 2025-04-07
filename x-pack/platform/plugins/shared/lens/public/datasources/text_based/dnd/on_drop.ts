@@ -34,7 +34,7 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
   const targetField = allColumns.find((f) => f.columnId === target.columnId);
   const newColumn = {
     columnId: target.columnId,
-    fieldName: sourceField?.variable ? `?${sourceField.variable}` : sourceField?.fieldName ?? '',
+    fieldName: sourceField?.variable ? `??${sourceField.variable}` : sourceField?.fieldName ?? '',
     meta: sourceField?.meta,
     variable: sourceField?.variable,
   };

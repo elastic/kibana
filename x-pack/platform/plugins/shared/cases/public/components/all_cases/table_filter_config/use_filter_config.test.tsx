@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+
 import { renderHook } from '@testing-library/react';
-import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer } from '../../../common/mock';
 import type { FilterConfig, FilterConfigRenderParams } from './types';
 import { useFilterConfig } from './use_filter_config';
 import type { FilterOptions } from '../../../../common/ui';
 import { CUSTOM_FIELD_KEY_PREFIX } from '../constants';
 import { CustomFieldTypes } from '../../../../common/types/domain';
+import { TestProviders } from '../../../common/mock';
 
 const emptyFilterOptions: FilterOptions = {
   search: '',
@@ -51,10 +50,7 @@ describe('useFilterConfig', () => {
     },
   ];
 
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     localStorage.clear();
   });
 
@@ -64,9 +60,7 @@ describe('useFilterConfig', () => {
 
   it('should remove a selected option if the filter is deleted', async () => {
     const { rerender } = renderHook(useFilterConfig, {
-      wrapper: ({ children }: React.PropsWithChildren) => (
-        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
-      ),
+      wrapper: TestProviders,
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,
@@ -106,9 +100,7 @@ describe('useFilterConfig', () => {
     );
 
     const { result } = renderHook(useFilterConfig, {
-      wrapper: ({ children }: React.PropsWithChildren) => (
-        <appMockRender.AppWrapper>{children}</appMockRender.AppWrapper>
-      ),
+      wrapper: TestProviders,
       initialProps: {
         systemFilterConfig: filters,
         onFilterOptionsChange,

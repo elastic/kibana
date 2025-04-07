@@ -51,11 +51,11 @@ describe('useResponderActionItem', () => {
     expect(renderHook().result.current).toHaveLength(0);
   });
 
-  it('should NOT return the Respond action menu item for Events', () => {
+  it('should return the Respond action menu item for Events', () => {
     alertDetailItemData = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType('foo', {
       'kibana.alert.rule.uuid': undefined,
     });
 
-    expect(renderHook().result.current).toHaveLength(0);
+    expect(renderHook().result.current).toHaveLength(1);
   });
 });

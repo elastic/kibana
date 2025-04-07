@@ -27,7 +27,7 @@ import {
   type EnrichCommandContext,
   type WhereCommandContext,
   default as esql_parser,
-  type MetricsCommandContext,
+  type TimeSeriesCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
@@ -37,32 +37,32 @@ import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
   createCommand,
   createFunction,
-  createOption,
   createLiteral,
   textExistsAndIsValid,
-  createSource,
+  visitSource,
   createAstBaseItem,
 } from './factories';
 import { getPosition } from './helpers';
 import {
-  collectAllSourceIdentifiers,
   collectAllFields,
   collectAllAggFields,
   visitByOption,
   collectAllColumnIdentifiers,
   visitRenameClauses,
-  collectBooleanExpression,
   visitOrderExpressions,
   getPolicyName,
   getMatchField,
   getEnrichClauses,
 } from './walkers';
-import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
+import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
 import { createJoinCommand } from './factories/join';
 import { createDissectCommand } from './factories/dissect';
 import { createGrokCommand } from './factories/grok';
 import { createStatsCommand } from './factories/stats';
 import { createChangePointCommand } from './factories/change_point';
+import { createWhereCommand } from './factories/where';
+import { createRowCommand } from './factories/row';
+import { createFromCommand } from './factories/from';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -102,9 +102,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitWhereCommand(ctx: WhereCommandContext) {
-    const command = createCommand('where', ctx);
+    const command = createWhereCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectBooleanExpression(ctx.booleanExpression()));
   }
 
   /**
@@ -112,9 +112,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitRowCommand(ctx: RowCommandContext) {
-    const command = createCommand('row', ctx);
+    const command = createRowCommand(ctx);
+
     this.ast.push(command);
-    command.args.push(...collectAllFields(ctx.fields()));
   }
 
   /**
@@ -122,43 +122,27 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitFromCommand(ctx: FromCommandContext) {
-    const commandAst = createCommand('from', ctx);
-    this.ast.push(commandAst);
-    commandAst.args.push(...collectAllSourceIdentifiers(ctx));
-    const metadataContext = ctx.metadata();
-    if (metadataContext && metadataContext.METADATA()) {
-      const option = createOption(
-        metadataContext.METADATA().getText().toLowerCase(),
-        metadataContext
-      );
-      commandAst.args.push(option);
-      option.args.push(...collectAllColumnIdentifiers(metadataContext));
-    }
+    const command = createFromCommand(ctx);
+
+    this.ast.push(command);
   }
 
   /**
-   * Exit a parse tree produced by `esql_parser.metricsCommand`.
+   * Exit a parse tree produced by `esql_parser.timeseriesCommand`.
    * @param ctx the parse tree
    */
-  exitMetricsCommand(ctx: MetricsCommandContext): void {
-    const node: ESQLAstMetricsCommand = {
-      ...createAstBaseItem('metrics', ctx),
+  exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
+    const node: ESQLAstTimeseriesCommand = {
+      ...createAstBaseItem('ts', ctx),
       type: 'command',
       args: [],
       sources: ctx
+        .indexPatternAndMetadataFields()
         .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => createSource(sourceCtx)),
+        .map((sourceCtx) => visitSource(sourceCtx)),
     };
     this.ast.push(node);
-    const aggregates = collectAllAggFields(ctx.aggFields());
-    const grouping = collectAllFields(ctx.fields());
-    if (aggregates && aggregates.length) {
-      node.aggregates = aggregates;
-    }
-    if (grouping && grouping.length) {
-      node.grouping = grouping;
-    }
-    node.args.push(...node.sources, ...aggregates, ...grouping);
+    node.args.push(...node.sources);
   }
 
   /**

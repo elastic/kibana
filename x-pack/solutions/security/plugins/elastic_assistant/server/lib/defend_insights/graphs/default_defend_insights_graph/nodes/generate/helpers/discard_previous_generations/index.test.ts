@@ -38,6 +38,7 @@ process.executable,another/file/path.exe`,
   refinePrompt: 'refinePrompt',
   replacements: {},
   unrefinedResults: null,
+  continuePrompt: 'continuePrompt',
 };
 
 describe('discardPreviousGenerations', () => {
