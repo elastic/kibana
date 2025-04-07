@@ -338,7 +338,7 @@ export async function ensureTemplatesAndIndexCreated(esClient: ElasticsearchClie
   });
 }
 
-async function createLocksWriteIndex(esClient: ElasticsearchClient): Promise<void> {
+export async function createLocksWriteIndex(esClient: ElasticsearchClient): Promise<void> {
   await esClient.indices.create({ index: LOCKS_CONCRETE_INDEX_NAME }, { ignore: [400] });
 }
 
