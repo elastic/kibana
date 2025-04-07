@@ -33,15 +33,15 @@ jest.mock('../../hooks/use_fetch_query_rules_sets', () => ({
 describe('Search Query Rules Sets list', () => {
   it('should render the list with query rule sets', () => {
     render(<QueryRulesSets />);
-    const queryRulesSetTable = screen.getByTestId('query-rules-set-table');
+    const queryRulesSetTable = screen.getByTestId('queryRulesSetTable');
     expect(queryRulesSetTable).toBeInTheDocument();
 
-    const queryRulesSetItemNames = screen.getAllByTestId('query-rules-set-item-name');
+    const queryRulesSetItemNames = screen.getAllByTestId('queryRuleSetName');
     expect(queryRulesSetItemNames).toHaveLength(2);
     expect(queryRulesSetItemNames[0].textContent).toBe('Query Rule Set 1');
     expect(queryRulesSetItemNames[1].textContent).toBe('Query Rule Set 2');
 
-    const queryRulesSetItemRuleCounts = screen.getAllByTestId('query-rules-set-item-rule-count');
+    const queryRulesSetItemRuleCounts = screen.getAllByTestId('queryRuleSetItemRuleCount');
     expect(queryRulesSetItemRuleCounts).toHaveLength(2);
     expect(queryRulesSetItemRuleCounts[0].textContent).toBe('2');
     expect(queryRulesSetItemRuleCounts[1].textContent).toBe('3');
