@@ -93,7 +93,7 @@ describe('updateAttackDiscoverySchedulesRoute', () => {
     });
   });
 
-  it('should handle `dataClient.createSchedule` error', async () => {
+  it('should handle `dataClient.updateSchedule` error', async () => {
     (updateAttackDiscoverySchedule as jest.Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
       updateAttackDiscoverySchedulesRequest('schedule-3', mockRequestBody),

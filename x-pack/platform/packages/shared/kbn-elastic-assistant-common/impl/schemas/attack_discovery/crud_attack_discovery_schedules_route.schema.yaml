@@ -27,7 +27,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: CreateAttackDiscoverySchedules
       description: Creates attack discovery schedule
-      summary: Creates attack discovery schedule via the Elastic Assistant
+      summary: Creates attack discovery schedule
       tags:
         - attack_discovery_schedule
       requestBody:
@@ -56,7 +56,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: GetAttackDiscoverySchedules
       description: Gets attack discovery schedule
-      summary: Gets attack discovery schedule via the Elastic Assistant
+      summary: Gets attack discovery schedule
       tags:
         - attack_discovery_schedule
       parameters:
@@ -84,7 +84,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: UpdateAttackDiscoverySchedules
       description: Updates attack discovery schedule
-      summary: Updates attack discovery schedule via the Elastic Assistant
+      summary: Updates attack discovery schedule
       tags:
         - attack_discovery_schedule
       parameters:
@@ -118,7 +118,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: DeleteAttackDiscoverySchedules
       description: Deletes attack discovery schedule
-      summary: Deletes attack discovery schedule via the Elastic Assistant
+      summary: Deletes attack discovery schedule
       tags:
         - attack_discovery_schedule
       parameters:
@@ -153,7 +153,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: EnableAttackDiscoverySchedules
       description: Enables attack discovery schedule
-      summary: Enables attack discovery schedule via the Elastic Assistant
+      summary: Enables attack discovery schedule
       tags:
         - attack_discovery_schedule
       parameters:
@@ -188,7 +188,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: DisableAttackDiscoverySchedules
       description: Disables attack discovery schedule
-      summary: Disables attack discovery schedule via the Elastic Assistant
+      summary: Disables attack discovery schedule
       tags:
         - attack_discovery_schedule
       parameters:

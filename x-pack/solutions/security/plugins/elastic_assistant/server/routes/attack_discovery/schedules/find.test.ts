@@ -100,7 +100,7 @@ describe('findAttackDiscoverySchedulesRoute', () => {
     });
   });
 
-  it('should handle `dataClient.createSchedule` error', async () => {
+  it('should handle `dataClient.findSchedules` error', async () => {
     (findAttackDiscoverySchedule as jest.Mock).mockRejectedValue(new Error('Oh no!'));
     const response = await server.inject(
       findAttackDiscoverySchedulesRequest(),

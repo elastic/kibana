@@ -9,7 +9,7 @@ paths:
       x-labels: [ess, serverless]
       operationId: FindAttackDiscoverySchedules
       description: Finds attack discovery schedules
-      summary: Finds attack discovery schedules via the Elastic Assistant
+      summary: Finds attack discovery schedules
       tags:
         - attack_discovery_schedule
       responses:
