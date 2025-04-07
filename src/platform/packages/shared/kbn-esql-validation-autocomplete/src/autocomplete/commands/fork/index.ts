@@ -49,31 +49,18 @@ export async function suggest(
   }
 
   const subCommand = activeBranch?.commands[activeBranch.commands.length - 1];
-  switch (subCommand?.name) {
-    case 'where':
-      return suggestForWhere({
-        ...params,
-        command: subCommand as ESQLCommand<'where'>,
-        definition: getCommandDefinition('where'),
-      });
 
-    case 'sort':
-      return suggestForSort({
-        ...params,
-        command: subCommand as ESQLCommand<'sort'>,
-        definition: getCommandDefinition('sort'),
-      });
-
-    case 'limit':
-      return suggestForLimit({
-        ...params,
-        command: subCommand as ESQLCommand<'limit'>,
-        definition: getCommandDefinition('limit'),
-      });
-
-    default:
-      return [];
+  if (!subCommand) {
+    return [];
   }
+
+  const commandDef = getCommandDefinition(subCommand?.name);
+
+  return commandDef.suggest({
+    ...params,
+    command: subCommand as ESQLCommand,
+    definition: commandDef,
+  });
 }
 
 const newBranchSuggestion: SuggestionRawDefinition = {
