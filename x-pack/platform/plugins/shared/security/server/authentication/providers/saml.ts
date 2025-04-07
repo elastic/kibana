@@ -26,14 +26,16 @@ import { HTTPAuthorizationHeader } from '../http_authentication';
 import type { RefreshTokenResult, TokenPair } from '../tokens';
 import { Tokens } from '../tokens';
 
+type RequestId = string;
+
 /**
  * The state supported by the provider (for the SAML handshake or established session).
  */
 interface ProviderState extends Partial<TokenPair> {
   /**
-   * Unique identifier of the SAML request initiated the handshake.
+   * Map of redirectURLs by requestId.
    */
-  requestIds?: string[];
+  requestIdMap?: Record<RequestId, { redirectURL: string }>;
 
   /**
    * Stores path component of the URL only or in a combination with URL fragment that was used to
@@ -274,7 +276,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       try {
         // It may _theoretically_ (highly unlikely in practice though) happen that when user receives
         // logout response they may already have a new SAML session (isSPInitiatedSLOResponse == true
-        // and state !== undefined). In this case case it'd be safer to trigger SP initiated logout
+        // and state !== undefined). In this case it'd be safer to trigger SP initiated logout
         // for the new session as well.
         const redirect = isIdPInitiatedSLORequest
           ? await this.performIdPInitiatedSingleLogout(request, this.realm || state?.realm)
@@ -335,23 +337,27 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // If we have a `SAMLResponse` and state, but state doesn't contain all the necessary information,
     // then something unexpected happened and we should fail.
     const {
-      requestIds: stateRequestIds,
+      requestIdMap: stateRequestIdMap = {},
       redirectURL: stateRedirectURL,
       realm: stateRealm,
     } = state || {
-      requestIds: [],
+      requestIdMap: {},
       redirectURL: '',
       realm: '',
     };
 
-    if (state && (stateRequestIds === undefined || stateRequestIds.length === 0)) {
+    const stateRequestIds = Object.keys(stateRequestIdMap) || [];
+
+    this.logger.debug(`Current state: ${JSON.stringify(state)}`);
+
+    if (state && stateRequestIds.length === 0) {
       const message = 'SAML response state does not have corresponding request id.';
       this.logger.warn(message);
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
     // When we don't have requestIds we assume that SAMLResponse came from an IdP initiated login.
-    const isIdPInitiatedLogin = !stateRequestIds?.length;
+    const isIdPInitiatedLogin = !stateRequestIds.length;
 
     this.logger.debug(
       !isIdPInitiatedLogin
@@ -361,7 +367,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     this.logger.debug(
       `SAML RESPONSE: ${samlResponse}:::${JSON.stringify(
-        !isIdPInitiatedLogin ? [stateRequestIds] : []
+        !isIdPInitiatedLogin ? [...stateRequestIds] : []
       )}`
     );
 
@@ -424,17 +430,31 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     this.logger.debug('Login has been performed with SAML response.');
 
-    const inResponseToRequestId = this.parseRequestIdFromSAMLResponse(samlResponse);
+    let redirectURLForRequestId;
+    let areAnyRequestIdsRemaining = false;
+    let remainingRequestIdMap = stateRequestIdMap;
 
-    // Remove value of inResponseToRequestId from stateRequestIds and return the array of any
-    // requestIds that remain
-    const [areAnyRequestIdsRemaining, remainingRequestIds] = this.updateRemainingRequestIds(
-      inResponseToRequestId,
-      stateRequestIds
-    );
+    if (!isIdPInitiatedLogin) {
+      const inResponseToRequestId = this.parseRequestIdFromSAMLResponse(samlResponse);
+      this.logger.debug(`Login was performed with requestId: ${inResponseToRequestId}`);
+
+      if (stateRequestIds.length && inResponseToRequestId) {
+        redirectURLForRequestId = stateRequestIdMap[inResponseToRequestId].redirectURL;
+      }
+
+      // Remove value of inResponseToRequestId from stateRequestIdMap and return a map of any
+      // requestIds that remain
+      [areAnyRequestIdsRemaining, remainingRequestIdMap] = this.updateRemainingRequestIds(
+        inResponseToRequestId,
+        stateRequestIdMap
+      );
+    }
 
     return AuthenticationResult.redirectTo(
-      redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
+      redirectURLFromRelayState ||
+        redirectURLForRequestId ||
+        stateRedirectURL ||
+        `${this.options.basePath.get(request)}/`,
       {
         user: this.authenticationInfoToAuthenticatedUser(result.authentication),
         userProfileGrant: { type: 'accessToken', accessToken: result.access_token },
@@ -442,7 +462,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
           accessToken: result.access_token,
           refreshToken: result.refresh_token,
           realm: result.realm,
-          ...(areAnyRequestIdsRemaining && { requestIds: remainingRequestIds }),
+          ...(areAnyRequestIdsRemaining && { requestIdMap: remainingRequestIdMap }),
         },
       }
     );
@@ -458,18 +478,20 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
   private updateRemainingRequestIds(
     requestIdToRemove: string | null,
-    remainingRequestIds: string[] = []
-  ): [boolean, string[]] {
+    remainingRequestIds: Record<RequestId, { redirectURL: string }>
+  ): [boolean, Record<RequestId, { redirectURL: string }>] {
     if (requestIdToRemove) {
       this.logger.info(`Removing requestId ${requestIdToRemove} from the state.`);
-      remainingRequestIds = remainingRequestIds?.filter(
-        (requestId) => requestId !== requestIdToRemove
-      );
+      delete remainingRequestIds[requestIdToRemove];
     }
 
-    const areAnyRequestIdsRemaining = remainingRequestIds && remainingRequestIds?.length > 0;
+    const areAnyRequestIdsRemaining =
+      remainingRequestIds && Object.keys(remainingRequestIds)?.length > 0;
+
     if (areAnyRequestIdsRemaining) {
-      this.logger.info(`The remaining requestIds in the state are ${remainingRequestIds}`);
+      this.logger.info(
+        `The remaining requestIds in the state are ${Object.keys(remainingRequestIds)}`
+      );
     } else {
       this.logger.info(`There are no remaining requestIds in the state.`);
     }
@@ -499,7 +521,8 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.info('Trying to log in with SAML response payload and existing valid session.');
 
     // If there are requestIds we want to pass the state
-    const shouldPassState = (existingState?.requestIds?.length ?? 0) > 0;
+    const shouldPassState =
+      existingState?.requestIdMap && Object.keys(existingState.requestIdMap).length > 0;
 
     // First let's try to authenticate via SAML Response payload.
     const payloadAuthenticationResult = await this.loginWithSAMLResponse(
@@ -659,8 +682,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       // Store request id in the state so that we can reuse it once we receive `SAMLResponse`.
       return AuthenticationResult.redirectTo(redirect, {
         state: {
-          requestIds: this.prepareRequestIDs(requestId, state?.requestIds),
-          redirectURL,
+          requestIdMap: this.updateRequestIdMap(requestId, redirectURL, state?.requestIdMap),
           realm,
         },
       });
@@ -670,30 +692,34 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
   }
 
-  private prepareRequestIDs(
+  private updateRequestIdMap(
     newRequestID: string,
-    existingRequestIDs: string[] | undefined
-  ): string[] {
-    let result: string[] = [];
+    newRedirectURL: string,
+    existingRequestIdMap: Record<RequestId, { redirectURL: string }> | undefined
+  ): Record<RequestId, { redirectURL: string }> {
+    let result: Record<RequestId, { redirectURL: string }> = {};
 
-    if (existingRequestIDs) {
-      result = existingRequestIDs;
+    if (existingRequestIdMap) {
+      result = existingRequestIdMap;
     }
 
     // We do not want to add an infinite number of requestIds to the state, so we limit it to `samlRequestIdLimit`(50)
     // We remove the first requestId if we have 50
-    if (result.length >= samlRequestIdLimit) {
+    if (Object.keys(result).length >= samlRequestIdLimit) {
       this.logger.debug(
         `requestId limit reached, removing the oldest requestId ${result[0]} from the state.`
       );
-      result.shift();
+
+      const oldestRequestId = Object.keys(result)[0];
+      delete result[oldestRequestId];
     }
 
     // We add the new requestId to the end of the array
+    result[newRequestID] = { redirectURL: newRedirectURL };
+
     this.logger.debug(
-      `Adding new requestId ${newRequestID} to the state. Current state: ${result}`
+      `Adding new requestId ${newRequestID} to the state. Current state: ${JSON.stringify(result)}`
     );
-    result.push(newRequestID);
 
     return result;
   }
