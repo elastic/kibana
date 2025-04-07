@@ -7,24 +7,15 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import classNames from 'classnames';
 
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  Position,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import type { EuiDataGridColumn } from '@elastic/eui';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
 
-import './column_chart.scss';
-
 import { i18n } from '@kbn/i18n';
 import { useColumnChart } from './use_column_chart';
+import { useColumnChartStyles } from './column_chart_styles';
 
 interface Props {
   chartData: ChartData;
@@ -47,6 +38,7 @@ export const ColumnChart: FC<Props> = ({
   isNumeric,
 }) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns, isNumeric);
+  const styles = useColumnChartStyles();
   const chartBaseTheme = useElasticChartsTheme();
   return (
     <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
@@ -81,12 +73,7 @@ export const ColumnChart: FC<Props> = ({
           />
         </Chart>
       )}
-      <div
-        className={classNames('dataGridChart__legend', {
-          'dataGridChart__legend--numeric': columnType.schema === 'number',
-        })}
-        data-test-subj={`${dataTestSubj}-legend`}
-      >
+      <div css={styles.legend} data-test-subj={`${dataTestSubj}-legend`}>
         {legendText}
       </div>
       {!hideLabel && <div data-test-subj={`${dataTestSubj}-id`}>{columnType.id}</div>}
