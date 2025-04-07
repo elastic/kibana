@@ -104,17 +104,17 @@ export const ChatSetupPage: React.FC = () => {
                         defaultMessage="Select your data sources to include as context or upload files to start."
                       />
                     }
-                    footer={indices.length ? <AddDataSources /> : <CreateIndexButton />}
+                    footer={
+                      <EuiFlexGroup>
+                        <EuiFlexItem grow={false}>
+                          {indices.length ? <AddDataSources /> : <CreateIndexButton />}
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <UploadFileButton isSetup={true} />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ConnectLLMButton />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {indices.length ? <AddDataSources /> : <CreateIndexButton />}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <UploadFileButton isSetup={true} />
                 </EuiFlexItem>
               </>
             )}
