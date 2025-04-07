@@ -26,7 +26,7 @@ jobs:
           cache: 'npm'
 
       - name: Install Dependencies for Script
-        run: npm install axios semver
+        run: npm install axios semver @octokit/rest@18.12.0
         working-directory: ./.github/scripts
 
       - name: Run Dependency Analysis Script
