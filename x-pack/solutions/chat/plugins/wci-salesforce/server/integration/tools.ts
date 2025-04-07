@@ -15,7 +15,6 @@ import { contentRefBuilder, ContentRefSourceType } from '@kbn/wci-common';
 import { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase, Account } from './types';
-import { Client } from 'elasticsearch-8.x';
 
 interface SearchParams {
   size?: number;
@@ -84,22 +83,22 @@ export async function searchDocs({
   dataSource,
   params = {},
 }: {
-  esClient: Client;
+  esClient: ElasticsearchClient;
   logger: Logger;
   integrationId: string;
   indexName: string;
   dataSource: string;
-  params: Record<string, any>;
+  params: SearchParams;
 }): Promise<ToolContentResult[]> {
   const size = params.size || 10;
 
     let query: QueryDslQueryContainer = {}
     if (dataSource == 'support_case'){
-      query = buildQuery(params, 'support_case', baseObjectMappings)
+      query = buildQuery(params, baseObjectMappings, 'support_case')
     } else if (dataSource == 'account') {
-      query = buildQuery(params, 'account', baseObjectMappings)
-    } else if (dataSource == 'all') {
-      query = buildQuery(params, 'all', baseObjectMappings)
+      query = buildQuery(params, baseObjectMappings, 'account')
+    } else {
+      query = buildQuery(params, baseObjectMappings)
     }
 
   const searchRequest: SearchRequest = {
@@ -155,16 +154,15 @@ export async function searchDocs({
   return contentFragments;
 }
 
-  
 
 /**
- * Retrieves Salesforce cases
+ * Retrieves Salesforce docuemnt by id
  *
  * @param esClient - Elasticsearch client
  * @param logger - Logger instance
  * @param indexName - Index name to query
- * @param dataSource - data source to search through
- * @param params - Search parameters including optional sorting configuration
+ * @param dataSource - Data source to search through
+ * @param id - Id to search by
  */
 export async function getById({
   esClient,
@@ -172,38 +170,32 @@ export async function getById({
   integrationId,
   indexName,
   dataSource,
-  params = {},
+  id,
 }: {
-  esClient: Client;
+  esClient: ElasticsearchClient;
   logger: Logger;
   integrationId: string;
   indexName: string;
   dataSource: string;
-  params: Record<string, any>;
+  id: string;
 }): Promise<ToolContentResult[]> {
-  const size = params.size || 10;
-  const sort = params.sortField
-    ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
-    : [];
 
     let query: QueryDslQueryContainer = {}
     if (dataSource == 'support_case'){
-      query = buildQuery(params, 'support_case', baseObjectMappings)
+      query = buildQuery({id}, baseObjectMappings, 'support_case')
     } else if (dataSource == 'account') {
-      query = buildQuery(params, 'account', baseObjectMappings)
-    } else if (dataSource == 'all') {
-      query = buildQuery(params, 'all', baseObjectMappings)
+      query = buildQuery({id}, baseObjectMappings, 'account')
+    } else {
+      query = buildQuery({id}, baseObjectMappings)
     }
 
   const searchRequest: SearchRequest = {
     index: indexName,
-    query,
-    sort,
-    size,
+    query
   };
 
   logger.info(
-    `Retrieving cases from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
+    `Retrieving document from ${indexName} with id: ${JSON.stringify(id)}`
   );
 
   const response = await esClient.search<SearchResponse>(searchRequest);
@@ -265,7 +257,7 @@ export async function getCases({
   indexName,
   params = {},
 }: {
-  esClient: Client;
+  esClient: ElasticsearchClient;
   logger: Logger;
   integrationId: string;
   indexName: string;
@@ -285,7 +277,7 @@ export async function getCases({
       'accountName': 'metadata.account_name',
     };
 
-  const query = buildQuery(params, 'support_case', supportCaseMappings);
+  const query = buildQuery(params, supportCaseMappings, 'support_case');
 
   const searchRequest: SearchRequest = {
     index: indexName,
@@ -321,17 +313,6 @@ export async function getCases({
 
   const contentFragments = response.hits.hits.map((hit) => {
     const source = hit._source as SupportCase;
-
-    // Helper function to safely get nested values
-    const getNestedValue = (obj: any, path: string[]): string => {
-      return (
-        path
-          .reduce((prev, curr) => {
-            return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
-          }, obj)
-          ?.toString() || ''
-      );
-    };
 
     // Format comments if they exist
     let commentsText = '';
@@ -395,7 +376,7 @@ export async function getAccounts({
   indexName,
   params = {},
 }: {
-  esClient: Client;
+  esClient: ElasticsearchClient;
   logger: Logger;
   integrationId: string;
   indexName: string;
@@ -412,7 +393,7 @@ export async function getAccounts({
       'isCustomerPortal': 'metadata.is_customer_portal',
     };
 
-  const query = buildQuery(params, 'account', accountMappings);
+  const query = buildQuery(params, accountMappings, 'account',);
 
   const searchRequest: SearchRequest = {
     index: indexName,
@@ -564,12 +545,10 @@ function addSemanticQuery(mustClauses: any[], semanticQuery?: string): void {
   }
 }
 
-function buildQuery(params: Record<string,any>, objectType: string, mappings: Record<string, string>): any {
+function buildQuery(params: Record<string,any>, mappings: Record<string, string>, objectType?: string,): any {
   let mustClauses: any[] = [];
   
-  if (objectType == 'all') {
-    mustClauses.push({ terms: { object_type: ['support_case', 'account']} });
-  } else {
+  if (objectType) {
     mustClauses.push({ term: { object_type: objectType} });
   }
 
