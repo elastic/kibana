@@ -14,6 +14,8 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiTitle,
+  EuiCard,
+  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -71,6 +73,56 @@ export const ChatSetupPage: React.FC = () => {
             ) : (
               <>
                 <EuiFlexItem grow={false}>
+                  <EuiCard
+                    textAlign="left"
+                    title={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.connectToLLM"
+                        defaultMessage="Large Language Model (LLM)"
+                      />
+                    }
+                    description={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.connectToLLMDescription"
+                        defaultMessage="Select a model to integrate with your chat experience.  You can also set up your own connection."
+                      />
+                    }
+                    footer={
+                      <EuiButton iconType="sparkles" data-test-subj="connectToLLMButton">
+                        <FormattedMessage
+                          id="xpack.searchPlayground.setupPage.connectToLLMButtonLabel"
+                          defaultMessage="Connect to an LLM"
+                        />
+                      </EuiButton>
+                    }
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiCard
+                    textAlign="left"
+                    title={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.elasticsearchData"
+                        defaultMessage="Elasticsearch Data"
+                      />
+                    }
+                    description={
+                      <FormattedMessage
+                        id="xpack.searchPlayground.setupPage.elasticsearchDataDescription"
+                        defaultMessage="Select your data sources to include as context or upload files to start."
+                      />
+                    }
+                    footer={
+                      <EuiButton iconType="plusInCircle" data-test-subj="addDataSourcesButton">
+                        <FormattedMessage
+                          id="xpack.searchPlayground.setupPage.addDataSourcesButtonLabel"
+                          defaultMessage="Add data sources"
+                        />
+                      </EuiButton>
+                    }
+                  />
+                </EuiFlexItem>
+                {/* <EuiFlexItem grow={false}>
                   <ConnectLLMButton />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -78,7 +130,7 @@ export const ChatSetupPage: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <UploadFileButton isSetup={true} />
-                </EuiFlexItem>
+                </EuiFlexItem> */}
               </>
             )}
           </EuiFlexGroup>
