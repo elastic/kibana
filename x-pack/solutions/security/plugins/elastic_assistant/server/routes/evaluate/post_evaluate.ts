@@ -196,8 +196,7 @@ export const postEvaluateRoute = (
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs, assistantGraphs } =
-            getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, assistantGraphs } = getGraphsFromNames(graphNames);
 
           const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvaluations({
             esClient,
