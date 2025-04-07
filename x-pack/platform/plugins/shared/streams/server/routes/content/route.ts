@@ -7,9 +7,20 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
-import { createListStream } from '@kbn/utils';
+import {
+  createConcatStream,
+  createListStream,
+  createMapStream,
+  createPromiseFromStreams,
+} from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
-import { contentPackIncludedObjectsSchema, isIncludeAll } from '@kbn/content-packs-schema';
+import {
+  ContentPackEntry,
+  INDEX_PLACEHOLDER,
+  contentPackIncludedObjectsSchema,
+  isIncludeAll,
+  replaceIndexPatterns,
+} from '@kbn/content-packs-schema';
 import { Asset } from '../../../common';
 import { DashboardAsset, DashboardLink } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
@@ -74,11 +85,17 @@ const exportContentRoute = createServerRoute({
       includeReferencesDeep: true,
     });
 
-    const archive = await generateArchive(
-      params.body,
+    const objects: ContentPackEntry[] = await createPromiseFromStreams([
       exportStream,
-      params.body.pattern_replacements
-    );
+      createMapStream((object: ContentPackEntry) => {
+        if (object.type === 'dashboard') {
+          return replaceIndexPatterns(object, { [INDEX_PLACEHOLDER]: params.path.name });
+        }
+        return object;
+      }),
+      createConcatStream([]),
+    ]);
+    const archive = await generateArchive(params.body, objects);
 
     return response.ok({
       body: archive,
@@ -136,12 +153,14 @@ const importContentRoute = createServerRoute({
 
     const { successResults, errors } = await importer.import({
       readStream: createListStream(
-        contentPack.entries.filter(
-          (entry) =>
-            isIncludeAll(params.body.include) ||
-            (entry.type === 'dashboard' &&
-              params.body.include.objects.dashboards.includes(entry.id))
-        )
+        contentPack.entries
+          .filter(
+            (entry) =>
+              isIncludeAll(params.body.include) ||
+              (entry.type === 'dashboard' &&
+                params.body.include.objects.dashboards.includes(entry.id))
+          )
+          .map((entry) => replaceIndexPatterns(entry, { [INDEX_PLACEHOLDER]: params.path.name }))
       ),
       createNewCopies: true,
       overwrite: true,

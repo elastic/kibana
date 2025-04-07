@@ -8,7 +8,6 @@
 import { z } from 'zod';
 import type { SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
-import { createIsNarrowSchema } from '@kbn/streams-schema';
 
 export interface ContentPackManifest {
   name: string;
