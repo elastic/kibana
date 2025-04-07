@@ -95,9 +95,15 @@ const createActions = (testBed: TestBed) => {
     clickFilterByTitle: async (title: string) => {
       // We need to read the document "body" as the filter dropdown (an EuiSelectable)
       // is added in a portalled popover and not inside the component DOM tree.
-      const filterButton: HTMLButtonElement | null = document.body.querySelector(
-        `.euiSelectableListItem[title=${title}]`
-      );
+      let filterButton: HTMLButtonElement | null = null;
+
+      // Wait for the filterButton to be available
+      await act(async () => {
+        while (!filterButton) {
+          filterButton = document.body.querySelector(`.euiSelectableListItem[title=${title}]`);
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        }
+      });
 
       expect(filterButton).not.toBeNull();
 
