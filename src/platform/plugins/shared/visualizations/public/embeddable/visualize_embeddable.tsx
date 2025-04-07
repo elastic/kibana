@@ -50,7 +50,6 @@ import { getExpressionRendererProps } from './get_expression_renderer_props';
 import { saveToLibrary } from './save_to_library';
 import { deserializeState, serializeState } from './state';
 import {
-  ExtraSavedObjectProperties,
   VisualizeApi,
   VisualizeOutputState,
   VisualizeSavedObjectInputState,
@@ -176,7 +175,14 @@ export const getVisualizeEmbeddableFactory: (deps: {
       uuid,
       parentApi,
       serializeState: () => {
-
+        return {
+          savedVis: vis$.getValue().serialize(),
+          ...timeRangeManager.getLatestState(),
+          ...titleManager.getLatestState(),
+          ...(runtimeState.savedObjectProperties ?? {}),
+          ...(runtimeState.savedObjectId ? { savedObjectId: runtimeState.savedObjectId } : {}),
+          ...(dynamicActionsManager?.getLatestState() ?? {}),
+        }
       },
       latestRuntimeState$: combineLatest([
         ...(dynamicActionsManager ? [dynamicActionsManager.latestState$] : []),
