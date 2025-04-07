@@ -15,10 +15,12 @@ import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 
-type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor' | 'lifecycle';
+const wiredStreamManagementSubTabs = ['route', 'enrich', 'schemaEditor', 'lifecycle'] as const;
 
-function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['route', 'enrich', 'schemaEditor', 'lifecycle'].includes(value);
+type WiredStreamManagementSubTab = (typeof wiredStreamManagementSubTabs)[number];
+
+function isValidManagementSubTab(value: string): value is WiredStreamManagementSubTab {
+  return wiredStreamManagementSubTabs.includes(value as WiredStreamManagementSubTab);
 }
 
 export function WiredStreamDetailManagement({
@@ -69,10 +71,7 @@ export function WiredStreamDetailManagement({
 
   if (!isValidManagementSubTab(subtab)) {
     return (
-      <RedirectTo
-        path="/{key}/{tab}/{subtab}"
-        params={{ path: { key, tab: 'management', subtab: 'route' } }}
-      />
+      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'route' } }} />
     );
   }
 

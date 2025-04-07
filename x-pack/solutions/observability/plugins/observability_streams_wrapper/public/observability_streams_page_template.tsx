@@ -42,6 +42,7 @@ export const createObservabilityStreamsAppPageTemplate =
             className: css`
               padding-block: 0px;
               display: flex;
+              flex-direction: column;
               height: 100%;
             `,
           },

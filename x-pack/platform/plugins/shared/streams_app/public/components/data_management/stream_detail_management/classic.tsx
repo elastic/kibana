@@ -15,10 +15,12 @@ import { ManagementTabs, Wrapper } from './wrapper';
 import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { UnmanagedElasticsearchAssets } from './unmanaged_elasticsearch_assets';
 
-type ManagementSubTabs = 'enrich' | 'advanced' | 'lifecycle';
+const classicStreamManagementSubTabs = ['enrich', 'advanced', 'lifecycle'] as const;
 
-function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['enrich', 'advanced', 'lifecycle'].includes(value);
+type ClassicStreamManagementSubTab = (typeof classicStreamManagementSubTabs)[number];
+
+function isValidManagementSubTab(value: string): value is ClassicStreamManagementSubTab {
+  return classicStreamManagementSubTabs.includes(value as ClassicStreamManagementSubTab);
 }
 
 export function ClassicStreamDetailManagement({
@@ -86,10 +88,7 @@ export function ClassicStreamDetailManagement({
 
   if (!isValidManagementSubTab(subtab)) {
     return (
-      <RedirectTo
-        path="/{key}/{tab}/{subtab}"
-        params={{ path: { key, tab: 'management', subtab: 'enrich' } }}
-      />
+      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'enrich' } }} />
     );
   }
 

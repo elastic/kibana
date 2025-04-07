@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { EuiPageTemplate } from '@elastic/eui';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
@@ -20,3 +21,7 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
    */
   return <PageTemplate>{children}</PageTemplate>;
 }
+
+StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
+StreamsAppPageTemplate.Body = EuiPageTemplate.Section;
+StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
