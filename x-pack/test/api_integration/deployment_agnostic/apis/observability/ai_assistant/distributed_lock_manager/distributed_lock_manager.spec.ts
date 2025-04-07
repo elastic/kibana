@@ -98,6 +98,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       beforeEach(async () => {
         retryCounter = 0;
+
         lockManager = new LockManager(LOCK_ID, es, logger);
       });
 
@@ -111,7 +112,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       function addElasticsearchMock({ numberOfMocks }: { numberOfMocks: number }) {
-        nock('http://localhost:9220', { allowUnmocked: true })
+        nock(/localhost:9220/, { allowUnmocked: true })
           .filteringRequestBody(() => '*')
           .post(`/${LOCKS_CONCRETE_INDEX_NAME}/_update/${LOCK_ID}`)
           .times(numberOfMocks)
