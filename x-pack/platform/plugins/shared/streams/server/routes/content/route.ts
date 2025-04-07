@@ -10,8 +10,10 @@ import { z } from '@kbn/zod';
 import { createListStream } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import { contentPackIncludedObjectsSchema, isIncludeAll } from '@kbn/content-packs-schema';
+import { Asset } from '../../../common';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
+import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
 import { generateArchive, parseArchive } from '../../lib/content';
 
 const exportContentRoute = createServerRoute({
@@ -49,14 +51,16 @@ const exportContentRoute = createServerRoute({
       throw new StatusError(`Content pack must include at least one object`, 400);
     }
 
-    const dashboards = await assetClient
-      .getAssets({ entityId: params.path.name, entityType: 'stream' })
-      .then((assets) =>
-        assets.filter(
-          ({ assetId, assetType }) =>
-            assetType === 'dashboard' &&
-            (isIncludeAll(params.body.include) ||
-              params.body.include.objects.dashboards.includes(assetId))
+    function isDashboard(asset: Asset): asset is DashboardAsset {
+      return asset[ASSET_TYPE] === 'dashboard';
+    }
+
+    const dashboards = (await assetClient.getAssets(params.path.name))
+      .filter(isDashboard)
+      .filter(
+          ({ assetId }) =>
+            isIncludeAll(params.body.include) ||
+              params.body.include.objects.dashboards.includes(assetId)
         )
       );
     if (dashboards.length === 0) {
@@ -66,7 +70,7 @@ const exportContentRoute = createServerRoute({
     const exporter = (await context.core).savedObjects.getExporter(soClient);
     const exportStream = await exporter.exportByObjects({
       request,
-      objects: dashboards.map((dashboard) => ({ id: dashboard.assetId, type: 'dashboard' })),
+      objects: dashboards.map((dashboard) => ({ id: dashboard[ASSET_ID], type: 'dashboard' })),
       includeReferencesDeep: true,
     });
 
@@ -143,19 +147,18 @@ const importContentRoute = createServerRoute({
       overwrite: true,
     });
 
-    const createdAssets = (successResults ?? [])
-      .filter((savedObject) => savedObject.type === 'dashboard')
-      .map((dashboard) => ({
-        assetType: 'dashboard' as const,
-        assetId: dashboard.destinationId ?? dashboard.id,
-      }));
+    const createdAssets: Array<Omit<DashboardLink, 'asset.uuid'>> =
+      successResults
+        ?.filter((savedObject) => savedObject.type === 'dashboard')
+        .map((dashboard) => ({
+          [ASSET_TYPE]: 'dashboard',
+          [ASSET_ID]: dashboard.destinationId ?? dashboard.id,
+        })) ?? [];
 
     if (createdAssets.length > 0) {
       await assetClient.bulk(
-        { entityId: params.path.name, entityType: 'stream' },
-        createdAssets.map((asset) => ({
-          index: { asset },
-        }))
+        params.path.name,
+        createdAssets.map((asset) => ({ index: { asset } }))
       );
     }
 

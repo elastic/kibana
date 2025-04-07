@@ -18,7 +18,7 @@ export const DraggableProcessorListItem = ({
     spacing="m"
     draggableId={props.processorRef.id}
     hasInteractiveChildren
-    style={{
+    css={{
       paddingLeft: 0,
       paddingRight: 0,
     }}
