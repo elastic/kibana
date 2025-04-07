@@ -19,6 +19,7 @@ import {
 } from '../../../document_details/right/tabs/test_ids';
 
 // FLAKY: https://github.com/elastic/kibana/issues/216735
+// FLAKY: https://github.com/elastic/kibana/issues/216815
 describe.skip('AssetDocumentTab', () => {
   it('renders', () => {
     const { getByTestId } = render(

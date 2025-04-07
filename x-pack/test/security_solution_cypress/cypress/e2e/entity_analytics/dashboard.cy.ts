@@ -24,6 +24,7 @@ import {
 } from '../../tasks/entity_analytics';
 
 // FLAKY: https://github.com/elastic/kibana/issues/213821
+// Failing: See https://github.com/elastic/kibana/issues/213821
 describe.skip(
   'Entity analytics dashboard page',
   {
