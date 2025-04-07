@@ -501,7 +501,7 @@ export function ChatBody({
             <EuiFlexItem
               grow={false}
               className={promptEditorClassname(euiTheme)}
-              style={{ height: promptEditorHeight }}
+              css={{ height: promptEditorHeight }}
             >
               <EuiHorizontalRule margin="none" />
               <EuiPanel
