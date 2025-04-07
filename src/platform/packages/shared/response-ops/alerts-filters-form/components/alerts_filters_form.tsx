@@ -13,25 +13,27 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPanel,
   EuiText,
   useEuiTheme,
-  EuiPanel,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
+import { alertsFiltersMetadata } from '../filters';
 import { AlertsFiltersFormContextProvider } from '../contexts/alerts_filters_form_context';
 import {
+  AlertsFilter,
   AlertsFiltersExpression,
   AlertsFiltersFormItemType,
-  AlertsFilter,
   AlertsFiltersExpressionOperator,
 } from '../types';
 import {
   ADD_OPERATION_LABEL,
   AND_OPERATOR,
   DELETE_OPERAND_LABEL,
+  getMaxFiltersNote,
   OR_OPERATOR,
 } from '../translations';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
@@ -44,10 +46,29 @@ import {
 } from '../constants';
 
 export interface AlertsFiltersFormProps {
+  /**
+   * Restricts the queries used by filters to these rule types
+   */
   ruleTypeIds: string[];
+  /**
+   * The current filters expression
+   */
   value?: AlertsFiltersExpression;
+  /**
+   * Callback for changes is the filters expression
+   */
   onChange: (newValue: AlertsFiltersExpression) => void;
+  /**
+   * Disables all the filters
+   */
   isDisabled?: boolean;
+  /**
+   * Restricts the total number of filters, preventing the user from creating more
+   */
+  maxFilters?: number;
+  /**
+   * Service dependencies
+   */
   services: {
     http: HttpStart;
     notifications: NotificationsStart;
@@ -56,6 +77,7 @@ export interface AlertsFiltersFormProps {
 
 // This ensures that the form is initialized with an initially empty "Filter by" selector
 const DEFAULT_VALUE: AlertsFiltersExpression = [{ filter: {} }];
+const DEFAULT_MAX_FILTERS = 5;
 
 /**
  * A form to build boolean expressions of filters for alerts searches
@@ -65,6 +87,7 @@ export const AlertsFiltersForm = ({
   value = DEFAULT_VALUE,
   onChange,
   isDisabled = false,
+  maxFilters = DEFAULT_MAX_FILTERS,
   services,
 }: AlertsFiltersFormProps) => {
   const [firstItem, ...otherItems] = value as [
@@ -73,6 +96,20 @@ export const AlertsFiltersForm = ({
     },
     ...AlertsFiltersExpression
   ];
+  const lastFilterEmpty = useMemo(() => {
+    if (!Boolean(value?.length)) {
+      return true;
+    }
+    const { filter: lastFilter } = value[value.length - 1] as Extract<
+      AlertsFiltersExpression,
+      { filter: AlertsFilter }
+    >;
+    if (!lastFilter.type) {
+      return true;
+    }
+    const { isEmpty } = alertsFiltersMetadata[lastFilter.type];
+    return isEmpty((lastFilter as AlertsFilter<Parameters<typeof isEmpty>[0]>).value);
+  }, [value]);
 
   const addOperand = useCallback(
     (operator: AlertsFiltersExpressionOperator) => {
@@ -175,43 +212,51 @@ export const AlertsFiltersForm = ({
             </EuiFlexGroup>
           </EuiPanel>
         )}
-        <EuiFlexItem>
-          <EuiFlexGroup
-            alignItems="center"
-            gutterSize="s"
-            role="group"
-            aria-label={ADD_OPERATION_LABEL}
-          >
-            <EuiFlexItem grow>
-              <EuiHorizontalRule margin="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="plusInCircle"
-                size="xs"
-                onClick={() => addOperand('or')}
-                isDisabled={isDisabled}
-                data-test-subj={ADD_OR_OPERATION_BUTTON_SUBJ}
+        {!maxFilters || otherItems.length >= (maxFilters - 1) * 2 ? (
+          <EuiText textAlign="center" size="s" color="subdued">
+            <p>{getMaxFiltersNote(maxFilters)}</p>
+          </EuiText>
+        ) : (
+          !lastFilterEmpty && (
+            <EuiFlexItem>
+              <EuiFlexGroup
+                alignItems="center"
+                gutterSize="s"
+                role="group"
+                aria-label={ADD_OPERATION_LABEL}
               >
-                {OR_OPERATOR}
-              </EuiButtonEmpty>
+                <EuiFlexItem grow>
+                  <EuiHorizontalRule margin="s" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="plusInCircle"
+                    size="xs"
+                    onClick={() => addOperand('or')}
+                    isDisabled={isDisabled}
+                    data-test-subj={ADD_OR_OPERATION_BUTTON_SUBJ}
+                  >
+                    {OR_OPERATOR}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    iconType="plusInCircle"
+                    size="xs"
+                    onClick={() => addOperand('and')}
+                    isDisabled={isDisabled}
+                    data-test-subj={ADD_AND_OPERATION_BUTTON_SUBJ}
+                  >
+                    {AND_OPERATOR}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow>
+                  <EuiHorizontalRule margin="s" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                iconType="plusInCircle"
-                size="xs"
-                onClick={() => addOperand('and')}
-                isDisabled={isDisabled}
-                data-test-subj={ADD_AND_OPERATION_BUTTON_SUBJ}
-              >
-                {AND_OPERATOR}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow>
-              <EuiHorizontalRule margin="s" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+          )
+        )}
       </EuiFlexGroup>
     </AlertsFiltersFormContextProvider>
   );

@@ -12,6 +12,7 @@ import { useGetRuleTagsQuery } from '@kbn/response-ops-rules-apis/hooks/use_get_
 import React, { useCallback, useMemo } from 'react';
 import { EuiComboBoxProps } from '@elastic/eui/src/components/combo_box/combo_box';
 import {
+
   RULE_TAGS_FILTER_LABEL,
   RULE_TAGS_FILTER_NO_OPTIONS_PLACEHOLDER,
   RULE_TAGS_FILTER_PLACEHOLDER,

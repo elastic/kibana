@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useMemo } from 'react';
+import React, { forwardRef, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -68,11 +68,10 @@ const getAvailableSolutions = (ruleTypes: InternalRuleType[]) => {
  * Stack is shown only when it's the unique alternative to Security
  * (i.e. in Security serverless projects).
  */
-export const AlertsSolutionSelector = ({
-  solution,
-  onSolutionChange,
-  services: { http },
-}: AlertsSolutionSelectorProps) => {
+export const AlertsSolutionSelector = forwardRef<
+  EuiSuperSelect<RuleTypeSolution>,
+  AlertsSolutionSelectorProps
+>(({ solution, onSolutionChange, services: { http } }, ref) => {
   const { data: ruleTypes, isLoading, isError } = useGetInternalRuleTypesQuery({ http });
   const availableSolutions = useMemo(() => getAvailableSolutions(ruleTypes ?? []), [ruleTypes]);
   const options = useMemo<Array<EuiSuperSelectOption<RuleTypeSolution>>>(() => {
@@ -108,6 +107,7 @@ export const AlertsSolutionSelector = ({
       data-test-subj={SOLUTION_SELECTOR_SUBJ}
     >
       <EuiSuperSelect
+        ref={ref}
         isLoading={isLoading}
         isInvalid={isError}
         placeholder={SOLUTION_SELECTOR_PLACEHOLDER}
@@ -115,7 +115,11 @@ export const AlertsSolutionSelector = ({
         valueOfSelected={solution}
         onChange={(newSol) => onSolutionChange(newSol)}
         fullWidth
+        popoverProps={{
+          repositionOnScroll: true,
+          ownFocus: true,
+        }}
       />
     </EuiFormRow>
   );
-};
+});

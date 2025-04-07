@@ -18,9 +18,9 @@ export type AlertsFilterComponentType<T> = ComponentType<{
   isDisabled?: boolean;
 }>;
 
-export interface AlertsFilter {
+export interface AlertsFilter<T = unknown> {
   type?: AlertsFiltersFormItemType;
-  value?: unknown;
+  value?: T;
 }
 
 export interface AlertsFilterMetadata<T> {

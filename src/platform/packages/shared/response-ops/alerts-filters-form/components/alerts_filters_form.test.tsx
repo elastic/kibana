@@ -14,6 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsFiltersForm, AlertsFiltersFormProps } from './alerts_filters_form';
 import { AlertsFilter, AlertsFiltersExpression } from '../types';
 import {
+  ADD_AND_OPERATION_BUTTON_SUBJ,
   ADD_OR_OPERATION_BUTTON_SUBJ,
   DELETE_OPERAND_BUTTON_SUBJ,
   FORM_ITEM_SUBJ,
@@ -163,5 +164,30 @@ describe('AlertsFiltersForm', () => {
       },
       ...testExpression.slice(1),
     ]);
+  });
+
+  it('should prevent the user from adding more filters than `maxFilters`', async () => {
+    render(
+      <IntlProvider locale="en">
+        <AlertsFiltersForm
+          ruleTypeIds={[]}
+          value={{
+            operator: 'or',
+            operands: [
+              { type: 'ruleTypes', value: 'filter1' },
+              { type: 'ruleTypes', value: 'filter2' },
+              { type: 'ruleTypes', value: 'filter3' },
+              { type: 'ruleTypes', value: 'filter4' },
+              { type: 'ruleTypes', value: 'filter5' },
+            ],
+          }}
+          onChange={jest.fn()}
+          services={{ http, notifications }}
+        />
+      </IntlProvider>
+    );
+
+    expect(screen.queryByTestId(ADD_OR_OPERATION_BUTTON_SUBJ)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ADD_AND_OPERATION_BUTTON_SUBJ)).not.toBeInTheDocument();
   });
 });

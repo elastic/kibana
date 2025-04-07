@@ -106,3 +106,9 @@ export const SOLUTION_SELECTOR_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Select solution',
   }
 );
+
+export const getMaxFiltersNote = (max: number) =>
+  i18n.translate('alertsFiltersForm.maxFiltersReached', {
+    defaultMessage: 'Maximum number of {max} filters reached',
+    values: { max },
+  });

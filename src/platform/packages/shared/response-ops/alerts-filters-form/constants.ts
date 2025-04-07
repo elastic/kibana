@@ -9,6 +9,7 @@
 
 export const DELETE_OPERAND_BUTTON_SUBJ = 'deleteOperandButton';
 export const FILTERS_FORM_SUBJ = 'alertsFiltersForm';
+export const FILTERS_FORM_ITEM_SUBJ = 'alertsFiltersFormItem';
 export const ADD_OR_OPERATION_BUTTON_SUBJ = 'addOrOperationButton';
 export const ADD_AND_OPERATION_BUTTON_SUBJ = 'addAndOperationButton';
 export const SOLUTION_SELECTOR_SUBJ = 'solutionSelector';

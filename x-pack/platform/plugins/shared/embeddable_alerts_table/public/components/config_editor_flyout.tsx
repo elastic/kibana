@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -16,8 +16,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiHorizontalRule,
   EuiLoadingSpinner,
-  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import { AlertsFiltersForm } from '@kbn/response-ops-alerts-filters-form/components/alerts_filters_form';
@@ -27,6 +27,8 @@ import { useGetInternalRuleTypesQuery } from '@kbn/response-ops-rules-apis/hooks
 import type { AlertsFiltersExpression } from '@kbn/response-ops-alerts-filters-form/types';
 import type { RuleTypeSolution } from '@kbn/alerting-types';
 import { isEmptyFiltersExpression } from '@kbn/response-ops-alerts-filters-form/utils/filters_expression';
+import type { EuiSuperSelect } from '@elastic/eui/src/components/form/super_select/super_select';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import type { EmbeddableAlertsTableConfig } from '../types';
 import {
   CONFIG_EDITOR_ADD_TABLE_TITLE,
@@ -40,6 +42,7 @@ import {
   SWITCH_SOLUTION_CONFIRM_CONFIRM_MESSAGE,
   SWITCH_SOLUTION_CONFIRM_MESSAGE,
   SWITCH_SOLUTION_CONFIRM_TITLE,
+  CONFIG_EDITOR_CLEAR_FILTERS_LABEL,
 } from '../translations';
 
 export interface ConfigEditorFlyoutProps {
@@ -65,6 +68,8 @@ export const ConfigEditorFlyout = ({
   services,
 }: ConfigEditorFlyoutProps) => {
   const { http, overlays } = services;
+  const flyoutBodyRef = useRef<HTMLDivElement>(null);
+  const solutionSelectorRef = useRef<EuiSuperSelect<RuleTypeSolution>>(null);
   const [solution, setSolution] = useState<EmbeddableAlertsTableConfig['solution'] | undefined>(
     initialConfig?.solution
   );
@@ -80,6 +85,10 @@ export const ConfigEditorFlyout = ({
     () => (!ruleTypes || !solution ? [] : getRuleTypeIdsForSolution(ruleTypes, solution)),
     [ruleTypes, solution]
   );
+
+  const resetFilters = useCallback(() => {
+    setFilters(EMPTY_FILTERS);
+  }, []);
 
   const onSolutionChange = useCallback(
     (newSolution: RuleTypeSolution) => {
@@ -102,15 +111,27 @@ export const ConfigEditorFlyout = ({
             if (result) {
               // User accepted to switch solution
               setSolution(newSolution);
-              setFilters(EMPTY_FILTERS);
+              resetFilters();
             }
           });
       } else {
         setSolution(newSolution);
       }
     },
-    [filters, overlays, solution]
+    [filters, overlays, resetFilters, solution]
   );
+
+  useEffectOnce(() => {
+    if (!solution && flyoutBodyRef.current) {
+      const panel = flyoutBodyRef.current.closest('.euiFlyout');
+      // Waiting for the flyuot entry animation to finish before auto-opening the solution
+      // selector, otherwise the options popover cannot position itself correctly
+      panel?.addEventListener('animationend', () => solutionSelectorRef.current?.openPopover(), {
+        once: true,
+      });
+      return () => panel?.removeEventListener('animationend', focus);
+    }
+  });
 
   return (
     <>
@@ -121,44 +142,61 @@ export const ConfigEditorFlyout = ({
       </EuiFlyoutHeader>
 
       <EuiFlyoutBody>
-        <EuiFlexGroup direction="column" gutterSize="m">
+        <EuiFlexGroup direction="column" gutterSize="m" ref={flyoutBodyRef}>
           <EuiFlexItem>
             <AlertsSolutionSelector
-              services={{ http }}
+              ref={solutionSelectorRef}
               solution={solution}
               onSolutionChange={onSolutionChange}
+              services={{ http }}
             />
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiFlexItem>
-                <EuiText>
-                  <h4>{CONFIG_EDITOR_FILTERS_FORM_TITLE}</h4>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                {isLoadingRuleTypes ? (
-                  <EuiLoadingSpinner size="m" />
-                ) : cannotLoadRuleTypes ? (
-                  <EuiCallOut
-                    color="danger"
-                    iconType="error"
-                    title={CONFIG_EDITOR_CANNOT_LOAD_RULE_TYPES_TITLE}
-                  >
-                    <p>{CONFIG_EDITOR_CANNOT_LOAD_RULE_TYPES_DESCRIPTION}</p>
-                  </EuiCallOut>
-                ) : (
-                  <AlertsFiltersForm
-                    ruleTypeIds={ruleTypeIds}
-                    value={filters}
-                    onChange={setFilters}
-                    isDisabled={!solution}
-                    services={services}
-                  />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {solution && (
+            <EuiFlexItem>
+              <EuiFlexGroup direction="column" gutterSize="s">
+                <EuiFlexItem>
+                  <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="xs">
+                        <h4>{CONFIG_EDITOR_FILTERS_FORM_TITLE}</h4>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={resetFilters}
+                        iconType="eraser"
+                        flush="right"
+                        size="xs"
+                      >
+                        {CONFIG_EDITOR_CLEAR_FILTERS_LABEL}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiHorizontalRule margin="xs" />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {isLoadingRuleTypes ? (
+                    <EuiLoadingSpinner size="m" />
+                  ) : cannotLoadRuleTypes ? (
+                    <EuiCallOut
+                      color="danger"
+                      iconType="error"
+                      title={CONFIG_EDITOR_CANNOT_LOAD_RULE_TYPES_TITLE}
+                    >
+                      <p>{CONFIG_EDITOR_CANNOT_LOAD_RULE_TYPES_DESCRIPTION}</p>
+                    </EuiCallOut>
+                  ) : (
+                    <AlertsFiltersForm
+                      ruleTypeIds={ruleTypeIds}
+                      value={filters}
+                      onChange={setFilters}
+                      services={services}
+                    />
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiFlyoutBody>
 

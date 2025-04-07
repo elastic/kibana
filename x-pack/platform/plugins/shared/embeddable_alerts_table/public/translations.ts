@@ -36,6 +36,13 @@ export const SWITCH_SOLUTION_CONFIRM_CONFIRM_MESSAGE = i18n.translate(
   }
 );
 
+export const CONFIG_EDITOR_CLEAR_FILTERS_LABEL = i18n.translate(
+  'xpack.embeddableAlertsTable.configEditorFlyout.clearFiltersLabel',
+  {
+    defaultMessage: 'Clear all',
+  }
+);
+
 export const RULE_TYPES_LOAD_ERROR_TITLE = i18n.translate(
   'xpack.embeddableAlertsTable.ruleTypesLoadErrorTitle',
   {
