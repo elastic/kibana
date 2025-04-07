@@ -33,7 +33,7 @@ import { sendUpdateAgentPolicyForRq } from '../../../../../../hooks/use_request/
 export interface ManageAutoUpgradeAgentsModalProps {
   onClose: (refreshPolicy: boolean) => void;
   agentPolicy: AgentPolicy;
-  agentCount: number;
+  agentCount?: number;
 }
 
 export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
@@ -250,11 +250,12 @@ const TargetVersionsRow: React.FunctionComponent<{
               />
               <EuiIconTip
                 type="iInCircle"
+                title={'Rounding Applied'}
                 content={
                   <FormattedMessage
                     data-test-subj="percentageTooltip"
                     id="xpack.fleet.manageAutoUpgradeAgents.percentageTooltip"
-                    defaultMessage="Set 100 to upgrade all agents in the policy."
+                    defaultMessage="The actual percentage of agents upgraded may vary slightly due to rounding. For example, selecting 30% of 25 agents may result in 8 agents being upgraded (32%)."
                   />
                 }
               />

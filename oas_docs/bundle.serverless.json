@@ -18666,6 +18666,9 @@
                           "hasRolloutPeriod": {
                             "type": "boolean"
                           },
+                          "is_automatic": {
+                            "type": "boolean"
+                          },
                           "latestErrors": {
                             "items": {
                               "additionalProperties": false,
