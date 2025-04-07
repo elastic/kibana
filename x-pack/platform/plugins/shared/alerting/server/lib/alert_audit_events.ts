@@ -7,17 +7,20 @@
 
 import type { EcsEvent } from '@kbn/core/server';
 import type { AuditEvent } from '@kbn/security-plugin/server';
-import { ReadOperations, WriteOperations } from '@kbn/alerting-plugin/server';
 import type { ArrayElement } from '@kbn/utility-types';
+import { ReadOperations, WriteOperations } from '../authorization/types';
 
 export enum AlertAuditAction {
   GET = 'alert_get',
   UPDATE = 'alert_update',
   FIND = 'alert_find',
+  DELETE = 'alert_delete',
+  SCHEDULE_DELETE = 'alert_schedule_delete',
 }
 
 export const operationAlertAuditActionMap = {
   [WriteOperations.Update]: AlertAuditAction.UPDATE,
+  [WriteOperations.Delete]: AlertAuditAction.DELETE,
   [ReadOperations.Find]: AlertAuditAction.FIND,
   [ReadOperations.Get]: AlertAuditAction.GET,
 };
@@ -28,29 +31,51 @@ const eventVerbs: Record<AlertAuditAction, VerbsTuple> = {
   alert_get: ['access', 'accessing', 'accessed'],
   alert_update: ['update', 'updating', 'updated'],
   alert_find: ['access', 'accessing', 'accessed'],
+  alert_delete: ['delete', 'deleting', 'deleted'],
+  alert_schedule_delete: [
+    'schedule deletion task for',
+    'scheduling deletion task for',
+    'scheduled deletion task for',
+  ],
 };
 
 const eventTypes: Record<AlertAuditAction, ArrayElement<EcsEvent['type']>> = {
   alert_get: 'access',
   alert_update: 'change',
   alert_find: 'access',
+  alert_delete: 'deletion',
+  alert_schedule_delete: 'deletion',
 };
 
 export interface AlertAuditEventParams {
   action: AlertAuditAction;
+  actor?: string;
   outcome?: EcsEvent['outcome'];
   id?: string;
   error?: Error;
+  bulk?: boolean;
 }
 
-export function alertAuditEvent({ action, id, outcome, error }: AlertAuditEventParams): AuditEvent {
-  const doc = id ? `alert [id=${id}]` : 'an alert';
+export function alertAuditEvent({
+  action,
+  id,
+  outcome,
+  error,
+  actor = 'User',
+  bulk = false,
+}: AlertAuditEventParams): AuditEvent {
+  let doc: string = '';
+  if (id) {
+    doc = `alert [id=${id}]`;
+  } else {
+    doc = bulk ? 'alerts' : 'an alert';
+  }
   const [present, progressive, past] = eventVerbs[action];
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+    ? `${actor} is ${progressive} ${doc}`
+    : `${actor} has ${past} ${doc}`;
   const type = eventTypes[action];
 
   return {
@@ -66,4 +91,19 @@ export function alertAuditEvent({ action, id, outcome, error }: AlertAuditEventP
       message: error.message,
     },
   };
+}
+
+export function alertAuditSystemEvent({
+  action,
+  id,
+  outcome,
+  error,
+}: AlertAuditEventParams): AuditEvent {
+  return alertAuditEvent({
+    action,
+    id,
+    outcome,
+    error,
+    actor: 'System',
+  });
 }
