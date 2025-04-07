@@ -51,7 +51,6 @@ describe('nl to esql agent', () => {
     validateEsqlResults: [],
     maximumValidationAttempts: 3,
     maximumEsqlGenerationAttempts: 3,
-    indexPatternIdentified: false,
     selectedIndexPattern: '',
     objectiveSummary: '',
   };

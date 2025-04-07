@@ -12,8 +12,16 @@ import { HumanMessage } from '@langchain/core/messages';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
 import { getGenerateEsqlGraph } from './graphs/generate_esql/generate_esql';
+import { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
+import { ActionsClientChatBedrockConverse, ActionsClientChatVertexAI, ActionsClientChatOpenAI } from '@kbn/langchain/server';
 
-export type GenerateEsqlParams = AssistantToolParams;
+export type GenerateEsqlParams = AssistantToolParams & {
+    assistantContext: ElasticAssistantApiRequestHandlerContext;
+    createLlmInstance: () =>
+      | ActionsClientChatBedrockConverse
+      | ActionsClientChatVertexAI
+      | ActionsClientChatOpenAI;
+};
 
 const TOOL_NAME = 'GenerateESQLTool';
 
@@ -33,19 +41,23 @@ const toolDetails = {
 export const GENERATE_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: GenerateEsqlParams): params is GenerateEsqlParams => {
-    const { inference, connectorId, assistantContext } = params;
+  isSupported: (params: AssistantToolParams): params is GenerateEsqlParams => {
+    const { inference, connectorId, assistantContext, createLlmInstance } = params;
     return (
       inference != null &&
       connectorId != null &&
-      assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration
+      assistantContext != null &&
+      assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration &&
+      createLlmInstance != null
     );
   },
-  getTool(params: GenerateEsqlParams) {
+  getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel, esClient, createLlmInstance } =
-      params;
+      params as GenerateEsqlParams;
+
+
     if (inference == null || connectorId == null) return null;
 
     const selfHealingGraph = getGenerateEsqlGraph({
