@@ -75,7 +75,7 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  if (definition.can_manage) {
+  if (definition.privileges.manage) {
     tabs.advanced = {
       content: (
         <UnmanagedElasticsearchAssets

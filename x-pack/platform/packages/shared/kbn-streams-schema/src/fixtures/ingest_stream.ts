@@ -11,5 +11,10 @@ export const ingestStream = {
   name: 'logs.nginx',
   elasticsearch_assets: [],
   stream: ingestStreamConfig,
-  can_manage: true,
+  privileges: {
+    manage: true,
+    monitor: true,
+    lifecycle: true,
+    simulate: true,
+  },
 };

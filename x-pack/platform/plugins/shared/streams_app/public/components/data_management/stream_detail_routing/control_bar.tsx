@@ -169,7 +169,7 @@ export function ControlBar() {
           <EuiButtonEmpty
             color="danger"
             size="s"
-            disabled={routingAppState.saveInProgress}
+            disabled={routingAppState.saveInProgress || !definition.privileges.manage}
             data-test-subj="streamsAppRoutingStreamEntryRemoveButton"
             onClick={() => {
               routingAppState.setShowDeleteModal(true);
@@ -196,6 +196,7 @@ export function ControlBar() {
         </EuiButtonEmpty>
         <EuiButton
           isLoading={routingAppState.saveInProgress}
+          disabled={routingAppState.saveInProgress || !definition.privileges.manage}
           onClick={saveOrUpdateChildren}
           data-test-subj="streamsAppStreamDetailRoutingSaveButton"
         >
