@@ -11,24 +11,23 @@ import {
   type ActionConnector,
 } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
-const ExternalAIActionTypeIds = ['.bedrock', '.gen-ai', '.gemini'];
-const InferenceActionTypeId = '.inference';
+const AllowedActionTypeIds = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
 
-type PreconfiguredInferenceConnector = ActionConnector & {
-  actionTypeId: typeof InferenceActionTypeId;
+type PreConfiguredInferenceConnector = ActionConnector & {
+  actionTypeId: '.inference';
   isPreconfigured: true;
   config?: {
-    inferenceId: string;
+    inferenceId?: string;
   };
 };
 
-const isExternalAIConnector = (connector: ActionConnector): boolean =>
-  ExternalAIActionTypeIds.includes(connector.actionTypeId);
+const isAllowedConnector = (connector: ActionConnector): boolean =>
+  AllowedActionTypeIds.includes(connector.actionTypeId);
 
 const isPreConfiguredInferenceConnector = (
   connector: ActionConnector
-): connector is PreconfiguredInferenceConnector =>
-  connector.actionTypeId === InferenceActionTypeId && connector.isPreconfigured;
+): connector is PreConfiguredInferenceConnector =>
+  connector.actionTypeId === '.inference' && connector.isPreconfigured;
 
 const isValidAiConnector = async (
   connector: ActionConnector,
@@ -38,21 +37,22 @@ const isValidAiConnector = async (
     return false;
   }
 
-  if (isExternalAIConnector(connector)) {
-    return true;
+  if (!isAllowedConnector(connector)) {
+    return false;
   }
 
   if (isPreConfiguredInferenceConnector(connector)) {
     const inferenceId = connector.config?.inferenceId;
-    if (inferenceId) {
-      const exists = await isInferenceEndpointExists(deps.http, inferenceId);
-      if (exists) {
-        return true;
-      }
+    if (!inferenceId) {
+      return false;
+    }
+    const exists = await isInferenceEndpointExists(deps.http, inferenceId);
+    if (!exists) {
+      return false;
     }
   }
 
-  return false;
+  return true;
 };
 
 /**

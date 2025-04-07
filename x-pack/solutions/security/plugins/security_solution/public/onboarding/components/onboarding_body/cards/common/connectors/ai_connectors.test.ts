@@ -81,6 +81,25 @@ describe('loadAiConnectors', () => {
     expect(result).toEqual([]);
   });
 
+  it('should exclude inference connectors if it is not configured correctly', async () => {
+    const mockConnectors: ActionConnector[] = [
+      {
+        id: '1',
+        actionTypeId: '.inference',
+        isMissingSecrets: false,
+        isPreconfigured: true,
+        config: { inferenceId: undefined },
+      } as unknown as ActionConnector,
+    ];
+
+    mockLoadAllActions.mockResolvedValue(mockConnectors);
+    mockIsInferenceEndpointExists.mockResolvedValue(true);
+
+    const result = await loadAiConnectors(mockHttp);
+
+    expect(result).toEqual([]);
+  });
+
   it('should exclude connectors with missing secrets', async () => {
     const mockConnectors: ActionConnector[] = [
       { id: '1', actionTypeId: '.bedrock', isMissingSecrets: true } as ActionConnector,
