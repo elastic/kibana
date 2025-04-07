@@ -9,17 +9,16 @@ import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
 import { BulkDeleteSLOParams } from '@kbn/slo-schema';
 import {
-  getSLOPipelineId,
-  getSLOSummaryPipelineId,
-  getSLOSummaryTransformId,
-  getSLOTransformId,
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
+  getSLOSummaryTransformId,
+  getSLOTransformId,
+  getWildcardPipelineId,
 } from '../../common/constants';
+import { SLODefinition } from '../domain/models';
 import { retryTransientEsErrors } from '../utils/retry';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
-import { SLODefinition } from '../domain/models';
 
 export class DeleteSLO {
   constructor(
@@ -38,20 +37,12 @@ export class DeleteSLO {
 
         await Promise.all([this.deleteSummaryTransform(slo), this.deleteRollupTransform(slo)]);
 
-        await Promise.all([
-          retryTransientEsErrors(() =>
-            this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-              { id: getSLOPipelineId(slo.id, slo.revision) },
-              { ignore: [404] }
-            )
-          ),
-          retryTransientEsErrors(() =>
-            this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-              { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
-              { ignore: [404] }
-            )
-          ),
-        ]);
+        await retryTransientEsErrors(() =>
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+            { id: getWildcardPipelineId(slo.id, slo.revision) },
+            { ignore: [404] }
+          )
+        );
 
         await Promise.all([
           this.deleteRollupData(slo.id),
@@ -65,13 +56,11 @@ export class DeleteSLO {
 
   private async deleteRollupTransform(slo: SLODefinition) {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.stop(rollupTransformId);
     await this.transformManager.uninstall(rollupTransformId);
   }
 
   private async deleteSummaryTransform(slo: SLODefinition) {
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
-    await this.summaryTransformManager.stop(summaryTransformId);
     await this.summaryTransformManager.uninstall(summaryTransformId);
   }
 
@@ -82,8 +71,12 @@ export class DeleteSLO {
       conflicts: 'proceed',
       slices: 'auto',
       query: {
-        match: {
-          'slo.id': sloId,
+        bool: {
+          filter: {
+            term: {
+              'slo.id': sloId,
+            },
+          },
         },
       },
     });
@@ -97,8 +90,12 @@ export class DeleteSLO {
       conflicts: 'proceed',
       slices: 'auto',
       query: {
-        match: {
-          'slo.id': sloId,
+        bool: {
+          filter: {
+            term: {
+              'slo.id': sloId,
+            },
+          },
         },
       },
     });
