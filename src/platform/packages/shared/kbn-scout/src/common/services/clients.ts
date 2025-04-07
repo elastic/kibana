@@ -11,8 +11,6 @@ import { createEsClientForTesting, KbnClient } from '@kbn/test';
 import { ScoutLogger } from './logger';
 import { ScoutTestConfig, EsClient } from '../../types';
 
-const ES_REQUEST_TIMEOUT = 30_000;
-
 interface ClientOptions {
   serviceName: string;
   url: string;
@@ -47,7 +45,6 @@ export function getEsClient(config: ScoutTestConfig, log: ScoutLogger) {
 
     esClientInstance = createEsClientForTesting({
       esUrl: elasticsearchUrl,
-      requestTimeout: ES_REQUEST_TIMEOUT,
       isCloud: config.isCloud,
       authOverride: { username, password },
     });
