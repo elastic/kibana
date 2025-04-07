@@ -107,10 +107,6 @@ export async function searchDocs({
     size,
   };
 
-  logger.info(
-    `Retrieving cases from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
-  );
-
   const response = await esClient.search<SearchResponse>(searchRequest);
 
   const contextFields = [
