@@ -18,6 +18,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
 
+  const bringFocusWithKeyboardToSelectedTab = async () => {
+    await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.TAB).perform();
+  };
+
+  const openTabContextMenuWithKeyboard = async () => {
+    await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.F10).perform();
+  };
+
   describe('Managing Unified Tabs', () => {
     before(async () => {
       await browser.setWindowSize(1200, 800);
@@ -86,6 +94,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await unifiedTabs.closeTab(6);
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      await unifiedTabs.openTabMenu(6);
+      expect(await unifiedTabs.getContextMenuItems()).to.eql([
+        'Rename',
+        'Duplicate',
+        'Close other tabs',
+      ]);
     });
 
     it('should support keyboard events for navigating between tabs', async () => {
@@ -94,7 +108,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await unifiedTabs.createNewTab();
       expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
-      await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.TAB).perform(); // moves the focus from "+" to the active tab
+      await bringFocusWithKeyboardToSelectedTab();
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 6');
@@ -103,6 +117,12 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await browser.pressKeys(browser.keys.DELETE);
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      await openTabContextMenuWithKeyboard();
+      expect(await unifiedTabs.getContextMenuItems()).to.eql([
+        'Rename',
+        'Duplicate',
+        'Close other tabs',
+      ]);
     });
 
     it('should support drag and drop for reordering tabs', async () => {
@@ -121,7 +141,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         'Untitled session 7',
         'Untitled session 8',
       ]);
-      await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.TAB).perform(); // moves the focus from "+" to the active tab
+      await bringFocusWithKeyboardToSelectedTab();
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
       await browser.pressKeys(browser.keys.SPACE);

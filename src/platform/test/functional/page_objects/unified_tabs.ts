@@ -96,6 +96,20 @@ export class UnifiedTabsPageObject extends FtrService {
     });
   }
 
+  public async openTabMenu(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    const menuButton = await tabElements[index].findByCssSelector(
+      '[data-test-subj^="unifiedTabs_tabMenuBtn_"]'
+    );
+    await menuButton.click();
+    await this.retry.waitFor('the menu to open', async () => {
+      return (await this.getContextMenuItems()).length > 0;
+    });
+  }
+
   public async editTabLabel(index: number, newLabel: string) {
     const tabElements = await this.getTabElements();
     if (index < 0 || index >= tabElements.length) {
@@ -120,6 +134,24 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.retry.waitFor('the tab label to change', async () => {
       return (await this.getSelectedTab())?.label === newLabel;
     });
+  }
+
+  public async getContextMenuItems() {
+    let items: string[] = [];
+
+    await this.retry.waitFor('context menu items to appear', async () => {
+      items = [];
+      const contextMenuItems = await this.find.allByCssSelector(
+        '[data-test-subj^="unifiedTabs_tabMenuItem"]'
+      );
+      for (const item of contextMenuItems) {
+        items.push(await item.getVisibleText());
+      }
+
+      return items.length > 0;
+    });
+
+    return items;
   }
 
   public async isScrollable() {
