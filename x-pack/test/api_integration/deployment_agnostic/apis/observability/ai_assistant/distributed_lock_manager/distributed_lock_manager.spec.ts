@@ -118,7 +118,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           .reply((uri, requestBody, cb) => {
             log.debug(`Returning mock error for ${uri}`);
             retryCounter++;
-            cb(null, [503, 'Service Unavailable']);
+            setTimeout(() => {
+              cb(null, [503, 'Service Unavailable']);
+            }, 100);
           });
       }
 
