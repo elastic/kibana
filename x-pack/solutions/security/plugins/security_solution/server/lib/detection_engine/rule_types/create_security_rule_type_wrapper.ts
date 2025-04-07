@@ -97,6 +97,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
   ({
     lists,
     actions,
+    docLinks,
     logger,
     config,
     publicBaseUrl,
@@ -306,6 +307,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   privileges,
                   ruleExecutionLogger,
                   uiSettingsClient,
+                  docLinks,
                 });
 
                 if (readIndexWarningMessage != null) {

@@ -31,7 +31,11 @@ import type {
   FoundExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type {
+  DocLinksServiceSetup,
+  ElasticsearchClient,
+  IUiSettingsClient,
+} from '@kbn/core/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -91,35 +95,32 @@ export const hasReadIndexPrivileges = async (args: {
   privileges: Privilege;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   uiSettingsClient: IUiSettingsClient;
+  docLinks: DocLinksServiceSetup;
 }): Promise<string | undefined> => {
-  const { privileges, ruleExecutionLogger, uiSettingsClient } = args;
-
+  const { privileges, ruleExecutionLogger, uiSettingsClient, docLinks } = args;
+  const apiKeyDocs = docLinks.links.alerting.authorization;
   const isCcsPermissionWarningEnabled = await uiSettingsClient.get(ENABLE_CCS_READ_WARNING_SETTING);
-
   const indexNames = Object.keys(privileges.index);
   const filteredIndexNames = isCcsPermissionWarningEnabled
     ? indexNames
     : indexNames.filter((indexName) => {
         return !isCCSRemoteIndexName(indexName);
       });
-
   const [, indexesWithNoReadPrivileges] = partition(
     filteredIndexNames,
     (indexName) => privileges.index[indexName].read
   );
-
   let warningStatusMessage;
 
   // Some indices have read privileges others do not.
   if (indexesWithNoReadPrivileges.length > 0) {
     const indexesString = JSON.stringify(indexesWithNoReadPrivileges);
-    warningStatusMessage = `The concrete indices that match this index pattern may not be available to this rule's api key: ${indexesString}`;
+    warningStatusMessage = `All concrete indices that match this index pattern may not be available to this rule's api key: ${indexesString}. Only indices available to rule's api key have been searched. See ${apiKeyDocs} for details.`;
     await ruleExecutionLogger.logStatusChange({
       newStatus: RuleExecutionStatusEnum['partial failure'],
       message: warningStatusMessage,
     });
   }
-
   return warningStatusMessage;
 };
 
