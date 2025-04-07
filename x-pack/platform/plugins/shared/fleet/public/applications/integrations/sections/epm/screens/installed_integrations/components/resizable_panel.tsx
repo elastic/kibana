@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -37,12 +37,37 @@ export const ResizablePanelComponent: React.FunctionComponent<{
   const initialPanelHeight = useRef(panelHeight);
   const initialMouseY = useRef(0);
 
-  const onMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
-    const mouseOffset = getMouseOrTouchY(e) - initialMouseY.current;
-    const changedPanelHeight = initialPanelHeight.current + mouseOffset;
+  const normalizeHeight = useCallback(
+    (height: number) => {
+      const marginTop = parseInt(euiTheme.euiTheme.size.xxxxl, 10);
+      // Be sure to not go over top bar
+      return Math.min(Math.max(height, 0), window.innerHeight - marginTop * 3);
+    },
+    [euiTheme.euiTheme.size.xxxxl]
+  );
 
-    setPanelHeight(Math.max(changedPanelHeight, 0));
-  }, []);
+  useEffect(() => {
+    function onResize() {
+      const normalizedHeight = normalizeHeight(panelHeight);
+      if (normalizedHeight !== panelHeight) {
+        setPanelHeight(normalizedHeight);
+      }
+    }
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+    };
+  }, [panelHeight, normalizeHeight]);
+
+  const onMouseMove = useCallback(
+    (e: MouseEvent | TouchEvent) => {
+      const mouseOffset = getMouseOrTouchY(e) - initialMouseY.current;
+      const changedPanelHeight = initialPanelHeight.current + mouseOffset;
+
+      setPanelHeight(normalizeHeight(changedPanelHeight));
+    },
+    [normalizeHeight]
+  );
 
   const onMouseUp = useCallback(() => {
     initialMouseY.current = 0;
@@ -68,19 +93,26 @@ export const ResizablePanelComponent: React.FunctionComponent<{
     [panelHeight, onMouseMove, onMouseUp]
   );
 
-  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    const KEYBOARD_OFFSET = 10;
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      const KEYBOARD_OFFSET = 10;
 
-    switch (e.key) {
-      case keys.ARROW_UP:
-        e.preventDefault(); // Safari+VO will screen reader navigate off the button otherwise
-        setPanelHeight((currentPanelHeight) => currentPanelHeight + KEYBOARD_OFFSET);
-        break;
-      case keys.ARROW_DOWN:
-        e.preventDefault(); // Safari+VO will screen reader navigate off the button otherwise
-        setPanelHeight((currentPanelHeight) => Math.max(currentPanelHeight - KEYBOARD_OFFSET, 0));
-    }
-  }, []);
+      switch (e.key) {
+        case keys.ARROW_UP:
+          e.preventDefault(); // Safari+VO will screen reader navigate off the button otherwise
+          setPanelHeight((currentPanelHeight) =>
+            normalizeHeight(currentPanelHeight + KEYBOARD_OFFSET)
+          );
+          break;
+        case keys.ARROW_DOWN:
+          e.preventDefault(); // Safari+VO will screen reader navigate off the button otherwise
+          setPanelHeight((currentPanelHeight) =>
+            normalizeHeight(currentPanelHeight - KEYBOARD_OFFSET)
+          );
+      }
+    },
+    [normalizeHeight]
+  );
 
   return (
     <EuiPanel
