@@ -62,8 +62,7 @@ export const ConnectLLMButton: React.FC = () => {
         </EuiButtonEmpty>
       ) : (
         <EuiButton
-          fill
-          iconType="link"
+          iconType="sparkles"
           data-test-subj="connectLLMButton"
           onClick={handleSetupGenAiConnector}
         >

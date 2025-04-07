@@ -15,7 +15,6 @@ import {
   EuiLoadingSpinner,
   EuiTitle,
   EuiCard,
-  EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -87,14 +86,7 @@ export const ChatSetupPage: React.FC = () => {
                         defaultMessage="Select a model to integrate with your chat experience.  You can also set up your own connection."
                       />
                     }
-                    footer={
-                      <EuiButton iconType="sparkles" data-test-subj="connectToLLMButton">
-                        <FormattedMessage
-                          id="xpack.searchPlayground.setupPage.connectToLLMButtonLabel"
-                          defaultMessage="Connect to an LLM"
-                        />
-                      </EuiButton>
-                    }
+                    footer={<ConnectLLMButton />}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -112,17 +104,10 @@ export const ChatSetupPage: React.FC = () => {
                         defaultMessage="Select your data sources to include as context or upload files to start."
                       />
                     }
-                    footer={
-                      <EuiButton iconType="plusInCircle" data-test-subj="addDataSourcesButton">
-                        <FormattedMessage
-                          id="xpack.searchPlayground.setupPage.addDataSourcesButtonLabel"
-                          defaultMessage="Add data sources"
-                        />
-                      </EuiButton>
-                    }
+                    footer={indices.length ? <AddDataSources /> : <CreateIndexButton />}
                   />
                 </EuiFlexItem>
-                {/* <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false}>
                   <ConnectLLMButton />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -130,7 +115,7 @@ export const ChatSetupPage: React.FC = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <UploadFileButton isSetup={true} />
-                </EuiFlexItem> */}
+                </EuiFlexItem>
               </>
             )}
           </EuiFlexGroup>
