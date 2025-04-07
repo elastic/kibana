@@ -15,7 +15,7 @@ import {
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { ApiPrivileges } from '@kbn/security-authorization-core-common';
+import { ApiPrivileges } from '@kbn/core-security-server';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
