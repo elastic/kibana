@@ -18,7 +18,7 @@ export function transformSectionsIn(
   const updatedSections = sections?.map(({ id, order, ...rest }, index) => {
     return {
       ...rest,
-      order: order ?? index,
+      order: order ?? index + 1,
       id: id ?? uuidv4(),
     };
   });
