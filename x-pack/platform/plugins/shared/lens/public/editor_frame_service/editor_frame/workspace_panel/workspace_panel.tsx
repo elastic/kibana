@@ -17,7 +17,6 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiTextColor,
-  transparentize,
   useEuiTheme,
   EuiSpacer,
   type UseEuiTheme,
@@ -514,9 +513,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             aria-hidden={true}
             css={[
               css`
-                filter: drop-shadow(0 6px 12px ${transparentize(euiTheme.colors.shadow, 0.2)})
-                  drop-shadow(0 4px 4px ${transparentize(euiTheme.colors.shadow, 0.2)})
-                  drop-shadow(0 2px 2px ${transparentize(euiTheme.colors.shadow, 0.2)});
+                filter: drop-shadow(0 6px 12px rgba(0, 0, 1, 0.2))
+                  drop-shadow(0 4px 4px rgba(0, 0, 1, 0.2))
+                  drop-shadow(0 2px 2px rgba(0, 0, 1, 0.2));
               `,
               promptIllustrationStyle,
             ]}
