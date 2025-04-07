@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { AIMessageChunk } from '@langchain/core/messages';
+import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
 import { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
+import type { ContentRef } from '@kbn/wci-common';
 import type { ToolResultEvent } from '../../../../../common/chat_events';
-import { extractTextContent, messageFromLangchain } from '../../utils/from_langchain_messages';
+import type { AssistantMessage } from '../../../../../common/conversation_events';
+import { extractTextContent, messageFromLangchain } from '../../utils';
 import { AgentRunEvents } from '../../types';
 import { matchGraphName } from '../utils';
 import type { EventConverter } from './types';
@@ -39,13 +41,20 @@ export const getSimpleGraphConverter = ({ graphName }: { graphName: string }): E
 
     // emit full message on each agent step
     if (event.event === 'on_chain_end' && event.name === 'agent') {
-      const addedMessages = event.data.output.addedMessages;
+      const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
       const lastMessage = addedMessages[addedMessages.length - 1];
-      return [{ type: 'message', message: messageFromLangchain(lastMessage) }];
+
+      const message = messageFromLangchain(lastMessage);
+
+      // we know it can't be a user message given it's the LLM response
+      const citations: ContentRef[] = event.data.input.citations;
+      (message as AssistantMessage).citations = citations;
+
+      return [{ type: 'message', message }];
     }
 
     // emit tool result events
-    if (event.event === 'on_tool_end' && event.metadata?.langgraph_node === 'tools') {
+    if (event.event === 'on_tool_end') {
       return [
         {
           type: 'tool_result',

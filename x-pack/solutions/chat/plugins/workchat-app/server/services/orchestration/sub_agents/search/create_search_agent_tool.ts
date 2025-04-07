@@ -56,9 +56,10 @@ export const createSearchAgentTool = ({
         .optional()
         .describe(`Optional additional context that could be useful for the search agent`),
     }),
-    responseFormat: '',
-    func: ({ query, context }) => {
-      return runSearchAgent({ query, context });
+    responseFormat: 'content_and_artifact',
+    func: async ({ query, context }) => {
+      const result = await runSearchAgent({ query, context });
+      return [result, result];
     },
   });
 };

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css, keyframes } from '@emotion/react';
-import { EuiTimelineItem } from '@elastic/eui';
+import { EuiTimelineItem, EuiLoadingElastic, EuiAvatar } from '@elastic/eui';
 import type { ProgressionEvent } from '../../../../common/chat_events';
 import type { ProgressionConversationItem } from '../../utils/conversation_items';
 
@@ -37,8 +37,11 @@ export const ChatConversationProgression: React.FC<ChatConversationMessageProps>
 
   const lastEvent = progressionEvents[progressionEvents.length - 1];
 
+  const icon = <EuiAvatar name="loading" color="subdued" iconType={EuiLoadingElastic} />;
+
+  // search node dot
   return (
-    <EuiTimelineItem icon="dot">
+    <EuiTimelineItem icon={icon}>
       <FancyLoadingText text={getText(lastEvent)} />
     </EuiTimelineItem>
   );
