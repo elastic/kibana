@@ -50,17 +50,27 @@ jobs:
           method: chat.postMessage
           token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
           payload: |
-            channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
-            text: ":warning: *Low Dependency Score Alert!* :warning:"
-            blocks: |
-              - type: section
-                text:
-                  type: mrkdwn
-                  text: "One or more newly added dependencies scored below the threshold (0.65)."
-              - type: actions
-                elements:
-                  - type: button
-                    text:
-                      type: plain_text
-                      text: "View Pull Request"
-                    url: ${{ github.event.pull_request.html_url }}
+            "channel": ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
+            "text": ":warning: *Low Dependency Score Alert!* :warning:"
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "One or more newly added dependencies scored below the threshold (0.65)."
+                }
+              },
+              {
+                "type": "actions",
+                "elements": [
+                  {
+                    "type": "button",
+                    "text": {
+                      "type": "plain_text",
+                      "text": "View Pull Request"
+                    },
+                    "url": "${{ github.event.pull_request.html_url }}"
+                  }
+                ]
+              }
+            ]
