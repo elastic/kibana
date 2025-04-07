@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const ASSET_ENTITY_ID = 'entity.id';
-export const ASSET_ENTITY_TYPE = 'entity.type';
-export const ASSET_ASSET_ID = 'asset.id';
+export const STREAM_NAME = 'stream.name';
+export const ASSET_UUID = 'asset.uuid';
+export const ASSET_ID = 'asset.id';
 export const ASSET_TYPE = 'asset.type';
+
+export const QUERY_KQL_BODY = 'query.kql.query';
+export const QUERY_TITLE = 'query.title';
