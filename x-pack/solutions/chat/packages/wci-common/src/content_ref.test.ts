@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ContentRef, ContentRefSourceType, serializeContentRef, parseContentRef } from './content_ref';
+import {
+  ContentRef,
+  ContentRefSourceType,
+  serializeContentRef,
+  parseContentRef,
+} from './content_ref';
 
 describe('ContentRef', () => {
   describe('serializeRef', () => {
