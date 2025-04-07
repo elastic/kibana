@@ -37,8 +37,3 @@ registerCypressGrep();
 Cypress.on('uncaught:exception', () => {
   return false;
 });
-
-// finds elements that contain the given selector
-Cypress.Commands.add('getByTestSubjContains', (selector, ...args) =>
-  cy.get(`[data-test-subj*="${selector}"]`, ...args)
-);
