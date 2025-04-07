@@ -9027,6 +9027,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/tsconfig-base@link:packages/kbn-tsconfig-base":
+  version "0.0.0"
+  uid ""
+
 "@kbn/typed-react-router-config@link:src/platform/packages/shared/kbn-typed-react-router-config":
   version "0.0.0"
   uid ""
