@@ -37,7 +37,7 @@ import {
   MIN_THRESHOLD_DAYS,
   THRESHOLD_UNITS,
 } from '../constants';
-import { useAlertDeletePreview } from '../api/useAlertDeletePreview';
+import { useAlertDeletePreview } from '../api/preview/use_alert_delete_preview';
 
 const FORM_ID = 'alert-delete-settings';
 const MODAL_ID = 'alert-delete-modal';
@@ -68,11 +68,17 @@ const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOp
 };
 
 export interface AlertDeleteProps {
-  http: HttpStart;
+  services: { http: HttpStart };
   onCloseModal: () => void;
   isVisible: boolean;
+  isDisabled?: boolean;
 }
-export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteProps) => {
+export const AlertDeleteModal = ({
+  services: { http },
+  onCloseModal,
+  isVisible,
+  isDisabled = false,
+}: AlertDeleteProps) => {
   const [activeState, setActiveState] = useState({
     checked: DEFAULT_THRESHOLD_ENABLED,
     threshold: DEFAULT_THRESHOLD,
@@ -88,7 +94,9 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
   const [deleteConfirmation, setDeleteConfirmation] = useState('');
 
   const { affectedAlertsCount: previewAffectedAlertsCount } = useAlertDeletePreview({
-    http,
+    services: {
+      http,
+    },
     isActiveAlertDeleteEnabled: activeState.checked,
     isInactiveAlertDeleteEnabled: inactiveState.checked,
     activeAlertDeleteThreshold: getThresholdInDays(
@@ -210,6 +218,7 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
               id="alert-delete-active"
               data-test-subj="alert-delete-active-checkbox"
               checked={activeState.checked}
+              disabled={isDisabled}
               onChange={activeAlertsCallbacks.onChangeEnabled}
               labelProps={{ css: 'width: 100%' }}
               label={
@@ -221,7 +230,7 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
                   onChangeThreshold={activeAlertsCallbacks.onChangeThreshold}
                   onChangeThresholdUnit={activeAlertsCallbacks.onChangeThresholdUnit}
                   isInvalid={!validations.isActiveThresholdValid}
-                  isDisabled={!activeState.checked} // TODO: also if readonly
+                  isDisabled={!activeState.checked || isDisabled}
                   error={errorMessages.activeThreshold}
                   thresholdTestSubj="alert-delete-active-threshold"
                   thresholdUnitTestSubj="alert-delete-active-threshold-unit"
@@ -236,6 +245,7 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
               id="alert-delete-inactive"
               data-test-subj="alert-delete-inactive-checkbox"
               checked={inactiveState.checked}
+              disabled={isDisabled}
               onChange={inactiveAlertsCallbacks.onChangeEnabled}
               labelProps={{ css: 'width: 100%' }}
               label={
@@ -247,7 +257,7 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
                   onChangeThreshold={inactiveAlertsCallbacks.onChangeThreshold}
                   onChangeThresholdUnit={inactiveAlertsCallbacks.onChangeThresholdUnit}
                   isInvalid={!validations.isInactiveThresholdValid}
-                  isDisabled={!inactiveState.checked} // TODO: also if readonly
+                  isDisabled={!inactiveState.checked || isDisabled}
                   error={errorMessages.inactiveThreshold}
                   thresholdTestSubj="alert-delete-inactive-threshold"
                   thresholdUnitTestSubj="alert-delete-inactive-threshold-unit"
@@ -276,6 +286,7 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
           >
             <EuiFieldText
               value={deleteConfirmation}
+              disabled={isDisabled}
               onChange={onChangeDeleteConfirmation}
               data-test-subj="alert-delete-delete-confirmation"
             />
@@ -291,7 +302,7 @@ export const AlertDeleteModal = ({ http, onCloseModal, isVisible }: AlertDeleteP
             form={FORM_ID}
             fill
             color="danger"
-            isDisabled={!isFormValid}
+            isDisabled={!isFormValid || isDisabled}
             data-test-subj="alert-delete-submit"
           >
             {i18n.MODAL_SUBMIT}

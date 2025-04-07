@@ -8,4 +8,4 @@
  */
 
 export { AlertDeleteModal } from './components/modal';
-export { AlertDeleteRuleSettingsSection as AlertDeleteDescriptiveFormGroup } from './components/rule_settings_section';
+export { AlertDeleteDescriptiveFormGroup } from './components/rule_settings_section';

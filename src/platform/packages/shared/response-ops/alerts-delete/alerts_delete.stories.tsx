@@ -12,7 +12,7 @@ import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { HttpStart } from '@kbn/core/public';
-import { AlertDeleteRuleSettingsSection } from './components/rule_settings_section';
+import { AlertDeleteDescriptiveFormGroup } from './components/rule_settings_section';
 import { AlertDeleteModal } from './components/modal';
 
 const http = {
@@ -32,7 +32,7 @@ const meta = {
 
 export default meta;
 
-const DefaultStory = () => {
+const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(true);
   const closeFlyout = () => setIsFlyoutVisible(false);
   const showFlyout = () => setIsFlyoutVisible(true);
@@ -40,7 +40,7 @@ const DefaultStory = () => {
   return isFlyoutVisible ? (
     <EuiFlyout type="push" onClose={closeFlyout} maxWidth={440}>
       <EuiFlyoutBody>
-        <AlertDeleteRuleSettingsSection http={http} />
+        <AlertDeleteDescriptiveFormGroup services={{ http }} isDisabled={isDisabled} />
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : (
@@ -49,25 +49,44 @@ const DefaultStory = () => {
 };
 
 export const RuleSettingsFlyout: StoryObj<typeof DefaultStory> = {
+  args: {
+    isDisabled: true,
+  },
+  argTypes: {
+    isDisabled: {
+      control: 'boolean',
+      description: 'Controls the disabled state',
+    },
+  },
   render: DefaultStory,
 };
 
-const ModalOnlyStory = () => {
+const ModalOnlyStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const hideModal = () => setIsModalVisible(false);
-  const showFlyout = () => setIsModalVisible(true);
+  const showModal = () => setIsModalVisible(true);
 
   return isModalVisible ? (
-    <AlertDeleteModal http={http} isVisible={isModalVisible} onCloseModal={hideModal} />
+    <AlertDeleteModal
+      services={{ http }}
+      isVisible={isModalVisible}
+      onCloseModal={hideModal}
+      isDisabled={isDisabled}
+    />
   ) : (
-    <EuiButton onClick={showFlyout}>Open Modal</EuiButton>
+    <EuiButton onClick={showModal}>Open Modal</EuiButton>
   );
 };
 
 export const ModalOnly: StoryObj<typeof AlertDeleteModal> = {
   args: {
-    isVisible: false,
-    onCloseModal: () => {},
+    isDisabled: true,
+  },
+  argTypes: {
+    isDisabled: {
+      control: 'boolean',
+      description: 'Controls the disabled state',
+    },
   },
   render: ModalOnlyStory,
 };

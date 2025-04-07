@@ -16,7 +16,14 @@ import * as i18n from '../translations';
 
 const ModalComponent = lazy(() => import('./modal'));
 
-export const AlertDeleteRuleSettingsSection = ({ http }: { http: HttpStart }) => {
+interface AlertDeleteDescriptiveFormGroupProps {
+  services: { http: HttpStart };
+  isDisabled?: boolean;
+}
+export const AlertDeleteDescriptiveFormGroup = ({
+  services: { http },
+  isDisabled = false,
+}: AlertDeleteDescriptiveFormGroupProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const onCloseModal = () => setIsModalOpen(false);
@@ -49,7 +56,12 @@ export const AlertDeleteRuleSettingsSection = ({ http }: { http: HttpStart }) =>
         </EuiButton>
       </EuiDescribedFormGroup>
       <Suspense fallback={<></>}>
-        <ModalComponent http={http} onCloseModal={onCloseModal} isVisible={isModalOpen} />
+        <ModalComponent
+          services={{ http }}
+          onCloseModal={onCloseModal}
+          isVisible={isModalOpen}
+          isDisabled={isDisabled}
+        />
       </Suspense>
     </>
   );
