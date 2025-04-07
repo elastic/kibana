@@ -1,5 +1,5 @@
 {
-  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["node", "jest"],
