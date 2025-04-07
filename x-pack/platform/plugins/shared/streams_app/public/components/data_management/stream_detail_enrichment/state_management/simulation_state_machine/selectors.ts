@@ -9,6 +9,7 @@ import { createSelector } from 'reselect';
 
 import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { SimulationContext } from './types';
 import { filterSimulationDocuments } from './utils';
 
@@ -27,7 +28,7 @@ export const selectPreviewDocuments = createSelector(
     return (
       ((previewDocsFilter && documents
         ? filterSimulationDocuments(documents, previewDocsFilter)
-        : samples) as FlattenRecord[]) || EMPTY_ARRAY
+        : samples.map(flattenObjectNestedLast)) as FlattenRecord[]) || EMPTY_ARRAY
     );
   }
 );
