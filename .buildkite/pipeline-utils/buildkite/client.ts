@@ -49,6 +49,8 @@ export interface BuildkiteAgentTargetingRule {
   machineType?: string;
   minCpuPlatform?: string;
   preemptible?: boolean;
+  zones?: string[];
+  spotZones?: string[];
 }
 
 export interface BuildkiteCommandStep {

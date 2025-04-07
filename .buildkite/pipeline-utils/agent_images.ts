@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { dump } from 'js-yaml';
 import { BuildkiteClient, BuildkiteAgentTargetingRule } from './buildkite';
 
 const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
@@ -30,10 +29,7 @@ const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const FTR_ENABLE_FIPS_AGENT = process.env.FTR_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
 const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
 
-// Narrow the return type with overloads
-function getAgentImageConfig(): BuildkiteAgentTargetingRule;
-function getAgentImageConfig(options: { returnYaml: true }): string;
-function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAgentTargetingRule {
+function getAgentImageConfig(): BuildkiteAgentTargetingRule {
   const bk = new BuildkiteClient();
   let config: BuildkiteAgentTargetingRule;
 
@@ -51,10 +47,6 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
 
   if (USE_QA_IMAGE_FOR_PR || GITHUB_PR_LABELS.includes('ci:use-qa-image')) {
     config.imageProject = ELASTIC_IMAGES_QA_PROJECT;
-  }
-
-  if (returnYaml) {
-    return dump({ agents: config });
   }
 
   return config;

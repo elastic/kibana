@@ -16,6 +16,7 @@
         ] */
 
 import fs from 'fs';
+import { dump } from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import {
   areChangesSkippable,
@@ -52,7 +53,23 @@ const getPipeline = (filename: string, removeSteps = true) => {
       return;
     }
 
-    pipeline.push(getAgentImageConfig({ returnYaml: true }));
+    const agentConfig = getAgentImageConfig();
+    agentConfig.zones = ['us-central1-a', 'us-central1-c', 'us-central1-f'];
+    agentConfig.spotZones = [
+      'northamerica-northeast2-a',
+      'northamerica-northeast2-b',
+      'northamerica-northeast2-c',
+      'europe-west2-a',
+      'europe-west2-b',
+      'europe-west2-c',
+      'southamerica-east1-a',
+      'southamerica-east1-b',
+      'southamerica-east1-c',
+      'asia-south2-a',
+      'asia-south2-b',
+      'asia-south2-c',
+    ];
+    pipeline.push(dump(agentConfig));
 
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
