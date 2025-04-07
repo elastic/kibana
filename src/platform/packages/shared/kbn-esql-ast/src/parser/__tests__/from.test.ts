@@ -157,6 +157,211 @@ describe('FROM', () => {
         },
       ]);
     });
+
+    describe('source', () => {
+      describe('index', () => {
+        it('can parse single-double quoted index', () => {
+          const text = 'FROM "index"';
+          const { root, errors } = parse(text);
+
+          expect(errors.length).toBe(0);
+          expect(root.commands).toMatchObject([
+            {
+              type: 'command',
+              name: 'from',
+              args: [
+                {
+                  type: 'source',
+                  sourceType: 'index',
+                  index: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'index',
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('can parse triple-double quoted index', () => {
+          const text = 'FROM """index"""';
+          const { root, errors } = parse(text);
+
+          expect(errors.length).toBe(0);
+          expect(root.commands).toMatchObject([
+            {
+              type: 'command',
+              name: 'from',
+              args: [
+                {
+                  type: 'source',
+                  sourceType: 'index',
+                  index: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'index',
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+      });
+
+      describe('cluster', () => {
+        it('can parse unquoted cluster', () => {
+          const text = 'FROM cluster:index';
+          const { root, errors } = parse(text);
+
+          expect(errors.length).toBe(0);
+          expect(root.commands).toMatchObject([
+            {
+              type: 'command',
+              name: 'from',
+              args: [
+                {
+                  type: 'source',
+                  index: {
+                    valueUnquoted: 'index',
+                  },
+                  sourceType: 'index',
+                  cluster: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'cluster',
+                    unquoted: true,
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('can parse single-double quoted cluster', () => {
+          const text = 'FROM "cluster":index';
+          const { root, errors } = parse(text);
+
+          expect(errors.length).toBe(0);
+          expect(root.commands).toMatchObject([
+            {
+              type: 'command',
+              name: 'from',
+              args: [
+                {
+                  type: 'source',
+                  index: {
+                    valueUnquoted: 'index',
+                  },
+                  sourceType: 'index',
+                  cluster: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'cluster',
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('can parse triple-double quoted cluster', () => {
+          const text = 'FROM """cluster""":index';
+          const { root, errors } = parse(text);
+
+          expect(errors.length).toBe(0);
+          expect(root.commands).toMatchObject([
+            {
+              type: 'command',
+              name: 'from',
+              args: [
+                {
+                  type: 'source',
+                  index: {
+                    valueUnquoted: 'index',
+                  },
+                  sourceType: 'index',
+                  cluster: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'cluster',
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+      });
+
+      describe('selector', () => {
+        it('can parse source selector', () => {
+          const text = 'FROM index::selector';
+          const { root, errors } = parse(text);
+
+          expect(errors.length).toBe(0);
+          expect(root.commands).toMatchObject([
+            {
+              type: 'command',
+              name: 'from',
+              args: [
+                {
+                  type: 'source',
+                  index: {
+                    valueUnquoted: 'index',
+                  },
+                  sourceType: 'index',
+                  selector: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'selector',
+                    unquoted: true,
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+
+        it('can parse single and triple quoted selectors', () => {
+          const text = 'FROM index1::"selector1", index2::"""selector2"""';
+          const { root, errors } = parse(text);
+
+          expect(errors.length).toBe(0);
+          expect(root.commands).toMatchObject([
+            {
+              type: 'command',
+              name: 'from',
+              args: [
+                {
+                  type: 'source',
+                  index: {
+                    valueUnquoted: 'index1',
+                  },
+                  sourceType: 'index',
+                  selector: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'selector1',
+                  },
+                },
+                {
+                  type: 'source',
+                  index: {
+                    valueUnquoted: 'index2',
+                  },
+                  sourceType: 'index',
+                  selector: {
+                    type: 'literal',
+                    literalType: 'keyword',
+                    valueUnquoted: 'selector2',
+                  },
+                },
+              ],
+            },
+          ]);
+        });
+      });
+    });
   });
 
   describe('when incorrectly formatted, returns errors', () => {
