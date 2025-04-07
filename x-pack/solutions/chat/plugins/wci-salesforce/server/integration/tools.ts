@@ -10,6 +10,8 @@ import type {
   SearchResponse,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
+import { contentRefBuilder, ContentRefSourceType } from '@kbn/wci-common';
+import { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase, Account } from './types';
 
@@ -52,113 +54,117 @@ interface AccountRetrievalParams {
  * @param indexName - Index name to query
  * @param params - Search parameters including optional sorting configuration
  */
-export async function getCases(
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  indexName: string,
-  params: CaseRetrievalParams = {}
-): Promise<Array<{ type: 'text'; text: string }>> {
+export async function getCases({
+  esClient,
+  logger,
+  integrationId,
+  indexName,
+  params = {},
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  integrationId: string;
+  indexName: string;
+  params: CaseRetrievalParams;
+}): Promise<ToolContentResult[]> {
   const size = params.size || 10;
   const sort = params.sortField
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
 
-  try {
-    const query = buildCaseQuery(params);
+  const query = buildCaseQuery(params);
 
-    const searchRequest: SearchRequest = {
-      index: indexName,
-      query,
-      sort,
-      size,
+  const searchRequest: SearchRequest = {
+    index: indexName,
+    query,
+    sort,
+    size,
+  };
+
+  logger.info(
+    `Retrieving cases from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
+  );
+
+  const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+
+  // Let's keep this here for now
+  const contextFields = [
+    { field: 'title', type: 'keyword' },
+    { field: 'description', type: 'text' },
+    { field: 'url', type: 'keyword' },
+    { field: 'metadata.case_number', type: 'keyword' },
+    { field: 'metadata.priority', type: 'keyword' },
+    { field: 'metadata.status', type: 'keyword' },
+    { field: 'metadata.account_id', type: 'keyword' },
+    { field: 'metadata.account_name', type: 'keyword' },
+    { field: 'owner.email', type: 'keyword' },
+    { field: 'owner.name', type: 'keyword' },
+  ];
+
+  const createRef = contentRefBuilder({
+    sourceType: ContentRefSourceType.integration,
+    sourceId: integrationId,
+  });
+
+  const contentFragments = response.hits.hits.map((hit) => {
+    const source = hit._source as SupportCase;
+
+    // Helper function to safely get nested values
+    const getNestedValue = (obj: any, path: string[]): string => {
+      return (
+        path
+          .reduce((prev, curr) => {
+            return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
+          }, obj)
+          ?.toString() || ''
+      );
     };
 
-    logger.info(
-      `Retrieving cases from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
-    );
+    // Format comments if they exist
+    let commentsText = '';
+    if (source.comments && source.comments.length > 0) {
+      const limitedComments = source.comments.slice(0, 10);
 
-    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+      commentsText =
+        '\n\nComments:\n' +
+        limitedComments
+          .map((comment, index) => {
+            return (
+              `Comment ${index + 1}:\n` +
+              `Author: ${comment.author?.name || 'Unknown'} (${
+                comment.author?.email || 'No email'
+              })\n` +
+              `Created: ${comment.created_at || 'Unknown date'}\n` +
+              `Content: ${comment.content || 'No content'}\n`
+            );
+          })
+          .join('\n');
+    }
 
-    // Let's keep this here for now
-    const contextFields = [
-      { field: 'title', type: 'keyword' },
-      { field: 'description', type: 'text' },
-      { field: 'url', type: 'keyword' },
-      { field: 'metadata.case_number', type: 'keyword' },
-      { field: 'metadata.priority', type: 'keyword' },
-      { field: 'metadata.status', type: 'keyword' },
-      { field: 'metadata.account_id', type: 'keyword' },
-      { field: 'metadata.account_name', type: 'keyword' },
-      { field: 'owner.email', type: 'keyword' },
-      { field: 'owner.name', type: 'keyword' },
-    ];
+    return {
+      reference: createRef(hit._id!),
+      content: contextFields.reduce<ToolContentResult['content']>(
+        (content, { field }) => {
+          const fieldPath = field.split('.');
 
-    const contentFragments = response.hits.hits.map((hit) => {
-      const source = hit._source as SupportCase;
+          // Use the helper function for both nested and non-nested fields
+          const value =
+            fieldPath.length > 1
+              ? getNestedValue(source, fieldPath)
+              : (source[field as keyof SupportCase] || '').toString();
 
-      // Helper function to safely get nested values
-      const getNestedValue = (obj: any, path: string[]): string => {
-        return (
-          path
-            .reduce((prev, curr) => {
-              return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
-            }, obj)
-            ?.toString() || ''
-        );
-      };
+          content[field] = value;
 
-      // Format comments if they exist
-      let commentsText = '';
-      if (source.comments && source.comments.length > 0) {
-        const limitedComments = source.comments.slice(0, 10);
+          return content;
+        },
+        {
+          commentsText,
+        }
+      ),
+    };
+  });
 
-        commentsText =
-          '\n\nComments:\n' +
-          limitedComments
-            .map((comment, index) => {
-              return (
-                `Comment ${index + 1}:\n` +
-                `Author: ${comment.author?.name || 'Unknown'} (${
-                  comment.author?.email || 'No email'
-                })\n` +
-                `Created: ${comment.created_at || 'Unknown date'}\n` +
-                `Content: ${comment.content || 'No content'}\n`
-              );
-            })
-            .join('\n');
-      }
-
-      return {
-        type: 'text' as const,
-        text:
-          contextFields
-            .map(({ field }) => {
-              const fieldPath = field.split('.');
-              let value = '';
-
-              // Use the helper function for both nested and non-nested fields
-              value =
-                fieldPath.length > 1
-                  ? getNestedValue(source, fieldPath)
-                  : (source[field as keyof SupportCase] || '').toString();
-
-              return `${field}: ${value}`;
-            })
-            .join('\n') + commentsText,
-      };
-    });
-
-    return contentFragments;
-  } catch (error) {
-    logger.error(`Search failed: ${error}`);
-
-    return [
-      {
-        type: 'text' as const,
-        text: `Error: Search failed: ${error}`,
-      },
-    ];
-  }
+  return contentFragments;
 }
 
 /**
@@ -169,109 +175,111 @@ export async function getCases(
  * @param indexName - Index name to query
  * @param params - Search parameters including optional sorting configuration
  */
-export async function getAccounts(
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  indexName: string,
-  params: AccountRetrievalParams = {}
-): Promise<Array<{ type: 'text'; text: string }>> {
+export async function getAccounts({
+  esClient,
+  logger,
+  integrationId,
+  indexName,
+  params = {},
+}: {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  integrationId: string;
+  indexName: string;
+  params: AccountRetrievalParams;
+}): Promise<ToolContentResult[]> {
   const size = params.size || 10;
   const sort = params.sortField
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
 
-  try {
-    const query = buildAccountQuery(params);
+  const query = buildAccountQuery(params);
 
-    const searchRequest: SearchRequest = {
-      index: indexName,
-      query,
-      sort,
-      size,
+  const searchRequest: SearchRequest = {
+    index: indexName,
+    query,
+    sort,
+    size,
+  };
+
+  logger.info(
+    `Retrieving accounts from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
+  );
+
+  const response = await esClient.search<SearchResponse<Account>>(searchRequest);
+
+  // Define fields to include in the response
+  const contextFields = [
+    { field: 'id', type: 'keyword' },
+    { field: 'title', type: 'keyword' },
+    { field: 'url', type: 'keyword' },
+    { field: 'owner.email', type: 'keyword' },
+    { field: 'owner.name', type: 'keyword' },
+    { field: 'created_at', type: 'date' },
+    { field: 'updated_at', type: 'date' },
+  ];
+
+  const createRef = contentRefBuilder({
+    sourceType: ContentRefSourceType.integration,
+    sourceId: integrationId,
+  });
+
+  const contentFragments = response.hits.hits.map((hit) => {
+    const source = hit._source as Account;
+
+    // Helper function to safely get nested values
+    const getNestedValue = (obj: any, path: string[]): string => {
+      return (
+        path
+          .reduce((prev, curr) => {
+            return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
+          }, obj)
+          ?.toString() || ''
+      );
     };
 
-    logger.info(
-      `Retrieving accounts from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
-    );
+    // Format contacts if they exist
+    let contactsText = '';
+    if (source.contacts && source.contacts.length > 0) {
+      const limitedContacts = source.contacts.slice(0, 10);
+      contactsText =
+        '\n\nContacts:\n' +
+        limitedContacts
+          .map((contact, index) => {
+            return (
+              `Contact ${index + 1}:\n` +
+              `Name: ${contact.name || 'Unknown'}\n` +
+              `Email: ${contact.email || 'No email'}\n` +
+              `Phone: ${contact.phone || 'No phone'}\n` +
+              `Title: ${contact.title || 'No title'}\n` +
+              `Department: ${contact.department || 'No department'}\n`
+            );
+          })
+          .join('\n');
+    }
 
-    const response = await esClient.search<SearchResponse<Account>>(searchRequest);
+    return {
+      reference: createRef(hit._id!),
+      content: contextFields.reduce<ToolContentResult['content']>(
+        (content, { field }) => {
+          const fieldPath = field.split('.');
+          const value =
+            fieldPath.length > 1
+              ? getNestedValue(source, fieldPath)
+              : (source[field as keyof Account] || '').toString();
 
-    // Define fields to include in the response
-    const contextFields = [
-      { field: 'id', type: 'keyword' },
-      { field: 'title', type: 'keyword' },
-      { field: 'url', type: 'keyword' },
-      { field: 'owner.email', type: 'keyword' },
-      { field: 'owner.name', type: 'keyword' },
-      { field: 'created_at', type: 'date' },
-      { field: 'updated_at', type: 'date' },
-    ];
+          content[field] = value;
 
-    const contentFragments = response.hits.hits.map((hit) => {
-      const source = hit._source as Account;
+          return content;
+        },
+        {
+          contactsText,
+        }
+      ),
+    };
+  });
 
-      // Helper function to safely get nested values
-      const getNestedValue = (obj: any, path: string[]): string => {
-        return (
-          path
-            .reduce((prev, curr) => {
-              return prev && typeof prev === 'object' && curr in prev ? prev[curr] : '';
-            }, obj)
-            ?.toString() || ''
-        );
-      };
-
-      // Format contacts if they exist
-      let contactsText = '';
-      if (source.contacts && source.contacts.length > 0) {
-        const limitedContacts = source.contacts.slice(0, 10);
-        contactsText =
-          '\n\nContacts:\n' +
-          limitedContacts
-            .map((contact, index) => {
-              return (
-                `Contact ${index + 1}:\n` +
-                `Name: ${contact.name || 'Unknown'}\n` +
-                `Email: ${contact.email || 'No email'}\n` +
-                `Phone: ${contact.phone || 'No phone'}\n` +
-                `Title: ${contact.title || 'No title'}\n` +
-                `Department: ${contact.department || 'No department'}\n`
-              );
-            })
-            .join('\n');
-      }
-
-      return {
-        type: 'text' as const,
-        text:
-          contextFields
-            .map(({ field }) => {
-              const fieldPath = field.split('.');
-              let value = '';
-
-              // Use the helper function for both nested and non-nested fields
-              value =
-                fieldPath.length > 1
-                  ? getNestedValue(source, fieldPath)
-                  : (source[field as keyof Account] || '').toString();
-
-              return `${field}: ${value}`;
-            })
-            .join('\n') + contactsText,
-      };
-    });
-
-    return contentFragments;
-  } catch (error) {
-    logger.error(`Account search failed: ${error}`);
-
-    return [
-      {
-        type: 'text' as const,
-        text: `Error: Account search failed: ${error}`,
-      },
-    ];
-  }
+  return contentFragments;
 }
 
 function buildCaseQuery(params: CaseRetrievalParams): any {
