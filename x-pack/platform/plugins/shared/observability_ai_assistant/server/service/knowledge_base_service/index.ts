@@ -490,7 +490,7 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    const { ready, enabled, errorMessage, endpoint, modelStats } = await getKbModelStatus({
+    const { enabled, errorMessage, endpoint, modelStats } = await getKbModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
@@ -507,14 +507,17 @@ export class KnowledgeBaseService {
       modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
     ) {
       kbState = KnowledgeBaseState.DEPLOYING_MODEL;
-    } else if (ready) {
+    } else if (
+      modelStats?.deployment_stats?.state === 'started' &&
+      modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+      modelStats?.deployment_stats?.allocation_status?.allocation_count > 0
+    ) {
       kbState = KnowledgeBaseState.READY;
     } else {
       kbState = KnowledgeBaseState.ENDPOINT_CREATED;
     }
 
     return {
-      ready,
       enabled,
       errorMessage,
       endpoint,

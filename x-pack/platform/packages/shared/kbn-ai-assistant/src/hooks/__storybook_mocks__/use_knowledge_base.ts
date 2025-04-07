@@ -19,7 +19,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       error: undefined,
       value: {
         kbState: KnowledgeBaseState.NOT_INSTALLED,
-        ready: true,
         enabled: true,
       },
     },

@@ -60,10 +60,6 @@ export function WelcomeMessage({
     if (isSupportedConnectorType(createdConnector.actionTypeId)) {
       connectors.reloadConnectors();
     }
-
-    if (!knowledgeBase.status.value || knowledgeBase.status.value?.ready === false) {
-      knowledgeBase.install();
-    }
   };
 
   const ConnectorFlyout = useMemo(

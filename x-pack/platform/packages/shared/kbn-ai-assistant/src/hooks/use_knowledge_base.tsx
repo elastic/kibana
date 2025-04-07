@@ -11,6 +11,7 @@ import {
   type AbortableAsyncState,
   useAbortableAsync,
   APIReturnType,
+  KnowledgeBaseState,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibana } from './use_kibana';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
@@ -34,7 +35,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   );
 
   const [isInstalling, setIsInstalling] = useState(false);
-  const isPolling = !!statusRequest.value?.endpoint && !statusRequest.value?.ready;
+  const isPolling =
+    !!statusRequest.value?.endpoint && statusRequest.value?.kbState !== KnowledgeBaseState.READY;
 
   useEffect(() => {
     if (isInstalling && !!statusRequest.value?.endpoint) {
@@ -72,7 +74,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   }, [ml, service, notifications, statusRequest]);
 
   // poll the status if isPolling (inference endpoint is created but deployment is not ready)
-  // stop when ready === true or some error
   useEffect(() => {
     if (!isPolling) {
       return;
@@ -80,7 +81,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
     const interval = setInterval(statusRequest.refresh, 5000);
 
-    if (statusRequest.value?.ready) {
+    if (statusRequest.value?.kbState === KnowledgeBaseState.READY) {
       // done installing
       clearInterval(interval);
       return;

@@ -107,7 +107,6 @@ export async function getKbModelStatus({
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
 }): Promise<{
-  ready: boolean;
   enabled: boolean;
   endpoint?: InferenceInferenceEndpointInfo;
   modelStats?: MlTrainedModelStats;
@@ -122,7 +121,7 @@ export async function getKbModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    return { ready: false, enabled, errorMessage: error.message };
+    return { enabled, errorMessage: error.message };
   }
 
   let trainedModelStatsResponse: MlGetTrainedModelsStatsResponse;
@@ -132,20 +131,15 @@ export async function getKbModelStatus({
     });
   } catch (error) {
     logger.debug(`Failed to get model stats: ${error.message}`);
-    return { ready: false, enabled, errorMessage: error.message };
+    return { enabled, errorMessage: error.message };
   }
 
   const modelStats = trainedModelStatsResponse.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
-  const ready =
-    modelStats?.deployment_stats?.state === 'started' &&
-    modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
-    modelStats?.deployment_stats?.allocation_status?.allocation_count > 0;
 
   return {
     endpoint,
-    ready,
     enabled,
     modelStats,
   };
@@ -162,7 +156,12 @@ export async function waitForKbModel({
 }) {
   return pRetry(
     async () => {
-      const { ready } = await getKbModelStatus({ esClient, logger, config });
+      const { modelStats } = await getKbModelStatus({ esClient, logger, config });
+      const ready =
+        modelStats?.deployment_stats?.state === 'started' &&
+        modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+        modelStats?.deployment_stats?.allocation_status?.allocation_count > 0;
+
       if (!ready) {
         logger.debug('Knowledge base model is not yet ready. Retrying...');
         throw new Error('Knowledge base model is not yet ready');

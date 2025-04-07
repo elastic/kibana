@@ -26,7 +26,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       install: partial.install ?? jest.fn(),
       status: partial.status ?? {
         value: {
-          ready: false,
           enabled: true,
           errorMessage: undefined,
           kbState: KnowledgeBaseState.NOT_INSTALLED,
@@ -47,7 +46,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       isInstalling: true,
       status: {
         value: {
-          ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.ENDPOINT_CREATED,
@@ -68,7 +66,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       isInstalling: true,
       isPolling: true,
       status: {
-        value: { ready: false, enabled: true, kbState: KnowledgeBaseState.NOT_INSTALLED },
+        value: { enabled: true, kbState: KnowledgeBaseState.NOT_INSTALLED },
         loading: false,
         refresh: jest.fn(),
       },
@@ -86,7 +84,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
         ...kb.status,
         value: {
           ...kb.status.value,
-          ready: true,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.READY,
@@ -110,7 +107,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       isPolling: true,
       status: {
         value: {
-          ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.DEPLOYING_MODEL,
@@ -142,7 +138,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       isPolling: true,
       status: {
         value: {
-          ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
           kbState: KnowledgeBaseState.ERROR,
@@ -180,7 +175,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
       isInstalling: false,
       status: {
         value: {
-          ready: false,
           enabled: true,
           kbState: KnowledgeBaseState.NOT_INSTALLED,
           errorMessage: 'no endpoint',
@@ -217,7 +211,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
               start_time: 0,
             },
           },
-          ready: false,
           enabled: true,
         },
         loading: false,
@@ -237,7 +230,6 @@ describe('WelcomeMessageKnowledgeBase', () => {
         value: {
           kbState: KnowledgeBaseState.READY,
           endpoint: { inference_id: 'inference_id' },
-          ready: true,
           enabled: true,
           errorMessage: undefined,
         },
