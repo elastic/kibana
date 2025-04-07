@@ -71,7 +71,7 @@ export const ChatSetupPage: React.FC = () => {
               <EuiLoadingSpinner />
             ) : (
               <>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem style={{ minWidth: 360 }}>
                   <EuiCard
                     textAlign="left"
                     title={
@@ -89,7 +89,7 @@ export const ChatSetupPage: React.FC = () => {
                     footer={<ConnectLLMButton />}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem style={{ minWidth: 360 }}>
                   <EuiCard
                     textAlign="left"
                     title={
