@@ -30,7 +30,7 @@ export function ClassicStreamDetailManagement({
 }) {
   const {
     path: { key, subtab },
-  } = useStreamsAppParams('/{key}/{tab}/{subtab}');
+  } = useStreamsAppParams('/{key}/management/{subtab}');
 
   if (!definition.data_stream_exists) {
     return (

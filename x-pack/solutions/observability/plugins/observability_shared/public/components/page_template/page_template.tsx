@@ -134,10 +134,10 @@ export function ObservabilityPageTemplate({
             (entry.matchPath
               ? entry.matchPath(currentPath)
               : matchPath(currentPath, {
-                  path: entry.path,
-                  exact: !!entry.matchFullPath,
-                  strict: !entry.ignoreTrailingSlash,
-                }) != null);
+                path: entry.path,
+                exact: !!entry.matchFullPath,
+                strict: !entry.ignoreTrailingSlash,
+              }) != null);
           const badgeLocalStorageId = `observability.nav_item_badge_visible_${entry.app}${entry.path}`;
           const navId = entry.label.toLowerCase().split(' ').join('_');
           return {
@@ -209,12 +209,12 @@ export function ObservabilityPageTemplate({
               solutionNav={
                 showSolutionNav
                   ? {
-                      icon: 'logoObservability',
-                      items: sideNavItems,
-                      name: sideNavTitle,
-                      // Only false if tour is active
-                      canBeCollapsed: isTourVisible === false,
-                    }
+                    icon: 'logoObservability',
+                    items: sideNavItems,
+                    name: sideNavTitle,
+                    // Only false if tour is active
+                    canBeCollapsed: isTourVisible === false,
+                  }
                   : undefined
               }
             >

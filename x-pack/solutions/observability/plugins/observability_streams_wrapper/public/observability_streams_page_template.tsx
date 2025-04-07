@@ -26,6 +26,7 @@ export const createObservabilityStreamsAppPageTemplate =
     return (
       <PageTemplate
         pageSectionProps={{
+          color: 'subdued',
           className: css`
             max-height: calc(
               100vh - var(--euiFixedHeadersOffset, 0)

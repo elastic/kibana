@@ -30,7 +30,7 @@ export function WiredStreamDetailManagement({
 }) {
   const {
     path: { key, subtab },
-  } = useStreamsAppParams('/{key}/{tab}/{subtab}');
+  } = useStreamsAppParams('/{key}/management/{subtab}');
 
   const tabs = {
     route: {
