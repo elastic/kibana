@@ -546,7 +546,7 @@
               "\nFetch an exception list parent container"
             ],
             "signature": [
-              "({ filter, listId, id, namespaceType, }: ",
+              "(options: ",
               "GetExceptionListSummaryOptions",
               ") => Promise<{ windows: number; linux: number; macos: number; total: number; } | null>"
             ],
@@ -559,7 +559,7 @@
                 "id": "def-server.ExceptionListClient.getExceptionListSummary.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    filter,\n    listId,\n    id,\n    namespaceType,\n  }",
+                "label": "options",
                 "description": [],
                 "signature": [
                   "GetExceptionListSummaryOptions"
