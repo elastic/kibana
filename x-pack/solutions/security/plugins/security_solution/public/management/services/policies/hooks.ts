@@ -19,7 +19,9 @@ import type { GetPolicyListResponse } from '../../pages/policy/types';
 import { sendGetEndpointSpecificPackagePolicies } from './policies';
 import type { ServerApiError } from '../../../common/types';
 
-// FIXME:PT move to `hooks` folder
+/**
+ * @deprecated use `useFetchIntegrationPolicyList()` hook instead
+ */
 export function useGetEndpointSpecificPolicies(
   {
     onError,
