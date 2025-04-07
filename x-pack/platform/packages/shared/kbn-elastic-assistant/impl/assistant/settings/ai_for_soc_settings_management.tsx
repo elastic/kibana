@@ -111,11 +111,6 @@ export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
                 onClick={onClick}
                 isActive={isSelected}
                 size="s"
-                css={css`
-                  font-weight: ${isSelected
-                    ? 'bold'
-                    : 'normal'}; // enable text truncation for long breadcrumb titles
-                `}
               />
             ))}
           </EuiListGroup>
