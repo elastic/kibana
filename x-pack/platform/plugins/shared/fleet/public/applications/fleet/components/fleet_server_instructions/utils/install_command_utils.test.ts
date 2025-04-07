@@ -113,6 +113,25 @@ describe('getInstallCommandForPlatform', () => {
       `);
     });
 
+    it('should return the correct command if the the policyId is not set for windows MSI', () => {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows_msi',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
+        cd elastic-agent--windows-x86_64
+        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-port=8220 \`
+          --install-servers"\"
+      `);
+    });
+
     it('should return the correct command if the the policyId is not set for rpm', () => {
       expect(
         getInstallCommandForPlatform({
@@ -319,6 +338,27 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-policy=policy-1 \`
           --fleet-server-port=8220 \`
           --install-servers"
+      `);
+    });
+
+    it('should return the correct command if the the policyId is set for windows MSI', () => {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows_msi',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
+        cd elastic-agent--windows-x86_64
+        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220 \`
+          --install-servers\""
       `);
     });
 
@@ -574,6 +614,32 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \`
           --fleet-server-port=8220 \`
           --install-servers"
+      `);
+    });
+    it('should return the correct command if the the policyId is set for windows MSI', () => {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows_msi',
+        esOutputHost: 'http://elasticsearch:9200',
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost,
+        isProductionDeployment: true,
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
+        cd elastic-agent--windows-x86_64
+        .\\\\elastic-agent.msi install --% INSTALLARGS="--url=http://fleetserver:8220 \`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --certificate-authorities=<PATH_TO_CA> \`
+          --fleet-server-es-ca=<PATH_TO_ES_CERT> \`
+          --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \`
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \`
+          --fleet-server-port=8220 \`
+          --install-servers\""
       `);
     });
 
@@ -973,6 +1039,47 @@ describe('getInstallCommandForPlatform', () => {
           --proxy-url=http://es-proxy:1111"
       `);
     });
+    it('should return the correct command if proxies are set for windows MSI', () => {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows_msi',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          is_preconfigured: false,
+        },
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost,
+        downloadSource: {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        downloadSourceProxy: {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          is_preconfigured: false,
+        },
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\"
+        cd elastic-agent--windows-x86_64
+        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220 \`
+          --install-servers \`
+          --proxy-url=http://es-proxy:1111\""
+      `);
+    });
 
     it('should return the correct command if proxies are set for rpm', () => {
       expect(
@@ -1354,6 +1461,57 @@ describe('getInstallCommandForPlatform', () => {
           --proxy-url=http://es-proxy:1111 \`
           --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \`
           --proxy-header=\\"test-header=test-value\\""
+      `);
+    });
+    it('should return the correct command if proxies are set for windows MSI', () => {
+      const res = getInstallCommandForPlatform({
+        platform: 'windows_msi',
+        esOutputHost: 'http://elasticsearch:9200',
+        esOutputProxy: {
+          id: 'es-proxy',
+          name: 'es-proxy',
+          url: 'http://es-proxy:1111',
+          proxy_headers: {
+            'X-Forwarded-For': 'forwarded-value',
+            'test-header': 'test-value',
+          },
+          is_preconfigured: false,
+        },
+        serviceToken: 'service-token-1',
+        policyId: 'policy-1',
+        fleetServerHost,
+        downloadSource: {
+          id: 'download-src',
+          name: 'download-src',
+          host: 'https://download-src/8.12.0-test/',
+          is_default: false,
+          proxy_id: 'download-proxy',
+        },
+        downloadSourceProxy: {
+          id: 'download-src-proxy',
+          name: 'download-src-proxy',
+          url: 'http://download-src-proxy:2222',
+          proxy_headers: {
+            'Accept-Language': 'en-US,en;q=0.5',
+            'second-header': 'second-value',
+          },
+          is_preconfigured: false,
+        },
+      });
+
+      expect(res).toMatchInlineSnapshot(`
+        "$ProgressPreference = 'SilentlyContinue'
+        Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\" -Headers @{\\"Accept-Language\\"=\\"en-US,en;q=0.5\\"; \\"second-header\\"=\\"second-value\\"}
+        cd elastic-agent--windows-x86_64
+        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+          --fleet-server-es=http://elasticsearch:9200 \`
+          --fleet-server-service-token=service-token-1 \`
+          --fleet-server-policy=policy-1 \`
+          --fleet-server-port=8220 \`
+          --install-servers \`
+          --proxy-url=http://es-proxy:1111 \`
+          --proxy-header=\\"X-Forwarded-For=forwarded-value\\" \`
+          --proxy-header=\\"test-header=test-value\\"\\""
       `);
     });
 
