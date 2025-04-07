@@ -14,6 +14,7 @@ export class UnifiedTabsPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly browser = this.ctx.getService('browser');
 
   public async getTabElements() {
     return await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
@@ -92,6 +93,32 @@ export class UnifiedTabsPageObject extends FtrService {
     await closeButton.click();
     await this.retry.waitFor('the tab to be closed', async () => {
       return (await this.getNumberOfTabs()) === tabElements.length - 1;
+    });
+  }
+
+  public async editTabLabel(index: number, newLabel: string) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    const tabElement = tabElements[index];
+    const controlElement = await tabElement.findByCssSelector(
+      '[data-test-subj^="unifiedTabs_selectTabBtn_"]'
+    );
+    await controlElement.doubleClick();
+    await this.retry.waitFor('the tab label to be editable', async () => {
+      return Boolean(
+        await tabElement.findByCssSelector('[data-test-subj^="unifiedTabs_editTabLabelInput_"]')
+      );
+    });
+    const labelElement = await tabElement.findByCssSelector(
+      '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
+    );
+    await labelElement.clearValue();
+    await labelElement.type(newLabel);
+    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.retry.waitFor('the tab label to change', async () => {
+      return (await this.getSelectedTab())?.label === newLabel;
     });
   }
 

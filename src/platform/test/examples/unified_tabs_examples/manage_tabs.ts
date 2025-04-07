@@ -58,6 +58,21 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect((await unifiedTabs.getTabWidths()).every((width) => width === 96)).to.be(true);
     });
 
+    it('can edit tab label', async () => {
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      await unifiedTabs.editTabLabel(3, 'Test label');
+      expect(await unifiedTabs.getTabLabels()).to.eql([
+        'Untitled session 1',
+        'Untitled session 2',
+        'Untitled session 3',
+        'Test label',
+        'Untitled session 5',
+        'Untitled session 6',
+        'Untitled session 7',
+      ]);
+    });
+
     it('should support mouse events for navigating between tabs', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
