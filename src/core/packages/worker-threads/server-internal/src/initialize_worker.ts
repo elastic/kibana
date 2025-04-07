@@ -99,7 +99,7 @@ export async function initialize({ services }: InternalWorkerData) {
         (m) => new m.AnalyticsService(coreContext)
       )
     );
-  });
+  }).pipe(shareReplay(1));
 
   const context$ = defer(() => {
     return from(
@@ -107,7 +107,7 @@ export async function initialize({ services }: InternalWorkerData) {
         (m) => new m.ContextService(coreContext)
       )
     );
-  });
+  }).pipe(shareReplay(1));
 
   const executionContext$ = defer(() => {
     return from(
@@ -115,13 +115,13 @@ export async function initialize({ services }: InternalWorkerData) {
         (m) => new m.ExecutionContextService(coreContext)
       )
     );
-  });
+  }).pipe(shareReplay(1));
 
   const http$ = defer(() => {
     return from(
       import('@kbn/core-http-server-internal').then((m) => new m.HttpService(coreContext))
     );
-  });
+  }).pipe(shareReplay(1));
 
   const elasticsearch$ = defer(() => {
     return from(
@@ -129,7 +129,7 @@ export async function initialize({ services }: InternalWorkerData) {
         (m) => new m.ElasticsearchService(coreContext)
       )
     );
-  });
+  }).pipe(shareReplay(1));
 
   const coreUsageData$ = defer(() => {
     return from(
@@ -137,13 +137,13 @@ export async function initialize({ services }: InternalWorkerData) {
         (m) => new m.CoreUsageDataService(coreContext)
       )
     );
-  });
+  }).pipe(shareReplay(1));
 
   const docLinks$ = defer(() => {
     return from(
       import('@kbn/core-doc-links-server-internal').then((m) => new m.DocLinksService(coreContext))
     );
-  });
+  }).pipe(shareReplay(1));
 
   const deprecations$ = defer(() => {
     return from(
@@ -157,19 +157,19 @@ export async function initialize({ services }: InternalWorkerData) {
     return from(
       import('@kbn/core-logging-server-internal').then((m) => new m.LoggingService(coreContext))
     );
-  });
+  }).pipe(shareReplay(1));
 
   const metrics$ = defer(() => {
     return from(
       import('@kbn/core-metrics-server-internal').then((m) => new m.MetricsService(coreContext))
     );
-  });
+  }).pipe(shareReplay(1));
 
   const node$ = defer(() => {
     return from(
       import('@kbn/core-node-server-internal').then((m) => new m.NodeService(coreContext))
     );
-  });
+  }).pipe(shareReplay(1));
 
   const savedObjects$ = defer(() => {
     return from(
@@ -177,7 +177,7 @@ export async function initialize({ services }: InternalWorkerData) {
         (m) => new m.SavedObjectsService(coreContext)
       )
     );
-  });
+  }).pipe(shareReplay(1));
 
   const uiSettings$ = defer(() => {
     return from(
@@ -185,64 +185,91 @@ export async function initialize({ services }: InternalWorkerData) {
         (m) => new m.UiSettingsService(coreContext)
       )
     );
-  });
+  }).pipe(shareReplay(1));
 
   const pluginDependencies = new Map();
 
   const contextSetup$ = context$.pipe(
-    map((contextService) => contextService.setup({ pluginDependencies }))
+    map((context) => {
+      return context.setup({ pluginDependencies });
+    }),
+    shareReplay(1)
   );
 
   const executionContextSetup$ = executionContext$.pipe(
-    map((executionContextService) => executionContextService.setup())
+    map((executionContext) => executionContext.setup()),
+    shareReplay(1)
   );
 
-  const analyticsSetup$ = analytics$.pipe(map((analytics) => analytics.setup()));
+  const analyticsSetup$ = analytics$.pipe(
+    map((analytics) => {
+      return analytics.setup();
+    }),
+    shareReplay(1)
+  );
 
-  const httpSetup$ = forkJoin([http$, contextSetup$, executionContextSetup$]).pipe(
-    switchMap(([http, context, executionContext]) => {
-      return from(
-        http.setup({
+  const httpSetup$ = forkJoin([http$, contextSetup$, executionContextSetup$])
+    .pipe(
+      switchMap(async ([http, context, executionContext]) => {
+        return http.setup({
           context,
           executionContext,
-        })
-      );
-    })
-  );
+        });
+      })
+    )
+    .pipe(shareReplay(1));
 
   const elasticsearchSetup$ = forkJoin([
     elasticsearch$,
     analyticsSetup$,
     executionContextSetup$,
     httpSetup$,
-  ]).pipe(
-    switchMap(([elasticsearch, analytics, executionContext, http]) => {
-      return from(
-        elasticsearch.setup({
+  ])
+    .pipe(
+      switchMap(([elasticsearch, analytics, executionContext, http]) => {
+        return elasticsearch.setup({
           analytics,
           executionContext,
           http,
-        })
-      );
-    })
-  );
-
-  const docLinksSetup$ = docLinks$.pipe(map((docLinks) => docLinks.setup()));
-
-  const metricsSetup$ = metrics$.pipe(switchMap((metrics) => from(metrics.start())));
-
-  const coreUsageDataSetup$ = forkJoin([coreUsageData$, metricsSetup$, httpSetup$]).pipe(
-    map(([coreUsageData, metrics, http]) =>
-      coreUsageData.setup({
-        metrics,
-        http,
-        savedObjectsStartPromise: lastValueFrom(savedObjectsStart$),
-        changedDeprecatedConfigPath$: configService.getDeprecatedConfigPath$(),
+        });
       })
     )
-  );
+    .pipe(shareReplay(1));
 
-  const loggingSetup$ = logging$.pipe(map((logging) => logging.setup()));
+  const docLinksSetup$ = docLinks$.pipe(map((docLinks) => docLinks.setup())).pipe(shareReplay(1));
+
+  const metricsSetup$ = forkJoin([metrics$, elasticsearchSetup$, httpSetup$])
+    .pipe(
+      switchMap(([metrics, elasticsearchService, http]) =>
+        metrics.setup({
+          elasticsearchService,
+          http,
+        })
+      )
+    )
+    .pipe(shareReplay(1));
+
+  const coreUsageDataSetup$ = forkJoin([coreUsageData$, metricsSetup$, httpSetup$])
+    .pipe(
+      map(([coreUsageData, metrics, http]) =>
+        coreUsageData.setup({
+          metrics,
+          http,
+          savedObjectsStartPromise: lastValueFrom(savedObjectsStart$),
+          changedDeprecatedConfigPath$: configService.getDeprecatedConfigPath$(),
+        })
+      )
+    )
+    .pipe(shareReplay(1));
+
+  const loggingSetup$ = logging$
+    .pipe(
+      switchMap(async (logging) => {
+        await logging.preboot({ loggingSystem });
+        return logging.setup();
+      })
+    )
+    .pipe(shareReplay(1));
 
   const deprecationsSetup$ = forkJoin([
     deprecations$,
@@ -250,18 +277,20 @@ export async function initialize({ services }: InternalWorkerData) {
     docLinksSetup$,
     httpSetup$,
     loggingSetup$,
-  ]).pipe(
-    switchMap(([deprecations, coreUsageData, docLinks, http, logging]) =>
-      from(
-        deprecations.setup({
-          coreUsageData,
-          docLinks,
-          http,
-          logging,
-        })
+  ])
+    .pipe(
+      switchMap(([deprecations, coreUsageData, docLinks, http, logging]) =>
+        from(
+          deprecations.setup({
+            coreUsageData,
+            docLinks,
+            http,
+            logging,
+          })
+        )
       )
     )
-  );
+    .pipe(shareReplay(1));
 
   const savedObjectsSetup$ = forkJoin([
     savedObjects$,
@@ -270,40 +299,55 @@ export async function initialize({ services }: InternalWorkerData) {
     deprecationsSetup$,
     docLinksSetup$,
     httpSetup$,
-  ]).pipe(
-    switchMap(([savedObjects, elasticsearch, coreUsageData, deprecations, docLinks, http]) => {
-      return from(
-        savedObjects.setup({
-          elasticsearch,
-          coreUsageData,
-          deprecations,
-          docLinks,
-          http,
-        })
-      );
-    })
+  ])
+    .pipe(
+      switchMap(([savedObjects, elasticsearch, coreUsageData, deprecations, docLinks, http]) => {
+        return from(
+          savedObjects.setup({
+            elasticsearch,
+            coreUsageData,
+            deprecations,
+            docLinks,
+            http,
+          })
+        );
+      })
+    )
+    .pipe(shareReplay(1));
+
+  const uiSettingsSetup$ = forkJoin([uiSettings$, httpSetup$, savedObjectsSetup$])
+    .pipe(
+      switchMap(([uiSettings, http, savedObjects]) => {
+        return from(
+          uiSettings.setup({
+            http,
+            savedObjects,
+          })
+        );
+      })
+    )
+    .pipe(shareReplay(1));
+
+  const elasticsearchStart$ = forkJoin([elasticsearch$, elasticsearchSetup$])
+    .pipe(
+      switchMap(([elasticsearch]) => {
+        return from(elasticsearch.start());
+      })
+    )
+    .pipe(shareReplay(1));
+
+  const docLinksStart$ = forkJoin([docLinks$, docLinksSetup$])
+    .pipe(map(([docLinks]) => docLinks.start()))
+    .pipe(shareReplay(1));
+  const nodeStart$ = node$.pipe(
+    switchMap(async (node) => {
+      await node.preboot({
+        loggingSystem,
+      });
+      return node.start();
+    }),
+    shareReplay(1)
   );
-
-  const uiSettingsSetup$ = forkJoin([uiSettings$, httpSetup$, savedObjectsSetup$]).pipe(
-    switchMap(([uiSettings, http, savedObjects]) => {
-      return from(
-        uiSettings.setup({
-          http,
-          savedObjects,
-        })
-      );
-    })
-  );
-
-  const elasticsearchStart$ = forkJoin([elasticsearch$, elasticsearchSetup$]).pipe(
-    switchMap(([elasticsearch]) => {
-      return from(elasticsearch.start());
-    })
-  );
-
-  const nodeStart$ = node$.pipe(map((node) => node.start()));
-
-  const docLinksStart$ = docLinks$.pipe(map((docLinks) => docLinks.start()));
 
   const savedObjectsStart$: Observable<InternalSavedObjectsServiceStart> = forkJoin([
     savedObjects$,
@@ -311,24 +355,28 @@ export async function initialize({ services }: InternalWorkerData) {
     elasticsearchStart$,
     nodeStart$,
     savedObjectsSetup$,
-  ]).pipe(
-    switchMap(([savedObjects, docLinks, elasticsearch, node]) => {
-      return from(
-        savedObjects.start({
-          docLinks,
-          elasticsearch,
-          node,
-          pluginsInitialized: false,
-        })
-      );
-    })
-  );
+  ])
+    .pipe(
+      switchMap(([savedObjects, docLinks, elasticsearch, node]) => {
+        return from(
+          savedObjects.start({
+            docLinks,
+            elasticsearch,
+            node,
+            pluginsInitialized: false,
+          })
+        );
+      })
+    )
+    .pipe(shareReplay(1));
 
-  const uiSettingsStart$ = forkJoin([uiSettings$, uiSettingsSetup$]).pipe(
-    switchMap(([uiSettings]) => {
-      return from(uiSettings.start());
-    })
-  );
+  const uiSettingsStart$ = forkJoin([uiSettings$, uiSettingsSetup$])
+    .pipe(
+      switchMap(([uiSettings]) => {
+        return from(uiSettings.start());
+      })
+    )
+    .pipe(shareReplay(1));
 
   const config = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
 
@@ -340,16 +388,16 @@ export async function initialize({ services }: InternalWorkerData) {
 
   return {
     elasticsearch: {
-      start$: elasticsearchStart$.pipe(shareReplay(1)),
-      setup$: elasticsearchSetup$.pipe(shareReplay(1)),
+      start$: elasticsearchStart$,
+      setup$: elasticsearchSetup$,
     },
     savedObjects: {
-      start$: savedObjectsStart$.pipe(shareReplay(1)),
-      setup$: savedObjectsSetup$.pipe(shareReplay(1)),
+      start$: savedObjectsStart$,
+      setup$: savedObjectsSetup$,
     },
     uiSettings: {
-      start$: uiSettingsStart$.pipe(shareReplay(1)),
-      setup$: savedObjectsSetup$.pipe(shareReplay(1)),
+      start$: uiSettingsStart$,
+      setup$: savedObjectsSetup$,
     },
     logger: loggerFactory,
   };

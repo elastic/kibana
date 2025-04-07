@@ -39,6 +39,7 @@ export default initialize({ services }).then(
         }),
         signal,
         logger,
+        request,
       });
     };
   }

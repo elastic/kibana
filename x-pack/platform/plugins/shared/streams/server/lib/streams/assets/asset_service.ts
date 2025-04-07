@@ -5,11 +5,41 @@
  * 2.0.
  */
 
-import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import {
+  CoreSetup,
+  IScopedClusterClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { StreamsPluginStartDependencies } from '../../../types';
 import { AssetClient, StoredAssetLink } from './asset_client';
 import { AssetStorageSettings, assetStorageSettings } from './storage_settings';
+
+export function getAssetClientWithRequest({
+  scopedClusterClient,
+  savedObjectsClient,
+  request,
+  logger,
+}: {
+  scopedClusterClient: IScopedClusterClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  request: KibanaRequest;
+  logger: Logger;
+}) {
+  const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
+    scopedClusterClient.asInternalUser,
+    logger.get('assets'),
+    assetStorageSettings
+  );
+
+  return new AssetClient({
+    storageClient: adapter.getClient(),
+    soClient: savedObjectsClient,
+    rulesClient: null,
+  });
+}
 
 export class AssetService {
   constructor(

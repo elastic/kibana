@@ -29,7 +29,7 @@ export interface InternalWorkerThreadsClientConfig {
   elasticsearch: InternalElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
-  pool: Piscina;
+  pool?: Piscina;
   logger: Logger;
 }
 
@@ -53,8 +53,12 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
       },
     });
 
-    if (isPromise(filenameOrImport)) {
-      const worker = await filenameOrImport;
+    const runLocally = !pool || isPromise(filenameOrImport);
+
+    if (runLocally) {
+      const worker = await (typeof filenameOrImport === 'string'
+        ? import(filenameOrImport)
+        : filenameOrImport);
       return worker.run({
         input,
         signal,
@@ -65,6 +69,7 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
           uiSettingsStart$: of(uiSettings),
         }),
         logger,
+        request,
       });
     }
 

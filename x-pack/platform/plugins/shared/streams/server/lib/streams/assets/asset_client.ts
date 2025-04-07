@@ -8,7 +8,7 @@ import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { IStorageClient } from '@kbn/storage-adapter';
-import { keyBy } from 'lodash';
+import { compact, keyBy } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
@@ -115,7 +115,7 @@ export class AssetClient {
     private readonly clients: {
       storageClient: IStorageClient<AssetStorageSettings, StoredAssetLink>;
       soClient: SavedObjectsClientContract;
-      rulesClient: RulesClient;
+      rulesClient: RulesClient | null;
     }
   ) {}
 
@@ -319,7 +319,7 @@ export class AssetClient {
       Promise.all(
         idsByType.rule.map((ruleId) => {
           return limiter(() =>
-            this.clients.rulesClient.get({ id: ruleId }).then((rule): Asset => {
+            this.clients.rulesClient?.get({ id: ruleId }).then((rule): Asset => {
               return ruleToAsset(ruleId, rule);
             })
           );
@@ -348,7 +348,7 @@ export class AssetClient {
         : [],
     ]);
 
-    return [...dashboards, ...rules, ...slos];
+    return [...dashboards, ...compact(rules), ...slos];
   }
 
   async getSuggestions({
@@ -406,7 +406,7 @@ export class AssetClient {
         : Promise.resolve([]),
       searchRules
         ? this.clients.rulesClient
-            .find({
+            ?.find({
               options: {
                 perPage,
                 ...(tags
@@ -426,9 +426,9 @@ export class AssetClient {
     ]);
 
     return {
-      assets: [...suggestionsFromRules, ...suggestionsFromSlosAndDashboards],
+      assets: [...compact(suggestionsFromRules), ...suggestionsFromSlosAndDashboards],
       hasMore:
-        Math.max(suggestionsFromSlosAndDashboards.length, suggestionsFromRules.length) >
+        Math.max(suggestionsFromSlosAndDashboards.length, compact(suggestionsFromRules).length) >
         perPage - 1,
     };
   }

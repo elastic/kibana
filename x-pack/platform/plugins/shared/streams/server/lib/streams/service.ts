@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, IScopedClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { IStorageClient, StorageIndexAdapter, StorageSettings, types } from '@kbn/storage-adapter';
 import { StreamDefinition } from '@kbn/streams-schema';
 import type { StreamsPluginStartDependencies } from '../../types';
@@ -25,6 +25,34 @@ export const streamsStorageSettings = {
 
 export type StreamsStorageSettings = typeof streamsStorageSettings;
 export type StreamsStorageClient = IStorageClient<StreamsStorageSettings, StreamDefinition>;
+
+export function getStreamsClientWithRequest({
+  request,
+  assetClient,
+  scopedClusterClient,
+  isServerless,
+  logger,
+}: {
+  request: KibanaRequest;
+  assetClient: AssetClient;
+  scopedClusterClient: IScopedClusterClient;
+  isServerless: boolean;
+  logger: Logger;
+}) {
+  const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, StreamDefinition>(
+    scopedClusterClient.asInternalUser,
+    logger,
+    streamsStorageSettings
+  );
+
+  return new StreamsClient({
+    assetClient,
+    logger,
+    scopedClusterClient,
+    storageClient: storageAdapter.getClient(),
+    isServerless,
+  });
+}
 
 export class StreamsService {
   constructor(
@@ -47,18 +75,12 @@ export class StreamsService {
 
     const isServerless = coreStart.elasticsearch.getCapabilities().serverless;
 
-    const storageAdapter = new StorageIndexAdapter<StreamsStorageSettings, StreamDefinition>(
-      scopedClusterClient.asInternalUser,
-      logger,
-      streamsStorageSettings
-    );
-
-    return new StreamsClient({
+    return getStreamsClientWithRequest({
+      request,
       assetClient,
+      isServerless,
       logger,
       scopedClusterClient,
-      storageClient: storageAdapter.getClient(),
-      isServerless,
     });
   }
 }

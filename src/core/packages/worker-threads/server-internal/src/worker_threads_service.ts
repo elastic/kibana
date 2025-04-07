@@ -23,9 +23,11 @@ import {
 import { Logger } from '@kbn/logging';
 import Path from 'path';
 import Piscina from 'piscina';
+import { firstValueFrom } from 'rxjs';
 import { InternalWorkerThreadsClient } from './client';
 import { InternalRouteWorkerData } from './types';
 import { serialize } from './utils';
+import { WorkerThreadsConfig, WorkerThreadsConfigType } from './worker_threads_config';
 
 /**
  * @internal
@@ -59,11 +61,17 @@ export class WorkerThreadsService
   private routeWorkerPool?: Piscina;
   private log: Logger;
 
+  private config?: WorkerThreadsConfig;
+
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('worker-threads-service');
   }
 
-  public setup({}: SetupDeps): InternalWorkerThreadsServiceSetup {
+  public async setup({}: SetupDeps): Promise<InternalWorkerThreadsServiceSetup> {
+    const config = await firstValueFrom(
+      this.coreContext.configService.atPath<WorkerThreadsConfigType>('workerThreads')
+    );
+    this.config = new WorkerThreadsConfig(config);
     return {};
   }
 
@@ -77,14 +85,33 @@ export class WorkerThreadsService
       Env: this.coreContext.env,
     });
 
-    const routeWorkerPool = (this.routeWorkerPool = new Piscina({
-      filename: Path.join(__dirname, './route_worker_entry.js'),
-      workerData: {
-        services,
-      } satisfies InternalRouteWorkerData,
-      minThreads: 1,
-      idleTimeout: 2000,
-    }));
+    const config = this.config!;
+
+    this.log.info(JSON.stringify(config));
+
+    const enabled = config.enabled;
+
+    const routeWorkerPool = enabled
+      ? (this.routeWorkerPool = new Piscina({
+          filename: Path.join(__dirname, './route_worker_entry.js'),
+          workerData: {
+            services,
+          } satisfies InternalRouteWorkerData,
+          minThreads: config.minWorkers,
+          maxThreads: config.maxWorkers,
+          idleTimeout: config.idleTimeout,
+        }))
+      : undefined;
+
+    setInterval(() => {
+      if (!routeWorkerPool) {
+        return;
+      }
+      const { queueSize, runTime, waitTime, utilization } = routeWorkerPool;
+      this.log.info(
+        `Worker stats: ${JSON.stringify({ queueSize, runTime, waitTime, utilization })}`
+      );
+    }, 2500);
 
     return {
       getClientWithRequest: (request: KibanaRequest) => {

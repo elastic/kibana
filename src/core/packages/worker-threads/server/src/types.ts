@@ -13,6 +13,7 @@ import { Logger } from '@kbn/logging';
 import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
 import { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
 import { CoreUiSettingsRouteHandlerContext } from '@kbn/core-ui-settings-server-internal';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -44,6 +45,7 @@ export type RouteWorker<
       savedObjects: Promise<SavedObjectsRequestHandlerContext>;
       uiSettings: Promise<UiSettingsRequestHandlerContext>;
     };
+    request: KibanaRequest;
   }
 >;
 
