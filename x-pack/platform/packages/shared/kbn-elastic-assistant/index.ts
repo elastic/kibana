@@ -168,3 +168,4 @@ export {
   /** Your anonymization settings will apply to these alerts (label) */
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
+export { AIForSOCSettingsManagement } from './impl/assistant/settings/ai_for_soc_settings_management';
