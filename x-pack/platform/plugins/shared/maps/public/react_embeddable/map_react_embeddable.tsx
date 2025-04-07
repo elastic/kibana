@@ -16,13 +16,13 @@ import {
   areTriggersDisabled,
   initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
 import type { MapApi, MapSerializedState } from './types';
@@ -184,6 +184,7 @@ export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi>
         savedObjectId$.next(lastSaved?.savedObjectId);
         dynamicActionsManager?.reinitializeState(lastSaved ?? {});
         reduxSync.reinitializeState(lastSaved);
+        timeRangeManager.reinitializeState(lastSaved);
         titleManager.reinitializeState(lastSaved);
       },
     });

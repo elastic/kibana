@@ -14,13 +14,13 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   EmbeddableStart,
-  ReactEmbeddableFactory,
+  EmbeddableFactory,
   SELECT_RANGE_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
 import { ExpressionRendererParams, useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
-import { apiPublishesSettings } from '@kbn/presentation-containers';
+import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   apiHasDisableTriggers,
   apiHasExecutionContext,
@@ -29,15 +29,16 @@ import {
   apiPublishesTimeslice,
   apiPublishesUnifiedSearch,
   fetch$,
-  getUnchangingComparator,
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  timeRangeComparators,
+  titleComparators,
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { BehaviorSubject, switchMap } from 'rxjs';
+import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from './events';
@@ -52,7 +53,8 @@ import {
   ExtraSavedObjectProperties,
   VisualizeApi,
   VisualizeOutputState,
-  VisualizeRuntimeState,
+  VisualizeSavedObjectInputState,
+  VisualizeSavedVisInputState,
   VisualizeSerializedState,
 } from './types';
 import { initializeEditApi } from './initialize_edit_api';
@@ -60,36 +62,32 @@ import { initializeEditApi } from './initialize_edit_api';
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
   embeddableEnhancedStart?: EmbeddableEnhancedPluginStart;
-}) => ReactEmbeddableFactory<VisualizeSerializedState, VisualizeRuntimeState, VisualizeApi> = ({
+}) => EmbeddableFactory<VisualizeSerializedState, VisualizeApi> = ({
   embeddableStart,
   embeddableEnhancedStart,
 }) => ({
   type: VISUALIZE_EMBEDDABLE_TYPE,
-  deserializeState,
-  buildEmbeddable: async (initialState, buildApi, uuid, parentApi) => {
-    const state = {
-      ...initialState,
-      linkedToLibrary: Boolean(initialState.savedObjectId),
-    };
+  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    const runtimeState = await deserializeState(initialState);
 
     // Initialize dynamic actions
-    const dynamicActionsApi = embeddableEnhancedStart?.initializeReactEmbeddableDynamicActions(
+    const dynamicActionsManager = embeddableEnhancedStart?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      state
+      runtimeState
     );
     // if it is provided, start the dynamic actions manager
-    const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
-    const titleManager = initializeTitleManager(state);
+    const titleManager = initializeTitleManager(runtimeState);
 
     // Count renders; mostly used for testing.
     const renderCount$ = new BehaviorSubject<number>(0);
     const hasRendered$ = new BehaviorSubject<boolean>(false);
 
     // Track vis data and initialize it into a vis instance
-    const serializedVis$ = new BehaviorSubject<SerializedVis>(state.serializedVis);
-    const initialVisInstance = await createVisInstance(state.serializedVis);
+    const serializedVis$ = new BehaviorSubject<SerializedVis>(runtimeState.serializedVis);
+    const initialVisInstance = await createVisInstance(runtimeState.serializedVis);
     const vis$ = new BehaviorSubject<Vis>(initialVisInstance);
 
     // Track UI state
@@ -116,12 +114,9 @@ export const getVisualizeEmbeddableFactory: (deps: {
 
     // Track visualizations linked to a saved object in the library
     const savedObjectId$ = new BehaviorSubject<string | undefined>(
-      state.savedObjectId ?? state.serializedVis.id
+      runtimeState.savedObjectId ?? runtimeState.serializedVis.id
     );
-    const savedObjectProperties$ = new BehaviorSubject<ExtraSavedObjectProperties | undefined>(
-      undefined
-    );
-    const linkedToLibrary$ = new BehaviorSubject<boolean | undefined>(state.linkedToLibrary);
+    const linkedToLibrary = Boolean(runtimeState.savedObjectId);
 
     // Track the vis expression
     const expressionParams$ = new BehaviorSubject<ExpressionRendererParams>({
@@ -134,11 +129,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
       abortController: expressionAbortController$.getValue(),
     });
 
-    const {
-      api: customTimeRangeApi,
-      serialize: serializeCustomTimeRange,
-      comparators: customTimeRangeComparators,
-    } = initializeTimeRange(state);
+    const timeRangeManager = initializeTimeRangeManager(runtimeState);
 
     const searchSessionId$ = new BehaviorSubject<string | undefined>('');
 
@@ -170,118 +161,40 @@ export const getVisualizeEmbeddableFactory: (deps: {
       savedObjectId: string | undefined,
       linkedToLibrary: boolean
     ) => {
-      const savedObjectProperties = savedObjectProperties$.getValue();
       return serializeState({
         serializedVis: vis$.getValue().serialize(),
-        titles: titleManager.serialize(),
+        titles: titleManager.getLatestState(),
         id: savedObjectId,
         linkedToLibrary,
-        ...(savedObjectProperties ? { savedObjectProperties } : {}),
-        ...(dynamicActionsApi?.serializeDynamicActions?.() ?? {}),
-        ...serializeCustomTimeRange(),
+        ...(runtimeState.savedObjectProperties ? { savedObjectProperties: runtimeState.savedObjectProperties } : {}),
+        ...(dynamicActionsManager?.getLatestState() ?? {}),
+        ...timeRangeManager.getLatestState(),
       });
     };
 
-    const api = buildApi(
-      {
-        ...customTimeRangeApi,
-        ...titleManager.api,
-        ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-        defaultTitle$,
-        dataLoading$,
-        dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
-        rendered$: hasRendered$,
-        supportedTriggers: () => [
-          ACTION_CONVERT_TO_LENS,
-          APPLY_FILTER_TRIGGER,
-          SELECT_RANGE_TRIGGER,
-        ],
-        serializeState: () => {
-          // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
-          // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
-          // serialize the state with just the savedObjectId so that the current revision of the vis is always used
-          const linkedToLibrary = apiIsOfType(parentApi, VISUALIZE_APP_NAME)
-            ? false
-            : linkedToLibrary$.getValue();
-          return serializeVisualizeEmbeddable(savedObjectId$.getValue(), Boolean(linkedToLibrary));
-        },
-        getVis: () => vis$.getValue(),
-        getInspectorAdapters: () => inspectorAdapters$.getValue(),
-        ...initializeEditApi({
-          customTimeRange$: customTimeRangeApi.timeRange$,
-          description$: titleManager.api.description$,
-          parentApi,
-          savedObjectId$,
-          searchSessionId$,
-          title$: titleManager.api.title$,
-          vis$,
-          uuid,
-        }),
-        updateVis: async (visUpdates) => {
-          const currentSerializedVis = vis$.getValue().serialize();
-          serializedVis$.next({
-            ...currentSerializedVis,
-            ...visUpdates,
-            params: {
-              ...currentSerializedVis.params,
-              ...visUpdates.params,
-            },
-            data: {
-              ...currentSerializedVis.data,
-              ...visUpdates.data,
-            },
-          } as SerializedVis);
-          if (visUpdates.title) {
-            titleManager.api.setTitle(visUpdates.title);
-          }
-        },
-        openInspector: () => {
-          const adapters = inspectorAdapters$.getValue();
-          if (!adapters) return;
-          const inspector = getInspector();
-          if (!inspector.isAvailable(adapters)) return;
-          return getInspector().open(adapters, {
-            title:
-              titleManager.api.title$?.getValue() ||
-              i18n.translate('visualizations.embeddable.inspectorTitle', {
-                defaultMessage: 'Inspector',
-              }),
-          });
-        },
-        // Library transforms
-        saveToLibrary: (newTitle: string) => {
-          titleManager.api.setTitle(newTitle);
-          const { rawState, references } = serializeState({
-            serializedVis: vis$.getValue().serialize(),
-            titles: {
-              ...titleManager.serialize(),
-              title: newTitle,
-            },
-          });
-          return saveToLibrary({
-            uiState: vis$.getValue().uiState,
-            rawState: rawState as VisualizeOutputState,
-            references,
-          });
-        },
-        canLinkToLibrary: () => Promise.resolve(!state.linkedToLibrary),
-        canUnlinkFromLibrary: () => Promise.resolve(!!state.linkedToLibrary),
-        checkForDuplicateTitle: () => Promise.resolve(), // Handled by saveToLibrary action
-        getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
-        getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
+    const unsavedChangesApi = initializeUnsavedChanges<VisualizeSerializedState>({
+      uuid,
+      parentApi,
+      serializeState: () => {
+
       },
-      {
-        ...titleManager.comparators,
-        ...customTimeRangeComparators,
-        ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-          enhancements: getUnchangingComparator(),
-        }),
-        serializedVis: [
-          serializedVis$,
-          (value) => {
-            serializedVis$.next(value);
+      latestRuntimeState$: combineLatest([
+        ...(dynamicActionsManager ? [dynamicActionsManager.latestState$] : []),
+        savedObjectId$,
+        serializedVis$,
+        titleManager.latestState$,
+        timeRangeManager.latestState$,
+      ]),
+      getComparators: () => {
+        return {
+          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...titleComparators,
+          ...timeRangeComparators,
+          savedObjectId: (a, b) => {
+            if (!a && !b) return true;
+            return a === b;
           },
-          (a, b) => {
+          savedVis: (a, b) => {
             const visA = a
               ? {
                   ...omitBy(a, isEmpty),
@@ -297,26 +210,110 @@ export const getVisualizeEmbeddableFactory: (deps: {
                 }
               : {};
             return isEqual(visA, visB);
+          }
+        };
+      },
+      onReset: (lastSaved) => {
+        if ((lastSaved as VisualizeSavedVisInputState)?.savedVis) {
+          serializedVis$.next((lastSaved as VisualizeSavedVisInputState)!.savedVis);
+        }
+        if ((lastSaved as VisualizeSavedObjectInputState)?.savedObjectId) {
+          savedObjectId$.next((lastSaved as VisualizeSavedObjectInputState)!.savedObjectId);
+        };
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        timeRangeManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
+      },
+    });
+
+    const api = finalizeApi({
+      ...timeRangeManager.api,
+      ...titleManager.api,
+      ...(dynamicActionsManager?.api ?? {}),
+      ...unsavedChangesApi,
+      defaultTitle$,
+      dataLoading$,
+      dataViews$: new BehaviorSubject<DataView[] | undefined>(initialDataViews),
+      rendered$: hasRendered$,
+      supportedTriggers: () => [
+        ACTION_CONVERT_TO_LENS,
+        APPLY_FILTER_TRIGGER,
+        SELECT_RANGE_TRIGGER,
+      ],
+      serializeState: () => {
+        // In the visualize editor, linkedToLibrary should always be false to force the full state to be serialized,
+        // instead of just passing a reference to the linked saved object. Other contexts like dashboards should
+        // serialize the state with just the savedObjectId so that the current revision of the vis is always used
+        const forcedLinkedToLibrary = apiIsOfType(parentApi, VISUALIZE_APP_NAME)
+          ? false
+          : linkedToLibrary;
+        return serializeVisualizeEmbeddable(savedObjectId$.getValue(), forcedLinkedToLibrary);
+      },
+      getVis: () => vis$.getValue(),
+      getInspectorAdapters: () => inspectorAdapters$.getValue(),
+      ...initializeEditApi({
+        customTimeRange$: timeRangeManager.api.timeRange$,
+        description$: titleManager.api.description$,
+        parentApi,
+        savedObjectId$,
+        searchSessionId$,
+        title$: titleManager.api.title$,
+        vis$,
+        uuid,
+      }),
+      updateVis: async (visUpdates) => {
+        const currentSerializedVis = vis$.getValue().serialize();
+        serializedVis$.next({
+          ...currentSerializedVis,
+          ...visUpdates,
+          params: {
+            ...currentSerializedVis.params,
+            ...visUpdates.params,
           },
-        ],
-        savedObjectId: [
-          savedObjectId$,
-          (value) => savedObjectId$.next(value),
-          (a, b) => {
-            if (!a && !b) return true;
-            return a === b;
+          data: {
+            ...currentSerializedVis.data,
+            ...visUpdates.data,
           },
-        ],
-        savedObjectProperties: getUnchangingComparator(),
-        linkedToLibrary: [
-          linkedToLibrary$,
-          (value) => linkedToLibrary$.next(value),
-          (a, b) => {
-            return a === undefined || b === undefined ? true : a === b;
+        } as SerializedVis);
+        if (visUpdates.title) {
+          titleManager.api.setTitle(visUpdates.title);
+        }
+      },
+      openInspector: () => {
+        const adapters = inspectorAdapters$.getValue();
+        if (!adapters) return;
+        const inspector = getInspector();
+        if (!inspector.isAvailable(adapters)) return;
+        return getInspector().open(adapters, {
+          title:
+            titleManager.api.title$?.getValue() ||
+            i18n.translate('visualizations.embeddable.inspectorTitle', {
+              defaultMessage: 'Inspector',
+            }),
+        });
+      },
+      // Library transforms
+      saveToLibrary: (newTitle: string) => {
+        titleManager.api.setTitle(newTitle);
+        const { rawState, references } = serializeState({
+          serializedVis: vis$.getValue().serialize(),
+          titles: {
+            ...titleManager.getLatestState(),
+            title: newTitle,
           },
-        ],
-      }
-    );
+        });
+        return saveToLibrary({
+          uiState: vis$.getValue().uiState,
+          rawState: rawState as VisualizeOutputState,
+          references,
+        });
+      },
+      canLinkToLibrary: () => Promise.resolve(!linkedToLibrary),
+      canUnlinkFromLibrary: () => Promise.resolve(linkedToLibrary),
+      checkForDuplicateTitle: () => Promise.resolve(), // Handled by saveToLibrary action
+      getSerializedStateByValue: () => serializeVisualizeEmbeddable(undefined, false),
+      getSerializedStateByReference: (libraryId) => serializeVisualizeEmbeddable(libraryId, true),
+    });
 
     const fetchSubscription = fetch$(api)
       .pipe(
@@ -343,7 +340,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
             ? parentApi.timeslice$.getValue()
             : undefined;
 
-          const customTimeRange = customTimeRangeApi.timeRange$.getValue();
+          const customTimeRange = timeRangeManager.api.timeRange$.getValue();
           const parentTimeRange = apiPublishesTimeRange(parentApi) ? data.timeRange : undefined;
           const timesliceTimeRange = timeslice
             ? {
