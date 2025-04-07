@@ -187,7 +187,7 @@ export const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.
 
 export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.testErrorLabel', {
   defaultMessage:
-    'This synthetics script could not be run as written. Debug this locally by running elastic-synthetics with the --dry-run flag.',
+    'This Elastic Synthetics script could not be run as written. Debug this locally by running elastic-synthetics with the --dry-run flag.',
 });
 
 const LOADING_STEPS = i18n.translate('xpack.synthetics.monitorManagement.loadingSteps', {
