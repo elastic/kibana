@@ -46,7 +46,7 @@ export const getRelatedColumns = (): EuiDataGridColumn[] => {
     {
       id: ALERT_CASE_IDS,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.caseIdsColumnDescription', {
-        defaultMessage: 'Related cases',
+        defaultMessage: 'Attached cases',
       }),
     },
     {
