@@ -32,7 +32,7 @@ describe('pruneContentReferences', () => {
 
     const prunedContentReferences = pruneContentReferences(content, contentReferencesStore);
 
-    const keys = Object.keys(prunedContentReferences!);
-    expect(keys.sort()).toEqual([alertsPageReference1.id, alertsPageReference2.id].sort());
+    const keys = Object.keys(prunedContentReferences);
+    expect(keys.sort()).toEqual([alertsPageReference1!.id, alertsPageReference2!.id].sort());
   });
 });

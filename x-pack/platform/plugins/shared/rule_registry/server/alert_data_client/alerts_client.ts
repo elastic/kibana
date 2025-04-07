@@ -49,8 +49,8 @@ import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { TypeOf } from 'io-ts';
+import { alertAuditEvent, operationAlertAuditActionMap } from '@kbn/alerting-plugin/server/lib';
 import type { BrowserFields } from '../../common';
-import { alertAuditEvent, operationAlertAuditActionMap } from './audit_events';
 import {
   ALERT_WORKFLOW_STATUS,
   ALERT_RULE_CONSUMER,
@@ -520,7 +520,7 @@ export class AlertsClient {
     query: object | string;
     operation: WriteOperations.Update | ReadOperations.Find | ReadOperations.Get;
   }) {
-    let lastSortIds;
+    let lastSortIds: Array<string | number> | undefined;
     let hasSortIds = true;
     const alertSpaceId = this.spaceId;
     if (alertSpaceId == null) {

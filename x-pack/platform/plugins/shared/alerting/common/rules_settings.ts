@@ -6,6 +6,7 @@
  */
 
 import type {
+  RulesSettingsAlertDeleteProperties,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
 } from '@kbn/alerting-types';
@@ -22,6 +23,7 @@ export type {
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
   RuleSpecificFlappingProperties,
+  RulesSettingsAlertDeleteProperties,
   RulesSettingsFlapping,
   RulesSettingsQueryDelay,
   RulesSettingsProperties,
@@ -36,12 +38,16 @@ export const ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'allFlappingSettings';
 export const READ_FLAPPING_SETTINGS_SUB_FEATURE_ID = 'readFlappingSettings';
 export const ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'allQueryDelaySettings';
 export const READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID = 'readQueryDelaySettings';
+export const ALL_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID = 'allAlertDeleteSettings';
+export const READ_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID = 'readAlertDeleteSettings';
 
 export const API_PRIVILEGES = {
   READ_FLAPPING_SETTINGS: 'read-flapping-settings',
   WRITE_FLAPPING_SETTINGS: 'write-flapping-settings',
   READ_QUERY_DELAY_SETTINGS: 'read-query-delay-settings',
   WRITE_QUERY_DELAY_SETTINGS: 'write-query-delay-settings',
+  READ_ALERT_DELETE_SETTINGS: 'read-alert-delete-settings',
+  WRITE_ALERT_DELETE_SETTINGS: 'write-alert-deletion-settings',
 };
 
 export const RULES_SETTINGS_SAVED_OBJECT_TYPE = 'rules-settings';
@@ -69,4 +75,11 @@ export const DEFAULT_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
 };
 export const DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS: RulesSettingsQueryDelayProperties = {
   delay: DEFAULT_SERVERLESS_QUERY_DELAY,
+};
+
+export const DEFAULT_ALERT_DELETE_SETTINGS: RulesSettingsAlertDeleteProperties = {
+  isActiveAlertDeleteEnabled: false,
+  isInactiveAlertDeleteEnabled: false,
+  activeAlertDeleteThreshold: 90,
+  inactiveAlertDeleteThreshold: 90,
 };
