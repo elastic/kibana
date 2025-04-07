@@ -188,7 +188,7 @@ export const postEvaluateRoute = (
           const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } =
             getGraphsFromNames(graphNames);
 
-          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvalusations({
+          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvaluations({
             esClient,
             logger,
           });
