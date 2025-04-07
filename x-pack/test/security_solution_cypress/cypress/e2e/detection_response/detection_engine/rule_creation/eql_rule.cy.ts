@@ -19,7 +19,7 @@ import {
   getDefineContinueButton,
   getIndexPatternClearButton,
   getRuleIndexInput,
-  selectEqlRuleType
+  selectEqlRuleType,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -54,20 +54,18 @@ describe('EQL Rule - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(RULE_NAME_HEADER).should('contain', rule.name);
   });
 
-  it(
-    'Creates a new EQL rule with a sequence', () => {
-      const rule = getEqlSequenceRule();
+  it('Creates a new EQL rule with a sequence', () => {
+    const rule = getEqlSequenceRule();
 
-      selectEqlRuleType();
-      fillDefineEqlRuleAndContinue(rule);
-      fillAboutRuleAndContinue(rule);
-      fillScheduleRuleAndContinue(rule);
-      createRuleWithoutEnabling();
+    selectEqlRuleType();
+    fillDefineEqlRuleAndContinue(rule);
+    fillAboutRuleAndContinue(rule);
+    fillScheduleRuleAndContinue(rule);
+    createRuleWithoutEnabling();
 
-      cy.log('Asserting we have a new rule created');
-      cy.get(RULE_NAME_HEADER).should('contain', rule.name);
-    }
-  );
+    cy.log('Asserting we have a new rule created');
+    cy.get(RULE_NAME_HEADER).should('contain', rule.name);
+  });
 
   describe('with source data requiring EQL overrides', () => {
     before(() => {

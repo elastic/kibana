@@ -6,10 +6,7 @@
  */
 
 import { getNewThresholdRule } from '../../../../objects/rule';
-import {
-  DEFINITION_DETAILS,
-  SUPPRESS_FOR_DETAILS,
-} from '../../../../screens/rule_details';
+import { DEFINITION_DETAILS, SUPPRESS_FOR_DETAILS } from '../../../../screens/rule_details';
 import { goToRuleDetailsOf } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 
