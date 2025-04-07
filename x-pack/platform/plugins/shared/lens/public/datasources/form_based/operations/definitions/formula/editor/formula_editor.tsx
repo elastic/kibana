@@ -687,9 +687,7 @@ export function FormulaEditor({
     <div
       css={[
         sharedEditorStyles.self(euiThemeContext),
-        isFullscreen
-          ? fullscreenEditorStyles(euiThemeContext)
-          : defaultEditorStyles(euiThemeContext),
+        isFullscreen ? fullscreenEditorStyles : defaultEditorStyles,
       ]}
     >
       {!isFullscreen && (
@@ -714,7 +712,14 @@ export function FormulaEditor({
           height: isFullscreen ? '100%' : 'auto',
         })}
       >
-        <div className="lnsFormula__editor">
+        <div
+          className="lnsFormula__editor"
+          css={css`
+            & > * + * {
+              border-top: ${euiTheme.border.thin};
+            }
+          `}
+        >
           <div css={sharedEditorStyles.editorHeader(euiThemeContext)}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem
@@ -974,10 +979,12 @@ const sharedEditorStyles = {
           border-top: ${euiTheme.border.thin};
         }
       }
+
       .lnsFormulaOverflow {
         // Needs to be higher than the modal and all flyouts
         z-index: ${euiTheme.levels.toast} + 1;
       }
+
       .lnsFormula__editorContent {
         background-color: ${euiTheme.colors.backgroundBasePlain};
         min-height: 0;
@@ -1021,37 +1028,33 @@ const sharedEditorStyles = {
     align-items: center;
     display: flex;
     padding: ${euiTheme.size.xs};
+
     & > * + * {
       margin-left: ${euiTheme.size.xs};
     }
   `,
 };
 
-const defaultEditorStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
-    .lnsFormula__editorContent {
-      height: 200px;
-    }
-  `;
-};
+const defaultEditorStyles = css`
+  .lnsFormula__editorContent {
+    height: 200px;
+  }
+`;
 
-const fullscreenEditorStyles = ({ euiTheme }: UseEuiTheme) => {
-  return css`
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    .lnsFormula__editor {
-      border-bottom: none;
-      display: flex;
-      flex-direction: column;
-      & > * + * {
-        border-top: ${euiTheme.border.thin};
-      }
-    }
-    .lnsFormula__editorContent {
-      flex: 1;
-    }
-  `;
-};
+const fullscreenEditorStyles = css`
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+
+  .lnsFormula__editor {
+    border-bottom: none;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .lnsFormula__editorContent {
+    flex: 1;
+  }
+`;

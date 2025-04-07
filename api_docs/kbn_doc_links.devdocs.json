@@ -1066,6 +1066,20 @@
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.queryRules",
+            "type": "Object",
+            "tags": [],
+            "label": "queryRules",
+            "description": [],
+            "signature": [
+              "{ readonly queryRulesAPIDocumentation: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
