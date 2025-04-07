@@ -245,5 +245,6 @@
     "@kbn/security-ai-prompts",
     "@kbn/deeplinks-analytics",
     "@kbn/scout-security",
+    "@kbn/inference-endpoint-ui-common"
   ]
 }
