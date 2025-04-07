@@ -97,7 +97,11 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
                 values={{
                   infoText: <EuiCode>info</EuiCode>,
                   guideLink: (
-                    <EuiLink external={true} href={docLinks.links.fleet.agentLevelLogging}>
+                    <EuiLink
+                      target="_blank"
+                      external={true}
+                      href={docLinks.links.fleet.agentLevelLogging}
+                    >
                       <FormattedMessage
                         id="xpack.fleet.agentLog.levelGuideLinkText"
                         defaultMessage="Learn More"
