@@ -23878,13 +23878,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              {
-                "pluginId": "fleet",
-                "scope": "common",
-                "docId": "kibFleetPluginApi",
-                "section": "def-common.ListWithKuery",
-                "text": "ListWithKuery"
-              }
+              "{ readonly page?: number | undefined; readonly format?: \"simplified\" | \"legacy\" | undefined; readonly perPage?: number | undefined; readonly sortField?: string | undefined; readonly sortOrder?: \"asc\" | \"desc\" | undefined; readonly kuery?: string | undefined; readonly showUpgradeable?: boolean | undefined; readonly withAgentCount?: boolean | undefined; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/package_policy.ts",
             "deprecated": false,

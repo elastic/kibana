@@ -33,6 +33,7 @@ export const useConversation = ({
 
   const {
     conversationEvents,
+    progressionEvents,
     setConversationEvents,
     sendMessage,
     status: chatStatus,
@@ -53,5 +54,5 @@ export const useConversation = ({
     }
   }, [conversationId, conversationService]);
 
-  return { conversationEvents, chatStatus, sendMessage };
+  return { conversationEvents, progressionEvents, chatStatus, sendMessage };
 };
