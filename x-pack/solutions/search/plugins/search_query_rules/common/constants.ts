@@ -5,11 +5,4 @@
  * 2.0.
  */
 
-import { StatusError } from './status_error';
-
-export class DetectedMappingFailureError extends StatusError {
-  constructor(message: string) {
-    super(message, 400);
-    this.name = 'DetectedMappingFailureError';
-  }
-}
+export const QUERY_RULES_SETS_QUERY_KEY = 'query-rules-sets-fetch';
