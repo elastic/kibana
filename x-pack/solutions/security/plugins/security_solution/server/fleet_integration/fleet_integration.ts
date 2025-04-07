@@ -145,6 +145,11 @@ export const getPackagePolicyCreateCallback = (
       return newPackagePolicy;
     }
 
+    logger.debug(
+      () =>
+        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+    );
+
     if (newPackagePolicy?.inputs) {
       validatePolicyAgainstProductFeatures(newPackagePolicy.inputs, productFeatures);
       validateEndpointPackagePolicy(newPackagePolicy.inputs);
@@ -241,6 +246,11 @@ export const getPackagePolicyUpdateCallback = (
     if (!isEndpointPackagePolicy(newPackagePolicy)) {
       return newPackagePolicy;
     }
+
+    logger.debug(
+      () =>
+        `Checking endpoint policy [${newPackagePolicy.id}][${newPackagePolicy.name}] for compliance.`
+    );
 
     const endpointIntegrationData = newPackagePolicy as NewPolicyData;
 
