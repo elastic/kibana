@@ -7,16 +7,13 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
-import {
-  createConcatStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-} from '@kbn/utils';
-import { createSavedObjectsStreamFromNdJson } from '@kbn/core-saved-objects-server-internal/src/routes/utils';
-import { ContentPack, contentPackSchema } from '@kbn/streams-schema';
+import YAML from 'yaml';
+import AdmZip from 'adm-zip';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { ContentPackEntry, ContentPackManifest } from '@kbn/streams-schema';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
+import { parseArchive } from '../../lib/content';
 
 const exportContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
@@ -28,6 +25,11 @@ const exportContentRoute = createServerRoute({
   params: z.object({
     path: z.object({
       name: z.string(),
+    }),
+    body: z.object({
+      name: z.string(),
+      description: z.string(),
+      version: z.string(),
     }),
   }),
   security: {
@@ -56,19 +58,13 @@ const exportContentRoute = createServerRoute({
       includeReferencesDeep: true,
     });
 
-    const savedObjects: string[] = await createPromiseFromStreams([
-      exportStream,
-      createMapStream((savedObject) => {
-        return JSON.stringify(savedObject);
-      }),
-      createConcatStream([]),
-    ]);
+    const archive = await generateContentPack(params.body, exportStream);
 
     return response.ok({
-      body: { content: savedObjects.join('\n') },
+      body: archive,
       headers: {
-        'Content-Disposition': `attachment; filename="content.json"`,
-        'Content-Type': 'application/json',
+        'Content-Disposition': `attachment; filename="${params.body.name}.zip"`,
+        'Content-Type': 'application/zip',
       },
     });
   },
@@ -105,28 +101,13 @@ const importContentRoute = createServerRoute({
 
     await streamsClient.ensureStream(params.path.name);
 
-    const body: ContentPack = await new Promise((resolve, reject) => {
-      let data = '';
-      params.body.content.on('data', (chunk) => (data += chunk));
-      params.body.content.on('end', () => {
-        try {
-          const parsed = JSON.parse(data);
-          resolve(contentPackSchema.parse(parsed));
-        } catch (err) {
-          reject(new StatusError('Invalid content pack format', 400));
-        }
-      });
-      params.body.content.on('error', (error) => reject(error));
-    });
-
-    const updatedSavedObjectsStream = await createPromiseFromStreams([
-      await createSavedObjectsStreamFromNdJson(Readable.from(body.content)),
-      createConcatStream([]),
-    ]);
+    const contentPack = await parseArchive(params.body.content);
 
     const importer = (await context.core).savedObjects.getImporter(soClient);
     const { successResults, errors } = await importer.import({
-      readStream: createListStream(updatedSavedObjectsStream),
+      readStream: createListStream(
+        contentPack.entries.filter((entry) => entry.type === 'dashboard')
+      ),
       createNewCopies: true,
       overwrite: true,
     });
@@ -150,6 +131,24 @@ const importContentRoute = createServerRoute({
     return { errors, created: createdAssets };
   },
 });
+
+const generateContentPack = async (manifest: ContentPackManifest, readStream: Readable) => {
+  const zip = new AdmZip();
+  const objects: any[] = await createPromiseFromStreams([readStream, createConcatStream([])]);
+
+  objects.forEach((object: ContentPackEntry) => {
+    if (object.type === 'dashboard') {
+      zip.addFile(
+        `kibana/dashboard/${object.id}.json`,
+        Buffer.from(JSON.stringify(object, null, 2))
+      );
+    }
+  });
+
+  zip.addFile('manifest.yml', Buffer.from(YAML.stringify(manifest)));
+
+  return zip.toBuffer();
+};
 
 export const contentRoutes = {
   ...exportContentRoute,

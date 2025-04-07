@@ -5,14 +5,33 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from 'zod';
+import type { SavedObject } from '@kbn/core/server';
+import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 
-interface ContentPack {
-  content: string;
+interface ContentPackManifest {
+  name: string;
+  description: string;
 }
 
-const contentPackSchema: z.Schema<ContentPack> = z.object({
-  content: z.string(),
+const contentPackManifestSchema: z.Schema<ContentPackManifest> = z.object({
+  name: z.string(),
+  description: z.string(),
+  version: z.string(),
 });
 
-export { contentPackSchema, type ContentPack };
+interface ContentPack extends ContentPackManifest {
+  entries: ContentPackEntry[];
+}
+
+type ContentPackDashboard = SavedObject<DashboardAttributes>;
+
+type ContentPackEntry = ContentPackDashboard;
+
+export {
+  type ContentPackDashboard,
+  type ContentPackEntry,
+  type ContentPack,
+  type ContentPackManifest,
+  contentPackManifestSchema,
+};
