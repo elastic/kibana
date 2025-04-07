@@ -6,7 +6,7 @@
  */
 
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IndicatorTypes, SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
@@ -27,7 +27,7 @@ export interface TransformManager {
 export class DefaultTransformManager implements TransformManager {
   constructor(
     private generators: Record<IndicatorTypes, TransformGenerator>,
-    private scopedClusterClient: IScopedClusterClient,
+    private esClient: ElasticsearchClient,
     private logger: Logger
   ) {}
 
@@ -40,12 +40,9 @@ export class DefaultTransformManager implements TransformManager {
 
     const transformParams = await generator.getTransformParams(slo);
     try {
-      await retryTransientEsErrors(
-        () => this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams),
-        {
-          logger: this.logger,
-        }
-      );
+      await retryTransientEsErrors(() => this.esClient.transform.putTransform(transformParams), {
+        logger: this.logger,
+      });
     } catch (err) {
       this.logger.debug(
         `Cannot create SLO transform for indicator type [${slo.indicator.type}]. ${err}`
@@ -74,7 +71,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.previewTransform({
+          this.esClient.transform.previewTransform({
             transform_id: transformId,
           }),
         { logger: this.logger }
@@ -89,10 +86,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
-            { transform_id: transformId },
-            { ignore: [409] }
-          ),
+          this.esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
         { logger: this.logger }
       );
       await this.scheduleNowTransform(transformId);
@@ -106,7 +100,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.stopTransform(
+          this.esClient.transform.stopTransform(
             {
               transform_id: transformId,
               wait_for_completion: true,
@@ -127,7 +121,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
+          this.esClient.transform.deleteTransform(
             { transform_id: transformId, force: true },
             { ignore: [404] }
           ),
@@ -143,10 +137,7 @@ export class DefaultTransformManager implements TransformManager {
     try {
       const response = await retryTransientEsErrors(
         () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
-            { transform_id: transformId },
-            { ignore: [404] }
-          ),
+          this.esClient.transform.getTransform({ transform_id: transformId }, { ignore: [404] }),
         { logger: this.logger }
       );
       return response?.transforms[0]?._meta?.version;
@@ -157,7 +148,7 @@ export class DefaultTransformManager implements TransformManager {
   }
 
   private async scheduleNowTransform(transformId: TransformId) {
-    this.scopedClusterClient.asSecondaryAuthUser.transform
+    this.esClient.transform
       .scheduleNowTransform({ transform_id: transformId })
       .then(() => {
         this.logger.debug(`SLO transform [${transformId}] scheduled now successfully`);

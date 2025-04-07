@@ -52,13 +52,13 @@ export const deleteSLORoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(
       transformGenerators,
-      scopedClusterClient,
+      scopedClusterClient.asSecondaryAuthUser,
       logger
     );
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
-      scopedClusterClient,
+      scopedClusterClient.asSecondaryAuthUser,
       logger
     );
 

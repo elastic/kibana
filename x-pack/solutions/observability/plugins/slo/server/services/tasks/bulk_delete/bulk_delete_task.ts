@@ -6,7 +6,12 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
+import {
+  SavedObjectsClient,
+  type CoreSetup,
+  type Logger,
+  type LoggerFactory,
+} from '@kbn/core/server';
 import { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { runBulkDelete } from './run_bulk_delete';
 
@@ -38,7 +43,10 @@ export class BulkDeleteTask {
             run: async () => {
               this.logger.debug(`started`);
               const [coreStart] = await core.getStartServices();
-              const esClient = coreStart.elasticsearch.client.asInternalUser;
+              const internalEsClient = coreStart.elasticsearch.client.asInternalUser;
+              const internalSoClient = new SavedObjectsClient(
+                coreStart.savedObjects.createInternalRepository()
+              );
 
               // add zod checks
               if (!taskInstance.params.list || taskInstance.params.list.length === 0) {
@@ -48,7 +56,8 @@ export class BulkDeleteTask {
               try {
                 const params = { list: taskInstance.params.list as string[] };
                 return await runBulkDelete(params, {
-                  esClient,
+                  internalEsClient,
+                  internalSoClient,
                   logger: this.logger,
                   abortController: this.abortController,
                 });
