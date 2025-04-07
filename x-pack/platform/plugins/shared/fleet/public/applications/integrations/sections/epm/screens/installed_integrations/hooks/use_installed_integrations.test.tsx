@@ -92,6 +92,31 @@ describe('useInstalledIntegrations', () => {
     });
   });
 
+  it('should compute upgrading status in ui property', () => {
+    const { result } = renderHook(() =>
+      useInstalledIntegrations({}, { currentPage: 1, pageSize: 10 }, [
+        {
+          id: 'mysql',
+          name: 'mysql',
+          status: 'installed',
+          version: '2.0.0',
+          installationInfo: { version: '1.0.0' },
+        },
+      ] as any)
+    );
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        installedPackages: expect.arrayContaining([
+          expect.objectContaining({
+            id: 'mysql',
+            ui: { installation_status: 'upgrading' },
+          }),
+        ]),
+      })
+    );
+  });
+
   it('should support filtering on status', () => {
     const { result } = renderHook(() =>
       useInstalledIntegrations(

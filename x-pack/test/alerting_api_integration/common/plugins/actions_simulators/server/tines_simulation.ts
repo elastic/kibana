@@ -106,6 +106,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.get(
     {
       path: `${path}/api/v1/stories`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -123,6 +129,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.get(
     {
       path: `${path}/api/v1/agents`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },
@@ -140,6 +152,12 @@ export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
       path: `${path}/webhook/path/secret`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       options: {
         authRequired: false,
       },

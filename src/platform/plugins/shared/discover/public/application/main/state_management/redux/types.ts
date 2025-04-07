@@ -11,6 +11,7 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import type { TabItem } from '@kbn/unified-tabs';
 
 export enum LoadingStatus {
   Uninitialized = 'uninitialized',
@@ -42,16 +43,13 @@ export interface InternalStateDataRequestParams {
   timeRangeRelative?: TimeRange;
 }
 
-export interface DiscoverInternalState {
-  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+export interface TabState extends TabItem {
+  globalState?: Record<string, unknown>;
+  appState?: Record<string, unknown>;
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
-  savedDataViews: DataViewListItem[];
-  defaultProfileAdHocDataViewIds: string[];
-  expandedDoc: DataTableRecord | undefined;
   dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  isESQLToDataViewTransitionModalVisible: boolean;
   resetDefaultProfileState: {
     resetId: string;
     columns: boolean;
@@ -61,4 +59,16 @@ export interface DiscoverInternalState {
   documentsRequest: DocumentsRequest;
   totalHitsRequest: TotalHitsRequest;
   chartRequest: ChartRequest;
+}
+
+export interface DiscoverInternalState {
+  initializationState: { hasESData: boolean; hasUserDataView: boolean };
+  savedDataViews: DataViewListItem[];
+  defaultProfileAdHocDataViewIds: string[];
+  expandedDoc: DataTableRecord | undefined;
+  isESQLToDataViewTransitionModalVisible: boolean;
+  tabs: {
+    byId: Record<string, TabState>;
+    allIds: string[];
+  };
 }

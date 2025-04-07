@@ -106,7 +106,7 @@ export class RelatedDashboardsClient {
       const panels = d.attributes.panels;
       const matchingPanels = this.getPanelsByIndex(index, panels);
       if (matchingPanels.length > 0) {
-        this.logger.info(
+        this.logger.debug(
           () => `Found ${matchingPanels.length} panel(s) in dashboard ${d.id} using index ${index}`
         );
         relevantDashboards.push({
@@ -151,7 +151,7 @@ export class RelatedDashboardsClient {
         matchingPanels.map((p) => Array.from(p.matchingFields)).flat()
       );
       if (matchingPanels.length > 0) {
-        this.logger.info(
+        this.logger.debug(
           () =>
             `Found ${matchingPanels.length} panel(s) in dashboard ${
               d.id

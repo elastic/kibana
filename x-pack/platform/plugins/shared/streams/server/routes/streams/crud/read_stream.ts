@@ -67,7 +67,7 @@ export async function readStream({
             dataStream,
             scopedClusterClient,
           })
-        : [],
+        : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,

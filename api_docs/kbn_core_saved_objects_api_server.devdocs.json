@@ -1880,6 +1880,18 @@
                 "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/logs.ts"
               },
@@ -1890,18 +1902,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "osquery",

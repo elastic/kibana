@@ -18,6 +18,11 @@ const items = Array.from({ length: 5 }).map((_, i) => ({
   label: `Tab ${i}`,
 }));
 
+const recentlyClosedItems = Array.from({ length: 3 }).map((_, i) => ({
+  id: `closed-tab-${i}`,
+  label: `Closed Tab ${i}`,
+}));
+
 const tabContentId = 'test-content-id';
 
 describe('TabsBar', () => {
@@ -41,6 +46,7 @@ describe('TabsBar', () => {
       <TabsBar
         tabContentId={tabContentId}
         items={items}
+        recentlyClosedItems={recentlyClosedItems}
         selectedItem={selectedItem}
         services={servicesMock}
         onAdd={onAdd}

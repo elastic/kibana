@@ -6,13 +6,20 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiSplitPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiSplitPanel, EuiText, EuiLoadingLogo, useEuiTheme } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 
 import { getErrorMessage } from '../../../common/errors';
-import { FullHeight, QueryViewTitlePanel } from './styles';
+import { FullHeight, PanelFillContainer, QueryViewTitlePanel } from './styles';
 import { QueryTestResponse } from '../../types';
+
+const LOADING_MESSAGE = i18n.translate(
+  'xpack.searchPlayground.viewQuery.queryOutput.loading.message',
+  { defaultMessage: 'Fetching...' }
+);
 
 export interface ElasticsearchQueryOutputProps {
   queryResponse?: QueryTestResponse;
@@ -25,10 +32,14 @@ export const ElasticsearchQueryOutput = ({
   queryResponse,
   isError,
   queryError,
+  isLoading,
 }: ElasticsearchQueryOutputProps) => {
   const { euiTheme } = useEuiTheme();
   const respJSON = useMemo(() => {
     if (isError) {
+      if (isHttpFetchError(queryError)) {
+        return queryError?.body ? JSON.stringify(queryError?.body, null, 2) : queryError.message;
+      }
       return getErrorMessage(queryError);
     }
     return queryResponse ? JSON.stringify(queryResponse.searchResponse, null, 2) : undefined;
@@ -45,12 +56,12 @@ export const ElasticsearchQueryOutput = ({
           </h5>
         </EuiText>
       </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner paddingSize="none">
+      <EuiSplitPanel.Inner paddingSize="none" css={PanelFillContainer}>
         {!!respJSON ? (
           <CodeEditor
             dataTestSubj="ViewElasticsearchQueryResponse"
             languageId="json"
-            value={respJSON}
+            value={isLoading ? LOADING_MESSAGE : respJSON}
             options={{
               automaticLayout: true,
               readOnly: true,
@@ -66,14 +77,18 @@ export const ElasticsearchQueryOutput = ({
             css={FullHeight}
             data-test-subj="ViewElasticsearchQueryResponseEmptyState"
           >
-            <EuiText>
-              <p>
-                <FormattedMessage
-                  id="xpack.searchPlayground.viewQuery.queryOutput.emptyPrompt.body"
-                  defaultMessage="Run your query above to view the raw JSON output here."
-                />
-              </p>
-            </EuiText>
+            {isLoading ? (
+              <EuiLoadingLogo />
+            ) : (
+              <EuiText>
+                <p>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.viewQuery.queryOutput.emptyPrompt.body"
+                    defaultMessage="Run your query above to view the raw JSON output here."
+                  />
+                </p>
+              </EuiText>
+            )}
           </EuiFlexGroup>
         )}
       </EuiSplitPanel.Inner>

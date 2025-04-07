@@ -10,10 +10,10 @@ import { first, uniq } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   clearKnowledgeBase,
-  deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
   addSampleDocsToInternalKb,
   addSampleDocsToCustomIndex,
+  setupKnowledgeBase,
 } from '../../utils/knowledge_base';
 
 const customSearchConnectorIndex = 'animals_kb';
@@ -67,10 +67,10 @@ const sampleDocsForCustomIndex = [
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
   const es = getService('es');
-  const ml = getService('ml');
 
   describe('recall', function () {
     before(async () => {
+      await setupKnowledgeBase(getService);
       await addSampleDocsToInternalKb(getService, sampleDocsForInternalKb);
       await addSampleDocsToCustomIndex(
         getService,
@@ -80,8 +80,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     after(async () => {
-      await deleteKnowledgeBaseModel(ml);
-      await deleteInferenceEndpoint({ es });
+      await deleteKnowledgeBaseModel(getService);
       await clearKnowledgeBase(es);
       // clear custom index
       await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] });
@@ -90,7 +89,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('GET /internal/observability_ai_assistant/functions/recall', () => {
       it('produces unique scores for each doc', async () => {
         const entries = await recall('What happened during the database outage?');
-        const uniqueScores = uniq(entries.map(({ score }) => score));
+        const uniqueScores = uniq(entries.map(({ esScore }) => esScore));
         expect(uniqueScores.length).to.be.greaterThan(1);
         expect(uniqueScores.length).to.be(8);
       });
@@ -104,7 +103,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       it('returns entries in a consistent order', async () => {
         const entries = await recall('whales');
 
-        expect(entries.map(({ id, score }) => `${formatScore(score!)} - ${id}`)).to.eql([
+        expect(entries.map(({ id, esScore }) => `${formatScore(esScore!)} - ${id}`)).to.eql([
           'high - animal_whale_migration_patterns',
           'low - animal_elephants_social_structure',
           'low - technical_api_gateway_timeouts',
@@ -118,12 +117,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns the "Cheetah" entry from search connectors as the top result', async () => {
         const entries = await recall('Cheetah');
-        const { text, score } = first(entries)!;
+        const { text, esScore } = first(entries)!;
 
         // search connector entries have their entire doc stringified in `text` field
         const parsedDoc = JSON.parse(text) as { title: string; text: string };
         expect(parsedDoc.title).to.eql('The Life of a Cheetah');
-        expect(score).to.greaterThan(0.1);
+        expect(esScore).to.greaterThan(0.1);
       });
 
       it('returns different result order for different queries', async () => {
@@ -166,26 +165,4 @@ function formatScore(score: number) {
   }
 
   return 'low';
-}
-
-// Clear data before running tests
-// this is useful for debugging purposes
-// @ts-ignore
-async function clearBefore(getService: DeploymentAgnosticFtrProviderContext['getService']) {
-  const log = getService('log');
-  const ml = getService('ml');
-  const es = getService('es');
-
-  await deleteKnowledgeBaseModel(ml).catch(() => {
-    log.error('Failed to delete knowledge base model');
-  });
-  await deleteInferenceEndpoint({ es }).catch(() => {
-    log.error('Failed to delete inference endpoint');
-  });
-  await clearKnowledgeBase(es).catch(() => {
-    log.error('Failed to clear knowledge base');
-  });
-  await es.indices.delete({ index: customSearchConnectorIndex }, { ignore: [404] }).catch(() => {
-    log.error('Failed to clear custom index');
-  });
 }

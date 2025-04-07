@@ -23,6 +23,12 @@ export class CoreDynamicResolvingBPlugin implements Plugin {
     router.get(
       {
         path: '/api/core_dynamic_resolving_b/test',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
       },
       async (ctx, req, res) => {
