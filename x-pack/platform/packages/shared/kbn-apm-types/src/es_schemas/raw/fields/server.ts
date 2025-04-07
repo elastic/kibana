@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const AIActionTypeIds = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
+export interface Server {
+  address?: string;
+  port?: string;
+}
