@@ -21,7 +21,10 @@ import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_c
 
 const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant/plugin_startup';
 
-export async function reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
+// This function populates the `semantic_text` field for knowledge base entries during the plugin's startup process.
+// It ensures all missing fields are updated in batches and uses a distributed lock to prevent conflicts in distributed environments.
+// If the knowledge base index does not support the `semantic_text` field, it is re-indexed.
+export async function populateMissingSemanticTextFieldMigration({
   core,
   logger,
   config,

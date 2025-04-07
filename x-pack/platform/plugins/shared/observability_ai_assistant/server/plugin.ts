@@ -31,7 +31,7 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { reIndexKnowledgeBaseAndPopulateMissingSemanticTextField } from './service/startup_migrations/re_index_knowledge_base_and_populate_missing_semantic_text_field';
+import { populateMissingSemanticTextFieldMigration } from './service/startup_migrations/populate_missing_semantic_text_field_migration';
 import { updateExistingIndexAssets } from './service/startup_migrations/create_or_update_index_assets';
 
 export class ObservabilityAIAssistantPlugin
@@ -132,7 +132,7 @@ export class ObservabilityAIAssistantPlugin
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
     updateExistingIndexAssets({ logger: this.logger, core })
       .then(() =>
-        reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
+        populateMissingSemanticTextFieldMigration({
           core,
           logger: this.logger,
           config: this.config,

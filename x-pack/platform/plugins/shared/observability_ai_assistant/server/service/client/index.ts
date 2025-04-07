@@ -67,7 +67,7 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import { reIndexKnowledgeBaseAndPopulateMissingSemanticTextField } from '../startup_migrations/re_index_knowledge_base_and_populate_missing_semantic_text_field';
+import { populateMissingSemanticTextFieldMigration } from '../startup_migrations/populate_missing_semantic_text_field_migration';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
@@ -678,7 +678,7 @@ export class ObservabilityAIAssistantClient {
     // setup the knowledge base
     const res = await knowledgeBaseService.setup(esClient, modelId);
 
-    reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
+    populateMissingSemanticTextFieldMigration({
       core,
       logger,
       config: this.dependencies.config,
@@ -705,7 +705,7 @@ export class ObservabilityAIAssistantClient {
   };
 
   reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
+    return populateMissingSemanticTextFieldMigration({
       core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
