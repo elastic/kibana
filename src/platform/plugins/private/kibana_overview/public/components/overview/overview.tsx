@@ -43,6 +43,7 @@ import {
   FeatureCatalogueCategory,
 } from '@kbn/home-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import classNames from 'classnames';
 import { PLUGIN_ID, PLUGIN_PATH } from '../../../common';
 import { AppPluginStartDependencies } from '../../types';
 import { AddData } from '../add_data';
@@ -80,7 +81,8 @@ export const Overview: FC<Props> = ({ newsFetchResult, solutions, features }) =>
   const currentTheme = useObservable(theme.theme$, { darkMode: false, name: 'amsterdam' });
   const { euiTheme } = useEuiTheme();
   const minBreakpointM = useEuiMinBreakpoint('m');
-  classnames({
+
+  const className = classNames({
     'kbnOverviewSupplements--noNews': !newsFetchResult?.feedItems?.length,
   });
 
