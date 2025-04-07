@@ -7,8 +7,7 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { v4 as uuid } from 'uuid';
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { Filter, Query } from '@kbn/es-query';
+import type { ChartsPanelProps } from '../alerts_summary_charts_panel/types';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { StackByComboBox } from '../common/components';
@@ -18,23 +17,28 @@ import { alertsGroupingAggregations } from '../alerts_summary_charts_panel/aggre
 import { getIsAlertsProgressBarData } from './helpers';
 import * as i18n from './translations';
 import type { GroupBySelection } from './types';
-import type { AddFilterProps } from '../common/types';
 
 const TOP_ALERTS_CHART_ID = 'alerts-summary-top-alerts';
 const DEFAULT_COMBOBOX_WIDTH = 150;
 const DEFAULT_OPTIONS = ['host.name', 'user.name', 'source.ip', 'destination.ip'];
 
-interface Props {
-  filters?: Filter[];
-  query?: Query;
-  signalIndexName: string | null;
-  runtimeMappings?: MappingRuntimeFields;
-  skip?: boolean;
+interface AlertsProgressBarPanelProps extends ChartsPanelProps {
+  /**
+   * Field to group the alerts by
+   */
   groupBySelection: GroupBySelection;
+  /**
+   * Callback to set which field to group the alerts by
+   */
   setGroupBySelection: (groupBySelection: GroupBySelection) => void;
-  addFilter?: ({ field, value, negate }: AddFilterProps) => void;
 }
-export const AlertsProgressBarPanel: React.FC<Props> = ({
+
+/**
+ * Renders a list showing the percentages of alerts grouped by a property.
+ * The component is used in the alerts page, where users can select what fields they want the alerts to be grouped by,
+ * and in the AI for SOC alert summary page where the alerts are automatically grouped by host.
+ */
+export const AlertsProgressBarPanel: React.FC<AlertsProgressBarPanelProps> = ({
   filters,
   query,
   signalIndexName,
@@ -70,12 +74,17 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
   });
   const data = useMemo(() => (getIsAlertsProgressBarData(items) ? items : []), [items]);
 
+  const inspectTitle = useMemo(
+    () => `${i18n.ALERT_BY_TITLE} ${groupBySelection}`,
+    [groupBySelection]
+  );
+
   return (
     <InspectButtonContainer>
       <EuiPanel hasBorder hasShadow={false} data-test-subj="alerts-progress-bar-panel">
         <HeaderSection
           id={uniqueQueryId}
-          inspectTitle={`${i18n.ALERT_BY_TITLE} ${groupBySelection}`}
+          inspectTitle={inspectTitle}
           outerDirection="row"
           title={i18n.ALERT_BY_TITLE}
           titleSize="xs"

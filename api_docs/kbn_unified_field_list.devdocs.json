@@ -6098,6 +6098,69 @@
       },
       {
         "parentPluginId": "@kbn/unified-field-list",
+        "id": "def-public.GenericFieldItemButtonType",
+        "type": "Type",
+        "tags": [],
+        "label": "GenericFieldItemButtonType",
+        "description": [],
+        "signature": [
+          "<T extends ",
+          {
+            "pluginId": "@kbn/field-utils",
+            "scope": "common",
+            "docId": "kibKbnFieldUtilsPluginApi",
+            "section": "def-common.FieldBase",
+            "text": "FieldBase"
+          },
+          " = ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          ">({ field, fieldSearchHighlight, isSelected, isActive, isEmpty, infoIcon, className, getCustomFieldType, dataTestSubj, size, withDragIcon, onClick, shouldAlwaysShowAction, buttonAddFieldToWorkspaceProps, buttonRemoveFieldFromWorkspaceProps, onAddFieldToWorkspace, onRemoveFieldFromWorkspace, ...otherProps }: ",
+          {
+            "pluginId": "@kbn/unified-field-list",
+            "scope": "public",
+            "docId": "kibKbnUnifiedFieldListPluginApi",
+            "section": "def-public.FieldItemButtonProps",
+            "text": "FieldItemButtonProps"
+          },
+          "<T>) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-field-list",
+            "id": "def-public.GenericFieldItemButtonType.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "__0",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/unified-field-list",
+                "scope": "public",
+                "docId": "kibKbnUnifiedFieldListPluginApi",
+                "section": "def-public.FieldItemButtonProps",
+                "text": "FieldItemButtonProps"
+              },
+              "<T>"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/unified-field-list",
         "id": "def-public.GetCustomFieldType",
         "type": "Type",
         "tags": [],

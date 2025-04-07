@@ -36,13 +36,18 @@ import { TelegramIcon } from './telegram_icon';
 import { transformFromChatMessages } from '../utils/transform_to_messages';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
 import { PlaygroundBodySection } from './playground_body_section';
+import { elasticsearchQueryString } from '../utils/user_query';
 
 const buildFormData = (formData: ChatForm): ChatRequestData => ({
   connector_id: formData[ChatFormFields.summarizationModel].connectorId!,
   prompt: formData[ChatFormFields.prompt],
   indices: formData[ChatFormFields.indices].join(),
   citations: formData[ChatFormFields.citations],
-  elasticsearch_query: JSON.stringify(formData[ChatFormFields.elasticsearchQuery]),
+  elasticsearch_query: elasticsearchQueryString(
+    formData[ChatFormFields.elasticsearchQuery],
+    formData[ChatFormFields.userElasticsearchQuery],
+    formData[ChatFormFields.userElasticsearchQueryValidations]
+  ),
   summarization_model: formData[ChatFormFields.summarizationModel].value,
   source_fields: JSON.stringify(formData[ChatFormFields.sourceFields]),
   doc_size: formData[ChatFormFields.docSize],

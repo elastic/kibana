@@ -7,7 +7,8 @@
 import type { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import type { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
+import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
 // default end date
 export const END_DATE = '2020-01-01T00:00:00Z';

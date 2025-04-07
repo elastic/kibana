@@ -6,31 +6,38 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
+import type { TaskInstance, SerializedConcreteTaskInstance } from './task';
+import { TaskStatus, TaskLifecycleResult } from './task';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
-  TaskInstance,
-  TaskStatus,
-  TaskLifecycleResult,
-  SerializedConcreteTaskInstance,
-} from './task';
-import {
-  ElasticsearchClientMock,
+  coreMock,
   elasticsearchServiceMock,
+  httpServerMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { SearchOpts, AggregationOpts } from './task_store';
+import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { SavedObjectAttributes } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
-import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/msearch_error';
+import { getApiKeyAndUserScope } from './lib/api_key_utils';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+} from '@kbn/encrypted-saved-objects-shared';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();
@@ -45,11 +52,30 @@ jest.mock('./task_validator', () => {
   };
 });
 
+jest.mock('./lib/api_key_utils', () => ({
+  getApiKeyAndUserScope: jest.fn(),
+}));
+
+function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
+  return {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn((findOptions, deps) =>
+      savedObjectsClientMock.create().createPointInTimeFinder(findOptions, deps)
+    ),
+  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
+}
+
 const savedObjectsClient = savedObjectsRepositoryMock.create();
+const scopedSavedObjectsClient = savedObjectsRepositoryMock.create();
+const esoClient = createEncryptedSavedObjectsClientMock();
+
 const serializer = savedObjectsServiceMock.createSerializer();
 const adHocTaskCounter = new AdHocTaskCounter();
 
 const randomId = () => `id-${_.random(1, 20)}`;
+
+const coreStart = coreMock.createStart();
+const spacesStart = spacesMock.createStart();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -118,14 +144,21 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        spaces: spacesStart,
+        canEncryptSavedObjects: true,
       });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     afterEach(() => {
       adHocTaskCounter.reset();
+      jest.resetAllMocks();
     });
 
-    async function testSchedule(task: unknown) {
+    async function testSchedule(task: unknown, options?: Record<string, unknown>) {
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
         id: 'testid',
         type,
@@ -133,7 +166,7 @@ describe('TaskStore', () => {
         references: [],
         version: '123',
       }));
-      const result = await store.schedule(task as TaskInstance);
+      const result = await store.schedule(task as TaskInstance, options);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
@@ -225,10 +258,122 @@ describe('TaskStore', () => {
       expect(attributes.state).toEqual('{}');
     });
 
+    test('schedule a task with API key if request is provided', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+
+      const mockUserScope = {
+        apiKeyId: 'apiKeyId',
+        apiKeyCreatedBy: 'testUser',
+        spaceId: 'testSpace',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('id', {
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+
+      scopedSavedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })
+      );
+
+      const result = await store.schedule(task as TaskInstance, { request });
+
+      expect(scopedSavedObjectsClient.create).toHaveBeenCalledWith(
+        'task',
+        {
+          attempts: 0,
+          params: '{"hello":"world"}',
+          retryAt: null,
+          runAt: '2019-02-12T21:01:22.479Z',
+          scheduledAt: '2019-02-12T21:01:22.479Z',
+          startedAt: null,
+          state: '{"foo":"bar"}',
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          apiKey: mockApiKey,
+          userScope: mockUserScope,
+        },
+        {
+          id: 'id',
+          refresh: false,
+        }
+      );
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task],
+        request,
+        true,
+        coreStart.security,
+        spacesStart
+      );
+
+      expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+      expect(result).toEqual({
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        attempts: 0,
+        scheduledAt: mockedDate,
+        startedAt: null,
+        retryAt: null,
+        runAt: mockedDate,
+        status: 'idle',
+        partition: 225,
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+        id: 'testid',
+        version: '123',
+      });
+    });
+
     test('errors if the task type is unknown', async () => {
       await expect(testSchedule({ taskType: 'nope', params: {}, state: {} })).rejects.toThrow(
         /Unsupported task type "nope"/i
       );
+    });
+
+    test('errors if API key could not be created', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+        new Error('Something went wrong!')
+      );
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow(
+        'Something went wrong!'
+      );
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalled();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -295,6 +440,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -367,7 +514,45 @@ describe('TaskStore', () => {
       typeof elasticsearchServiceMock.createClusterClient
     >['asInternalUser'];
 
-    beforeAll(() => {
+    const mockTask = {
+      taskType: 'taskWithApiKey',
+      params: '{}',
+      state: '{}',
+      enabled: true,
+      schedule: {
+        interval: '30s',
+      },
+      traceparent: '',
+      attempts: 1,
+      scheduledAt: '2019-02-12T21:01:22.479Z',
+      startedAt: '2019-02-12T21:01:22.479Z',
+      retryAt: '2019-02-12T21:01:22.479Z',
+      runAt: '2019-02-12T21:01:22.479Z',
+      status: 'running',
+      partition: 237,
+      userScope: {
+        apiKeyId: 'EJYCtpUBGuyFd3FroZmZ',
+        spaceId: 'default',
+        apiKeyCreatedByUser: false,
+      },
+      ownerId: 'kibana:5b2de169-2785-441b-ae8c-186a1936b17d',
+      id: 'task1',
+      version: '123',
+    };
+
+    beforeEach(() => {
+      const mockSerializer = savedObjectsServiceMock.createSerializer();
+      mockSerializer.isRawSavedObject = jest.fn().mockReturnValue(true);
+      mockSerializer.rawToSavedObject = jest.fn().mockImplementation((doc) => ({
+        id: 'task1',
+        version: '123',
+        type: 'task',
+        references: [],
+        attributes: {
+          ...doc._source.task,
+        },
+      }));
+
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       esClient.child.mockReturnValue(childEsClient as unknown as Client);
@@ -375,7 +560,7 @@ describe('TaskStore', () => {
         logger: mockLogger(),
         index: 'tasky',
         taskManagerId: '',
-        serializer,
+        serializer: mockSerializer,
         esClient,
         definitions: taskDefinitions,
         savedObjectsRepository: savedObjectsClient,
@@ -384,7 +569,29 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
       });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield {
+            saved_objects: [
+              {
+                id: 'task1',
+                attributes: {
+                  ...mockTask,
+                  apiKey: 'decryptedApiKey',
+                },
+              },
+            ],
+          };
+        },
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     async function testMsearch(
@@ -469,6 +676,35 @@ describe('TaskStore', () => {
       });
     });
 
+    test('should return tasks with decrypted API keys', async () => {
+      const { result } = await testMsearch(
+        [{}],
+        [
+          {
+            hits: [
+              {
+                _index: '.kibana_task_manager_8.16.0_001',
+                _source: {
+                  task: { ...mockTask, apiKey: 'encryptedKey' },
+                },
+              },
+            ],
+          },
+        ]
+      );
+
+      expect(result.docs[0]).toEqual({
+        ...mockTask,
+        retryAt: new Date(mockTask.retryAt),
+        runAt: new Date(mockTask.runAt),
+        scheduledAt: new Date(mockTask.scheduledAt),
+        startedAt: new Date(mockTask.startedAt),
+        state: {},
+        params: {},
+        apiKey: 'decryptedApiKey',
+      });
+    });
+
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       childEsClient.msearch.mockResponse({
@@ -519,6 +755,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -643,6 +881,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -800,6 +1040,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -953,6 +1195,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1365,8 +1609,36 @@ describe('TaskStore', () => {
 
   describe('remove', () => {
     let store: TaskStore;
+    const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
 
-    beforeAll(() => {
+    const mockTask = {
+      id: 'task1',
+      type: 'test',
+      attributes: {
+        attempts: 0,
+        params: '{"hello":"world"}',
+        retryAt: null,
+        runAt: '2019-02-12T21:01:22.479Z',
+        scheduledAt: '2019-02-12T21:01:22.479Z',
+        startedAt: null,
+        state: '{"foo":"bar"}',
+        stateVersion: 1,
+        status: 'idle',
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        partition: 225,
+        apiKey: mockApiKey,
+        userScope: {
+          apiKeyId: 'apiKeyId',
+          apiKeyCreatedBy: 'testUser',
+          spaceId: 'testSpace',
+        },
+      },
+      references: [],
+      version: '123',
+    };
+
+    beforeEach(() => {
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -1380,17 +1652,43 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        spaces: spacesStart,
+        canEncryptSavedObjects: true,
       });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockTask] };
+        },
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     test('removes the task with the specified id', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(mockTask);
       const id = randomId();
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
     });
 
+    test('invalidates API key of task with api key', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(mockTask);
+      const id = 'task1';
+      const result = await store.remove(id);
+      expect(result).toBeUndefined();
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
+      expect(coreStart.security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['apiKeyId'],
+      });
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(mockTask);
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.delete.mockRejectedValue(new Error('Failure'));
       await expect(store.remove(randomId())).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1402,10 +1700,66 @@ describe('TaskStore', () => {
 
   describe('bulkRemove', () => {
     let store: TaskStore;
+    const mockApiKey1 = Buffer.from('apiKeyId1:apiKey').toString('base64');
+    const mockApiKey2 = Buffer.from('apiKeyId2:apiKey').toString('base64');
+
+    const mockTask1 = {
+      id: 'task1',
+      type: 'test',
+      attributes: {
+        attempts: 0,
+        params: '{"hello":"world"}',
+        retryAt: null,
+        runAt: '2019-02-12T21:01:22.479Z',
+        scheduledAt: '2019-02-12T21:01:22.479Z',
+        startedAt: null,
+        state: '{"foo":"bar"}',
+        stateVersion: 1,
+        status: 'idle',
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        partition: 225,
+        apiKey: mockApiKey1,
+        userScope: {
+          apiKeyId: 'apiKeyId1',
+          apiKeyCreatedBy: 'testUser',
+          spaceId: 'testSpace',
+        },
+      },
+      references: [],
+      version: '123',
+    };
+
+    const mockTask2 = {
+      id: 'task2',
+      type: 'test',
+      attributes: {
+        attempts: 0,
+        params: '{"hello":"world"}',
+        retryAt: null,
+        runAt: '2019-02-12T21:01:22.479Z',
+        scheduledAt: '2019-02-12T21:01:22.479Z',
+        startedAt: null,
+        state: '{"foo":"bar"}',
+        stateVersion: 1,
+        status: 'idle',
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+        partition: 225,
+        apiKey: mockApiKey2,
+        userScope: {
+          apiKeyId: 'apiKeyId2',
+          apiKeyCreatedBy: 'testUser',
+          spaceId: 'testSpace',
+        },
+      },
+      references: [],
+      version: '123',
+    };
 
     const tasksIdsToDelete = [randomId(), randomId()];
 
-    beforeAll(() => {
+    beforeEach(() => {
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -1419,10 +1773,26 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        spaces: spacesStart,
+        canEncryptSavedObjects: true,
       });
+
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockTask1, mockTask2] };
+        },
+      });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     test('removes the tasks with the specified ids', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
       const result = await store.bulkRemove(tasksIdsToDelete);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
@@ -1434,7 +1804,21 @@ describe('TaskStore', () => {
       );
     });
 
+    test('bulk invalidates API key of tasks with API keys', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
+      const result = await store.bulkRemove(['task1', 'task2']);
+      expect(result).toBeUndefined();
+      expect(coreStart.security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['apiKeyId1', 'apiKeyId2'],
+      });
+    });
+
     test('pushes error from saved objects client to errors$', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, mockTask2],
+      });
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkDelete.mockRejectedValue(new Error('Failure'));
       await expect(store.bulkRemove(tasksIdsToDelete)).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1461,6 +1845,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1524,6 +1910,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1622,6 +2010,8 @@ describe('TaskStore', () => {
             requestTimeouts: {
               update_by_query: 1000,
             },
+            savedObjectsService: coreStart.savedObjects,
+            security: coreStart.security,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -1647,6 +2037,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -1670,6 +2062,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -1693,11 +2087,18 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        spaces: spacesStart,
+        canEncryptSavedObjects: true,
       });
+
+      store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     afterEach(() => {
       adHocTaskCounter.reset();
+      jest.resetAllMocks();
     });
 
     async function testBulkSchedule(task: unknown) {
@@ -1804,6 +2205,166 @@ describe('TaskStore', () => {
       ]);
     });
 
+    test('bulk schedules tasks with API key if request is provided', async () => {
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const task2 = {
+        id: 'task2',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const mockApiKey = Buffer.from('apiKeyId:apiKey').toString('base64');
+
+      const mockUserScope = {
+        apiKeyId: 'apiKeyId',
+        apiKeyCreatedBy: 'testUser',
+        spaceId: 'testSpace',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const apiKeyAndUserScopeMap = new Map();
+      apiKeyAndUserScopeMap.set('task1', {
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
+      apiKeyAndUserScopeMap.set('task2', {
+        apiKey: mockApiKey,
+        userScope: mockUserScope,
+      });
+      (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(apiKeyAndUserScopeMap);
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+
+      scopedSavedObjectsClient.bulkCreate.mockImplementationOnce(async () => ({
+        saved_objects: [
+          {
+            id: 'task1',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+            references: [],
+            version: '123',
+          },
+          {
+            id: 'task2',
+            type: 'test',
+            attributes: {
+              attempts: 0,
+              params: '{"hello":"world"}',
+              retryAt: null,
+              runAt: '2019-02-12T21:01:22.479Z',
+              scheduledAt: '2019-02-12T21:01:22.479Z',
+              startedAt: null,
+              state: '{"foo":"bar"}',
+              stateVersion: 1,
+              status: 'idle',
+              taskType: 'report',
+              traceparent: 'apmTraceparent',
+              partition: 225,
+              apiKey: mockApiKey,
+              userScope: mockUserScope,
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      }));
+
+      const result = await store.bulkSchedule([task1, task2], { request });
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task1, task2],
+        request,
+        true,
+        coreStart.security,
+        spacesStart
+      );
+
+      expect(savedObjectsClient.create).not.toHaveBeenCalled();
+
+      expect(result).toEqual([
+        {
+          id: 'task1',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          apiKey: mockApiKey,
+          userScope: mockUserScope,
+          version: '123',
+        },
+        {
+          id: 'task2',
+          attempts: 0,
+          params: { hello: 'world' },
+          retryAt: null,
+          runAt: mockedDate,
+          scheduledAt: mockedDate,
+          startedAt: null,
+          state: { foo: 'bar' },
+          stateVersion: 1,
+          status: 'idle',
+          taskType: 'report',
+          traceparent: 'apmTraceparent',
+          partition: 225,
+          apiKey: mockApiKey,
+          userScope: mockUserScope,
+          version: '123',
+        },
+      ]);
+    });
+
+    test('errors if API key could not be created', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      (getApiKeyAndUserScope as jest.Mock).mockRejectedValueOnce(
+        new Error('Something went wrong!')
+      );
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task as TaskInstance], { request })).rejects.toThrow(
+        'Something went wrong!'
+      );
+
+      expect(getApiKeyAndUserScope).toHaveBeenCalled();
+    });
+
     test('errors if the task type is unknown', async () => {
       await expect(testBulkSchedule([{ taskType: 'nope', params: {}, state: {} }])).rejects.toThrow(
         /Unsupported task type "nope"/i
@@ -1869,6 +2430,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
@@ -1894,6 +2457,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
@@ -1928,6 +2493,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
     test('should pass requestTimeout', async () => {
@@ -1965,6 +2532,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -2083,6 +2652,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 

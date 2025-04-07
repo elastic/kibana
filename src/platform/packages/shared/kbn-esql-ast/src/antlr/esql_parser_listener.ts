@@ -26,6 +26,7 @@ import { MetricsCommandContext } from "./esql_parser.js";
 import { IndexPatternAndMetadataFieldsContext } from "./esql_parser.js";
 import { IndexPatternContext } from "./esql_parser.js";
 import { ClusterStringContext } from "./esql_parser.js";
+import { SelectorStringContext } from "./esql_parser.js";
 import { IndexStringContext } from "./esql_parser.js";
 import { MetadataContext } from "./esql_parser.js";
 import { EvalCommandContext } from "./esql_parser.js";
@@ -276,6 +277,16 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitClusterString?: (ctx: ClusterStringContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.selectorString`.
+	 * @param ctx the parse tree
+	 */
+	enterSelectorString?: (ctx: SelectorStringContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.selectorString`.
+	 * @param ctx the parse tree
+	 */
+	exitSelectorString?: (ctx: SelectorStringContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.indexString`.
 	 * @param ctx the parse tree

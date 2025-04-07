@@ -157,6 +157,20 @@ export default function ({ getService }: FtrProviderContext) {
         });
     }
 
+    function scheduleTaskWithApiKey(
+      task: Partial<ConcreteTaskInstance | DeprecatedConcreteTaskInstance>
+    ): Promise<SerializedConcreteTaskInstance> {
+      return supertest
+        .post('/api/sample_tasks/schedule_with_api_key')
+        .set('kbn-xsrf', 'xxx')
+        .send({ task })
+        .expect(200)
+        .then((response: { body: SerializedConcreteTaskInstance }) => {
+          log.debug(`Task Scheduled: ${response.body.id}`);
+          return response.body;
+        });
+    }
+
     function runTaskSoon(task: { id: string }) {
       return supertest
         .post('/api/sample_tasks/run_soon')
@@ -414,6 +428,56 @@ export default function ({ getService }: FtrProviderContext) {
 
         expectReschedule(Date.parse(originalTask.runAt), task, intervalMilliseconds);
       });
+    });
+
+    it('should schedule tasks with API keys if request is provided', async () => {
+      let queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const apiKeysLength = queryResult.body.apiKeys.length;
+
+      await scheduleTaskWithApiKey({
+        id: 'test-task-for-sample-task-plugin-to-test-task-api-key',
+        taskType: 'sampleTask',
+        params: {},
+      });
+
+      const result = await currentTask('test-task-for-sample-task-plugin-to-test-task-api-key');
+
+      expect(result.apiKey).not.empty();
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(1);
+
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength + 1);
+
+      await supertest.delete('/api/sample_tasks').set('kbn-xsrf', 'xxx').expect(200);
+
+      queryResult = await supertest
+        .post('/internal/security/api_key/_query')
+        .send({})
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      expect(
+        queryResult.body.apiKeys.filter((apiKey: { id: string }) => {
+          return apiKey.id === result.userScope?.apiKeyId;
+        }).length
+      ).eql(0);
+
+      expect(queryResult.body.apiKeys.length).eql(apiKeysLength);
     });
 
     it('should return a task run result when asked to run a task now', async () => {
