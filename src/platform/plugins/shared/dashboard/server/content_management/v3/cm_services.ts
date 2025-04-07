@@ -33,7 +33,7 @@ import {
   DEFAULT_DASHBOARD_OPTIONS,
 } from '../../../common/content_management';
 import { getResultV3ToV2 } from './transform_utils';
-import { sectionSchema } from '../../dashboard_saved_object/schema/v2/v2';
+import { sectionSchema as sectionSavedObjectSchema } from '../../dashboard_saved_object/schema/v2/v2';
 
 const apiError = schema.object({
   error: schema.string(),
@@ -346,6 +346,24 @@ export const searchResultsAttributesSchema = schema.object({
   ),
 });
 
+export const sectionSchema = sectionSavedObjectSchema.extends({
+  // make ID and order optional for CM schema
+  id: schema.maybe(
+    schema.string({
+      meta: { description: 'The unique ID of the section.' },
+    })
+  ),
+  order: schema.maybe(
+    schema.number({
+      min: 1,
+      meta: {
+        description:
+          'The order that sections should be rendered in. These values should be unique, and the order `0` is reserved for the main dashhboard content.',
+      },
+    })
+  ),
+});
+
 export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   // Search
   kibanaSavedObjectMeta: schema.object(
@@ -409,7 +427,7 @@ export const dashboardAttributesSchema = searchResultsAttributesSchema.extends({
   // Dashboard Content
   controlGroupInput: schema.maybe(controlGroupInputSchema),
   panels: schema.arrayOf(panelSchema, { defaultValue: [] }),
-  sections: schema.maybe(sectionSchema),
+  sections: schema.maybe(schema.arrayOf(sectionSchema)),
   options: optionsSchema,
   version: schema.maybe(schema.number({ meta: { deprecated: true } })),
 });

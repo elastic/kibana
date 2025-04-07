@@ -17,9 +17,9 @@ export interface DashboardSectionMap {
 
 export interface DashboardSectionState {
   title: string;
-  collapsed: boolean;
+  collapsed?: boolean; // if undefined, then collapsed is false
   order: number;
-  id?: string;
+  id: string;
 }
 
 export interface DashboardPanelMap {
