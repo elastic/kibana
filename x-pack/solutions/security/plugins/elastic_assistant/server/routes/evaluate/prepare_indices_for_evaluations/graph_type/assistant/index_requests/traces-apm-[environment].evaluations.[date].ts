@@ -8,7 +8,7 @@
 import { IndexRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const tracesApmIndexRequest: IndexRequest = {
-  index: 'traces-apm-[environment].evlauations.[date]',
+  index: 'traces-apm-[environment].evaluations.[date]',
   document: {
     '@timestamp': '2024-04-02T12:00:00.000Z',
     event: {
