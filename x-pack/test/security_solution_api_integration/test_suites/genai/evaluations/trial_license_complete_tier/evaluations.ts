@@ -25,6 +25,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const ml = getService('ml') as ReturnType<typeof MachineLearningProvider>;
 
+  // Note: Disabled in `.buildkite/ftr_security_stateful_configs.yml` as this suite has its own weekly pipeline located
+  // at `.buildkite/pipelines/security_solution/gen_ai_evals.yml`
   describe('@ess Basic Security AI Assistant Evaluations', () => {
     before(async () => {
       await installTinyElser(ml);
