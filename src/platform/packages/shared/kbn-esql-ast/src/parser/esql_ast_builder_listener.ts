@@ -37,15 +37,13 @@ import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
 import {
   createCommand,
   createFunction,
-  createOption,
   createLiteral,
   textExistsAndIsValid,
-  createSource,
+  visitSource,
   createAstBaseItem,
 } from './factories';
 import { getPosition } from './helpers';
 import {
-  collectAllSourceIdentifiers,
   collectAllFields,
   collectAllAggFields,
   visitByOption,
@@ -64,6 +62,7 @@ import { createStatsCommand } from './factories/stats';
 import { createChangePointCommand } from './factories/change_point';
 import { createWhereCommand } from './factories/where';
 import { createRowCommand } from './factories/row';
+import { createFromCommand } from './factories/from';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
@@ -123,18 +122,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitFromCommand(ctx: FromCommandContext) {
-    const commandAst = createCommand('from', ctx);
-    this.ast.push(commandAst);
-    commandAst.args.push(...collectAllSourceIdentifiers(ctx));
-    const metadataContext = ctx.indexPatternAndMetadataFields().metadata();
-    if (metadataContext && metadataContext.METADATA()) {
-      const option = createOption(
-        metadataContext.METADATA().getText().toLowerCase(),
-        metadataContext
-      );
-      commandAst.args.push(option);
-      option.args.push(...collectAllColumnIdentifiers(metadataContext));
-    }
+    const command = createFromCommand(ctx);
+
+    this.ast.push(command);
   }
 
   /**
@@ -149,7 +139,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
       sources: ctx
         .indexPatternAndMetadataFields()
         .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => createSource(sourceCtx)),
+        .map((sourceCtx) => visitSource(sourceCtx)),
     };
     this.ast.push(node);
     node.args.push(...node.sources);
