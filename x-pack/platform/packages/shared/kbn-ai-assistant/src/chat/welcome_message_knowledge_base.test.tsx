@@ -21,9 +21,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
     partial: Partial<UseKnowledgeBaseResult> = {}
   ): UseKnowledgeBaseResult {
     return {
-      isLoading: partial.isLoading ?? false,
+      isInstalling: partial.isInstalling ?? false,
       isPolling: partial.isPolling ?? false,
-      setupKb: partial.setupKb ?? jest.fn(),
+      install: partial.install ?? jest.fn(),
       status: partial.status ?? {
         value: {
           ready: false,
@@ -42,9 +42,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
     return render(<WelcomeMessageKnowledgeBase knowledgeBase={kb} />);
   }
 
-  it('renders install message if isLoading', () => {
+  it('renders install message if isInstalling', () => {
     const kb = createMockKnowledgeBase({
-      isLoading: true,
+      isInstalling: true,
       status: {
         value: {
           ready: false,
@@ -65,7 +65,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
   it('renders the success banner after a transition from installing to not installing with no error', async () => {
     // 1) Start in an installing state
     let kb = createMockKnowledgeBase({
-      isLoading: true,
+      isInstalling: true,
       isPolling: true,
       status: {
         value: { ready: false, enabled: true, kbState: KnowledgeBaseState.NOT_INSTALLED },
@@ -80,7 +80,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
     kb = {
       ...kb,
-      isLoading: false,
+      isInstalling: false,
       isPolling: false,
       status: {
         ...kb.status,
@@ -106,7 +106,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "We are setting up your knowledge base" with the inspect button', () => {
     const kb = createMockKnowledgeBase({
-      isLoading: false,
+      isInstalling: false,
       isPolling: true,
       status: {
         value: {
@@ -138,7 +138,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "Base setup failed" with inspect issues', () => {
     const kb = createMockKnowledgeBase({
-      isLoading: false,
+      isInstalling: false,
       isPolling: true,
       status: {
         value: {
@@ -177,7 +177,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // which can happen for on prem users with preconfigured connector where /setup is not
     // automatically called
     const kb = createMockKnowledgeBase({
-      isLoading: false,
+      isInstalling: false,
       status: {
         value: {
           ready: false,
@@ -200,7 +200,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // This could happen if the user manually stopped the model in ML,
     // so we have no install error, but ready = false
     const kb = createMockKnowledgeBase({
-      isLoading: false,
+      isInstalling: false,
       isPolling: true,
       status: {
         value: {

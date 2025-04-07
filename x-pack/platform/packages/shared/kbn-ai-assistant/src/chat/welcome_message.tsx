@@ -62,7 +62,7 @@ export function WelcomeMessage({
     }
 
     if (!knowledgeBase.status.value || knowledgeBase.status.value?.ready === false) {
-      knowledgeBase.setupKb();
+      knowledgeBase.install();
     }
   };
 

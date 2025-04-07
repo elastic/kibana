@@ -56,7 +56,7 @@ const InspectKnowledgeBasePopover = ({
 
   const handleInstall = async () => {
     setIsPopoverOpen(false);
-    await knowledgeBase.setupKb();
+    await knowledgeBase.install();
   };
 
   return knowledgeBase.status.value?.modelStats ? (
@@ -91,20 +91,20 @@ export function WelcomeMessageKnowledgeBase({
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
 }) {
-  const prevIsInstalling = usePrevious(knowledgeBase.isLoading || knowledgeBase.isPolling);
+  const prevIsInstalling = usePrevious(knowledgeBase.isInstalling || knowledgeBase.isPolling);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
 
   useEffect(() => {
     if (prevIsInstalling) {
       setShowSuccessBanner(true);
     }
-  }, [knowledgeBase.isLoading, prevIsInstalling]);
+  }, [knowledgeBase.isInstalling, prevIsInstalling]);
 
   const install = async () => {
-    await knowledgeBase.setupKb();
+    await knowledgeBase.install();
   };
 
-  if (knowledgeBase.isLoading) return <SettingUpKnowledgeBase />;
+  if (knowledgeBase.isInstalling) return <SettingUpKnowledgeBase />;
 
   switch (knowledgeBase.status.value?.kbState) {
     case KnowledgeBaseState.NOT_INSTALLED:

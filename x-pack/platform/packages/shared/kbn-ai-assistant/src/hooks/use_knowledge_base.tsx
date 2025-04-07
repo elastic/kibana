@@ -17,9 +17,9 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
-  isLoading: boolean;
+  isInstalling: boolean;
   isPolling: boolean;
-  setupKb: () => Promise<void>;
+  install: () => Promise<void>;
 }
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
@@ -42,7 +42,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
     }
   }, [isInstalling, statusRequest]);
 
-  const setupKb = useCallback(async () => {
+  const install = useCallback(async () => {
     setIsInstalling(true);
     try {
       // Retry the setup with a maximum of 5 attempts
@@ -94,8 +94,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   return {
     status: statusRequest,
-    setupKb,
-    isLoading: isInstalling,
+    install,
+    isInstalling,
     isPolling,
   };
 }

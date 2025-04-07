@@ -63,7 +63,7 @@ describe('useKnowledgeBase', () => {
     });
   });
 
-  it('calls setupKb function', async () => {
+  it('calls install function', async () => {
     const successResponse = { ready: true };
     mockCallApi
       .mockResolvedValueOnce({ ready: false }) // Initial GET /status
@@ -73,10 +73,10 @@ describe('useKnowledgeBase', () => {
 
     // Trigger setup
     act(() => {
-      result.current.setupKb();
+      result.current.install();
     });
 
-    // Verify that the setupKb was called
+    // Verify that the install was called
     await waitFor(() => {
       expect(mockCallApi).toHaveBeenCalledWith(
         'POST /internal/observability_ai_assistant/kb/setup',
