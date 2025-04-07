@@ -130,6 +130,9 @@ export const BaseDefaultableFields = z.object({
   interval: RuleInterval.optional(),
   from: RuleIntervalFrom.optional(),
   to: RuleIntervalTo.optional(),
+  /**
+   * Array defining the automated actions (notifications) taken when alerts are generated.
+   */
   actions: z.array(RuleAction).optional(),
   exceptions_list: z.array(RuleExceptionList).optional(),
   author: RuleAuthorArray.optional(),
@@ -139,6 +142,12 @@ export const BaseDefaultableFields = z.object({
   threat: ThreatArray.optional(),
   setup: SetupGuide.optional(),
   related_integrations: RelatedIntegrationArray.optional(),
+  /** 
+      * Elasticsearch fields and their types that need to be present for the rule to function.
+> info
+> The value of `required_fields` does not affect the rule’s behavior, and specifying it incorrectly won’t cause the rule to fail. Use `required_fields` as an informational property to document the fields that the rule expects to be present in the data.
+ 
+      */
   required_fields: z.array(RequiredFieldInput).optional(),
 });
 
@@ -206,9 +215,6 @@ export const EqlRequiredFields = z.object({
    * Rule type
    */
   type: z.literal('eql'),
-  /**
-   * EQL query to execute
-   */
   query: RuleQuery,
   /**
    * Query language to use
@@ -564,9 +570,6 @@ export const EsqlRuleRequiredFields = z.object({
    */
   type: z.literal('esql'),
   language: EsqlQueryLanguage,
-  /**
-   * ESQL query to execute
-   */
   query: RuleQuery,
 });
 
