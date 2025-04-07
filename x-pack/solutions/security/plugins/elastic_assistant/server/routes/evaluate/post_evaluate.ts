@@ -193,7 +193,7 @@ export const postEvaluateRoute = (
             logger,
           });
 
-          if (assistantGraphs.length > 0) {
+          if (assistantGraphs?.length) {
             await prepareIndicesForAssistantGraph.cleanup();
             await prepareIndicesForAssistantGraph.setup();
           }
