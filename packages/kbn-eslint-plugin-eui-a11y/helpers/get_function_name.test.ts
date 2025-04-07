@@ -21,7 +21,7 @@ describe('getFunctionName', () => {
       },
     };
 
-    expect(getFunctionName(mockNode as any)).toEqual('myFunction');
+    expect(getFunctionName(mockNode as any)).toEqual(mockNode.parent.id.name);
   });
 
   it('should return the function name if the function is defined as a function declaration', () => {
