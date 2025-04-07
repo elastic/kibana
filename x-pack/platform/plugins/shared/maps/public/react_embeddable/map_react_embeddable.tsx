@@ -9,23 +9,25 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import { ReactEmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {
   apiIsOfType,
   areTriggersDisabled,
-  getUnchangingComparator,
-  initializeTimeRange,
+  initializeTimeRangeManager,
   initializeTitleManager,
+  titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, combineLatest } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
 import { MAP_SAVED_OBJECT_TYPE } from '../../common/constants';
 import { inject } from '../../common/embeddable';
-import type { MapApi, MapRuntimeState, MapSerializedState } from './types';
+import type { MapApi, MapSerializedState } from './types';
 import { SavedMap } from '../routes/map_page';
-import { initializeReduxSync } from './initialize_redux_sync';
+import { initializeReduxSync, reduxSyncComparators } from './initialize_redux_sync';
 import {
   getByReferenceState,
   getByValueState,
@@ -35,7 +37,10 @@ import { getEmbeddableEnhanced, getSpacesApi } from '../kibana_services';
 import { initializeActionHandlers } from './initialize_action_handlers';
 import { MapContainer } from '../connected_components/map_container';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
-import { initializeCrossPanelActions } from './initialize_cross_panel_actions';
+import {
+  crossPanelActionsComparators,
+  initializeCrossPanelActions,
+} from './initialize_cross_panel_actions';
 import { initializeDataViews } from './initialize_data_views';
 import { initializeFetch } from './initialize_fetch';
 import { initializeEditApi } from './initialize_edit_api';
@@ -48,29 +53,27 @@ export function getControlledBy(id: string) {
   return `mapEmbeddablePanel${id}`;
 }
 
-export const mapEmbeddableFactory: ReactEmbeddableFactory<
-  MapSerializedState,
-  MapRuntimeState,
-  MapApi
-> = {
+export const mapEmbeddableFactory: EmbeddableFactory<MapSerializedState, MapApi> = {
   type: MAP_SAVED_OBJECT_TYPE,
-  deserializeState: (state) => {
-    return state.rawState
+  buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
+    const mapSerializedState = initialState.rawState
       ? (inject(
-          state.rawState as EmbeddableStateWithType,
-          state.references ?? []
+          initialState.rawState as EmbeddableStateWithType,
+          initialState.references ?? []
         ) as unknown as MapSerializedState)
       : {};
-  },
-  buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-    const savedMap = new SavedMap({
-      mapSerializedState: state,
-    });
+    const savedMap = new SavedMap({ mapSerializedState });
     await savedMap.whenReady();
 
-    const attributes$ = new BehaviorSubject<MapAttributes | undefined>(state.attributes);
-    const mapSettings$ = new BehaviorSubject<Partial<MapSettings> | undefined>(state.mapSettings);
-    const savedObjectId$ = new BehaviorSubject<string | undefined>(state.savedObjectId);
+    const attributes$ = new BehaviorSubject<MapAttributes | undefined>(
+      mapSerializedState.attributes
+    );
+    const mapSettings$ = new BehaviorSubject<Partial<MapSettings> | undefined>(
+      mapSerializedState.mapSettings
+    );
+    const savedObjectId$ = new BehaviorSubject<string | undefined>(
+      mapSerializedState.savedObjectId
+    );
 
     // eslint bug, eslint thinks api is never reassigned even though it is
     // eslint-disable-next-line prefer-const
@@ -79,14 +82,14 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
     const sharingSavedObjectProps = savedMap.getSharingSavedObjectProps();
     const spaces = getSpacesApi();
     const controlledBy = getControlledBy(uuid);
-    const titleManager = initializeTitleManager(state);
-    const timeRange = initializeTimeRange(state);
-    const dynamicActionsApi = getEmbeddableEnhanced()?.initializeReactEmbeddableDynamicActions(
+    const titleManager = initializeTitleManager(mapSerializedState);
+    const timeRangeManager = initializeTimeRangeManager(mapSerializedState);
+    const dynamicActionsManager = getEmbeddableEnhanced()?.initializeEmbeddableDynamicActions(
       uuid,
       () => titleManager.api.title$.getValue(),
-      state
+      mapSerializedState
     );
-    const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
+    const maybeStopDynamicActions = dynamicActionsManager?.startDynamicActions();
 
     const defaultTitle$ = new BehaviorSubject<string | undefined>(savedMap.getAttributes().title);
     const defaultDescription$ = new BehaviorSubject<string | undefined>(
@@ -94,7 +97,7 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
     );
     const reduxSync = initializeReduxSync({
       savedMap,
-      state,
+      state: mapSerializedState,
       syncColors$: apiPublishesSettings(parentApi) ? parentApi.settings.syncColors$ : undefined,
       uuid,
     });
@@ -103,24 +106,24 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       controlledBy,
       getActionContext: actionHandlers.getActionContext,
       getApi,
-      state,
+      state: mapSerializedState,
       savedMap,
       uuid,
     });
 
-    function getState() {
+    function getLatestState() {
       return {
-        ...state,
-        ...timeRange.serialize(),
-        ...titleManager.serialize(),
-        ...(dynamicActionsApi?.serializeDynamicActions() ?? {}),
-        ...crossPanelActions.serialize(),
-        ...reduxSync.serialize(),
+        ...mapSerializedState,
+        ...timeRangeManager.getLatestState(),
+        ...titleManager.getLatestState(),
+        ...(dynamicActionsManager?.getLatestState() ?? {}),
+        ...crossPanelActions.getLatestState(),
+        ...reduxSync.getLatestState(),
       };
     }
 
     function serializeState() {
-      const rawState = getState();
+      const rawState = getLatestState();
 
       // by-reference embeddable
       if (rawState.savedObjectId) {
@@ -152,46 +155,61 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
       };
     }
 
-    api = buildApi(
-      {
-        defaultTitle$,
-        defaultDescription$,
-        ...timeRange.api,
-        ...(dynamicActionsApi?.dynamicActionsApi ?? {}),
-        ...titleManager.api,
-        ...reduxSync.api,
-        ...initializeEditApi(uuid, getState, parentApi, state.savedObjectId),
-        ...initializeLibraryTransforms(savedMap, serializeState),
-        ...initializeDataViews(savedMap.getStore()),
-        serializeState,
-        supportedTriggers: () => {
-          return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
-        },
+    const unsavedChangesApi = initializeUnsavedChanges<MapSerializedState>({
+      uuid,
+      parentApi,
+      serializeState: getLatestState,
+      latestRuntimeState$: combineLatest([
+        ...(dynamicActionsManager ? [dynamicActionsManager.latestState$] : []),
+        crossPanelActions.latestState$,
+        reduxSync.latestState$,
+        titleManager.latestState$,
+        timeRangeManager.latestState$,
+      ]),
+      getComparators: () => {
+        return {
+          ...crossPanelActionsComparators,
+          ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
+          ...reduxSyncComparators,
+          ...titleComparators,
+          ...timeRangeComparators,
+          attributes: 'referenceEquality',
+          mapSettings: 'referenceEquality',
+          savedObjectId: 'referenceEquality',
+        };
       },
-      {
-        ...timeRange.comparators,
-        ...titleManager.comparators,
-        ...(dynamicActionsApi?.dynamicActionsComparator ?? {
-          enhancements: getUnchangingComparator(),
-        }),
-        ...crossPanelActions.comparators,
-        ...reduxSync.comparators,
-        attributes: [attributes$, (next: MapAttributes | undefined) => attributes$.next(next)],
-        mapSettings: [
-          mapSettings$,
-          (next: Partial<MapSettings> | undefined) => mapSettings$.next(next),
-        ],
-        savedObjectId: [savedObjectId$, (next: string | undefined) => savedObjectId$.next(next)],
-        // readonly comparators
-        mapBuffer: getUnchangingComparator(),
-      }
-    );
+      onReset: (lastSaved) => {
+        attributes$.next(lastSaved?.attributes);
+        mapSettings$.next(lastSaved?.mapSettings);
+        savedObjectId$.next(lastSaved?.savedObjectId);
+        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
+        reduxSync.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved);
+      },
+    });
+
+    api = finalizeApi({
+      defaultTitle$,
+      defaultDescription$,
+      ...unsavedChangesApi,
+      ...timeRangeManager.api,
+      ...(dynamicActionsManager?.api ?? {}),
+      ...titleManager.api,
+      ...reduxSync.api,
+      ...initializeEditApi(uuid, getLatestState, parentApi, mapSerializedState.savedObjectId),
+      ...initializeLibraryTransforms(savedMap, serializeState),
+      ...initializeDataViews(savedMap.getStore()),
+      serializeState,
+      supportedTriggers: () => {
+        return [APPLY_FILTER_TRIGGER, VALUE_CLICK_TRIGGER];
+      },
+    });
 
     const unsubscribeFromFetch = initializeFetch({
       api,
       controlledBy,
       getIsFilterByMapExtent: crossPanelActions.getIsFilterByMapExtent,
-      searchSessionMapBuffer: state.mapBuffer,
+      searchSessionMapBuffer: mapSerializedState.mapBuffer,
       store: savedMap.getStore(),
     });
 
