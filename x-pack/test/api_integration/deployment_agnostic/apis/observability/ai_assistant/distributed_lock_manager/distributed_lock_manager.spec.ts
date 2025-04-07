@@ -133,7 +133,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(retryCounter).to.be(3);
       });
 
-      it('and eventually fails', async () => {
+      it('eventually fails', async () => {
         addElasticsearchMock({ numberOfMocks: 4 });
 
         const acquired = await lockManager.acquire();
