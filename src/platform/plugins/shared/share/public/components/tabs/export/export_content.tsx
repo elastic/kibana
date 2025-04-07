@@ -18,11 +18,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiIcon,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
+  EuiToolTip,
   type EuiRadioGroupOption,
   EuiIconTip,
 } from '@elastic/eui';
@@ -112,14 +114,16 @@ const ExportContentUi = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiIconTip
+            <EuiToolTip
               content={
                 <FormattedMessage
                   id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
                   defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
                 />
               }
-            />
+            >
+              <EuiIcon type="questionInCircle" />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       );
