@@ -12,7 +12,7 @@ import { useDispatch } from 'react-redux';
 import { css } from '@emotion/css';
 
 import { useEnableExperimental } from '../../../../../common/hooks/use_experimental_features';
-import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
+import { useDataViewSpec } from '../../../../../data_view_manager/hooks/use_data_view_spec';
 import type { EqlOptions } from '../../../../../../common/search_strategy';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
@@ -70,7 +70,9 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
 
   const { newDataViewPickerEnabled } = useEnableExperimental();
 
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
+  const { dataViewSpec: experimentalDataView, status } = useDataViewSpec(
+    SourcererScopeName.timeline
+  );
   const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
   if (newDataViewPickerEnabled) {

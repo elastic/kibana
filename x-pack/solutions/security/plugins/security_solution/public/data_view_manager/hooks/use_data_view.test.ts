@@ -5,45 +5,47 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import { type DataView } from '@kbn/data-views-plugin/public';
+import { act, renderHook } from '@testing-library/react';
+import { TestProviders } from '../../common/mock';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../constants';
 
-import { DataViewManagerScopeName } from '../constants';
 import { useDataView } from './use_data_view';
-import { useFullDataView } from './use_full_data_view';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useSelector } from 'react-redux';
 
-jest.mock('./use_full_data_view');
+jest.mock('../../common/hooks/use_experimental_features');
+
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useSelector: jest.fn(),
+}));
 
 describe('useDataView', () => {
   beforeEach(() => {
-    jest.mocked(useFullDataView).mockReturnValue({
-      dataView: {
-        id: 'test',
-        title: 'test',
-        toSpec: jest.fn().mockReturnValue({ id: 'test', title: 'test' }),
-      } as unknown as DataView,
-      status: 'ready',
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+    jest
+      .mocked(useSelector)
+      .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
+  });
+
+  describe('when data view is available', () => {
+    it('should return DataView instance', async () => {
+      const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
+        wrapper: TestProviders,
+      });
+
+      await act(async () => wrapper.rerender(DataViewManagerScopeName.default));
+      expect(wrapper.result.current.dataView).toBeTruthy();
     });
   });
 
-  it('should return correct dataView from the store, based on the provided scope', () => {
-    const wrapper = renderHook((scope) => useDataView(scope), {
-      initialProps: DataViewManagerScopeName.default,
-    });
+  describe('when data view fields are not available', () => {
+    it('should return undefined', () => {
+      const wrapper = renderHook(() => useDataView(DataViewManagerScopeName.default), {
+        wrapper: TestProviders,
+      });
 
-    expect(jest.mocked(useFullDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.default);
-
-    expect(wrapper.result.current).toMatchObject({
-      status: expect.any(String),
-      dataView: expect.objectContaining({ id: expect.any(String) }),
-    });
-
-    wrapper.rerender(DataViewManagerScopeName.timeline);
-    expect(jest.mocked(useFullDataView)).toHaveBeenCalledWith(DataViewManagerScopeName.timeline);
-
-    expect(wrapper.result.current).toMatchObject({
-      status: expect.any(String),
-      dataView: expect.objectContaining({ id: expect.any(String) }),
+      expect(wrapper.result.current.dataView).toBeUndefined();
     });
   });
 });

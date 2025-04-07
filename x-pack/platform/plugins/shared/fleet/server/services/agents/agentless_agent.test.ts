@@ -652,12 +652,10 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
+    jest.spyOn(appContextService, 'getKibanaVersion').mockReturnValue('8.18.0');
     jest.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
 
-    await agentlessAgentService.upgradeAgentlessDeployment(
-      'mocked-agentless-agent-policy-id',
-      '8.17.0'
-    );
+    await agentlessAgentService.upgradeAgentlessDeployment('mocked-agentless-agent-policy-id');
 
     expect(axios).toHaveBeenCalledTimes(1);
 
@@ -667,7 +665,7 @@ describe('Agentless Agent service', () => {
         httpsAgent: expect.anything(),
         method: 'PUT',
         data: {
-          stack_version: '8.17.0',
+          stack_version: '8.18.0',
         },
         url: 'http://api.agentless.com/api/v1/ess/deployments/mocked-agentless-agent-policy-id',
       })

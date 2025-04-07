@@ -17,7 +17,7 @@ import type { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
-import { internalStateActions, selectCurrentTab } from './redux';
+import { internalStateActions } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -178,10 +178,12 @@ describe('test getDataStateContainer', () => {
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: true,
-        rowHeight: true,
-        breakdownField: true,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: true,
+          rowHeight: true,
+          breakdownField: true,
+        },
       })
     );
 
@@ -194,12 +196,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(
-        selectCurrentTab(stateContainer.internalState.getState()).resetDefaultProfileState,
-        'resetId'
-      )
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
@@ -218,10 +215,12 @@ describe('test getDataStateContainer', () => {
     await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
-      internalStateActions.setResetDefaultProfileState({
-        columns: false,
-        rowHeight: false,
-        breakdownField: false,
+      stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
+        resetDefaultProfileState: {
+          columns: false,
+          rowHeight: false,
+          breakdownField: false,
+        },
       })
     );
     dataState.data$.totalHits$.next({
@@ -232,12 +231,7 @@ describe('test getDataStateContainer', () => {
     await waitFor(() => {
       expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.COMPLETE);
     });
-    expect(
-      omit(
-        selectCurrentTab(stateContainer.internalState.getState()).resetDefaultProfileState,
-        'resetId'
-      )
-    ).toEqual({
+    expect(omit(stateContainer.getCurrentTab().resetDefaultProfileState, 'resetId')).toEqual({
       columns: false,
       rowHeight: false,
       breakdownField: false,
