@@ -118,7 +118,6 @@ const serializeNavNode = (
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
   };
-
   serialized.renderAs = getRenderAs(serialized, { isSideNavCollapsed });
   serialized.spaceBefore = getSpaceBefore(serialized, {
     isSideNavCollapsed,
@@ -258,7 +257,7 @@ const getEuiProps = (
   // if it is the highest match in the URL, not if one of its children is also active.
   const onlyIfHighestMatch = isAccordion && !isCollapsible;
   const isActive = isActiveFromUrl(navNode.path, activeNodes, onlyIfHighestMatch);
-  const isExternal = Boolean(href) && !navNode.isElasticInternalLink && isAbsoluteLink(href!);
+  const isExternal = Boolean(href) && navNode.isExternalLink && isAbsoluteLink(href!);
   const isAccordionExpanded = !getIsCollapsed(path);
 
   let isSelected = isActive;
@@ -369,7 +368,7 @@ function nodeToEuiCollapsibleNavProps(
     _navNode,
     deps
   );
-  const { id, path, href, renderAs, isCollapsible, spaceBefore } = navNode;
+  const { id, path, href, renderAs, isCollapsible, spaceBefore, isExternalLink } = navNode;
 
   if (navNode.renderItem) {
     // Leave the rendering to the consumer
@@ -411,7 +410,9 @@ function nodeToEuiCollapsibleNavProps(
       // Render as an accordion or a link (handled by EUI) depending if
       // "items" is undefined or not. If it is undefined --> a link, otherwise an
       // accordion is rendered.
-      ...(subItems ? { items: subItems, isCollapsible } : { href, linkProps }),
+      ...(subItems
+        ? { items: subItems, isCollapsible }
+        : { href, ...linkProps, external: isExternalLink }),
     },
   ];
 
