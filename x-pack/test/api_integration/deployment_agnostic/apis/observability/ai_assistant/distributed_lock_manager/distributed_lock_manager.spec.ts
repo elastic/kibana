@@ -16,6 +16,7 @@ import {
   LockDocument,
   LOCKS_CONCRETE_INDEX_NAME,
 } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
+import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -87,6 +88,56 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await lockManager.release();
         const lock = await getLockById(es, LOCK_ID);
         expect(lock).to.be(undefined);
+      });
+    });
+
+    describe('when encountering network error the ES client retries the request', () => {
+      let lockManager: LockManager;
+      const LOCK_ID = 'es_client_retries_lock';
+      let retryCounter = 0;
+
+      beforeEach(async () => {
+        retryCounter = 0;
+        lockManager = new LockManager(LOCK_ID, es, logger);
+      });
+
+      afterEach(async () => {
+        nock.cleanAll();
+        await lockManager.release();
+      });
+
+      after(async () => {
+        nock.restore();
+      });
+
+      function addElasticsearchMock({ numberOfMocks }: { numberOfMocks: number }) {
+        nock('http://localhost:9220', { allowUnmocked: true })
+          .filteringRequestBody(() => '*')
+          .post(`/${LOCKS_CONCRETE_INDEX_NAME}/_update/${LOCK_ID}`)
+          .times(numberOfMocks)
+          .reply((uri, requestBody, cb) => {
+            log.debug(`Returning mock error for ${uri}`);
+            retryCounter++;
+            cb(null, [503, 'Service Unavailable']);
+          });
+      }
+
+      it('and eventually succeeds', async () => {
+        addElasticsearchMock({ numberOfMocks: 3 });
+
+        const acquired = await lockManager.acquire();
+
+        expect(acquired).to.be(true);
+        expect(retryCounter).to.be(3);
+      });
+
+      it('and eventually fails', async () => {
+        addElasticsearchMock({ numberOfMocks: 4 });
+
+        const acquired = await lockManager.acquire();
+
+        expect(acquired).to.be(false);
+        expect(retryCounter).to.be(4);
       });
     });
 
@@ -174,7 +225,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('with retries', () => {
+    describe('when waiting for lock to be available using pRetry', () => {
       let blockingManager: LockManager;
       let waitingManager: LockManager;
 
@@ -350,7 +401,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('with retry that times out', () => {
+      describe('when waiting for lock to be available using pRetry and it times out', () => {
         const RETRY_LOCK_ID = 'my_lock_with_retry';
         let retries = 0;
         let error: Error | undefined;
@@ -394,7 +445,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe('with retry that does not times out', () => {
+      describe('when waiting for lock to be available using pRetry and does not time out', () => {
         const RETRY_LOCK_ID = 'my_lock_with_retry';
         let retries = 0;
         let res: string | undefined;

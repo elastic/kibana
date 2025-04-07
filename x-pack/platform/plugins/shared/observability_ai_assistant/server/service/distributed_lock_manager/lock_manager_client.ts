@@ -57,17 +57,19 @@ export class LockManager {
     metadata = {},
     ttl = duration(30, 'seconds').asMilliseconds(),
   }: AcquireOptions = {}): Promise<boolean> {
+    let response: Awaited<ReturnType<ElasticsearchClient['update']>>;
     await createLocksWriteIndexOnce(this.esClient);
     this.token = uuid();
 
     try {
-      const response = await this.esClient.update<LockDocument>({
-        index: LOCKS_CONCRETE_INDEX_NAME,
-        id: this.lockId,
-        scripted_upsert: true,
-        script: {
-          lang: 'painless',
-          source: `
+      response = await this.esClient.update<LockDocument>(
+        {
+          index: LOCKS_CONCRETE_INDEX_NAME,
+          id: this.lockId,
+          scripted_upsert: true,
+          script: {
+            lang: 'painless',
+            source: `
               // Get the current time on the ES server.
               long now = System.currentTimeMillis();
               
@@ -83,84 +85,89 @@ export class LockManager {
                 ctx.op = 'noop';
               }
             `,
-          params: {
-            ttl,
+            params: {
+              ttl,
+              token: this.token,
+            },
+          },
+          // @ts-expect-error
+          upsert: {
+            metadata,
             token: this.token,
           },
         },
-        // @ts-expect-error
-        upsert: {
-          metadata,
-          token: this.token,
-        },
-      });
+        {
+          retryOnTimeout: true,
+          maxRetries: 3,
+        }
+      );
+    } catch (e) {
+      if (isVersionConflictException(e)) {
+        this.logger.debug(`Lock "${this.lockId}" already held (version conflict)`);
+        return false;
+      }
 
-      if (response.result === 'created') {
+      this.logger.error(`Failed to acquire lock "${this.lockId}": ${e.message}`);
+      return false;
+    }
+
+    switch (response.result) {
+      case 'created': {
         this.logger.debug(
           `Lock "${this.lockId}" with token = ${
             this.token
           } acquired with ttl = ${prettyMilliseconds(ttl)}`
         );
         return true;
-      } else if (response.result === 'updated') {
+      }
+      case 'updated': {
         this.logger.debug(
           `Lock "${this.lockId}" was expired and re-acquired with ttl = ${prettyMilliseconds(
             ttl
           )} and token = ${this.token}`
         );
         return true;
-      } else if (response.result === 'noop') {
+      }
+      case 'noop': {
         this.logger.debug(
           `Lock "${this.lockId}" with token = ${this.token} could not be acquired. It is already held`
         );
         return false;
-      } else {
-        throw new Error(`Unexpected response: ${response.result}`);
       }
-    } catch (e) {
-      if (isVersionConflictException(e)) {
-        this.logger.debug(`Lock "${this.lockId}" already held (version conflict)`);
-        return false;
-      }
-      this.logger.error(`Failed to acquire lock "${this.lockId}": ${e.message}`);
-      this.logger.debug(e);
-      return false;
     }
+
+    this.logger.warn(`Unexpected response: ${response.result}`);
+    return false;
   }
 
   /**
    * Releases the lock by deleting the document with the given lockId and token
    */
   public async release(): Promise<boolean> {
+    let response: Awaited<ReturnType<ElasticsearchClient['update']>>;
     try {
-      const response = await this.esClient.update<LockDocument>({
-        index: LOCKS_CONCRETE_INDEX_NAME,
-        id: this.lockId,
-        scripted_upsert: false,
-        script: {
-          lang: 'painless',
-          source: `
+      response = await this.esClient.update<LockDocument>(
+        {
+          index: LOCKS_CONCRETE_INDEX_NAME,
+          id: this.lockId,
+          scripted_upsert: false,
+          script: {
+            lang: 'painless',
+            source: `
             if (ctx._source.token == params.token) {
               ctx.op = 'delete';
             } else {
               ctx.op = 'noop';
             }
           `,
-          params: { token: this.token },
+            params: { token: this.token },
+          },
         },
-      });
-
-      if (response.result === 'deleted') {
-        this.logger.debug(`Lock "${this.lockId}" released with token ${this.token}.`);
-        return true;
-      } else if (response.result === 'noop') {
-        this.logger.debug(
-          `Lock "${this.lockId}" with token = ${this.token} could not be released. Token does not match.`
-        );
-        return false;
-      } else {
-        throw new Error(`Unexpected response: ${response.result}`);
-      }
+        {
+          retryOnTimeout: true,
+          maxRetries: 3,
+        }
+      );
     } catch (error: any) {
       if (isDocumentMissingException(error)) {
         this.logger.debug(`Lock "${this.lockId}" already released.`);
@@ -168,9 +175,22 @@ export class LockManager {
       }
 
       this.logger.error(`Failed to release lock "${this.lockId}": ${error.message}`);
-      this.logger.debug(error);
-      return false;
+      throw error;
     }
+
+    switch (response.result) {
+      case 'deleted':
+        this.logger.debug(`Lock "${this.lockId}" released with token ${this.token}.`);
+        return true;
+      case 'noop':
+        this.logger.debug(
+          `Lock "${this.lockId}" with token = ${this.token} could not be released. Token does not match.`
+        );
+        return false;
+    }
+
+    this.logger.warn(`Unexpected response: ${response.result}`);
+    return false;
   }
 
   /**
