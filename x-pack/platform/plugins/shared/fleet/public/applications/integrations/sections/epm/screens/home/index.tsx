@@ -15,7 +15,13 @@ import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../.
 import { DefaultLayout } from '../../../../layouts';
 import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
 import { InstalledIntegrationsPage } from '../installed_integrations';
-import { useAuthz, useGetPackagesQuery, useGetSettingsQuery } from '../../../../hooks';
+import {
+  useAuthz,
+  useConfig,
+  useGetPackagesQuery,
+  useGetSettingsQuery,
+  useStartServices,
+} from '../../../../hooks';
 
 import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
 
@@ -42,6 +48,12 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 };
 
 export const EPMHomePage: React.FC = () => {
+  const config = useConfig();
+  const { application } = useStartServices();
+  if (config.integrationsHomeOverride) {
+    application.navigateToUrl(config.integrationsHomeOverride);
+  }
+
   const authz = useAuthz();
   const isAuthorizedToFetchSettings = authz.fleet.readSettings;
   const { data: settings, isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
