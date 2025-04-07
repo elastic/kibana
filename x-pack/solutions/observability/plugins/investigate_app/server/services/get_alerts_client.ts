@@ -32,6 +32,7 @@ export async function getAlertsClient({
     track_total_hits: boolean | number;
     sort?: estypes.SortOptions[];
     _source?: string[] | false;
+    search_after?: Array<string | number>;
   };
 
   return {
