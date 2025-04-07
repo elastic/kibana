@@ -457,7 +457,7 @@ export class KnowledgeBaseService {
         });
 
         throw serverUnavailable(
-          `The index "${resourceNames.aliases.kb}" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
+          `The index "${resourceNames.aliases.kb}" does not support semantic text and must be re-indexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
         );
       }
 
