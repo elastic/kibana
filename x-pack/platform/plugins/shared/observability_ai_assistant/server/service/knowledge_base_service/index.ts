@@ -496,21 +496,21 @@ export class KnowledgeBaseService {
       config: this.dependencies.config,
     });
 
-    let state: KnowledgeBaseState = KnowledgeBaseState.NOT_INSTALLED;
+    let kbState: KnowledgeBaseState = KnowledgeBaseState.NOT_INSTALLED;
 
     if (!endpoint) {
-      state = KnowledgeBaseState.NOT_INSTALLED;
+      kbState = KnowledgeBaseState.NOT_INSTALLED;
     } else if (errorMessage || modelStats?.deployment_stats?.state === 'failed') {
-      state = KnowledgeBaseState.ERROR;
+      kbState = KnowledgeBaseState.ERROR;
     } else if (
       modelStats?.deployment_stats?.state === 'starting' &&
       modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
     ) {
-      state = KnowledgeBaseState.DEPLOYING_MODEL;
+      kbState = KnowledgeBaseState.DEPLOYING_MODEL;
     } else if (ready) {
-      state = KnowledgeBaseState.READY;
+      kbState = KnowledgeBaseState.READY;
     } else {
-      state = KnowledgeBaseState.ENDPOINT_CREATED;
+      kbState = KnowledgeBaseState.ENDPOINT_CREATED;
     }
 
     return {
@@ -519,7 +519,7 @@ export class KnowledgeBaseService {
       errorMessage,
       endpoint,
       modelStats,
-      state,
+      kbState,
     };
   };
 }

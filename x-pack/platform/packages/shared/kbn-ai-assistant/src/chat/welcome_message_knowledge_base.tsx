@@ -59,7 +59,7 @@ const InspectKnowledgeBasePopover = ({
     await knowledgeBase.setupKb();
   };
 
-  return knowledgeBase.status.value?.endpoint && knowledgeBase.status.value?.modelStats ? (
+  return knowledgeBase.status.value?.modelStats ? (
     <EuiFlexItem grow={false}>
       <EuiPopover
         button={
@@ -106,7 +106,7 @@ export function WelcomeMessageKnowledgeBase({
 
   if (knowledgeBase.isLoading) return <SettingUpKnowledgeBase />;
 
-  switch (knowledgeBase.status.value?.state) {
+  switch (knowledgeBase.status.value?.kbState) {
     case KnowledgeBaseState.NOT_INSTALLED:
       return (
         <>

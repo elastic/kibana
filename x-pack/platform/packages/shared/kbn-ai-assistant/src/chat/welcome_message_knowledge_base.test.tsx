@@ -29,7 +29,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           ready: false,
           enabled: true,
           errorMessage: undefined,
-          state: KnowledgeBaseState.NOT_INSTALLED,
+          kbState: KnowledgeBaseState.NOT_INSTALLED,
         },
         loading: false,
         error: undefined,
@@ -50,7 +50,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
-          state: KnowledgeBaseState.ENDPOINT_CREATED,
+          kbState: KnowledgeBaseState.ENDPOINT_CREATED,
         },
         loading: false,
         refresh: jest.fn(),
@@ -68,7 +68,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       isLoading: true,
       isPolling: true,
       status: {
-        value: { ready: false, enabled: true, state: KnowledgeBaseState.NOT_INSTALLED },
+        value: { ready: false, enabled: true, kbState: KnowledgeBaseState.NOT_INSTALLED },
         loading: false,
         refresh: jest.fn(),
       },
@@ -89,7 +89,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           ready: true,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
-          state: KnowledgeBaseState.READY,
+          kbState: KnowledgeBaseState.READY,
         },
         loading: false,
         refresh: jest.fn(),
@@ -113,7 +113,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
-          state: KnowledgeBaseState.DEPLOYING_MODEL,
+          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
           modelStats: {
             deployment_stats: {
               state: 'starting',
@@ -145,7 +145,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
-          state: KnowledgeBaseState.ERROR,
+          kbState: KnowledgeBaseState.ERROR,
           modelStats: {
             deployment_stats: {
               reason: 'model deployment failed',
@@ -182,7 +182,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
         value: {
           ready: false,
           enabled: true,
-          state: KnowledgeBaseState.NOT_INSTALLED,
+          kbState: KnowledgeBaseState.NOT_INSTALLED,
           errorMessage: 'no endpoint',
         },
         loading: false,
@@ -205,7 +205,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
       status: {
         value: {
           endpoint: { inference_id: 'inference_id' },
-          state: KnowledgeBaseState.DEPLOYING_MODEL,
+          kbState: KnowledgeBaseState.DEPLOYING_MODEL,
           modelStats: {
             deployment_stats: {
               reason: 'model deployment failed',
@@ -235,7 +235,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     const kb = createMockKnowledgeBase({
       status: {
         value: {
-          state: KnowledgeBaseState.READY,
+          kbState: KnowledgeBaseState.READY,
           endpoint: { inference_id: 'inference_id' },
           ready: true,
           enabled: true,

@@ -60,34 +60,33 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
 
           <EuiDescriptionListDescription>
             <ul>
-              {!deploymentState ? (
-                <li>
-                  <EuiIcon type="alert" color="subdued" />{' '}
-                  <FormattedMessage
-                    id="xpack.aiAssistant.welcomeMessage.modelIsNotDeployedLabel"
-                    defaultMessage="Model {modelId} is not deployed"
-                    values={{
-                      modelId: <EuiCode>{modelId}</EuiCode>,
-                    }}
-                  />
-                </li>
+              {deploymentState ? (
+                <>
+                  <li>
+                    <EuiIcon type="alert" color="subdued" />{' '}
+                    <FormattedMessage
+                      id="xpack.aiAssistant.welcomeMessage.modelIsNotDeployedLabel"
+                      defaultMessage="Model {modelId} is not deployed"
+                      values={{
+                        modelId: <EuiCode>{modelId}</EuiCode>,
+                      }}
+                    />
+                  </li>
+                  <li>
+                    <EuiIcon type="alert" color="subdued" />{' '}
+                    <FormattedMessage
+                      id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabel"
+                      defaultMessage="Deployment state of {modelId} is {deploymentState}"
+                      values={{
+                        modelId: <EuiCode>{modelId}</EuiCode>,
+                        deploymentState: <EuiCode>{deploymentState}</EuiCode>,
+                      }}
+                    />
+                  </li>
+                </>
               ) : null}
 
-              {deploymentState && deploymentState !== 'started' ? (
-                <li>
-                  <EuiIcon type="alert" color="subdued" />{' '}
-                  <FormattedMessage
-                    id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabel"
-                    defaultMessage="Deployment state of {modelId} is {deploymentState}"
-                    values={{
-                      modelId: <EuiCode>{modelId}</EuiCode>,
-                      deploymentState: <EuiCode>{deploymentState}</EuiCode>,
-                    }}
-                  />
-                </li>
-              ) : null}
-
-              {deploymentState && deploymentState !== 'started' && deploymentReason ? (
+              {deploymentReason ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
@@ -100,7 +99,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                 </li>
               ) : null}
 
-              {allocationState && allocationState !== 'fully_allocated' ? (
+              {allocationState ? (
                 <li>
                   <EuiIcon type="alert" color="subdued" />{' '}
                   <FormattedMessage
