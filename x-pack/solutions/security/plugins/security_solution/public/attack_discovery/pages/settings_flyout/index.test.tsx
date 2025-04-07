@@ -219,7 +219,7 @@ describe('SettingsFlyout', () => {
     });
   });
 
-  describe('when `assistantAttackDiscoverySchedulingEnabled` feature flag is enabled', () => {
+  describe('when `securitySolution.assistantAttackDiscoverySchedulingEnabled` feature flag is enabled', () => {
     beforeEach(() => {
       getBooleanValueMock.mockReturnValue(true);
       render(

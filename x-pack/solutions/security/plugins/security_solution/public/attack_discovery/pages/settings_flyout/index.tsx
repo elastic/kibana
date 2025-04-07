@@ -17,7 +17,11 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS } from '@kbn/elastic-assistant';
-import { DEFAULT_END, DEFAULT_START } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+  DEFAULT_END,
+  DEFAULT_START,
+} from '@kbn/elastic-assistant-common';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { useKibana } from '../../../common/lib/kibana';
@@ -68,7 +72,7 @@ const SettingsFlyoutComponent: React.FC<Props> = ({
   });
 
   const isAttackDiscoverySchedulingEnabled = featureFlags.getBooleanValue(
-    'securitySolution.assistantAttackDiscoverySchedulingEnabled',
+    ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
     false
   );
 

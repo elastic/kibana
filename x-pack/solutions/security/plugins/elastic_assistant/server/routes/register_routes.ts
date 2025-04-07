@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureFlagsStart, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 
 import { cancelAttackDiscoveryRoute } from './attack_discovery/post/cancel/cancel_attack_discovery';
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
@@ -45,8 +45,7 @@ import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  getElserId: GetElser,
-  featureFlags?: FeatureFlagsStart
+  getElserId: GetElser
 ) => {
   /** PUBLIC */
   // Chat
