@@ -150,7 +150,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
                       href={docLinks.links.fleet.agentLevelLogging}
                     >
                       <FormattedMessage
-                        id="xpack.fleet.agentLog.levelGuideLinkText"
+                        id="xpack.fleet.agentLogs.levelGuideLinkText"
                         defaultMessage="Learn More"
                       />
                     </EuiLink>
@@ -160,44 +160,40 @@ export const SelectLogLevel: React.FC<{ agent: Agent; agentPolicyLogLevel?: stri
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  disabled={isSetLevelLoading || !authz.fleet.allAgents}
-                  compressed={true}
-                  fullWidth={true}
-                  id="selectAgentLogLevel"
-                  data-test-subj="selectAgentLogLevel"
-                  value={selectedLogLevel}
-                  onChange={(event) => {
-                    setSelectedLogLevel(event.target.value);
-                  }}
-                  options={AGENT_LOG_LEVELS.map((level) => ({
-                    value: level,
-                    text: level,
-                  }))}
-                />
-              </EuiFlexItem>
-              {canResetLogLevel && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    flush="both"
-                    size="xs"
-                    disabled={!authz.fleet.allAgents}
-                    isLoading={isSetLevelLoading || isResetLevelLoading}
-                    iconType="cross"
-                    onClick={resetLogLevel}
-                    data-test-subj="resetLogLevelBtn"
-                  >
-                    <FormattedMessage
-                      id="xpack.fleet.agentLogs.resetLogLevelLabelText"
-                      defaultMessage="Reset to policy"
-                    />
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
+            <EuiSelect
+              disabled={isSetLevelLoading || !authz.fleet.allAgents}
+              compressed={true}
+              fullWidth={true}
+              id="selectAgentLogLevel"
+              data-test-subj="selectAgentLogLevel"
+              value={selectedLogLevel}
+              onChange={(event) => {
+                setSelectedLogLevel(event.target.value);
+              }}
+              options={AGENT_LOG_LEVELS.map((level) => ({
+                value: level,
+                text: level,
+              }))}
+            />
           </EuiFlexItem>
+          {canResetLogLevel && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="both"
+                size="xs"
+                disabled={!authz.fleet.allAgents}
+                isLoading={isSetLevelLoading || isResetLevelLoading}
+                iconType="cross"
+                onClick={resetLogLevel}
+                data-test-subj="resetLogLevelBtn"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentLogs.resetLogLevelLabelText"
+                  defaultMessage="Reset to policy"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </>
     );

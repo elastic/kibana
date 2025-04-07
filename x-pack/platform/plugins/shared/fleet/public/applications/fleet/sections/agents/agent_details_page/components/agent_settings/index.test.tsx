@@ -88,6 +88,13 @@ describe('AgentSettings', () => {
           },
         },
       },
+      docLinks: {
+        links: {
+          fleet: {
+            agentLevelLogging: 'agentLevelLogging',
+          },
+        },
+      },
     });
   };
   it('should show log level dropdown with correct value', () => {
