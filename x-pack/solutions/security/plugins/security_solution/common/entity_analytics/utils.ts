@@ -7,6 +7,6 @@
 
 import { EntityType } from './types';
 
-const ENTITY_ANALYTICS_ENTITY_TYPES = [EntityType.host, EntityType.user, EntityType.service];
+const ENTITY_ANALYTICS_ENTITY_TYPES = [EntityType.user, EntityType.host, EntityType.service];
 
 export const getEntityAnalyticsEntityTypes = (): EntityType[] => ENTITY_ANALYTICS_ENTITY_TYPES;

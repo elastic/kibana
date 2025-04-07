@@ -12,7 +12,11 @@ import {
   RISK_SCORE_INDEX_PATTERN,
   type CriticalityLevels,
 } from '../../../../../common/constants';
-import { EntityTypeToLevelField, type RiskSeverity } from '../../../../../common/search_strategy';
+import {
+  EntityTypeToLevelField,
+  RiskScoreFields,
+  type RiskSeverity,
+} from '../../../../../common/search_strategy';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
 import { EntitySourceTag } from '../types';
 import { useStoreEntityTypes } from '../../../hooks/use_enabled_entity_types';
@@ -60,11 +64,15 @@ export const useEntitiesListFilters = ({
       ? [
           {
             bool: {
-              should: enabledEntityTypes.map((type) => ({
-                terms: {
-                  [EntityTypeToLevelField[type]]: selectedSeverities,
-                },
-              })),
+              should: enabledEntityTypes
+                .filter((type) => {
+                  return EntityTypeToLevelField[type] !== RiskScoreFields.unsupported;
+                })
+                .map((type) => ({
+                  terms: {
+                    [EntityTypeToLevelField[type]]: selectedSeverities,
+                  },
+                })),
             },
           },
         ]
