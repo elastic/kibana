@@ -323,7 +323,7 @@ describe.skip('GraphInvestigation Component', () => {
       ]);
     });
 
-    it('query includes origin event ids onInvestigateInTimeline callback', async () => {
+    it(`query doesn't include event id in filters input when onInvestigateInTimeline callback`, async () => {
       // Arrange
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
@@ -341,42 +341,10 @@ describe.skip('GraphInvestigation Component', () => {
       // Assert
       expect(onInvestigateInTimeline).toHaveBeenCalled();
       expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
-        query: '(host1) OR event.id: "1" OR event.id: "2"',
+        query: 'host1',
         language: 'kuery',
       });
-      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
-        {
-          $state: {
-            store: 'appState',
-          },
-          meta: expect.objectContaining({
-            disabled: false,
-            index: '1235',
-            negate: false,
-            controlledBy: 'graph-investigation',
-            params: ['1', '2'].map((eventId) => ({
-              meta: {
-                controlledBy: 'graph-investigation',
-                field: 'event.id',
-                index: '1235',
-                key: 'event.id',
-                negate: false,
-                params: {
-                  query: eventId,
-                },
-                type: 'phrase',
-              },
-              query: {
-                match_phrase: {
-                  'event.id': eventId,
-                },
-              },
-            })),
-            type: 'combined',
-            relation: 'OR',
-          }),
-        },
-      ]);
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
     });
   });
 });
