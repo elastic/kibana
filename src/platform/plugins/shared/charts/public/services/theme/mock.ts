@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LIGHT_THEME, PartialTheme } from '@elastic/charts';
+import { AMSTERDAM_LIGHT_THEME, PartialTheme } from '@elastic/charts';
 import { ThemeService } from './theme';
 
 export const MOCK_SPARKLINE_THEME: PartialTheme = {
@@ -28,7 +28,7 @@ export const MOCK_SPARKLINE_THEME: PartialTheme = {
 };
 
 export const themeServiceMock: ThemeService = {
-  chartsDefaultBaseTheme: LIGHT_THEME,
+  chartsDefaultBaseTheme: AMSTERDAM_LIGHT_THEME,
   chartsBaseTheme$: jest.fn(() => ({
     subscribe: jest.fn(),
   })),
@@ -36,6 +36,6 @@ export const themeServiceMock: ThemeService = {
     subscribe: jest.fn(),
   })),
   useDarkMode: jest.fn().mockReturnValue(false),
-  useChartsBaseTheme: jest.fn().mockReturnValue(LIGHT_THEME),
+  useChartsBaseTheme: jest.fn().mockReturnValue(AMSTERDAM_LIGHT_THEME),
   useSparklineOverrides: jest.fn().mockReturnValue(MOCK_SPARKLINE_THEME),
 } as any;
