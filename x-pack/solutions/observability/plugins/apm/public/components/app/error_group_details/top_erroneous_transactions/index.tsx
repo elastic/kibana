@@ -88,11 +88,7 @@ export function TopErroneousTransactions({ serviceName }: Props) {
             text={transactionName}
             content={
               <TransactionDetailLink
-                serviceName={serviceName}
                 transactionName={transactionName}
-                transactionType={transactionType ?? ''}
-                comparisonEnabled={comparisonEnabled}
-                offset={offset}
                 href={link('/services/{serviceName}/transactions/view', {
                   path: { serviceName },
                   query: {
