@@ -39,8 +39,7 @@ const labelConfig: VisParams['metric']['labels'] = {
 };
 
 describe('MetricVisValue', () => {
-  // TODO: component.find('button') doesn't work because of emotion css prop babel preset
-  it.skip('should be wrapped in button if having a click listener', () => {
+  it('should be wrapped in button if having a click listener', () => {
     const component = shallow(
       <MetricVisValue
         style={font}
@@ -51,7 +50,7 @@ describe('MetricVisValue', () => {
       />
     );
 
-    expect(component.find('button').exists()).toBe(true);
+    expect(component.find('[data-test-subj="metric_value_button"]').exists()).toBe(true);
   });
 
   it('should not be wrapped in button without having a click listener', () => {

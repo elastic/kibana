@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiButtonGroup, EuiSuperDatePicker } from '@elastic/eui';
+import { EuiSuperDatePicker } from '@elastic/eui';
 
 import { AnalyticsCollection } from '../../../../../common/types/analytics';
 
@@ -49,9 +49,10 @@ describe('AnalyticsCollectionTable', () => {
     expect(collectionCards.at(1).prop('collection')).toMatchObject(analyticsCollections[1]);
   });
 
-  // TODO: .find(EuiButtonGroup); doesn't work due to emotion css prop babel preset
-  it.skip('renders filters', () => {
-    const buttonGroup = shallow(<AnalyticsCollectionTable {...props} />).find(EuiButtonGroup);
+  it('renders filters', () => {
+    const buttonGroup = shallow(<AnalyticsCollectionTable {...props} />).find(
+      '[data-test-subj="enterpriseSearchAnalyticsCollectionTableButtonGroup"]'
+    );
 
     expect(buttonGroup).toHaveLength(1);
     expect(buttonGroup.prop('options')).toHaveLength(4);

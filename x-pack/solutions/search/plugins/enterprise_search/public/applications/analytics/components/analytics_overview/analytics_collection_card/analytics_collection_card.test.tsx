@@ -11,8 +11,7 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { Chart } from '@elastic/charts';
-import { EuiCard, EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 
 import { FilterBy } from '../../../utils/get_formula_by_filter';
 
@@ -25,8 +24,10 @@ const mockCollection = {
   name: 'example2',
 };
 
-// TODO: wrapper.find(EuiCard) doesn't work due to emotion css prop babel preset
-describe.skip('AnalyticsCollectionCard', () => {
+const chartSelector = '[data-test-subj="enterpriseSearchAnalyticsCollectionCardChart"]';
+const cardSelector = '[data-test-subj="enterpriseSearchAnalyticsCollectionCard"]';
+
+describe('AnalyticsCollectionCard', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -43,8 +44,8 @@ describe.skip('AnalyticsCollectionCard', () => {
       />
     );
 
-    expect(wrapper.find(Chart)).toHaveLength(0);
-    expect(wrapper.find(EuiCard).prop('footer')).toEqual(
+    expect(wrapper.find(chartSelector)).toHaveLength(0);
+    expect(wrapper.find(cardSelector).prop('footer')).toEqual(
       <EuiFlexGroup alignItems="center" justifyContent="center">
         <EuiLoadingChart size="m" />
       </EuiFlexGroup>
@@ -67,8 +68,8 @@ describe.skip('AnalyticsCollectionCard', () => {
       />
     );
 
-    expect(wrapper.find(EuiCard)).toHaveLength(1);
-    expect(wrapper.find(Chart)).toHaveLength(1);
+    expect(wrapper.find(cardSelector)).toHaveLength(1);
+    expect(wrapper.find(chartSelector)).toHaveLength(1);
   });
 
   it('hide charts when data is not provided', async () => {
@@ -87,7 +88,7 @@ describe.skip('AnalyticsCollectionCard', () => {
       />
     );
 
-    expect(wrapper.find(EuiCard)).toHaveLength(1);
-    expect(wrapper.find(Chart)).toHaveLength(0);
+    expect(wrapper.find(cardSelector)).toHaveLength(1);
+    expect(wrapper.find(chartSelector)).toHaveLength(0);
   });
 });
