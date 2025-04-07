@@ -6663,9 +6663,7 @@ paths:
                                   description: The title of the section.
                                   type: string
                               required:
-                                - order
                                 - title
-                                - collapsed
                             type: array
                           tags:
                             items:
@@ -7159,9 +7157,7 @@ paths:
                             description: The title of the section.
                             type: string
                         required:
-                          - order
                           - title
-                          - collapsed
                       type: array
                     tags:
                       items:
@@ -7578,9 +7574,7 @@ paths:
                                   description: The title of the section.
                                   type: string
                               required:
-                                - order
                                 - title
-                                - collapsed
                             type: array
                           tags:
                             items:
@@ -8054,9 +8048,7 @@ paths:
                             description: The title of the section.
                             type: string
                         required:
-                          - order
                           - title
-                          - collapsed
                       type: array
                     tags:
                       items:
@@ -8469,9 +8461,7 @@ paths:
                                   description: The title of the section.
                                   type: string
                               required:
-                                - order
                                 - title
-                                - collapsed
                             type: array
                           tags:
                             items:
