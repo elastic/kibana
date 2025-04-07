@@ -48,9 +48,20 @@ const createActions = (testBed: TestBed) => {
     component.update();
   };
 
+  const clickRetryLogsButton = async () => {
+    const { find, component } = testBed;
+
+    await act(async () => {
+      find('deprecationLogsRetryButton').simulate('click');
+    });
+
+    component.update();
+  };
+
   return {
     clickViewSystemIndicesState,
     clickRetrySystemIndicesButton,
+    clickRetryLogsButton,
   };
 };
 
