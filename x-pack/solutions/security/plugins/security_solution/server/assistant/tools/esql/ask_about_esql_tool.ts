@@ -10,12 +10,12 @@ import type { AssistantTool, AssistantToolParams } from '@kbn/elastic-assistant-
 import { z } from '@kbn/zod';
 import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
+import type { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
-import { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
 
 export type ESQLToolParams = AssistantToolParams & {
-    assistantContext: ElasticAssistantApiRequestHandlerContext;
+  assistantContext: ElasticAssistantApiRequestHandlerContext;
 };
 
 const TOOL_NAME = 'AskAboutEsqlTool';
