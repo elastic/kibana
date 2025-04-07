@@ -458,6 +458,7 @@ describe('scheduleBackfill()', () => {
             alertTypeId: existingDecryptedRule2.attributes.alertTypeId,
             apiKey: existingDecryptedRule2.attributes.apiKey,
             apiKeyCreatedByUser: existingDecryptedRule2.attributes.apiKeyCreatedByUser,
+            artifacts: { dashboards: [] },
             consumer: existingDecryptedRule2.attributes.consumer,
             createdAt: new Date(existingDecryptedRule2.attributes.createdAt),
             createdBy: existingDecryptedRule2.attributes.createdBy,
