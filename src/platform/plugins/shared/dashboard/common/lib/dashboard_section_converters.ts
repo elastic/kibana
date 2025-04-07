@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardSectionMap, DashboardSectionState } from '../dashboard_container/types';
+import { DashboardSectionMap } from '..';
+import { type DashboardSections } from '../../server/content_management';
 
 export const convertSectionArrayToSectionMap = (
-  sections?: DashboardSectionState[]
+  sections?: DashboardSections
 ): DashboardSectionMap | undefined => {
   if ((sections ?? []).length === 0) return undefined;
   const sectionsMap: DashboardSectionMap = {};
@@ -19,6 +20,7 @@ export const convertSectionArrayToSectionMap = (
     sectionsMap[sectionId] = {
       ...section,
       id: sectionId,
+      order: section.order ?? idx + 1,
     };
   });
   return sectionsMap;
@@ -26,7 +28,7 @@ export const convertSectionArrayToSectionMap = (
 
 export const convertSectionMapToSectionArray = (
   sections?: DashboardSectionMap
-): DashboardSectionState[] | undefined => {
+): DashboardSections | undefined => {
   const sectionEntries = Object.entries(sections ?? {});
   if (sectionEntries.length === 0) return undefined;
   return sectionEntries.map(([sectionId, section]) => {
