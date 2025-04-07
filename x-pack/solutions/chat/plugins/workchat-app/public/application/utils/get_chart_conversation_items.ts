@@ -12,6 +12,7 @@ import {
   isToolResult,
   createAssistantMessage,
 } from '../../../common/conversation_events';
+import type { ProgressionEvent } from '../../../common/chat_events';
 import type { ChatStatus } from '../hooks/use_chat';
 import {
   type ConversationItem,
@@ -19,8 +20,10 @@ import {
   createUserMessageItem,
   createAssistantMessageItem,
   createToolCallItem,
+  createProgressionItem,
   isAssistantMessageItem,
   isToolCallItem,
+  isProgressionItem,
 } from './conversation_items';
 
 /**
@@ -28,9 +31,11 @@ import {
  */
 export const getChartConversationItems = ({
   conversationEvents,
+  progressionEvents,
   chatStatus,
 }: {
   conversationEvents: ConversationEvent[];
+  progressionEvents: ProgressionEvent[];
   chatStatus: ChatStatus;
 }): ConversationItem[] => {
   const toolCallMap = new Map<string, ToolCallConversationItem>();
@@ -61,9 +66,13 @@ export const getChartConversationItems = ({
     return list;
   }, []);
 
+  if (progressionEvents.length > 0 && chatStatus === 'loading') {
+    items.push(createProgressionItem({ progressionEvents }));
+  }
+
   if (chatStatus === 'loading') {
     const lastItem = items[items.length - 1];
-    if (isAssistantMessageItem(lastItem)) {
+    if (isAssistantMessageItem(lastItem) || isProgressionItem(lastItem)) {
       lastItem.loading = true;
     } else if (isToolCallItem(lastItem) && !lastItem.toolResult) {
       lastItem.loading = true;
