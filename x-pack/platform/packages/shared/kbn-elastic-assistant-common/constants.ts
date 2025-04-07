@@ -71,8 +71,8 @@ export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as co
  */
 export const INVOKE_LLM_SERVER_TIMEOUT = 4 * 60 * 1000; // 4 minutes
 /**
- * The client timeout is set to 3 seconds less than the server timeout to prevent 
+ * The client timeout is set to 3 seconds less than the server timeout to prevent
  * the `core-http-browser` from retrying the request.
- * 
+ *
  */
 export const INVOKE_LL_CLIENT_TIMEOUT = INVOKE_LLM_SERVER_TIMEOUT - 3000; // 4 minutes - 1 second

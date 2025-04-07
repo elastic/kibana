@@ -57,7 +57,7 @@ export const chatCompleteRoute = (
       },
       options: {
         timeout: {
-          idleSocket: INVOKE_LLM_SERVER_TIMEOUT
+          idleSocket: INVOKE_LLM_SERVER_TIMEOUT,
         },
       },
     })
