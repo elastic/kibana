@@ -18,15 +18,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiIcon,
   EuiRadioGroup,
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
   EuiText,
-  EuiToolTip,
-  type EuiRadioGroupOption,
   EuiIconTip,
+  type EuiRadioGroupOption,
 } from '@elastic/eui';
 import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
@@ -114,16 +112,14 @@ const ExportContentUi = ({
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiToolTip
+            <EuiIconTip
               content={
                 <FormattedMessage
                   id="share.screenCapturePanelContent.optimizeForPrintingHelpText"
                   defaultMessage="Uses multiple pages, showing at most 2 visualizations per page "
                 />
               }
-            >
-              <EuiIcon type="questionInCircle" />
-            </EuiToolTip>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
