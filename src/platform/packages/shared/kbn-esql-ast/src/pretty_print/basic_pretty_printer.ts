@@ -411,7 +411,7 @@ export class BasicPrettyPrinter {
           })
           .filter(Boolean) as string[];
 
-        const spaces = (n: number) => new Array(n).fill(' ').join('');
+        const spaces = (n: number) => ' '.repeat(n);
 
         const branchSeparator = opts.multiline ? `)\n${spaces(4)}(` : `) (`;
 
