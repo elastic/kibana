@@ -186,7 +186,7 @@ export async function createMcpServer({
         });
 
         logger.info(`Retrieved ${caseContent.length} support cases`);
-        
+
         return toolResultFactory.contentList(caseContent);
       } catch (e) {
         return toolResultFactory.error(`Error fetching cases: ${e.message}`);
