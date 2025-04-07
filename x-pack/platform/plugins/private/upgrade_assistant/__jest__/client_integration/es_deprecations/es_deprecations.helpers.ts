@@ -8,6 +8,7 @@ import { act } from 'react-dom/test-utils';
 
 import { registerTestBed, TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
+import { waitFor } from '@testing-library/dom';
 import { EsDeprecations } from '../../../public/application/components';
 import { WithAppDependencies } from '../helpers';
 
@@ -95,19 +96,11 @@ const createActions = (testBed: TestBed) => {
     clickFilterByTitle: async (title: string) => {
       // We need to read the document "body" as the filter dropdown (an EuiSelectable)
       // is added in a portalled popover and not inside the component DOM tree.
-      let filterButton: HTMLButtonElement | null = null;
-
-      // Wait for the filterButton to be available
-      await act(async () => {
-        while (!filterButton) {
-          filterButton = document.body.querySelector(`.euiSelectableListItem[title=${title}]`);
-          await new Promise((resolve) => setTimeout(resolve, 50));
-        }
-      });
-
-      expect(filterButton).not.toBeNull();
-
-      await act(async () => {
+      await waitFor(() => {
+        const filterButton: HTMLButtonElement | null = document.body.querySelector(
+          `.euiSelectableListItem[title=${title}]`
+        );
+        expect(filterButton).not.toBeNull();
         filterButton!.click();
       });
 
