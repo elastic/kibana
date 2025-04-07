@@ -29,7 +29,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
   // State management
   const filters = useUrlFilters();
   const pagination = useUrlPagination();
-  const { upgradingIntegrations } = useBulkActions();
+  const { upgradingIntegrations, uninstallingIntegrations } = useBulkActions();
   const {
     installedPackages,
     countPerStatus,
@@ -37,7 +37,12 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
     isLoading,
     isInitialLoading,
     total,
-  } = useInstalledIntegrations(filters, pagination.pagination, upgradingIntegrations);
+  } = useInstalledIntegrations(
+    filters,
+    pagination.pagination,
+    upgradingIntegrations,
+    uninstallingIntegrations
+  );
 
   const [selectedItems, setSelectedItems] = useState<InstalledPackageUIPackageListItem[]>([]);
 

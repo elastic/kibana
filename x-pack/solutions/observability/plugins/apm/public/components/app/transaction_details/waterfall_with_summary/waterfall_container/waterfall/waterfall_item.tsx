@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useRef, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
+import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -49,7 +49,7 @@ const Container = styled.div<IContainerStyleProps>`
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
-      ? props.timelineMargins.left - 30 // fix margin if there is a toggle
+      ? props.timelineMargins.left - 21 // fix margin if there is a toggle (toggle width is 20px)
       : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.euiTheme.colors.lightestShade : 'initial'};
@@ -333,8 +333,13 @@ function RelatedErrors({
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
-  if (item.doc.transaction?.id) {
-    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  const transactionId = item.doc.transaction?.id;
+  const spanId = item.doc.span?.id;
+
+  if (item.docType === 'transaction' && spanId) {
+    kuery += ` and ${SPAN_ID} : "${spanId}"`;
+  } else if (transactionId) {
+    kuery += ` and ${TRANSACTION_ID} : "${transactionId}"`;
   }
 
   const mobileHref = apmRouter.link(`/mobile-services/{serviceName}/errors-and-crashes`, {

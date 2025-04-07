@@ -90,8 +90,16 @@ export const epmRouteService = {
     return EPM_API_ROUTES.BULK_UPGRADE_PATTERN;
   },
 
+  getBulkUninstallPath: () => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_PATTERN;
+  },
+
   getOneBulkUpgradePath: (taskId: string) => {
     return EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN.replace('{taskId}', taskId);
+  },
+
+  getOneBulkUninstallPath: (taskId: string) => {
+    return EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN.replace('{taskId}', taskId);
   },
 
   getRemovePath: (pkgName: string, pkgVersion?: string) => {
