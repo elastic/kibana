@@ -189,6 +189,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     if (!isGroupAgg) {
       // update the timestamp based on the current search results
       const firstValidTimefieldSort = getValidTimefieldSort(
+        // @ts-expect-error `sort` now depends on `FieldValue` that is too broad
         result.hits.find((hit) => getValidTimefieldSort(hit.sort))?.sort
       );
       if (firstValidTimefieldSort) {
