@@ -19,7 +19,7 @@ import {
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
 import {
   DynamicActionStorage,
   type DynamicActionStorageApi,
@@ -40,19 +40,21 @@ export interface StartDependencies {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupContract {}
 
-export interface ReactEmbeddableDynamicActionsApi {
-  dynamicActionsApi: HasDynamicActions;
-  dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
-  serializeDynamicActions: () => DynamicActionsSerializedState;
+export interface EmbeddableDynamicActionsManager {
+  api: HasDynamicActions;
+  comparators: StateComparators<DynamicActionsSerializedState>;
+  latestState$: Observable<DynamicActionsSerializedState>;
+  getLatestState: () => DynamicActionsSerializedState;
+  reinitializeState: (lastState: DynamicActionsSerializedState) => void;
   startDynamicActions: () => { stopDynamicActions: () => void };
 }
 
 export interface StartContract {
-  initializeReactEmbeddableDynamicActions: (
+  initializeEmbeddableDynamicActions: (
     uuid: string,
     getTitle: () => string | undefined,
     state: DynamicActionsSerializedState
-  ) => ReactEmbeddableDynamicActionsApi;
+  ) => EmbeddableDynamicActionsManager;
 }
 
 export interface DynamicActionsSerializedState {
@@ -74,7 +76,7 @@ export class EmbeddableEnhancedPlugin
     this.uiActions = plugins.uiActionsEnhanced;
 
     return {
-      initializeReactEmbeddableDynamicActions: this.initializeDynamicActions.bind(this),
+      initializeEmbeddableDynamicActions: this.initializeDynamicActions.bind(this),
     };
   }
 
@@ -84,12 +86,7 @@ export class EmbeddableEnhancedPlugin
     uuid: string,
     getTitle: () => string | undefined,
     state: DynamicActionsSerializedState
-  ): {
-    dynamicActionsApi: HasDynamicActions;
-    dynamicActionsComparator: StateComparators<DynamicActionsSerializedState>;
-    serializeDynamicActions: () => DynamicActionsSerializedState;
-    startDynamicActions: () => { stopDynamicActions: () => void };
-  } {
+  ): EmbeddableDynamicActionsManager {
     const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>(
       getDynamicActionsState(state.enhancements)
     );
@@ -109,19 +106,23 @@ export class EmbeddableEnhancedPlugin
       uiActions: this.uiActions!,
     });
 
+    function getLatestState() {
+      return { enhancements: dynamicActionsState$.getValue() };
+    }
+
     return {
-      dynamicActionsApi: { ...api, enhancements: { dynamicActions } },
-      dynamicActionsComparator: {
-        enhancements: [
-          dynamicActionsState$,
-          api.setDynamicActions,
-          (a, b) => {
-            return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
-          },
-        ],
-      },
-      serializeDynamicActions: () => {
-        return { enhancements: dynamicActionsState$.getValue() };
+      api: { ...api, enhancements: { dynamicActions } },
+      comparators: {
+        enhancements: (a, b) => {
+          return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
+        }
+      } as StateComparators<DynamicActionsSerializedState>,
+      latestState$: dynamicActionsState$.pipe(
+        map(() => getLatestState())
+      ),
+      getLatestState,
+      reinitializeState: (lastState: DynamicActionsSerializedState) => {
+        api.setDynamicActions(lastState.enhancements);
       },
       startDynamicActions: () => {
         const stop = this.startDynamicActions(dynamicActions);
