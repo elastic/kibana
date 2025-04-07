@@ -53,7 +53,7 @@ import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
-import { PrepareIndicesForAssistantGraphEvalusations } from './prepare_indices_for_evaluations/graph_type/assistant';
+import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -188,12 +188,12 @@ export const postEvaluateRoute = (
           const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } =
             getGraphsFromNames(graphNames);
 
-          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvalusations({
+          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvaluations({
             esClient,
             logger,
           });
 
-          if (assistantGraphs.length > 0) {
+          if (assistantGraphs?.length) {
             await prepareIndicesForAssistantGraph.cleanup();
             await prepareIndicesForAssistantGraph.setup();
           }

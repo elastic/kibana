@@ -121,7 +121,7 @@ export interface ValidationErrors {
   };
   unsupportedColumnTypeForCommand: {
     message: string;
-    type: { command: string; type: string; typeCount: number; givenType: string; column: string };
+    type: { command: string; type: string; givenType: string; column: string };
   };
   unknownDissectKeyword: {
     message: string;

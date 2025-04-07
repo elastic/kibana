@@ -6,6 +6,6 @@
  */
 
 import { metricsApmIndexRequest } from './metrics-apm-[environment].evaluations.[date]';
-import { tracesApmIndexRequest } from './traces-apm-[environment].evlauations.[date]';
+import { tracesApmIndexRequest } from './traces-apm-[environment].evaluations.[date]';
 
 export const indexRequests = [metricsApmIndexRequest, tracesApmIndexRequest];

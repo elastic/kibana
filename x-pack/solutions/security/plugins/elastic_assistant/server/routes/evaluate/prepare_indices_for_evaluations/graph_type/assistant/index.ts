@@ -13,14 +13,14 @@ import { indicesCreateRequests } from './indices_create_requests';
 import { indexRequests } from './index_requests';
 
 const ENVIRONMENTS = ['production', 'staging', 'development'];
-export class PrepareIndicesForAssistantGraphEvalusations extends PrepareIndicesForEvaluations {
+export class PrepareIndicesForAssistantGraphEvaluations extends PrepareIndicesForEvaluations {
   constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
     super({
       esClient,
-      indicesCreateRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(
+      indicesCreateRequests: PrepareIndicesForAssistantGraphEvaluations.hydrateRequestTemplate(
         Object.values(indicesCreateRequests)
       ),
-      indexRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(
+      indexRequests: PrepareIndicesForAssistantGraphEvaluations.hydrateRequestTemplate(
         Object.values(indexRequests)
       ),
       logger,
@@ -60,17 +60,22 @@ export class PrepareIndicesForAssistantGraphEvalusations extends PrepareIndicesF
     );
 
     const indicesToDelete = indicesResolveIndexResponses
-      .flatMap((response) => {
-        return response.indices;
-      })
+      .flatMap((response) => response.indices)
       .map((index) => index.name);
 
-    if (indicesToDelete.length === 0) {
-      this.logger.debug('No indices to delete');
-      return;
+    const dataStreamsToDelete = indicesResolveIndexResponses
+      .flatMap((response) => response.data_streams)
+      .map((dataStream) => dataStream.name);
+
+    if (indicesToDelete.length > 0) {
+      this.logger.info('Deleting indices');
+      await this.esClient.indices.delete({ index: indicesToDelete });
     }
 
-    await this.esClient.indices.delete({ index: indicesToDelete });
+    if (dataStreamsToDelete.length > 0) {
+      this.logger.info('Deleting data streams');
+      await this.esClient.indices.deleteDataStream({ name: dataStreamsToDelete });
+    }
   }
 
   static getRandomDate() {
