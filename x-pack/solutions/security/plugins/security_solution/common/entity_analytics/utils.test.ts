@@ -11,7 +11,7 @@ describe('utils', () => {
   describe('getEntityAnalyticsEntityTypes', () => {
     it('should return all Entity Analytics entity types', () => {
       const entityTypes = getEntityAnalyticsEntityTypes();
-      expect(entityTypes).toEqual([EntityType.host, EntityType.user, EntityType.service]);
+      expect(entityTypes).toEqual([EntityType.user, EntityType.host, EntityType.service]);
     });
   });
 });
