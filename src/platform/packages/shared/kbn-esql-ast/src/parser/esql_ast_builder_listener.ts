@@ -9,7 +9,6 @@
 
 import type { ErrorNode, ParserRuleContext, TerminalNode } from 'antlr4';
 import {
-  ForkCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
@@ -18,11 +17,11 @@ import {
   type DropCommandContext,
   type EnrichCommandContext,
   type EvalCommandContext,
+  type ForkCommandContext,
   type FromCommandContext,
   type GrokCommandContext,
   type KeepCommandContext,
   type LimitCommandContext,
-  type MetricsCommandContext,
   type MvExpandCommandContext,
   type RenameCommandContext,
   type RowCommandContext,
@@ -31,21 +30,22 @@ import {
   type SingleStatementContext,
   type SortCommandContext,
   type StatsCommandContext,
+  type TimeSeriesCommandContext,
   type WhereCommandContext,
 } from '../antlr/esql_parser';
 import { default as ESQLParserListener } from '../antlr/esql_parser_listener';
-import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
+import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
 import {
   createAstBaseItem,
   createCommand,
   createFunction,
-  createOption,
-  createSource,
   textExistsAndIsValid,
+  visitSource,
 } from './factories';
 import { createChangePointCommand } from './factories/change_point';
 import { createDissectCommand } from './factories/dissect';
 import { createForkCommand } from './factories/fork';
+import { createFromCommand } from './factories/from';
 import { createGrokCommand } from './factories/grok';
 import { createJoinCommand } from './factories/join';
 import { createLimitCommand } from './factories/limit';
@@ -58,7 +58,6 @@ import {
   collectAllAggFields,
   collectAllColumnIdentifiers,
   collectAllFields,
-  collectAllSourceIdentifiers,
   getEnrichClauses,
   getMatchField,
   getPolicyName,
@@ -129,33 +128,24 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitFromCommand(ctx: FromCommandContext) {
-    const commandAst = createCommand('from', ctx);
-    this.ast.push(commandAst);
-    commandAst.args.push(...collectAllSourceIdentifiers(ctx));
-    const metadataContext = ctx.indexPatternAndMetadataFields().metadata();
-    if (metadataContext && metadataContext.METADATA()) {
-      const option = createOption(
-        metadataContext.METADATA().getText().toLowerCase(),
-        metadataContext
-      );
-      commandAst.args.push(option);
-      option.args.push(...collectAllColumnIdentifiers(metadataContext));
-    }
+    const command = createFromCommand(ctx);
+
+    this.ast.push(command);
   }
 
   /**
-   * Exit a parse tree produced by `esql_parser.metricsCommand`.
+   * Exit a parse tree produced by `esql_parser.timeseriesCommand`.
    * @param ctx the parse tree
    */
-  exitMetricsCommand(ctx: MetricsCommandContext): void {
-    const node: ESQLAstMetricsCommand = {
-      ...createAstBaseItem('metrics', ctx),
+  exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
+    const node: ESQLAstTimeseriesCommand = {
+      ...createAstBaseItem('ts', ctx),
       type: 'command',
       args: [],
       sources: ctx
         .indexPatternAndMetadataFields()
         .getTypedRuleContexts(IndexPatternContext)
-        .map((sourceCtx) => createSource(sourceCtx)),
+        .map((sourceCtx) => visitSource(sourceCtx)),
     };
     this.ast.push(node);
     node.args.push(...node.sources);

@@ -10,7 +10,7 @@
 import {
   AstProviderFn,
   ESQLAst,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -54,7 +54,7 @@ import type {
 } from './types';
 
 import { validate as validateJoinCommand } from './commands/join';
-import { validate as validateMetricsCommand } from './commands/metrics';
+import { validate as validateTimeseriesCommand } from './commands/metrics';
 
 /**
  * ES|QL validation public API
@@ -222,9 +222,9 @@ function validateCommand(
   }
 
   switch (commandDef.name) {
-    case 'metrics': {
-      const metrics = command as ESQLAstMetricsCommand;
-      const metricsCommandErrors = validateMetricsCommand(metrics, references);
+    case 'ts': {
+      const metrics = command as ESQLAstTimeseriesCommand;
+      const metricsCommandErrors = validateTimeseriesCommand(metrics, references);
       messages.push(...metricsCommandErrors);
       break;
     }

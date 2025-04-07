@@ -21,7 +21,6 @@ import {
   DereferenceContext,
   EntryExpressionContext,
   FunctionContext,
-  IndexPatternContext,
   InlineCastContext,
   InlinestatsCommandContext,
   InputParameterContext,
@@ -55,7 +54,6 @@ import {
   type EnrichCommandContext,
   type FieldContext,
   type FieldsContext,
-  type FromCommandContext,
   type KeepCommandContext,
   type OperatorExpressionContext,
   type PrimaryExpressionContext,
@@ -80,7 +78,6 @@ import {
   createParam,
   createPolicy,
   createSetting,
-  createSource,
   createTimeUnit,
   createUnknownItem,
   nonNullable,
@@ -106,13 +103,6 @@ import {
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
 import { getPosition } from './helpers';
-
-export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  const fromContexts = ctx
-    .indexPatternAndMetadataFields()
-    .getTypedRuleContexts(IndexPatternContext);
-  return fromContexts.map((sourceCtx) => createSource(sourceCtx));
-}
 
 function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
   const context = new ParserRuleContext();

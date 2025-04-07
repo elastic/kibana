@@ -234,13 +234,31 @@ describe('single line query', () => {
       test('quoted source', () => {
         const { text } = reprint('FROM "quoted"');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
       });
 
       test('triple-quoted source', () => {
         const { text } = reprint('FROM """quoted"""');
 
-        expect(text).toBe('FROM quoted');
+        expect(text).toBe('FROM "quoted"');
+      });
+
+      test('source selector', () => {
+        const { text } = reprint('FROM index::selector');
+
+        expect(text).toBe('FROM index::selector');
+      });
+
+      test('single-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"selector"');
+
+        expect(text).toBe('FROM index::"selector"');
+      });
+
+      test('triple-double quoted source selector', () => {
+        const { text } = reprint('FROM index::"""say "jump"!"""');
+
+        expect(text).toBe('FROM index::"say \\"jump\\"!"');
       });
     });
 

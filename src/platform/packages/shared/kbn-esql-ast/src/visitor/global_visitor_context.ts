@@ -105,9 +105,9 @@ export class GlobalVisitorContext<
         return this.visitRowCommand(parent, commandNode, input as any);
       }
       // TODO: uncomment this when the command is implemented
-      // case 'metrics': {
-      //   if (!this.methods.visitMetricsCommand) break;
-      //   return this.visitMetricsCommand(parent, commandNode, input as any);
+      // case 'ts': {
+      //   if (!this.methods.visitTimeseriesCommand) break;
+      //   return this.visitTimeseriesCommand(parent, commandNode, input as any);
       // }
       case 'show': {
         if (!this.methods.visitShowCommand) break;
@@ -225,13 +225,13 @@ export class GlobalVisitorContext<
     return this.visitWithSpecificContext('visitRowCommand', context, input);
   }
 
-  public visitMetricsCommand(
+  public visitTimeseriesCommand(
     parent: contexts.VisitorContext | null,
     node: ESQLAstCommand,
-    input: types.VisitorInput<Methods, 'visitMetricsCommand'>
-  ): types.VisitorOutput<Methods, 'visitMetricsCommand'> {
-    const context = new contexts.MetricsCommandVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitMetricsCommand', context, input);
+    input: types.VisitorInput<Methods, 'visitTimeseriesCommand'>
+  ): types.VisitorOutput<Methods, 'visitTimeseriesCommand'> {
+    const context = new contexts.TimeseriesCommandVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitTimeseriesCommand', context, input);
   }
 
   public visitShowCommand(
