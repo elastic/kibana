@@ -9,18 +9,15 @@
 
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { CommandSuggestParams } from '../../../definitions/types';
 import {
   getCommandDefinition,
   getCommandsByName,
   pipePrecedesCurrentWord,
 } from '../../../shared/helpers';
-import { CommandSuggestParams } from '../../../definitions/types';
-import type { SuggestionRawDefinition } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
-import { suggest as suggestForWhere } from '../where';
-import { suggest as suggestForSort } from '../sort';
-import { suggest as suggestForLimit } from '../limit';
 import { getCommandAutocompleteDefinitions, pipeCompleteItem } from '../../complete_items';
+import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
+import type { SuggestionRawDefinition } from '../../types';
 
 export async function suggest(
   params: CommandSuggestParams<'fork'>
