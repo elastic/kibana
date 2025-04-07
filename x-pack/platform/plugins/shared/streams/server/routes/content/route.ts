@@ -7,13 +7,10 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
-import YAML from 'yaml';
-import AdmZip from 'adm-zip';
-import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
-import { ContentPackEntry, ContentPackManifest } from '@kbn/streams-schema';
+import { createListStream } from '@kbn/utils';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
-import { parseArchive } from '../../lib/content';
+import { generateArchive, parseArchive } from '../../lib/content';
 
 const exportContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
@@ -58,7 +55,7 @@ const exportContentRoute = createServerRoute({
       includeReferencesDeep: true,
     });
 
-    const archive = await generateContentPack(params.body, exportStream);
+    const archive = await generateArchive(params.body, exportStream);
 
     return response.ok({
       body: archive,
@@ -131,24 +128,6 @@ const importContentRoute = createServerRoute({
     return { errors, created: createdAssets };
   },
 });
-
-const generateContentPack = async (manifest: ContentPackManifest, readStream: Readable) => {
-  const zip = new AdmZip();
-  const objects: any[] = await createPromiseFromStreams([readStream, createConcatStream([])]);
-
-  objects.forEach((object: ContentPackEntry) => {
-    if (object.type === 'dashboard') {
-      zip.addFile(
-        `kibana/dashboard/${object.id}.json`,
-        Buffer.from(JSON.stringify(object, null, 2))
-      );
-    }
-  });
-
-  zip.addFile('manifest.yml', Buffer.from(YAML.stringify(manifest)));
-
-  return zip.toBuffer();
-};
 
 export const contentRoutes = {
   ...exportContentRoute,

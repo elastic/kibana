@@ -6,11 +6,18 @@
  */
 
 import YAML from 'yaml';
-import { ContentPack, ContentPackDashboard, contentPackManifestSchema } from '@kbn/streams-schema';
+import {
+  ContentPack,
+  ContentPackDashboard,
+  ContentPackEntry,
+  ContentPackManifest,
+  contentPackManifestSchema,
+} from '@kbn/streams-schema';
 import AdmZip from 'adm-zip';
 import { compact } from 'lodash';
 import path from 'path';
 import { Readable } from 'stream';
+import { createConcatStream, createPromiseFromStreams } from '@kbn/utils';
 
 export async function parseArchive(archive: Readable): Promise<ContentPack> {
   const zip: AdmZip = await new Promise((resolve, reject) => {
@@ -48,4 +55,22 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
   );
 
   return { ...manifestData, entries };
+}
+
+export async function generateArchive(manifest: ContentPackManifest, readStream: Readable) {
+  const zip = new AdmZip();
+  const objects: any[] = await createPromiseFromStreams([readStream, createConcatStream([])]);
+
+  objects.forEach((object: ContentPackEntry) => {
+    if (object.type === 'dashboard') {
+      zip.addFile(
+        `kibana/dashboard/${object.id}.json`,
+        Buffer.from(JSON.stringify(object, null, 2))
+      );
+    }
+  });
+
+  zip.addFile('manifest.yml', Buffer.from(YAML.stringify(manifest)));
+
+  return zip.toBuffer();
 }
