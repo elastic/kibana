@@ -55,39 +55,46 @@ export class ElasticAssistantPlugin
   ) {
     this.logger.debug('elasticAssistant: Setup');
 
-    this.assistantService = new AIAssistantService({
-      logger: this.logger.get('service'),
-      ml: plugins.ml,
-      taskManager: plugins.taskManager,
-      kibanaVersion: this.kibanaVersion,
-      elasticsearchClientPromise: core
-        .getStartServices()
-        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
-      productDocManager: core
-        .getStartServices()
-        .then(([_, { productDocBase }]) => productDocBase.management),
-      pluginStop$: this.pluginStop$,
-    });
+    // The featureFlags service is not available in the core setup, so we need
+    // to wait for the start services to be available to read the feature flags.
+    // This can take a while, but the plugin setup phase cannot run for a long time.
+    // As a workaround, this promise does not block the setup phase.
+    core
+      .getStartServices()
+      .then(([{ elasticsearch, featureFlags }, { productDocBase }]) => {
+        this.assistantService = new AIAssistantService({
+          logger: this.logger.get('service'),
+          ml: plugins.ml,
+          taskManager: plugins.taskManager,
+          kibanaVersion: this.kibanaVersion,
+          elasticsearchClientPromise: Promise.resolve(elasticsearch.client.asInternalUser),
+          productDocManager: Promise.resolve(productDocBase.management),
+          pluginStop$: this.pluginStop$,
+        });
 
-    const requestContextFactory = new RequestContextFactory({
-      logger: this.logger,
-      core,
-      plugins,
-      kibanaVersion: this.kibanaVersion,
-      assistantService: this.assistantService,
-    });
+        const requestContextFactory = new RequestContextFactory({
+          logger: this.logger,
+          core,
+          plugins,
+          kibanaVersion: this.kibanaVersion,
+          assistantService: this.assistantService,
+        });
 
-    const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
-    core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
-      PLUGIN_ID,
-      (context, request) => requestContextFactory.create(context, request)
-    );
-    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+        const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
+        core.http.registerRouteHandlerContext<
+          ElasticAssistantRequestHandlerContext,
+          typeof PLUGIN_ID
+        >(PLUGIN_ID, (context, request) => requestContextFactory.create(context, request));
+        events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
-    this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
-    this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+        this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
+        this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
 
-    registerRoutes(router, this.logger, this.getElserId);
+        registerRoutes(router, this.logger, this.getElserId, featureFlags);
+      })
+      .catch((error) => {
+        this.logger.error(`error in security assistant plugin setup: ${error}`);
+      });
 
     return {
       actions: plugins.actions,
