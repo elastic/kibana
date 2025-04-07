@@ -32,11 +32,10 @@ export function getPropValues({
     for (const prop of jsxOpeningElement.attributes) {
       if (
         prop.type === TypescriptEsTree.AST_NODE_TYPES.JSXAttribute &&
-        propName === prop.name.name
+        propName === prop.name.name &&
+        prop.value
       ) {
-        if (prop.value) {
-          acc[propName] = prop.value; // can be a string or an function
-        }
+        acc[propName] = prop.value; // can be a string or an function
       }
 
       // If the prop is a JSXSpreadAttribute, get the value of the spreaded variable
