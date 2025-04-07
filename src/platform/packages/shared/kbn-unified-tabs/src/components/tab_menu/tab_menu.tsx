@@ -15,6 +15,7 @@ import {
   EuiContextMenuPanel,
   EuiHorizontalRule,
   EuiPopover,
+  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { GetTabMenuItems, TabItem, TabMenuItemName } from '../../types';
@@ -90,17 +91,17 @@ export const TabMenu: React.FC<TabMenuProps> = ({
       anchorPosition="downLeft"
       closePopover={closePopover}
       button={
-        <EuiButtonIcon
-          // semantically role="tablist" does not allow other buttons in tabs
-          aria-hidden={true}
-          tabIndex={-1}
-          aria-label={menuButtonLabel} // TODO: replace with a EuiToolTip
-          title={menuButtonLabel}
-          color="text"
-          data-test-subj={`unifiedTabs_tabMenuBtn_${item.id}`}
-          iconType="boxesVertical"
-          onClick={() => setPopover(!isPopoverOpen)}
-        />
+        <EuiToolTip content={menuButtonLabel}>
+          <EuiButtonIcon
+            // semantically role="tablist" does not allow other buttons in tabs
+            aria-hidden={true}
+            tabIndex={-1}
+            color="text"
+            data-test-subj={`unifiedTabs_tabMenuBtn_${item.id}`}
+            iconType="boxesVertical"
+            onClick={() => setPopover(!isPopoverOpen)}
+          />
+        </EuiToolTip>
       }
     >
       <EuiContextMenuPanel items={panelItems} />

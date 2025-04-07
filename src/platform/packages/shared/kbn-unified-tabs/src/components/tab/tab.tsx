@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiToolTip,
   useEuiTheme,
   type EuiThemeComputed,
   type DraggableProvidedDragHandleProps,
@@ -219,17 +220,17 @@ export const Tab: React.FC<TabProps> = (props) => {
               )}
               {!!onClose && (
                 <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
-                  <EuiButtonIcon
-                    // semantically role="tablist" does not allow other buttons in tabs
-                    aria-hidden={true}
-                    tabIndex={-1}
-                    aria-label={closeButtonLabel} // TODO: replace with a EuiToolTip
-                    title={closeButtonLabel}
-                    color="text"
-                    data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
-                    iconType="cross"
-                    onClick={onCloseEvent}
-                  />
+                  <EuiToolTip content={closeButtonLabel}>
+                    <EuiButtonIcon
+                      // semantically role="tablist" does not allow other buttons in tabs
+                      aria-hidden={true}
+                      tabIndex={-1}
+                      color="text"
+                      data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
+                      iconType="cross"
+                      onClick={onCloseEvent}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

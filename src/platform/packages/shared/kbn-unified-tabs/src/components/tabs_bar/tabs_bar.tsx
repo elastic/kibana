@@ -18,6 +18,7 @@ import {
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
   euiDragDropReorder,
   useEuiTheme,
   keys,
@@ -223,14 +224,15 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           {!!scrollRightButton && <EuiFlexItem grow={false}>{scrollRightButton}</EuiFlexItem>}
           {!hasReachedMaxItemsCount && (
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="unifiedTabs_tabsBar_newTabBtn"
-                iconType="plus"
-                color="text"
-                aria-label={addButtonLabel}
-                title={addButtonLabel}
-                onClick={onAdd}
-              />
+              <EuiToolTip content={addButtonLabel}>
+                <EuiButtonIcon
+                  data-test-subj="unifiedTabs_tabsBar_newTabBtn"
+                  iconType="plus"
+                  color="text"
+                  aria-label={addButtonLabel}
+                  onClick={onAdd}
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
