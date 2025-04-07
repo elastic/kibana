@@ -5,71 +5,242 @@
  * 2.0.
  */
 
-import type {
-  AppDeepLinkId,
-  GroupDefinition,
-  NavigationTreeDefinition,
-} from '@kbn/core-chrome-browser';
+import * as Rx from 'rxjs';
 
-import type { WritableDraft } from 'immer/dist/internal';
-import { ExternalPageName, SecurityPageName } from '@kbn/security-solution-navigation';
-import { alertSummaryLink, configurationsLink } from './links';
-import { AiForTheSocIcon } from './icons';
-import { filterFromWhitelist } from './utils';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
+
+import { SecurityPageName } from '@kbn/security-solution-navigation';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
+
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine } from '../../../common/product';
+import { AiForTheSocIcon } from './icons';
+import { createStackManagementNavigationTree } from '../stack_management_navigation';
 
-const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
-  return productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
-};
+const SOLUTION_NAME = i18n.translate(
+  'xpack.securitySolutionServerless.socNavLinks.projectType.title',
+  { defaultMessage: 'AI for SOC' }
+);
 
-export const aiGroup: GroupDefinition<AppDeepLinkId, string, string> = {
-  type: 'navGroup',
-  id: 'security_solution_ai_nav',
-  title: 'AI for SOC',
-  icon: AiForTheSocIcon,
-  breadcrumbStatus: 'hidden',
-  defaultIsCollapsed: false,
-  isCollapsible: false,
-  children: [],
-};
-// Elements we want to show in AI for SOC navigation
-// This is a temporary solution until we figure out a way to handle Upselling with new Tier
-const whitelist = [
-  SecurityPageName.case,
-  SecurityPageName.caseCreate,
-  SecurityPageName.caseConfigure,
-  SecurityPageName.alertSummary,
-  SecurityPageName.attackDiscovery,
-  SecurityPageName.configurations,
-  ExternalPageName.discover,
-  SecurityPageName.mlLanding,
-];
+export const shouldUseAINavigation = (productTypes: SecurityProductTypes) =>
+  productTypes.some((productType) => productType.product_line === ProductLine.aiSoc);
 
-// Apply AI for SOC navigation tree changes.
-// The navigation tree received by parameter is generated at: x-pack/solutions/security/plugins/security_solution/public/app/solution_navigation/navigation_tree.ts
-// An example of static navigation tree: x-pack/solutions/observability/plugins/observability/public/navigation_tree.ts
-
-// !! This is a temporary solution until the "classic" navigation is deprecated and the "generated" navigationTree is replaced by a static navigationTree (probably multiple of them).
-export const applyAiSocNavigation = (
-  draft: WritableDraft<NavigationTreeDefinition<AppDeepLinkId>>,
-  productTypes: SecurityProductTypes
-): void => {
-  if (!shouldUseAINavigation(productTypes)) {
-    return;
-  }
-
-  const securityGroup = draft.body[0] as WritableDraft<
-    GroupDefinition<AppDeepLinkId, string, string>
-  >;
-
-  // hardcode elements existing only in AI for SOC group
-  securityGroup.children.push(alertSummaryLink, configurationsLink);
-
-  // Overwrite the children with only the elements available for AI for SOC navigation
-  // Temporary solution until we have clarity how to proceed with Upselling in the new Tier
-  // (eg. Threat Intelligence couldn't be hidden)
-  securityGroup.children = filterFromWhitelist(securityGroup.children, whitelist);
-
-  draft.body = [{ ...aiGroup, children: securityGroup.children }];
+export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefinition> => {
+  return Rx.of({
+    body: [
+      {
+        type: 'navGroup',
+        id: 'security_solution_ai_nav',
+        title: SOLUTION_NAME,
+        icon: AiForTheSocIcon,
+        breadcrumbStatus: 'hidden',
+        defaultIsCollapsed: false,
+        isCollapsible: false,
+        children: [
+          {
+            id: 'discover:',
+            link: 'discover',
+          },
+          {
+            id: 'attack_discovery',
+            link: securityLink(SecurityPageName.attackDiscovery),
+          },
+          {
+            id: 'cases',
+            link: securityLink(SecurityPageName.case),
+            children: [
+              {
+                id: 'cases_create',
+                link: securityLink(SecurityPageName.caseCreate),
+                sideNavStatus: 'hidden',
+              },
+              {
+                id: 'cases_configure',
+                link: securityLink(SecurityPageName.caseConfigure),
+                sideNavStatus: 'hidden',
+              },
+            ],
+            renderAs: 'panelOpener',
+          },
+          {
+            id: 'machine_learning-landing',
+            link: securityLink(SecurityPageName.mlLanding),
+            children: [
+              {
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    id: 'ml:overview',
+                    link: 'ml:overview',
+                    title: i18nStrings.ml.overview,
+                  },
+                  {
+                    id: 'ml:notifications',
+                    link: 'ml:notifications',
+                    title: i18nStrings.ml.notifications,
+                  },
+                  {
+                    id: 'ml:memoryUsage',
+                    link: 'ml:memoryUsage',
+                    title: i18nStrings.ml.memoryUsage,
+                  },
+                ],
+              },
+              {
+                id: 'category-anomaly_detection',
+                title: i18nStrings.ml.anomalyDetection.title,
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    id: 'ml:anomalyDetection',
+                    link: 'ml:anomalyDetection',
+                    title: i18nStrings.ml.anomalyDetection.jobs,
+                  },
+                  {
+                    id: 'ml:anomalyExplorer',
+                    link: 'ml:anomalyExplorer',
+                    title: i18nStrings.ml.anomalyDetection.anomalyExplorer,
+                  },
+                  {
+                    id: 'ml:singleMetricViewer',
+                    link: 'ml:singleMetricViewer',
+                    title: i18nStrings.ml.anomalyDetection.singleMetricViewer,
+                  },
+                  {
+                    id: 'ml:suppliedConfigurations',
+                    link: 'ml:suppliedConfigurations',
+                    title: i18nStrings.ml.anomalyDetection.suppliedConfigurations,
+                  },
+                  {
+                    id: 'ml:settings',
+                    link: 'ml:settings',
+                    title: i18nStrings.ml.anomalyDetection.settings,
+                  },
+                ],
+              },
+              {
+                id: 'category-data_frame analytics',
+                title: i18nStrings.ml.dataFrameAnalytics.title,
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    id: 'ml:dataFrameAnalytics',
+                    link: 'ml:dataFrameAnalytics',
+                    title: i18nStrings.ml.dataFrameAnalytics.jobs,
+                  },
+                  {
+                    id: 'ml:resultExplorer',
+                    link: 'ml:resultExplorer',
+                    title: i18nStrings.ml.dataFrameAnalytics.resultExplorer,
+                  },
+                  {
+                    id: 'ml:analyticsMap',
+                    link: 'ml:analyticsMap',
+                    title: i18nStrings.ml.dataFrameAnalytics.analyticsMap,
+                  },
+                ],
+              },
+              {
+                id: 'category-model_management',
+                title: i18nStrings.ml.modelManagement.title,
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    id: 'ml:nodesOverview',
+                    link: 'ml:nodesOverview',
+                    title: i18nStrings.ml.modelManagement.trainedModels,
+                  },
+                ],
+              },
+              {
+                id: 'category-data_visualizer',
+                title: i18nStrings.ml.dataVisualizer.title,
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    id: 'ml:fileUpload',
+                    link: 'ml:fileUpload',
+                    title: i18nStrings.ml.dataVisualizer.fileDataVisualizer,
+                  },
+                  {
+                    id: 'ml:indexDataVisualizer',
+                    link: 'ml:indexDataVisualizer',
+                    title: i18nStrings.ml.dataVisualizer.dataViewDataVisualizer,
+                  },
+                  {
+                    id: 'ml:esqlDataVisualizer',
+                    link: 'ml:esqlDataVisualizer',
+                    title: i18nStrings.ml.dataVisualizer.esqlDataVisualizer,
+                  },
+                  {
+                    id: 'ml:dataDrift',
+                    link: 'ml:dataDrift',
+                    title: i18nStrings.ml.dataVisualizer.dataDrift,
+                  },
+                ],
+              },
+              {
+                id: 'category-aiops_labs',
+                title: i18nStrings.ml.aiopsLabs.title,
+                breadcrumbStatus: 'hidden',
+                children: [
+                  {
+                    id: 'ml:logRateAnalysis',
+                    link: 'ml:logRateAnalysis',
+                    title: i18nStrings.ml.aiopsLabs.logRateAnalysis,
+                  },
+                  {
+                    id: 'ml:logPatternAnalysis',
+                    link: 'ml:logPatternAnalysis',
+                    title: i18nStrings.ml.aiopsLabs.logPatternAnalysis,
+                  },
+                  {
+                    id: 'ml:changePointDetections',
+                    link: 'ml:changePointDetections',
+                    title: i18nStrings.ml.aiopsLabs.changePointDetection,
+                  },
+                ],
+              },
+            ],
+            renderAs: 'panelOpener',
+          },
+          {
+            id: 'alert_summary',
+            link: securityLink(SecurityPageName.alertSummary),
+          },
+          {
+            id: 'configurations',
+            link: securityLink(SecurityPageName.configurations),
+            renderAs: 'panelOpener',
+            children: [
+              {
+                link: securityLink(SecurityPageName.configurationsAiSettings),
+              },
+              {
+                link: securityLink(SecurityPageName.configurationsBasicRules),
+              },
+              {
+                link: securityLink(SecurityPageName.configurationsIntegrations),
+              },
+            ],
+          },
+        ],
+      },
+    ],
+    footer: [
+      {
+        type: 'navItem',
+        link: securityLink(SecurityPageName.landing),
+        icon: 'launch',
+      },
+      {
+        type: 'navItem',
+        link: 'dev_tools',
+        title: i18nStrings.devTools,
+        icon: 'editorCodeBlock',
+      },
+      createStackManagementNavigationTree(),
+    ],
+  });
 };
