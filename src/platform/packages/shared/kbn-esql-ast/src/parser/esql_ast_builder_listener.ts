@@ -326,6 +326,10 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     this.inFork = true;
   }
 
+  /**
+   * NOTE — every new command supported in fork needs to be added
+   * to createForkCommand!
+   */
   exitForkCommand(ctx: ForkCommandContext): void {
     const command = createForkCommand(ctx);
 

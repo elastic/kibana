@@ -192,7 +192,7 @@ export class CommandVisitorContext<
     return this.node.name.toUpperCase();
   }
 
-  public visitQuery(queryNode: ESQLAstQueryExpression) {
+  public visitSubQuery(queryNode: ESQLAstQueryExpression) {
     this.ctx.assertMethodExists('visitQuery');
     return this.ctx.visitQuery(this, queryNode, undefined as any);
   }
@@ -494,7 +494,7 @@ export class ChangePointCommandVisitorContext<
 export class ForkCommandVisitorContext<
   Methods extends VisitorMethods = VisitorMethods,
   Data extends SharedData = SharedData
-> extends CommandVisitorContext<Methods, Data, ESQLAstChangePointCommand> {}
+> extends CommandVisitorContext<Methods, Data, ESQLAstCommand> {}
 
 // Expressions -----------------------------------------------------------------
 

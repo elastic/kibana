@@ -183,11 +183,7 @@ export class GlobalVisitorContext<
       }
       case 'fork': {
         if (!this.methods.visitForkCommand) break;
-        return this.visitForkCommand(
-          parent,
-          commandNode as ESQLAstChangePointCommand,
-          input as any
-        );
+        return this.visitForkCommand(parent, commandNode, input as any);
       }
     }
     return this.visitCommandGeneric(parent, commandNode, input as any);
@@ -393,10 +389,10 @@ export class GlobalVisitorContext<
 
   public visitForkCommand(
     parent: contexts.VisitorContext | null,
-    node: ESQLAstChangePointCommand,
+    node: ESQLAstCommand,
     input: types.VisitorInput<Methods, 'visitForkCommand'>
   ): types.VisitorOutput<Methods, 'visitForkCommand'> {
-    const context = new contexts.ChangePointCommandVisitorContext(this, node, parent);
+    const context = new contexts.ForkCommandVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitChangePointCommand', context, input);
   }
 

@@ -407,7 +407,7 @@ export class BasicPrettyPrinter {
               return undefined;
             }
 
-            return ctx.visitQuery(branch);
+            return ctx.visitSubQuery(branch);
           })
           .filter(Boolean) as string[];
 

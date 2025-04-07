@@ -57,7 +57,7 @@ test('a query can have a parent fork command', () => {
   new Visitor()
     .on('visitCommand', (ctx) => {
       if (ctx.node.name === 'fork') {
-        ctx.node.args.forEach((subQuery) => ctx.visitQuery(subQuery as ESQLAstQueryExpression));
+        ctx.node.args.forEach((subQuery) => ctx.visitSubQuery(subQuery as ESQLAstQueryExpression));
       }
     })
     .on('visitQuery', (ctx) => {
