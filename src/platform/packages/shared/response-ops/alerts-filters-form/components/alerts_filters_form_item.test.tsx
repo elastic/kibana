@@ -68,15 +68,13 @@ describe('AlertsFiltersFormItem', () => {
   });
 
   it('should render the correct filter component for the selected type', () => {
-    render(<TestComponent type={alertsFiltersMetadata.ruleTags.id as 'ruleTags'} />);
+    render(<TestComponent type={'ruleTags'} />);
 
     expect(screen.getByTestId('ruleTagsFilter')).toBeInTheDocument();
   });
 
   it('should forward the correct props to the selected filter component', () => {
-    render(
-      <TestComponent type={alertsFiltersMetadata.ruleTags.id as 'ruleTags'} value={['tag1']} />
-    );
+    render(<TestComponent type={'ruleTags'} value={['tag1']} />);
 
     expect(screen.getByText('tag1')).toBeInTheDocument();
     expect(alertsFiltersMetadata.ruleTags.component).toHaveBeenCalledWith(

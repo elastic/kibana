@@ -27,7 +27,6 @@ import {
   RULE_TAGS_FILTER_LABEL,
   RULE_TYPES_FILTER_LABEL,
 } from '../translations';
-import { alertsFiltersMetadata } from '../filters_metadata';
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
@@ -60,11 +59,11 @@ mockUseGetInternalRuleTypesQuery.mockReturnValue({
 });
 
 const testExpression: AlertsFiltersExpression = [
-  { filter: { type: alertsFiltersMetadata.ruleTags.id as 'ruleTags', value: [TAG_1] } },
+  { filter: { type: 'ruleTags', value: [TAG_1] } },
   { operator: 'and' },
-  { filter: { type: alertsFiltersMetadata.ruleTags.id as 'ruleTags', value: [TAG_2] } },
+  { filter: { type: 'ruleTags', value: [TAG_2] } },
   { operator: 'or' },
-  { filter: { type: alertsFiltersMetadata.ruleTags.id as 'ruleTags', value: [TAG_3] } },
+  { filter: { type: 'ruleTags', value: [TAG_3] } },
 ];
 
 const mockOnChange = jest.fn();
@@ -142,7 +141,7 @@ describe('AlertsFiltersForm', () => {
     await userEvent.click(filterTypeSelectors[0]);
     await userEvent.click(screen.getByRole('option', { name: RULE_TYPES_FILTER_LABEL }));
     expect(mockOnChange).toHaveBeenCalledWith([
-      { filter: { type: alertsFiltersMetadata.ruleTypes.id } },
+      { filter: { type: 'ruleTypes' } },
       ...testExpression.slice(1),
     ]);
   });
