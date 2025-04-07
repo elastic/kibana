@@ -123,12 +123,12 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-port=8220 \`
-          --install-servers\""
-        `);
+          --install-servers\\""
+      `);
     });
 
     it('should return the correct command if the the policyId is not set for rpm', () => {
@@ -352,12 +352,12 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
           --fleet-server-port=8220 \`
-          --install-servers\""
+          --install-servers\\""
       `);
     });
 
@@ -629,7 +629,7 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS=\"--url=http://fleetserver:8220 \`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\\"--url=http://fleetserver:8220 \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
@@ -638,7 +638,7 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \`
           --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \`
           --fleet-server-port=8220 \`
-          --install-servers\""
+          --install-servers\\""
       `);
     });
 
@@ -774,21 +774,21 @@ describe('getInstallCommandForPlatform', () => {
         });
 
         expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
-        sudo dpkg -i elastic-agent--amd64.deb
-        sudo systemctl enable elastic-agent
-        sudo systemctl start elastic-agent
-        sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
-          --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1 \\\\
-          --certificate-authorities='cert authorities' \\\\
-          --fleet-server-es-ca='path/to/EScert' \\\\
-          --fleet-server-cert='path/to/cert' \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220 \\\\
-          --install-servers"
-      `);
+                  "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
+                  sudo dpkg -i elastic-agent--amd64.deb
+                  sudo systemctl enable elastic-agent
+                  sudo systemctl start elastic-agent
+                  sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
+                    --fleet-server-es=http://elasticsearch:9200 \\\\
+                    --fleet-server-service-token=service-token-1 \\\\
+                    --fleet-server-policy=policy-1 \\\\
+                    --certificate-authorities='cert authorities' \\\\
+                    --fleet-server-es-ca='path/to/EScert' \\\\
+                    --fleet-server-cert='path/to/cert' \\\\
+                    --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+                    --fleet-server-port=8220 \\\\
+                    --install-servers"
+              `);
       });
       it('should return the command with SSL options and placeholders', () => {
         const fullFleetServerHost = {
@@ -808,21 +808,21 @@ describe('getInstallCommandForPlatform', () => {
         });
 
         expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
-        sudo dpkg -i elastic-agent--amd64.deb
-        sudo systemctl enable elastic-agent
-        sudo systemctl start elastic-agent
-        sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
-          --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1 \\\\
-          --certificate-authorities='cert authorities' \\\\
-          --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
-          --fleet-server-cert='path/to/cert' \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
-          --fleet-server-port=8220 \\\\
-          --install-servers"
-      `);
+                  "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
+                  sudo dpkg -i elastic-agent--amd64.deb
+                  sudo systemctl enable elastic-agent
+                  sudo systemctl start elastic-agent
+                  sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
+                    --fleet-server-es=http://elasticsearch:9200 \\\\
+                    --fleet-server-service-token=service-token-1 \\\\
+                    --fleet-server-policy=policy-1 \\\\
+                    --certificate-authorities='cert authorities' \\\\
+                    --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
+                    --fleet-server-cert='path/to/cert' \\\\
+                    --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY> \\\\
+                    --fleet-server-port=8220 \\\\
+                    --install-servers"
+              `);
       });
     });
   });
@@ -1070,13 +1070,13 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\"
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
           --fleet-server-port=8220 \`
           --install-servers \`
-          --proxy-url=http://es-proxy:1111\""
+          --proxy-url=http://es-proxy:1111\\""
       `);
     });
 
@@ -1502,7 +1502,7 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\" -Headers @{\\"Accept-Language\\"=\\"en-US,en;q=0.5\\"; \\"second-header\\"=\\"second-value\\"}
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
