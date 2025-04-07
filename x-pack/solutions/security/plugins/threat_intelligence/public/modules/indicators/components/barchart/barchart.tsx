@@ -13,8 +13,8 @@ import {
   Position,
   ScaleType,
   Settings,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiComboBoxOptionOption, EuiThemeProvider } from '@elastic/eui';
 import { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -55,12 +55,12 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
   field,
   height = DEFAULT_CHART_HEIGHT,
 }) => {
+  const chartBaseTheme = useElasticChartsTheme();
   return (
     <EuiThemeProvider>
       <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
         <Settings
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
+          baseTheme={chartBaseTheme}
           showLegend
           legendPosition={Position.Right}
           legendSize={DEFAULT_LEGEND_SIZE}

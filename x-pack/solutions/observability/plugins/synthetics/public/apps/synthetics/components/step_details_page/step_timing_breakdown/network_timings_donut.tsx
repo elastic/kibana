@@ -8,7 +8,6 @@
 import {
   Chart,
   Datum,
-  LEGACY_LIGHT_THEME,
   PartialTheme,
   Partition,
   PartitionLayout,
@@ -23,6 +22,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { formatMillisecond } from '../common/network_data/data_formatting';
@@ -47,6 +47,7 @@ export const NetworkTimingsDonut = () => {
   const networkTimings = useNetworkTimings();
 
   const { euiTheme } = useEuiTheme();
+  const chartBaseTheme = useElasticChartsTheme();
 
   if (!networkTimings) {
     return <EuiLoadingSpinner size="xl" />;
@@ -70,8 +71,7 @@ export const NetworkTimingsDonut = () => {
       <Chart size={{ height: 240 }}>
         <Settings
           theme={[themeOverrides]}
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
+          baseTheme={chartBaseTheme}
           showLegend={false}
           locale={i18n.getLocale()}
         />

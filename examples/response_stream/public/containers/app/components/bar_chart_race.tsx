@@ -16,20 +16,20 @@ import {
   BarSeries,
   Position,
   ScaleType,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 interface BarChartRaceProps {
   entities: Record<string, number>;
 }
 
 export const BarChartRace: FC<BarChartRaceProps> = ({ entities }) => {
+  const chartBaseTheme = useElasticChartsTheme();
+
   return (
     <div style={{ height: '300px' }}>
       <Chart>
         <Settings
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
+          baseTheme={chartBaseTheme}
           rotation={90}
         />
         <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />

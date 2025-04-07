@@ -13,13 +13,12 @@ import {
   Axis,
   BarSeries,
   Chart,
-  LEGACY_LIGHT_THEME,
   Position,
   ScaleType,
   Settings,
 } from '@elastic/charts';
 import type { EuiDataGridColumn } from '@elastic/eui';
-
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { isUnsupportedChartData, type ChartData } from '@kbn/ml-data-grid';
 
 import './column_chart.scss';
@@ -48,14 +47,13 @@ export const ColumnChart: FC<Props> = ({
   isNumeric,
 }) => {
   const { data, legendText } = useColumnChart(chartData, columnType, maxChartColumns, isNumeric);
-
+  const chartBaseTheme = useElasticChartsTheme();
   return (
     <div data-test-subj={dataTestSubj} style={{ width: '100%' }}>
       {!isUnsupportedChartData(chartData) && data.length > 0 && (
         <Chart size={size}>
           <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-            baseTheme={LEGACY_LIGHT_THEME}
+            baseTheme={chartBaseTheme}
             xDomain={Array.from({ length: maxChartColumns }, (_, i) => i)}
             theme={{
               chartMargins: zeroSize,

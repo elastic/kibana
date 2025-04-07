@@ -29,13 +29,13 @@ import {
   HistogramBarSeries,
   ScaleType,
   Settings,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18nTexts } from '../i18n_texts';
 import { useFilesManagementContext } from '../context';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 interface Props {
   onClose: () => void;
@@ -43,6 +43,7 @@ interface Props {
 
 export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
   const { filesClient } = useFilesManagementContext();
+  const chartBaseTheme = useElasticChartsTheme();
   const { status, refetch, data, isLoading, error } = useQuery(['filesDiagnostics'], async () => {
     return filesClient.getMetrics();
   });
@@ -100,8 +101,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
               </EuiTitle>
               <Chart size={{ height: 200, width: '100%' }}>
                 <Settings
-                  // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-                  baseTheme={LEGACY_LIGHT_THEME}
+                  baseTheme={chartBaseTheme}
                 />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
