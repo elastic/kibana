@@ -241,6 +241,8 @@
     "@kbn/security-ai-prompts",
     "@kbn/scout-security",
     "@kbn/custom-icons",
-    "@kbn/management-settings-ids"
+    "@kbn/security-plugin-types-common",
+    "@kbn/management-settings-ids",
+    "@kbn/inference-endpoint-ui-common"
   ]
 }
