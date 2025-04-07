@@ -11,7 +11,6 @@ import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -209,18 +208,21 @@ export const JobsListPage: FC<Props> = ({
                   >
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
-                        <>
-                          <EuiButtonEmpty
-                            onClick={() => setShowSyncFlyout(true)}
-                            data-test-subj="mlStackMgmtSyncButton"
-                          >
-                            {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                              defaultMessage: 'Synchronize saved objects',
-                            })}
-                          </EuiButtonEmpty>
-                          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                          <EuiSpacer size="s" />
-                        </>
+                        {
+                          <>
+                            <EuiButtonEmpty
+                              disabled={!canCreateJob}
+                              onClick={() => setShowSyncFlyout(true)}
+                              data-test-subj="mlStackMgmtSyncButton"
+                            >
+                              {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                                defaultMessage: 'Synchronize saved objects',
+                              })}
+                            </EuiButtonEmpty>
+                            {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                            <EuiSpacer size="s" />
+                          </>
+                        }
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <ExportJobsFlyout
