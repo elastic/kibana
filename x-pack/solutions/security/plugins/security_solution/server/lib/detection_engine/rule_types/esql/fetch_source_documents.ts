@@ -77,6 +77,7 @@ export const fetchSourceDocuments = async ({
   const response = await esClient.search<SignalSource>({
     index,
     ...searchBody,
+    size: ids.length,
     ignore_unavailable: ignoreUnavailable,
   });
 

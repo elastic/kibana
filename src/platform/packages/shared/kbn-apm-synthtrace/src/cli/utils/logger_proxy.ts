@@ -14,7 +14,7 @@ import { WorkerData } from './synthtrace_worker';
 const { workerId } = isMainThread ? { workerId: -1 } : (workerData as WorkerData);
 // logging proxy to main thread, ensures we see real time logging
 export const loggerProxy: Logger = isMainThread
-  ? createLogger(LogLevel.verbose)
+  ? createLogger(LogLevel.info)
   : createLogger(LogLevel.verbose, {
       write: (msg) => {
         parentPort?.postMessage([msg.type, [`[${workerId}]`, msg.args[0]].join(' ')]);

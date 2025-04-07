@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import React from 'react';
 
-export * from './ingest';
-export * from './base/api';
-export * from './api';
-export * from './core';
-export * from './helpers';
-export * from './group';
-export * from './record_types';
-export * from './content';
-export * from './significant_events';
+export function StreamDetailSignificantEventsView({
+  definition,
+}: {
+  definition?: IngestStreamGetResponse;
+}) {
+  return <></>;
+}

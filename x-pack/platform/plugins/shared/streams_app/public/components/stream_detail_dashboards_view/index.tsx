@@ -33,7 +33,7 @@ export function StreamDetailDashboardsView({
 
   const filteredDashboards = useMemo(() => {
     return linkedDashboards.filter((dashboard) => {
-      return dashboard.label.toLowerCase().includes(query.toLowerCase());
+      return dashboard.title.toLowerCase().includes(query.toLowerCase());
     });
   }, [linkedDashboards, query]);
 

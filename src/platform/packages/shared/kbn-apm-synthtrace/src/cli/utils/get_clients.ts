@@ -20,8 +20,10 @@ import { SynthtraceEsClientOptions } from '../../lib/shared/base_client';
 import { StreamsSynthtraceClient } from '../../lib/streams/streams_synthtrace_client';
 import { SyntheticsSynthtraceEsClient } from '../../lib/synthetics/synthetics_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
+import { KibanaClient } from '../../lib/shared/base_kibana_client';
 
 export interface SynthtraceClients {
+  kibanaClient: KibanaClient;
   apmEsClient: ApmSynthtraceEsClient;
   entitiesEsClient: EntitiesSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
@@ -82,6 +84,7 @@ export async function getClients({
   const streamsClient = new StreamsSynthtraceClient(options);
 
   return {
+    kibanaClient: options.kibana,
     apmEsClient,
     entitiesEsClient,
     infraEsClient,
