@@ -7,37 +7,111 @@
 
 export const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-1') => ({
   bool: {
-    should: [
+    filter: [
       {
         bool: {
-          filter: [
+          minimum_should_match: 1,
+          should: [
             {
               bool: {
-                should: [
+                filter: [
                   {
                     bool: {
-                      should: [{ match_phrase: { 'kibana.alert.workflow_status': 'closed' } }],
                       minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.workflow_status': 'closed',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.workflow_status': 'acknowledged',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
                     },
                   },
                   {
                     bool: {
-                      should: [
-                        { match_phrase: { 'kibana.alert.workflow_status': 'acknowledged' } },
-                      ],
                       minimum_should_match: 1,
+                      should: [
+                        {
+                          range: {
+                            'kibana.alert.workflow_status_updated_at': {
+                              lt: `now-${days}d`,
+                            },
+                          },
+                        },
+                      ],
                     },
                   },
                 ],
-                minimum_should_match: 1,
               },
             },
             {
               bool: {
-                should: [
-                  { range: { 'kibana.alert.workflow_status_updated_at': { lt: `now-${days}d` } } },
+                filter: [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.status': 'untracked',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'kibana.alert.status': 'recovered',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        {
+                          range: {
+                            'kibana.alert.end': {
+                              lt: `now-${days}d`,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
                 ],
-                minimum_should_match: 1,
               },
             },
           ],
@@ -45,49 +119,33 @@ export const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-
       },
       {
         bool: {
-          filter: [
-            {
-              bool: {
-                filter: [
-                  {
-                    bool: {
-                      should: [
-                        {
-                          bool: {
-                            should: [{ match_phrase: { 'kibana.alert.status': 'untracked' } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                        {
-                          bool: {
-                            should: [{ match_phrase: { 'kibana.alert.status': 'recovered' } }],
-                            minimum_should_match: 1,
-                          },
-                        },
-                      ],
-                      minimum_should_match: 1,
-                    },
+          must_not: {
+            bool: {
+              minimum_should_match: 1,
+              should: [
+                {
+                  exists: {
+                    field: 'kibana.alert.case_ids',
                   },
-                  {
-                    bool: {
-                      should: [{ range: { 'kibana.alert.end': { lt: `now-${days}d` } } }],
-                      minimum_should_match: 1,
-                    },
-                  },
-                ],
-              },
+                },
+              ],
             },
+          },
+        },
+      },
+      {
+        bool: {
+          minimum_should_match: 1,
+          should: [
             {
-              bool: {
-                should: [{ match: { 'kibana.space_ids': spaceId } }],
-                minimum_should_match: 1,
+              match: {
+                'kibana.space_ids': spaceId,
               },
             },
           ],
         },
       },
     ],
-    minimum_should_match: 1,
   },
 });
 
@@ -122,6 +180,16 @@ export const activeAlertsQuery = (days: number = 45, spaceId: string = 'space-1'
             bool: {
               minimum_should_match: 1,
               should: [{ exists: { field: 'kibana.alert.workflow_status_updated_at' } }],
+            },
+          },
+        },
+      },
+      {
+        bool: {
+          must_not: {
+            bool: {
+              minimum_should_match: 1,
+              should: [{ exists: { field: 'kibana.alert.case_ids' } }],
             },
           },
         },
