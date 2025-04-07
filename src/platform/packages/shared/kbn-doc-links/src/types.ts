@@ -646,6 +646,10 @@ export interface DocLinks {
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
   };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
+  };
 }
 
 export type BuildFlavor = 'serverless' | 'traditional';
