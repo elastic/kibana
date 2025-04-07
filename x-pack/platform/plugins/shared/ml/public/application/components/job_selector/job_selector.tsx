@@ -11,7 +11,6 @@ import { EuiButtonEmpty, EuiFlexItem, EuiFlexGroup, EuiHorizontalRule } from '@e
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import './_index.scss';
 
 import { ML_PAGES } from '../../../locator';
 import type { Dictionary } from '../../../../common/types/common';
