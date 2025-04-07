@@ -985,5 +985,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     synonyms: {
       synonymsAPIDocumentation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/synonyms-apis.html`,
     },
+    queryRules: {
+      queryRulesAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/group/endpoint-query_rules`,
+    },
   });
 };

@@ -19,6 +19,13 @@ paths:
           description: The connector's `id` value.
           schema:
             type: string
+        - name: content_references_disabled
+          in: query
+          required: false
+          description: If true, the response will not include content references.
+          schema:
+            type: boolean
+            default: false
       requestBody:
         required: true
         content:
