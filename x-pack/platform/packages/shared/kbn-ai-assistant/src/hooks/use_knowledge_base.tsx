@@ -18,7 +18,7 @@ import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 export interface UseKnowledgeBaseResult {
   status: AbortableAsyncState<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>;
   isLoading: boolean;
-  installError?: Error;
+  isPolling: boolean;
   setupKb: () => Promise<void>;
 }
 
@@ -34,7 +34,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   );
 
   const [isInstalling, setIsInstalling] = useState(false);
-  const [installError, setInstallError] = useState<Error>();
   const isPolling = !!statusRequest.value?.endpoint && !statusRequest.value?.ready;
 
   useEffect(() => {
@@ -45,8 +44,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
 
   const setupKb = useCallback(async () => {
     setIsInstalling(true);
-    setInstallError(undefined);
-
     try {
       // Retry the setup with a maximum of 5 attempts
       await pRetry(
@@ -66,7 +63,6 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
       // Refresh status after installation
       statusRequest.refresh();
     } catch (error) {
-      setInstallError(error);
       notifications!.toasts.addError(error, {
         title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
           defaultMessage: 'Could not create inference endpoint',
@@ -99,7 +95,7 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {
     status: statusRequest,
     setupKb,
-    isLoading: isInstalling || isPolling,
-    installError,
+    isLoading: isInstalling,
+    isPolling,
   };
 }

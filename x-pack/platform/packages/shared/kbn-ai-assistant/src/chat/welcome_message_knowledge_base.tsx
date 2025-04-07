@@ -17,20 +17,82 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import { WelcomeMessageKnowledgeBaseSetupErrorPanel } from './welcome_message_knowledge_base_setup_error_panel';
 import { UseKnowledgeBaseResult } from '../hooks';
+
+const SettingUpKnowledgeBase = () => (
+  <>
+    <EuiText color="subdued" size="s">
+      {i18n.translate('xpack.aiAssistant.welcomeMessage.weAreSettingUpTextLabel', {
+        defaultMessage:
+          'We are setting up your knowledge base. This may take a few minutes. You can continue to use the Assistant while this process is underway.',
+      })}
+    </EuiText>
+
+    <EuiSpacer size="m" />
+
+    <EuiButtonEmpty
+      data-test-subj="observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseButton"
+      isLoading
+      onClick={() => {}}
+    >
+      {i18n.translate('xpack.aiAssistant.welcomeMessage.div.settingUpKnowledgeBaseLabel', {
+        defaultMessage: 'Setting up Knowledge base',
+      })}
+    </EuiButtonEmpty>
+  </>
+);
+
+const InspectKnowledgeBasePopover = ({
+  knowledgeBase,
+}: {
+  knowledgeBase: UseKnowledgeBaseResult;
+}) => {
+  // track whether the "inspect issues" popover is open
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const handleInstall = async () => {
+    setIsPopoverOpen(false);
+    await knowledgeBase.setupKb();
+  };
+
+  return knowledgeBase.status.value?.endpoint && knowledgeBase.status.value?.modelStats ? (
+    <EuiFlexItem grow={false}>
+      <EuiPopover
+        button={
+          <EuiButtonEmpty
+            data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
+            iconType="inspect"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          >
+            {i18n.translate('xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel', {
+              defaultMessage: 'Inspect',
+            })}
+          </EuiButtonEmpty>
+        }
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+        closePopover={() => setIsPopoverOpen(false)}
+      >
+        <WelcomeMessageKnowledgeBaseSetupErrorPanel
+          knowledgeBase={knowledgeBase}
+          onRetryInstall={handleInstall}
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+  ) : null;
+};
 
 export function WelcomeMessageKnowledgeBase({
   knowledgeBase,
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
 }) {
-  const prevIsInstalling = usePrevious(knowledgeBase.isLoading);
+  const prevIsInstalling = usePrevious(knowledgeBase.isLoading || knowledgeBase.isPolling);
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
-  // track whether the "inspect issues" popover is open
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   useEffect(() => {
     if (prevIsInstalling) {
@@ -38,130 +100,85 @@ export function WelcomeMessageKnowledgeBase({
     }
   }, [knowledgeBase.isLoading, prevIsInstalling]);
 
-  const handleInstall = async () => {
-    setIsPopoverOpen(false);
+  const install = async () => {
     await knowledgeBase.setupKb();
   };
 
-  // If we are installing at any step (POST /setup + model deployment)
-  if (knowledgeBase.isLoading) {
-    return (
-      <>
-        {!!knowledgeBase.status.value?.endpoint &&
-        !knowledgeBase.status.value?.ready &&
-        knowledgeBase.status.value?.model_stats?.deployment_stats?.state === 'failed' ? (
+  if (knowledgeBase.isLoading) return <SettingUpKnowledgeBase />;
+
+  switch (knowledgeBase.status.value?.state) {
+    case KnowledgeBaseState.NOT_INSTALLED:
+      return (
+        <>
+          <EuiText color="subdued" size="s">
+            {i18n.translate(
+              'xpack.aiAssistant.welcomeMessageKnowledgeBase.yourKnowledgeBaseIsNotSetUpCorrectlyLabel',
+              { defaultMessage: `Your Knowledge base hasn't been set up.` }
+            )}
+          </EuiText>
+
+          <EuiSpacer size="m" />
+
+          <EuiFlexGroup justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <div>
+                <EuiButton
+                  color="primary"
+                  data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
+                  fill
+                  isLoading={false}
+                  iconType="importAction"
+                  onClick={install}
+                >
+                  {i18n.translate('xpack.aiAssistant.welcomeMessage.retryButtonLabel', {
+                    defaultMessage: 'Install Knowledge base',
+                  })}
+                </EuiButton>
+              </div>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="m" />
+        </>
+      );
+    case KnowledgeBaseState.DEPLOYING_MODEL:
+    case KnowledgeBaseState.ENDPOINT_CREATED:
+      return (
+        <>
+          <SettingUpKnowledgeBase />
+          <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
+        </>
+      );
+    case KnowledgeBaseState.READY:
+      return showSuccessBanner ? (
+        <div>
+          <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="checkInCircleFilled" color="success" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText color="subdued" size="s">
+                {i18n.translate(
+                  'xpack.aiAssistant.welcomeMessage.knowledgeBaseSuccessfullyInstalledLabel',
+                  { defaultMessage: 'Knowledge base successfully installed' }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+      ) : null;
+    case KnowledgeBaseState.ERROR:
+      return (
+        <>
           <EuiText color="subdued" size="s">
             {i18n.translate('xpack.aiAssistant.welcomeMessage.SettingUpFailTextLabel', {
               defaultMessage: `Knowledge Base setup failed. Check 'Inspect' for details.`,
             })}
           </EuiText>
-        ) : (
-          <>
-            <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.aiAssistant.welcomeMessage.weAreSettingUpTextLabel', {
-                defaultMessage:
-                  'We are setting up your knowledge base. This may take a few minutes. You can continue to use the Assistant while this process is underway.',
-              })}
-            </EuiText>
-
-            <EuiSpacer size="m" />
-
-            <EuiButtonEmpty
-              data-test-subj="observabilityAiAssistantWelcomeMessageSettingUpKnowledgeBaseButton"
-              isLoading
-              onClick={() => {}}
-            >
-              {i18n.translate('xpack.aiAssistant.welcomeMessage.div.settingUpKnowledgeBaseLabel', {
-                defaultMessage: 'Setting up Knowledge base',
-              })}
-            </EuiButtonEmpty>
-          </>
-        )}
-
-        {knowledgeBase.status.value?.endpoint && knowledgeBase.status.value?.model_stats ? (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
-                <EuiButtonEmpty
-                  data-test-subj="observabilityAiAssistantWelcomeMessageInspectErrorsButton"
-                  iconType="inspect"
-                  onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-                >
-                  {i18n.translate(
-                    'xpack.aiAssistant.welcomeMessage.inspectErrorsButtonEmptyLabel',
-                    {
-                      defaultMessage: 'Inspect',
-                    }
-                  )}
-                </EuiButtonEmpty>
-              }
-              isOpen={isPopoverOpen}
-              panelPaddingSize="none"
-              closePopover={() => setIsPopoverOpen(false)}
-            >
-              <WelcomeMessageKnowledgeBaseSetupErrorPanel
-                knowledgeBase={knowledgeBase}
-                onRetryInstall={handleInstall}
-              />
-            </EuiPopover>
-          </EuiFlexItem>
-        ) : null}
-      </>
-    );
-  } else if (!knowledgeBase.status.value?.endpoint) {
-    return (
-      <>
-        <EuiText color="subdued" size="s">
-          {i18n.translate(
-            'xpack.aiAssistant.welcomeMessageKnowledgeBase.yourKnowledgeBaseIsNotSetUpCorrectlyLabel',
-            { defaultMessage: `Your Knowledge base hasn't been set up.` }
-          )}
-        </EuiText>
-
-        <EuiSpacer size="m" />
-
-        <EuiFlexGroup justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <div>
-              <EuiButton
-                color="primary"
-                data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
-                fill
-                isLoading={false}
-                iconType="importAction"
-                onClick={handleInstall}
-              >
-                {i18n.translate('xpack.aiAssistant.welcomeMessage.retryButtonLabel', {
-                  defaultMessage: 'Install Knowledge base',
-                })}
-              </EuiButton>
-            </div>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-      </>
-    );
-  } else if (showSuccessBanner) {
-    // successfull installation
-    return (
-      <div>
-        <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="center">
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="checkInCircleFilled" color="success" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="s">
-              {i18n.translate(
-                'xpack.aiAssistant.welcomeMessage.knowledgeBaseSuccessfullyInstalledLabel',
-                { defaultMessage: 'Knowledge base successfully installed' }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </div>
-    );
+          <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
+        </>
+      );
+    default:
+      return null;
   }
-
-  return null;
 }

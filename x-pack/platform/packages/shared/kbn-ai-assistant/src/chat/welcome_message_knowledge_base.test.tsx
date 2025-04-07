@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
 
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
@@ -21,12 +22,14 @@ describe('WelcomeMessageKnowledgeBase', () => {
   ): UseKnowledgeBaseResult {
     return {
       isLoading: partial.isLoading ?? false,
+      isPolling: partial.isPolling ?? false,
       setupKb: partial.setupKb ?? jest.fn(),
-      installError: partial.installError,
       status: partial.status ?? {
         value: {
           ready: false,
           enabled: true,
+          errorMessage: undefined,
+          state: KnowledgeBaseState.NOT_INSTALLED,
         },
         loading: false,
         error: undefined,
@@ -43,7 +46,12 @@ describe('WelcomeMessageKnowledgeBase', () => {
     const kb = createMockKnowledgeBase({
       isLoading: true,
       status: {
-        value: { ready: false, enabled: true, endpoint: { inference_id: 'inference_id' } },
+        value: {
+          ready: false,
+          enabled: true,
+          endpoint: { inference_id: 'inference_id' },
+          state: KnowledgeBaseState.ENDPOINT_CREATED,
+        },
         loading: false,
         refresh: jest.fn(),
       },
@@ -58,8 +66,9 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // 1) Start in an installing state
     let kb = createMockKnowledgeBase({
       isLoading: true,
+      isPolling: true,
       status: {
-        value: { ready: false, enabled: true },
+        value: { ready: false, enabled: true, state: KnowledgeBaseState.NOT_INSTALLED },
         loading: false,
         refresh: jest.fn(),
       },
@@ -72,6 +81,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     kb = {
       ...kb,
       isLoading: false,
+      isPolling: false,
       status: {
         ...kb.status,
         value: {
@@ -79,6 +89,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
           ready: true,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
+          state: KnowledgeBaseState.READY,
         },
         loading: false,
         refresh: jest.fn(),
@@ -95,14 +106,15 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "We are setting up your knowledge base" with the inspect button', () => {
     const kb = createMockKnowledgeBase({
-      isLoading: true,
-      installError: undefined,
+      isLoading: false,
+      isPolling: true,
       status: {
         value: {
           ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
-          model_stats: {
+          state: KnowledgeBaseState.DEPLOYING_MODEL,
+          modelStats: {
             deployment_stats: {
               state: 'starting',
               deployment_id: 'deployment_id',
@@ -126,14 +138,15 @@ describe('WelcomeMessageKnowledgeBase', () => {
 
   it('renders "Base setup failed" with inspect issues', () => {
     const kb = createMockKnowledgeBase({
-      isLoading: true,
-      installError: undefined,
+      isLoading: false,
+      isPolling: true,
       status: {
         value: {
           ready: false,
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
-          model_stats: {
+          state: KnowledgeBaseState.ERROR,
+          modelStats: {
             deployment_stats: {
               reason: 'model deployment failed',
               state: 'failed',
@@ -169,6 +182,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
         value: {
           ready: false,
           enabled: true,
+          state: KnowledgeBaseState.NOT_INSTALLED,
           errorMessage: 'no endpoint',
         },
         loading: false,
@@ -186,11 +200,13 @@ describe('WelcomeMessageKnowledgeBase', () => {
     // This could happen if the user manually stopped the model in ML,
     // so we have no install error, but ready = false
     const kb = createMockKnowledgeBase({
-      isLoading: true,
+      isLoading: false,
+      isPolling: true,
       status: {
         value: {
           endpoint: { inference_id: 'inference_id' },
-          model_stats: {
+          state: KnowledgeBaseState.DEPLOYING_MODEL,
+          modelStats: {
             deployment_stats: {
               reason: 'model deployment failed',
               deployment_id: 'deployment_id',
@@ -219,6 +235,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
     const kb = createMockKnowledgeBase({
       status: {
         value: {
+          state: KnowledgeBaseState.READY,
           endpoint: { inference_id: 'inference_id' },
           ready: true,
           enabled: true,

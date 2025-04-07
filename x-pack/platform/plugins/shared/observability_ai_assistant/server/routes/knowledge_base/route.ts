@@ -15,7 +15,12 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { Instruction, KnowledgeBaseEntry, KnowledgeBaseEntryRole } from '../../../common/types';
+import {
+  Instruction,
+  KnowledgeBaseEntry,
+  KnowledgeBaseEntryRole,
+  KnowledgeBaseState,
+} from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -32,7 +37,8 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     ready: boolean;
     enabled: boolean;
     endpoint?: Partial<InferenceInferenceEndpointInfo>;
-    model_stats?: Partial<MlTrainedModelStats>;
+    modelStats?: Partial<MlTrainedModelStats>;
+    state: KnowledgeBaseState;
   }> => {
     const client = await service.getClient({ request });
 

@@ -38,10 +38,10 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
   const { http } = useKibana().services;
 
   const modelId = knowledgeBase.status.value?.endpoint?.service_settings?.model_id;
-  const deploymentState = knowledgeBase.status.value?.model_stats?.deployment_stats?.state;
-  const deploymentReason = knowledgeBase.status.value?.model_stats?.deployment_stats?.reason;
+  const deploymentState = knowledgeBase.status.value?.modelStats?.deployment_stats?.state;
+  const deploymentReason = knowledgeBase.status.value?.modelStats?.deployment_stats?.reason;
   const allocationState =
-    knowledgeBase.status.value?.model_stats?.deployment_stats?.allocation_status?.state;
+    knowledgeBase.status.value?.modelStats?.deployment_stats?.allocation_status?.state;
 
   return (
     <div

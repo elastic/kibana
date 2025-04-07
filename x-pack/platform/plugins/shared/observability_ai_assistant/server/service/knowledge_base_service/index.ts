@@ -15,6 +15,7 @@ import {
   Instruction,
   KnowledgeBaseEntry,
   KnowledgeBaseEntryRole,
+  KnowledgeBaseState,
   KnowledgeBaseType,
 } from '../../../common/types';
 import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
@@ -489,10 +490,36 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    return getKbModelStatus({
+    const { ready, enabled, errorMessage, endpoint, modelStats } = await getKbModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
+
+    let state: KnowledgeBaseState = KnowledgeBaseState.NOT_INSTALLED;
+
+    if (!endpoint) {
+      state = KnowledgeBaseState.NOT_INSTALLED;
+    } else if (errorMessage || modelStats?.deployment_stats?.state === 'failed') {
+      state = KnowledgeBaseState.ERROR;
+    } else if (
+      modelStats?.deployment_stats?.state === 'starting' &&
+      modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
+    ) {
+      state = KnowledgeBaseState.DEPLOYING_MODEL;
+    } else if (ready) {
+      state = KnowledgeBaseState.READY;
+    } else {
+      state = KnowledgeBaseState.ENDPOINT_CREATED;
+    }
+
+    return {
+      ready,
+      enabled,
+      errorMessage,
+      endpoint,
+      modelStats,
+      state,
+    };
   };
 }

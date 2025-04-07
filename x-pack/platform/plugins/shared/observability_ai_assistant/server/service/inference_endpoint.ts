@@ -13,6 +13,7 @@ import pRetry from 'p-retry';
 import {
   InferenceInferenceEndpointInfo,
   MlGetTrainedModelsStatsResponse,
+  MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ObservabilityAIAssistantConfig } from '../config';
 
@@ -105,7 +106,13 @@ export async function getKbModelStatus({
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
-}) {
+}): Promise<{
+  ready: boolean;
+  enabled: boolean;
+  endpoint?: InferenceInferenceEndpointInfo;
+  modelStats?: MlTrainedModelStats;
+  errorMessage?: string;
+}> {
   const enabled = config.enableKnowledgeBase;
 
   let endpoint: InferenceInferenceEndpointInfo;
@@ -140,7 +147,7 @@ export async function getKbModelStatus({
     endpoint,
     ready,
     enabled,
-    model_stats: modelStats,
+    modelStats,
   };
 }
 

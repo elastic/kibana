@@ -5,17 +5,20 @@
  * 2.0.
  */
 
+import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
 import { UseKnowledgeBaseResult } from '../use_knowledge_base';
 
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {
     isLoading: false,
+    isPolling: false,
     setupKb: async () => {},
     status: {
       loading: false,
       refresh: () => {},
       error: undefined,
       value: {
+        state: KnowledgeBaseState.NOT_INSTALLED,
         ready: true,
         enabled: true,
       },
