@@ -92,6 +92,11 @@ export const createUserAttachmentUserActionBuilder = ({
         draftFooter:
           !isEdit && !isLoading && hasDraftComment(appId, caseId, comment.id, comment.comment),
       }),
+      css: css`
+        [class*='euiTimelineItemEvent'] {
+          max-width: 100%;
+        }
+      `,
       children: (
         <>
           <UserActionMarkdown
