@@ -249,6 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, FIRST_STREAM_NAME, {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               lifecycle: { inherit: {} },
@@ -291,6 +292,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         await putStream(apiClient, SECOND_STREAM_NAME, {
           dashboards: [],
+          queries: [],
           stream: {
             ingest: {
               lifecycle: { inherit: {} },
