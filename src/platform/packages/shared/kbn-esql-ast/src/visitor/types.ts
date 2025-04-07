@@ -148,7 +148,11 @@ export interface VisitorMethods<
   visitLimitCommand?: Visitor<contexts.LimitCommandVisitorContext<Visitors, Data>, any, any>;
   visitExplainCommand?: Visitor<contexts.ExplainCommandVisitorContext<Visitors, Data>, any, any>;
   visitRowCommand?: Visitor<contexts.RowCommandVisitorContext<Visitors, Data>, any, any>;
-  visitTimeseriesCommand?: Visitor<contexts.TimeseriesCommandVisitorContext<Visitors, Data>, any, any>;
+  visitTimeseriesCommand?: Visitor<
+    contexts.TimeseriesCommandVisitorContext<Visitors, Data>,
+    any,
+    any
+  >;
   visitShowCommand?: Visitor<contexts.ShowCommandVisitorContext<Visitors, Data>, any, any>;
   visitMetaCommand?: Visitor<contexts.MetaCommandVisitorContext<Visitors, Data>, any, any>;
   visitEvalCommand?: Visitor<contexts.EvalCommandVisitorContext<Visitors, Data>, any, any>;
