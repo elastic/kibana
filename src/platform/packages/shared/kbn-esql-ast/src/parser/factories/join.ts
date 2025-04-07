@@ -9,11 +9,11 @@
 
 import { JoinCommandContext, JoinTargetContext } from '../../antlr/esql_parser';
 import { ESQLAstItem, ESQLAstJoinCommand, ESQLIdentifier, ESQLSource } from '../../types';
-import { createCommand, createOption, createSource } from '../factories';
+import { createCommand, createOption, visitSource } from '../factories';
 import { visitValueExpression } from '../walkers';
 
 const createNodeFromJoinTarget = (ctx: JoinTargetContext): ESQLSource | ESQLIdentifier => {
-  return createSource(ctx._index);
+  return visitSource(ctx._index);
 };
 
 export const createJoinCommand = (ctx: JoinCommandContext): ESQLAstJoinCommand => {
