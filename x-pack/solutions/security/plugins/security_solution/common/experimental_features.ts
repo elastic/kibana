@@ -279,11 +279,15 @@ export const parseExperimentalConfigValue = (
   const enabledFeatures: Mutable<Partial<ExperimentalFeatures>> = {};
   const invalidKeys: string[] = [];
 
-  for (const value of configValue) {
+  for (let value of configValue) {
+    const isNegated = value.startsWith('!');
+    if (isNegated) {
+      value = value.replace('!', '');
+    }
     if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
       invalidKeys.push(value);
     } else {
-      enabledFeatures[value as keyof ExperimentalFeatures] = true;
+      enabledFeatures[value as keyof ExperimentalFeatures] = isNegated ? false : true;
     }
   }
 
