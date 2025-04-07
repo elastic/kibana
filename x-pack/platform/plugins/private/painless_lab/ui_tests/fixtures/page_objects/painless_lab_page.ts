@@ -30,7 +30,7 @@ export class PainlessLab {
     await this.page.testSubj.locator('painless_lab').waitFor({ state: 'visible' });
   }
 
-  async setCodeEditorValue(value: any, nthIndex?: any) {
+  async setCodeEditorValue(value: string, nthIndex?: any) {
     await this.page.evaluate(
       ([editorIndex, codeEditorValue]) => {
         // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
