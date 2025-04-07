@@ -132,18 +132,25 @@ export const TabsBar: React.FC<TabsBarProps> = ({
 
   const onSelectedTabKeyDown = useCallback(
     async (event: KeyboardEvent<HTMLDivElement>) => {
+      const firstItemIndex = 0;
+      const lastItemIndex = items.length - 1;
+
       const selectedItemIndex = items.findIndex((item) => item.id === selectedItem?.id);
       if (selectedItemIndex < 0) {
         return;
       }
 
-      if (event.key === keys.ARROW_LEFT && selectedItemIndex > 0) {
-        await selectAndMoveFocusToItemIndex(selectedItemIndex - 1);
+      if (event.key === keys.ARROW_LEFT) {
+        await selectAndMoveFocusToItemIndex(
+          selectedItemIndex > 0 ? selectedItemIndex - 1 : lastItemIndex
+        );
         return;
       }
 
-      if (event.key === keys.ARROW_RIGHT && selectedItemIndex < items.length - 1) {
-        await selectAndMoveFocusToItemIndex(selectedItemIndex + 1);
+      if (event.key === keys.ARROW_RIGHT) {
+        await selectAndMoveFocusToItemIndex(
+          selectedItemIndex < lastItemIndex ? selectedItemIndex + 1 : firstItemIndex
+        );
         return;
       }
 
@@ -153,15 +160,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       }
 
       if (event.key === keys.END && items.length > 0) {
-        await selectAndMoveFocusToItemIndex(items.length - 1);
+        await selectAndMoveFocusToItemIndex(lastItemIndex);
         return;
       }
 
-      if (
-        (event.key === keys.BACKSPACE || event.key === 'Delete') &&
-        selectedItem &&
-        items.length > 1
-      ) {
+      if (event.key === 'Delete' && selectedItem && items.length > 1) {
         moveFocusToSelectedItemRef.current = true;
         await onClose?.(selectedItem);
         return;
