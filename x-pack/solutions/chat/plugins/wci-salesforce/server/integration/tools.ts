@@ -57,13 +57,13 @@ interface AccountRetrievalParams {
 
 // Shared base mappings
 const baseObjectMappings: Record<string, string> = {
-  'id': 'id',
-  'title': 'title',
-  'url': 'url',
-  'ownerEmail': 'owner.email',
-  'ownerName': 'owner.name',
-  'createdAt': 'created_at',
-  'updatedAt': 'updated_at',
+  id: 'id',
+  title: 'title',
+  url: 'url',
+  ownerEmail: 'owner.email',
+  ownerName: 'owner.name',
+  createdAt: 'created_at',
+  updatedAt: 'updated_at',
 };
 
 /**
@@ -92,14 +92,14 @@ export async function searchDocs({
 }): Promise<ToolContentResult[]> {
   const size = params.size || 10;
 
-    let query: QueryDslQueryContainer = {}
-    if (dataSource == 'support_case'){
-      query = buildQuery(params, baseObjectMappings, 'support_case')
-    } else if (dataSource == 'account') {
-      query = buildQuery(params, baseObjectMappings, 'account')
-    } else {
-      query = buildQuery(params, baseObjectMappings)
-    }
+  let query: QueryDslQueryContainer = {};
+  if (dataSource == 'support_case') {
+    query = buildQuery(params, baseObjectMappings, 'support_case');
+  } else if (dataSource == 'account') {
+    query = buildQuery(params, baseObjectMappings, 'account');
+  } else {
+    query = buildQuery(params, baseObjectMappings);
+  }
 
   const searchRequest: SearchRequest = {
     index: indexName,
@@ -110,10 +110,10 @@ export async function searchDocs({
   const response = await esClient.search<SearchResponse>(searchRequest);
 
   const contextFields = [
-    { field: 'id', type:  'keyword'},
-    { field: 'title', type:  'keyword' },
+    { field: 'id', type: 'keyword' },
+    { field: 'title', type: 'keyword' },
     { field: 'content', type: 'text' },
-    { field: 'url', type:  'keyword' },
+    { field: 'url', type: 'keyword' },
   ];
 
   const createRef = contentRefBuilder({
@@ -126,30 +126,26 @@ export async function searchDocs({
 
     return {
       reference: createRef(`case:${hit._id!}`),
-      content: contextFields.reduce<ToolContentResult['content']>(
-        (content, { field }) => {
-          const fieldPath = field.split('.');
-          
-          let value = ''
-          if (source) {
-            value =
-              fieldPath.length > 1
-                ? getNestedValue(source, fieldPath)
-                : (source[field as keyof SearchResponse] || '').toString();
-            }
+      content: contextFields.reduce<ToolContentResult['content']>((content, { field }) => {
+        const fieldPath = field.split('.');
 
-          content[field] = value;
+        let value = '';
+        if (source) {
+          value =
+            fieldPath.length > 1
+              ? getNestedValue(source, fieldPath)
+              : (source[field as keyof SearchResponse] || '').toString();
+        }
 
-          return content;
-        },
-        {}
-      ),
+        content[field] = value;
+
+        return content;
+      }, {}),
     };
   });
 
   return contentFragments;
 }
-
 
 /**
  * Retrieves Salesforce docuemnt by id
@@ -175,24 +171,21 @@ export async function getById({
   dataSource: string;
   id: string;
 }): Promise<ToolContentResult[]> {
-
-    let query: QueryDslQueryContainer = {}
-    if (dataSource == 'support_case'){
-      query = buildQuery({id}, baseObjectMappings, 'support_case')
-    } else if (dataSource == 'account') {
-      query = buildQuery({id}, baseObjectMappings, 'account')
-    } else {
-      query = buildQuery({id}, baseObjectMappings)
-    }
+  let query: QueryDslQueryContainer = {};
+  if (dataSource == 'support_case') {
+    query = buildQuery({ id }, baseObjectMappings, 'support_case');
+  } else if (dataSource == 'account') {
+    query = buildQuery({ id }, baseObjectMappings, 'account');
+  } else {
+    query = buildQuery({ id }, baseObjectMappings);
+  }
 
   const searchRequest: SearchRequest = {
     index: indexName,
-    query
+    query,
   };
 
-  logger.info(
-    `Retrieving document from ${indexName} with id: ${JSON.stringify(id)}`
-  );
+  logger.info(`Retrieving document from ${indexName} with id: ${JSON.stringify(id)}`);
 
   const response = await esClient.search<SearchResponse>(searchRequest);
 
@@ -212,31 +205,26 @@ export async function getById({
 
     return {
       reference: createRef(`case:${hit._id!}`),
-      content: contextFields.reduce<ToolContentResult['content']>(
-        (content, { field }) => {
-          const fieldPath = field.split('.');
-          
-          let value = ''
-          if (source) {
-            value =
-              fieldPath.length > 1
-                ? getNestedValue(source, fieldPath)
-                : (source[field as keyof SearchResponse] || '').toString();
-            }
+      content: contextFields.reduce<ToolContentResult['content']>((content, { field }) => {
+        const fieldPath = field.split('.');
 
-          content[field] = value;
-
-          return content;
-        },
-        {
+        let value = '';
+        if (source) {
+          value =
+            fieldPath.length > 1
+              ? getNestedValue(source, fieldPath)
+              : (source[field as keyof SearchResponse] || '').toString();
         }
-      ),
+
+        content[field] = value;
+
+        return content;
+      }, {}),
     };
   });
 
   return contentFragments;
 }
-
 
 /**
  * Retrieves Salesforce cases
@@ -264,14 +252,14 @@ export async function getCases({
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
 
-    const supportCaseMappings: Record<string, string> = {
-      ...baseObjectMappings,
-      'caseNumber': 'metadata.case_number',
-      'priority': 'metadata.priority',
-      'status': 'metadata.status',
-      'accountId': 'metadata.account_id',
-      'accountName': 'metadata.account_name',
-    };
+  const supportCaseMappings: Record<string, string> = {
+    ...baseObjectMappings,
+    caseNumber: 'metadata.case_number',
+    priority: 'metadata.priority',
+    status: 'metadata.status',
+    accountId: 'metadata.account_id',
+    accountName: 'metadata.account_name',
+  };
 
   const query = buildQuery(params, supportCaseMappings, 'support_case');
 
@@ -382,14 +370,14 @@ export async function getAccounts({
   const sort = params.sortField
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
-    const accountMappings: Record<string, string> = {
-      ...baseObjectMappings,
-      'recordTypeId': 'metadata.record_type_id',
-      'isPartner': 'metadata.is_partner',
-      'isCustomerPortal': 'metadata.is_customer_portal',
-    };
+  const accountMappings: Record<string, string> = {
+    ...baseObjectMappings,
+    recordTypeId: 'metadata.record_type_id',
+    isPartner: 'metadata.is_partner',
+    isCustomerPortal: 'metadata.is_customer_portal',
+  };
 
-  const query = buildQuery(params, accountMappings, 'account',);
+  const query = buildQuery(params, accountMappings, 'account');
 
   const searchRequest: SearchRequest = {
     index: indexName,
@@ -476,10 +464,14 @@ function getNestedValue(obj: any, path: string[]) {
       }, obj)
       ?.toString() || ''
   );
-};
+}
 
-function addTermsClause(mustClauses: any[], field: string, value: any, mappings?: Record<string, string>) {
-
+function addTermsClause(
+  mustClauses: any[],
+  field: string,
+  value: any,
+  mappings?: Record<string, string>
+) {
   if (mappings && mappings[field]) {
     if (Array.isArray(value)) {
       mustClauses.push({ terms: { [mappings[field]]: value } });
@@ -489,14 +481,19 @@ function addTermsClause(mustClauses: any[], field: string, value: any, mappings?
   }
 }
 
-function addDateRangeClause(mustClauses: any[], field: string, createdAfter?: string, createdBefore?: string) {
+function addDateRangeClause(
+  mustClauses: any[],
+  field: string,
+  createdAfter?: string,
+  createdBefore?: string
+) {
   if (createdAfter || createdBefore) {
     const range: any = { range: { [field]: {} } };
     if (createdAfter) range.range[field].gte = createdAfter;
     if (createdBefore) range.range[field].lte = createdBefore;
-       mustClauses.push(range);
-     }
+    mustClauses.push(range);
   }
+}
 
 function addCommentFilters(mustClauses: any[], params: Record<string, any>) {
   // Add comment-related queries
@@ -541,36 +538,44 @@ function addSemanticQuery(mustClauses: any[], semanticQuery?: string): void {
   }
 }
 
-function buildQuery(params: Record<string,any>, mappings: Record<string, string>, objectType?: string,): any {
-  let mustClauses: any[] = [];
-  
+function buildQuery(
+  params: Record<string, any>,
+  mappings: Record<string, string>,
+  objectType?: string
+): any {
+  const mustClauses: any[] = [];
+
   if (objectType) {
-    mustClauses.push({ term: { object_type: objectType} });
+    mustClauses.push({ term: { object_type: objectType } });
   }
 
-  Object.entries(params).forEach(( [field, value]) => {
+  Object.entries(params).forEach(([field, value]) => {
     if (value) {
-      if  (field === 'semanticQuery') {
+      if (field === 'semanticQuery') {
         addSemanticQuery(mustClauses, value);
-      } else if  (field === 'createdAfter' || field === 'createdBefore') {
-        if (!mustClauses.some(clause => clause.range && clause.range.created_at !== undefined)) {
+      } else if (field === 'createdAfter' || field === 'createdBefore') {
+        if (!mustClauses.some((clause) => clause.range && clause.range.created_at !== undefined)) {
           addDateRangeClause(mustClauses, 'created_at', params.createdAfter, params.createdBefore);
         }
-      } else if  (field === 'updatedAfter' || field === 'updatedBefore') {
-        if (!mustClauses.some(clause => clause.range && clause.range.updated_at !== undefined)) {
+      } else if (field === 'updatedAfter' || field === 'updatedBefore') {
+        if (!mustClauses.some((clause) => clause.range && clause.range.updated_at !== undefined)) {
           addDateRangeClause(mustClauses, 'updated_at', params.updatedAfter, params.updatedBefore);
         }
-      } else if  (field === 'commentAuthorEmail' || field === 'commentCreatedAfter' || field === 'commentCreatedBefore') {
+      } else if (
+        field === 'commentAuthorEmail' ||
+        field === 'commentCreatedAfter' ||
+        field === 'commentCreatedBefore'
+      ) {
         addCommentFilters(mustClauses, {
           commentAuthorEmail: params.commentAuthorEmail,
           commentCreatedAfter: params.commentCreatedAfter,
-          commentCreatedBefore: params.commentCreatedBefore
-        })
+          commentCreatedBefore: params.commentCreatedBefore,
+        });
       } else {
         addTermsClause(mustClauses, field, value, mappings);
       }
     }
   });
-  
+
   return { bool: { must: mustClauses } };
 }

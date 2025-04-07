@@ -59,13 +59,17 @@ export async function createMcpServer({
     priorityValues.length ? (priorityValues as [string, ...string[]]) : ['']
   );
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
-  const dataSources = ['support_case', 'account']
+  const dataSources = ['support_case', 'account'];
 
   const searchTool: McpServerTool = {
     name: 'search',
     description: 'Searches through Salesforce data sources using a semantic query',
     schema: {
-      dataSource: z.string().describe(`what Salesforce object type to search through. Can only be a out of these ${dataSources}`),
+      dataSource: z
+        .string()
+        .describe(
+          `what Salesforce object type to search through. Can only be a out of these ${dataSources}`
+        ),
       semanticQuery: z
         .string()
         .optional()
@@ -93,7 +97,7 @@ export async function createMcpServer({
       createdAfter,
       createdBefore,
       updatedAfter,
-      updatedBefore
+      updatedBefore,
     }) => {
       try {
         const content = await searchDocs({
@@ -107,7 +111,7 @@ export async function createMcpServer({
             createdAfter,
             createdBefore,
             updatedAfter,
-            updatedBefore
+            updatedBefore,
           },
         });
 
@@ -125,12 +129,13 @@ export async function createMcpServer({
     description: 'Retrieves a Salesforce document by id only. If there is no id use another tool',
     schema: {
       id: z.string().describe('id of document '),
-      dataSource: z.string().describe(`what Salesforce object type to search through. Can only be a out of these ${dataSources}`),
+      dataSource: z
+        .string()
+        .describe(
+          `what Salesforce object type to search through. Can only be a out of these ${dataSources}`
+        ),
     },
-    execute: async ({
-      id,
-      dataSource,
-    }) => {
+    execute: async ({ id, dataSource }) => {
       try {
         const content = await getById({
           esClient: elasticsearchClient,
@@ -138,7 +143,7 @@ export async function createMcpServer({
           integrationId,
           indexName: index,
           dataSource,
-          id
+          id,
         });
 
         logger.info(`Retrieved ${content.length} support cases`);
@@ -154,16 +159,8 @@ export async function createMcpServer({
     name: 'search_cases',
     description: 'Retrieves Salesforce support cases with flexible filtering options',
     schema: {
-      caseNumber: z
-        .array(z.string())
-        .optional()
-        .describe('Salesforce case number identifiers'),
-      id: z
-        .array(z.string())
-        .optional()
-        .describe(
-          'Salesforce internal IDs of the support cases'
-        ),
+      caseNumber: z.array(z.string()).optional().describe('Salesforce case number identifiers'),
+      id: z.array(z.string()).optional().describe('Salesforce internal IDs of the support cases'),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
       sortField: z
         .string()
