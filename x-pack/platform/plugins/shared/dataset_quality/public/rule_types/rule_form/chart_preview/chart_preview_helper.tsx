@@ -5,24 +5,50 @@
  * 2.0.
  */
 
+import { EuiFlexGroup, EuiIcon, EuiLoadingChart, EuiText, EuiToolTip } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import { IconChartBar } from '@kbn/chart-icons';
+import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+
+export type Maybe<T> = T | null | undefined;
+
+function isFiniteNumber(value: any): value is number {
+  return isFinite(value);
+}
+
+export function asPercent(
+  numerator: Maybe<number>,
+  denominator: number | undefined,
+  fallbackResult = 'N/A'
+) {
+  if (!denominator || !isFiniteNumber(numerator)) {
+    return fallbackResult;
+  }
+
+  const decimal = numerator / denominator;
+
+  if (Math.abs(decimal) >= 0.1 || decimal === 0) {
+    return numeral(decimal).format('0.000%');
+  }
+
+  return numeral(decimal).format('0.000%');
+}
 
 export const TIME_LABELS = {
-  s: i18n.translate('xpack.apm.alerts.timeLabels.seconds', {
+  s: i18n.translate('xpack.datasetQuality.alerts.timeLabels.seconds', {
     defaultMessage: 'seconds',
   }),
-  m: i18n.translate('xpack.apm.alerts.timeLabels.minutes', {
+  m: i18n.translate('xpack.datasetQuality.alerts.timeLabels.minutes', {
     defaultMessage: 'minutes',
   }),
-  h: i18n.translate('xpack.apm.alerts.timeLabels.hours', {
+  h: i18n.translate('xpack.datasetQuality.alerts.timeLabels.hours', {
     defaultMessage: 'hours',
   }),
-  d: i18n.translate('xpack.apm.alerts.timeLabels.days', {
+  d: i18n.translate('xpack.datasetQuality.alerts.timeLabels.days', {
     defaultMessage: 'days',
   }),
 };
@@ -55,12 +81,15 @@ const EmptyContainer: FC<PropsWithChildren<unknown>> = ({ children }) => (
 export function NoDataState() {
   return (
     <EmptyContainer>
-      <EuiText color="subdued" data-test-subj="noChartData">
-        <FormattedMessage
-          id="xpack.apm.alerts.charts.noDataMessage"
-          defaultMessage="No chart data available"
-        />
-      </EuiText>
+      <EmptyPlaceholder
+        icon={IconChartBar}
+        message={
+          <FormattedMessage
+            id="xpack.datasetQuality.chartPreview.noDataMessage"
+            defaultMessage="No results found"
+          />
+        }
+      />
     </EmptyContainer>
   );
 }
@@ -80,7 +109,7 @@ export function ErrorState() {
     <EmptyContainer>
       <EuiText color="subdued" data-test-subj="chartErrorState">
         <FormattedMessage
-          id="xpack.apm.alerts.charts.errorMessage"
+          id="xpack.datasetQuality.alerts.charts.errorMessage"
           defaultMessage="Uh oh, something went wrong"
         />
       </EuiText>
@@ -89,32 +118,59 @@ export function ErrorState() {
 }
 
 interface PreviewChartLabel {
-  lookback: number;
-  timeLabel: string;
-  displayedGroups: number;
+  field: string;
+  timeSize: number;
+  timeUnit: string;
+  series: number;
   totalGroups: number;
 }
 
 export function TimeLabelForData({
-  lookback,
-  timeLabel,
-  displayedGroups,
+  field,
+  timeSize,
+  timeUnit,
+  series,
   totalGroups,
 }: PreviewChartLabel) {
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <EuiText size="xs" color="subdued">
+  const totalGroupsTooltip = i18n.translate(
+    'xpack.datasetQuality.chartPreview.TimeLabelForData.totalGroupsTooltip',
+    {
+      defaultMessage: 'Showing {series} out of {totalGroups} groups',
+      values: {
+        series,
+        totalGroups,
+      },
+    }
+  );
+
+  const xAxisInfo = (
+    <EuiText size="xs">
+      <strong>
         <FormattedMessage
-          id="xpack.apm.alerts.timeLabelForData"
-          defaultMessage="Last {lookback} {timeLabel} of data, showing {displayedGroups}/{totalGroups} groups"
+          id="xpack.datasetQuality.chartPreview.timeLabelForData.xAxis"
+          defaultMessage="{field} per {timeSize} {timeUnit}"
           values={{
-            lookback,
-            timeLabel,
-            displayedGroups,
-            totalGroups,
+            field,
+            timeSize,
+            timeUnit: TIME_LABELS[timeUnit as keyof typeof TIME_LABELS],
           }}
         />
-      </EuiText>
+      </strong>
+    </EuiText>
+  );
+
+  return (
+    <div style={{ textAlign: 'center' }}>
+      {totalGroups > series ? (
+        <EuiToolTip content={totalGroupsTooltip} position="top">
+          <EuiFlexGroup gutterSize="xs">
+            {xAxisInfo}
+            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+          </EuiFlexGroup>
+        </EuiToolTip>
+      ) : (
+        xAxisInfo
+      )}
     </div>
   );
 }

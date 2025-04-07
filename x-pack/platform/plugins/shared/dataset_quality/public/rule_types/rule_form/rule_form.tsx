@@ -209,7 +209,7 @@ export const RuleForm: React.FunctionComponent<
 
       <EuiExpression
         data-test-subj="datasetQualityRuleCountExpression"
-        description={'count'}
+        description={'PERCENTAGE'}
         value={'degraded docs'} // TODO: Check if this should be translatable
         display="columns"
         onClick={() => {}}
@@ -256,7 +256,6 @@ export const RuleForm: React.FunctionComponent<
         timeUnit={timeUnit as TimeUnitChar}
         dataView={dataView}
         groupBy={groupBy}
-        label={'degraded docs'} // TODO: check this label, it's not being shown in the chart
         timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
       />
 

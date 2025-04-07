@@ -14,6 +14,7 @@
     "@kbn/alerting-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/calculate-auto",
+    "@kbn/charts-plugin",
     "@kbn/core-analytics-browser",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-elasticsearch-server",

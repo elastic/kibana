@@ -39,6 +39,7 @@
       "usageCollection",
     ],
     "requiredBundles": [
+      "charts",
       "discover",
       "unifiedHistogram",
     ],
