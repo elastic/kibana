@@ -36,7 +36,7 @@ export function PreviewTable({
     return columns.map((column) => ({
       id: column,
       displayAsText: column,
-      actions: false,
+      actions: false as false,
       initialWidth: columns.length > 10 ? 250 : undefined,
     }));
   }, [columns]);
