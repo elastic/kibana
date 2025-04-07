@@ -202,7 +202,7 @@ export const JobSelectorFlyoutContent: FC<JobSelectorFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody className="mlJobSelectorFlyoutBody" data-test-subj={'mlJobSelectorFlyoutBody'}>
+      <EuiFlyoutBody data-test-subj={'mlJobSelectorFlyoutBody'}>
         <EuiResizeObserver onResize={handleResize}>
           {(resizeRef) => (
             <div
