@@ -6,23 +6,20 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { Coordinate } from '../../common/types';
+import { PreviewChartResponse } from '../../common/api_types';
 import { extractIndexNameFromBackingIndex } from '../../common/utils';
 
-export interface PreviewChartResponseItem {
-  name: string;
-  data: Coordinate[];
-}
-
-export interface PreviewChartResponse {
-  series: PreviewChartResponseItem[];
-  totalGroups: number;
+interface DataStreamTotals {
+  x: Coordinate['x'];
+  totalCount: number;
+  ignoredCount: number;
 }
 
 const NUM_SERIES = 5;
 
-export const getFilteredBarSeries = (barSeries: any) => {
+export const getFilteredBarSeries = (barSeries: PreviewChartResponse['series']) => {
   const sortedSeries = barSeries.sort((a, b) => {
     const aMax = Math.max(...a.data.map((point) => point.y as number));
     const bMax = Math.max(...b.data.map((point) => point.y as number));
@@ -38,7 +35,6 @@ export async function getChartPreview({
   esClient,
   index,
   groupBy,
-  query = {},
   start,
   end,
   interval,
@@ -46,15 +42,10 @@ export async function getChartPreview({
   esClient: ElasticsearchClient;
   index: string;
   groupBy: string[];
-  query?: {
-    must?: QueryDslQueryContainer | QueryDslQueryContainer[];
-  };
   start: string;
   end: string;
   interval: string;
 }): Promise<PreviewChartResponse> {
-  const { must } = query;
-
   const bool = {
     filter: [
       {
@@ -122,10 +113,7 @@ export async function getChartPreview({
     track_total_hits: false,
     size: 0,
     query: {
-      bool: {
-        ...bool,
-        // ...(must ? { must } : {}),
-      },
+      bool,
     },
     aggs,
   });
@@ -134,43 +122,51 @@ export async function getChartPreview({
     return { series: [], totalGroups: 0 };
   }
 
-  console.log(JSON.stringify(esResult, null, 2));
+  const seriesBuckets = (esResult.aggregations?.series?.buckets ??
+    []) as estypes.AggregationsStringTermsBucket[];
 
-  const seriesDataMap = esResult.aggregations.series.buckets.reduce((acc, bucket) => {
+  const seriesDataMap: Record<string, DataStreamTotals[]> = seriesBuckets.reduce((acc, bucket) => {
     const bucketKey = Array.isArray(bucket.key)
       ? bucket.key.join('_')
       : extractIndexNameFromBackingIndex(bucket.key);
-    bucket.timeseries.buckets.forEach((timeseriesBucket) => {
-      const x = timeseriesBucket.key;
-      const doc_count = timeseriesBucket.doc_count;
-      const ignored_count = timeseriesBucket.ignored_fields.doc_count;
+    bucket.timeseries.buckets.forEach(
+      (timeseriesBucket: {
+        key: number;
+        doc_count?: number;
+        ignored_fields?: { doc_count?: number };
+      }) => {
+        const x = timeseriesBucket.key;
+        const totalCount = timeseriesBucket.doc_count ?? 0;
+        const ignoredCount = timeseriesBucket.ignored_fields?.doc_count ?? 0;
 
-      if (acc[bucketKey]) {
-        acc[bucketKey].push({ x, doc_count, ignored_count });
-      } else {
-        acc[bucketKey] = [{ x, doc_count, ignored_count }];
+        if (acc[bucketKey]) {
+          acc[bucketKey].push({ x, totalCount, ignoredCount });
+        } else {
+          acc[bucketKey] = [{ x, totalCount, ignoredCount }];
+        }
       }
-    });
+    );
 
     return acc;
-  }, {} as Record<string, Coordinate[]>);
+  }, {} as Record<string, DataStreamTotals[]>);
 
   const series = Object.keys(seriesDataMap).map((key) => ({
     name: key,
     data: Array.from(
       seriesDataMap[key]
-        .reduce((map, curr) => {
+        .reduce((map, curr: DataStreamTotals) => {
           if (!map.has(curr.x)) map.set(curr.x, { ...curr });
           else {
-            map.get(curr.x).doc_count += curr.doc_count;
-            map.get(curr.x).ignored_count += curr.ignored_count;
+            map.get(curr.x).totalCount += curr.totalCount;
+            map.get(curr.x).ignoredCount += curr.ignoredCount;
           }
+
           return map;
         }, new Map())
         .values()
-    ).map((item) => ({
+    ).map((item: DataStreamTotals) => ({
       x: item.x,
-      y: (item.ignored_count / item.doc_count) * 100,
+      y: (item.ignoredCount / item.totalCount) * 100,
     })),
   }));
 

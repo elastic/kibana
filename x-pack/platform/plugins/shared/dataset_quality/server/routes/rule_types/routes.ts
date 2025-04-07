@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { PreviewChartResponse } from '../../../common/api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
-import { getChartPreview, PreviewChartResponse } from '../../rule_types/get_chart_preview';
+import { getChartPreview } from '../../rule_types/get_chart_preview';
 
 const degradedDocsChartPreviewRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/rule_types/degraded_docs/chart_preview',
@@ -30,9 +31,7 @@ const degradedDocsChartPreviewRoute = createDatasetQualityServerRoute({
         'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
-  async handler(resources): Promise<{
-    degradedDocsChartPreview: PreviewChartResponse;
-  }> {
+  async handler(resources): Promise<PreviewChartResponse> {
     const { context, params } = resources;
     const coreContext = await context.core;
 
@@ -42,12 +41,9 @@ const degradedDocsChartPreviewRoute = createDatasetQualityServerRoute({
       esClient,
       ...params.query,
       groupBy: [params.query.groupBy],
-      query: {
-        must: { exists: { field: '_ignored' } },
-      },
     });
 
-    return { degradedDocsChartPreview };
+    return { ...degradedDocsChartPreview };
   },
 });
 
