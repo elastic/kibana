@@ -8,9 +8,9 @@
 import { partition } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
+import { isBoom } from '@hapi/boom';
 import type { RuleToImport } from '../../../../../../../common/api/detection_engine';
-import type { BulkError } from '../../../../routes/utils';
-import { handleActionConnectorsErrors } from './utils';
+import { createBulkErrorObject, type BulkError } from '../../../../routes/utils';
 
 export type ActionsOrErrors =
   | { allActions: ConnectorWithExtraFindData[]; bulkError: undefined }
@@ -32,7 +32,17 @@ const getActionsOrError = async ({
       bulkError: undefined,
     };
   } catch (exc) {
-    return { allActions: undefined, bulkError: handleActionConnectorsErrors(exc) };
+    if (isBoom(exc)) {
+      return {
+        allActions: undefined,
+        bulkError: createBulkErrorObject({
+          statusCode: 403,
+          message: `You may not have actions privileges required to import rules with actions: ${exc.output.payload.message}`,
+        }),
+      };
+    } else {
+      throw exc;
+    }
   }
 };
 

@@ -198,9 +198,17 @@ export default ({ getService }: FtrProviderContext): void => {
           success: true,
           success_count: 1,
           rules_count: 1,
-          action_connectors_success: true,
+          action_connectors_success: false,
           action_connectors_success_count: 0,
-          action_connectors_errors: [],
+          action_connectors_errors: [
+            {
+              error: {
+                message: 'Saved Object already exists',
+                status_code: 409,
+              },
+              id: '1be16246-642a-4ed8-bfd3-b47f8c7d7055',
+            },
+          ],
           action_connectors_warnings: [],
         });
 

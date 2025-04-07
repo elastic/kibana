@@ -5,17 +5,14 @@
  * 2.0.
  */
 import { Readable } from 'stream';
+import { isBoom } from '@hapi/boom';
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
 
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
-import {
-  filterExistingActionConnectors,
-  mapSOErrorToRuleError,
-  returnErroredImportResult,
-} from './utils';
+import { mapSOErrorsToBulkErrors } from './utils';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
+import { createBulkErrorObject } from '../../../../routes/utils';
 
 const NO_ACTION_RESULT = {
   success: true,
@@ -26,28 +23,15 @@ const NO_ACTION_RESULT = {
 
 export const importRuleActionConnectors = async ({
   actionConnectors,
-  actionsClient,
   actionsImporter,
   overwrite,
 }: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
   try {
-    let actionConnectorsToImport: SavedObject[] = actionConnectors;
-
-    if (!actionConnectorsToImport.length) {
+    if (!actionConnectors.length) {
       return NO_ACTION_RESULT;
     }
 
-    if (!overwrite) {
-      actionConnectorsToImport = await filterExistingActionConnectors(
-        actionsClient,
-        actionConnectors
-      );
-    }
-    if (!actionConnectorsToImport.length) {
-      return NO_ACTION_RESULT;
-    }
-
-    const readStream = Readable.from(actionConnectorsToImport);
+    const readStream = Readable.from(actionConnectors);
     const { success, successCount, warnings, errors }: SavedObjectsImportResponse =
       await actionsImporter.import({
         readStream,
@@ -58,10 +42,24 @@ export const importRuleActionConnectors = async ({
     return {
       success,
       successCount,
-      errors: errors ? mapSOErrorToRuleError(errors) : [],
+      errors: errors ? mapSOErrorsToBulkErrors(errors) : [],
       warnings: (warnings as WarningSchema[]) || [],
     };
-  } catch (error) {
-    return returnErroredImportResult(error);
+  } catch (exc) {
+    if (isBoom(exc)) {
+      return {
+        success: false,
+        successCount: 0,
+        errors: [
+          createBulkErrorObject({
+            statusCode: 403,
+            message: `You may not have actions privileges required to import actions: ${exc.output.payload.message}`,
+          }),
+        ],
+        warnings: [],
+      };
+    } else {
+      throw exc;
+    }
   }
 };

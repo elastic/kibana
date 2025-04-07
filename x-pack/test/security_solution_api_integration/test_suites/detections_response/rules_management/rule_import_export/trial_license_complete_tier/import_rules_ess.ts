@@ -173,7 +173,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unable to bulk_create action',
+                  'You may not have actions privileges required to import actions: Unable to bulk_create action',
                 status_code: 403,
               },
               rule_id: '(unknown id)',
@@ -244,7 +244,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               error: {
                 message:
-                  'You may not have actions privileges required to import rules with actions: Unauthorized to get actions',
+                  'You may not have actions privileges required to import actions: Unable to bulk_create action',
                 status_code: 403,
               },
               rule_id: '(unknown id)',

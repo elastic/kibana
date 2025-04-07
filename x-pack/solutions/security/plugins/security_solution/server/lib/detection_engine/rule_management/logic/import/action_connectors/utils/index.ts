@@ -5,63 +5,39 @@
  * 2.0.
  */
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
-import type { SavedObject } from '@kbn/core-saved-objects-server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { BulkError } from '../../../../../routes/utils';
 import { createBulkErrorObject } from '../../../../../routes/utils';
-import type { ConflictError, ErrorType, ImportRuleActionConnectorsResult, SOError } from '../types';
 
-export const returnErroredImportResult = (error: ErrorType): ImportRuleActionConnectorsResult => ({
-  success: false,
-  errors: [handleActionConnectorsErrors(error)],
-  successCount: 0,
-  warnings: [],
-});
-
-export const handleActionConnectorsErrors = (error: ErrorType, id?: string): BulkError => {
-  let statusCode: number | null = null;
-  let message: string = '';
-  if ('output' in error) {
-    statusCode = (error as SOError).output.statusCode;
-    message = (error as SOError).output.payload?.message;
-  }
-  switch (statusCode) {
-    case null:
-      return createBulkErrorObject({
-        statusCode: 500,
-        message:
-          (error as ConflictError)?.type === 'conflict'
-            ? 'There is a conflict'
-            : (error as Error).message
-            ? (error as Error).message
-            : '',
-      });
-
-    case 403:
-      return createBulkErrorObject({
-        id,
-        statusCode,
-        message: `You may not have actions privileges required to import rules with actions: ${message}`,
-      });
-
-    default:
-      return createBulkErrorObject({
-        id,
-        statusCode,
-        message,
-      });
-  }
+export const mapSOErrorsToBulkErrors = (errors: SavedObjectsImportFailure[]): BulkError[] => {
+  return errors.map((error) => mapSOErrorToBulkError(error));
 };
 
-export const mapSOErrorToRuleError = (errors: SavedObjectsImportFailure[]): BulkError[] => {
-  return errors.map(({ id, error }) => handleActionConnectorsErrors(error, id));
-};
-
-export const filterExistingActionConnectors = async (
-  actionsClient: ActionsClient,
-  actions: Array<SavedObject<unknown>>
-) => {
-  const storedConnectors = await actionsClient.getAll();
-  const storedActionIds: string[] = storedConnectors.map(({ id }) => id);
-  return actions.filter(({ id }) => !storedActionIds.includes(id));
+export const mapSOErrorToBulkError = (error: SavedObjectsImportFailure): BulkError => {
+  switch (error.error.type) {
+    case 'conflict':
+    case 'ambiguous_conflict':
+      return createBulkErrorObject({
+        id: error.id,
+        statusCode: 409,
+        message: `Saved Object already exists`,
+      });
+    case 'unsupported_type':
+      return createBulkErrorObject({
+        id: error.id,
+        statusCode: 400,
+        message: 'Unsupported SO action type',
+      });
+    case 'missing_references':
+      return createBulkErrorObject({
+        id: error.id,
+        statusCode: 400,
+        message: 'Missing SO references',
+      });
+    case 'unknown':
+      return createBulkErrorObject({
+        id: error.id,
+        statusCode: error.error.statusCode,
+        message: `Unknown Saved Object import error: ${error.error.message}`,
+      });
+  }
 };

@@ -5,8 +5,6 @@
  * 2.0.
  */
 import type { ISavedObjectsImporter, SavedObject } from '@kbn/core-saved-objects-server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
 import type { BulkError } from '../../../../routes/utils';
 
@@ -19,17 +17,6 @@ export interface ImportRuleActionConnectorsResult {
 
 export interface ImportRuleActionConnectorsParams {
   actionConnectors: SavedObject[];
-  actionsClient: ActionsClient;
   actionsImporter: ISavedObjectsImporter;
   overwrite: boolean;
 }
-
-export interface SOError {
-  output: { statusCode: number; payload: { message: string } };
-}
-
-export interface ConflictError {
-  type: string;
-}
-
-export type ErrorType = SOError | ConflictError | SavedObjectsImportFailure | Error;
