@@ -113,6 +113,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           href: '/app/kibana',
           icon: 'iInCircle',
           isExternalLink: true,
+          withBadge: true,
         },
         {
           id: 'item02',
