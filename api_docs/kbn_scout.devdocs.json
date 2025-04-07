@@ -7958,8 +7958,8 @@
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
                 "docId": "kibKbnApmSynthtraceClientPluginApi",
-                "section": "def-common.OtelDocument",
-                "text": "OtelDocument"
+                "section": "def-common.ApmOtelFields",
+                "text": "ApmOtelFields"
               },
               ">"
             ],
