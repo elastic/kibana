@@ -36,7 +36,7 @@ export function StreamListView() {
   return (
     <>
       <StreamsAppPageTemplate.Header
-        bottomBorder={false}
+        bottomBorder="extended"
         pageTitle={
           <EuiFlexGroup alignItems="center" gutterSize="m">
             {i18n.translate('xpack.streams.streamsListView.pageHeaderTitle', {

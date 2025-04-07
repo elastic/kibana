@@ -25,6 +25,7 @@ import { StreamsAppPageBody } from '../streams_app_page_body';
 import { StreamsAppPageHeader } from '../streams_app_page_header';
 import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
 import { useKibana } from '../../hooks/use_kibana';
+import { StreamsAppPageTemplate } from '../streams_app_page_template';
 
 export interface EntityViewTab {
   name: string;
@@ -85,53 +86,36 @@ export function EntityDetailViewWithoutParams({
   const selectedTabObject = tabMap[selectedTab];
 
   return (
-    <EuiFlexGroup
-      direction="column"
-      gutterSize="none"
-      className={css`
-        max-width: 100%;
-      `}
-    >
-      <EuiFlexItem grow={false}>
-        <StreamsAppPageHeader
-          title={
-            <StreamsAppPageHeaderTitle
-              title={
-                <EuiFlexGroup gutterSize="s" alignItems="center">
-                  {entity.displayName}
-                  {definition && isUnwiredStreamDefinition(definition.stream) ? (
-                    <>
-                      {' '}
-                      <EuiBadge>
-                        {i18n.translate(
-                          'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
-                          { defaultMessage: 'Classic' }
-                        )}
-                      </EuiBadge>
-                    </>
-                  ) : null}
-                  {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
-                </EuiFlexGroup>
-              }
-            />
-          }
-        >
-          <EntityOverviewTabList
-            tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
-              return {
-                name: tabKey,
-                label,
-                href,
-                selected: selectedTab === tabKey,
-              };
-            })}
-          />
-        </StreamsAppPageHeader>
-      </EuiFlexItem>
-      <StreamsAppPageBody background={selectedTabObject.background}>
-        {selectedTabObject.content}
-      </StreamsAppPageBody>
-    </EuiFlexGroup>
+    <>
+      <StreamsAppPageTemplate.Header
+        bottomBorder="extended"
+        pageTitle={
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {entity.displayName}
+            {definition && isUnwiredStreamDefinition(definition.stream) ? (
+              <>
+                {' '}
+                <EuiBadge>
+                  {i18n.translate(
+                    'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
+                    { defaultMessage: 'Classic' }
+                  )}
+                </EuiBadge>
+              </>
+            ) : null}
+            {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
+          </EuiFlexGroup>
+        }
+        tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
+          return {
+            label,
+            href,
+            isSelected: selectedTab === tabKey,
+          };
+        })}
+      />
+      <StreamsAppPageTemplate.Body grow>{selectedTabObject.content}</StreamsAppPageTemplate.Body>
+    </>
   );
 }
 
