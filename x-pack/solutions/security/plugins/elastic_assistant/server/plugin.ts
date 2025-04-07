@@ -58,47 +58,53 @@ export class ElasticAssistantPlugin
   ) {
     this.logger.debug('elasticAssistant: Setup');
 
+    this.assistantService = new AIAssistantService({
+      logger: this.logger.get('service'),
+      ml: plugins.ml,
+      taskManager: plugins.taskManager,
+      kibanaVersion: this.kibanaVersion,
+      elasticsearchClientPromise: core
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      productDocManager: core
+        .getStartServices()
+        .then(([_, { productDocBase }]) => productDocBase.management),
+      pluginStop$: this.pluginStop$,
+    });
+
+    const requestContextFactory = new RequestContextFactory({
+      logger: this.logger,
+      core,
+      plugins,
+      kibanaVersion: this.kibanaVersion,
+      assistantService: this.assistantService,
+    });
+
+    const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
+    core.http.registerRouteHandlerContext<ElasticAssistantRequestHandlerContext, typeof PLUGIN_ID>(
+      PLUGIN_ID,
+      (context, request) => requestContextFactory.create(context, request)
+    );
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
+
+    this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
+    this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
+
+    registerRoutes(router, this.logger, this.getElserId);
+
     // The featureFlags service is not available in the core setup, so we need
     // to wait for the start services to be available to read the feature flags.
     // This can take a while, but the plugin setup phase cannot run for a long time.
     // As a workaround, this promise does not block the setup phase.
     core
       .getStartServices()
-      .then(([{ elasticsearch, featureFlags }, { productDocBase }]) => {
+      .then(([{ featureFlags }]) => {
         // read all feature flags:
         void Promise.all([
           featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
           // add more feature flags here
-        ]).then(() => {
-          this.assistantService = new AIAssistantService({
-            logger: this.logger.get('service'),
-            ml: plugins.ml,
-            taskManager: plugins.taskManager,
-            kibanaVersion: this.kibanaVersion,
-            elasticsearchClientPromise: Promise.resolve(elasticsearch.client.asInternalUser),
-            productDocManager: Promise.resolve(productDocBase.management),
-            pluginStop$: this.pluginStop$,
-          });
-
-          const requestContextFactory = new RequestContextFactory({
-            logger: this.logger,
-            core,
-            plugins,
-            kibanaVersion: this.kibanaVersion,
-            assistantService: this.assistantService,
-          });
-
-          const router = core.http.createRouter<ElasticAssistantRequestHandlerContext>();
-          core.http.registerRouteHandlerContext<
-            ElasticAssistantRequestHandlerContext,
-            typeof PLUGIN_ID
-          >(PLUGIN_ID, (context, request) => requestContextFactory.create(context, request));
-          events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
-
-          this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
-          this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
-
-          registerRoutes(router, this.logger, this.getElserId);
+        ]).then(([assistantAttackDiscoverySchedulingEnabled]) => {
+          // TODO: use `assistantAttackDiscoverySchedulingEnabled` to conditionally create alerts index
         });
       })
       .catch((error) => {
