@@ -97,7 +97,7 @@ export function isInferenceEndpointMissingOrUnavailable(error: Error) {
   );
 }
 
-export async function getElserModelStatus({
+export async function getKbModelStatus({
   esClient,
   logger,
   config,
@@ -160,7 +160,7 @@ export async function waitForKbModel({
 }) {
   return pRetry(
     async () => {
-      const { ready } = await getElserModelStatus({ esClient, logger, config });
+      const { ready } = await getKbModelStatus({ esClient, logger, config });
       if (!ready) {
         logger.debug('Knowledge base model is not yet ready. Retrying...');
         throw new Error('Knowledge base model is not yet ready');

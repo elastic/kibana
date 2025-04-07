@@ -140,7 +140,7 @@ export class ObservabilityAIAssistantPlugin
       )
       .catch((e) =>
         this.logger.error(
-          `Error while setting up the Knowledge Base for the AI Assistant: ${e.message}`
+          `Error during knowledge base migration in AI Assistant plugin startup: ${e.message}`
         )
       );
 

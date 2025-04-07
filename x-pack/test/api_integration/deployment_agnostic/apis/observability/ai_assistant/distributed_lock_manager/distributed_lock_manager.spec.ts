@@ -12,7 +12,6 @@ import {
   LockId,
   ensureTemplatesAndIndexCreated,
   LockManager,
-  withLock,
   LockDocument,
   LOCKS_CONCRETE_INDEX_NAME,
 } from '@kbn/observability-ai-assistant-plugin/server/service/distributed_lock_manager/lock_manager_client';
@@ -20,17 +19,17 @@ import nock from 'nock';
 import { Client } from '@elastic/elasticsearch';
 import { times } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
-import { duration, unitOfTime } from 'moment';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { getLoggerMock } from '../utils/logger';
+import { dateAsTimestamp, durationAsMs, sleep } from '../utils/time';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
   const logger = getLoggerMock(log);
 
-  describe('LockManager', function () {
+  describe('LockManager - class', function () {
     this.tags(['failsOnMKI']);
     before(async () => {
       await clearAllLocks(es);
@@ -287,206 +286,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe('withLock', () => {
-      const LOCK_ID = 'my_lock_with_lock';
-
-      describe('Successful execution and concurrent calls', () => {
-        let executions: number;
-        let runWithLock: () => Promise<string | undefined>;
-        let results: Array<PromiseSettledResult<string | undefined>>;
-
-        before(async () => {
-          executions = 0;
-          runWithLock = async () => {
-            return withLock({ esClient: es, lockId: LOCK_ID, logger }, async () => {
-              executions++;
-              await sleep(100);
-              return 'was called';
-            });
-          };
-          results = await Promise.allSettled([runWithLock(), runWithLock(), runWithLock()]);
-        });
-
-        it('executes the callback only once', async () => {
-          expect(executions).to.be(1);
-        });
-
-        it('returns the callback result for the successful call', async () => {
-          const fulfilled = results.filter((r) => r.status === 'fulfilled') as Array<
-            PromiseFulfilledResult<string>
-          >;
-          expect(fulfilled).to.have.length(1);
-          expect(fulfilled[0].value).to.be('was called');
-        });
-
-        it('releases the lock after execution', async () => {
-          const lock = await getLockById(es, LOCK_ID);
-          expect(lock).to.be(undefined);
-        });
-      });
-
-      describe('Error handling in withLock', () => {
-        it('should release the lock even if the callback throws an error', async () => {
-          let error: Error | undefined;
-          try {
-            await withLock({ lockId: LOCK_ID, esClient: es, logger }, async () => {
-              throw new Error('Simulated callback failure');
-            });
-            throw new Error('withLock did not throw an error');
-          } catch (err) {
-            error = err;
-          }
-          expect(error?.message).to.be('Simulated callback failure');
-
-          // Verify that the lock is released even after a callback error.
-          const lock = await getLockById(es, LOCK_ID);
-          expect(lock).to.be(undefined);
-        });
-
-        it('should throw a LockAcquisitionError if the lock cannot be acquired', async () => {
-          // Pre-acquire the lock so that withLock cannot acquire it.
-          const preAcquirer = new LockManager(LOCK_ID, es, logger);
-          const acquired = await preAcquirer.acquire();
-          expect(acquired).to.be(true);
-
-          let error: Error | undefined;
-          try {
-            await withLock(
-              { lockId: LOCK_ID, esClient: es, logger },
-              async () => 'should not execute'
-            );
-          } catch (err) {
-            error = err;
-          }
-
-          expect(error?.name).to.be('LockAcquisitionError');
-          expect(error?.message).to.contain(`Lock "${LOCK_ID}" not acquired`);
-
-          await preAcquirer.release();
-        });
-      });
-
-      describe('Extending TTL', () => {
-        let lockExpiryBefore: string | undefined;
-        let lockExpiryAfter: string | undefined;
-        let result: string | undefined;
-
-        before(async () => {
-          // Use a very short TTL (1 second) so that without extension the lock would expire.
-          // The withLock helper extends the TTL periodically.
-          result = await withLock({ lockId: LOCK_ID, esClient: es, logger, ttl: 500 }, async () => {
-            lockExpiryBefore = (await getLockById(es, LOCK_ID))?.expiresAt;
-            await sleep(600); // Simulate a long-running operation
-            lockExpiryAfter = (await getLockById(es, LOCK_ID))?.expiresAt;
-            return 'done';
-          });
-        });
-
-        it('should return the result of the callback', () => {
-          expect(result).to.be('done');
-        });
-
-        it('should extend the ttl', () => {
-          expect(lockExpiryBefore).not.to.be(undefined);
-          expect(lockExpiryAfter).not.to.be(undefined);
-
-          // Verify that the new expiration is later than before.
-          expect(dateAsTimestamp(lockExpiryAfter!)).to.be.greaterThan(
-            dateAsTimestamp(lockExpiryBefore!)
-          );
-        });
-
-        // Even though the initial TTL was short, the periodic extension should have kept the lock active.
-        // After the withLock call completes, the lock should be released.
-        it('should release the lock after the callback', async () => {
-          const lock = await getLockById(es, LOCK_ID);
-          expect(lock).to.be(undefined);
-        });
-      });
-
-      describe('when waiting for lock to be available using pRetry and it times out', () => {
-        const RETRY_LOCK_ID = 'my_lock_with_retry';
-        let retries = 0;
-        let error: Error | undefined;
-        let lm: LockManager;
-
-        before(async () => {
-          lm = new LockManager(RETRY_LOCK_ID, es, logger);
-          const acquired = await lm.acquire();
-          expect(acquired).to.be(true);
-
-          try {
-            await pRetry(
-              async () => {
-                retries++;
-                await withLock(
-                  { lockId: RETRY_LOCK_ID, esClient: es, logger },
-                  async () => 'should not execute'
-                );
-              },
-              { minTimeout: 50, maxTimeout: 50, retries: 2 }
-            );
-          } catch (err) {
-            error = err;
-          }
-        });
-
-        after(async () => {
-          await lm.release();
-        });
-
-        it('invokes withLock 3 times', async () => {
-          expect(retries).to.be(3);
-        });
-
-        it('throws a LockAcquisitionError', () => {
-          expect(error?.name).to.be('LockAcquisitionError');
-        });
-
-        it('throws a LockAcquisitionError with a message', () => {
-          expect(error?.message).to.contain(`Lock "${RETRY_LOCK_ID}" not acquired`);
-        });
-      });
-
-      describe('when waiting for lock to be available using pRetry and does not time out', () => {
-        const RETRY_LOCK_ID = 'my_lock_with_retry';
-        let retries = 0;
-        let res: string | undefined;
-
-        before(async () => {
-          const lm = new LockManager(RETRY_LOCK_ID, es, logger);
-          const acquired = await lm.acquire();
-          expect(acquired).to.be(true);
-
-          setTimeout(() => lm.release(), 100);
-
-          await pRetry(
-            async () => {
-              retries++;
-              res = await withLock(
-                { lockId: RETRY_LOCK_ID, esClient: es, logger },
-                async () => 'should execute'
-              );
-            },
-            { minTimeout: 50, maxTimeout: 50, retries: 5 }
-          );
-        });
-
-        it('retries calling withLock multiple times', async () => {
-          expect(retries).to.be.greaterThan(1);
-        });
-
-        it('returns the result', () => {
-          expect(res).to.be('should execute');
-        });
-
-        it('releases the lock', async () => {
-          const lock = await getLockById(es, RETRY_LOCK_ID);
-          expect(lock).to.be(undefined);
-        });
-      });
-    });
-
     describe('extendTtl', () => {
       let lockManager: LockManager;
       const ttl = 1000;
@@ -634,11 +433,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   });
 }
 
-function sleep(value: number) {
-  return new Promise((resolve) => setTimeout(resolve, value));
-}
-
-function clearAllLocks(es: Client) {
+export function clearAllLocks(es: Client) {
   return es.deleteByQuery(
     {
       index: LOCKS_CONCRETE_INDEX_NAME,
@@ -649,7 +444,7 @@ function clearAllLocks(es: Client) {
   );
 }
 
-async function getLocks(es: Client) {
+export async function getLocks(es: Client) {
   const res = await es.search<LockDocument>({
     index: LOCKS_CONCRETE_INDEX_NAME,
     query: { match_all: {} },
@@ -675,19 +470,14 @@ async function outputLocks(es: Client, log: ToolingLog, name?: string) {
   }
 }
 
-async function getLockById(esClient: Client, lockId: LockId): Promise<LockDocument | undefined> {
+export async function getLockById(
+  esClient: Client,
+  lockId: LockId
+): Promise<LockDocument | undefined> {
   const res = await esClient.get<LockDocument>(
     { index: LOCKS_CONCRETE_INDEX_NAME, id: lockId },
     { ignore: [404] }
   );
 
   return res._source;
-}
-
-function durationAsMs(value: number, unit: unitOfTime.DurationConstructor) {
-  return duration(value, unit).asMilliseconds();
-}
-
-function dateAsTimestamp(value: string) {
-  return new Date(value).getTime();
 }

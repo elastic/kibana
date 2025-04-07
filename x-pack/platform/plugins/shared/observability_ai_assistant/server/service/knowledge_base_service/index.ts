@@ -23,7 +23,7 @@ import { getSpaceQuery } from '../util/get_space_query';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getElserModelStatus,
+  getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
@@ -457,7 +457,7 @@ export class KnowledgeBaseService {
         });
 
         throw serverUnavailable(
-          `The index "${resourceNames.aliases.kb}" does not support semantic text and must be re-indexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
+          `The index "${resourceNames.aliases.kb}" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
         );
       }
 
@@ -489,7 +489,7 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    return getElserModelStatus({
+    return getKbModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
