@@ -187,18 +187,6 @@
     "@kbn/alerting-types",
     "@kbn/ai-assistant-common",
     "@kbn/core-deprecations-common",
-    "@kbn/usage-collection-plugin",
-    "@kbn/palettes",
-    "@kbn/sse-utils-server",
-    "@kbn/gen-ai-functional-testing",
-    "@kbn/automatic-import-plugin",
-    "@kbn/core-elasticsearch-server",
-    "@kbn/streams-schema",
-    "@kbn/server-route-repository-utils",
-    "@kbn/streams-plugin",
-    "@kbn/response-ops-rule-params",
-    "@kbn/scout-info",
-    "@kbn/inference-common",
-    "@kbn/apm-sources-access-plugin",
+    "@kbn/usage-collection-plugin"
   ]
 }
