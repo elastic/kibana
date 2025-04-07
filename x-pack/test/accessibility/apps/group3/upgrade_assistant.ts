@@ -12,7 +12,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function upgradeAssistantPage({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
