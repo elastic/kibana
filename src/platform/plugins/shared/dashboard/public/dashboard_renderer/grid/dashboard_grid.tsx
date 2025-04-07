@@ -68,7 +68,7 @@ export const DashboardGrid = ({
       newLayout[sectionId] = {
         id: sectionId,
         title: section.title,
-        isCollapsed: section.collapsed ?? false,
+        isCollapsed: Boolean(section.collapsed),
         order: section.order,
         panels: {},
       };
