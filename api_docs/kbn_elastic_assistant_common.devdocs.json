@@ -758,12 +758,28 @@
           "\nCreates a new ContentReferencesStore used for storing references (also known as citations)"
         ],
         "signature": [
-          "() => { add: <T extends { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; } | { id: string; type: \"SecurityAlert\"; alertId: string; } | { id: string; type: \"SecurityAlertsPage\"; } | { id: string; type: \"ProductDocumentation\"; title: string; url: string; } | { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>(generator: (params: { id: string; }) => T) => T; getStore: () => Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; timerange: Zod.ZodOptional<Zod.ZodObject<{ from: Zod.ZodString; to: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { from: string; to: string; }, { from: string; to: string; }>>; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>]>, \"strip\">; }"
+          "(options?: Options | undefined) => { add: <T extends { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; } | { id: string; type: \"SecurityAlert\"; alertId: string; } | { id: string; type: \"SecurityAlertsPage\"; } | { id: string; type: \"ProductDocumentation\"; title: string; url: string; } | { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>(generator: (params: { id: string; }) => T) => T | undefined; getStore: () => Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; timerange: Zod.ZodOptional<Zod.ZodObject<{ from: Zod.ZodString; to: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { from: string; to: string; }, { from: string; to: string; }>>; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>]>, \"strip\">; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/content_references_store/content_references_store.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.newContentReferencesStore.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "Options | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/content_references_store/content_references_store.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
         "returnComment": [],
         "initialIsOpen": false
       },
@@ -1409,7 +1425,7 @@
               "\nAdds a content reference into the ContentReferencesStore."
             ],
             "signature": [
-              "<T extends { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; } | { id: string; type: \"SecurityAlert\"; alertId: string; } | { id: string; type: \"SecurityAlertsPage\"; } | { id: string; type: \"ProductDocumentation\"; title: string; url: string; } | { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>(generator: (params: { id: string; }) => T) => T"
+              "<T extends { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; } | { id: string; type: \"SecurityAlert\"; alertId: string; } | { id: string; type: \"SecurityAlertsPage\"; } | { id: string; type: \"ProductDocumentation\"; title: string; url: string; } | { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>(generator: (params: { id: string; }) => T) => T | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/types.ts",
             "deprecated": false,
@@ -2041,6 +2057,36 @@
         "description": [],
         "signature": [
           "{ connectorId: string; messages: { role: \"user\" | \"system\" | \"assistant\"; data?: Zod.objectInputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; content?: string | undefined; fields_to_anonymize?: string[] | undefined; }[]; persist: boolean; conversationId?: string | undefined; model?: string | undefined; langSmithProject?: string | undefined; langSmithApiKey?: string | undefined; promptId?: string | undefined; isStream?: boolean | undefined; responseLanguage?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompleteRequestQuery",
+        "description": [],
+        "signature": [
+          "{ content_references_disabled?: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "ChatCompleteRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ content_references_disabled?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
         "deprecated": false,
@@ -3544,6 +3590,36 @@
         "description": [],
         "signature": [
           "{ connectorId: string; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ExecuteConnectorRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecuteConnectorRequestQuery",
+        "description": [],
+        "signature": [
+          "{ content_references_disabled?: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ExecuteConnectorRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "ExecuteConnectorRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ content_references_disabled?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
         "deprecated": false,
@@ -5636,6 +5712,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ChatCompleteRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "ChatCompleteRequestQuery",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ content_references_disabled: Zod.ZodDefault<Zod.ZodOptional<KbnZodBooleanFromString>>; }, \"strip\", Zod.ZodTypeAny, { content_references_disabled?: any; }, { content_references_disabled?: any; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/chat/post_chat_complete_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ChatMessage",
         "type": "Object",
         "tags": [],
@@ -6562,6 +6653,21 @@
         "description": [],
         "signature": [
           "Zod.ZodObject<{ connectorId: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { connectorId: string; }, { connectorId: string; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.ExecuteConnectorRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "ExecuteConnectorRequestQuery",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ content_references_disabled: Zod.ZodDefault<Zod.ZodOptional<KbnZodBooleanFromString>>; }, \"strip\", Zod.ZodTypeAny, { content_references_disabled?: any; }, { content_references_disabled?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/actions_connector/post_actions_connector_execute_route.gen.ts",
         "deprecated": false,
