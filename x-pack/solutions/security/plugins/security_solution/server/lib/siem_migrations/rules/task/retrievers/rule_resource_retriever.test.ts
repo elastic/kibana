@@ -6,10 +6,7 @@
  */
 
 import { RuleResourceRetriever } from './rule_resource_retriever'; // Adjust path as needed
-import type {
-  OriginalRule,
-  RuleMigration,
-} from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigration } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
