@@ -82,7 +82,7 @@ describe('autocomplete', () => {
     },
   });
 
-  // const sourceCommands = ['row', 'from', 'show', 'metrics']; Uncomment when metrics is being released
+  // const sourceCommands = ['row', 'from', 'show', 'ts']; Uncomment when ts is being released
   const sourceCommands = ['row', 'from', 'show'];
 
   describe('New command', () => {
