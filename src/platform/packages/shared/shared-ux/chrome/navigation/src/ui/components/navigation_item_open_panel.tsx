@@ -24,6 +24,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { SubItemTitle } from './subitem_title';
 import { useNavigation as useServices } from '../../services';
 import { isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
@@ -46,7 +47,11 @@ const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   }
 `;
 
-const getButtonStyles = (euiTheme: EuiThemeComputed<{}>, isActive: boolean) => css`
+const getButtonStyles = (
+  euiTheme: EuiThemeComputed<{}>,
+  isActive: boolean,
+  withBadge?: boolean
+) => css`
   background-color: ${isActive ? transparentize(euiTheme.colors.lightShade, 0.5) : 'transparent'};
   transform: none !important; /* don't translateY 1px */
   color: inherit;
@@ -56,14 +61,17 @@ const getButtonStyles = (euiTheme: EuiThemeComputed<{}>, isActive: boolean) => c
     justify-content: flex-start;
     position: relative;
   }
-  & .euiIcon {
-    position: absolute;
-    right: 0;
-    top: 0;
-    transform: translateY(50%);
-  }
+  ${!withBadge
+    ? `
+    & .euiIcon {
+      position: absolute;
+      right: 0;
+      top: 0;
+      transform: translateY(50%);
+    }
+  `
+    : ''}
 `;
-
 interface Props {
   item: ChromeProjectNavigationNode;
   navigateToUrl: NavigateToUrlFn;
@@ -74,7 +82,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { isSideNavCollapsed } = useServices();
-  const { title, deepLink, children } = item;
+  const { title, deepLink, children, withBadge } = item;
   const { id, path } = item;
   const href = deepLink?.url ?? item.href;
   const isNotMobile = useIsWithinMinBreakpoint('s');
@@ -89,7 +97,10 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     getStyles(euiTheme)
   );
 
-  const buttonClassNames = classNames('sideNavItem', getButtonStyles(euiTheme, isActive));
+  const buttonClassNames = classNames(
+    'sideNavItem',
+    getButtonStyles(euiTheme, isActive, withBadge)
+  );
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -144,17 +155,17 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
         className={buttonClassNames}
         data-test-subj={dataTestSubj}
       >
-        {title}
+        {withBadge ? <SubItemTitle item={item} /> : title}
       </EuiButton>
     );
   }
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem style={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
+      <EuiFlexItem css={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
         <EuiListGroup gutterSize="none">
           <EuiListGroupItem
-            label={title}
+            label={withBadge ? <SubItemTitle item={item} /> : title}
             href={href}
             wrapText
             onClick={onLinkClick}
@@ -166,7 +177,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
         </EuiListGroup>
       </EuiFlexItem>
       {isIconVisible && (
-        <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
+        <EuiFlexItem grow={0} css={{ flexBasis: '15%' }}>
           <EuiButtonIcon
             display={isExpanded ? 'base' : 'empty'}
             size="s"

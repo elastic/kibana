@@ -295,6 +295,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
               path: '',
               icon: 'iInCircle',
               renderAs: 'panelOpener',
+              withBadge: true,
               children: [
                 {
                   id: 'sub1',
