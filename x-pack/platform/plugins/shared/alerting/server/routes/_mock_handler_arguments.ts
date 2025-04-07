@@ -11,7 +11,6 @@ import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { alertDeletionClientMock } from '../alert_deletion/alert_deletion_client.mock';
 import type { RulesClientMock } from '../rules_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
 import type { RulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
@@ -30,7 +29,6 @@ export function mockHandlerArguments(
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
-    alertDeletionClient = alertDeletionClientMock.create(),
   }: {
     rulesClient?: RulesClientMock;
     actionsClient?: ActionsClientMock;
@@ -40,10 +38,6 @@ export function mockHandlerArguments(
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
-    // TODO: update this to use the correct type once we have the alert deletion client
-    alertDeletionClient: {
-      previewTask: jest.Mock;
-    };
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -72,9 +66,6 @@ export function mockHandlerArguments(
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
-        getAlertDeletionClient() {
-          return alertDeletionClient;
-        },
       },
       actions: {
         getActionsClient() {

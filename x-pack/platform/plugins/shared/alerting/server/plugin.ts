@@ -669,16 +669,6 @@ export class AlertingPlugin {
     return async function alertsRouteHandlerContext(context, request) {
       const [{ savedObjects }] = await core.getStartServices();
       return {
-        getAlertDeletionClient: () => {
-          // TODO: Delete this fake client and use the real one when it's implemented
-          return {
-            previewTask: async (settings: unknown, spaceId: string) => {
-              return {
-                affectedAlertCount: 55,
-              };
-            },
-          };
-        },
         getRulesClient: () => {
           return rulesClientFactory!.create(request, savedObjects);
         },
