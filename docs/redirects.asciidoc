@@ -760,3 +760,8 @@ Refer to {observability-guide}/apm-agent-key-api.html[APM agent Key API].
 Refer to {observability-guide}/apm-app-troubleshooting.html[Troubleshooting].
 
 :!apm-docs-move-notice:
+
+[role="exclude",id="upgrade-assistant-api-default-field"]
+== Add default field API
+
+This API was removed in 7.13.0. Refer to <<upgrade-assistant-api>>.
