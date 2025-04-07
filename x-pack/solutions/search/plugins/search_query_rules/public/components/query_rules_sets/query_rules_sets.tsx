@@ -37,16 +37,14 @@ export const QueryRulesSets = () => {
         defaultMessage: 'Query Rule Set',
       }),
       render: (name: string) => (
-        <div data-test-subj="query-rules-set-item-name">
-          <EuiLink
-            data-test-subj="searchQueryRulesColumnsLink"
-            onClick={() => {
-              // Navigate to the ruleset details page
-            }}
-          >
-            {name}
-          </EuiLink>
-        </div>
+        <EuiLink
+          data-test-subj="queryRuleSetName"
+          onClick={() => {
+            // Navigate to the ruleset details page
+          }}
+        >
+          {name}
+        </EuiLink>
       ),
     },
     {
@@ -55,23 +53,21 @@ export const QueryRulesSets = () => {
         defaultMessage: 'Rule Count',
       }),
       render: (ruleCount: number) => (
-        <div data-test-subj="query-rules-set-item-rule-count">{ruleCount}</div>
+        <div data-test-subj="queryRuleSetItemRuleCount">{ruleCount}</div>
       ),
     },
   ];
 
   return (
-    <>
-      <EuiBasicTable
-        data-test-subj="query-rules-set-table"
-        items={queryRulesData.data}
-        columns={columns}
-        pagination={pagination}
-        onChange={({ page: changedPage }) => {
-          setPageIndex(changedPage.index);
-          setPageSize(changedPage.size);
-        }}
-      />
-    </>
+    <EuiBasicTable
+      data-test-subj="queryRulesSetTable"
+      items={queryRulesData.data}
+      columns={columns}
+      pagination={pagination}
+      onChange={({ page: changedPage }) => {
+        setPageIndex(changedPage.index);
+        setPageSize(changedPage.size);
+      }}
+    />
   );
 };
