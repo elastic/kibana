@@ -130,7 +130,7 @@ export const getLinksEmbeddableFactory = () => {
           saveToLibrary: async (newTitle: string) => {
             defaultTitle$.next(newTitle);
             const runtimeState = api.snapshotRuntimeState();
-            const { attributes, references } = serializeLinksAttributes(runtimeState);
+            const { attributes, references } = serializeLinksAttributes(runtimeState, true);
             const {
               item: { id },
             } = await linksClient.create({
