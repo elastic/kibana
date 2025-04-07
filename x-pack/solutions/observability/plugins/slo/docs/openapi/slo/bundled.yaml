@@ -441,6 +441,11 @@ paths:
           schema:
             type: boolean
           example: true
+        - name: tags
+          in: query
+          description: 'Specify which SLO tags to query by (comma-separated list)'
+          schema:
+            type: string
         - name: search
           in: query
           description: Filters the SLOs by name
@@ -1470,7 +1475,7 @@ components:
           example: Bad Request
         message:
           type: string
-          example: 'Invalid value ''foo'' supplied to: [...]'
+          example: "Invalid value 'foo' supplied to: [...]"
     401_response:
       title: Unauthorized
       type: object

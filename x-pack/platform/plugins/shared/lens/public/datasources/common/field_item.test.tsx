@@ -175,17 +175,14 @@ describe('Lens Field Item', () => {
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   };
 
-  const getFieldNode = (index = 0) => {
-    return screen.getAllByTestId('lnsFieldListPanelField')[index];
-  };
-
   const queryProgressBar = () => screen.queryByRole('progressbar', { name: 'Loading' });
 
   const queryFieldStats = () => screen.queryByTestId('unifiedFieldStats-buttonGroup');
 
   it('should display displayName of a field', async () => {
     renderFieldItem();
-    expect(getFieldNode()).toHaveTextContent('bytes');
+    const [fieldNode] = await screen.findAllByTestId('lnsFieldListPanelField');
+    expect(fieldNode).toHaveTextContent('bytes');
   });
 
   it('should show gauge icon for gauge fields', async () => {

@@ -325,6 +325,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         investigations: new subPluginClasses.Investigations(),
         machineLearning: new subPluginClasses.MachineLearning(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
+        configurations: new subPluginClasses.Configurations(),
       };
     }
     return this._subPlugins;
@@ -361,6 +362,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
+      configurations: subPlugins.configurations.start(),
     };
   }
 
