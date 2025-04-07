@@ -40,6 +40,7 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
   const modelId = knowledgeBase.status.value?.endpoint?.service_settings?.model_id;
   const deploymentState = knowledgeBase.status.value?.model_stats?.deployment_state;
   const allocationState = knowledgeBase.status.value?.model_stats?.allocation_state;
+  const deploymentReason = knowledgeBase.status.value?.model_stats?.deployment_reason;
 
   return (
     <div
@@ -94,6 +95,19 @@ export function WelcomeMessageKnowledgeBaseSetupErrorPanel({
                     values={{
                       modelId: <EuiCode>{modelId}</EuiCode>,
                       allocationState: <EuiCode>{allocationState}</EuiCode>,
+                    }}
+                  />
+                </li>
+              ) : null}
+
+              {deploymentState && deploymentState !== 'started' && deploymentReason ? (
+                <li>
+                  <EuiIcon type="alert" color="subdued" />{' '}
+                  <FormattedMessage
+                    id="xpack.aiAssistant.welcomeMessage.modelIsNotStartedLabelReason"
+                    defaultMessage="reason: {reason}"
+                    values={{
+                      reason: <EuiCode>{deploymentReason}</EuiCode>,
                     }}
                   />
                 </li>

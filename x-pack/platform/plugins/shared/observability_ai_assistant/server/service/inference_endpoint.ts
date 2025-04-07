@@ -129,8 +129,13 @@ export async function getElserModelStatus({
   const elserModelStats = modelStats.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
+  // no deployment_stats means the model is not deployed / not deploying
+  if (!elserModelStats) {
+    return { endpoint, ready: false, enabled, errorMessage };
+  }
   const deploymentState = elserModelStats?.deployment_stats?.state;
   const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
+  const deploymentReason = elserModelStats?.deployment_stats?.reason;
   const allocationCount =
     elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
   const ready =
@@ -144,6 +149,7 @@ export async function getElserModelStatus({
       allocation_count: allocationCount,
       deployment_state: deploymentState,
       allocation_state: allocationState,
+      deployment_reason: deploymentReason,
     },
   };
 }

@@ -10,6 +10,7 @@ import { UseKnowledgeBaseResult } from '../use_knowledge_base';
 export function useKnowledgeBase(): UseKnowledgeBaseResult {
   return {
     install: async () => {},
+    kbState: 'NOT_INSTALLED',
     isInstalling: false,
     status: {
       loading: false,

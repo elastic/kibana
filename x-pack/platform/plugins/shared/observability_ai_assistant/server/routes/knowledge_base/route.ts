@@ -14,6 +14,7 @@ import {
   MlDeploymentAllocationState,
   MlDeploymentAssignmentState,
   MlTrainedModelDeploymentAllocationStatus,
+  MlTrainedModelDeploymentStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
@@ -38,6 +39,7 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
       deployment_state?: MlDeploymentAssignmentState;
       allocation_state?: MlDeploymentAllocationState;
       allocation_count?: MlTrainedModelDeploymentAllocationStatus['allocation_count'];
+      deployment_reason?: MlTrainedModelDeploymentStats['reason'];
     };
   }> => {
     const client = await service.getClient({ request });
