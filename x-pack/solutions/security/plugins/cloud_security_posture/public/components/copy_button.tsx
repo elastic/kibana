@@ -16,12 +16,7 @@ export const COPY_ARIA_LABEL = i18n.translate('xpack.csp.clipboard.copy', {
 export const CopyButton: React.FC<{ copyText: string }> = ({ copyText }) => (
   <EuiCopy textToCopy={copyText}>
     {(copy) => (
-      <EuiButtonIcon
-        color="text"
-        aria-label={COPY_ARIA_LABEL}
-        iconType="copy"
-        onClick={copy}
-      />
+      <EuiButtonIcon color="text" aria-label={COPY_ARIA_LABEL} iconType="copy" onClick={copy} />
     )}
   </EuiCopy>
 );

@@ -188,9 +188,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(({ value }: { value: str
                     defaultMessage: 'Open URL in window',
                   }
                 ),
-                title: i18n.translate('xpack.securitySolution.vulnerabilities.findingsDetailsTable.openUrlInWindow', {
-                  defaultMessage: 'Open URL in window',
-                }),
+                title: i18n.translate(
+                  'xpack.securitySolution.vulnerabilities.findingsDetailsTable.openUrlInWindow',
+                  {
+                    defaultMessage: 'Open URL in window',
+                  }
+                ),
               },
             ]
           : []),

@@ -164,12 +164,9 @@ export const LatestVulnerabilitiesTable = ({
               {
                 onClick: () => window.open(findReferenceLink(references, item)!, '_blank'),
                 iconType: 'popout',
-                ariaLabel: i18n.translate(
-                  'xpack.csp.latestVulnerabilities.table.openUrlInWindow',
-                  {
-                    defaultMessage: 'Open URL in window',
-                  }
-                ),
+                ariaLabel: i18n.translate('xpack.csp.latestVulnerabilities.table.openUrlInWindow', {
+                  defaultMessage: 'Open URL in window',
+                }),
                 title: i18n.translate('xpack.csp.latestVulnerabilities.table.openUrlInWindow', {
                   defaultMessage: 'Open URL in window',
                 }),
