@@ -31,7 +31,7 @@ export interface IndexErrorProps {
 }
 
 interface SemanticTextProperty extends MappingPropertyBase {
-  inference_id: string;
+  inference_id?: string;
   type: 'semantic_text';
 }
 

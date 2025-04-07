@@ -51,13 +51,11 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
   }
 
   private inferenceId;
-  private taskType;
 
   constructor(params: ServiceParams<Config, Secrets>) {
     super(params);
 
     this.provider = this.config.provider;
-    this.taskType = this.config.taskType;
     this.inferenceId = this.config.inferenceId;
     this.logger = this.logger;
     this.connectorID = this.connector.id;

@@ -11,7 +11,7 @@ import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type {
   TermsEnumRequest,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import supertest from 'supertest';
 import { APMEventClient, type APMEventESSearchRequest, type APMEventFieldCapsRequest } from '.';
@@ -201,7 +201,7 @@ describe('APMEventClient', () => {
       });
 
       const msearchParams = esClientMock.msearch.mock.calls[0][0] as {
-        searches: MsearchMultisearchBody[];
+        searches: SearchSearchRequestBody[];
       };
 
       expect(msearchParams.searches[1].query?.bool).toEqual({

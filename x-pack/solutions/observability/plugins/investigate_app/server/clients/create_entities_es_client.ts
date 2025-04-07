@@ -12,7 +12,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { entitiesAliasPattern, ENTITY_LATEST } from '@kbn/entities-schema';
 import { unwrapEsResponse } from '@kbn/observability-plugin/common/utils/unwrap_es_response';
 import {
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
 
@@ -99,7 +99,7 @@ export function createEntitiesESClient({
       const searches = allSearches
         .map((params) => {
           const { index, ...body } = params;
-          const searchParams: [MsearchMultisearchHeader, MsearchMultisearchBody] = [
+          const searchParams: [MsearchMultisearchHeader, SearchSearchRequestBody] = [
             {
               index: [index],
               ignore_unavailable: true,

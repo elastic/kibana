@@ -12,6 +12,7 @@ import {
   IndicesDataStream,
   IndicesDataStreamsStatsDataStreamsStatsItem,
   IndicesGetIndexTemplateIndexTemplateItem,
+  type IndicesIndexMode,
   SecurityHasPrivilegesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MeteringStats } from '../../../lib/types';
@@ -79,8 +80,8 @@ const enhanceDataStreams = ({
         (template) => template.name === dataStream.template
       );
       if (indexTemplate) {
-        enhancedDataStream.index_mode =
-          indexTemplate.index_template?.template?.settings?.index?.mode;
+        enhancedDataStream.index_mode = indexTemplate.index_template?.template?.settings?.index
+          ?.mode as IndicesIndexMode | undefined;
       }
     }
 
