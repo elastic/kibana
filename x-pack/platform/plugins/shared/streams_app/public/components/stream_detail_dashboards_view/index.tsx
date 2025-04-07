@@ -17,7 +17,7 @@ import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
 }) {
   const [query, setQuery] = useState('');
 
@@ -33,7 +33,7 @@ export function StreamDetailDashboardsView({
 
   const filteredDashboards = useMemo(() => {
     return linkedDashboards.filter((dashboard) => {
-      return dashboard.label.toLowerCase().includes(query.toLowerCase());
+      return dashboard.title.toLowerCase().includes(query.toLowerCase());
     });
   }, [linkedDashboards, query]);
 

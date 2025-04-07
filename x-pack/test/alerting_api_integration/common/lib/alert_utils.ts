@@ -6,11 +6,11 @@
  */
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
-import { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
-import { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
-import { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/snooze';
-import { Space, User } from '../types';
-import { ObjectRemover } from './object_remover';
+import type { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
+import type { SupertestWithoutAuthProviderType } from '@kbn/ftr-common-functional-services';
+import type { SnoozeBody } from '@kbn/alerting-plugin/common/routes/rule/apis/snooze';
+import type { Space, User } from '../types';
+import type { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
 import { getTestRuleData } from './get_test_rule_data';
 

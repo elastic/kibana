@@ -143,11 +143,10 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           'kbn-esql-validation-autocomplete.esql.validation.unsupportedColumnTypeForCommand',
           {
             defaultMessage:
-              '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
+              '{command} only supports values of type [{type}]. Found [{column}] of type [{givenType}]',
             values: {
               command: out.command,
               type: out.type,
-              typeCount: out.typeCount,
               column: out.column,
               givenType: out.givenType,
             },

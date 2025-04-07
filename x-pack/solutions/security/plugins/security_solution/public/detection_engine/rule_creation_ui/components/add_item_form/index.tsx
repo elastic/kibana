@@ -19,7 +19,7 @@ import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import styled from 'styled-components';
 
-import * as RuleI18n from '../../../../detections/pages/detection_engine/rules/translations';
+import * as RuleI18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
 

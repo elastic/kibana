@@ -9,13 +9,25 @@
 
 import { Command } from '@kbn/dev-cli-runner';
 import { initLogsDir } from '@kbn/test';
+import { FlagsReader } from '@kbn/dev-cli-runner';
+import { ToolingLog } from '@kbn/tooling-log';
 import { TEST_FLAG_OPTIONS } from '../playwright/runner';
-import { parseTestFlags, runTests as runTestsFn } from '../playwright/runner';
+import { parseTestFlags, runTests } from '../playwright/runner';
+
+export const runScoutPlaywrightConfig = async (flagsReader: FlagsReader, log: ToolingLog) => {
+  const options = await parseTestFlags(flagsReader);
+
+  if (options.logsDir) {
+    await initLogsDir(log, options.logsDir);
+  }
+
+  await runTests(log, options);
+};
 
 /**
  * Start servers and run the tests
  */
-export const runTests: Command<void> = {
+export const runTestsCmd: Command<void> = {
   name: 'run-tests',
   description: `
   Run a Scout Playwright config.
@@ -29,12 +41,6 @@ export const runTests: Command<void> = {
   `,
   flags: TEST_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {
-    const options = await parseTestFlags(flagsReader);
-
-    if (options.logsDir) {
-      await initLogsDir(log, options.logsDir);
-    }
-
-    await runTestsFn(log, options);
+    await runScoutPlaywrightConfig(flagsReader, log);
   },
 };
