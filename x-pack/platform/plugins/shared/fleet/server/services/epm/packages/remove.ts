@@ -106,6 +106,7 @@ export async function removeInstallation(options: {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'delete',
     id: pkgName,
+    name: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
