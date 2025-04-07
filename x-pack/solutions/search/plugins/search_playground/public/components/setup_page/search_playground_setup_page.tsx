@@ -64,7 +64,12 @@ export const SearchPlaygroundSetupPage: React.FC = () => {
                 />
               </span>
             </EuiTitle>{' '}
-            <EuiLink href="todo" target="_blank" external>
+            <EuiLink
+              href="todo"
+              target="_blank"
+              data-test-subj="search-playground-setup-documentationLink"
+              external
+            >
               <FormattedMessage
                 id="xpack.searchPlayground.setupPage.documentationLink"
                 defaultMessage="Read documentation"

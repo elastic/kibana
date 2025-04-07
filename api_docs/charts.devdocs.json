@@ -3464,21 +3464,6 @@
       },
       {
         "parentPluginId": "charts",
-        "id": "def-common.COLOR_MAPPING_SETTING",
-        "type": "string",
-        "tags": [],
-        "label": "COLOR_MAPPING_SETTING",
-        "description": [],
-        "signature": [
-          "\"visualization:colorMapping\""
-        ],
-        "path": "src/platform/plugins/shared/charts/common/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "charts",
         "id": "def-common.ColorMode",
         "type": "Type",
         "tags": [],

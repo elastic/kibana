@@ -21,16 +21,16 @@ export function defineDeleteRolesRoutes({ router }: RouteDefinitionParams) {
       options: {
         tags: ['oas-tag:roles'],
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: `This route delegates authorization to Core's scoped ES cluster client`,
+        },
+      },
     })
     .addVersion(
       {
         version: API_VERSIONS.roles.public.v1,
-        security: {
-          authz: {
-            enabled: false,
-            reason: `This route delegates authorization to Core's scoped ES cluster client`,
-          },
-        },
         validate: {
           request: {
             params: schema.object({ name: schema.string({ minLength: 1 }) }),

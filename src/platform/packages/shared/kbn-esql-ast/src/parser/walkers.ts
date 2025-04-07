@@ -29,7 +29,6 @@ import {
   type FieldContext,
   type FieldsContext,
   type AggFieldsContext,
-  type FromCommandContext,
   FunctionContext,
   IntegerLiteralContext,
   IsNullContext,
@@ -57,13 +56,13 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
   InlineCastContext,
-  IndexPatternContext,
   InlinestatsCommandContext,
   MatchExpressionContext,
   MatchBooleanExpressionContext,
+  MapExpressionContext,
+  EntryExpressionContext,
 } from '../antlr/esql_parser';
 import {
-  createSource,
   createColumn,
   createOption,
   nonNullable,
@@ -99,17 +98,14 @@ import {
   ESQLOrderExpression,
   ESQLBinaryExpression,
   InlineCastingType,
+  ESQLMap,
+  ESQLMapEntry,
+  ESQLStringLiteral,
+  ESQLAstExpression,
 } from '../types';
 import { firstItem, lastItem } from '../visitor/utils';
 import { Builder } from '../builder';
 import { getPosition } from './helpers';
-
-export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  const fromContexts = ctx
-    .indexPatternAndMetadataFields()
-    .getTypedRuleContexts(IndexPatternContext);
-  return fromContexts.map((sourceCtx) => createSource(sourceCtx));
-}
 
 function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
   const context = new ParserRuleContext();
@@ -441,15 +437,57 @@ export function visitPrimaryExpression(ctx: PrimaryExpressionContext): ESQLAstIt
       .booleanExpression_list()
       .flatMap(collectBooleanExpression)
       .filter(nonNullable);
+
     if (functionArgs.length) {
       fn.args.push(...functionArgs);
     }
+
+    const mapExpressionCtx = functionExpressionCtx.mapExpression();
+
+    if (mapExpressionCtx) {
+      const trailingMap = visitMapExpression(mapExpressionCtx);
+
+      fn.args.push(trailingMap);
+    }
+
     return fn;
   } else if (ctx instanceof InlineCastContext) {
     return collectInlineCast(ctx);
   }
   return createUnknownItem(ctx);
 }
+
+export const visitMapExpression = (ctx: MapExpressionContext): ESQLMap => {
+  const map = Builder.expression.map(
+    {},
+    {
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception),
+    }
+  );
+  const entryCtxs = ctx.entryExpression_list();
+
+  for (const entryCtx of entryCtxs) {
+    const entry = visitMapEntryExpression(entryCtx);
+
+    map.entries.push(entry);
+  }
+
+  return map;
+};
+
+export const visitMapEntryExpression = (ctx: EntryExpressionContext): ESQLMapEntry => {
+  const keyCtx = ctx._key;
+  const valueCtx = ctx._value;
+  const key = createLiteralString(keyCtx) as ESQLStringLiteral;
+  const value = getConstant(valueCtx) as ESQLAstExpression;
+  const entry = Builder.expression.entry(key, value, {
+    location: getPosition(ctx.start, ctx.stop),
+    incomplete: Boolean(ctx.exception),
+  });
+
+  return entry;
+};
 
 function collectInlineCast(ctx: InlineCastContext): ESQLInlineCast {
   const primaryExpression = visitPrimaryExpression(ctx.primaryExpression());

@@ -51,7 +51,7 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
-import { ensurePackageKibanaAssetsInstalled } from '../../services/ensure_kibana_assets_installed';
+import { ensurePackageKibanaAssetsInstalled } from '../../../../../services/ensure_kibana_assets_installed';
 
 import { useAgentless, useSetupTechnology } from './setup_technology';
 
