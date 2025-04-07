@@ -13636,11 +13636,11 @@
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
+                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/change_dataview.tsx"
               },
               {
                 "plugin": "unifiedSearch",
-                "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/change_dataview.tsx"
+                "path": "src/platform/plugins/shared/unified_search/public/query_string_input/fetch_index_patterns.ts"
               },
               {
                 "plugin": "@kbn/unified-field-list",
@@ -13747,6 +13747,10 @@
                 "path": "x-pack/platform/plugins/private/canvas/public/components/datasource/datasource_component.js"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/datasource.sagas.ts"
               },
@@ -13757,10 +13761,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/public/state_management/persistence.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/query_bar.tsx"
               },
               {
                 "plugin": "transform",
@@ -25712,6 +25712,18 @@
                 "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
+                "plugin": "fleet",
+                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
+              },
+              {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/logs.ts"
               },
@@ -25722,18 +25734,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/platform/plugins/private/graph/server/sample_data/flights.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/platform/plugins/shared/fleet/server/services/epm/kibana/assets/install.ts"
               },
               {
                 "plugin": "osquery",

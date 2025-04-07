@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { buildUp, tearDown } from '../../helpers';
 
 // eslint-disable-next-line import/no-default-export

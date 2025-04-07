@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
+
+const dashboardTitle = 'Change point detection';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const elasticChart = getService('elasticChart');
@@ -14,6 +17,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
+
+  const PageObjects = getPageObjects(['dashboard']);
 
   describe('change point detection in dashboard', function () {
     before(async () => {
@@ -24,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await ml.testResources.deleteDashboardByTitle(dashboardTitle);
       await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
@@ -43,6 +49,30 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         applyTimeRange: true,
         maxSeries: 1,
       });
+    });
+
+    it('attaches change point charts to a dashboard from the dashboard app', async () => {
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await aiops.dashboardEmbeddables.assertDashboardIsEmpty();
+      await aiops.dashboardEmbeddables.openEmbeddableInitializer(
+        EMBEDDABLE_CHANGE_POINT_CHART_TYPE
+      );
+
+      await aiops.dashboardEmbeddables.assertInitializerConfirmButtonEnabled(
+        'aiopsChangePointChartsInitializerConfirmButton',
+        false
+      );
+      await aiops.dashboardEmbeddables.assertChangePointChartEmbeddableDataViewSelectorExists();
+      await aiops.dashboardEmbeddables.selectChangePointChartEmbeddableDataView('ft_ecommerce');
+
+      await aiops.dashboardEmbeddables.assertInitializerConfirmButtonEnabled(
+        'aiopsChangePointChartsInitializerConfirmButton'
+      );
+      await aiops.dashboardEmbeddables.submitChangePointInitForm();
+      await aiops.dashboardEmbeddables.assertChangePointPanelExists();
+      await PageObjects.dashboard.saveDashboard(dashboardTitle);
     });
   });
 }

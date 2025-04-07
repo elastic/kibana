@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ActionGroup } from '@kbn/alerting-types';
+import type { ActionGroup } from '@kbn/alerting-types';
 
 export type OmitMessageVariablesType = 'all' | 'keepContext';
 

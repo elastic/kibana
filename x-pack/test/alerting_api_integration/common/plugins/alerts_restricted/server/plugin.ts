@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup } from '@kbn/core/server';
-import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
-import { AlertingServerSetup } from '@kbn/alerting-plugin/server/plugin';
-import { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { Plugin, CoreSetup } from '@kbn/core/server';
+import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server/plugin';
+import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';

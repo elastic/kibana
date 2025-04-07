@@ -16,7 +16,7 @@ const StreamDetailEnrichmentContent = dynamic(() =>
 );
 
 interface StreamDetailEnrichmentProps {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   refreshDefinition: () => void;
 }
 
@@ -24,8 +24,6 @@ export function StreamDetailEnrichment({
   definition,
   refreshDefinition,
 }: StreamDetailEnrichmentProps) {
-  if (!definition) return null;
-
   if (isRootStreamDefinition(definition.stream)) {
     return <RootStreamEmptyPrompt />;
   }

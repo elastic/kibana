@@ -12,6 +12,7 @@ import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
 import { servicesMock } from '../../../__mocks__/services';
+import { getPreviewDataMock } from '../../../__mocks__/get_preview_data';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
 
 const asyncAction =
@@ -40,6 +41,7 @@ const TabTemplate: StoryFn<TabProps> = (args) => (
   <Tab
     {...args}
     tabsSizeConfig={tabsSizeConfig}
+    getPreviewData={getPreviewDataMock}
     services={servicesMock}
     onLabelEdited={asyncAction('onLabelEdited')}
     onSelect={asyncAction('onSelect')}
