@@ -11,6 +11,7 @@
 
 // require('dotenv').config();
 
+const core = require('@actions/core');
 
 const { Octokit } = require('@octokit/rest');
 const axios = require('axios');
@@ -326,8 +327,14 @@ const run = async () => {
       body: report,
   });
 
+    core.setOutput('analysis_performed', true);
+    core.setOutput('breaches_dependency_slo', breachesDependencySLO);
+
     return { analysis_performed: true, breaches_dependency_slo: breachesDependencySLO };
   } catch (error) {
+
+    core.setOutput('analysis_performed', false);
+    core.setOutput('breaches_dependency_slo', false);
 
     console.error(`Action failed with error: ${error.message}\n${error.stack}`);
     return { analysis_performed: false, breaches_dependency_slo: false };
