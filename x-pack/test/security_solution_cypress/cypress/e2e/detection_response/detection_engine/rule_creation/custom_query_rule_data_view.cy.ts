@@ -30,42 +30,46 @@ import { fillAddFilterForm } from '../../../../tasks/search_bar';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('Custom query rules with data views - Rule Creation', { tags: ['@ess', '@serverless'] }, () => {
-  const rule = getDataViewRule();
+describe(
+  'Custom query rules with data views - Rule Creation',
+  { tags: ['@ess', '@serverless'] },
+  () => {
+    const rule = getDataViewRule();
 
-  beforeEach(() => {
-    if (rule.data_view_id != null) {
-      postDataView(rule.data_view_id);
-    }
-    deleteAlertsAndRules();
-    login();
-    visit(CREATE_RULE_URL);
-  });
-
-  afterEach(() => {
-    if (rule.data_view_id != null) {
-      deleteDataView(rule.data_view_id);
-    }
-  });
-
-  it('Creates and enables a new rule', function () {
-    fillDefineCustomRuleAndContinue(rule);
-    fillAboutRuleAndContinue(rule);
-    fillScheduleRuleAndContinue(rule);
-    createRuleWithoutEnabling();
-
-    cy.log('Asserting we have a new rule created');
-    cy.get(RULE_NAME_HEADER).should('contain', rule.name);
-  });
-
-  it('Adds filter on define step', () => {
-    fillDefineCustomRule(rule);
-    openAddFilterPopover();
-    fillAddFilterForm({
-      key: 'host.name',
-      operator: 'exists',
+    beforeEach(() => {
+      if (rule.data_view_id != null) {
+        postDataView(rule.data_view_id);
+      }
+      deleteAlertsAndRules();
+      login();
+      visit(CREATE_RULE_URL);
     });
-    // Check that newly added filter exists
-    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: exists');
-  });
-});
+
+    afterEach(() => {
+      if (rule.data_view_id != null) {
+        deleteDataView(rule.data_view_id);
+      }
+    });
+
+    it('Creates and enables a new rule', function () {
+      fillDefineCustomRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
+      createRuleWithoutEnabling();
+
+      cy.log('Asserting we have a new rule created');
+      cy.get(RULE_NAME_HEADER).should('contain', rule.name);
+    });
+
+    it('Adds filter on define step', () => {
+      fillDefineCustomRule(rule);
+      openAddFilterPopover();
+      fillAddFilterForm({
+        key: 'host.name',
+        operator: 'exists',
+      });
+      // Check that newly added filter exists
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: exists');
+    });
+  }
+);

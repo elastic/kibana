@@ -7,10 +7,7 @@
 
 import { getSavedQueryRule } from '../../../../objects/rule';
 
-import {
-  DEFINE_CONTINUE_BUTTON,
-  QUERY_BAR,
-} from '../../../../screens/create_new_rule';
+import { DEFINE_CONTINUE_BUTTON, QUERY_BAR } from '../../../../screens/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import { RULE_NAME_HEADER } from '../../../../screens/rule_details';
 

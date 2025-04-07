@@ -28,10 +28,7 @@ import {
 import { saveEditedRule, visitEditRulePage } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
-import {
-  assertDetailsNotExist,
-  getDetails,
-} from '../../../../tasks/rule_details';
+import { assertDetailsNotExist, getDetails } from '../../../../tasks/rule_details';
 import { createRule } from '../../../../tasks/api_calls/rules';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
@@ -70,8 +67,8 @@ describe('Saved query rules, rule edit', { tags: ['@ess', '@serverless'] }, () =
     const expectedCustomTestQuery = 'random test query';
     createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
       cy.log(JSON.stringify(response.body, null, 2));
-      createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined })).then(
-        (rule) => visitEditRulePage(rule.body.id)
+      createRule(getSavedQueryRule({ saved_id: response.body.id, query: undefined })).then((rule) =>
+        visitEditRulePage(rule.body.id)
       );
     });
 

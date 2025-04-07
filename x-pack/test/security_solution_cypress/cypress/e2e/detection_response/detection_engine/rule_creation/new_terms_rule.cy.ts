@@ -15,7 +15,7 @@ import {
   fillDefineNewTermsRuleAndContinue,
   fillScheduleRuleAndContinue,
   selectNewTermsRuleType,
-  createRuleWithoutEnabling
+  createRuleWithoutEnabling,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';

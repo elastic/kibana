@@ -36,44 +36,44 @@ describe(
     tags: ['@ess'],
   },
   () => {
-      beforeEach(() => {
-        deleteAlertsAndRules();
-        login();
-        visit(CREATE_RULE_URL);
-        startBasicLicense();
-      });
+    beforeEach(() => {
+      deleteAlertsAndRules();
+      login();
+      visit(CREATE_RULE_URL);
+      startBasicLicense();
+    });
 
-      it('cannot create rule with rule execution suppression on basic license for all rules with enabled suppression', () => {
-        // Default query rule
-        openSuppressionFieldsTooltipAndCheckLicense();
+    it('cannot create rule with rule execution suppression on basic license for all rules with enabled suppression', () => {
+      // Default query rule
+      openSuppressionFieldsTooltipAndCheckLicense();
 
-        selectIndicatorMatchType();
-        openSuppressionFieldsTooltipAndCheckLicense();
+      selectIndicatorMatchType();
+      openSuppressionFieldsTooltipAndCheckLicense();
 
-        selectNewTermsRuleType();
-        openSuppressionFieldsTooltipAndCheckLicense();
+      selectNewTermsRuleType();
+      openSuppressionFieldsTooltipAndCheckLicense();
 
-        selectEsqlRuleType();
-        openSuppressionFieldsTooltipAndCheckLicense();
+      selectEsqlRuleType();
+      openSuppressionFieldsTooltipAndCheckLicense();
 
-        selectEqlRuleType();
-        cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
-        cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
+      selectEqlRuleType();
+      cy.get(ALERT_SUPPRESSION_FIELDS_INPUT).should('be.disabled');
+      cy.get(ALERT_SUPPRESSION_FIELDS).trigger('mouseover');
 
-        // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
-        cy.get(TOOLTIP).contains('Platinum license');
+      // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
+      cy.get(TOOLTIP).contains('Platinum license');
 
-        // ML Rules require Platinum license
-        cy.get(MACHINE_LEARNING_TYPE).get('button').should('be.disabled');
+      // ML Rules require Platinum license
+      cy.get(MACHINE_LEARNING_TYPE).get('button').should('be.disabled');
 
-        selectThresholdRuleType();
-        cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.disabled');
-        cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).parent().trigger('mouseover');
-        // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
-        cy.get(TOOLTIP).contains('Platinum license');
+      selectThresholdRuleType();
+      cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('be.disabled');
+      cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).parent().trigger('mouseover');
+      // Platinum license is required, tooltip on disabled alert suppression checkbox should tell this
+      cy.get(TOOLTIP).contains('Platinum license');
 
-        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.disabled');
-        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).should('be.disabled');
+      cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).should('be.disabled');
+      cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).should('be.disabled');
     });
   }
 );

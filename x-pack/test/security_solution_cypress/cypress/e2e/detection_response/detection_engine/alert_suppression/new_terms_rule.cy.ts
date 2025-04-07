@@ -11,7 +11,7 @@ import {
   DEFINITION_DETAILS,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
-  SUPPRESS_MISSING_FIELD
+  SUPPRESS_MISSING_FIELD,
 } from '../../../../screens/rule_details';
 
 import { getDetails } from '../../../../tasks/rule_details';

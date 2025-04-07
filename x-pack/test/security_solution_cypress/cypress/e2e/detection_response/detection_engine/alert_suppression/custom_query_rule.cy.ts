@@ -35,7 +35,7 @@ describe('Custom Query Rule - Alert suppression', { tags: ['@ess', '@serverless'
   beforeEach(() => {
     deleteAlertsAndRules();
     login();
-      visit(CREATE_RULE_URL);
+    visit(CREATE_RULE_URL);
   });
 
   const SUPPRESS_BY_FIELDS = ['source.ip'];
