@@ -637,7 +637,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         },
       });
     });
-    it('should return status = failed if versions do not match', async () => {
+    it('should return status = synchronizing if versions do not match', async () => {
       const searchMockWithVersionedPipeline = jest.fn().mockResolvedValue({
         hits: {
           hits: [
@@ -749,9 +749,8 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
-            sync_status: 'failed',
+            sync_status: 'synchronizing',
             type: 'ingest_pipeline',
-            error: 'Found incorrect installed version 1',
           },
         },
       });

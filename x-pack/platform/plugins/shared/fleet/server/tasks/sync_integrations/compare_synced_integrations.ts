@@ -247,8 +247,7 @@ const compareCustomAssets = ({
     ) {
       return {
         ...result,
-        sync_status: 'failed' as SyncStatus.FAILED,
-        error: `Found incorrect installed version ${installedPipeline.version}`,
+        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
       return {
