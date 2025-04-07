@@ -69,7 +69,7 @@ jobs:
                       "type": "plain_text",
                       "text": "View Pull Request"
                     },
-                    "url": "${{ github.event.pull_request.html_url }}"
+                    "url": "https://github.com/elastic/kibana/pull/217011"
                   }
                 ]
               }
