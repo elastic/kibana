@@ -6,8 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiComment, EuiPanel } from '@elastic/eui';
+import { EuiComment, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ContentRef } from '@kbn/wci-common';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import { ChatMessageText } from './chat_message_text';
 import { ChatMessageAvatar } from './chat_message_avatar';
@@ -15,6 +16,7 @@ import {
   type UserMessageConversationItem,
   type AssistantMessageConversationItem,
   isUserMessageItem,
+  isAssistantMessageItem,
 } from '../../utils/conversation_items';
 
 type UserOrAssistantMessageItem = UserMessageConversationItem | AssistantMessageConversationItem;
@@ -47,6 +49,8 @@ export const ChatConversationMessage: React.FC<ChatConversationMessageProps> = (
     return message.message.content;
   }, [message]);
 
+  const citations = isAssistantMessageItem(message) ? message.message.citations : [];
+
   return (
     <EuiComment
       username={getUserLabel(message)}
@@ -63,7 +67,39 @@ export const ChatConversationMessage: React.FC<ChatConversationMessageProps> = (
     >
       <EuiPanel hasShadow={false} paddingSize="s">
         <ChatMessageText content={messageContent} loading={message.loading} />
+        {citations.length > 0 && (
+          <>
+            <EuiSpacer />
+            <ChatMessageCitations citations={citations} />
+          </>
+        )}
       </EuiPanel>
     </EuiComment>
+  );
+};
+
+export const ChatMessageCitations: React.FC<{ citations: ContentRef[] }> = ({ citations }) => {
+  const renderCitation = (citation: ContentRef) => {
+    return (
+      <EuiFlexItem grow={false}>
+        <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s">
+          <EuiText size="s">Document</EuiText>
+          <EuiText size="s" color="subdued">
+            ID: {citation.contentId}
+          </EuiText>
+          <EuiText size="s" color="subdued">
+            Integration: {citation.sourceId}
+          </EuiText>
+        </EuiPanel>
+      </EuiFlexItem>
+    );
+  };
+
+  return (
+    <EuiPanel hasShadow={false} hasBorder={true} paddingSize="s" grow={false}>
+      <EuiText>Sources</EuiText>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup>{citations.map(renderCitation)}</EuiFlexGroup>
+    </EuiPanel>
   );
 };
