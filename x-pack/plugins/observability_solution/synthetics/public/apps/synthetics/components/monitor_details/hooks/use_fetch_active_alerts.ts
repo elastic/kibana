@@ -48,6 +48,11 @@ export function useFetchActiveAlerts() {
                   'location.id': selectedLocation?.id,
                 },
               },
+              {
+                term: {
+                  'kibana.alert.status': 'active',
+                },
+              },
             ],
           },
         },
@@ -58,6 +63,6 @@ export function useFetchActiveAlerts() {
   return {
     loading,
     data,
-    numberOfAlerts: data?.hits?.total.value ?? 0,
+    numberOfActiveAlerts: data?.hits?.total.value ?? 0,
   };
 }
