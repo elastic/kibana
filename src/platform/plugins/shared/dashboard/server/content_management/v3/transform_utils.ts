@@ -144,11 +144,9 @@ export const itemToSavedObject = ({
 }: ItemToSavedObjectParams): ItemToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
-    const { panelsJSON, references: panelReferences } = transformPanelsIn(
-      panels,
-      embeddable,
-      references
-    );
+    const { panelsJSON, references: extractedReferences } = panels
+      ? transformPanelsIn(panels, embeddable, references)
+      : { panelsJSON: '[]', references };
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -164,7 +162,7 @@ export const itemToSavedObject = ({
     };
     return {
       attributes: soAttributes,
-      references: [...references, ...panelReferences],
+      references: extractedReferences,
       error: null,
     };
   } catch (e) {

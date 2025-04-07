@@ -22,10 +22,14 @@ import {
   savedObjectLinksAttributesSchema as linksAttributesSchemaV1,
 } from '../../saved_objects/schema/v1';
 
-const dashboardLinkSchema = dashboardLinkSchemaV1.extends({
-  destinationRefName: schema.string({ meta: { deprecated: true } }),
-  destination: schema.string(),
-});
+const dashboardLinkSchema = schema.oneOf([
+  dashboardLinkSchemaV1.extends({
+    destinationRefName: schema.string({ meta: { deprecated: true } }),
+  }),
+  dashboardLinkSchemaV1.extends({
+    destination: schema.string(),
+  }),
+]);
 
 export const linksAttributesSchema = linksAttributesSchemaV1.extends({
   links: schema.arrayOf(schema.oneOf([dashboardLinkSchema, externalLinkSchema])),
