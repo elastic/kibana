@@ -34,6 +34,7 @@ import {
   ExecuteConnectorRequestBody,
   Replacements,
   ContentReferencesStore,
+  EntityResolutionPostRequestBody,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
@@ -261,7 +262,10 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostRequestBody
+    | DefendInsightsPostRequestBody
+    | EntityResolutionPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
