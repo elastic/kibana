@@ -77,7 +77,8 @@ export function initSelectionsManager(
       combineLatest([filters$, unpublishedFilters$, timeslice$, unpublishedTimeslice$]).subscribe(
         ([filters, unpublishedFilters, timeslice, unpublishedTimeslice]) => {
           const next =
-            !deepEqual(timeslice, unpublishedTimeslice) || !deepEqual(filters, unpublishedFilters);
+            !deepEqual(timeslice, unpublishedTimeslice) ||
+            hasUnpublishedChange(filters, unpublishedFilters);
           if (hasUnappliedSelections$.value !== next) {
             hasUnappliedSelections$.next(next);
           }
@@ -99,12 +100,19 @@ export function initSelectionsManager(
   });
 
   function applySelections() {
-    if (!deepEqual(filters$.value, unpublishedFilters$.value)) {
+    if (hasUnpublishedChange(filters$.value, unpublishedFilters$.value)) {
       filters$.next(unpublishedFilters$.value);
     }
     if (!deepEqual(timeslice$.value, unpublishedTimeslice$.value)) {
       timeslice$.next(unpublishedTimeslice$.value);
     }
+  }
+
+  function hasUnpublishedChange(
+    filters: Filter[] | undefined = [],
+    unpublishedFilters: Filter[] | undefined = []
+  ) {
+    return !deepEqual(filters, unpublishedFilters);
   }
 
   return {
