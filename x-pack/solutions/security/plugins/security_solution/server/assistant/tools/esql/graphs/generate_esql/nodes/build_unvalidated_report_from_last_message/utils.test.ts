@@ -7,8 +7,8 @@
 
 import { lastMessageWithUnvalidatedReport } from './utils';
 
-describe('esql self healing validator utils', () => {
-  it('with errors', () => {
+describe('utils', () => {
+  it('lastMessageWithUnvalidatedReport', () => {
     const response = `
 Here is the ES|QL query to retrieve 10 items from the ".data.hello" index:
 
@@ -30,7 +30,7 @@ Here is the ES|QL query to retrieve 10 items from the ".data.hello" index:
 FROM ".data.hello"
 | LIMIT 10
 
-// The resulting query was generated as a best effort example, but we are unable to validate it, as the suitable data could not be found.
+// This query was not validated.
 \`\`\`
 
 This query limits the results to 10 items from the specified index. Let me know if you need further assistance!
