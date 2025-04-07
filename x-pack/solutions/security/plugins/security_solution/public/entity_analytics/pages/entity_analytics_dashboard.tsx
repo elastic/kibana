@@ -23,11 +23,25 @@ import { EntityStoreDashboardPanels } from '../components/entity_store/component
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useStoreEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 const EntityAnalyticsComponent = () => {
   const [skipEmptyPrompt, setSkipEmptyPrompt] = React.useState(false);
   const onSkip = React.useCallback(() => setSkipEmptyPrompt(true), [setSkipEmptyPrompt]);
-  const { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+  let { indicesExist, loading: isSourcererLoading, sourcererDataView } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataView, status } = useDataView();
+  const { dataViewSpec } = useDataViewSpec();
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = dataViewSpec;
+    indicesExist = !!dataView?.matchedIndices.length;
+    isSourcererLoading = status !== 'ready';
+  }
+
   const isEntityStoreFeatureFlagDisabled = useIsExperimentalFeatureEnabled('entityStoreDisabled');
   const showEmptyPrompt = !indicesExist && !skipEmptyPrompt;
   const entityTypes = useStoreEntityTypes();

@@ -9,14 +9,28 @@ import React, { useCallback } from 'react';
 import { EuiWrappingPopover } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { StatefulTopN } from '../../../common/components/top_n';
 import { getScopeFromPath } from '../../../sourcerer/containers/sourcerer_paths';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../../common/lib/kibana';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
 
 export const TopValuesPopover = React.memo(() => {
   const { pathname } = useLocation();
-  const { browserFields, sourcererDataView } = useSourcererDataView(getScopeFromPath(pathname));
+  let { browserFields, sourcererDataView } = useSourcererDataView(getScopeFromPath(pathname));
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataViewSpec } = useDataViewSpec();
+  const experimentalBrowserFields = useBrowserFields();
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = dataViewSpec;
+    browserFields = experimentalBrowserFields;
+  }
+
   const {
     services: { topValuesPopover },
   } = useKibana();

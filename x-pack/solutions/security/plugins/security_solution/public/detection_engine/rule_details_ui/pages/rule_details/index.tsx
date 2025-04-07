@@ -39,6 +39,7 @@ import {
   TableId,
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import {
   defaultGroupStatsAggregations,
   defaultGroupStatsRenderer,
@@ -260,9 +261,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
 
-  const { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
+  let { sourcererDataView, loading: isLoadingIndexPattern } = useSourcererDataView(
     SourcererScopeName.detections
   );
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+
+  const { dataViewSpec, status } = useDataViewSpec(SourcererScopeName.detections);
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = dataViewSpec;
+    isLoadingIndexPattern = status !== 'ready';
+  }
 
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{

@@ -35,6 +35,9 @@ import type { RiskEngineMissingPrivilegesResponse } from '../hooks/use_missing_r
 import { userHasRiskEngineReadPermissions } from '../common';
 import { EntityIconByType } from './entity_store/helpers';
 import { useRiskEngineEntityTypes } from '../hooks/use_enabled_entity_types';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
+
 interface IRiskScorePreviewPanel {
   showMessage: React.ReactNode;
   hideMessage: React.ReactNode;
@@ -148,7 +151,14 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
 
-  const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+  let { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec();
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = dataViewSpec;
+  }
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
     data_view_id: sourcererDataView.title,

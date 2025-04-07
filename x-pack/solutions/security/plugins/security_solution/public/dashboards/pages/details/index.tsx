@@ -12,6 +12,7 @@ import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
@@ -30,6 +31,7 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
+import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;
@@ -51,7 +53,14 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   );
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
-  const { sourcererDataView } = useSourcererDataView();
+  let { sourcererDataView } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec();
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = dataViewSpec;
+  }
 
   const { show: canReadDashboard } = useCapabilities<DashboardCapabilities>('dashboard_v2');
   const errorState = useMemo(
@@ -75,7 +84,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
       <SecuritySolutionPageWrapper>
         <EuiFlexGroup
           direction="column"
-          style={dashboardViewFlexGroupStyle}
+          css={dashboardViewFlexGroupStyle}
           gutterSize="none"
           data-test-subj="dashboard-view-wrapper"
         >

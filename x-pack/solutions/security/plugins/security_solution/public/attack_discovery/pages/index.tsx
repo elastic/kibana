@@ -44,6 +44,8 @@ import { SettingsFlyout } from './settings_flyout';
 import { parseFilterQuery } from './settings_flyout/parse_filter_query';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useAttackDiscovery } from './use_attack_discovery';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useDataViewSpec } from '../../data_view_manager/hooks/use_data_view_spec';
 
 export const ID = 'attackDiscoveryQuery';
 
@@ -178,7 +180,14 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   const pageTitle = useMemo(() => <PageTitle />, []);
 
-  const { sourcererDataView } = useSourcererDataView();
+  let { sourcererDataView } = useSourcererDataView();
+
+  const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
+  const { dataViewSpec } = useDataViewSpec();
+
+  if (newDataViewPickerEnabled) {
+    sourcererDataView = dataViewSpec;
+  }
 
   // filterQuery is the combined search bar query and filters in ES format:
   const [filterQuery, kqlError] = useMemo(
