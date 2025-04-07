@@ -5782,16 +5782,16 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.DissectProcessorConfig",
-            "text": "DissectProcessorConfig"
+            "section": "def-common.GrokProcessorConfig",
+            "text": "GrokProcessorConfig"
           },
           " | ",
           {
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.GrokProcessorConfig",
-            "text": "GrokProcessorConfig"
+            "section": "def-common.DissectProcessorConfig",
+            "text": "DissectProcessorConfig"
           },
           " | ",
           {
