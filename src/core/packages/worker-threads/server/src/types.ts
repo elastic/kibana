@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
+import { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 import { Logger } from '@kbn/logging';
+import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
+import { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
+import { CoreUiSettingsRouteHandlerContext } from '@kbn/core-ui-settings-server-internal';
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -35,18 +40,26 @@ export type RouteWorker<
   {
     logger: Logger;
     core: {
-      elasticsearch: ElasticsearchRequestHandlerContext;
+      elasticsearch: Promise<ElasticsearchRequestHandlerContext>;
+      savedObjects: Promise<SavedObjectsRequestHandlerContext>;
+      uiSettings: Promise<UiSettingsRequestHandlerContext>;
     };
   }
 >;
 
 export interface WorkerThreadsRequestClient {
   run<TInput extends WorkerParams, TOutput extends WorkerParams>(
-    filenameOrImport: string | Promise<RouteWorker<TInput, TOutput>>,
+    filename: Promise<RouteWorker<TInput, TOutput>>,
     {}: { input: TInput; signal?: AbortSignal }
   ): Promise<TOutput>;
 }
 
 export interface WorkerParams {
   [x: string]: Primitive | Primitive[] | SharedArrayBuffer;
+}
+
+export interface RouteWorkerCoreRequestContext {
+  elasticsearch: Promise<CoreElasticsearchRouteHandlerContext>;
+  savedObjects: Promise<CoreSavedObjectsRouteHandlerContext>;
+  uiSettings: Promise<CoreUiSettingsRouteHandlerContext>;
 }

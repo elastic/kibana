@@ -364,6 +364,8 @@ export class Server {
 
     const workerThreadsSetup = this.workerThreads.setup({
       elasticsearch: elasticsearchServiceSetup,
+      savedObjects: savedObjectsSetup,
+      uiSettings: uiSettingsSetup,
     });
 
     const coreSetup: InternalCoreSetup = {
@@ -468,6 +470,8 @@ export class Server {
 
     const workerThreadsStart = await this.workerThreads.start({
       elasticsearch: elasticsearchStart,
+      savedObjects: savedObjectsStart,
+      uiSettings: uiSettingsStart,
     });
 
     this.coreStart = {

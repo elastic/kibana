@@ -8,31 +8,33 @@
  */
 
 import { KibanaRequest } from '@kbn/core-http-server';
-import Piscina from 'piscina';
-import { fromEvent, merge, of } from 'rxjs';
-import {
+import type {
   RouteWorker,
   WorkerParams,
   WorkerThreadsRequestClient,
 } from '@kbn/core-worker-threads-server/src/types';
+import Piscina from 'piscina';
+import { fromEvent, merge, of } from 'rxjs';
 import { isPromise } from 'util/types';
 
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
 import { Logger } from '@kbn/logging';
+import { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
+import { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
 import { InternalRouteWorkerParams } from './types';
+import { createLazyRouteContext } from './create_lazy_route_context';
 
 export interface InternalWorkerThreadsClientConfig {
-  elasticsearch: InternalElasticsearchServiceStart;
   request: KibanaRequest;
+  elasticsearch: InternalElasticsearchServiceStart;
+  savedObjects: InternalSavedObjectsServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
   pool: Piscina;
   logger: Logger;
 }
 
 export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
   private readonly abortController: AbortController;
-
-  private client?: IScopedClusterClient;
 
   constructor(private readonly config: InternalWorkerThreadsClientConfig) {
     this.abortController = new AbortController();
@@ -42,7 +44,7 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
     filenameOrImport: string | Promise<RouteWorker<TInput, TOutput>>,
     { input, signal }: { input: TInput; signal?: AbortSignal }
   ) {
-    const { request, pool } = this.config;
+    const { request, pool, elasticsearch, logger, savedObjects, uiSettings } = this.config;
     const controller = new AbortController();
 
     merge(request.events.aborted$, signal ? fromEvent(signal, 'abort') : of()).subscribe({
@@ -52,19 +54,17 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
     });
 
     if (isPromise(filenameOrImport)) {
-      if (!this.client) {
-        this.client = this.config.elasticsearch.client.asScoped(request);
-      }
       const worker = await filenameOrImport;
       return worker.run({
         input,
         signal,
-        core: {
-          elasticsearch: {
-            client: this.client,
-          },
-        },
-        logger: this.config.logger,
+        core: createLazyRouteContext({
+          request,
+          elasticsearchStart$: of(elasticsearch),
+          savedObjectsStart$: of(savedObjects),
+          uiSettingsStart$: of(uiSettings),
+        }),
+        logger,
       });
     }
 

@@ -12,13 +12,17 @@ import {
   InternalElasticsearchServiceStart,
 } from '@kbn/core-elasticsearch-server-internal';
 import { KibanaRequest } from '@kbn/core-http-server';
-import { WorkerThreadsRequestClient } from '@kbn/core-worker-threads-server/src/types';
+import {
+  InternalSavedObjectsServiceSetup,
+  InternalSavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server-internal';
+import {
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from '@kbn/core-ui-settings-server-internal';
 import { Logger } from '@kbn/logging';
-import Fs from 'fs';
 import Path from 'path';
-import Os from 'os';
 import Piscina from 'piscina';
-import { finished } from 'stream/promises';
 import { InternalWorkerThreadsClient } from './client';
 import { InternalRouteWorkerData } from './types';
 import { serialize } from './utils';
@@ -33,15 +37,19 @@ export interface InternalWorkerThreadsServiceSetup {}
  * @internal
  */
 export interface InternalWorkerThreadsServiceStart {
-  getClientWithRequest: (request: KibanaRequest) => WorkerThreadsRequestClient;
+  getClientWithRequest: (request: KibanaRequest) => InternalWorkerThreadsClient;
 }
 
 interface SetupDeps {
   elasticsearch: InternalElasticsearchServiceSetup;
+  uiSettings: InternalUiSettingsServiceSetup;
+  savedObjects: InternalSavedObjectsServiceSetup;
 }
 
 interface StartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
+  uiSettings: InternalUiSettingsServiceStart;
+  savedObjects: InternalSavedObjectsServiceStart;
 }
 
 /** @internal */
@@ -59,7 +67,11 @@ export class WorkerThreadsService
     return {};
   }
 
-  public async start({ elasticsearch }: StartDeps): Promise<InternalWorkerThreadsServiceStart> {
+  public async start({
+    elasticsearch,
+    savedObjects,
+    uiSettings,
+  }: StartDeps): Promise<InternalWorkerThreadsServiceStart> {
     const services = await serialize({
       ConfigService: this.coreContext.configService,
       Env: this.coreContext.env,
@@ -70,36 +82,18 @@ export class WorkerThreadsService
       workerData: {
         services,
       } satisfies InternalRouteWorkerData,
-      minThreads: 4,
+      minThreads: 1,
       idleTimeout: 2000,
     }));
 
-    setTimeout(() => {
-      const workers = routeWorkerPool.threads;
-
-      const tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'worker-heap-snapshot'));
-      Promise.allSettled(
-        workers.map(async (w) => {
-          const snapshotStream = await w.getHeapSnapshot();
-          const filePath = Path.join(tmpDir, `worker-${w.threadId}-heap.heapsnapshot`);
-          const fileStream = Fs.createWriteStream(filePath);
-
-          snapshotStream.pipe(fileStream);
-
-          this.log.info(`Writing heap snapshot for ${w.threadId}`);
-
-          await finished(fileStream);
-
-          this.log.info(`Wrote heap snapshot for ${w.threadId} to ${filePath}`);
-        })
-      ).then((results) => {});
-    }, 5000);
     return {
       getClientWithRequest: (request: KibanaRequest) => {
         return new InternalWorkerThreadsClient({
           request,
-          pool: routeWorkerPool,
           elasticsearch,
+          savedObjects,
+          uiSettings,
+          pool: routeWorkerPool,
           logger: this.log,
         });
       },

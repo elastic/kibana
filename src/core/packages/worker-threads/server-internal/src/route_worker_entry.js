@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-//eslint-disable-next-line @kbn/imports/no_boundary_crossing
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 require('../../../../../setup_node_env');
-//eslint-disable-next-line @kbn/imports/no_boundary_crossing
-// require('../../../../../setup_node_env/dns_ipv4_first');
-// require('@kbn/security-hardening');
+require('@kbn/security-hardening');
+
 module.exports = require('./route_worker');
