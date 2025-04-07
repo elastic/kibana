@@ -13,14 +13,14 @@ import { indicesCreateRequests } from './indices_create_requests';
 import { indexRequests } from './index_requests';
 
 const ENVIRONMENTS = ['production', 'staging', 'development'];
-export class PrepareIndicesForAssistantGraphEvalusations extends PrepareIndicesForEvaluations {
+export class PrepareIndicesForAssistantGraphEvaluations extends PrepareIndicesForEvaluations {
   constructor({ esClient, logger }: { esClient: ElasticsearchClient; logger: Logger }) {
     super({
       esClient,
-      indicesCreateRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(
+      indicesCreateRequests: PrepareIndicesForAssistantGraphEvaluations.hydrateRequestTemplate(
         Object.values(indicesCreateRequests)
       ),
-      indexRequests: PrepareIndicesForAssistantGraphEvalusations.hydrateRequestTemplate(
+      indexRequests: PrepareIndicesForAssistantGraphEvaluations.hydrateRequestTemplate(
         Object.values(indexRequests)
       ),
       logger,
