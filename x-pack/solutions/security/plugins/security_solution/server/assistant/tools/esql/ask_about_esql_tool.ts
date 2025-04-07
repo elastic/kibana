@@ -12,8 +12,11 @@ import { lastValueFrom } from 'rxjs';
 import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import { APP_UI_ID } from '../../../../common';
 import { getPromptSuffixForOssModel } from './utils/common';
+import { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
 
-export type ESQLToolParams = AssistantToolParams;
+export type ESQLToolParams = AssistantToolParams & {
+    assistantContext: ElasticAssistantApiRequestHandlerContext;
+};
 
 const TOOL_NAME = 'AskAboutEsqlTool';
 
@@ -37,15 +40,16 @@ Never use this tool when the user wants to generate a ES|QL for their data.`,
 export const ASK_ABOUT_ESQL_TOOL: AssistantTool = {
   ...toolDetails,
   sourceRegister: APP_UI_ID,
-  isSupported: (params: ESQLToolParams): params is ESQLToolParams => {
+  isSupported: (params: AssistantToolParams): params is ESQLToolParams => {
     const { inference, connectorId, assistantContext } = params;
     return (
       inference != null &&
       connectorId != null &&
+      assistantContext != null &&
       assistantContext.getRegisteredFeatures('securitySolutionUI').advancedEsqlGeneration
     );
   },
-  getTool(params: ESQLToolParams) {
+  getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
     const { connectorId, inference, logger, request, isOssModel } = params as ESQLToolParams;
