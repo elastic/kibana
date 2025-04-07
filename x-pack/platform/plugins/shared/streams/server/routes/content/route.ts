@@ -11,6 +11,7 @@ import { createListStream } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import { contentPackIncludedObjectsSchema, isIncludeAll } from '@kbn/content-packs-schema';
 import { Asset } from '../../../common';
+import { DashboardAsset, DashboardLink } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
@@ -58,10 +59,9 @@ const exportContentRoute = createServerRoute({
     const dashboards = (await assetClient.getAssets(params.path.name))
       .filter(isDashboard)
       .filter(
-          ({ assetId }) =>
-            isIncludeAll(params.body.include) ||
-              params.body.include.objects.dashboards.includes(assetId)
-        )
+        (dashboard) =>
+          isIncludeAll(params.body.include) ||
+          params.body.include.objects.dashboards.includes(dashboard['asset.id'])
       );
     if (dashboards.length === 0) {
       throw new StatusError('No included objects were found', 400);
