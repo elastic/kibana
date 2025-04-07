@@ -31,8 +31,8 @@ export function ClassicStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
-    path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+    path: { key, tab },
+  } = useStreamsAppParams('/{key}/management/{tab}');
 
   if (!definition.data_stream_exists) {
     return (
@@ -86,11 +86,9 @@ export function ClassicStreamDetailManagement({
     }),
   };
 
-  if (!isValidManagementSubTab(subtab)) {
-    return (
-      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'enrich' } }} />
-    );
+  if (!isValidManagementSubTab(tab)) {
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'enrich' } }} />;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
+  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
 }

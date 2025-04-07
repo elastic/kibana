@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageSectionProps, EuiPageTemplate } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamsAppPageTemplate({ children }: { children: React.ReactNode }) {
@@ -23,5 +24,17 @@ export function StreamsAppPageTemplate({ children }: { children: React.ReactNode
 }
 
 StreamsAppPageTemplate.Header = EuiPageTemplate.Header;
-StreamsAppPageTemplate.Body = EuiPageTemplate.Section;
 StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
+StreamsAppPageTemplate.Body = (props: EuiPageSectionProps) => (
+  <EuiPageTemplate.Section
+    grow
+    contentProps={{
+      css: css`
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      `,
+    }}
+    {...props}
+  />
+);

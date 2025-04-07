@@ -4,28 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiBadge } from '@elastic/eui';
+import { EuiFlexGroup, EuiButton, EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { css } from '@emotion/css';
-import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import {
-  IngestStreamEffectiveLifecycle,
-  IngestStreamGetResponse,
-  isDslLifecycle,
-  isErrorLifecycle,
-  isIlmLifecycle,
-  isUnwiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
-import { EntityOverviewTabList } from '../entity_overview_tab_list';
 import { LoadingPanel } from '../loading_panel';
-import { StreamsAppPageBody } from '../streams_app_page_body';
-import { StreamsAppPageHeader } from '../streams_app_page_header';
-import { StreamsAppPageHeaderTitle } from '../streams_app_page_header/streams_app_page_header_title';
-import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
+import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 
 export interface EntityViewTab {
   name: string;
@@ -46,7 +33,7 @@ export function EntityDetailViewWithoutParams({
     displayName?: string;
     id: string;
   };
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
 }) {
   const router = useStreamsAppRouter();
   useStreamsAppBreadcrumbs(() => {
@@ -92,18 +79,10 @@ export function EntityDetailViewWithoutParams({
         pageTitle={
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {entity.displayName}
-            {definition && isUnwiredStreamDefinition(definition.stream) ? (
-              <>
-                {' '}
-                <EuiBadge>
-                  {i18n.translate(
-                    'xpack.streams.entityDetailViewWithoutParams.unmanagedBadgeLabel',
-                    { defaultMessage: 'Classic' }
-                  )}
-                </EuiBadge>
-              </>
-            ) : null}
-            {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
+            <EuiBadgeGroup gutterSize="s">
+              {isUnwiredStreamDefinition(definition.stream) && <ClassicStreamBadge />}
+              <LifecycleBadge lifecycle={definition.effective_lifecycle} />
+            </EuiBadgeGroup>
           </EuiFlexGroup>
         }
         tabs={Object.entries(tabMap).map(([tabKey, { label, href }]) => {
@@ -113,66 +92,22 @@ export function EntityDetailViewWithoutParams({
             isSelected: selectedTab === tabKey,
           };
         })}
+        rightSideItems={[
+          <EuiButton
+            iconType="gear"
+            href={router.link('/{key}/management/{tab}', {
+              path: { key: entity.id, tab: 'route' },
+            })}
+          >
+            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.manageStreamLabel', {
+              defaultMessage: 'Manage stream',
+            })}
+          </EuiButton>,
+        ]}
       />
-      <StreamsAppPageTemplate.Body grow>{selectedTabObject.content}</StreamsAppPageTemplate.Body>
+      <StreamsAppPageTemplate.Body color={selectedTabObject.background ? 'plain' : 'subdued'}>
+        {selectedTabObject.content}
+      </StreamsAppPageTemplate.Body>
     </>
-  );
-}
-
-function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
-  const {
-    dependencies: {
-      start: { share },
-    },
-  } = useKibana();
-  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
-
-  if (isIlmLifecycle(lifecycle)) {
-    return (
-      <EuiBadge color="hollow">
-        <EuiLink
-          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
-          color="text"
-          href={ilmLocator?.getRedirectUrl({
-            page: 'policy_edit',
-            policyName: lifecycle.ilm.policy,
-          })}
-        >
-          {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
-            defaultMessage: 'ILM Policy: {name}',
-            values: { name: lifecycle.ilm.policy },
-          })}
-        </EuiLink>
-      </EuiBadge>
-    );
-  }
-
-  if (isErrorLifecycle(lifecycle)) {
-    return (
-      <EuiBadge color="hollow">
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
-          defaultMessage: 'Error: {message}',
-          values: { message: lifecycle.error.message },
-        })}
-      </EuiBadge>
-    );
-  }
-  if (isDslLifecycle(lifecycle)) {
-    return (
-      <EuiBadge color="hollow">
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
-          defaultMessage: 'Retention: {retention}',
-          values: { retention: lifecycle.dsl.data_retention || '∞' },
-        })}
-      </EuiBadge>
-    );
-  }
-
-  return (
-    <EuiBadge color="hollow">
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
-        defaultMessage: 'Retention: Disabled',
-      })}
-    </EuiBadge>
   );
 }

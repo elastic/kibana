@@ -31,8 +31,8 @@ export function WiredStreamDetailManagement({
   refreshDefinition: () => void;
 }) {
   const {
-    path: { key, subtab },
-  } = useStreamsAppParams('/{key}/management/{subtab}');
+    path: { key, tab },
+  } = useStreamsAppParams('/{key}/management/{tab}');
 
   const tabs = {
     route: {
@@ -40,7 +40,7 @@ export function WiredStreamDetailManagement({
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
-        defaultMessage: 'Streams Partitioning',
+        defaultMessage: 'Partitioning',
       }),
     },
     enrich: {
@@ -69,11 +69,9 @@ export function WiredStreamDetailManagement({
     },
   };
 
-  if (!isValidManagementSubTab(subtab)) {
-    return (
-      <RedirectTo path="/{key}/management/{subtab}" params={{ path: { key, subtab: 'route' } }} />
-    );
+  if (!isValidManagementSubTab(tab)) {
+    return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
   }
 
-  return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
+  return <Wrapper tabs={tabs} streamId={key} tab={tab} />;
 }
