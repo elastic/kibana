@@ -230,6 +230,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
                   title: 'Item 19',
                   icon: 'iInCircle',
                   renderAs: 'accordion',
+                  withBadge: true,
                   children: [
                     {
                       id: 'sub1',
@@ -413,6 +414,7 @@ const generalLayoutNavTree: NavigationTreeDefinitionUI = {
           path: '',
           renderAs: 'accordion',
           icon: 'iInCircle',
+          withBadge: true,
           children: [
             {
               id: 'item-beta',
