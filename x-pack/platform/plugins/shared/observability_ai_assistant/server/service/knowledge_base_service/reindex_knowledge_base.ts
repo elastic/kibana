@@ -14,7 +14,7 @@ import { createKbConcreteIndex } from '../startup_migrations/create_or_update_in
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
-export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant/kb_reindexing';
+export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant:kb_reindexing';
 export async function reIndexKnowledgeBaseWithLock({
   core,
   logger,

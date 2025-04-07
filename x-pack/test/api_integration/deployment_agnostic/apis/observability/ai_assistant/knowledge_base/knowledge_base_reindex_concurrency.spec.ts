@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const failures = results.filter((result) => result.status === 500);
         const errorMessages = failures.every(
           (result) =>
-            result.errorMessage === 'Lock "observability_ai_assistant/kb_reindexing" not acquired'
+            result.errorMessage === 'Lock "observability_ai_assistant:kb_reindexing" not acquired'
         );
 
         expect(errorMessages).to.be(true);

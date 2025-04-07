@@ -19,7 +19,7 @@ import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
-const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant/plugin_startup';
+const PLUGIN_STARTUP_LOCK_ID = 'observability_ai_assistant:startup_migrations';
 
 // This function populates the `semantic_text` field for knowledge base entries during the plugin's startup process.
 // It ensures all missing fields are updated in batches and uses a distributed lock to prevent conflicts in distributed environments.
