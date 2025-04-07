@@ -19,7 +19,6 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
-import { ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
@@ -583,22 +582,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
-    // read all feature flags:
-    Promise.all([
-      core.featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
-      // add more feature flags here
-    ])
-      .then(([assistantAttackDiscoverySchedulingEnabled]) => {
-        const features = {
-          assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-          assistantAttackDiscoverySchedulingEnabled,
-        };
-        plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
-        plugins.elasticAssistant.registerFeatures('management', features);
-      })
-      .catch((error) => {
-        this.logger.error(`error registering assistant feature flags: ${error}`);
-      });
+    const features = {
+      assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
+    };
+    plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
+    plugins.elasticAssistant.registerFeatures('management', features);
 
     const manifestManager = new ManifestManager({
       savedObjectsClient,
