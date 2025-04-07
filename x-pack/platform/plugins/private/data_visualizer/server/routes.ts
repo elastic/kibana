@@ -147,13 +147,29 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
           const inferenceId = request.params.inferenceId;
           const input = request.body.input;
           const esClient = (await context.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.inference.completion(
-            {
-              inference_id: inferenceId,
-              input,
-            },
-            { maxRetries: 0, requestTimeout: 10 * 60 * 1000 }
-          );
+
+          const { endpoints } = await esClient.asCurrentUser.inference.get({
+            inference_id: inferenceId,
+          });
+
+          if (endpoints.length === 0) {
+            return response.notFound({
+              body: `Inference endpoint ${inferenceId} not found`,
+            });
+          }
+
+          const params = {
+            inference_id: inferenceId,
+            input,
+          };
+          const options = { maxRetries: 0, requestTimeout: 10 * 60 * 1000 };
+
+          const body =
+            endpoints[0].task_type === 'text_embedding'
+              ? await esClient.asCurrentUser.inference.textEmbedding(params, options)
+              : endpoints[0].task_type === 'sparse_embedding'
+              ? await esClient.asCurrentUser.inference.sparseEmbedding(params, options)
+              : await esClient.asCurrentUser.inference.completion(params, options);
 
           return response.ok({ body });
         } catch (e) {
