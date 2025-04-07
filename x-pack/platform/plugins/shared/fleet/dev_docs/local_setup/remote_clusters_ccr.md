@@ -7,11 +7,11 @@ In order to allow this synchronization, Cluster B needs to have Cluster B setup 
 
 The synchronization happens via an async task (`SyncIntegrationsTask`) that populates the index `fleet-synced-integrations` on Cluster A with info related to remote ES output data and installed integrations data. Then the content of this index gets synced with the ccr index `fleet-synced-integrations-ccr-<remote-name>` on Cluster B. The basic architecture is shown in the diagram below:
 
-![secret storage architecture](./diagrams/remote_clusters/remote_clusters_diagram.png)
+![secret storage architecture](./diagrams/remote_clusters/remote_clusters.png)
 
 The communication between clusters happens as follows:
-- Kibana on Cluster B exposes the content of the ccr index on endpoints `GET api/fleet/remote_synced_integrations/status` and `/api/fleet/remote_synced_integrations/{outputId}/status`
-- Kibana on Cluster A reads polls these endpoints and exposes the status of the integrations sync in the UI
+- Kibana on Cluster B exposes the content of the ccr index on endpoints `GET api/fleet/remote_synced_integrations/status`
+- Kibana on Cluster A exposes endpoint `/api/fleet/remote_synced_integrations/{outputId}/status` and exposes the status of the integrations sync in the UI
 
 ## Run ES and Kibana
 
