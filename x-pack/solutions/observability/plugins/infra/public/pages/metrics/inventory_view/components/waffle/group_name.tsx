@@ -9,20 +9,22 @@ import { EuiButtonEmpty, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type {
   InfraWaffleMapGroup,
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
+
 
 interface Props {
   onDrilldown: (filter: string) => void;
   group: InfraWaffleMapGroup;
   isChild?: boolean;
   options: InfraWaffleMapOptions;
+  nodeType: InventoryItemType;
 }
 
-export const GroupName: React.FC<Props> = ({ onDrilldown, group, isChild, options }) => {
+export const GroupName: React.FC<Props> = ({ onDrilldown, group, isChild, options, nodeType }) => {
   const [a11yAnnouncement, setA11yAnnouncement] = useState('');
 
   const handleClick = useCallback(
@@ -70,11 +72,14 @@ export const GroupName: React.FC<Props> = ({ onDrilldown, group, isChild, option
           <Name>
             <EuiToolTip position="top" content={group.name}>
               <EuiButtonEmpty
-                aria-label={i18n.translate('xpack.infra.inventory.groupBySelectorButtonLabel', {
-                  defaultMessage: 'Group by {group}',
-                  values: { group: group.name },
-                })}
-                style={buttonStyle}
+                aria-label={i18n.translate(
+                  'xpack.infra.inventory.groupBySelectorButton.ariaLabel',
+                  {
+                    defaultMessage: 'Group by {group}',
+                    values: { group: group.name },
+                  }
+                )}
+                css={buttonStyle}
                 onClick={handleClick}
                 data-test-subj="groupNameButton"
               >
@@ -82,7 +87,14 @@ export const GroupName: React.FC<Props> = ({ onDrilldown, group, isChild, option
               </EuiButtonEmpty>
             </EuiToolTip>
           </Name>
-          <Count>{group.count}</Count>
+          <Count
+            aria-label={i18n.translate('xpack.infra.inventory.groupByCount.ariaLabel', {
+              defaultMessage: '{count} {nodeType} in this group',
+              values: { nodeType, count: group.count },
+            })}
+          >
+            {group.count}
+          </Count>
         </Inner>
       </GroupNameContainer>
     </>
