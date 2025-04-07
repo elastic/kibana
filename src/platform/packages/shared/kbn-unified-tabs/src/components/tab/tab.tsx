@@ -134,13 +134,21 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   const onKeyDownEvent = useCallback(
     async (event: KeyboardEvent<HTMLDivElement>) => {
+      // per https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
       if (event.key === keys.ENTER) {
         event.preventDefault();
         tabInteractiveElementRef.current?.focus();
+        await onSelectEvent(event);
+        return;
+      }
+
+      if (event.key === 'F10' && event.shiftKey) {
+        event.preventDefault();
         setActionPopover(true);
+        return;
       }
     },
-    [setActionPopover]
+    [onSelectEvent, setActionPopover]
   );
 
   const onGlobalKeyDown = useCallback(
@@ -192,6 +200,7 @@ export const Tab: React.FC<TabProps> = (props) => {
             data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
             role="tab"
             tabIndex={isSelected ? 0 : -1}
+            aria-haspopup="true"
             aria-selected={isSelected}
             onClick={onClick}
             onDoubleClick={onDoubleClick}
