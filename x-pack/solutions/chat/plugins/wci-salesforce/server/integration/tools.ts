@@ -15,6 +15,7 @@ import { contentRefBuilder, ContentRefSourceType } from '@kbn/wci-common';
 import { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase, Account } from './types';
+import { Client } from 'elasticsearch-8.x';
 
 interface SearchParams {
   size?: number;
@@ -67,134 +68,186 @@ const baseObjectMappings: Record<string, string> = {
 };
 
 /**
- * Search through Salesforce
+ * Retrieves Salesforce cases
  *
  * @param esClient - Elasticsearch client
  * @param logger - Logger instance
  * @param indexName - Index name to query
  * @param dataSource - data source to search through
- * @param params - parameters to filter results by
+ * @param params - Search parameters including optional sorting configuration
  */
-export async function search(
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  indexName: string,
-  dataSource: string,
-  params: SearchParams
-){
+export async function searchDocs({
+  esClient,
+  logger,
+  integrationId,
+  indexName,
+  dataSource,
+  params = {},
+}: {
+  esClient: Client;
+  logger: Logger;
+  integrationId: string;
+  indexName: string;
+  dataSource: string;
+  params: Record<string, any>;
+}): Promise<ToolContentResult[]> {
   const size = params.size || 10;
 
-  let query: QueryDslQueryContainer = {}
-  if (dataSource == 'support_case'){
-    query = buildQuery(params, 'support_case', baseObjectMappings)
-  } else if (dataSource == 'account') {
-    query = buildQuery(params, 'account', baseObjectMappings)
-  } else if (dataSource == 'all') {
-    query = buildQuery(params, 'all', baseObjectMappings)
-  }
-  
-  try {
-    const searchRequest: SearchRequest = {
-      index: indexName,
-      query: query,
-      size: size
+    let query: QueryDslQueryContainer = {}
+    if (dataSource == 'support_case'){
+      query = buildQuery(params, 'support_case', baseObjectMappings)
+    } else if (dataSource == 'account') {
+      query = buildQuery(params, 'account', baseObjectMappings)
+    } else if (dataSource == 'all') {
+      query = buildQuery(params, 'all', baseObjectMappings)
+    }
+
+  const searchRequest: SearchRequest = {
+    index: indexName,
+    query,
+    size,
+  };
+
+  logger.info(
+    `Retrieving cases from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
+  );
+
+  const response = await esClient.search<SearchResponse>(searchRequest);
+
+  const contextFields = [
+    { field: 'id', type:  'keyword'},
+    { field: 'title', type:  'keyword' },
+    { field: 'content', type: 'text' },
+    { field: 'url', type:  'keyword' },
+  ];
+
+  const createRef = contentRefBuilder({
+    sourceType: ContentRefSourceType.integration,
+    sourceId: integrationId,
+  });
+
+  const contentFragments = response.hits.hits.map((hit) => {
+    const source = hit._source;
+
+    return {
+      reference: createRef(`case:${hit._id!}`),
+      content: contextFields.reduce<ToolContentResult['content']>(
+        (content, { field }) => {
+          const fieldPath = field.split('.');
+          
+          let value = ''
+          if (source) {
+            value =
+              fieldPath.length > 1
+                ? getNestedValue(source, fieldPath)
+                : (source[field as keyof SearchResponse] || '').toString();
+            }
+
+          content[field] = value;
+
+          return content;
+        },
+        {}
+      ),
     };
-    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+  });
 
-    const contextFields = [
-      { field: 'id', type:  'keyword'},
-      { field: 'title', type:  'keyword' },
-      { field: 'description', type: 'text' },
-      { field: 'url', type:  'keyword' },
-    ];
-
-    const contentFragments = response.hits.hits.map((hit) => {
-      const source = hit._source as SupportCase;
-
-      return {
-        type: 'text' as const,
-        text:
-          contextFields
-            .map(({ field }) => {
-            const value = (source[field as keyof SupportCase] || '').toString()
-            return `${field}: ${value}`;
-            })
-            .join('\n')
-      };
-    });
-
-    return contentFragments;
-  } catch (error) {
-    logger.error(`Search failed: ${error}`);
-
-    return [
-      {
-        type: 'text' as const,
-        text: `Error: Search failed: ${error}`,
-      },
-    ];
-  }
+  return contentFragments;
 }
 
-export async function get(
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  indexName: string,
-  dataSource: string,
-  params: Record<string, any>
-){
-
-  let query: QueryDslQueryContainer = {}
-  if (dataSource == 'support_case'){
-    query = buildQuery(params, 'support_case', baseObjectMappings)
-  } else if (dataSource == 'account') {
-    query = buildQuery(params, 'account', baseObjectMappings)
-  } else if (dataSource == 'all') {
-    query = buildQuery(params, 'all', baseObjectMappings)
-  }
   
-  try {
-    const searchRequest: SearchRequest = {
-      index: indexName,
-      query: query
+
+/**
+ * Retrieves Salesforce cases
+ *
+ * @param esClient - Elasticsearch client
+ * @param logger - Logger instance
+ * @param indexName - Index name to query
+ * @param dataSource - data source to search through
+ * @param params - Search parameters including optional sorting configuration
+ */
+export async function getById({
+  esClient,
+  logger,
+  integrationId,
+  indexName,
+  dataSource,
+  params = {},
+}: {
+  esClient: Client;
+  logger: Logger;
+  integrationId: string;
+  indexName: string;
+  dataSource: string;
+  params: Record<string, any>;
+}): Promise<ToolContentResult[]> {
+  const size = params.size || 10;
+  const sort = params.sortField
+    ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
+    : [];
+
+    let query: QueryDslQueryContainer = {}
+    if (dataSource == 'support_case'){
+      query = buildQuery(params, 'support_case', baseObjectMappings)
+    } else if (dataSource == 'account') {
+      query = buildQuery(params, 'account', baseObjectMappings)
+    } else if (dataSource == 'all') {
+      query = buildQuery(params, 'all', baseObjectMappings)
+    }
+
+  const searchRequest: SearchRequest = {
+    index: indexName,
+    query,
+    sort,
+    size,
+  };
+
+  logger.info(
+    `Retrieving cases from ${indexName} with search request: ${JSON.stringify(searchRequest)}`
+  );
+
+  const response = await esClient.search<SearchResponse>(searchRequest);
+
+  const contextFields = [
+    { field: 'title', type: 'keyword' },
+    { field: 'content', type: 'text' },
+    { field: 'url', type: 'keyword' },
+  ];
+
+  const createRef = contentRefBuilder({
+    sourceType: ContentRefSourceType.integration,
+    sourceId: integrationId,
+  });
+
+  const contentFragments = response.hits.hits.map((hit) => {
+    const source = hit._source;
+
+    return {
+      reference: createRef(`case:${hit._id!}`),
+      content: contextFields.reduce<ToolContentResult['content']>(
+        (content, { field }) => {
+          const fieldPath = field.split('.');
+          
+          let value = ''
+          if (source) {
+            value =
+              fieldPath.length > 1
+                ? getNestedValue(source, fieldPath)
+                : (source[field as keyof SearchResponse] || '').toString();
+            }
+
+          content[field] = value;
+
+          return content;
+        },
+        {
+        }
+      ),
     };
-    const response = await esClient.search<SearchResponse<SupportCase>>(searchRequest);
+  });
 
-    const contextFields = [
-      { field: 'id', type:  'keyword'},
-      { field: 'title', type:  'keyword' },
-      { field: 'description', type: 'text' },
-      { field: 'url', type:  'keyword' },
-    ];
-
-    const contentFragments = response.hits.hits.map((hit) => {
-      const source = hit._source as SupportCase;
-
-      return {
-        type: 'text' as const,
-        text:
-          contextFields
-            .map(({ field }) => {
-            const value = (source[field as keyof SupportCase] || '').toString()
-            return `${field}: ${value}`;
-            })
-            .join('\n')
-      };
-    });
-
-    return contentFragments;
-  } catch (error) {
-    logger.error(`Search failed: ${error}`);
-
-    return [
-      {
-        type: 'text' as const,
-        text: `Error: Search failed: ${error}`,
-      },
-    ];
-  }
+  return contentFragments;
 }
-
 
 
 /**
@@ -212,7 +265,7 @@ export async function getCases({
   indexName,
   params = {},
 }: {
-  esClient: ElasticsearchClient;
+  esClient: Client;
   logger: Logger;
   integrationId: string;
   indexName: string;
@@ -222,18 +275,17 @@ export async function getCases({
   const sort = params.sortField
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
-  const supportCaseMappings: Record<string, string> = {
-    ...baseObjectMappings,
-    'caseNumber': 'metadata.case_number',
-    'priority': 'metadata.priority',
-    'status': 'metadata.status',
-    'accountId': 'metadata.account_id',
-    'accountName': 'metadata.account_name',
-  };
 
-  try {
+    const supportCaseMappings: Record<string, string> = {
+      ...baseObjectMappings,
+      'caseNumber': 'metadata.case_number',
+      'priority': 'metadata.priority',
+      'status': 'metadata.status',
+      'accountId': 'metadata.account_id',
+      'accountName': 'metadata.account_name',
+    };
 
-    const query = buildQuery(params, 'support_case', supportCaseMappings);
+  const query = buildQuery(params, 'support_case', supportCaseMappings);
 
   const searchRequest: SearchRequest = {
     index: indexName,
@@ -326,42 +378,6 @@ export async function getCases({
   });
 
   return contentFragments;
-} catch (error) {
-  logger.error(`Search failed: ${error}`);
-
-<<<<<<< HEAD
-  return [
-    {
-      type: 'text' as const,
-      text: `Error: Search failed: ${error}`,
-    },
-  ];
-}
-=======
-              // Use the helper function for both nested and non-nested fields
-              value =
-               fieldPath.length > 1
-                  ? getNestedValue(source, fieldPath)
-                  : (source[field as keyof SupportCase] || '').toString();
-
-              return `${field}: ${value}`;
-            })
-            .join('\n') + commentsText,
-      };
-    });
-
-    return contentFragments;
-  } catch (error) {
-    logger.error(`Search failed: ${error}`);
-
-    return [
-      {
-        type: 'text' as const,
-        text: `Error: Search failed: ${error}`,
-      },
-    ];
-  }
->>>>>>> 47b6b4a5ca2 (fix comment filters and syntax)
 }
 
 /**
@@ -379,7 +395,7 @@ export async function getAccounts({
   indexName,
   params = {},
 }: {
-  esClient: ElasticsearchClient;
+  esClient: Client;
   logger: Logger;
   integrationId: string;
   indexName: string;
@@ -389,14 +405,12 @@ export async function getAccounts({
   const sort = params.sortField
     ? [{ [params.sortField as string]: { order: params.sortOrder as SortOrder } }]
     : [];
-  const accountMappings: Record<string, string> = {
-    ...baseObjectMappings,
-    'recordTypeId': 'metadata.record_type_id',
-    'isPartner': 'metadata.is_partner',
-    'isCustomerPortal': 'metadata.is_customer_portal',
-  };
-
-  try {
+    const accountMappings: Record<string, string> = {
+      ...baseObjectMappings,
+      'recordTypeId': 'metadata.record_type_id',
+      'isPartner': 'metadata.is_partner',
+      'isCustomerPortal': 'metadata.is_customer_portal',
+    };
 
   const query = buildQuery(params, 'account', accountMappings);
 
@@ -474,86 +488,6 @@ export async function getAccounts({
   });
 
   return contentFragments;
-} catch (error) {
-  logger.error(`Search failed: ${error}`);
-
-<<<<<<< HEAD
-  return [
-    {
-      type: 'text' as const,
-      text: `Error: Search failed: ${error}`,
-    },
-  ];
-}
-=======
-    const response = await esClient.search<SearchResponse<Account>>(searchRequest);
-
-    // Define fields to include in the response
-    const contextFields = [
-      { field: 'id', type: 'keyword' },
-      { field: 'title', type: 'keyword' },
-      { field: 'url', type: 'keyword' },
-      { field: 'owner.email', type: 'keyword' },
-      { field: 'owner.name', type: 'keyword' },
-      { field: 'created_at', type: 'date' },
-      { field: 'updated_at', type: 'date' },
-    ];
-
-    const contentFragments = response.hits.hits.map((hit) => {
-      const source = hit._source as Account;
-
-      // Format contacts if they exist
-      let contactsText = '';
-      if (source.contacts && source.contacts.length > 0) {
-        const limitedContacts = source.contacts.slice(0, 10);
-        contactsText =
-          '\n\nContacts:\n' +
-          limitedContacts
-            .map((contact, index) => {
-              return (
-                `Contact ${index + 1}:\n` +
-                `Name: ${contact.name || 'Unknown'}\n` +
-                `Email: ${contact.email || 'No email'}\n` +
-                `Phone: ${contact.phone || 'No phone'}\n` +
-                `Title: ${contact.title || 'No title'}\n` +
-                `Department: ${contact.department || 'No department'}\n`
-              );
-            })
-            .join('\n');
-      }
-
-      return {
-        type: 'text' as const,
-        text:
-          contextFields
-            .map(({ field }) => {
-              const fieldPath = field.split('.');
-              let value = '';
-
-              // Use the helper function for both nested and non-nested fields
-              value =
-               fieldPath.length > 1
-                  ? getNestedValue(source, fieldPath)
-                  : (source[field as keyof Account] || '').toString();
-
-              return `${field}: ${value}`;
-            })
-            .join('\n') + contactsText,
-      };
-    });
-
-    return contentFragments;
-  } catch (error) {
-    logger.error(`Account search failed: ${error}`);
-
-    return [
-      {
-        type: 'text' as const,
-        text: `Error: Account search failed: ${error}`,
-      },
-    ];
-  }
->>>>>>> 47b6b4a5ca2 (fix comment filters and syntax)
 }
 
 // Helper function to safely get nested values

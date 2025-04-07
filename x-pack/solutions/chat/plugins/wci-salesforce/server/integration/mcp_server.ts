@@ -9,7 +9,8 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from '@kbn/zod';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { createMcpServer as createServer, McpServerTool, toolResultFactory } from '@kbn/wci-server';
-import { getCases, getAccounts, search, get } from './tools';
+import { getCases, getAccounts, searchDocs, getById } from './tools';
+import { Client } from 'elasticsearch-8.x';
 
 // Define enum field structure upfront
 interface Field {
@@ -26,12 +27,12 @@ interface FieldWithValues extends Field {
 export async function createMcpServer({
   integrationId,
   configuration,
-  elasticsearchClient,
+  // elasticsearchClient,
   logger,
 }: {
   integrationId: string;
   configuration: Record<string, any>;
-  elasticsearchClient: ElasticsearchClient;
+  // elasticsearchClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<McpServer> {
   const { index } = configuration;
@@ -93,23 +94,34 @@ export async function createMcpServer({
       createdAfter,
       createdBefore,
       updatedAfter,
-      updatedBefore,
+      updatedBefore
     }) => {
+      try {
+        const caseContent = await searchDocs({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          dataSource,
+          params: {
+            semanticQuery,
+            createdAfter,
+            createdBefore,
+            updatedAfter,
+            updatedBefore
+          },
+        });
 
-      const searchResult = await search(elasticsearchClient, logger, index, dataSource, {
-        semanticQuery,
-        createdAfter,
-        createdBefore,
-        updatedAfter,
-        updatedBefore,
-      });
-      
-      return {
-        content: searchResult,
-      };
-    }
-  }
-  
+        logger.info(`Retrieved ${caseContent.length} support cases`);
+
+        logger.info(() => `Case content: ${JSON.stringify(caseContent)}`);
+        return toolResultFactory.contentList(caseContent);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
   const get: McpServerTool = {
     name: 'get',
     description: 'Retrieves a Salesforce document by id',
@@ -121,17 +133,27 @@ export async function createMcpServer({
       id,
       dataSource,
     }) => {
+      try {
+        const caseContent = await getById({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          dataSource,
+          params: {
+            id
+          },
+        });
 
-      const searchResult = await get(elasticsearchClient, logger, index, dataSource, {
-        id
-      });
-      
-      logger.info(`results: ${JSON.stringify(searchResult)}`)
-      return {
-        content: searchResult,
-      };
-    }
-  }
+        logger.info(`Retrieved ${caseContent.length} support cases`);
+
+        logger.info(() => `Case content: ${JSON.stringify(caseContent)}`);
+        return toolResultFactory.contentList(caseContent);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
 
   const getCasesTool: McpServerTool = {
     name: 'search_cases',
@@ -140,12 +162,12 @@ export async function createMcpServer({
       caseNumber: z
         .array(z.string())
         .optional()
-        .describe('Salesforce case number identifiers (preferred lookup method)'),
+        .describe('Salesforce case number identifiers'),
       id: z
         .array(z.string())
         .optional()
         .describe(
-          'Salesforce internal IDs of the support cases (use only when specifically requested)'
+          'Salesforce internal IDs of the support cases'
         ),
       size: z.number().int().positive().default(10).describe('Maximum number of cases to return'),
       sortField: z
@@ -333,7 +355,7 @@ export async function createMcpServer({
   return createServer({
     name: 'wci-salesforce',
     version: '1.0.0',
-    tools: [getCasesTool, getAccountsTool],
+    tools: [search, get, getCasesTool, getAccountsTool],
   });
 }
 
@@ -341,7 +363,7 @@ export async function createMcpServer({
  * Retrieves possible values for enum fields from Elasticsearch using _terms_enum API
  */
 async function getFieldValues(
-  elasticsearchClient: ElasticsearchClient,
+  elasticsearchClient: Client,
   logger: Logger,
   index: string,
   enumFields: Field[]
@@ -378,7 +400,7 @@ async function getFieldValues(
  * Retrieves index field properties for sorting
  */
 async function getSortableFields(
-  client: ElasticsearchClient,
+  client: Client,
   logger: Logger,
   indexName: string
 ): Promise<Record<string, any>> {
