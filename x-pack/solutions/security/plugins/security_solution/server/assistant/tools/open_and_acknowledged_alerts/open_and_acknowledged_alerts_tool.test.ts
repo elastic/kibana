@@ -19,7 +19,6 @@ import type {
   SecurityAlertContentReference,
 } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
-import { ElasticAssistantApiRequestHandlerContext } from '@kbn/elastic-assistant-plugin/server/types';
 
 const MAX_SIZE = 10000;
 
