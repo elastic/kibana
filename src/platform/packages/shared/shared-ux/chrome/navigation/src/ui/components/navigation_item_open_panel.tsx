@@ -70,7 +70,11 @@ const getButtonStyles = (
       transform: translateY(50%);
     }
   `
-    : ''}
+    : `
+    & .euiBetaBadge {
+      margin-left: -${euiTheme.size.m};
+    }
+    `}
 `;
 interface Props {
   item: ChromeProjectNavigationNode;
