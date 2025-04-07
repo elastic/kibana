@@ -81,9 +81,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       all: {
         ui: ['detections'],
         api: [
-          'lists-all',
-          'lists-read',
-          'lists-summary',
           'cloud-security-posture-all',
           'cloud-security-posture-read',
           'cloud-defend-all',
@@ -100,12 +97,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       },
       read: {
         ui: ['detections'],
-        api: [
-          'lists-read',
-          'cloud-security-posture-read',
-          'cloud-defend-read',
-          'bulkGetUserProfiles',
-        ],
+        api: ['cloud-security-posture-read', 'cloud-defend-read', 'bulkGetUserProfiles'],
         alerting: {
           rule: {
             read: alertingFeatures,
