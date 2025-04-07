@@ -142,7 +142,7 @@ export async function getCases({
     }
 
     return {
-      reference: createRef(hit._id!),
+      reference: createRef(`case:${hit._id!}`),
       content: contextFields.reduce<ToolContentResult['content']>(
         (content, { field }) => {
           const fieldPath = field.split('.');
@@ -259,7 +259,7 @@ export async function getAccounts({
     }
 
     return {
-      reference: createRef(hit._id!),
+      reference: createRef(`account:${hit._id!}`),
       content: contextFields.reduce<ToolContentResult['content']>(
         (content, { field }) => {
           const fieldPath = field.split('.');
