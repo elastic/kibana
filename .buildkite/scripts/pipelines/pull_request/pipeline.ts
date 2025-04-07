@@ -69,7 +69,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       'asia-south2-b',
       'asia-south2-c',
     ];
-    pipeline.push(dump(agentConfig));
+    pipeline.push(dump({ agents: agentConfig }));
 
     const onlyRunQuickChecks = await areChangesSkippable([/^renovate\.json$/], REQUIRED_PATHS);
     if (onlyRunQuickChecks) {
