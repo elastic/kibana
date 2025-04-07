@@ -7,7 +7,7 @@
 
 import type {
   MsearchMultisearchHeader,
-  MsearchMultisearchBody,
+  SearchSearchRequestBody,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { AllowedValuesInputs } from '../schemas/get_unallowed_field_values';
 
@@ -24,7 +24,7 @@ export const getMSearchRequestBody = ({
   indexName: string;
   indexFieldName: string;
   allowedValues: AllowedValuesInputs;
-}): MsearchMultisearchBody => ({
+}): SearchSearchRequestBody => ({
   aggregations: {
     [indexFieldName]: {
       terms: {

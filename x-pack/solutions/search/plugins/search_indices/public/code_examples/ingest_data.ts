@@ -74,7 +74,6 @@ export const SemanticIngestDataCodeExamples: IngestDataCodeExamples = {
     }
   ),
   defaultMapping: {
-    // @ts-expect-error - our types don't understand yet that we can have semantic_text fields without inference ids
     text: { type: 'semantic_text' },
   },
   sense: ConsoleIngestDataExample,

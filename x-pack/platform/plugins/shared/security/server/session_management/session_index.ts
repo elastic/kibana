@@ -785,7 +785,7 @@ export class SessionIndex {
         index: this.aliasName,
         document: sessionValueToStore,
         refresh: false,
-        querystring: { require_alias: true },
+        require_alias: true,
       },
       { meta: true, ignore: ignore404 ? [404] : [] }
     );
