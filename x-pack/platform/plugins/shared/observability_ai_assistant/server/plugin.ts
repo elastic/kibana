@@ -138,7 +138,7 @@ export class ObservabilityAIAssistantPlugin
           config: this.config,
         })
       )
-      .catch((e) => this.logger.error(`Error while setting up the AI Assistant: ${e.message}`));
+      .catch((e) => this.logger.error(`Error while setting up the Knowledge Base for the AI Assistant: ${e.message}`));
 
     service.register(registerFunctions);
 
