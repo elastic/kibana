@@ -34,7 +34,6 @@ import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
 import { agentConfigurationRouteRepository } from '../settings/agent_configuration/route';
 import { anomalyDetectionRouteRepository } from '../settings/anomaly_detection/route';
-import { apmIndicesRouteRepository } from '../settings/apm_indices/route';
 import { customLinkRouteRepository } from '../settings/custom_link/route';
 import { labsRouteRepository } from '../settings/labs/route';
 import { sourceMapsRouteRepository } from '../source_maps/route';
@@ -64,7 +63,6 @@ function getTypedGlobalApmServerRouteRepository() {
     ...alertsChartPreviewRouteRepository,
     ...agentConfigurationRouteRepository,
     ...anomalyDetectionRouteRepository,
-    ...apmIndicesRouteRepository,
     ...customLinkRouteRepository,
     ...sourceMapsRouteRepository,
     ...apmFleetRouteRepository,
