@@ -43,7 +43,7 @@ export const functions = {
   ### AVG
   The average of a numeric field.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS AVG(height)
   \`\`\`
@@ -76,7 +76,7 @@ export const functions = {
   ### COUNT
   Returns the total number (count) of input values.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS COUNT(height)
   \`\`\`
@@ -110,7 +110,7 @@ export const functions = {
   ### COUNT_DISTINCT
   Returns the approximate number of distinct values.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM hosts
   | STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
   \`\`\`
@@ -142,7 +142,7 @@ export const functions = {
   ### MAX
   The maximum value of a field.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS MAX(languages)
   \`\`\`
@@ -173,13 +173,13 @@ export const functions = {
   -->
 
   ### MEDIAN
-  The value that is greater than half of all values and less than half of all values, also known as the 50% \`PERCENTILE\`.
+  The value that is greater than half of all values and less than half of all values, also known as the 50% [\`PERCENTILE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile).
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS MEDIAN(salary), PERCENTILE(salary, 50)
   \`\`\`
-  Note: Like \`PERCENTILE\`, \`MEDIAN\` is usually approximate.
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile), \`MEDIAN\` is [usually approximate](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -212,11 +212,11 @@ export const functions = {
 
   It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable \`X\`, the median absolute deviation is \`median(|median(X) - X|)\`.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS MEDIAN(salary), MEDIAN_ABSOLUTE_DEVIATION(salary)
   \`\`\`
-  Note: Like \`PERCENTILE\`, \`MEDIAN_ABSOLUTE_DEVIATION\` is usually approximate.
+  Note: Like [\`PERCENTILE\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile), \`MEDIAN_ABSOLUTE_DEVIATION\` is [usually approximate](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-percentile-approximate).
   `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -245,7 +245,7 @@ export const functions = {
   ### MIN
   The minimum value of a field.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS MIN(languages)
   \`\`\`
@@ -278,7 +278,7 @@ export const functions = {
   ### PERCENTILE
   Returns the value at which a certain percentage of observed values occur. For example, the 95th percentile is the value which is greater than 95% of the observed values and the 50th percentile is the \`MEDIAN\`.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS p0 = PERCENTILE(salary,  0)
        , p50 = PERCENTILE(salary, 50)
@@ -314,7 +314,7 @@ export const functions = {
   ### ST_CENTROID_AGG
   Calculate the spatial centroid over a field with spatial point geometry type.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airports
   | STATS centroid=ST_CENTROID_AGG(location)
   \`\`\`
@@ -348,7 +348,7 @@ export const functions = {
   ### ST_EXTENT_AGG
   Calculate the spatial extent over a field with geometry type. Returns a bounding box for all values of the field.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM airports
   | WHERE country == "India"
   | STATS extent = ST_EXTENT_AGG(location)
@@ -383,7 +383,7 @@ export const functions = {
   ### STD_DEV
   The standard deviation of a numeric field.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS STD_DEV(height)
   \`\`\`
@@ -415,7 +415,7 @@ export const functions = {
   ### SUM
   The sum of a numeric expression.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS SUM(languages)
   \`\`\`
@@ -446,7 +446,7 @@ export const functions = {
   ### TOP
   Collects the top values for a field. Includes repeated values.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
   | STATS top_salaries = TOP(salary, 3, "desc"), top_salary = MAX(salary)
   \`\`\`
@@ -477,12 +477,12 @@ export const functions = {
   -->
 
   ### VALUES
-  Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use \`MV_SORT\`.
+  Returns all values in a group as a multivalued field. The order of the returned values isn’t guaranteed. If you need the values returned in order use [\`MV_SORT\`](https://www.elastic.co/docs/reference/elasticsearch/query-languages/esql/esql-functions-operators#esql-mv_sort).
 
-  \`\`\` esql
-    FROM employees
+  \`\`\`esql
+  FROM employees
   | EVAL first_letter = SUBSTRING(first_name, 0, 1)
-  | STATS first_name=MV_SORT(VALUES(first_name)) BY first_letter
+  | STATS first_name = MV_SORT(VALUES(first_name)) BY first_letter
   | SORT first_letter
   \`\`\`
   `,
@@ -515,9 +515,9 @@ export const functions = {
   ### WEIGHTED_AVG
   The weighted average of a numeric expression.
 
-  \`\`\` esql
+  \`\`\`esql
   FROM employees
-  | STATS w_avg = WEIGHTED_AVG(salary, height) by languages
+  | STATS w_avg = WEIGHTED_AVG(salary, height) BY languages
   | EVAL w_avg = ROUND(w_avg)
   | KEEP w_avg, languages
   | SORT languages
