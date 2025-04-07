@@ -76,7 +76,6 @@
   },
   "resolutions": {
     "**/@babel/parser": "7.24.7",
-    "**/@bazel/typescript/protobufjs": "6.11.4",
     "**/@hello-pangea/dnd": "16.6.0",
     "**/@langchain/core": "^0.3.40",
     "**/@langchain/google-common": "^0.1.8",
