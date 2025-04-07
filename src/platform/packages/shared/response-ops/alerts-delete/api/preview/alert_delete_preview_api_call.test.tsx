@@ -8,7 +8,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { alertDeletePreviewApiCall } from './api_call';
+import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
 
 const http = httpServiceMock.createStartContract();
 

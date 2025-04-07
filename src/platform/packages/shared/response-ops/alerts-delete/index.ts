@@ -9,3 +9,12 @@
 
 export { AlertDeleteModal } from './components/modal';
 export { AlertDeleteDescriptiveFormGroup } from './components/rule_settings_section';
+
+export {
+  type UseAlertDeletePreviewParams,
+  useAlertDeletePreview,
+} from './api/preview/use_alert_delete_preview';
+export {
+  type AlertDeletePreviewApiCallParams,
+  alertDeletePreviewApiCall,
+} from './api/preview/alert_delete_preview_api_call';

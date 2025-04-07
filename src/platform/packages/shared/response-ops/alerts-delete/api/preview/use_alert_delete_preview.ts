@@ -12,9 +12,9 @@ import { useQuery } from '@tanstack/react-query';
 import debounce from 'lodash/debounce';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types/rule_settings';
-import { alertDeletePreviewApiCall } from './api_call';
+import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
 
-type UseAlertDeletePreviewParams = RulesSettingsAlertDeleteProperties & {
+export type UseAlertDeletePreviewParams = RulesSettingsAlertDeleteProperties & {
   services: { http: HttpStart };
 };
 export const useAlertDeletePreview = ({
