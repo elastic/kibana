@@ -41,7 +41,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
 
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
 const INTERVAL = '30m';
@@ -324,6 +324,9 @@ export class AutomaticAgentUpgradeTask {
       );
       if (!done && numberOfAgentsForUpgrade > 0) {
         ({ done, agents } = await this.getNextAgentsBatch(agentsFetcher));
+        if (done) {
+          shouldProcessAgents = false;
+        }
       } else {
         shouldProcessAgents = false;
       }

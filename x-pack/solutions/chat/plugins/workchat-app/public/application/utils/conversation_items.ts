@@ -6,6 +6,7 @@
  */
 
 import type { AssistantMessage, UserMessage, ToolCall } from '../../../common/conversation_events';
+import type { ProgressionEvent } from '../../../common/chat_events';
 
 interface ConversationItemBase {
   id: string;
@@ -29,13 +30,19 @@ export type ToolCallConversationItem = ConversationItemBase & {
   toolResult?: string;
 };
 
+export type ProgressionConversationItem = ConversationItemBase & {
+  type: 'progression';
+  progressionEvents: ProgressionEvent[];
+};
+
 /**
  * UI-specific representation of the conversation events.
  */
 export type ConversationItem =
   | UserMessageConversationItem
   | AssistantMessageConversationItem
-  | ToolCallConversationItem;
+  | ToolCallConversationItem
+  | ProgressionConversationItem;
 
 export const isUserMessageItem = (item: ConversationItem): item is UserMessageConversationItem => {
   return item.type === 'user_message';
@@ -49,6 +56,25 @@ export const isAssistantMessageItem = (
 
 export const isToolCallItem = (item: ConversationItem): item is ToolCallConversationItem => {
   return item.type === 'tool_call';
+};
+
+export const isProgressionItem = (item: ConversationItem): item is ProgressionConversationItem => {
+  return item.type === 'progression';
+};
+
+export const createProgressionItem = ({
+  progressionEvents,
+  loading = false,
+}: {
+  progressionEvents: ProgressionEvent[];
+  loading?: boolean;
+}): ProgressionConversationItem => {
+  return {
+    id: 'foobar', // TODO don't have an ID now, but that whole thing will get refactored soon
+    type: 'progression',
+    progressionEvents,
+    loading,
+  };
 };
 
 export const createUserMessageItem = ({
