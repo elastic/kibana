@@ -23,7 +23,7 @@ export const enableAttackDiscoverySchedulesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
 ): void => {
   router.versioned
-    .put({
+    .post({
       access: 'internal',
       path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
       security: {
