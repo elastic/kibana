@@ -21,5 +21,6 @@ export * from './src/alert_filter_controls/types';
 export * from './src/common/types';
 export * from './src/check_action_type_enabled';
 export * from './src/action_variables';
+export * from './src/alert_rule_from_vis_ui_action';
 
 export { useFetchFlappingSettings } from './src/common/hooks/use_fetch_flapping_settings';

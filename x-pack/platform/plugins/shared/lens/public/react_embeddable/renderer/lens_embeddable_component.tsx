@@ -7,16 +7,17 @@
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi, LensApi, LensEmbeddableStartServices } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
 import { addLog } from '../logger';
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 export function LensEmbeddableComponent({
   internalApi,
@@ -68,9 +69,13 @@ export function LensEmbeddableComponent({
   const rootRef = useDispatcher(hasRendered, api);
 
   // Publish the data attributes only if avaialble/visible
-  const title = internalApi.getDisplayOptions()?.noPanelTitle
-    ? undefined
-    : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() };
+  const title = useMemo(
+    () =>
+      internalApi.getDisplayOptions()?.noPanelTitle
+        ? undefined
+        : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() },
+    [api.defaultTitle$, api.title$, internalApi]
+  );
   const description = api.description$?.getValue()
     ? {
         'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
@@ -87,6 +92,24 @@ export function LensEmbeddableComponent({
   );
   const canShowRuleForm =
     isValidRuleFormPlugins(ruleFormPlugins) && ruleTypeRegistry && actionTypeRegistry;
+  const closeRuleForm = useCallback(
+    () => internalApi.isRuleFormVisible$.next(false),
+    [internalApi.isRuleFormVisible$]
+  );
+  const alertRuleTitle = useMemo(
+    () =>
+      i18n.translate('xpack.lens.embeddable.alertRuleTitle', {
+        defaultMessage: '{title} rule',
+        values: {
+          title: title
+            ? title['data-title']
+            : i18n.translate('xpack.lens.embeddable.alertRuleTitle.defaultName', {
+                defaultMessage: 'Elasticsearch query from visualization',
+              }),
+        },
+      }),
+    [title]
+  );
 
   return (
     <div
@@ -112,8 +135,9 @@ export function LensEmbeddableComponent({
           <RuleFormFlyout
             plugins={{ ...ruleFormPlugins, ruleTypeRegistry, actionTypeRegistry }}
             ruleTypeId={ES_QUERY_ID}
-            initialValues={alertRuleInitialValues}
-            onCancel={() => internalApi.isRuleFormVisible$.next(false)}
+            initialValues={{ ...alertRuleInitialValues, name: alertRuleTitle }}
+            onCancel={closeRuleForm}
+            onSubmit={closeRuleForm}
           />
         </KibanaContextProvider>
       )}

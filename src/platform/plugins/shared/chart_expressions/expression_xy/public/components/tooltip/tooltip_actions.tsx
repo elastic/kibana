@@ -18,11 +18,11 @@ import { i18n } from '@kbn/i18n';
 import { MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { BooleanRelation } from '@kbn/es-query';
+import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import { isTimeChart } from '../../../common/helpers';
 import { CommonXYDataLayerConfig } from '../../../common';
 import { DatatablesWithFormatInfo, LayersFieldFormats } from '../../helpers';
 import { MultiFilterEvent } from '../../types';
-import { access } from 'fs';
 
 type XYTooltipValue = TooltipValue<Record<string, string | number>, XYChartSeriesIdentifier>;
 
@@ -113,7 +113,7 @@ function getXSeriesValue(dataLayers: CommonXYDataLayerConfig[], firstSeries: XYT
 export const getTooltipActions = (
   dataLayers: CommonXYDataLayerConfig[],
   onClickMultiValue: (data: MultiFilterEvent['data']) => void,
-  onCreateAlertRule: (data: MultiFilterEvent['data']) => void,
+  onCreateAlertRule: (data: AlertRuleFromVisUIActionData) => void,
   fieldFormats: LayersFieldFormats,
   formattedDatatables: DatatablesWithFormatInfo,
   xAxisFormatter: FieldFormat,
@@ -211,7 +211,7 @@ export const getTooltipActions = (
             );
             if (!layer) return;
 
-            const { yAccessor, xAccessor, splitAccessors } = firstSeries.seriesIdentifier;
+            const { xAccessor, splitAccessors } = firstSeries.seriesIdentifier;
 
             const xSeriesValue = getXSeriesValue(dataLayers, firstSeries);
 
@@ -225,20 +225,27 @@ export const getTooltipActions = (
             );
 
             const { table, row } = xSeriesPoint;
-            const yColumn = table.columns.find((col) => col.id === yAccessor);
-            if (!yColumn || !yColumn.meta.sourceParams) return;
             const xColumn = table.columns.find((col) => col.id === xAccessor);
 
             // Get the field name and value for the Y axis
-            const { sourceField } = yColumn.meta.sourceParams;
-            const yValue = table.rows[row][yAccessor];
+            const selectedYValues = selectedValues.length ? selectedValues : [firstSeries];
+            const thresholdValues = selectedYValues.reduce((result, value) => {
+              const { yAccessor } = value.seriesIdentifier;
+              const yColumn = table.columns.find((col) => col.id === yAccessor);
+              if (!yColumn || !yColumn.meta.sourceParams) return result;
+              const { sourceField } = yColumn.meta.sourceParams;
+              const yValue = table.rows[row][yAccessor] as number;
+              return { ...result, [String(sourceField)]: yValue };
+            }, {});
 
-            // Get the time field name from the X axis for time vizzes, default to @timestamp for non-time vizzes
+            // Get the time field name from the X axis for time vizzes, default to timestamp for non-time vizzes
             const { sourceField: xSourceField } = xColumn?.meta?.sourceParams ?? {};
-            const timeField = isTimeViz && xSourceField ? xSourceField : '@timestamp';
+            const timeField = isTimeViz && xSourceField ? String(xSourceField) : 'timestamp';
 
             // If there are split accessors, get their values. For non-time vizzes, treat the X axis as a split accessor.
-            const splitValues = isTimeViz ? [] : [[xSourceField, [xSeriesValue]]];
+            const splitValues: Record<string, Array<string | number | null | undefined>> = isTimeViz
+              ? {}
+              : { [String(xSourceField)]: [xSeriesValue] };
             if (splitAccessors.size > 0) {
               for (const [accessor, firstSplitValue] of splitAccessors) {
                 const splitColumn = table.columns.find((col) => col.id === accessor);
@@ -249,16 +256,15 @@ export const getTooltipActions = (
                   ? selectedValues.map((v) => v.seriesIdentifier.splitAccessors.get(accessor))
                   : [firstSplitValue];
                 if (selectedSplitValues.length > 0)
-                  splitValues.push([splitSourceField, selectedSplitValues]);
+                  splitValues[String(splitSourceField)] = selectedSplitValues;
               }
             }
 
-            const query = table.meta?.type === 'es_ql' ? table.meta.query : null;
+            const query = table.meta?.type === 'es_ql' ? (table.meta.query as string) : null;
 
             const context = {
-              sourceField,
               timeField,
-              value: yValue,
+              thresholdValues,
               splitValues,
               query,
             };
