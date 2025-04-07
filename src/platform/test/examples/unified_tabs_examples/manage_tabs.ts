@@ -89,5 +89,56 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
     });
+
+    it('should support drag and drop for reordering tabs', async () => {
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      await unifiedTabs.createNewTab();
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      expect(await unifiedTabs.getTabLabels()).to.eql([
+        'Untitled session 1',
+        'Untitled session 2',
+        'Untitled session 3',
+        'Untitled session 4',
+        'Untitled session 5',
+        'Untitled session 6',
+        'Untitled session 7',
+        'Untitled session 8',
+      ]);
+      await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.TAB).perform(); // moves the focus from "+" to the active tab
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      await browser.pressKeys(browser.keys.SPACE);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      expect(await unifiedTabs.getTabLabels()).to.eql([
+        'Untitled session 1',
+        'Untitled session 2',
+        'Untitled session 3',
+        'Untitled session 4',
+        'Untitled session 7',
+        'Untitled session 5',
+        'Untitled session 6',
+        'Untitled session 8',
+      ]);
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 5');
+      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
+      await browser.pressKeys(browser.keys.SPACE);
+      expect(await unifiedTabs.getTabLabels()).to.eql([
+        'Untitled session 1',
+        'Untitled session 2',
+        'Untitled session 3',
+        'Untitled session 4',
+        'Untitled session 7',
+        'Untitled session 6',
+        'Untitled session 5',
+        'Untitled session 8',
+      ]);
+    });
   });
 };

@@ -44,6 +44,15 @@ export class UnifiedTabsPageObject extends FtrService {
     );
   }
 
+  public async getTabLabels() {
+    const tabElements = await this.getTabElements();
+    return await Promise.all(
+      tabElements.map(async (tabElement) => {
+        return await tabElement.getVisibleText();
+      })
+    );
+  }
+
   public async getNumberOfTabs() {
     const numberOfTabs = await this.getTabElements();
     return numberOfTabs.length;
