@@ -27,7 +27,7 @@ import {
   type EnrichCommandContext,
   type WhereCommandContext,
   default as esql_parser,
-  type MetricsCommandContext,
+  type TimeSeriesCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
@@ -141,7 +141,7 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * Exit a parse tree produced by `esql_parser.metricsCommand`.
    * @param ctx the parse tree
    */
-  exitMetricsCommand(ctx: MetricsCommandContext): void {
+  exitMetricsCommand(ctx: TimeSeriesCommandContext): void {
     const node: ESQLAstMetricsCommand = {
       ...createAstBaseItem('metrics', ctx),
       type: 'command',
