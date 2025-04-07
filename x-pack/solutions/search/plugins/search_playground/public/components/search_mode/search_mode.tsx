@@ -10,7 +10,6 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
   useEuiTheme,
 } from '@elastic/eui';
 import React from 'react';
@@ -75,33 +74,26 @@ export const SearchMode: React.FC = () => {
         >
           <EuiFlexGroup direction="column">
             <EuiFlexItem grow={false}>
-              <EuiForm
-                component="form"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                }}
-              >
-                <Controller
-                  control={control}
-                  name={ChatFormFields.searchQuery}
-                  render={({ field }) => (
-                    <EuiFieldSearch
-                      data-test-subj="searchPlaygroundSearchModeFieldText"
-                      {...field}
-                      value={searchBarValue}
-                      fullWidth
-                      placeholder={i18n.translate(
-                        'xpack.searchPlayground.searchMode.searchBar.placeholder',
-                        { defaultMessage: 'Search for documents' }
-                      )}
-                      isLoading={isSubmitting}
-                      isClearable
-                      incremental
-                      onSearch={handleSearch}
-                    />
-                  )}
-                />
-              </EuiForm>
+              <Controller
+                control={control}
+                name={ChatFormFields.searchQuery}
+                render={({ field }) => (
+                  <EuiFieldSearch
+                    data-test-subj="searchPlaygroundSearchModeFieldText"
+                    {...field}
+                    value={searchBarValue}
+                    fullWidth
+                    placeholder={i18n.translate(
+                      'xpack.searchPlayground.searchMode.searchBar.placeholder',
+                      { defaultMessage: 'Search for documents' }
+                    )}
+                    isLoading={isSubmitting}
+                    isClearable
+                    incremental
+                    onSearch={handleSearch}
+                  />
+                )}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFlexGroup direction="column">

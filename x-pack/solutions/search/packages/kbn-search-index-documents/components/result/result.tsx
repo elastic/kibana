@@ -66,9 +66,7 @@ export const Result: React.FC<ResultProps> = ({
         });
   const toolTipContent = <>{tooltipText}</>;
 
-  const showResultsFields = isExpanded
-    ? fields.length > 0
-    : fields.slice(0, defaultVisibleFields).length > 0;
+  const showResultsFields = isExpanded ? fields.length > 0 : defaultVisibleFields > 0;
 
   return (
     <>
