@@ -71,9 +71,13 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
 ]);
 
 interface IngestStreamPrivileges {
+  // User can change everything about the stream
   manage: boolean;
+  // User can read stats (like size in bytes) about the stream
   monitor: boolean;
+  // User can change the retention policy of the stream
   lifecycle: boolean;
+  // User can simulate changes to the processing or the mapping of the stream
   simulate: boolean;
 }
 
