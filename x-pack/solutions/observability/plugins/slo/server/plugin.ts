@@ -30,6 +30,7 @@ import { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
 import { DefaultResourceInstaller } from './services';
+import { BulkDeleteTask } from './services/tasks/bulk_delete/bulk_delete_task';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import { TempSummaryCleanupTask } from './services/tasks/temp_summary_cleanup_task';
 import type {
@@ -179,6 +180,12 @@ export class SLOPlugin
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
       config: this.config,
+    });
+
+    new BulkDeleteTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
     });
 
     return {};
