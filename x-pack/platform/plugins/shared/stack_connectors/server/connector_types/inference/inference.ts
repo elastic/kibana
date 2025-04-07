@@ -12,10 +12,6 @@ import { Stream } from 'openai/streaming';
 import type { Readable } from 'stream';
 
 import type { AxiosError } from 'axios';
-import type {
-  InferenceInferenceRequest,
-  InferenceInferenceResponse,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
 import type { Observable } from 'rxjs';
 import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
@@ -259,16 +255,15 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     query,
     signal,
   }: RerankParams & { signal?: AbortSignal }): Promise<RerankResponse> {
-    const response = await this.performInferenceApi(
+    const response = await this.esClient?.inference.rerank(
       {
         query,
         inference_id: this.inferenceId,
         input,
-        task_type: 'rerank',
       },
-      false,
-      signal
+      { asStream: false, signal }
     );
+
     return response.rerank!.map(({ relevance_score: score, ...rest }) => ({ score, ...rest }));
   }
 
@@ -281,10 +276,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     input,
     signal,
   }: SparseEmbeddingParams & { signal?: AbortSignal }): Promise<SparseEmbeddingResponse> {
-    const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input, task_type: 'sparse_embedding' },
-      false,
-      signal
+    const response = await this.esClient?.inference.sparseEmbedding(
+      { inference_id: this.inferenceId, input },
+      { asStream: false, signal }
     );
     return response.sparse_embedding!;
   }
@@ -299,43 +293,17 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     inputType,
     signal,
   }: TextEmbeddingParams & { signal?: AbortSignal }): Promise<TextEmbeddingResponse> {
-    const response = await this.performInferenceApi(
+    const response = await this.esClient?.inference.textEmbedding(
       {
         inference_id: this.inferenceId,
         input,
-        task_type: 'text_embedding',
         task_settings: {
           input_type: inputType,
         },
       },
-      false,
-      signal
+      { asStream: false, signal }
     );
     return response.text_embedding!;
-  }
-
-  /**
-   * private generic method to avoid duplication esClient inference inference execute.
-   * @param params InferenceInferenceRequest params.
-   * @param asStream defines the type of the responce, regular or stream
-   * @signal abort signal
-   */
-  private async performInferenceApi(
-    params: InferenceInferenceRequest,
-    asStream = false,
-    signal?: AbortSignal
-  ): Promise<InferenceInferenceResponse> {
-    try {
-      const response = await this.esClient?.inference.inference(params, { asStream, signal });
-      this.logger.info(
-        `Perform Inference endpoint for task type "${this.taskType}" and inference id ${this.inferenceId}`
-      );
-      // TODO: const usageMetadata = response?.data?.usageMetadata;
-      return response;
-    } catch (err) {
-      this.logger.error(`error perform inference endpoint API: ${err}`);
-      throw err;
-    }
   }
 
   /**
@@ -347,10 +315,9 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     input,
     signal,
   }: ChatCompleteParams & { signal?: AbortSignal }): Promise<ChatCompleteResponse> {
-    const response = await this.performInferenceApi(
-      { inference_id: this.inferenceId, input, task_type: 'completion' },
-      false,
-      signal
+    const response = await this.esClient?.inference.completion(
+      { inference_id: this.inferenceId, input },
+      { asStream: false, signal }
     );
     return response.completion!;
   }

@@ -9,7 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 export const ensureDefaultElserDeployed = async ({ client }: { client: ElasticsearchClient }) => {
-  await client.inference.inference(
+  await client.inference.completion(
     {
       inference_id: defaultInferenceEndpoints.ELSER,
       input: 'I just want to call the API to force the model to download and allocate',

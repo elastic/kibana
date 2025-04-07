@@ -7,7 +7,7 @@
 
 import type {
   InferenceInferenceEndpointInfo,
-  InferenceInferenceResponse,
+  InferenceCompletionResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpSetup } from '@kbn/core/public';
 
@@ -43,7 +43,7 @@ export class AutoDeploy {
   }
 
   private async infer() {
-    return this.http.fetch<InferenceInferenceResponse>(
+    return this.http.fetch<InferenceCompletionResponse>(
       `/internal/data_visualizer/inference/${this.inferenceId}`,
       {
         method: 'POST',

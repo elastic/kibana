@@ -12,7 +12,10 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable, Transform } from 'stream';
 import {} from '@kbn/actions-plugin/server/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { InferenceInferenceResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  InferenceCompletionResponse,
+  InferenceTextEmbeddingResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 
 const OPENAI_CONNECTOR_ID = '123';
 const DEFAULT_OPENAI_MODEL = 'gpt-4o';
@@ -20,20 +23,20 @@ const DEFAULT_OPENAI_MODEL = 'gpt-4o';
 describe('InferenceConnector', () => {
   let mockError: jest.Mock;
   const logger = loggingSystemMock.createLogger();
-  const mockResponse: InferenceInferenceResponse = {
-    completion: [
-      {
-        result:
-          'Elastic is a company known for developing the Elasticsearch search and analytics engine, which allows for real-time data search, analysis, and visualization. Elasticsearch is part of the larger Elastic Stack (also known as the ELK Stack), which includes:\n\n1. **Elasticsearch**: A distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.\n  \n2. **Logstash**: A server-side data processing pipeline that ingests data from multiple sources simultaneously, transforms it, and sends it to your preferred "stash," such as Elasticsearch.\n  \n3. **Kibana**: A data visualization dashboard for Elasticsearch. It allows you to search, view, and interact with data stored in Elasticsearch indices. You can perform advanced data analysis and visualize data in various charts, tables, and maps.\n\n4. **Beats**: Lightweight data shippers for different types of data. They send data from hundreds or thousands of machines and systems to Elasticsearch or Logstash.\n\nThe Elastic Stack is commonly used for various applications, such as log and event data analysis, full-text search, security analytics, business analytics, and more. It is employed across many industries to derive insights from large volumes of structured and unstructured data.\n\nElastic offers both open-source and paid versions of its software, providing a variety of features ranging from basic data ingestion and visualization to advanced machine learning and security capabilities.',
-      },
-    ],
-  };
 
   describe('performApiUnifiedCompletion', () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    const mockResponse: InferenceCompletionResponse = {
+      completion: [
+        {
+          result:
+            'Elastic is a company known for developing the Elasticsearch search and analytics engine, which allows for real-time data search, analysis, and visualization. Elasticsearch is part of the larger Elastic Stack (also known as the ELK Stack), which includes:\n\n1. **Elasticsearch**: A distributed, RESTful search and analytics engine capable of addressing a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.\n  \n2. **Logstash**: A server-side data processing pipeline that ingests data from multiple sources simultaneously, transforms it, and sends it to your preferred "stash," such as Elasticsearch.\n  \n3. **Kibana**: A data visualization dashboard for Elasticsearch. It allows you to search, view, and interact with data stored in Elasticsearch indices. You can perform advanced data analysis and visualize data in various charts, tables, and maps.\n\n4. **Beats**: Lightweight data shippers for different types of data. They send data from hundreds or thousands of machines and systems to Elasticsearch or Logstash.\n\nThe Elastic Stack is commonly used for various applications, such as log and event data analysis, full-text search, security analytics, business analytics, and more. It is employed across many industries to derive insights from large volumes of structured and unstructured data.\n\nElastic offers both open-source and paid versions of its software, providing a variety of features ranging from basic data ingestion and visualization to advanced machine learning and security capabilities.',
+        },
+      ],
+    };
 
     beforeEach(() => {
-      mockEsClient.inference.inference.mockResolvedValue(mockResponse);
+      mockEsClient.inference.completion.mockResolvedValue(mockResponse);
       mockError = jest.fn().mockImplementation(() => {
         throw new Error('API Error');
       });
@@ -128,7 +131,7 @@ describe('InferenceConnector', () => {
     };
 
     beforeEach(() => {
-      mockEsClient.inference.inference.mockResolvedValue(mockResponseRerank);
+      mockEsClient.inference.rerank.mockResolvedValue(mockResponseRerank);
       mockError = jest.fn().mockImplementation(() => {
         throw new Error('API Error');
       });
@@ -156,12 +159,11 @@ describe('InferenceConnector', () => {
         input: ['apple', 'banana'],
         query: 'test',
       });
-      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+      expect(mockEsClient.inference.rerank).toHaveBeenCalledWith(
         {
           inference_id: 'test-rerank',
           input: ['apple', 'banana'],
           query: 'test',
-          task_type: 'rerank',
         },
         { asStream: false }
       );
@@ -173,9 +175,16 @@ describe('InferenceConnector', () => {
 
   describe('performApiTextEmbedding', () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    const mockTextEmbeddingResponse: InferenceTextEmbeddingResponse = {
+      text_embedding: [
+        {
+          embedding: [0.1, 0.2, 0.3],
+        },
+      ],
+    };
 
     beforeEach(() => {
-      mockEsClient.inference.inference.mockResolvedValue(mockResponse);
+      mockEsClient.inference.textEmbedding.mockResolvedValue(mockTextEmbeddingResponse);
       mockError = jest.fn().mockImplementation(() => {
         throw new Error('API Error');
       });
@@ -205,23 +214,22 @@ describe('InferenceConnector', () => {
         input: 'Hello world',
         inputType: 'ingest',
       });
-      expect(mockEsClient.inference.inference).toHaveBeenCalledWith(
+      expect(mockEsClient.inference.textEmbedding).toHaveBeenCalledWith(
         {
           inference_id: '',
           input: 'Hello world',
           task_settings: {
             input_type: 'ingest',
           },
-          task_type: 'text_embedding',
         },
         { asStream: false }
       );
-      expect(response).toEqual(mockResponse.text_embedding);
+      expect(response).toEqual(mockTextEmbeddingResponse.text_embedding);
     });
 
     it('errors during API calls are properly handled', async () => {
       // @ts-ignore
-      mockEsClient.inference.inference = mockError;
+      mockEsClient.inference.textEmbedding = mockError;
 
       await expect(
         connectorTextEmbedding.performApiTextEmbedding({
@@ -247,7 +255,7 @@ describe('InferenceConnector', () => {
       streamMock.complete();
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      mockEsClient.inference.inference.mockResolvedValue(streamMock.transform as any);
+      mockEsClient.inference.completion.mockResolvedValue(streamMock.transform as any);
     };
 
     beforeEach(() => {

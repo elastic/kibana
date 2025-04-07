@@ -147,7 +147,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
           const inferenceId = request.params.inferenceId;
           const input = request.body.input;
           const esClient = (await context.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.inference.inference(
+          const body = await esClient.asCurrentUser.inference.completion(
             {
               inference_id: inferenceId,
               input,
