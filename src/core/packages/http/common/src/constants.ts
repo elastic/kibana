@@ -11,6 +11,7 @@
 export const ELASTIC_HTTP_VERSION_HEADER = 'elastic-api-version' as const;
 export const ELASTIC_HTTP_VERSION_QUERY_PARAM = 'apiVersion' as const;
 export const ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM = 'elasticInternalOrigin' as const;
+export const ELASTIC_PUBLIC_FILTER_PATH_QUERY_PARAM = 'filter_path' as const;
 export const X_ELASTIC_INTERNAL_ORIGIN_REQUEST = 'x-elastic-internal-origin' as const;
 
 /** @internal */

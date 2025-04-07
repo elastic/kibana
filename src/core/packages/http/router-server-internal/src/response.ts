@@ -24,7 +24,12 @@ import type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from '@kbn/core-http-server';
+import { isPlainObject, pick } from 'lodash';
 import mime from 'mime';
+
+interface KibanaResponseFromOptions {
+  filterPath?: string | string[];
+}
 
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
@@ -38,6 +43,15 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
     public readonly payload?: T,
     public readonly options: HttpResponseOptions = {}
   ) {}
+
+  public static from(response: KibanaResponse, { filterPath }: KibanaResponseFromOptions) {
+    let body = response.payload;
+    if (filterPath?.length && isPlainObject(body)) {
+      if (!Array.isArray(filterPath)) filterPath = [filterPath];
+      body = pick(body, filterPath);
+    }
+    return new KibanaResponse(response.status, body, response.options);
+  }
 }
 
 const successResponseFactory: KibanaSuccessResponseFactory = {

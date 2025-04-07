@@ -33,7 +33,7 @@ import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { Env } from '@kbn/config';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
-import { kibanaResponseFactory } from './response';
+import { KibanaResponse, kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { formatErrorMeta } from './util';
@@ -184,7 +184,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     this.routes.push({
       ...route,
       handler: async (request, responseToolkit) =>
-        await this.handle({ request, responseToolkit, handler: route.handler }),
+        await this.handle({ request, responseToolkit, handler: route.handler, route }),
     });
   }
 
@@ -192,20 +192,27 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
     request,
     responseToolkit,
     handler,
+    route,
   }: {
     request: Request;
     responseToolkit: ResponseToolkit;
     handler: InternalRouteHandler;
+    route: InternalRouterRoute;
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
-      const kibanaResponse = await handler(request);
+      let kibanaResponse = await handler(request);
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,
           isDev: this.options.env.mode.dev,
           logger: this.log,
           requestContext: `${request.route.method} ${request.route.path}`,
+        });
+      }
+      if (!route.options.httpResource && request.query.filter_path) {
+        kibanaResponse = KibanaResponse.from(kibanaResponse, {
+          filterPath: request.query.filter_path,
         });
       }
       return hapiResponseAdapter.handle(kibanaResponse);
