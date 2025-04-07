@@ -134,6 +134,7 @@ const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { reorderProcessors } = useStreamEnrichmentEvents();
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
 
   const processorsRefs = useStreamsEnrichmentSelector((state) =>
     state.context.processorsRefs.filter((processorRef) =>
@@ -222,6 +223,7 @@ const ProcessorsEditor = React.memo(() => {
           <SortableList onDragItem={handlerItemDrag}>
             {processorsRefs.map((processorRef, idx) => (
               <DraggableProcessorListItem
+                disableDrag={!definition.privileges.manage}
                 key={processorRef.id}
                 idx={idx}
                 processorRef={processorRef}
@@ -230,7 +232,7 @@ const ProcessorsEditor = React.memo(() => {
             ))}
           </SortableList>
         )}
-        <AddProcessorPanel />
+        {definition.privileges.manage && <AddProcessorPanel />}
       </EuiPanel>
       <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (

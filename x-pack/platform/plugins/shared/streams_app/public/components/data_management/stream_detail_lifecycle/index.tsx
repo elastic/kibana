@@ -195,16 +195,18 @@ export function StreamDetailLifecycle({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem grow={2}>
-            <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
-              <IngestionRate
-                definition={definition}
-                refreshStats={refreshStats}
-                isLoadingStats={isLoadingStats}
-                stats={stats}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
+          {definition.privileges.monitor && (
+            <EuiFlexItem grow={2}>
+              <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
+                <IngestionRate
+                  definition={definition}
+                  refreshStats={refreshStats}
+                  isLoadingStats={isLoadingStats}
+                  stats={stats}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          )}
 
           {isIlmLifecycle(definition.effective_lifecycle) ? (
             <EuiFlexItem grow={3}>

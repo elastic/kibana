@@ -70,6 +70,13 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
   unwiredIngestUpsertRequestSchema,
 ]);
 
+interface IngestStreamPrivileges {
+  manage: boolean;
+  monitor: boolean;
+  lifecycle: boolean;
+  simulate: boolean;
+}
+
 /**
  * Stream get response
  */
@@ -77,6 +84,7 @@ interface WiredStreamGetResponse extends StreamGetResponseBase {
   stream: WiredStreamDefinition;
   inherited_fields: InheritedFieldDefinition;
   effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
+  privileges: IngestStreamPrivileges;
 }
 
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
@@ -84,6 +92,7 @@ interface UnwiredStreamGetResponse extends StreamGetResponseBase {
   elasticsearch_assets?: ElasticsearchAssets;
   data_stream_exists: boolean;
   effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
+  privileges: IngestStreamPrivileges;
 }
 
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
@@ -121,12 +130,20 @@ const ingestStreamUpsertRequestSchema: z.Schema<IngestStreamUpsertRequest> = z.u
   unwiredStreamUpsertRequestSchema,
 ]);
 
+const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
+  manage: z.boolean(),
+  monitor: z.boolean(),
+  lifecycle: z.boolean(),
+  simulate: z.boolean(),
+});
+
 const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.intersection(
   streamGetResponseSchemaBase,
   z.object({
     stream: wiredStreamDefinitionSchema,
     inherited_fields: inheritedFieldDefinitionSchema,
     effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+    privileges: ingestStreamPrivilegesSchema,
   })
 );
 
@@ -137,6 +154,7 @@ const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.int
     elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
     data_stream_exists: z.boolean(),
     effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
+    privileges: ingestStreamPrivilegesSchema,
   })
 );
 

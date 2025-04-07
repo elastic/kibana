@@ -65,6 +65,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
               iconType="plus"
               size="s"
               data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+              disabled={!definition.privileges.manage}
               onClick={() => {
                 selectChildUnderEdit({
                   isNew: true,
@@ -98,6 +99,7 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                   <EuiDraggable
                     key={child.destination}
                     index={i}
+                    isDragDisabled={!definition.privileges.manage}
                     draggableId={child.destination}
                     hasInteractiveChildren={true}
                     customDragHandle={true}
@@ -111,7 +113,9 @@ export function ChildStreamList({ availableStreams }: { availableStreams: string
                       >
                         <RoutingStreamEntry
                           draggableProvided={provided}
-                          disableEditButton={hasChildStreamsOrderChanged}
+                          disableEditButton={
+                            hasChildStreamsOrderChanged || !definition.privileges.manage
+                          }
                           child={
                             !childUnderEdit?.isNew &&
                             child.destination === childUnderEdit?.child.destination

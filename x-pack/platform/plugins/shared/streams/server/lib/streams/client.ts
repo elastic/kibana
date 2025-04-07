@@ -714,6 +714,46 @@ export class StreamsClient {
   }
 
   /**
+   * Checks whether the user has the required privileges to manage the stream.
+   * Managing a stream means updating the stream properties. It does not
+   * include the dashboard links.
+   */
+  async getPrivileges(name: string) {
+    const privileges =
+      await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
+        cluster: [
+          'manage_index_templates',
+          'manage_ingest_pipelines',
+          'manage_pipeline',
+          'read_pipeline',
+        ],
+        index: [
+          {
+            names: [name],
+            privileges: [
+              'read',
+              'write',
+              'manage',
+              'monitor',
+              'manage_data_stream_lifecycle',
+              'manage_ilm',
+            ],
+          },
+        ],
+      });
+
+    return {
+      manage:
+        Object.values(privileges.cluster).every((privilege) => privilege === true) &&
+        Object.values(privileges.index[name]).every((privilege) => privilege === true),
+      monitor: privileges.index[name].monitor,
+      lifecycle:
+        privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
+      simulate: privileges.cluster.read_pipeline,
+    };
+  }
+
+  /**
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
    */

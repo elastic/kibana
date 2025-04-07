@@ -37,6 +37,7 @@ import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { formatIngestionRate } from './helpers/format_bytes';
+import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 
 export function RetentionMetadata({
   definition,
@@ -66,6 +67,7 @@ export function RetentionMetadata({
             size="s"
             fullWidth
             onClick={toggleMenu}
+            disabled={!definition.privileges.lifecycle}
           >
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
               defaultMessage: 'Edit data retention',
@@ -178,15 +180,20 @@ export function RetentionMetadata({
             'Estimated average (stream total size divided by the number of days since creation).',
         })}
         value={
-          statsError ? (
-            '-'
-          ) : isLoadingStats || !stats ? (
-            <EuiLoadingSpinner size="s" />
-          ) : stats.bytesPerDay ? (
-            formatIngestionRate(stats.bytesPerDay)
-          ) : (
-            '-'
-          )
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="ingestionRate"
+          >
+            {statsError ? (
+              '-'
+            ) : isLoadingStats || !stats ? (
+              <EuiLoadingSpinner size="s" />
+            ) : stats.bytesPerDay ? (
+              formatIngestionRate(stats.bytesPerDay)
+            ) : (
+              '-'
+            )}
+          </PrivilegesWarningIconWrapper>
         }
       />
       <EuiHorizontalRule margin="s" />
@@ -195,13 +202,18 @@ export function RetentionMetadata({
           defaultMessage: 'Total doc count',
         })}
         value={
-          statsError ? (
-            '-'
-          ) : isLoadingStats || !stats ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            formatNumber(stats.totalDocs, '0,0')
-          )
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="totalDocCount"
+          >
+            {statsError ? (
+              '-'
+            ) : isLoadingStats || !stats ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              formatNumber(stats.totalDocs, '0,0')
+            )}
+          </PrivilegesWarningIconWrapper>
         }
       />
     </EuiPanel>
