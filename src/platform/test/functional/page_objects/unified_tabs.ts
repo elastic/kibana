@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class UnifiedTabsPageObject extends FtrService {
@@ -16,6 +17,22 @@ export class UnifiedTabsPageObject extends FtrService {
 
   public async getTabElements() {
     return await this.find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+  }
+
+  public async getSelectedTab(): Promise<
+    { element: WebElementWrapper; index: number; label: string } | undefined
+  > {
+    const tabElements = await this.getTabElements();
+    for (const tabElement of tabElements) {
+      const tabRoleElement = await tabElement.findByCssSelector('[role="tab"]');
+      if ((await tabRoleElement.getAttribute('aria-selected')) === 'true') {
+        return {
+          element: tabElement,
+          index: tabElements.indexOf(tabElement),
+          label: await tabElement.getVisibleText(),
+        };
+      }
+    }
   }
 
   public async getTabWidths() {
@@ -37,7 +54,35 @@ export class UnifiedTabsPageObject extends FtrService {
     await this.testSubjects.click('unifiedTabs_tabsBar_newTabBtn');
     await this.retry.waitFor('the new tab to appear', async () => {
       const newNumberOfTabs = await this.getNumberOfTabs();
-      return newNumberOfTabs === numberOfTabs + 1;
+      return (
+        newNumberOfTabs === numberOfTabs + 1 &&
+        (await this.getSelectedTab())?.index === newNumberOfTabs - 1
+      );
+    });
+  }
+
+  public async selectTab(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    await tabElements[index].click();
+    await this.retry.waitFor('the selected tab to change', async () => {
+      return (await this.getSelectedTab())?.index === index;
+    });
+  }
+
+  public async closeTab(index: number) {
+    const tabElements = await this.getTabElements();
+    if (index < 0 || index >= tabElements.length) {
+      throw new Error(`Tab index ${index} is out of bounds`);
+    }
+    const closeButton = await tabElements[index].findByCssSelector(
+      '[data-test-subj^="unifiedTabs_closeTabBtn_"]'
+    );
+    await closeButton.click();
+    await this.retry.waitFor('the tab to be closed', async () => {
+      return (await this.getNumberOfTabs()) === tabElements.length - 1;
     });
   }
 

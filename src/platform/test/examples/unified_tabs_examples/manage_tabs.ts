@@ -8,6 +8,7 @@
  */
 
 import expect from '@kbn/expect';
+import { Key } from 'selenium-webdriver';
 import type { FtrProviderContext } from '../../functional/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,6 +29,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
+    });
+
+    beforeEach(async () => {
       await common.navigateToApp('unifiedTabsExamples');
       await header.waitUntilLoadingHasFinished();
     });
@@ -52,6 +56,38 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(12);
       await unifiedTabs.waitForScrollButtons();
       expect((await unifiedTabs.getTabWidths()).every((width) => width === 96)).to.be(true);
+    });
+
+    it('should support mouse events for navigating between tabs', async () => {
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      await unifiedTabs.createNewTab();
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      await unifiedTabs.selectTab(5);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 6');
+      await unifiedTabs.selectTab(6);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      await unifiedTabs.closeTab(6);
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+    });
+
+    it('should support keyboard events for navigating between tabs', async () => {
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
+      await unifiedTabs.createNewTab();
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
+      await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.TAB).perform(); // moves the focus from "+" to the active tab
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      await browser.pressKeys(browser.keys.ARROW_LEFT);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 6');
+      await browser.pressKeys(browser.keys.ARROW_RIGHT);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
+      await browser.pressKeys(browser.keys.DELETE);
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
+      expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
     });
   });
 };
