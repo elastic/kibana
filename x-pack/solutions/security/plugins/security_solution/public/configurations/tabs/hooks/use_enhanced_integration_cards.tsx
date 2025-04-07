@@ -31,19 +31,17 @@ const addPathParamToUrl = (url: string, path: string) => {
   return `${url}?${paramsString}`;
 };
 
-const applyCategoryBadgeAndStyling = (
+export const getCategoryBadgeIfAny = (categories: string[]): string | null => {
+  return categories.includes('edr_xdr') ? 'EDR/XDR' : categories.includes('siem') ? 'SIEM' : null;
+};
+
+export const applyCategoryBadgeAndStyling = (
   card: IntegrationCardItem,
   callerView: IntegrationsFacets
 ): IntegrationCardItem => {
-  // Build the return location
   const returnPath = `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
   const url = addPathParamToUrl(card.url, returnPath);
-  // Set the custom badges for SIEM and EDR/XDR categories
-  const categoryBadge = card.categories.includes('edr_xdr')
-    ? 'EDR/XDR'
-    : card.categories.includes('siem')
-    ? 'SIEM'
-    : null;
+  const categoryBadge = getCategoryBadgeIfAny(card.categories);
   return {
     ...card,
     url,
