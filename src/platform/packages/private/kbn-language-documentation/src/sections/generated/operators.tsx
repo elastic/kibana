@@ -13,13 +13,13 @@ import { Markdown } from '@kbn/shared-ux-markdown';
 
 // DO NOT RENAME!
 export const functions = {
-  label: i18n.translate('languageDocumentation.documentationESQL.aggregationFunctions', {
-    defaultMessage: 'Aggregation functions',
+  label: i18n.translate('languageDocumentation.documentationESQL.operators', {
+    defaultMessage: 'Operators',
   }),
   description: i18n.translate(
     'languageDocumentation.documentationESQL.aggregationFunctionsDocumentationESQLDescription',
     {
-      defaultMessage: `These functions can by used with STATS...BY:`,
+      defaultMessage: `ES|QL supports the following operators:`,
     }
   ),
   // items are managed by scripts/generate_esql_docs.ts
