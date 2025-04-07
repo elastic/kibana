@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
+import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
-import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
-import { StreamDetailManagement } from '../data_management/stream_detail_management';
-import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { StreamDetailManagement } from '../data_management/stream_detail_management';
+import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
 import { RedirectTo } from '../redirect_to';
+import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
+import { StreamDetailOverview } from '../stream_detail_overview';
 
 export function StreamDetailView() {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
