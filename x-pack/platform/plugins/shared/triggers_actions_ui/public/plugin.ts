@@ -34,6 +34,7 @@ import type { RuleAction } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -84,7 +85,6 @@ import type {
   RulesListNotifyBadgePropsWithApi,
   RulesListProps,
 } from './types';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -422,26 +422,50 @@ export class Plugin
           'xpack.triggersActionsUi.alertRuleFromVis.thresholdComment',
           {
             defaultMessage:
-              'Threshold automatically generated from the selected value on the chart. This rule will fire if {sourceField} is >= {value}; to change this, modify the following line:',
+              'Threshold automatically generated from the selected value on the chart. This rule will fire if {sourceField} is >= {value}; to change this, modify the following:',
             values: { value, sourceField },
           }
         );
-        const thresholdQuery = `${sourceField} >= ${value}`;
+
+        let evalQuery = '';
+        const evaluateFieldName = (fieldName: string) => {
+          // Detect if the passed column name is actually an ES|QL function call instead of a field name
+          const esqlFunctionRegex = /[A-Z]+\(.*?\)/;
+          if (esqlFunctionRegex.test(fieldName)) {
+            // Convert the function to a lowercase, snake_cased variable
+            // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
+            const colName = `_${fieldName
+              .toLowerCase()
+              .replace(/[\),*]/g, '') // Eliminate parens, asterisks, commas
+              .replace(/[\( ]/g, '_')}`; // Replace opening paren and spaces with underscores
+            // Add this to the evalQuery as a side effect
+            evalQuery += `| EVAL ${colName} = \`${fieldName}\` `;
+            return colName;
+          }
+          return fieldName;
+        };
+
+        const thresholdQuery = `${evaluateFieldName(sourceField)} >= ${value}`;
         const splitValueQueries = splitValues.map(([fieldName, values]) =>
           values.length === 1
             ? `${fieldName} == "${values[0]}"`
-            : `(${values.map((value) => `${fieldName} == "${value}"`).join(' OR ')})`
+            : `(${values
+                .map((value) => `${evaluateFieldName(fieldName)} == "${value}"`)
+                .join(' OR ')})`
         );
-        const conditionsQuery = [thresholdQuery, ...splitValueQueries].join(' AND ');
+        const conditionsQuery = [...splitValueQueries, thresholdQuery].join(' AND ');
+
+        const timeRange = context.embeddable.parentApi.timeRange$._value;
         const initialValues = {
           params: {
             searchType: 'esqlQuery',
             esqlQuery: {
-              esql: `${query}\n// ${thresholdQueryComment}\n| WHERE ${conditionsQuery}`,
+              esql: `${query}\n// ${thresholdQueryComment}\n${evalQuery}| WHERE ${conditionsQuery}`,
             },
             timeField,
           },
         };
+
         context.embeddable.createAlertRule(
           initialValues,
           this.ruleTypeRegistry,

@@ -8,13 +8,16 @@
 import type { RuleFormData, RuleTypeModel } from '@kbn/response-ops-rule-form';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { ActionTypeModel } from '@kbn/alerts-ui-shared';
+import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { getDateRange } from '@kbn/timerange';
+import { TimeRange } from '@kbn/es-query';
+import { unitsMap } from '@kbn/datemath';
 import type { LensInternalApi } from '../types';
 
-export function initializeAlertRules({
-  alertRuleInitialValues$,
-  isRuleFormVisible$,
-  alertingTypeRegistries$,
-}: LensInternalApi) {
+export function initializeAlertRules(
+  { alertRuleInitialValues$, isRuleFormVisible$, alertingTypeRegistries$ }: LensInternalApi,
+  parentApi: unknown
+) {
   return {
     api: {
       createAlertRule: (
@@ -22,13 +25,43 @@ export function initializeAlertRules({
         ruleTypeRegistry: TypeRegistry<RuleTypeModel>,
         actionTypeRegistry: TypeRegistry<ActionTypeModel>
       ) => {
+        const { timeRange$ } = apiPublishesUnifiedSearch(parentApi)
+          ? parentApi
+          : { timeRange$: undefined };
+        const timeRange = timeRange$?.getValue();
+        if (timeRange) {
+          alertRuleInitialValues$.next({
+            params: {
+              ...initialValues.params,
+              ...timeRangeToNearestTimeWindow(timeRange),
+            },
+          });
+        } else {
+          alertRuleInitialValues$.next(initialValues);
+        }
+
         alertingTypeRegistries$.next({
           ruleTypeRegistry,
           actionTypeRegistry,
         });
-        alertRuleInitialValues$.next(initialValues);
         isRuleFormVisible$.next(true);
       },
     },
   };
+}
+
+function timeRangeToNearestTimeWindow(timeRange: TimeRange) {
+  const { startDate, endDate } = getDateRange(timeRange);
+  const timeWindow = endDate - startDate;
+  const timeWindowUnit =
+    timeWindow >= unitsMap.d.base
+      ? 'd'
+      : timeWindow >= unitsMap.h.base
+      ? 'h'
+      : timeWindow >= unitsMap.m.base
+      ? 'm'
+      : 's';
+  const timeWindowSize = Math.round(timeWindow / unitsMap[timeWindowUnit].base);
+
+  return { timeWindowUnit, timeWindowSize };
 }

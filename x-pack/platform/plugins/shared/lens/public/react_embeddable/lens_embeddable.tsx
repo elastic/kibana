@@ -121,7 +121,7 @@ export const createLensEmbeddableFactory = (
         services
       );
 
-      const alertRulesConfig = initializeAlertRules(internalApi);
+      const alertRulesConfig = initializeAlertRules(internalApi, parentApi);
 
       /**
        * This is useful to have always the latest version of the state
