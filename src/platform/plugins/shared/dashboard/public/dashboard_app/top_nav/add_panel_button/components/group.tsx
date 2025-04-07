@@ -31,7 +31,6 @@ export function Group({ group }: { group: MenuItemGroup }) {
           position: 'right',
         },
         showToolTip: true,
-        'aria-label': item.name,
         label: !item.isDeprecated ? (
           item.name
         ) : (
