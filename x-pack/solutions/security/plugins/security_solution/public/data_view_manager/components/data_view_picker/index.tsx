@@ -17,6 +17,7 @@ import { useDataViewSpec } from '../../hooks/use_data_view_spec';
 import { sharedStateSelector } from '../../redux/selectors';
 import { sharedDataViewManagerSlice } from '../../redux/slices';
 import { useSelectDataView } from '../../hooks/use_select_data_view';
+import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 
 export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) => {
   const dispatch = useDispatch();
@@ -119,17 +120,19 @@ export const DataViewPicker = memo((props: { scope: DataViewManagerScopeName }) 
   }, [adhocDataViewSpecs, fieldFormats]);
 
   return (
-    <UnifiedDataViewPicker
-      isDisabled={status !== 'ready'}
-      currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
-      trigger={triggerConfig}
-      onChangeDataView={handleChangeDataView}
-      onEditDataView={handleDataViewModified}
-      onAddField={handleAddField}
-      onDataViewCreated={createNewDataView}
-      adHocDataViews={adhocDataViews}
-      savedDataViews={savedDataViews}
-    />
+    <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
+      <UnifiedDataViewPicker
+        isDisabled={status !== 'ready'}
+        currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
+        trigger={triggerConfig}
+        onChangeDataView={handleChangeDataView}
+        onEditDataView={handleDataViewModified}
+        onAddField={handleAddField}
+        onDataViewCreated={createNewDataView}
+        adHocDataViews={adhocDataViews}
+        savedDataViews={savedDataViews}
+      />
+    </div>
   );
 });
 
