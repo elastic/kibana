@@ -57,10 +57,11 @@ export const getFollowerIndexInfo = async (
     }
     return { info: res.follower_indices[0] };
   } catch (err) {
-    if (err?.body?.error?.type === 'index_not_found_exception')
+    if (err?.body?.error?.type === 'index_not_found_exception') {
       throw new IndexNotFoundError(`Index not found`);
+    }
 
-    logger.error('error', err.message);
+    logger.error('error', err?.message);
     throw err;
   }
 };
@@ -238,13 +239,7 @@ const compareCustomAssets = ({
     if (ccrCustomAsset.is_deleted === true && installedPipeline) {
       return {
         ...result,
-        sync_status: 'failed' as SyncStatus.FAILED,
-        error: `Asset ${ccrCustomAsset.name} marked for deletion found installed`,
-      };
-    } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
-      return {
-        ...result,
-        sync_status: 'completed' as SyncStatus.COMPLETED,
+        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     } else if (
       installedPipeline?.version &&
@@ -254,6 +249,11 @@ const compareCustomAssets = ({
         ...result,
         sync_status: 'failed' as SyncStatus.FAILED,
         error: `Found incorrect installed version ${installedPipeline.version}`,
+      };
+    } else if (isEqual(installedPipeline, ccrCustomAsset?.pipeline)) {
+      return {
+        ...result,
+        sync_status: 'completed' as SyncStatus.COMPLETED,
       };
     } else {
       return {
@@ -279,8 +279,7 @@ const compareCustomAssets = ({
     if (ccrCustomAsset.is_deleted === true && installedCompTemplate) {
       return {
         ...result,
-        sync_status: 'failed' as SyncStatus.FAILED,
-        error: `Asset ${ccrCustomAsset.name} marked for deletion found installed`,
+        sync_status: 'synchronizing' as SyncStatus.SYNCHRONIZING,
       };
     } else if (isEqual(installedCompTemplate, ccrCustomAsset?.template)) {
       return {
@@ -320,7 +319,7 @@ export const getRemoteSyncedIntegrationsStatus = async (
       logger
     );
     return res;
-  } catch (err) {
-    throw err;
+  } catch (error) {
+    return { error, integrations: [] };
   }
 };

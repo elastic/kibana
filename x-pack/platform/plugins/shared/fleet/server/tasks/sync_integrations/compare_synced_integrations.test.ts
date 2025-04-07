@@ -7,12 +7,18 @@
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
+import { loggerMock } from '@kbn/logging-mocks';
+import type { Logger } from '@kbn/core/server';
+
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
+
+import { appContextService } from '../../services';
 
 import { installCustomAsset, getPipeline, getComponentTemplate } from './custom_assets';
 import {
   getFollowerIndexInfo,
   fetchAndCompareSyncedIntegrations,
+  getRemoteSyncedIntegrationsStatus,
 } from './compare_synced_integrations';
 
 jest.mock('../../services');
@@ -25,15 +31,16 @@ jest.mock('../../services/epm/packages/get', () => {
     getPackageSavedObjects: jest.fn(),
   };
 });
+const mockedAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
 const getPipelineMock = getPipeline as jest.Mocked<typeof getPipeline>;
 const getComponentTemplateMock = getComponentTemplate as jest.Mocked<typeof getComponentTemplate>;
+let mockedLogger: jest.Mocked<Logger>;
 
 describe('getFollowerIndexInfo', () => {
   let esClientMock: any;
   let getIndicesMock: jest.Mock;
   let searchMock: jest.Mock;
-  let loggerMock: any;
 
   beforeEach(() => {
     getIndicesMock = jest.fn();
@@ -46,20 +53,19 @@ describe('getFollowerIndexInfo', () => {
       ccr: { followInfo: jest.fn() },
     };
 
-    loggerMock = {
-      debug: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-    };
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     (installCustomAsset as jest.Mock).mockClear();
     getIndicesMock.mockResolvedValue({
       'fleet-synced-integrations-ccr-remote1': {},
     });
   });
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
 
   it('should return error if follower index is not available', async () => {
-    expect(await getFollowerIndexInfo(esClientMock, loggerMock)).toEqual({
+    expect(await getFollowerIndexInfo(esClientMock, mockedLogger)).toEqual({
       error: 'Follower index fleet-synced-integrations-ccr-remote1 not available',
     });
   });
@@ -69,7 +75,7 @@ describe('getFollowerIndexInfo', () => {
       follower_indices: [],
     } as any);
 
-    expect(await getFollowerIndexInfo(esClientMock, loggerMock)).toEqual({
+    expect(await getFollowerIndexInfo(esClientMock, mockedLogger)).toEqual({
       error: 'Follower index fleet-synced-integrations-ccr-remote1 not available',
     });
   });
@@ -97,7 +103,7 @@ describe('getFollowerIndexInfo', () => {
         },
       ],
     } as any);
-    const info = await getFollowerIndexInfo(esClientMock, loggerMock);
+    const info = await getFollowerIndexInfo(esClientMock, mockedLogger);
     expect(info).toEqual({
       info: {
         follower_index: 'fleet-synced-integrations-ccr-remote1',
@@ -132,7 +138,7 @@ describe('getFollowerIndexInfo', () => {
         },
       ],
     } as any);
-    const info = await getFollowerIndexInfo(esClientMock, loggerMock);
+    const info = await getFollowerIndexInfo(esClientMock, mockedLogger);
     expect(info).toEqual({
       error: 'Follower index fleet-synced-integrations-ccr-remote1 paused',
     });
@@ -145,8 +151,6 @@ describe('fetchAndCompareSyncedIntegrations', () => {
   let searchMock: jest.Mock;
   const soClientMock = savedObjectsClientMock.create();
 
-  let loggerMock: any;
-
   beforeEach(() => {
     getIndicesMock = jest.fn();
     searchMock = jest.fn();
@@ -156,14 +160,12 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       },
       search: searchMock,
     };
-
-    loggerMock = {
-      debug: jest.fn(),
-      error: jest.fn(),
-      warn: jest.fn(),
-      info: jest.fn(),
-    };
     (installCustomAsset as jest.Mock).mockClear();
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+  });
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it('should return error if no integrations are found', async () => {
@@ -176,7 +178,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock,
       soClientMock,
       'fleet-synced-integrations-ccr-*',
-      loggerMock
+      mockedLogger
     );
     expect(res).toEqual({
       error: 'No integrations found on fleet-synced-integrations-ccr-*',
@@ -211,7 +213,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock,
       soClientMock,
       'fleet-synced-integrations-ccr-*',
-      loggerMock
+      mockedLogger
     );
     expect(res).toEqual({
       integrations: [
@@ -284,7 +286,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock,
       soClientMock,
       'fleet-synced-integrations-ccr-*',
-      loggerMock
+      mockedLogger
     );
     expect(res).toEqual({
       integrations: [
@@ -370,7 +372,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       esClientMock,
       soClientMock,
       'fleet-synced-integrations-ccr-*',
-      loggerMock
+      mockedLogger
     );
     expect(res).toEqual({
       integrations: [
@@ -517,7 +519,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
 
       expect(res).toEqual({
@@ -605,7 +607,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
 
       expect(res).toEqual({
@@ -730,7 +732,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
 
       expect(res).toEqual({
@@ -780,7 +782,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
       expect(res).toEqual({
         custom_assets: {
@@ -862,7 +864,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
       expect(res).toEqual({
         custom_assets: {
@@ -943,7 +945,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
       expect(res).toEqual({
         custom_assets: {
@@ -973,7 +975,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
     });
 
-    it('should return failed status if is_deleted = true but the assets are still installed', async () => {
+    it('should return synchronizing status if is_deleted = true but the assets are still installed', async () => {
       const searchMockWithDeletedAssets = jest.fn().mockResolvedValue({
         hits: {
           hits: [
@@ -1056,7 +1058,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
       expect(res).toEqual({
         custom_assets: {
@@ -1064,16 +1066,14 @@ describe('fetchAndCompareSyncedIntegrations', () => {
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
-            sync_status: 'failed',
-            error: 'Asset logs-system.auth@custom marked for deletion found installed',
+            sync_status: 'synchronizing',
             type: 'component_template',
           },
           'ingest_pipeline:logs-system.auth@custom': {
             name: 'logs-system.auth@custom',
             package_name: 'system',
             package_version: '1.67.3',
-            sync_status: 'failed',
-            error: 'Asset logs-system.auth@custom marked for deletion found installed',
+            sync_status: 'synchronizing',
             type: 'ingest_pipeline',
           },
         },
@@ -1096,7 +1096,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
       expect(res).toEqual({
         error: 'Some es error',
@@ -1152,7 +1152,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         esClientMock,
         soClientMock,
         'fleet-synced-integrations-ccr-*',
-        loggerMock
+        mockedLogger
       );
 
       expect(res).toEqual({
@@ -1168,6 +1168,89 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           error: 'Error in getPipeline',
         },
       });
+    });
+  });
+});
+
+describe('getRemoteSyncedIntegrationsStatus', () => {
+  let esClientMock: any;
+  let getIndicesMock: jest.Mock;
+  let searchMock: jest.Mock;
+  let soClientMock: any;
+
+  beforeEach(() => {
+    getIndicesMock = jest.fn();
+    searchMock = jest.fn();
+    esClientMock = {
+      indices: {
+        get: getIndicesMock,
+      },
+      search: searchMock,
+      ccr: { followInfo: jest.fn() },
+    };
+
+    soClientMock = savedObjectsClientMock.create();
+    mockedLogger = loggerMock.create();
+    mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
+
+    (installCustomAsset as jest.Mock).mockClear();
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+  });
+
+  it('should return empty integrations array if feature flag is not available', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
+    expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
+      integrations: [],
+    });
+  });
+
+  it('should return error if there is an error in getFollowerIndexInfo', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    getIndicesMock.mockResolvedValue({
+      'fleet-synced-integrations-ccr-remote1': {},
+    });
+    expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
+      error: 'Follower index fleet-synced-integrations-ccr-remote1 not available',
+      integrations: [],
+    });
+  });
+
+  it('should return error if there is an error inside fetchAndCompareSyncedIntegrations', async () => {
+    jest
+      .spyOn(appContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+
+    esClientMock = {
+      search: jest.fn().mockRejectedValueOnce(new Error('Some ES error')),
+      indices: {
+        get: jest.fn().mockResolvedValue({
+          'fleet-synced-integrations-ccr-remote1': {},
+        }),
+      },
+      ccr: {
+        followInfo: jest.fn().mockResolvedValue({
+          follower_indices: [
+            {
+              follower_index: 'fleet-synced-integrations-ccr-remote1',
+              remote_cluster: 'Main',
+              leader_index: 'fleet-synced-integrations',
+              status: 'active',
+              parameters: {},
+            },
+          ],
+        }),
+      },
+    };
+    expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
+      integrations: [],
+      error: 'Some ES error',
     });
   });
 });
