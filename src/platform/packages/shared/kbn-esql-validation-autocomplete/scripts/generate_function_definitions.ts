@@ -94,7 +94,7 @@ const defaultAggFunctionLocations: Location[] = [Location.STATS];
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['case', 'cast']);
+const excludedFunctions = new Set(['case', 'cast', 'predicates']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
@@ -962,7 +962,6 @@ ${
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
     const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
-    const arePredicates = functionDefinition.name.toLowerCase().includes('predicates');
 
     if (functionDefinition.name.toLowerCase() === 'match') {
       scalarFunctionDefinitions.push({
@@ -972,27 +971,21 @@ ${
       continue;
     }
 
-    if (arePredicates) {
-      const nullFunctions: FunctionDefinition[] = [
-        {
-          name: 'is null',
-          description: 'Predicate for NULL comparison: returns true if the value is NULL',
-          operator: 'is null',
-        },
-        {
-          name: 'is not null',
-          description: 'Predicate for NULL comparison: returns true if the value is not NULL',
-          operator: 'is not null',
-        },
-      ].map<FunctionDefinition>(({ name, description, operator }) => {
-        return {
-          ...functionDefinition,
-          name,
-          operator,
-          description,
-        };
+    if (functionDefinition?.name?.toLowerCase() === 'is_null') {
+      operatorDefinitions.push({
+        ...functionDefinition,
+        operator: 'is null',
+        name: 'is null',
       });
-      operatorDefinitions.push(...nullFunctions);
+      continue;
+    }
+
+    if (functionDefinition?.name?.toLowerCase() === 'is_not_null') {
+      operatorDefinitions.push({
+        ...functionDefinition,
+        operator: 'is not null',
+        name: 'is not null',
+      });
       continue;
     }
 
