@@ -123,6 +123,11 @@ export const GenericEntity = z.object({
     category: z.string().optional(),
     source: z.string().optional(),
   }),
+  asset: z
+    .object({
+      criticality: AssetCriticalityLevel,
+    })
+    .optional(),
 });
 
 export const EntityInternal = z.union([UserEntity, HostEntity, ServiceEntity, GenericEntity]);

@@ -207,9 +207,9 @@ components:
     # The Generic Entity definition maps more than just entity.
     # however I don't see a reason to duplicate the definition 
     # of all the fields just for the sake of doing. 
-    # Thus the current mapping maps entity only (used in code).
-    # If you end up needing the fields mapped in the schema just 
-    # add it.              
+    # Thus the current mapping maps entity and asset only 
+    # (used in code). If you end up needing the fields mapped 
+    # in the schema just add it.              
     GenericEntity:
       type: object
       required:
@@ -237,6 +237,13 @@ components:
               type: string
             source:
               type: string
+        asset:
+          type: object
+          properties:
+            criticality:
+              $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
+          required:
+            - criticality
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
