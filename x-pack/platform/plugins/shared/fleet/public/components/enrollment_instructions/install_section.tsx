@@ -7,6 +7,11 @@
 
 import React from 'react';
 
+import type { EuiSwitchProps } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
+
 import type { CommandsByPlatform } from '../../applications/fleet/components/fleet_server_instructions/utils';
 
 import { InstallationMessage } from '../agent_enrollment_flyout/installation_message';
@@ -27,6 +32,8 @@ interface Props {
   isManaged?: boolean;
   onCopy?: () => void;
   rootIntegrations?: Array<{ name: string; title: string }>;
+  showCompleteAgentInstructions: boolean;
+  onChangeShowCompleteAgentInstructions: EuiSwitchProps['onChange'];
 }
 
 export const InstallSection: React.FunctionComponent<Props> = ({
@@ -39,12 +46,21 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   isManaged = true,
   onCopy,
   rootIntegrations,
+  showCompleteAgentInstructions,
+  onChangeShowCompleteAgentInstructions,
 }) => {
   return (
     <>
       <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
       <RootPrivilegesCallout rootIntegrations={rootIntegrations} />
       <UnprivilegedInfo />
+      <EuiSwitch
+        label={addElasticAgentCompleteLabel}
+        checked={showCompleteAgentInstructions}
+        onChange={onChangeShowCompleteAgentInstructions}
+        compressed
+      />
+      <EuiSpacer size="m" />
       <PlatformSelector
         fullCopyButton={fullCopyButton}
         onCopy={onCopy}
@@ -59,3 +75,10 @@ export const InstallSection: React.FunctionComponent<Props> = ({
     </>
   );
 };
+
+const addElasticAgentCompleteLabel = i18n.translate(
+  'xpack.fleet.enrollmentInstructions.completeAgent',
+  {
+    defaultMessage: 'Add elastic agent complete which is required for synthetics browser test',
+  }
+);
