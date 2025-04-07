@@ -337,7 +337,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
     (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
       page: 1,
       per_page: 10000,
-      total: 2,
+      total: 4,
       saved_objects: [
         {
           package_name: 'elastic_agent',
@@ -363,6 +363,14 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           attributes: {
             version: '1.4.1',
             install_status: 'not_installed',
+            latest_install_failed_attempts: [
+              {
+                created_at: '2023-06-20T08:47:31.457Z',
+                error: {
+                  message: 'installation failure',
+                },
+              },
+            ],
           },
           updated_at: '2025-03-26T14:06:27.611Z',
         },
@@ -390,7 +398,7 @@ describe('fetchAndCompareSyncedIntegrations', () => {
           error: 'Found incorrect installed version 1.67.2',
         },
         {
-          error: 'Installation status: not_installed',
+          error: `Installation status: not_installed - reason: installation failure at Tue, 20 Jun 2023 08:47:31 GMT`,
           package_name: 'synthetics',
           package_version: '1.4.1',
           sync_status: 'failed',
@@ -811,87 +819,6 @@ describe('fetchAndCompareSyncedIntegrations', () => {
       });
     });
 
-    it('should return completed status if is_deleted = true and the assets are not installed', async () => {
-      const searchMockWithDeletedAssets = jest.fn().mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _source: {
-                integrations: [
-                  {
-                    package_name: 'system',
-                    package_version: '1.67.3',
-                    updated_at: '2025-03-20T14:18:40.076Z',
-                  },
-                ],
-                custom_assets: {
-                  'component_template:logs-system.auth@custom': {
-                    ...customComponentTemplate,
-                    is_deleted: true,
-                  },
-                  'ingest_pipeline:logs-system.auth@custom': {
-                    ...customPipeline,
-                    is_deleted: true,
-                  },
-                },
-              },
-            },
-          ],
-        },
-      });
-      esClientMock = {
-        search: searchMockWithDeletedAssets,
-      };
-      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
-        page: 1,
-        per_page: 10000,
-        total: 1,
-        saved_objects: [
-          {
-            type: 'epm-packages',
-            id: 'system',
-            attributes: {
-              version: '1.67.3',
-              install_status: 'installed',
-            },
-            updated_at: '2025-03-26T14:06:27.611Z',
-          },
-        ],
-      });
-
-      const res = await fetchAndCompareSyncedIntegrations(
-        esClientMock,
-        soClientMock,
-        'fleet-synced-integrations-ccr-*',
-        mockedLogger
-      );
-      expect(res).toEqual({
-        custom_assets: {
-          'component_template:logs-system.auth@custom': {
-            name: 'logs-system.auth@custom',
-            package_name: 'system',
-            package_version: '1.67.3',
-            sync_status: 'completed',
-            type: 'component_template',
-          },
-          'ingest_pipeline:logs-system.auth@custom': {
-            name: 'logs-system.auth@custom',
-            package_name: 'system',
-            package_version: '1.67.3',
-            sync_status: 'completed',
-            type: 'ingest_pipeline',
-          },
-        },
-        integrations: [
-          {
-            package_name: 'system',
-            package_version: '1.67.3',
-            sync_status: 'completed',
-            updated_at: expect.any(String),
-          },
-        ],
-      });
-    });
     it('should return synchronizing status if assets are not installed and is_deleted === false', async () => {
       const searchMockWithDeletedAssets = jest.fn().mockResolvedValue({
         hits: {
@@ -1086,6 +1013,89 @@ describe('fetchAndCompareSyncedIntegrations', () => {
         ],
       });
     });
+
+    it('should return completed status if is_deleted = true and the assets are not installed', async () => {
+      const searchMockWithDeletedAssets = jest.fn().mockResolvedValue({
+        hits: {
+          hits: [
+            {
+              _source: {
+                integrations: [
+                  {
+                    package_name: 'system',
+                    package_version: '1.67.3',
+                    updated_at: '2025-03-20T14:18:40.076Z',
+                  },
+                ],
+                custom_assets: {
+                  'component_template:logs-system.auth@custom': {
+                    ...customComponentTemplate,
+                    is_deleted: true,
+                  },
+                  'ingest_pipeline:logs-system.auth@custom': {
+                    ...customPipeline,
+                    is_deleted: true,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      });
+      esClientMock = {
+        search: searchMockWithDeletedAssets,
+      };
+      (getPackageSavedObjects as jest.MockedFunction<any>).mockReturnValue({
+        page: 1,
+        per_page: 10000,
+        total: 1,
+        saved_objects: [
+          {
+            type: 'epm-packages',
+            id: 'system',
+            attributes: {
+              version: '1.67.3',
+              install_status: 'installed',
+            },
+            updated_at: '2025-03-26T14:06:27.611Z',
+          },
+        ],
+      });
+
+      const res = await fetchAndCompareSyncedIntegrations(
+        esClientMock,
+        soClientMock,
+        'fleet-synced-integrations-ccr-*',
+        mockedLogger
+      );
+      expect(res).toEqual({
+        custom_assets: {
+          'component_template:logs-system.auth@custom': {
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            type: 'component_template',
+          },
+          'ingest_pipeline:logs-system.auth@custom': {
+            name: 'logs-system.auth@custom',
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            type: 'ingest_pipeline',
+          },
+        },
+        integrations: [
+          {
+            package_name: 'system',
+            package_version: '1.67.3',
+            sync_status: 'completed',
+            updated_at: expect.any(String),
+          },
+        ],
+      });
+    });
+
     it('should return error in the top level if there is any error in the function', async () => {
       esClientMock = {
         search: jest.fn().mockRejectedValueOnce(new Error('Some es error')),

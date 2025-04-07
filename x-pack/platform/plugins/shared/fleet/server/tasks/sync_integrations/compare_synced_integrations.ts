@@ -143,10 +143,20 @@ const compareIntegrations = (
         };
       }
       if (localIntegrationSO?.attributes.install_status !== 'installed') {
+        const latestFailedAttemptTime = localIntegrationSO?.attributes
+          ?.latest_install_failed_attempts?.[0].created_at
+          ? `at ${new Date(
+              localIntegrationSO?.attributes?.latest_install_failed_attempts?.[0].created_at
+            ).toUTCString()}`
+          : '';
+        const latestFailedAttempt = localIntegrationSO?.attributes
+          ?.latest_install_failed_attempts?.[0]?.error?.message
+          ? `- reason: ${localIntegrationSO?.attributes?.latest_install_failed_attempts[0].error.message}`
+          : '';
         return {
           ...ccrIntegration,
           sync_status: 'failed' as SyncStatus.FAILED,
-          error: `Installation status: ${localIntegrationSO?.attributes.install_status}`,
+          error: `Installation status: ${localIntegrationSO?.attributes.install_status} ${latestFailedAttempt} ${latestFailedAttemptTime}`,
         };
       }
       return {
