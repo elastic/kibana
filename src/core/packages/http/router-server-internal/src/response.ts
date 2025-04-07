@@ -24,8 +24,9 @@ import type {
   KibanaResponseFactory,
   LifecycleResponseFactory,
 } from '@kbn/core-http-server';
-import { isPlainObject, pick } from 'lodash';
+import { isPlainObject } from 'lodash';
 import mime from 'mime';
+import { filterObject } from './filter_object';
 
 interface KibanaResponseFromOptions {
   filterPath?: string | string[];
@@ -48,7 +49,7 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
     let body = response.payload;
     if (filterPath?.length && isPlainObject(body)) {
       if (!Array.isArray(filterPath)) filterPath = [filterPath];
-      body = pick(body, filterPath);
+      body = filterObject(body, filterPath);
     }
     return new KibanaResponse(response.status, body, response.options);
   }
