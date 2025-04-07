@@ -119,17 +119,16 @@ describe('getInstallCommandForPlatform', () => {
         esOutputHost: 'http://elasticsearch:9200',
         serviceToken: 'service-token-1',
       });
-
       expect(res).toMatchInlineSnapshot(`
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-port=8220 \`
-          --install-servers"\"
-      `);
+          --install-servers\""
+        `);
     });
 
     it('should return the correct command if the the policyId is not set for rpm', () => {
@@ -353,7 +352,7 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
@@ -630,7 +629,7 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS="--url=http://fleetserver:8220 \`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\"--url=http://fleetserver:8220 \`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
@@ -1071,7 +1070,7 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\"
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
@@ -1503,7 +1502,7 @@ describe('getInstallCommandForPlatform', () => {
         "$ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri https://download-src/8.12.0-test/beats/elastic-agent/elastic-agent--windows-x86_64.msi -OutFile elastic-agent--windows-x86_64.msi -Proxy \\"http://download-src-proxy:2222\\" -Headers @{\\"Accept-Language\\"=\\"en-US,en;q=0.5\\"; \\"second-header\\"=\\"second-value\\"}
         cd elastic-agent--windows-x86_64
-        .\\\\elastic-agent.msi install --% INSTALLARGS="\`
+        .\\\\elastic-agent.msi install --% INSTALLARGS=\"\`
           --fleet-server-es=http://elasticsearch:9200 \`
           --fleet-server-service-token=service-token-1 \`
           --fleet-server-policy=policy-1 \`
