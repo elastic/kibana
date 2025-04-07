@@ -16,7 +16,10 @@ import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_c
 export interface RuleMigrationDefinedResource extends RuleMigrationResource {
   content: string; // ensures content exists
 }
-export type RuleMigrationResourcesData = Pick<RuleMigrationDefinedResource, 'name' | 'content'>;
+export type RuleMigrationResourcesData = Pick<
+  RuleMigrationDefinedResource,
+  'name' | 'content' | 'type'
+>;
 export type RuleMigrationResources = Partial<
   Record<RuleMigrationResourceType, RuleMigrationResourcesData[]>
 >;
@@ -106,6 +109,10 @@ export class RuleResourceRetriever {
   private formatOutput(
     resources: Map<string, RuleMigrationDefinedResource>
   ): RuleMigrationResourcesData[] {
-    return Array.from(resources.values()).map(({ name, content }) => ({ name, content }));
+    return Array.from(resources.values()).map(({ name, content, type }) => ({
+      name,
+      content,
+      type,
+    }));
   }
 }
