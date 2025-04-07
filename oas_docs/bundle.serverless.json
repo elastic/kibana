@@ -53211,8 +53211,56 @@
                   "description": {
                     "type": "string"
                   },
+                  "include": {
+                    "anyOf": [
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "objects": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "dashboards": {
+                                "items": {
+                                  "type": "string"
+                                },
+                                "type": "array"
+                              }
+                            },
+                            "required": [
+                              "dashboards"
+                            ],
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "objects"
+                        ],
+                        "type": "object"
+                      },
+                      {
+                        "additionalProperties": false,
+                        "properties": {
+                          "all": {
+                            "additionalProperties": false,
+                            "properties": {},
+                            "type": "object"
+                          }
+                        },
+                        "required": [
+                          "all"
+                        ],
+                        "type": "object"
+                      }
+                    ]
+                  },
                   "name": {
                     "type": "string"
+                  },
+                  "pattern_replacements": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object"
                   },
                   "version": {
                     "type": "string"
@@ -53221,7 +53269,9 @@
                 "required": [
                   "name",
                   "description",
-                  "version"
+                  "version",
+                  "pattern_replacements",
+                  "include"
                 ],
                 "type": "object"
               }
@@ -53265,9 +53315,13 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
-                  "content": {}
+                  "content": {},
+                  "include": {
+                    "type": "string"
+                  }
                 },
                 "required": [
+                  "include",
                   "content"
                 ],
                 "type": "object"
