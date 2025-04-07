@@ -11,7 +11,8 @@ import {
   ContentPackEntry,
   ContentPackManifest,
   contentPackManifestSchema,
-} from '@kbn/streams-schema';
+  replaceIndexPatterns,
+} from '@kbn/content-packs-schema';
 import AdmZip from 'adm-zip';
 import path from 'path';
 import { Readable } from 'stream';
@@ -58,7 +59,11 @@ export async function parseArchive(archive: Readable): Promise<ContentPack> {
   return { ...manifestData, entries };
 }
 
-export async function generateArchive(manifest: ContentPackManifest, readStream: Readable) {
+export async function generateArchive(
+  manifest: ContentPackManifest,
+  readStream: Readable,
+  patternReplacements: Record<string, string>
+) {
   const zip = new AdmZip();
   const rootDir = `${manifest.name}-${manifest.version}`;
   const objects: any[] = await createPromiseFromStreams([readStream, createConcatStream([])]);
@@ -67,7 +72,7 @@ export async function generateArchive(manifest: ContentPackManifest, readStream:
     if (object.type === 'dashboard') {
       zip.addFile(
         path.join(rootDir, 'kibana', 'dashboard', `${object.id}.json`),
-        Buffer.from(JSON.stringify(object, null, 2))
+        Buffer.from(JSON.stringify(replaceIndexPatterns(object, patternReplacements), null, 2))
       );
     }
   });

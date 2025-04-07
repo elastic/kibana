@@ -1,0 +1,228 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useState } from 'react';
+// @ts-expect-error
+import { saveAs } from '@elastic/filesaver';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import {
+  ContentPackEntry,
+  INDEX_PLACEHOLDER,
+  findIndexPatterns,
+  isIndexPlaceholder,
+} from '@kbn/content-packs-schema';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiCheckboxGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import * as zip from '@zip.js/zip.js';
+import { uniq } from 'lodash';
+import { useKibana } from '../../hooks/use_kibana';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { ContentPackObjectsList } from './content_pack_objects_list';
+import { readArchiveObjects } from './content_pack/read_archive_objects';
+
+export function ExportContentPackFlyout({
+  definition,
+  onExport,
+  onClose,
+}: {
+  definition: IngestStreamGetResponse;
+  onClose: () => void;
+  onExport: () => void;
+}) {
+  const {
+    dependencies: {
+      start: {
+        streams: { streamsRepositoryClient },
+      },
+    },
+  } = useKibana();
+
+  const { value: exportResponse, loading: isLoadingContentPack } = useStreamsAppFetch(
+    async ({ signal }) => {
+      if (!definition) {
+        return;
+      }
+
+      const contentPack = await streamsRepositoryClient.fetch(
+        'POST /api/streams/{name}/content/export 2023-10-31',
+        {
+          params: {
+            path: { name: definition.stream.name },
+            body: {
+              name: definition.stream.name,
+              description: '',
+              version: '1.0.0',
+              pattern_replacements: {},
+              include: { all: {} },
+            },
+          },
+          signal,
+        }
+      );
+
+      const reader = new zip.ZipReader(new zip.BlobReader(new Blob([contentPack])));
+      const objects = await readArchiveObjects(reader);
+      const indexPatterns = uniq(objects.flatMap((object) => findIndexPatterns(object))).filter(
+        (index) => !isIndexPlaceholder(index)
+      );
+
+      return { contentPack, objects, indexPatterns };
+    },
+    [definition, streamsRepositoryClient]
+  );
+
+  const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
+    []
+  );
+  const [indexPatternReplacements, setIndexPatternReplacements] = useState<Record<string, boolean>>(
+    {}
+  );
+
+  return (
+    <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h2>
+            {i18n.translate('xpack.streams.streamDetailDashboard.exportContent', {
+              defaultMessage: 'Export content pack',
+            })}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        {isLoadingContentPack ? (
+          <EuiLoadingSpinner />
+        ) : !exportResponse ? null : exportResponse.objects ? (
+          <>
+            <EuiSpacer />
+
+            {exportResponse.indexPatterns.length ? (
+              <EuiCallOut>
+                <details>
+                  <summary>
+                    {i18n.translate('xpack.streams.exportContentFlyout.advancedSettings', {
+                      defaultMessage: 'Advanced settings',
+                    })}
+                  </summary>
+                  <EuiSpacer />
+                  <p>
+                    {i18n.translate('xpack.streams.exportContentFlyout.detectedIndexPatterns', {
+                      defaultMessage:
+                        'We detected index patterns that do not match {streamName}* in the content pack. Check the ones you want to replace with the target stream index on import.',
+                      values: { streamName: definition.stream.name },
+                    })}
+                  </p>
+                  {
+                    <EuiCheckboxGroup
+                      idToSelectedMap={indexPatternReplacements}
+                      onChange={(id) =>
+                        setIndexPatternReplacements({
+                          ...indexPatternReplacements,
+                          ...{
+                            [id]: !indexPatternReplacements[id],
+                          },
+                        })
+                      }
+                      options={exportResponse.indexPatterns.map((index) => ({
+                        id: index,
+                        label: index,
+                      }))}
+                    />
+                  }
+                </details>
+              </EuiCallOut>
+            ) : null}
+
+            <EuiSpacer />
+
+            <ContentPackObjectsList
+              objects={exportResponse.objects}
+              onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
+            />
+          </>
+        ) : null}
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty onClick={() => onClose()}>Cancel</EuiButtonEmpty>
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="streamsAppModalFooterButton"
+              isLoading={isLoadingContentPack}
+              isDisabled={selectedContentPackObjects.length === 0}
+              fill
+              onClick={async () => {
+                if (!exportResponse || selectedContentPackObjects.length === 0) {
+                  return;
+                }
+
+                const replacements = Object.keys(indexPatternReplacements).reduce((acc, index) => {
+                  if (indexPatternReplacements[index]) {
+                    acc[index] = INDEX_PLACEHOLDER;
+                  }
+                  return acc;
+                }, {} as Record<string, string>);
+
+                const manifest = {
+                  name: definition.stream.name,
+                  description: '',
+                  version: '1.0.0',
+                };
+
+                const contentPack = await streamsRepositoryClient.fetch(
+                  'POST /api/streams/{name}/content/export 2023-10-31',
+                  {
+                    params: {
+                      path: { name: definition.stream.name },
+                      body: {
+                        ...manifest,
+                        pattern_replacements: replacements,
+                        include: {
+                          objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
+                        },
+                      },
+                    },
+                    signal: new AbortController().signal,
+                  }
+                );
+
+                saveAs(
+                  new Blob([contentPack], { type: 'application/zip' }),
+                  `${manifest.name}-${manifest.version}.zip`
+                );
+                onExport();
+              }}
+            >
+              {i18n.translate('xpack.streams.exportContentPackFlyout.exportContentPack', {
+                defaultMessage: 'Export content pack',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+}
