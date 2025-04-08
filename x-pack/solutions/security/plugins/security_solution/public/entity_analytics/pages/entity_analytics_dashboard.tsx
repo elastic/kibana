@@ -18,7 +18,7 @@ import { InputsModelId } from '../../common/store/inputs/constants';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
-
+import { ScoreSpikesCallout } from '../components/score_spikes_callout';
 import { EntityStoreDashboardPanels } from '../components/entity_store/components/dashboard_entity_store_panels';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -48,29 +48,33 @@ const EntityAnalyticsComponent = () => {
             {isSourcererLoading ? (
               <EuiLoadingSpinner size="l" data-test-subj="entityAnalyticsLoader" />
             ) : (
-              <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-                <EuiFlexItem>
-                  <EntityAnalyticsHeader />
-                </EuiFlexItem>
+              <>
+                <ScoreSpikesCallout />
 
-                {!isEntityStoreFeatureFlagDisabled ? (
+                <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
                   <EuiFlexItem>
-                    <EntityStoreDashboardPanels />
+                    <EntityAnalyticsHeader />
                   </EuiFlexItem>
-                ) : (
-                  <>
-                    {entityTypes.map((entityType) => (
-                      <EuiFlexItem key={entityType}>
-                        <EntityAnalyticsRiskScores riskEntity={entityType} />
-                      </EuiFlexItem>
-                    ))}
-                  </>
-                )}
 
-                <EuiFlexItem>
-                  <EntityAnalyticsAnomalies />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                  {!isEntityStoreFeatureFlagDisabled ? (
+                    <EuiFlexItem>
+                      <EntityStoreDashboardPanels />
+                    </EuiFlexItem>
+                  ) : (
+                    <>
+                      {entityTypes.map((entityType) => (
+                        <EuiFlexItem key={entityType}>
+                          <EntityAnalyticsRiskScores riskEntity={entityType} />
+                        </EuiFlexItem>
+                      ))}
+                    </>
+                  )}
+
+                  <EuiFlexItem>
+                    <EntityAnalyticsAnomalies />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </>
             )}
           </SecuritySolutionPageWrapper>
         </>

@@ -44,10 +44,14 @@ import {
   RISK_ENGINE_CLEANUP_URL,
   RISK_ENGINE_SCHEDULE_NOW_URL,
   RISK_ENGINE_CONFIGURE_SO_URL,
+  RISK_SCORE_SPIKES_URL,
 } from '../../../common/constants';
 import type { SnakeToCamelCase } from '../common/utils';
 import { useKibana } from '../../common/lib/kibana/kibana_react';
-import type { ReadRiskEngineSettingsResponse } from '../../../common/api/entity_analytics/risk_engine';
+import type {
+  GetRiskScoreSpikesResponse,
+  ReadRiskEngineSettingsResponse,
+} from '../../../common/api/entity_analytics/risk_engine';
 import type { ListEntitiesResponse } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { type ListEntitiesRequestQuery } from '../../../common/api/entity_analytics/entity_store/entities/list_entities.gen';
 
@@ -284,7 +288,14 @@ export const useEntityAnalyticsRoutes = () => {
       });
     };
 
+    const fetchRiskScoreSpikes = () =>
+      http.fetch<GetRiskScoreSpikesResponse>(RISK_SCORE_SPIKES_URL, {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+      });
+
     return {
+      fetchRiskScoreSpikes,
       fetchRiskScorePreview,
       fetchRiskEngineStatus,
       initRiskEngine,
