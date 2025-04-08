@@ -211,8 +211,8 @@ const previewContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/preview 2023-10-31',
   options: {
     access: 'public',
-    summary: 'Import content into a stream',
-    description: 'Links content objects to a stream.',
+    summary: 'Preview a content pack',
+    description: 'Returns a json representation of a content pack.',
     body: {
       accepts: 'multipart/form-data',
       maxBytes: 2000000,
