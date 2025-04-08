@@ -6,7 +6,12 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { DataViewLazy, DataViewsContract, FieldSpec } from '@kbn/data-views-plugin/common';
+import type {
+  DataView,
+  DataViewLazy,
+  DataViewsContract,
+  FieldSpec,
+} from '@kbn/data-views-plugin/common';
 import { LogSourcesService } from '@kbn/logs-data-access-plugin/common/services/log_sources_service/types';
 import { TIEBREAKER_FIELD, TIMESTAMP_FIELD } from '../constants';
 import { defaultLogViewsStaticConfig } from './defaults';
@@ -152,6 +157,8 @@ const resolveKibanaAdvancedSettingReference = async (
 };
 
 // this might take other sources of runtime fields into account in the future
-const resolveRuntimeMappings = (dataViewLazy: DataViewLazy): estypes.MappingRuntimeFields => {
+const resolveRuntimeMappings = (
+  dataViewLazy: DataView | DataViewLazy
+): estypes.MappingRuntimeFields => {
   return dataViewLazy.getRuntimeMappings();
 };
