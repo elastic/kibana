@@ -321,6 +321,23 @@ export interface DeprecationLoggingStatus {
   isDeprecationLoggingEnabled: boolean;
 }
 
+export interface EsDeprecationLog {
+  // Define expected properties from the logs
+  '@timestamp'?: string;
+  message?: string;
+  [key: string]: any; // Allow for any additional ES log properties
+}
+
+export interface StatusResponseBody {
+  readyForUpgrade: boolean;
+  details: string;
+  recentEsDeprecationLogs?: {
+    count: number;
+    logs: EsDeprecationLog[];
+  };
+  kibanaApiDeprecations?: any[]; // Uses DomainDeprecationDetails type from Kibana core
+}
+
 export type MIGRATION_STATUS = 'MIGRATION_NEEDED' | 'NO_MIGRATION_NEEDED' | 'IN_PROGRESS' | 'ERROR';
 export interface SystemIndicesMigrationFeature {
   id?: string;
