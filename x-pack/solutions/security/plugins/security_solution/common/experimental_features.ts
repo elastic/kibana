@@ -289,7 +289,7 @@ export const parseExperimentalConfigValue = (
     if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
       invalidKeys.push(value);
     } else {
-      enabledFeatures[value as keyof ExperimentalFeatures] = isDisabled ? false : true;
+      enabledFeatures[value as keyof ExperimentalFeatures] = !isDisabled;
     }
   }
 
