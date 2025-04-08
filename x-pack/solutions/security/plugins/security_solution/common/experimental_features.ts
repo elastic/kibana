@@ -270,7 +270,7 @@ const disableExperimentalPrefix = 'disable:' as const;
 
 /**
  * Parses the string value used in `xpack.securitySolution.enableExperimental` kibana configuration,
- * which should be a string of values delimited by a comma (`,`)
+ * which should be an array of strings.
  *
  * @param configValue
  * @throws SecuritySolutionInvalidExperimentalValue
