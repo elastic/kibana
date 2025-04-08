@@ -7,7 +7,7 @@
 
 import { useLicense } from '../../common/hooks/use_license';
 import { useKibana } from '../../common/lib/kibana';
-import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
+import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../common/constants';
 
 export interface UseAssistantAvailability {
   // True when product_line: 'ai_soc', product_tier: 'search_ai_lake'
@@ -34,6 +34,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities[ASSISTANT_FEATURE_ID]?.updateAIAssistantAnonymization === true;
   const hasManageGlobalKnowledgeBase =
     capabilities[ASSISTANT_FEATURE_ID]?.manageGlobalKnowledgeBaseAIAssistant === true;
+  const isAI4SOC = capabilities[SECURITY_FEATURE_ID]?.configurations === true;
 
   // Connectors & Actions capabilities as defined in x-pack/plugins/actions/server/feature.ts
   // `READ` ui capabilities defined as: { ui: ['show', 'execute'] }
@@ -46,7 +47,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities.actions?.save === true;
 
   return {
-    isAI4SOC: capabilities.siemV2.configurations,
+    isAI4SOC,
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,

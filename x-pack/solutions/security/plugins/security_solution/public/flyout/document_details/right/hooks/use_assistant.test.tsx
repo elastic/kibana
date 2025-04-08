@@ -29,6 +29,7 @@ describe('useAssistant', () => {
 
   it(`should return showAssistant true and a value for promptContextId`, () => {
     jest.mocked(useAssistantAvailability).mockReturnValue({
+      isAI4SOC: false,
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
@@ -48,6 +49,7 @@ describe('useAssistant', () => {
 
   it(`should return showAssistant false if hasAssistantPrivilege is false`, () => {
     jest.mocked(useAssistantAvailability).mockReturnValue({
+      isAI4SOC: false,
       hasAssistantPrivilege: false,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
@@ -67,6 +69,7 @@ describe('useAssistant', () => {
 
   it('returns anonymized prompt context data', async () => {
     jest.mocked(useAssistantAvailability).mockReturnValue({
+      isAI4SOC: false,
       hasAssistantPrivilege: true,
       hasConnectorsAllPrivilege: true,
       hasConnectorsReadPrivilege: true,
