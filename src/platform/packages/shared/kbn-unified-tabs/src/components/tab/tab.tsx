@@ -10,7 +10,6 @@
 import React, { MouseEvent, KeyboardEvent, useCallback, useState, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import useEvent from 'react-use/lib/useEvent';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -133,10 +132,15 @@ export const Tab: React.FC<TabProps> = (props) => {
   const onKeyDownEvent = useCallback(
     async (event: KeyboardEvent<HTMLDivElement>) => {
       // per https://www.w3.org/WAI/ARIA/apg/patterns/tabs/
-      if (event.key === keys.ENTER) {
+
+      if (!isSelected && event.key === keys.ENTER) {
         event.preventDefault();
         tabInteractiveElementRef.current?.focus();
         await onSelectEvent(event);
+        return;
+      }
+
+      if (!isSelected || isDragging) {
         return;
       }
 
@@ -145,26 +149,11 @@ export const Tab: React.FC<TabProps> = (props) => {
         setActionPopover(true);
         return;
       }
-    },
-    [onSelectEvent, setActionPopover]
-  );
-
-  const onGlobalKeyDown = useCallback(
-    async (event: KeyboardEvent<HTMLDivElement>) => {
-      if (
-        !isSelected ||
-        isDragging ||
-        document.activeElement !== tabInteractiveElementRef.current
-      ) {
-        return;
-      }
 
       await onSelectedTabKeyDown?.(event);
     },
-    [onSelectedTabKeyDown, isSelected, isDragging]
+    [isSelected, isDragging, onSelectEvent, setActionPopover, onSelectedTabKeyDown]
   );
-
-  useEvent('keydown', onGlobalKeyDown);
 
   useEffect(() => {
     if (isDragging && tabInteractiveElementRef.current) {

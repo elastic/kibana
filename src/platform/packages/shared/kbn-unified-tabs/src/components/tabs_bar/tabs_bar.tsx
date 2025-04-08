@@ -164,7 +164,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
         return;
       }
 
-      if (event.key === 'Delete' && selectedItem && items.length > 1) {
+      if (
+        (event.key === 'Delete' || event.key === keys.BACKSPACE) &&
+        selectedItem &&
+        items.length > 1
+      ) {
         moveFocusToSelectedItemRef.current = true;
         await onClose?.(selectedItem);
         return;
