@@ -20,7 +20,6 @@ import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base
 import {
   getApmSynthtraceEsClient,
   getInfraSynthtraceEsClient,
-  getOtelSynthtraceEsClient,
 } from '../../../common/services/synthtrace';
 import { coreWorkerFixtures } from './core_fixtures';
 
@@ -79,14 +78,6 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
       );
 
       await useSynthtraceClient<InfraDocument>(infraSynthtraceEsClient, use);
-    },
-    { scope: 'worker' },
-  ],
-  otelSynthtraceEsClient: [
-    async ({ esClient, log }, use) => {
-      const otelSynthtraceEsClient = await getOtelSynthtraceEsClient(esClient, log);
-
-      await useSynthtraceClient<OtelDocument>(otelSynthtraceEsClient, use);
     },
     { scope: 'worker' },
   ],
