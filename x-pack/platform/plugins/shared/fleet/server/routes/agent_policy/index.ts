@@ -113,10 +113,8 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
     router.versioned
       .get({
         path: AGENT_POLICY_API_ROUTES.AUTO_UPGRADE_AGENTS_STATUS_PATTERN,
-        security: {
-          authz: {
-            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
-          },
+        fleetAuthz: {
+          fleet: { readAgents: true },
         },
         summary: `Get auto upgrade agent status`,
         description: `Get auto upgrade agent status`,
@@ -132,9 +130,6 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             response: {
               200: {
                 body: () => GetAutoUpgradeAgentsStatusResponseSchema,
-              },
-              400: {
-                body: genericErrorResponse,
               },
             },
           },
