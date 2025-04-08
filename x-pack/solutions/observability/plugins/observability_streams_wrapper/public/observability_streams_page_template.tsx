@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
@@ -27,19 +27,16 @@ export const createObservabilityStreamsAppPageTemplate =
       <PageTemplate
         pageSectionProps={{
           color: 'subdued',
-          className: css`
+          css: css`
             max-height: calc(
               100vh - var(--euiFixedHeadersOffset, 0)
-                ${isSolutionNavEnabled
-                  ? `-
-              var(--kbnProjectHeaderAppActionMenuHeight, 48px)`
-                  : ''}
+                ${isSolutionNavEnabled ? `- var(--kbnProjectHeaderAppActionMenuHeight, 48px)` : ''}
             );
             overflow: auto;
             padding-inline: 0px;
           `,
           contentProps: {
-            className: css`
+            css: css`
               padding-block: 0px;
               display: flex;
               flex-direction: column;

@@ -28,6 +28,9 @@ StreamsAppPageTemplate.EmptyPrompt = EuiPageTemplate.EmptyPrompt;
 StreamsAppPageTemplate.Body = (props: EuiPageSectionProps) => (
   <EuiPageTemplate.Section
     grow
+    css={css`
+      overflow-y: auto;
+    `}
     contentProps={{
       css: css`
         display: flex;
