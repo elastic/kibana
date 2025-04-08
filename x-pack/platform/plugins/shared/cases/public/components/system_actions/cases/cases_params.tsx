@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -18,6 +18,7 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import * as i18n from './translations';
@@ -84,6 +85,8 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     [actionParams.subActionParams]
   );
 
+  const [showTimeWindowWarning, setShowTimeWindowWarning] = useState(false);
+
   const parsedTimeWindowSize = timeWindow.slice(0, timeWindow.length - 1);
   const parsedTimeWindowUnit = timeWindow.slice(-1);
 
@@ -112,6 +115,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         index
       );
     }
+    if (timeWindowUnit === 'm' && parseInt(timeWindowSize) <= 20) {
+      setShowTimeWindowWarning(true);
+    } else {
+      setShowTimeWindowWarning(false);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionParams]);
@@ -131,6 +139,15 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     (key: 'timeWindowSize' | 'timeWindowUnit', value: string) => {
       if (!value) {
         return;
+      }
+
+      const timeSize = key === 'timeWindowSize' ? value : timeWindowSize;
+      const timeUnit = key === 'timeWindowUnit' ? value : timeWindowUnit;
+
+      if (timeUnit === 'm' && parseInt(timeSize) <= 20) {
+        setShowTimeWindowWarning(true);
+      } else {
+        setShowTimeWindowWarning(false);
       }
 
       const newTimeWindow =
@@ -212,7 +229,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               prepend={i18n.TIME_WINDOW}
               data-test-subj="time-window-size-input"
               value={timeWindowSize}
-              min={1}
+              min={timeWindowUnit === 'm' ? 5 : 1}
               step={1}
               onChange={(e) => {
                 handleTimeWindowChange('timeWindowSize', e.target.value);
@@ -232,6 +249,16 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
+      <EuiSpacer size="s" />
+      {showTimeWindowWarning && (
+        <EuiCallOut
+          data-test-subj="show-time-window-warning"
+          title={i18n.TIME_WINDOW_WARNING}
+          color="warning"
+          iconType="alert"
+          size="s"
+        />
+      )}
       <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>

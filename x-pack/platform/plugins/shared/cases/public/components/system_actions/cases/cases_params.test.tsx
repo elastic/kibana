@@ -369,6 +369,36 @@ describe('CasesParamsFields renders', () => {
       expect(editAction.mock.calls[0][1].timeWindow).toEqual('6d');
     });
 
+    it('renders time window warning', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      const timeWindowSizeInput = await screen.findByTestId('time-window-size-input');
+      const timeWindowUnitInput = await screen.findByTestId('time-window-unit-select');
+
+      expect(timeWindowSizeInput).toBeInTheDocument();
+      expect(timeWindowUnitInput).toBeInTheDocument();
+
+      fireEvent.change(timeWindowSizeInput, { target: { value: '10' } });
+      fireEvent.change(timeWindowUnitInput, { target: { value: 'm' } });
+
+      expect(await screen.findByTestId('show-time-window-warning')).toBeInTheDocument();
+    });
+
+    it('does not update time window if size is less than 5 and unit is in minutes', async () => {
+      render(<CasesParamsFields {...defaultProps} />);
+
+      const timeWindowSizeInput = await screen.findByTestId('time-window-size-input');
+      const timeWindowUnitInput = await screen.findByTestId('time-window-unit-select');
+
+      expect(timeWindowSizeInput).toBeInTheDocument();
+      expect(timeWindowUnitInput).toBeInTheDocument();
+
+      fireEvent.change(timeWindowUnitInput, { target: { value: 'm' } });
+      fireEvent.change(timeWindowSizeInput, { target: { value: '4' } });
+
+      expect(editAction).not.toHaveBeenCalledWith(expect.objectContaining({ timeWindow: '4m' }));
+    });
+
     it('updates reopenClosedCases', async () => {
       render(<CasesParamsFields {...defaultProps} />);
 
