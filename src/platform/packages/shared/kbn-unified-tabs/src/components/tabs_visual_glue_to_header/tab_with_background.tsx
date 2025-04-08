@@ -9,7 +9,7 @@
 
 import React, { HTMLAttributes } from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, euiSlightShadowHover } from '@elastic/eui';
 import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
 import { useChromeStyle } from './use_chrome_style';
 import type { TabsServices } from '../../types';
@@ -40,6 +40,12 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
           display: inline-block;
           background: ${isSelected ? selectedTabBackgroundColor : euiTheme.colors.lightestShade};
           transition: background ${euiTheme.animation.fast};
+          ${isDragging
+            ? `
+              ${euiSlightShadowHover(euiThemeContext)};
+              border-radius: ${euiTheme.border.radius.small};
+          `
+            : ''}
 
           ${isSelected
             ? ''

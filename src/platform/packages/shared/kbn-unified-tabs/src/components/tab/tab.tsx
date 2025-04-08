@@ -156,12 +156,6 @@ export const Tab: React.FC<TabProps> = (props) => {
   );
 
   useEffect(() => {
-    if (isDragging && tabInteractiveElementRef.current) {
-      tabInteractiveElementRef.current.focus();
-    }
-  }, [isDragging]);
-
-  useEffect(() => {
     if (isInlineEditActive && !isSelected) {
       setIsInlineEditActive(false);
     }
