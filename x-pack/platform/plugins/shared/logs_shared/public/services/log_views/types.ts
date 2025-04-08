@@ -46,5 +46,7 @@ export interface ILogViewsClient {
     logViewId: string,
     logViewAttributes: LogViewAttributes
   ): Promise<ResolvedLogView<DataView>>;
-  unwrapDataViewLazy(logViewLazy: DataViewLazy): Promise<DataView>;
+  unwrapDataViewLazy(
+    logViewLazy: ResolvedLogView<DataViewLazy>
+  ): Promise<ResolvedLogView<DataView>>;
 }

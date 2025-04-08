@@ -71,8 +71,16 @@ export class LogViewsClient implements ILogViewsClient {
     return resolvedLogView;
   }
 
-  public async unwrapDataViewLazy(logViewLazy: DataViewLazy): Promise<DataView> {
-    return this.dataViews.toDataView(logViewLazy);
+  public async unwrapDataViewLazy(
+    resolvedLogViewLazy: ResolvedLogView<DataViewLazy>
+  ): Promise<ResolvedLogView<DataView>> {
+    const dataViewReference = await this.dataViews.toDataView(
+      resolvedLogViewLazy.dataViewReference
+    );
+    return {
+      ...resolvedLogViewLazy,
+      dataViewReference,
+    };
   }
 
   public async getResolvedLogViewStatus(
@@ -170,12 +178,8 @@ export class LogViewsClient implements ILogViewsClient {
       this.logSourcesService,
       this.config
     );
-    const resolvedDataView = await this.unwrapDataViewLazy(resolvedDataViewLazy.dataViewReference);
 
-    return {
-      ...resolvedDataViewLazy,
-      dataViewReference: resolvedDataView,
-    };
+    return this.unwrapDataViewLazy(resolvedDataViewLazy);
   }
 }
 
