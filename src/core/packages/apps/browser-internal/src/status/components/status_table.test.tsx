@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common';
 import { StatusTable } from './status_table';
 
@@ -27,14 +28,14 @@ const createServiceStatus = (parts: Partial<ServiceStatus> = {}): ServiceStatus 
 
 describe('StatusTable', () => {
   it('renders when statuses is provided', () => {
-    const component = shallow(
+    const { container } = render(
       <StatusTable statuses={[{ id: 'plugin:1', state, original: createServiceStatus() }]} />
     );
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   it('renders empty when statuses is not provided', () => {
-    const component = shallow(<StatusTable />);
-    expect(component.isEmptyRender()).toBe(true);
+    const { container } = render(<StatusTable />);
+    expect(container.firstChild).toBeNull();
   });
 });
