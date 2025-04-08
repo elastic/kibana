@@ -5,7 +5,8 @@
     "other_index",
     ".secret_index",
     "my-index",
-    "unsupported_index"
+    "unsupported_index",
+    "ccs:index"
   ],
   "fields": [
     {
@@ -9659,6 +9660,11 @@
     },
     {
       "query": "from my-index",
+      "error": [],
+      "warning": []
+    },
+    {
+      "query": "from my-index::data",
       "error": [],
       "warning": []
     },

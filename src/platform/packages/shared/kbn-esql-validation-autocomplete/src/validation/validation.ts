@@ -372,7 +372,7 @@ export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
 
   if (source.sourceType === 'index') {
     const index = source.index;
-    const indexName = index?.valueUnquoted;
+    const indexName = source.cluster ? source.name : index?.valueUnquoted;
     if (indexName && !sourceExists(indexName, sources)) {
       messages.push(
         getMessageFromId({
