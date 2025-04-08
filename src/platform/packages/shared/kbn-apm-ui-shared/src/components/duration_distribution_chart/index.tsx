@@ -164,7 +164,6 @@ export function DurationDistributionChart({
       data-test-subj={dataTestSubPrefix + 'CorrelationsChart'}
       style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
     >
-      HOLA - {markerCurrentEvent}
       <ChartContainer height={250} hasData={hasData} status={status}>
         <Chart>
           <Settings

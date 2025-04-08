@@ -8,3 +8,4 @@
  */
 
 export * from './src/components/duration';
+export * from './src/components/duration_distribution_chart';
