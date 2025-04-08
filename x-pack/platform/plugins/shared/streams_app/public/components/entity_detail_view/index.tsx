@@ -36,6 +36,7 @@ export function EntityDetailViewWithoutParams({
   definition: IngestStreamGetResponse;
 }) {
   const router = useStreamsAppRouter();
+
   useStreamsAppBreadcrumbs(() => {
     if (!entity.displayName) {
       return [];
