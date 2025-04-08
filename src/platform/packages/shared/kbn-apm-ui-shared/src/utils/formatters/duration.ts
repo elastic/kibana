@@ -116,7 +116,7 @@ function convertTo({
   };
 }
 
-function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
+export function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
   if (max > toMicroseconds(threshold, 'hours')) {
     return 'hours';
   }
@@ -134,7 +134,7 @@ function getDurationUnitKey(max: number, threshold = 10): DurationTimeUnit {
 
 // memoizer with a custom resolver to consider both arguments max/threshold.
 // by default lodash's memoize only considers the first argument.
-const getDurationFormatter: TimeFormatterBuilder = memoize(
+export const getDurationFormatter: TimeFormatterBuilder = memoize(
   (max: number, threshold: number = 10, scalingFactor: number = 1) => {
     const unit = getDurationUnitKey(max, threshold);
     return (value: number, { defaultValue }: FormatterOptions = {}) => {

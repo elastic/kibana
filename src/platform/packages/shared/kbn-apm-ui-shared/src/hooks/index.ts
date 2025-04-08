@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './common';
-export * from './correlations';
+export * from './use_chart_theme';
