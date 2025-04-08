@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
@@ -14,6 +15,7 @@ import { hasBlockingError } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { ActionTypeModel, RuleTypeModel } from '../common';
 import type { TypeRegistry } from '../common/type_registry';
 
@@ -23,6 +25,7 @@ export interface AlertRuleFromVisUIActionData {
   thresholdValues: Record<string, number>;
   splitValues: Record<string, Array<string | number | null | undefined>>;
   usesPlaceholderValues?: boolean;
+  dataView?: DataView;
 }
 
 interface Context {
@@ -50,9 +53,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public async isCompatible({ embeddable }: Context) {
     const { isLensApi } = await import('@kbn/lens-plugin/public');
     if (!isLensApi(embeddable) || hasBlockingError(embeddable)) return false;
-
-    const query = embeddable.query$.getValue();
-    return Boolean(query && 'esql' in query);
+    return true;
   }
 
   public getDisplayName = () =>
@@ -63,63 +64,79 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public shouldAutoExecute = async () => true;
 
   public async execute({ embeddable, data }: Context) {
-    const { timeField, query, thresholdValues, splitValues, usesPlaceholderValues } =
-      data ?? getDataFromEmbeddable(embeddable);
+    const { timeField, query, thresholdValues, splitValues, usesPlaceholderValues, dataView } =
+      data?.query
+        ? data
+        : data
+        ? {
+            ...data,
+            ...pick(getDataFromEmbeddable(embeddable), [
+              'query',
+              'dataView',
+              'usesPlaceholderValues',
+            ]),
+          }
+        : getDataFromEmbeddable(embeddable);
 
+    // Set up a helper function to evaluate field names that need to be escaped
+    let evalQuery = '';
+    const escapeFieldName = (fieldName: string) => {
+      if (!fieldName || fieldName === 'undefined') return missingSourceFieldPlaceholder;
+      // Detect if the passed column name is actually an ES|QL function call instead of a field name
+      const esqlFunctionRegex = /[A-Z]+\(.*?\)/;
+      if (esqlFunctionRegex.test(fieldName)) {
+        // Convert the function to a lowercase, snake_cased variable
+        // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
+        const colName = `_${fieldName
+          .toLowerCase()
+          .replace(/[\),*]/g, '') // Eliminate parens, asterisks, commas
+          .replace(/[\( ]/g, '_')}`; // Replace opening paren and spaces with underscores
+        // Add this to the evalQuery as a side effect
+        evalQuery += `| EVAL ${colName} = \`${fieldName}\` `;
+        return colName;
+      }
+      return fieldName;
+    };
+
+    // Generate an addition to the query that sets an alert threshold
+    const thresholdQuery = Object.entries(thresholdValues)
+      .map(([sourceField, value]) => `${escapeFieldName(sourceField)} >= ${value}`)
+      .join(' AND ');
+    const thresholdQueryComment = usesPlaceholderValues
+      ? i18n.translate('alertsUIShared.alertRuleFromVis.thresholdPlaceholderComment', {
+          defaultMessage:
+            'Modify the following conditions to set an alert threshold for this rule:',
+        })
+      : i18n.translate('alertsUIShared.alertRuleFromVis.thresholdComment', {
+          defaultMessage:
+            'Threshold automatically generated from the selected {thresholdValues, plural, one {value} other {values} } on the chart. This rule will generate an alert based on the following conditions:',
+          values: { thresholdValues: thresholdValues.length },
+        });
+
+    const splitValueQueries = Object.entries(splitValues).map(([fieldName, values]) => {
+      const queries = `${values
+        .map((v) =>
+          v ? `${escapeFieldName(fieldName)} == ${typeof v === 'number' ? v : `"${v}"`}` : ''
+        )
+        .filter(Boolean)
+        .join(' OR ')}`;
+      return values.length === 1 ? queries : `(${queries})`;
+    });
+    const conditionsQuery = [...splitValueQueries, thresholdQuery].join(' AND ');
+
+    // Generate ES|QL to escape function columns
+    if (evalQuery.length)
+      evalQuery = `// ${i18n.translate('alertsUIShared.alertRuleFromVis.evalComment', {
+        defaultMessage:
+          'Evaluate the following columns so they can be used as part of the alerting threshold:',
+      })}\n${evalQuery}\n`;
+
+    // Combine the escaped columns with the threshold conditions query
+    const additionalQuery = `${evalQuery}// ${thresholdQueryComment}\n| WHERE ${conditionsQuery}`;
+
+    // Generate the full ES|QL code
     let initialValues;
     if (query) {
-      let evalQuery = '';
-      const evaluateFieldName = (fieldName: string) => {
-        // Detect if the passed column name is actually an ES|QL function call instead of a field name
-        const esqlFunctionRegex = /[A-Z]+\(.*?\)/;
-        if (esqlFunctionRegex.test(fieldName)) {
-          // Convert the function to a lowercase, snake_cased variable
-          // e.g. FUNCTION(arg1, arg2) -> _function_arg1_arg2
-          const colName = `_${fieldName
-            .toLowerCase()
-            .replace(/[\),*]/g, '') // Eliminate parens, asterisks, commas
-            .replace(/[\( ]/g, '_')}`; // Replace opening paren and spaces with underscores
-          // Add this to the evalQuery as a side effect
-          evalQuery += `| EVAL ${colName} = \`${fieldName}\` `;
-          return colName;
-        }
-        return fieldName;
-      };
-
-      const thresholdQuery = Object.entries(thresholdValues)
-        .map(([sourceField, value]) => `${evaluateFieldName(sourceField)} >= ${value}`)
-        .join(' AND ');
-      const thresholdQueryComment = usesPlaceholderValues
-        ? i18n.translate('alertsUIShared.alertRuleFromVis.thresholdPlaceholderComment', {
-            defaultMessage:
-              'Modify the following conditions to set an alert threshold for this rule:',
-          })
-        : i18n.translate('alertsUIShared.alertRuleFromVis.thresholdComment', {
-            defaultMessage:
-              'Threshold automatically generated from the selected {thresholdValues, plural, one {value} other {values} } on the chart. This rule will generate an alert based on the following conditions:',
-            values: { thresholdValues: thresholdValues.length },
-          });
-
-      const splitValueQueries = Object.entries(splitValues).map(([fieldName, values]) =>
-        values.length === 1
-          ? `${fieldName} == "${values[0]}"`
-          : `(${values
-              .map((v) =>
-                v
-                  ? `${evaluateFieldName(fieldName)} == ${typeof v === 'number' ? v : `"${v}"`}`
-                  : ''
-              )
-              .filter(Boolean)
-              .join(' OR ')})`
-      );
-      const conditionsQuery = [...splitValueQueries, thresholdQuery].join(' AND ');
-
-      if (evalQuery.length)
-        evalQuery = `// ${i18n.translate('alertsUIShared.alertRuleFromVis.evalComment', {
-          defaultMessage:
-            'Evaluate the following columns so they can be used as part of the alerting threshold:',
-        })}\n${evalQuery}\n`;
-
       const queryHeader = i18n.translate('alertsUIShared.alertRuleFromVis.queryHeaderComment', {
         defaultMessage: 'Original ES|QL query derived from the visualization:',
       });
@@ -128,19 +145,37 @@ export class AlertRuleFromVisAction implements Action<Context> {
         params: {
           searchType: 'esqlQuery',
           esqlQuery: {
-            esql: `// ${queryHeader}\n${query}\n${evalQuery}// ${thresholdQueryComment}\n| WHERE ${conditionsQuery}`,
+            esql: `// ${queryHeader}\n${query}\n${additionalQuery}`,
           },
           timeField,
         },
       };
     } else {
+      const missingQueryComment = `// ${i18n.translate(
+        'alertsUIShared.alertRuleFromVis.missingQueryComment',
+        {
+          defaultMessage: 'Unable to generate an ES|QL query from the visualization.',
+        }
+      )}`;
+      let esql = missingQueryComment;
+
+      if (dataView) {
+        const [index] = dataView.matchedIndices;
+        const esqlFromDataviewComment = `// ${i18n.translate(
+          'alertsUIShared.alertRuleFromVis.esqlFromDataviewComment',
+          {
+            defaultMessage:
+              'Unable to automatically generate an ES|QL query that produces the same data as this visualization. You may be able to reproduce it manually using this data source:',
+          }
+        )}`;
+        const dataViewQuery = `FROM ${index}`;
+        esql = `${esqlFromDataviewComment}\n${dataViewQuery}\n${additionalQuery}`;
+      }
       initialValues = {
         params: {
           searchType: 'esqlQuery',
           esqlQuery: {
-            esql: `// ${i18n.translate('alertsUIShared.alertRuleFromVis.missingQueryComment', {
-              defaultMessage: 'Unable to generate an ES|QL query from the visualization.',
-            })}`,
+            esql,
           },
           timeField,
         },
@@ -151,28 +186,29 @@ export class AlertRuleFromVisAction implements Action<Context> {
   }
 }
 
-const getDataFromEmbeddable = (embeddable: Context['embeddable']) => {
+const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFromVisUIActionData => {
   const queryValue = embeddable.query$.getValue();
   const query = queryValue && 'esql' in queryValue ? queryValue.esql : null;
+  const datatable = Object.values(
+    embeddable.getInspectorAdapters().tables.tables ?? {}
+  )[0] as unknown as Datatable | undefined;
+
+  const dataView = query
+    ? undefined
+    : embeddable.dataViews$.getValue()?.find((view) => view.id === datatable?.meta?.source);
+
   const { state } = embeddable.serializeState().rawState.attributes ?? {};
   const layers = (state?.datasourceStates?.textBased as TextBasedPersistedState | undefined)
     ?.layers;
   const [firstLayer] = Object.values(layers ?? {});
-  const { timeField = 'timestamp' } = firstLayer;
 
-  const datatable = Object.values(
-    embeddable.getInspectorAdapters().tables.tables ?? {}
-  )[0] as unknown as Datatable | undefined;
+  const { timeField = 'timestamp' } = firstLayer ?? { timeField: dataView?.timeFieldName };
 
   const thresholdValues = datatable
     ? datatable.columns
         .filter((col) => col.meta.dimensionName === 'Vertical axis')
         .reduce((result, { meta }) => {
-          const { sourceField } = meta.sourceParams ?? {
-            sourceField: i18n.translate('alertsUIShared.alertRuleFromVis.fieldNamePlaceholder', {
-              defaultMessage: '{FIELD NAME}',
-            }),
-          };
+          const { sourceField = missingYFieldPlaceholder } = meta.sourceParams ?? {};
           return {
             ...result,
             [String(sourceField)]: i18n.translate(
@@ -191,11 +227,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']) => {
     isTimeViz || !xColumns
       ? {}
       : xColumns.reduce((result, { meta }) => {
-          const { sourceField } = meta.sourceParams ?? {
-            sourceField: i18n.translate('alertsUIShared.alertRuleFromVis.fieldNamePlaceholder', {
-              defaultMessage: '{FIELD NAME}',
-            }),
-          };
+          const { sourceField = missingXFieldPlaceholder } = meta.sourceParams ?? {};
           return {
             ...result,
             [String(sourceField)]: [
@@ -212,5 +244,27 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']) => {
     splitValues,
     thresholdValues,
     usesPlaceholderValues: true,
-  } as AlertRuleFromVisUIActionData;
+    dataView,
+  };
 };
+
+const missingSourceFieldPlaceholder = i18n.translate(
+  'alertsUIShared.alertRuleFromVis.fieldNamePlaceholder',
+  {
+    defaultMessage: '{FIELD NAME}',
+  }
+);
+
+const missingYFieldPlaceholder = i18n.translate(
+  'alertsUIShared.alertRuleFromVis.yAxisPlaceholder',
+  {
+    defaultMessage: '{Y AXIS}',
+  }
+);
+
+const missingXFieldPlaceholder = i18n.translate(
+  'alertsUIShared.alertRuleFromVis.xAxisPlaceholder',
+  {
+    defaultMessage: '{X AXIS}',
+  }
+);

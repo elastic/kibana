@@ -191,91 +191,95 @@ export const getTooltipActions = (
         ]
       : [];
 
-  const alertRulesTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> =
-    hasXAxis && isEsqlMode
-      ? [
-          {
-            disabled: () => !hasXAxis,
-            label: (_, [firstSeries]: XYTooltipValue[]) =>
-              i18n.translate('expressionXY.tooltipActions.addAlertRule', {
-                defaultMessage: 'Add alert rule',
-              }),
+  const alertRulesTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> = hasXAxis
+    ? [
+        {
+          disabled: () => !hasXAxis,
+          label: (_, [firstSeries]: XYTooltipValue[]) =>
+            i18n.translate('expressionXY.tooltipActions.addAlertRule', {
+              defaultMessage: 'Add alert rule',
+            }),
 
-            onSelect: (selectedValues: XYTooltipValue[], series: XYTooltipValue[]) => {
-              const [firstSeries] = series;
-              const layer = dataLayers.find((l) =>
-                firstSeries.seriesIdentifier.seriesKeys.some((key: string | number) =>
-                  l.accessors.some(
-                    (accessor) =>
-                      getAccessorByDimension(accessor, l.table.columns) === key.toString()
-                  )
+          onSelect: (selectedValues: XYTooltipValue[], series: XYTooltipValue[]) => {
+            const [firstSeries] = series;
+            const layer = dataLayers.find((l) =>
+              firstSeries.seriesIdentifier.seriesKeys.some((key: string | number) =>
+                l.accessors.some(
+                  (accessor) => getAccessorByDimension(accessor, l.table.columns) === key.toString()
                 )
-              );
-              if (!layer) return;
+              )
+            );
+            if (!layer) return;
 
-              const { xAccessor, splitAccessors } = firstSeries.seriesIdentifier;
+            const { xAccessor, splitAccessors } = firstSeries.seriesIdentifier;
 
-              const xSeriesValue = getXSeriesValue(dataLayers, firstSeries);
+            const xSeriesValue = getXSeriesValue(dataLayers, firstSeries);
 
-              const xSeriesPoint = getXSeriesPoint(
-                layer,
-                xSeriesValue,
-                fieldFormats,
-                formattedDatatables,
-                xAxisFormatter,
-                formatFactory
-              );
+            const xSeriesPoint = getXSeriesPoint(
+              layer,
+              xSeriesValue,
+              fieldFormats,
+              formattedDatatables,
+              xAxisFormatter,
+              formatFactory
+            );
 
-              const { table, row } = xSeriesPoint;
-              const xColumn = getColumnByAccessor(xAccessor.toString(), table.columns);
+            const { table, row } = xSeriesPoint;
+            const xColumn = getColumnByAccessor(xAccessor.toString(), table.columns);
 
-              // Get the field name and value for the Y axis
-              const selectedYValues = selectedValues.length ? selectedValues : [firstSeries];
-              const thresholdValues = selectedYValues.reduce((result, value) => {
-                const { yAccessor } = value.seriesIdentifier;
-                const yColumn = getColumnByAccessor(yAccessor.toString(), table.columns);
-                if (!yColumn || !yColumn.meta.sourceParams) return result;
-                const { sourceField } = yColumn.meta.sourceParams;
-                const yValue = table.rows[row][yAccessor] as number;
-                return { ...result, [String(sourceField)]: yValue };
-              }, {});
-
-              // Get the time field name from the X axis for time vizzes, default to timestamp for non-time vizzes
-              const { sourceField: xSourceField } = xColumn?.meta?.sourceParams ?? {};
-              const timeField = isTimeViz && xSourceField ? String(xSourceField) : 'timestamp';
-
-              // If there are split accessors, get their values. For non-time vizzes, treat the X axis as a split accessor.
-              const splitValues: Record<
-                string,
-                Array<string | number | null | undefined>
-              > = isTimeViz ? {} : { [String(xSourceField)]: [xSeriesValue] };
-              if (splitAccessors.size > 0) {
-                for (const [accessor, firstSplitValue] of splitAccessors) {
-                  const splitColumn = table.columns.find((col) => col.id === accessor);
-                  const { sourceField: splitSourceField } = splitColumn?.meta?.sourceParams ?? {};
-                  if (!splitSourceField) continue;
-
-                  const selectedSplitValues = selectedValues.length
-                    ? selectedValues.map((v) => v.seriesIdentifier.splitAccessors.get(accessor))
-                    : [firstSplitValue];
-                  if (selectedSplitValues.length > 0)
-                    splitValues[String(splitSourceField)] = selectedSplitValues;
-                }
-              }
-
-              const query = table.meta?.type === 'es_ql' ? (table.meta.query as string) : null;
-
-              const context = {
-                timeField,
-                thresholdValues,
-                splitValues,
-                query,
+            // Get the field name and value for the Y axis
+            const selectedYValues = selectedValues.length ? selectedValues : [firstSeries];
+            const thresholdValues = selectedYValues.reduce((result, value) => {
+              const { yAccessor } = value.seriesIdentifier;
+              const yColumn = getColumnByAccessor(yAccessor.toString(), table.columns);
+              if (!yColumn || !yColumn.meta.sourceParams) return result;
+              const { sourceField } = yColumn.meta.sourceParams;
+              const yValue = table.rows[row][yAccessor] as number;
+              return {
+                ...result,
+                // If there is no sourceField, wrap the Y axis label in {curly braces} to let the user set the field name manually
+                [String(sourceField ?? `{${yColumn?.name ?? 'Y'}}`)]: yValue,
               };
-              onCreateAlertRule(context);
-            },
+            }, {});
+
+            // Get the time field name from the X axis for time vizzes, default to timestamp for non-time vizzes
+            const { sourceField: xSourceField } = xColumn?.meta?.sourceParams ?? {};
+            const timeField = isTimeViz && xSourceField ? String(xSourceField) : 'timestamp';
+
+            // If there are split accessors, get their values. For non-time vizzes, treat the X axis as a split accessor.
+            const splitValues: Record<string, Array<string | number | null | undefined>> = isTimeViz
+              ? {}
+              : {
+                  // If there is no sourceField, wrap the X axis label in {curly braces} to let the user set the field name manually
+                  [String(xSourceField ?? `{${xColumn?.name ?? 'X'}}`)]: [xSeriesValue],
+                };
+            if (splitAccessors.size > 0) {
+              for (const [accessor, firstSplitValue] of splitAccessors) {
+                const splitColumn = table.columns.find((col) => col.id === accessor);
+                const { sourceField: splitSourceField } = splitColumn?.meta?.sourceParams ?? {};
+                if (!splitSourceField) continue;
+
+                const selectedSplitValues = selectedValues.length
+                  ? selectedValues.map((v) => v.seriesIdentifier.splitAccessors.get(accessor))
+                  : [firstSplitValue];
+                if (selectedSplitValues.length > 0)
+                  splitValues[String(splitSourceField)] = selectedSplitValues;
+              }
+            }
+
+            const query = table.meta?.type === 'es_ql' ? (table.meta.query as string) : null;
+
+            const context = {
+              timeField,
+              thresholdValues,
+              splitValues,
+              query,
+            };
+            onCreateAlertRule(context);
           },
-        ]
-      : [];
+        },
+      ]
+    : [];
 
   const breakdownTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> =
     !isEsqlMode && hasSplitAccessors
