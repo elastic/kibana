@@ -274,10 +274,10 @@ describe('fetchEsqlQuery', () => {
     });
 
     expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
-      'Your alerts do not appear to be unique, which will delay recovery of your alerts. There are duplicates for alert IDs: 1.2.0'
+      'Your alerts do not appear to be unique, we noticed multiple rows with the same alert ID. There are duplicates for alert IDs: 1.2.0'
     );
     expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
-      'Your alerts do not appear to be unique, which will delay recovery of your alerts. There are duplicates for alert IDs: 1.2.0'
+      'Your alerts do not appear to be unique, we noticed multiple rows with the same alert ID. There are duplicates for alert IDs: 1.2.0'
     );
   });
   describe('generateLink', () => {

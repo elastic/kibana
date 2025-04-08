@@ -61,7 +61,7 @@ const getWarning = (duplicateAlertIds: Set<string>, longAlertIds: Set<string>) =
   if (duplicateAlertIds.size > 0) {
     return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowWarning', {
       defaultMessage:
-        'Your alerts do not appear to be unique, which will delay recovery of your alerts.',
+        'Your alerts do not appear to be unique, we noticed multiple rows with the same alert ID.',
     });
   } else if (longAlertIds.size > 0) {
     return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowAlertIdWarning', {
