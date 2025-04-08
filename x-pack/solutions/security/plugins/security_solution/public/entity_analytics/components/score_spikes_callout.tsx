@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiButton, EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useRiskScoreSpikes } from '../api/hooks/use_risk_score_spikes';
@@ -55,16 +55,28 @@ export const ScoreSpikesCallout = () => {
       color="warning"
       data-test-subj="score-spikes-callout"
     >
-      <FormattedMessage
-        id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.description"
-        defaultMessage="Some entities scores have recently increased significantly. This may indicate a change in the entity's behavior or a new threat. Click the button below to investigate further."
-      />
-      <EuiButton color="warning" fill onClick={onClick} iconType="magnifyingGlass">
-        <FormattedMessage
-          id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.investigateButton"
-          defaultMessage="Investigate"
-        />
-      </EuiButton>
+      <EuiFlexGroup gutterSize="s" direction="column">
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.description"
+            defaultMessage="Some entities scores have recently increased significantly. This may indicate a change in the entity's behavior or a new threat. Do you wish to investugate further?"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="warning"
+            fill
+            onClick={onClick}
+            iconType="magnifyWithExclamation"
+            css={{ maxWidth: '180px' }}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.investigateButton"
+              defaultMessage="Investigate"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiCallOut>
   );
 };

@@ -9,7 +9,16 @@ import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import _ from 'lodash';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
@@ -157,11 +166,23 @@ const SpikeSummaryPanel: React.FC<{ spike: SpikeEntity }> = ({ spike }) => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="column" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiText>
-                  <h3>
-                    <EuiIcon type={iconType} /> {spike.identifier}
-                  </h3>
-                </EuiText>
+                <EuiFlexGroup justifyContent="spaceBetween">
+                  <EuiFlexItem grow={false}>
+                    <EuiText>
+                      <h3>
+                        <EuiIcon type={iconType} /> {spike.identifier}
+                      </h3>
+                    </EuiText>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty size="s" iconType="magnifyWithPlus" iconSide="right">
+                      <FormattedMessage
+                        id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.viewDetails"
+                        defaultMessage="Investigate with AI"
+                      />
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup alignItems="flexStart" gutterSize="s">
@@ -177,14 +198,24 @@ const SpikeSummaryPanel: React.FC<{ spike: SpikeEntity }> = ({ spike }) => {
                     </EuiFlexItem>
                   )}
                   {!spike.baseline && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="success" iconType="asterisk">
-                        <FormattedMessage
-                          id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.spikeAboveBaseline"
-                          defaultMessage="New score"
-                        />
-                      </EuiBadge>
-                    </EuiFlexItem>
+                    <>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="success" iconType="asterisk">
+                          <FormattedMessage
+                            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.newScore"
+                            defaultMessage="New score"
+                          />
+                        </EuiBadge>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge color="danger" iconType="warning">
+                          <FormattedMessage
+                            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.highFirstScore"
+                            defaultMessage="High first score"
+                          />
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    </>
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -225,6 +256,13 @@ export const RiskScoreSpikeDetailsPanel: FC<RiskScoreSpikeDetailsPanelProps> = m
                 defaultMessage="Risk score spikes detected"
               />
             </h2>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.spikesDescription"
+              defaultMessage="Some entities scores have recently increased significantly. This may indicate a change in the entity's behavior or a new threat."
+            />
           </EuiText>
         </FlyoutHeader>
         <FlyoutBody>
