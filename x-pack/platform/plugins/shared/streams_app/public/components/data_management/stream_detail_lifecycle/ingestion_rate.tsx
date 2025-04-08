@@ -19,13 +19,7 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import {
-  AreaSeries,
-  Axis,
-  BarSeries,
-  Chart,
-  Settings,
-} from '@elastic/charts';
+import { AreaSeries, Axis, BarSeries, Chart, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';

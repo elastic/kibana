@@ -8,15 +8,7 @@
 import React from 'react';
 
 import type { SeriesColorAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  Position,
-  ScaleType,
-  Settings,
-  Tooltip,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
@@ -54,10 +46,7 @@ export const SingleDistributionChart = ({
     <Chart>
       <Tooltip body={DataComparisonChartTooltipBody} />
 
-      <Settings
-        baseTheme={chartBaseTheme}
-        locale={i18n.getLocale()}
-      />
+      <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} />
       <Axis
         id="vertical"
         position={Position.Left}

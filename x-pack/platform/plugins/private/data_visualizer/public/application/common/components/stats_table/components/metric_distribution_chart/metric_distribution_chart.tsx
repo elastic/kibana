@@ -88,11 +88,7 @@ export const MetricDistributionChart: FC<Props> = ({
     <div data-test-subj="dataVisualizerFieldDataMetricDistributionChart" css={styles.histogram}>
       <Chart size={{ width, height }}>
         <Tooltip headerFormatter={headerFormatter} />
-        <Settings
-          baseTheme={chartBaseTheme}
-          theme={theme}
-          locale={i18n.getLocale()}
-        />
+        <Settings baseTheme={chartBaseTheme} theme={theme} locale={i18n.getLocale()} />
         <Axis
           id="bottom"
           position={Position.Bottom}

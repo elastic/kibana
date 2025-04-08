@@ -9,14 +9,7 @@
 
 import React, { type FC } from 'react';
 
-import {
-  Chart,
-  Settings,
-  Axis,
-  BarSeries,
-  Position,
-  ScaleType,
-} from '@elastic/charts';
+import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 interface BarChartRaceProps {
   entities: Record<string, number>;
@@ -28,10 +21,7 @@ export const BarChartRace: FC<BarChartRaceProps> = ({ entities }) => {
   return (
     <div style={{ height: '300px' }}>
       <Chart>
-        <Settings
-          baseTheme={chartBaseTheme}
-          rotation={90}
-        />
+        <Settings baseTheme={chartBaseTheme} rotation={90} />
         <Axis id="entities" position={Position.Bottom} title="Commits" showOverlappingTicks />
         <Axis id="left2" title="Developers" position={Position.Left} />
 

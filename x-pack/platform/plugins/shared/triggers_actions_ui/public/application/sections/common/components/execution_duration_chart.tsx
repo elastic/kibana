@@ -18,14 +18,7 @@ import {
   EuiLoadingChart,
   useEuiTheme,
 } from '@elastic/eui';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  CurveType,
-  LineSeries,
-  Settings,
-} from '@elastic/charts';
+import { Axis, BarSeries, Chart, CurveType, LineSeries, Settings } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { assign, fill } from 'lodash';

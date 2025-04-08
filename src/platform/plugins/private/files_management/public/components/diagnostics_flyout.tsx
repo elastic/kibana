@@ -22,20 +22,13 @@ import {
   EuiSpacer,
   EuiFlexItem,
 } from '@elastic/eui';
-import {
-  Chart,
-  Axis,
-  Position,
-  HistogramBarSeries,
-  ScaleType,
-  Settings,
-} from '@elastic/charts';
+import { Chart, Axis, Position, HistogramBarSeries, ScaleType, Settings } from '@elastic/charts';
 import numeral from '@elastic/numeral';
 import type { FunctionComponent } from 'react';
 import React from 'react';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18nTexts } from '../i18n_texts';
 import { useFilesManagementContext } from '../context';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 interface Props {
   onClose: () => void;
@@ -100,9 +93,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 <h3>{i18nTexts.diagnosticsBreakdownsStatus}</h3>
               </EuiTitle>
               <Chart size={{ height: 200, width: '100%' }}>
-                <Settings
-                  baseTheme={chartBaseTheme}
-                />
+                <Settings baseTheme={chartBaseTheme} />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
                 <HistogramBarSeries

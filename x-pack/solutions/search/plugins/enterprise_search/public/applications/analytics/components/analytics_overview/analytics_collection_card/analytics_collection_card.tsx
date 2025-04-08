@@ -10,14 +10,7 @@ import React, { MouseEvent } from 'react';
 import { parsePath } from 'history';
 import { useValues } from 'kea';
 
-import {
-  AreaSeries,
-  Chart,
-  CurveType,
-  ScaleType,
-  Settings,
-  Tooltip,
-} from '@elastic/charts';
+import { AreaSeries, Chart, CurveType, ScaleType, Settings, Tooltip } from '@elastic/charts';
 import {
   EuiBadge,
   EuiCard,
@@ -28,8 +21,8 @@ import {
   EuiLoadingChart,
   useEuiTheme,
 } from '@elastic/eui';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 
 import { i18n } from '@kbn/i18n';
 

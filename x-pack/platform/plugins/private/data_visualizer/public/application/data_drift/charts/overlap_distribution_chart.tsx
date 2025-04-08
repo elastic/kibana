@@ -61,11 +61,7 @@ export const OverlapDistributionComparison = ({
         hide={true}
       />
 
-      <Settings
-        baseTheme={chartBaseTheme}
-        showLegend={false}
-        locale={i18n.getLocale()}
-      />
+      <Settings baseTheme={chartBaseTheme} showLegend={false} locale={i18n.getLocale()} />
       <AreaSeries
         id="dataVisualizer.overlapDistributionComparisonChart"
         name={i18n.translate('xpack.dataVisualizer.dataDrift.distributionComparisonChartName', {

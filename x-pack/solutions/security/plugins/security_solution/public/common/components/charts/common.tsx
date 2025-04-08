@@ -24,7 +24,6 @@ import styled from '@emotion/styled';
 
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 
-
 export const defaultChartHeight = '100%';
 export const defaultChartWidth = '100%';
 const chartDefaultRotation: Rotation = 0;
