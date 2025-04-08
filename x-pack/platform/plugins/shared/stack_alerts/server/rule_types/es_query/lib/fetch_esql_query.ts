@@ -17,8 +17,6 @@ import { ecsFieldMap, alertFieldMap } from '@kbn/alerts-as-data-utils';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { Filter, Query } from '@kbn/es-query';
 import type { EsqlTable } from '../../../../common';
 import { getEsqlQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
@@ -28,7 +26,6 @@ export interface FetchEsqlQueryOpts {
   alertLimit: number | undefined;
   params: OnlyEsqlQueryRuleParams;
   spacePrefix: string;
-  publicBaseUrl: string;
   services: {
     logger: Logger;
     scopedClusterClient: IScopedClusterClient;
@@ -45,11 +42,11 @@ export async function fetchEsqlQuery({
   params,
   services,
   spacePrefix,
-  publicBaseUrl,
   dateStart,
   dateEnd,
 }: FetchEsqlQueryOpts) {
-  const { logger, scopedClusterClient, ruleResultService } = services;
+  const { logger, scopedClusterClient, share, ruleResultService } = services;
+  const discoverLocator = share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!;
   const esClient = scopedClusterClient.asCurrentUser;
   const query = getEsqlQuery(params, alertLimit, dateStart, dateEnd);
 
@@ -70,7 +67,6 @@ export async function fetchEsqlQuery({
   }
 
   const sourceFields = getSourceFields(response);
-  const link = `${publicBaseUrl}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`;
   const isGroupAgg = isPerRowAggregation(params.groupBy);
   const { results, duplicateAlertIds } = getEsqlQueryHits(
     response,
@@ -85,6 +81,8 @@ export async function fetchEsqlQuery({
     ruleResultService.addLastRunWarning(warning);
     ruleResultService.setLastRunOutcomeMessage(warning);
   }
+
+  const link = generateLink(params, discoverLocator, dateStart, dateEnd, spacePrefix);
 
   return {
     link,
@@ -141,30 +139,22 @@ export const getSourceFields = (results: EsqlTable) => {
   return intersectionBy(resultFields, ecsFields, 'label');
 };
 
-export async function generateLink(
-  esqlQuery: Query,
+export function generateLink(
+  params: OnlyEsqlQueryRuleParams,
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
-  dataViews: DataViewsContract,
-  dataViewToUpdate: DataView,
   dateStart: string,
   dateEnd: string,
-  spacePrefix: string,
-  filterToExcludeHitsFromPreviousRun: Filter | null
+  spacePrefix: string
 ) {
   const redirectUrlParams: DiscoverAppLocatorParams = {
-    filters: filterToExcludeHitsFromPreviousRun ? [filterToExcludeHitsFromPreviousRun] : [],
     timeRange: { from: dateStart, to: dateEnd },
+    query: params.esqlQuery,
     isAlertResults: true,
-    query: {
-      language: 'esql',
-      query: esqlQuery,
-    },
   };
 
   // use `lzCompress` flag for making the link readable during debugging/testing
   // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
-  return start + spacePrefix + '/app' + end;
+  return redirectUrl;
 }

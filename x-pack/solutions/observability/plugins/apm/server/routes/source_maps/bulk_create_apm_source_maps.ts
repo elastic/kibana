@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Artifact } from '@kbn/fleet-plugin/server';
+import { APM_SOURCE_MAP_INDEX } from '@kbn/apm-sources-access-plugin/server';
 import { getUnzippedArtifactBody } from '../fleet/source_maps';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
 import type { ApmSourceMap } from './create_apm_source_map_index_template';
 import { getEncodedContent, getSourceMapId } from './sourcemap_utils';
 
