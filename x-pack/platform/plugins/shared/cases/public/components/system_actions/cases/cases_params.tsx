@@ -115,14 +115,15 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
         index
       );
     }
-    if (timeWindowUnit === 'm' && parseInt(timeWindowSize) <= 20) {
+
+    if (timeWindowUnit === 'm' && parseInt(timeWindowSize, 10) <= 20) {
       setShowTimeWindowWarning(true);
     } else {
       setShowTimeWindowWarning(false);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [actionParams]);
+  }, [actionParams, timeWindowUnit, timeWindowSize]);
 
   const editSubActionProperty = useCallback(
     (key: string, value: unknown) => {
@@ -144,7 +145,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       const timeSize = key === 'timeWindowSize' ? value : timeWindowSize;
       const timeUnit = key === 'timeWindowUnit' ? value : timeWindowUnit;
 
-      if (timeUnit === 'm' && parseInt(timeSize) <= 20) {
+      if (timeUnit === 'm' && parseInt(timeSize, 10) <= 20) {
         setShowTimeWindowWarning(true);
       } else {
         setShowTimeWindowWarning(false);
