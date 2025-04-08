@@ -10,7 +10,7 @@
 export enum AuthzOptOutReason {
   DelegateToESClient = 'Route delegates authorization to the scoped ES client',
   DelegateToSOClient = 'Route delegates authorization to the scoped SO client',
-  ServeStaticFiles = 'Serving static files that do not require authorization',
+  ServeStaticFiles = 'Route serves static files that do not require authorization',
 }
 
 export class AuthzDisabled {
