@@ -330,7 +330,7 @@ export class Authenticator {
       );
 
       if (!authenticationResult.notHandled()) {
-        if (!ownsSession) {
+        if (!ownsSession && existingSessionValue?.provider.name) {
           // 'telemetry' to see how prevalent it is for users
           // to be using multiple concurrent providers to authenticate
           this.logger.warn(
@@ -414,7 +414,7 @@ export class Authenticator {
       );
 
       if (!authenticationResult.notHandled()) {
-        if (!ownsSession) {
+        if (!ownsSession && existingSession.value?.provider.name) {
           // 'telemetry' to see how prevalent it is for users
           // to be using multiple concurrent providers to authenticate
           this.logger.warn(

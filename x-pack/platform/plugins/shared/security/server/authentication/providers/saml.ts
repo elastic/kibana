@@ -440,6 +440,10 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
       if (stateRequestIds.length && inResponseToRequestId) {
         redirectURLForRequestId = stateRequestIdMap[inResponseToRequestId].redirectURL;
+      } else {
+        this.logger.info(
+          'No requestId found in SAML response or state does not contain requestId.'
+        );
       }
 
       // Remove value of inResponseToRequestId from stateRequestIdMap and return a map of any
