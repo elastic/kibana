@@ -11,6 +11,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { EuiPageTemplate, EuiSpacer, EuiPageHeader, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs, Section } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
@@ -67,7 +68,23 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
     setIsLoadingActions(true);
     try {
       const actionsResponse = await loadAllActions({ http });
-      setActions(actionsResponse);
+      const filteredActionsResponse = await actionsResponse.reduce<Promise<ActionConnector[]>>(
+        async (result, connector) => {
+          if (
+            connector.actionTypeId !== '.inference' ||
+            (connector.actionTypeId === '.inference' &&
+              // @ts-ignore property 'config' does not exist on type ActionConnector
+              (await isInferenceEndpointExists(http, connector.config?.inferenceId)))
+          ) {
+            return [...(await result), connector];
+          }
+
+          return result;
+        },
+        Promise.resolve([])
+      );
+
+      setActions(filteredActionsResponse);
     } catch (e) {
       toasts.addDanger({
         title: i18n.translate(
