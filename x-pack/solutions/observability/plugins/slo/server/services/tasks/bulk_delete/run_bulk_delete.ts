@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
   SLI_DESTINATION_INDEX_PATTERN,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -21,6 +26,7 @@ interface Dependencies {
   logger: Logger;
   internalSoClient: SavedObjectsClientContract;
   abortController: AbortController;
+  request: KibanaRequest;
 }
 
 async function waitFor(time: number) {
@@ -29,7 +35,7 @@ async function waitFor(time: number) {
 
 export async function runBulkDelete(
   params: { list: string[] },
-  { internalEsClient, internalSoClient, logger, abortController }: Dependencies
+  { internalEsClient, internalSoClient, logger, abortController, request }: Dependencies
 ) {
   // main problem to figure out: we only have the esClient internal user.
   logger.info(`running bulk deletion: ${params.list}`);

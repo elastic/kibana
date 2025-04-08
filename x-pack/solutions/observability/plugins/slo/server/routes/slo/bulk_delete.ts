@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { TYPE } from '../../services/tasks/bulk_delete/bulk_delete_task';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
+import { getSpaceId } from './utils/get_space_id';
+import { HTTPAuthorizationHeader } from '../../services/tasks/bulk_delete/http_authorization_header';
 
 export const bulkDeleteSLORoute = createSloServerRoute({
   endpoint: 'POST /api/observability/slos/_bulk_delete 2023-10-31',
@@ -22,7 +24,10 @@ export const bulkDeleteSLORoute = createSloServerRoute({
   params: bulkDeleteSLOParamsSchema,
   handler: async ({ request, response, context, params, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
-
+    const spaceId = await getSpaceId(plugins, request);
+    const core = await context.core;
+    const username = core.security.authc.getCurrentUser()?.username ?? undefined;
+    const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request, username);
     const taskManager = await plugins.taskManager.start();
 
     const task = await taskManager.ensureScheduled({
@@ -31,7 +36,7 @@ export const bulkDeleteSLORoute = createSloServerRoute({
       scope: ['observability', 'slo'],
       state: {},
       runAt: new Date(Date.now() + 3 * 1000),
-      params: params.body,
+      params: { ...params.body, spaceId, authorizationHeader },
     });
 
     return { taskId: task.id };

@@ -6,12 +6,16 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import {
+  FakeRawRequest,
   SavedObjectsClient,
   type CoreSetup,
+  type Headers,
   type Logger,
   type LoggerFactory,
 } from '@kbn/core/server';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { runBulkDelete } from './run_bulk_delete';
 
@@ -48,6 +52,9 @@ export class BulkDeleteTask {
                 coreStart.savedObjects.createInternalRepository()
               );
 
+              // @ts-ignore
+              const request = getFakeKibanaRequest(params.spaceId, params.authorizationHeader);
+
               // add zod checks
               if (!taskInstance.params.list || taskInstance.params.list.length === 0) {
                 return;
@@ -58,6 +65,7 @@ export class BulkDeleteTask {
                 return await runBulkDelete(params, {
                   internalEsClient,
                   internalSoClient,
+                  request,
                   logger: this.logger,
                   abortController: this.abortController,
                 });
@@ -79,4 +87,23 @@ export class BulkDeleteTask {
       },
     });
   }
+}
+
+export function getFakeKibanaRequest(spaceId: string, apiKey: string) {
+  const requestHeaders: Headers = {};
+
+  if (apiKey) {
+    requestHeaders.authorization = `ApiKey ${apiKey}`;
+  }
+
+  const path = addSpaceIdToPath('/', spaceId);
+
+  const fakeRawRequest: FakeRawRequest = {
+    headers: requestHeaders,
+    path,
+  };
+
+  const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+
+  return fakeRequest;
 }
