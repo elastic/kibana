@@ -123,11 +123,7 @@ export async function getKbModelStatus({
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
-    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.ERROR };
-  }
-
-  if (!endpoint) {
-    return { enabled, kbState: KnowledgeBaseState.NOT_INSTALLED };
+    return { enabled, errorMessage: error.message, kbState: KnowledgeBaseState.NOT_INSTALLED };
   }
 
   let trainedModelStatsResponse: MlGetTrainedModelsStatsResponse;
