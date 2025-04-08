@@ -15,7 +15,6 @@ import {
   EuiPanel,
   EuiButton,
   EuiLink,
-  useEuiTheme,
   EuiButtonEmpty,
 } from '@elastic/eui';
 
@@ -49,7 +48,6 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   onClickManageAutoUpgradeAgents: (action: ActionStatus) => void;
 }> = ({ action, abortUpgrade, onClickViewAgents, onClickManageAutoUpgradeAgents }) => {
   const { docLinks } = useStartServices();
-  const theme = useEuiTheme();
   const isAutomaticUpgrade = action.is_automatic;
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {
