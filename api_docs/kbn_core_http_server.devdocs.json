@@ -3558,6 +3558,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/health/health.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
               },
               {
