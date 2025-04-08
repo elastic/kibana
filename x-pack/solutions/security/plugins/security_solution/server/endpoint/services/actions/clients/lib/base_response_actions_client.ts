@@ -494,7 +494,8 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       agent: {
         id: actionRequest.endpoint_ids,
         // add the `policy` info if space awareness is enabled
-        ...(this.options.endpointService.experimentalFeatures.responseActionsTelemetryEnabled
+        ...(this.options.endpointService.experimentalFeatures
+          .endpointManagementSpaceAwarenessEnabled
           ? {
               policy: await this.fetchAgentPolicyInfo(actionRequest.endpoint_ids),
             }
