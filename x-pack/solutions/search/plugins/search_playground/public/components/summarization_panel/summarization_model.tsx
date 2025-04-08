@@ -13,6 +13,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiSuperSelect,
+  EuiButtonEmpty,
   type EuiSuperSelectOption,
   EuiText,
 } from '@elastic/eui';
@@ -21,6 +22,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
+import { useManagementLink } from '../../hooks/use_management_link';
+import { i18n } from '@kbn/i18n';
 
 interface SummarizationModelProps {
   selectedModel?: LLMModel;
@@ -36,6 +39,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   onSelect,
 }) => {
   const usageTracker = useUsageTracker();
+  const managementLink = useManagementLink(selectedModel?.connectorId);
   const onChange = (modelValue: string) => {
     const newSelectedModel = models.find((model) => getOptionValue(model) === modelValue);
 
@@ -113,13 +117,32 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
       }
       fullWidth
     >
-      <EuiSuperSelect
-        data-test-subj="summarizationModelSelect"
-        options={modelsOption}
-        valueOfSelected={selectedModel && getOptionValue(selectedModel)}
-        onChange={onChange}
-        fullWidth
-      />
+      <EuiFlexGroup direction="row" gutterSize="m">
+        <EuiFlexItem>
+          <EuiSuperSelect
+            data-test-subj="summarizationModelSelect"
+            options={modelsOption}
+            valueOfSelected={selectedModel && getOptionValue(selectedModel)}
+            onChange={onChange}
+            fullWidth
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            target="_blank"
+            href={managementLink}
+            data-test-subj="manageConnectorsLink"
+            iconType="wrench"
+            size="s"
+            aria-label={i18n.translate(
+              'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
+              {
+                defaultMessage: 'Manage connector',
+              }
+            )}
+          ></EuiButtonEmpty>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFormRow>
   );
 };

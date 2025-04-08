@@ -25,36 +25,13 @@ import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
 export const ChatSidebar: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-  const selectedModel = useWatch<ChatForm, ChatFormFields.summarizationModel>({
-    name: ChatFormFields.summarizationModel,
-  });
-  const managementLink = useManagementLink(selectedModel?.connectorId);
+
   const panels = [
     {
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
         defaultMessage: 'LLM settings',
       }),
       children: <SummarizationPanel />,
-      extraAction: (
-        <EuiButtonEmpty
-          target="_blank"
-          href={managementLink}
-          data-test-subj="manageConnectorsLink"
-          iconType="wrench"
-          size="s"
-          aria-label={i18n.translate(
-            'xpack.searchPlayground.sidebar.summarizationModel.manageConnectorLink',
-            {
-              defaultMessage: 'Manage connector',
-            }
-          )}
-        >
-          <FormattedMessage
-            id="xpack.searchPlayground.sidebar.summarizationModel.manageConnectorTooltip"
-            defaultMessage="Manage"
-          />
-        </EuiButtonEmpty>
-      ),
     },
     {
       title: i18n.translate('xpack.searchPlayground.sidebar.contextTitle', {
