@@ -17,34 +17,26 @@ import {
 } from '@elastic/eui';
 import { BenchmarkIcons } from '../findings_flyout';
 
-interface FindingsMisconfigurationFlyoutHeaderProps {
-  ruleName: string;
-  timestamp?: Date;
-  rulesTags?: string[];
-  resourceName?: string;
-  framework?: string[];
-  vendor?: string;
-  ruleBenchmarkId?: string;
-  ruleBenchmarkName?: string;
+export interface FindingsMisconfigurationFlyoutHeaderProps {
+  finding: any;
 }
 
 export const FindingsMisconfigurationFlyoutHeader = ({
-  ruleName,
-  timestamp,
-  rulesTags,
-  resourceName,
-  framework,
-  vendor,
-  ruleBenchmarkId,
-  ruleBenchmarkName,
+  finding,
 }: FindingsMisconfigurationFlyoutHeaderProps) => {
   const { euiTheme } = useEuiTheme();
+
+  const rulesTags = finding?.rule.tags;
+  const resourceName = finding?.resource.name;
+  const vendor = finding?.observer.vendor;
+  const ruleBenchmarkId = finding?.rule.benchmark.id;
+  const ruleBenchmarkName = finding?.rule.benchmark.name;
 
   return (
     <>
       <EuiSpacer size="s" />
       {rulesTags &&
-        rulesTags.map((tag) => (
+        rulesTags.map((tag: string) => (
           <EuiBadge key={tag} color={'hollow'}>
             {tag}
           </EuiBadge>
@@ -52,7 +44,7 @@ export const FindingsMisconfigurationFlyoutHeader = ({
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiPanel hasBorder={false}>
+          <EuiPanel hasBorder={true}>
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem>
                 <EuiPanel
@@ -90,7 +82,7 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                         />
                       )}
                     </EuiFlexItem>
-                    <EuiFlexItem> {framework} </EuiFlexItem>
+                    {/* <EuiFlexItem> {framework} </EuiFlexItem> */}
                   </EuiFlexGroup>
                 </EuiPanel>
               </EuiFlexItem>

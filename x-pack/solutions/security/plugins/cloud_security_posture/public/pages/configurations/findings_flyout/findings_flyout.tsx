@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import {
   useEuiTheme,
   EuiFlexItem,
@@ -233,128 +233,126 @@ export const MissingFieldsCallout = ({
   );
 };
 
-export const FindingsRuleFlyout = ({ ruleId, resourceId }: FindingMisconfigurationFlyoutProps) => {
+const FindingsRuleFlyout = ({ ruleId, resourceId, children }) => {
   const { data } = useMisconfigurationFinding({
     query: createMisconfigurationFindingsQuery(resourceId, ruleId),
     enabled: true,
     pageSize: 1,
   });
-  const finding = data?.result.hits[0]._source;
 
-  const convertObjectToArray = (obj: { [key: string]: any }) => {
-    if (obj === undefined) return null;
-    return Object.keys(obj)
-      .filter((key) => key !== 'raw')
-      .map((key) => ({
-        field: key,
-        value: obj[key],
-      }));
-  };
+  const [tab, setTab] = useState(tabs[0]);
 
-  const columns: Array<EuiBasicTableColumn<any>> = [
-    {
-      field: 'field',
-      name: 'Field',
-      'data-test-subj': 'firstNameCell',
-    },
-    {
-      field: 'value',
-      name: 'Value',
-      truncateText: true,
-    },
-  ];
-
-  const { euiTheme } = useEuiTheme();
-  const [tab, setTab] = useState<FindingsTab>(tabs[0]);
+  const finding = data?.result.hits[0]?._source;
 
   if (!finding) return null;
 
-  const createMisconfigurationRuleFn = async (http: HttpSetup) =>
-    createDetectionRuleFromBenchmarkRule(http, finding?.rule);
+  return children({
+    finding,
+    createRuleFn: (http) => createDetectionRuleFromBenchmarkRule(http, finding?.rule),
+    tab,
+    setTab,
+    tabs,
+  });
+};
+
+const Header = ({ tab, setTab, finding, tabs }) => {
+  const { euiTheme } = useEuiTheme();
 
   return (
-    <>
-      <EuiFlexGroup gutterSize={'none'} direction={'column'} data-test-subj={FINDINGS_FLYOUT}>
-        <EuiFlyoutHeader>
-          <EuiPanel hasShadow={false}>
-            <EuiSpacer />
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <CspEvaluationBadge type={finding?.result?.evaluation} />
-              </EuiFlexItem>
-              <EuiFlexItem grow style={{ minWidth: 0 }}>
-                <EuiTitle size="m" className="eui-textTruncate">
-                  <EuiTextColor color="primary" title={finding?.rule?.name}>
-                    {finding?.rule?.name}
-                  </EuiTextColor>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {finding && (
-              <div
-                css={css`
-                  line-height: 20px;
-                  margin-top: ${euiTheme.size.m};
-                `}
-              >
-                <CspInlineDescriptionList
-                  testId={FINDINGS_MISCONFIGS_FLYOUT_DESCRIPTION_LIST}
-                  listItems={getFlyoutDescriptionList(finding)}
-                />
-              </div>
-            )}
+    <EuiFlyoutHeader>
+      <EuiPanel hasShadow={false}>
+        <EuiSpacer />
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <CspEvaluationBadge type={finding?.result?.evaluation} />
+          </EuiFlexItem>
+          <EuiFlexItem grow style={{ minWidth: 0 }}>
+            <EuiTitle size="m" className="eui-textTruncate">
+              <EuiTextColor color="primary" title={finding?.rule?.name}>
+                {finding?.rule?.name}
+              </EuiTextColor>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
 
-            <EuiSpacer />
-            <EuiTabs>
-              {tabs.map((v) => (
-                <EuiTab
-                  key={v.id}
-                  isSelected={tab.id === v.id}
-                  onClick={() => setTab(v)}
-                  data-test-subj={`findings_flyout_tab_${v.id}`}
-                >
-                  {v.title}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </EuiPanel>
-        </EuiFlyoutHeader>
-        {finding && (
-          <EuiPanel hasShadow={false}>
-            <EuiFlyoutBody key={tab.id}>
-              {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
-                <div style={{ marginBottom: euiTheme.size.base }}>
-                  <MissingFieldsCallout finding={finding} />
-                </div>
-              )}
-              <FindingsTab tab={tab} finding={finding} />
-            </EuiFlyoutBody>
-          </EuiPanel>
-        )}
-        <EuiPanel>
-          <EuiPanel>
-            <EuiBasicTable
-              tableCaption="Demo of EuiBasicTable"
-              items={convertObjectToArray(finding?.resource) || []}
-              rowHeader="Field"
-              columns={columns}
-            />
-          </EuiPanel>
-        </EuiPanel>
+        <div style={{ lineHeight: '20px', marginTop: euiTheme.size.m }}>
+          <CspInlineDescriptionList
+            testId="misconfigs-findings-flyout-description-list"
+            listItems={[
+              {
+                title: 'Resource ID',
+                description: finding.resource?.id || '-',
+              },
+              {
+                title: 'Resource Name',
+                description: finding.resource?.name || '-',
+              },
+            ]}
+          />
+        </div>
 
-        <EuiFlyoutFooter>
-          <EuiPanel color="transparent">
-            <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <TakeAction createRuleFn={createMisconfigurationRuleFn} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlyoutFooter>
-      </EuiFlexGroup>
-    </>
+        <EuiSpacer />
+        <EuiTabs>
+          {tabs.map((t) => (
+            <EuiTab
+              key={t.id}
+              isSelected={tab.id === t.id}
+              onClick={() => setTab(t)}
+              data-test-subj={`findings_flyout_tab_${t.id}`}
+            >
+              {t.title}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </EuiPanel>
+    </EuiFlyoutHeader>
   );
 };
+
+const Body = ({ tab, finding }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiFlyoutBody>
+      {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
+        <div style={{ marginBottom: euiTheme.size.base }}>
+          <MissingFieldsCallout finding={finding} />
+        </div>
+      )}
+      <FindingsTab tab={tab} finding={finding} />
+    </EuiFlyoutBody>
+  );
+};
+
+const Footer = ({ finding, createRuleFn }) => {
+  const convertObjectToArray = (obj) =>
+    obj
+      ? Object.entries(obj)
+          .filter(([k]) => k !== 'raw')
+          .map(([field, value]) => ({ field, value }))
+      : [];
+
+  const columns = [
+    { field: 'field', name: 'Field' },
+    { field: 'value', name: 'Value', truncateText: true },
+  ];
+
+  return (
+    <EuiFlyoutFooter>
+      <EuiPanel color="transparent">
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <TakeAction createRuleFn={createRuleFn} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlyoutFooter>
+  );
+};
+
+export const FindingsRuleFlyoutHeader = Header;
+export const FindingsRuleFlyoutBody = Body;
+export const FindingsRuleFlyoutFooter = Footer;
 
 // eslint-disable-next-line import/no-default-export
 export default FindingsRuleFlyout;

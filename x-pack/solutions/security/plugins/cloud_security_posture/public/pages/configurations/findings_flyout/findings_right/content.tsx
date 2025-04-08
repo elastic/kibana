@@ -6,16 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import {
-  EuiPanel,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiTabs,
-  EuiTab,
-  EuiCallOut,
-  EuiFlyoutBody,
-  useEuiTheme,
-} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiPanel, EuiTabs, EuiTab, EuiCallOut, useEuiTheme, EuiFlexGroup } from '@elastic/eui';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
   CspFinding,
@@ -30,18 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { isNativeCspFinding } from '@kbn/cloud-security-posture/src/utils/is_native_csp_finding';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { OverviewTab } from '../overview_tab_new';
+import { JsonTab } from '../json_tab';
+import { TableTab } from '../table_tab';
 
 type FindingsTab = (typeof tabs)[number];
-
-const convertObjectToArray = (obj: { [key: string]: any }) => {
-  if (obj === undefined) return null;
-  return Object.keys(obj)
-    .filter((key) => key !== 'raw')
-    .map((key) => ({
-      field: key,
-      value: obj[key],
-    }));
-};
 
 export const MissingFieldsCallout = ({
   finding,
@@ -115,70 +100,53 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
 
   switch (tab.id) {
     case 'overview':
-      //   return <OverviewTab data={finding} ruleFlyoutLink={ruleFlyoutLink} />;
-      return <>{'OVERVIEW'}</>;
+      return <OverviewTab data={finding} ruleFlyoutLink={ruleFlyoutLink} />;
     case 'table':
-      //   return <TableTab data={finding} />;
-      return <>{'TABLE'}</>;
+      return <TableTab data={finding} />;
     case 'json':
-      //   return <JsonTab data={finding} />;
-      return <>{'JSON'}</>;
+      return <JsonTab data={finding} />;
     default:
       assertNever(tab);
   }
 };
 
-export const FindingsMisconfigurationFlyoutContent = (data: CspFinding) => {
-  const columns: Array<EuiBasicTableColumn<any>> = [
-    {
-      field: 'field',
-      name: 'Field',
-      'data-test-subj': 'firstNameCell',
-    },
-    {
-      field: 'value',
-      name: 'Value',
-      truncateText: true,
-    },
-  ];
+export const FindingsMisconfigurationFlyoutContent = ({ data }: { data: CspFinding }) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
+  const { euiTheme } = useEuiTheme();
 
   return (
     <>
-      <EuiTabs>
-        {tabs.map((v) => (
-          <EuiTab
-            key={v.id}
-            isSelected={tab.id === v.id}
-            onClick={() => setTab(v)}
-            data-test-subj={`findings_flyout_tab_${v.id}`}
+      <EuiFlexGroup gutterSize={'none'} direction={'column'}>
+        <EuiTabs expand>
+          {tabs.map((v) => (
+            <EuiTab
+              key={v.id}
+              isSelected={tab.id === v.id}
+              onClick={() => setTab(v)}
+              data-test-subj={`findings_flyout_tab_${v.id}`}
+            >
+              {v.title}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+        {data && (
+          <EuiPanel
+            hasShadow={false}
+            css={css`
+              position: relative;
+            `}
           >
-            {v.title}
-          </EuiTab>
-        ))}
-      </EuiTabs>
-      {/* {finding && (
-        <EuiPanel hasShadow={false}>
-          <EuiFlyoutBody key={tab.id}>
-            {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
+            {/* <EuiFlyoutBody key={tab.id}> */}
+            {!isNativeCspFinding(data) && ['overview', 'rule'].includes(tab.id) && (
               <div style={{ marginBottom: euiTheme.size.base }}>
-                <MissingFieldsCallout finding={finding} />
+                <MissingFieldsCallout finding={data} />
               </div>
             )}
-            <FindingsTab tab={tab} finding={finding} />
-          </EuiFlyoutBody>
-        </EuiPanel>
-      )} */}
-      <EuiPanel>
-        <EuiPanel>
-          <EuiBasicTable
-            tableCaption="Demo of EuiBasicTable"
-            items={convertObjectToArray(data?.resource) || []}
-            rowHeader="Field"
-            columns={columns}
-          />
-        </EuiPanel>
-      </EuiPanel>
+            <FindingsTab tab={tab} finding={data} />
+            {/* </EuiFlyoutBody> */}
+          </EuiPanel>
+        )}
+      </EuiFlexGroup>
     </>
   );
 };
