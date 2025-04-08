@@ -201,6 +201,9 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -316,6 +319,9 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -421,6 +427,9 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -711,6 +720,9 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "myType",
+            "artifacts": Object {
+              "dashboards": Array [],
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -741,6 +753,9 @@ describe('find()', () => {
               },
             ],
             "alertTypeId": "123",
+            "artifacts": Object {
+              "dashboards": Array [],
+            },
             "createdAt": 2019-02-12T21:01:22.479Z,
             "executionStatus": Object {
               "lastExecutionDate": 2019-02-12T21:01:22.000Z,
@@ -1018,6 +1033,9 @@ describe('find()', () => {
           "data": Array [
             Object {
               "actions": Array [],
+              "artifacts": Object {
+                "dashboards": Array [],
+              },
               "id": "1",
               "notifyWhen": undefined,
               "params": undefined,
