@@ -679,7 +679,6 @@ Object {
           "id": "cases",
           "link": "securitySolutionUI:cases",
           "renderAs": "panelOpener",
-          "spaceAfter": null,
           "spaceBefore": "m",
         },
         Object {
