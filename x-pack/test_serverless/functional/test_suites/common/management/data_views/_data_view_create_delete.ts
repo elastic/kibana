@@ -77,7 +77,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('can resolve errors and submit', async function () {
-        await PageObjects.settings.clickAddNewIndexPatternButton();
         await PageObjects.settings.setIndexPatternField('log*');
         await new Promise((e) => setTimeout(e, 500));
         await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
