@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from 'zod';
+import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
 
