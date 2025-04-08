@@ -14,7 +14,10 @@ export {
   extendToolingLog,
 } from './src/lib/utils/create_logger';
 
-export { ApmSynthtraceEsClient } from './src/lib/apm/client/apm_synthtrace_es_client';
+export {
+  ApmSynthtraceEsClient,
+  type ApmSynthtracePipelines,
+} from './src/lib/apm/client/apm_synthtrace_es_client';
 export { ApmSynthtraceKibanaClient } from './src/lib/apm/client/apm_synthtrace_kibana_client';
 export { InfraSynthtraceEsClient } from './src/lib/infra/infra_synthtrace_es_client';
 export { InfraSynthtraceKibanaClient } from './src/lib/infra/infra_synthtrace_kibana_client';
@@ -23,7 +26,6 @@ export { LogsSynthtraceEsClient } from './src/lib/logs/logs_synthtrace_es_client
 export { EntitiesSynthtraceEsClient } from './src/lib/entities/entities_synthtrace_es_client';
 export { EntitiesSynthtraceKibanaClient } from './src/lib/entities/entities_synthtrace_kibana_client';
 export { SyntheticsSynthtraceEsClient } from './src/lib/synthetics/synthetics_synthtrace_es_client';
-export { OtelSynthtraceEsClient } from './src/lib/apm/client/apm_otel_synthtrace_es_client/otel_synthtrace_es_client';
 export {
   addObserverVersionTransform,
   deleteSummaryFieldTransform,

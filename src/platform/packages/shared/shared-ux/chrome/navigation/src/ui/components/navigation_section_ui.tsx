@@ -423,7 +423,7 @@ function nodeToEuiCollapsibleNavProps(
       onClick,
       icon: navNode.icon,
       // @ts-expect-error title accepts JSX elements and they render correctly but the type definition expects a string
-      title: !subItems && navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
+      title: navNode.withBadge ? <SubItemTitle item={navNode} /> : navNode.title,
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 

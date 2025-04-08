@@ -69,7 +69,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
       ingestPipelineResourceName: 'something',
       setIsKBSetupInProgress: jest.fn().mockImplementation(() => {}),
       manageGlobalKnowledgeBaseAIAssistant: true,
-      trainedModelsProvider: trainedModelsProviderMock,
+      getTrainedModelsProvider: () => trainedModelsProviderMock,
     };
     esClientMock.search.mockReturnValue(
       // @ts-expect-error not full response interface

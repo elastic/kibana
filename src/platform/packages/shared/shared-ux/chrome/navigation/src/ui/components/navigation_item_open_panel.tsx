@@ -9,25 +9,62 @@
 
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
-import { css } from '@emotion/react';
-import { transparentize, EuiButton } from '@elastic/eui';
+import { css } from '@emotion/css';
+import { type EuiThemeComputed, useEuiTheme, transparentize, EuiButton } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { SubItemTitle } from './subitem_title';
 import { isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
 import { usePanel } from './panel';
 
+const getButtonStyles = (
+  euiTheme: EuiThemeComputed<{}>,
+  isActive: boolean,
+  withBadge?: boolean
+) => css`
+  background-color: ${isActive ? transparentize(euiTheme.colors.lightShade, 0.5) : 'transparent'};
+  transform: none !important; /* don't translateY 1px */
+  color: inherit;
+  font-weight: inherit;
+  padding-inline: ${euiTheme.size.s};
+  & > span {
+    justify-content: flex-start;
+    position: relative;
+  }
+  ${!withBadge
+    ? `
+    & .euiIcon {
+      position: absolute;
+      right: 0;
+      top: 0;
+      transform: translateY(50%);
+    }
+  `
+    : `
+    & .euiBetaBadge {
+      margin-left: -${euiTheme.size.m};
+    }
+    `}
+`;
 interface Props {
   item: ChromeProjectNavigationNode;
   navigateToUrl: NavigateToUrlFn;
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props) => {
+export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, activeNodes }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
-  const { title, deepLink } = item;
+  const { title, deepLink, withBadge } = item;
   const { id, path } = item;
+  const href = deepLink?.url ?? item.href;
   const isExpanded = selectedNode?.path === path;
   const isActive = isActiveFromUrl(item.path, activeNodes) || isExpanded;
+
+  const buttonClassNames = classNames(
+    'sideNavItem',
+    getButtonStyles(euiTheme, isActive, withBadge)
+  );
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -48,10 +85,15 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
 
   const onLinkClick = useCallback(
     (e: React.MouseEvent) => {
-      togglePanel(e.target);
-      return;
+      if (!href) {
+        togglePanel(e.target);
+        return;
+      }
+      e.preventDefault();
+      navigateToUrl(href);
+      closePanel();
     },
-    [togglePanel]
+    [closePanel, href, navigateToUrl, togglePanel]
   );
 
   return (
@@ -61,28 +103,10 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       iconType="arrowRight"
       size="s"
       fullWidth
-      css={({ euiTheme }) => css`
-        background-color: ${isActive
-          ? transparentize(euiTheme.colors.lightShade, 0.5)
-          : 'transparent'};
-        transform: none !important; /* don't translateY 1px */
-        color: inherit;
-        font-weight: inherit;
-        padding-inline: ${euiTheme.size.s};
-        & > span {
-          justify-content: flex-start;
-          position: relative;
-        }
-        & .euiIcon {
-          position: absolute;
-          right: 0;
-          top: 0;
-          transform: translateY(50%);
-        }
-      `}
+      className={buttonClassNames}
       data-test-subj={dataTestSubj}
     >
-      {title}
+      {withBadge ? <SubItemTitle item={item} /> : title}
     </EuiButton>
   );
 };
