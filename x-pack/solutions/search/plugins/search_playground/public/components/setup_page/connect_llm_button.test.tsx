@@ -59,8 +59,9 @@ describe('ConnectLLMButton', () => {
       isLoading: false,
       isSuccess: true,
     });
-    const { getByTestId } = render(<ConnectLLMButton />);
+    const { getByTestId, getByText } = render(<ConnectLLMButton />);
     expect(getByTestId('connectLLMButton')).toBeInTheDocument();
+    expect(getByText('Connect to an LLM')).toBeInTheDocument();
   });
 
   it('show the flyout when the button is clicked', async () => {
