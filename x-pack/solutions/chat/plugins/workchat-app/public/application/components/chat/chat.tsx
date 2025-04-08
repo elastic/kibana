@@ -28,7 +28,7 @@ const fullHeightClassName = css`
   height: 100%;
 `;
 
-const panelClassName = css`
+const conversationPanelClass = css`
   min-height: 100%;
 `;
 
@@ -88,7 +88,7 @@ export const Chat: React.FC<ChatProps> = ({
     <>
       <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
         <div ref={scrollContainerRef} className={fullHeightClassName}>
-          <EuiPanel hasBorder={false} hasShadow={false} className={panelClassName}>
+          <EuiPanel hasBorder={false} hasShadow={false} className={conversationPanelClass}>
             <ChatConversation
               conversationEvents={conversationEvents}
               progressionEvents={progressionEvents}
