@@ -15,7 +15,10 @@ export const getKibanaUpgradeStatus = async (deprecationsClient: DeprecationsCli
     (d) => d.deprecationType !== 'api' && d.level === 'critical'
   ).length;
 
+  const apiDeprecations = kibanaDeprecations.filter((d) => d.deprecationType === 'api');
+
   return {
     totalCriticalDeprecations,
+    apiDeprecations,
   };
 };
