@@ -12,9 +12,10 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 const workerThreadsSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
-  minWorkers: schema.number({ min: 1, max: 4, defaultValue: 4 }),
+  minWorkers: schema.number({ min: 0, max: 4, defaultValue: 4 }),
   maxWorkers: schema.number({ min: 1, max: 10, defaultValue: 8 }),
   idleTimeout: schema.number({ min: 0, defaultValue: 2000 }),
+  concurrentTasksPerWorker: schema.number({ min: 1, defaultValue: 1 }),
 });
 
 export type WorkerThreadsConfigType = TypeOf<typeof workerThreadsSchema>;
@@ -29,11 +30,13 @@ export class WorkerThreadsConfig {
   public minWorkers: number;
   public maxWorkers: number;
   public idleTimeout: number;
+  public concurrentTasksPerWorker: number;
 
   constructor(rawConfig: WorkerThreadsConfigType) {
     this.enabled = rawConfig.enabled;
     this.minWorkers = rawConfig.minWorkers;
     this.maxWorkers = rawConfig.maxWorkers;
     this.idleTimeout = rawConfig.idleTimeout;
+    this.concurrentTasksPerWorker = rawConfig.concurrentTasksPerWorker;
   }
 }

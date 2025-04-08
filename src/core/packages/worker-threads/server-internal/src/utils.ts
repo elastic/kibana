@@ -20,14 +20,14 @@ async function recursivelySerialize<T extends Record<string, any>>(obj: T) {
   for (const key of Object.keys(obj)) {
     const val = obj[key];
     if (typeof val === 'object' && val[kSerialize]) {
-      obj[key] = await serialize(val);
+      obj[key as keyof T] = await serialize(val);
     }
   }
   return obj;
 }
 
 // Serialize any transferable instance by calling its kSerialize method.
-export async function serialize<T>(obj: any): Promise<ExtractTransferableState<T>>;
+export async function serialize<T>(obj: T): Promise<ExtractTransferableState<T>>;
 
 export async function serialize(obj: any): Promise<unknown> {
   if (

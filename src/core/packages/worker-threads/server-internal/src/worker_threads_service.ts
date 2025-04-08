@@ -24,6 +24,7 @@ import { Logger } from '@kbn/logging';
 import Path from 'path';
 import Piscina from 'piscina';
 import { firstValueFrom } from 'rxjs';
+import { bytes } from '@kbn/config-schema/src/byte_size_value';
 import { InternalWorkerThreadsClient } from './client';
 import { InternalRouteWorkerData } from './types';
 import { serialize } from './utils';
@@ -92,7 +93,7 @@ export class WorkerThreadsService
     const enabled = config.enabled;
 
     const routeWorkerPool = enabled
-      ? (this.routeWorkerPool = new Piscina({
+      ? new Piscina({
           filename: Path.join(__dirname, './route_worker_entry.js'),
           workerData: {
             services,
@@ -100,18 +101,53 @@ export class WorkerThreadsService
           minThreads: config.minWorkers,
           maxThreads: config.maxWorkers,
           idleTimeout: config.idleTimeout,
-        }))
+          concurrentTasksPerWorker: config.concurrentTasksPerWorker,
+        })
       : undefined;
 
+    this.routeWorkerPool = routeWorkerPool;
+
     setInterval(() => {
-      if (!routeWorkerPool) {
-        return;
-      }
-      const { queueSize, runTime, waitTime, utilization } = routeWorkerPool;
+      const { rss, heapTotal, heapUsed } = process.memoryUsage();
+
       this.log.info(
-        `Worker stats: ${JSON.stringify({ queueSize, runTime, waitTime, utilization })}`
+        `Main thread stats: ${JSON.stringify({
+          rss: bytes(rss).toString(),
+          heapTotal: bytes(heapTotal).toString(),
+          heapUsed: bytes(heapUsed).toString(),
+          workers: routeWorkerPool?.threads.length ?? 0,
+        })}`
       );
-    }, 2500);
+    }, 5000).unref();
+
+    // const tmpDir = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'worker-heapsnapshots'));
+
+    // const log = this.log;
+
+    // setTimeout(function generateSnapshots() {
+    //   Promise.allSettled(
+    //     routeWorkerPool?.threads.map(async (thread) => {
+    //       log.info(`Getting heap snapshot for ${thread.threadId}`);
+    //       const readable = await thread.getHeapSnapshot();
+    //       const fileName = Path.join(tmpDir, `worker-${thread.threadId}.heapsnapshot`);
+    //       const fileStream = createWriteStream(fileName, { encoding: 'utf-8' });
+
+    //       log.info(`Writing heap snapshot to ${fileName}`);
+
+    //       readable.pipe(fileStream);
+    //       await finished(fileStream);
+
+    //       log.info(`Wrote heap snapshot to ${fileName}`);
+    //     }) ?? []
+    //   ).then((results) => {
+    //     results.forEach((result) => {
+    //       if (result.status === 'rejected') {
+    //         log.error(result.reason);
+    //       }
+    //     });
+    //     setTimeout(generateSnapshots, 5000);
+    //   });
+    // }, 5000);
 
     return {
       getClientWithRequest: (request: KibanaRequest) => {

@@ -7,10 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const start = performance.now();
+
 if (process.env.NODE_ENV !== 'production') {
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
   require('../../../../../setup_node_env');
+} else {
+  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
+  require('../../../../../setup_node_env/dist');
 }
-require('@kbn/security-hardening');
 
-module.exports = require('./route_worker');
+const { waitUntilStdoutCompleted } = require('./sync_console');
+
+const afterSetup = performance.now();
+
+const initialize = require('./route_worker').getRouteWorkerHandler();
+const setup = Math.round(performance.now() - afterSetup);
+
+module.exports = initialize.finally(async () => {
+  const total = Math.round(performance.now() - start);
+
+  process.stdout.write(`Worker initialized in ${total}ms, setup time was ${setup}ms\n`);
+
+  await waitUntilStdoutCompleted();
+});

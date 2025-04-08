@@ -8,8 +8,8 @@
  */
 import { ConfigService } from '@kbn/config/src/config_service';
 import { Env } from '@kbn/config/src/env';
-import { TransferableConstructor, kDeserialize } from '@kbn/core-base-common/src/transferable';
-import { CoreContext } from '@kbn/core-base-server-internal/src/core_context';
+import { type TransferableConstructor, kDeserialize } from '@kbn/core-base-common/src/transferable';
+import type { CoreContext } from '@kbn/core-base-server-internal/src/core_context';
 import type { LoggingConfigType } from '@kbn/core-logging-server-internal/src/logging_config';
 import { LoggingSystem } from '@kbn/core-logging-server-internal/src/logging_system';
 import { registerServiceConfig } from '@kbn/core-root-server-internal/src/register_service_config';
@@ -26,10 +26,20 @@ import {
   switchMap,
 } from 'rxjs';
 import { isPrimitive } from 'utility-types';
-import { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import type { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
+import { threadId } from 'worker_threads';
+import type { BaseWorkerParams, Worker } from '@kbn/core-worker-threads-server/src/types';
+import { bytes } from '@kbn/config-schema/src/byte_size_value';
 import { TRANSFERABLE_OBJECT_KEY } from './constants';
-import type { InternalWorkerData, TransferableWorkerService, WorkerService } from './types';
+import type {
+  InternalWorkerData,
+  InternalWorkerParams,
+  InternalWorkerRunContext,
+  TransferableWorkerService,
+  WorkerService,
+} from './types';
 import { isPlainObject, isTransferableState } from './utils';
+import { waitUntilStdoutCompleted } from './sync_console';
 
 function getDeserializer(ctorMap: Record<TransferableWorkerService, TransferableConstructor<any>>) {
   return function deserialize(obj: unknown): unknown {
@@ -60,11 +70,11 @@ function getDeserializer(ctorMap: Record<TransferableWorkerService, Transferable
 
 export async function initialize({ services }: InternalWorkerData) {
   const loggingSystem = new LoggingSystem();
-  const loggerFactory = loggingSystem.get('worker');
+  const rootLogger = loggingSystem.get('worker');
 
   class Logger {
     static [kDeserialize]({ context }: { context: string }) {
-      return loggerFactory.get(context);
+      return rootLogger.get(context);
     }
   }
 
@@ -78,19 +88,25 @@ export async function initialize({ services }: InternalWorkerData) {
 
   const deserializedServices = deserialize(services) as Record<WorkerService, any>;
 
-  const workerCoreId = Symbol('core');
-
   const configService: ConfigService = deserializedServices.ConfigService;
+
+  const workerCoreId = Symbol('core');
 
   configService.setGlobalStripUnknownKeys(true);
 
   registerServiceConfig(configService);
 
+  rootLogger.info('Worker started');
+
+  const config = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
+
+  await loggingSystem.upgrade(config);
+
   const coreContext: CoreContext = {
     configService,
     env: deserializedServices.Env,
     coreId: workerCoreId,
-    logger: loggerFactory,
+    logger: rootLogger,
   };
 
   const analytics$ = defer(() => {
@@ -378,27 +394,58 @@ export async function initialize({ services }: InternalWorkerData) {
     )
     .pipe(shareReplay(1));
 
-  const config = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
+  setInterval(() => {
+    const memUsage = process.memoryUsage();
+    rootLogger.info(
+      `Worker ${threadId} stats: ${JSON.stringify({
+        heapUsed: bytes(memUsage.heapUsed).toString(),
+        heapTotal: bytes(memUsage.heapTotal).toString(),
+      })}`
+    );
+  }, 5000).unref();
 
-  await loggingSystem.upgrade(config);
+  const context: InternalWorkerRunContext = {
+    core: {
+      elasticsearch: {
+        start$: elasticsearchStart$,
+        setup$: elasticsearchSetup$,
+      },
+      uiSettings: {
+        start$: uiSettingsStart$,
+        setup$: uiSettingsSetup$,
+      },
+    },
+    logger: rootLogger,
+  };
 
-  const logger = loggerFactory.get('worker-root');
+  rootLogger.info(`Initialized worker`);
 
-  logger.info(`Worker started`);
+  await waitUntilStdoutCompleted();
 
   return {
-    elasticsearch: {
-      start$: elasticsearchStart$,
-      setup$: elasticsearchSetup$,
+    context,
+    run: async <T extends Record<string, any>>({
+      filename,
+      input,
+      signal,
+      ...workerContext
+    }: Omit<InternalWorkerParams & T, keyof BaseWorkerParams>) => {
+      const worker = (await import(filename)) as Worker<any, any>;
+      const [result] = await Promise.allSettled([
+        worker.run({
+          ...workerContext,
+          input,
+          signal,
+          logger: rootLogger.get('runner'),
+        }),
+      ]);
+
+      await waitUntilStdoutCompleted();
+
+      if (result.status === 'fulfilled') {
+        return result.value;
+      }
+      throw result.reason;
     },
-    savedObjects: {
-      start$: savedObjectsStart$,
-      setup$: savedObjectsSetup$,
-    },
-    uiSettings: {
-      start$: uiSettingsStart$,
-      setup$: savedObjectsSetup$,
-    },
-    logger: loggerFactory,
   };
 }

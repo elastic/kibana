@@ -13,6 +13,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { StreamsPluginStartDependencies } from '../../../types';
 import { AssetClient, StoredAssetLink } from './asset_client';
 import { AssetStorageSettings, assetStorageSettings } from './storage_settings';
@@ -20,13 +21,13 @@ import { AssetStorageSettings, assetStorageSettings } from './storage_settings';
 export function getAssetClientWithRequest({
   scopedClusterClient,
   savedObjectsClient,
-  request,
   logger,
+  rulesClient,
 }: {
   scopedClusterClient: IScopedClusterClient;
   savedObjectsClient: SavedObjectsClientContract;
-  request: KibanaRequest;
   logger: Logger;
+  rulesClient: RulesClient | null;
 }) {
   const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
     scopedClusterClient.asInternalUser,
@@ -37,7 +38,7 @@ export function getAssetClientWithRequest({
   return new AssetClient({
     storageClient: adapter.getClient(),
     soClient: savedObjectsClient,
-    rulesClient: null,
+    rulesClient,
   });
 }
 
@@ -50,15 +51,10 @@ export class AssetService {
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AssetClient> {
     const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
 
-    const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
-      coreStart.elasticsearch.client.asInternalUser,
-      this.logger.get('assets'),
-      assetStorageSettings
-    );
-
-    return new AssetClient({
-      storageClient: adapter.getClient(),
-      soClient: coreStart.savedObjects.getScopedClient(request),
+    return getAssetClientWithRequest({
+      logger: this.logger,
+      savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
+      scopedClusterClient: coreStart.elasticsearch.client.asScoped(request),
       rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
     });
   }

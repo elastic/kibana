@@ -60,7 +60,9 @@ export interface CoreRequestHandlerContext {
    * {@link UserProfileRequestHandlerContext}
    */
   userProfile: UserProfileRequestHandlerContext;
-
+  /**
+   * {@link WorkerThreadsRequestHandlerContext}
+   */
   workerThreads: WorkerThreadsRequestHandlerContext;
 }
 

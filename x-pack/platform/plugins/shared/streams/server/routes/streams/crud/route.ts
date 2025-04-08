@@ -83,11 +83,13 @@ export const listStreamsRoute = createServerRoute({
   }): Promise<{ streams: StreamDefinition[] }> => {
     const { streamsClient } = await getScopedClients({ request });
 
-    const stuffFromAWorker = await (
+    await (
       await context.core
-    ).workerThreads.client.run(import('./read_stream.worker'), { input: {} });
-
-    logger.info(JSON.stringify(stuffFromAWorker));
+    ).workerThreads.client.run(import('./read_stream.worker'), {
+      input: {
+        name: 'logs.child',
+      },
+    });
 
     return {
       streams: await streamsClient.listStreams(),

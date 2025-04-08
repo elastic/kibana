@@ -7,21 +7,38 @@
 
 import { RouteWorker } from '@kbn/core-worker-threads-server';
 import { isWorkerThread } from 'piscina';
+import { getAssetClientWithRequest } from '../../../lib/streams/assets/asset_service';
 
 const worker: RouteWorker<
-  {},
+  {
+    name: string;
+  },
   {
     isWorkerThread: boolean;
   }
 > = {
-  run: async ({ input, core, signal, logger }) => {
-    logger.warn('Hi from a worker thread!');
-
-    await new Promise<void>((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 5000);
+  run: async ({ input, core: { elasticsearch, savedObjects, uiSettings }, signal, logger }) => {
+    const assetClient = getAssetClientWithRequest({
+      logger,
+      scopedClusterClient: (await elasticsearch).client,
+      savedObjectsClient: (await savedObjects).client,
+      rulesClient: null,
     });
+
+    const assets = await Promise.race([
+      assetClient.getAssets({
+        entityId: input.name,
+        entityType: 'stream',
+      }),
+      new Promise<void>((resolve) => {
+        setTimeout(() => {
+          resolve();
+        }, 1000);
+      }),
+    ]);
+
+    logger.info(JSON.stringify(assets));
+
     return {
       isWorkerThread,
     };

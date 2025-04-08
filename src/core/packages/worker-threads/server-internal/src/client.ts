@@ -17,12 +17,14 @@ import Piscina from 'piscina';
 import { fromEvent, merge, of } from 'rxjs';
 import { isPromise } from 'util/types';
 
-import { Logger } from '@kbn/logging';
-import { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
 import { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
+import { InternalSavedObjectsServiceStart } from '@kbn/core-saved-objects-server-internal';
 import { InternalUiSettingsServiceStart } from '@kbn/core-ui-settings-server-internal';
+import { Logger } from '@kbn/logging';
+import { MessageChannel } from 'worker_threads';
+import { createMainThreadRequestContext } from './create_worker_threads_request_context';
+import { createSavedObjectsRpcServer } from './rpc/saved_objects/server';
 import { InternalRouteWorkerParams } from './types';
-import { createLazyRouteContext } from './create_lazy_route_context';
 
 export interface InternalWorkerThreadsClientConfig {
   request: KibanaRequest;
@@ -62,7 +64,7 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
       return worker.run({
         input,
         signal,
-        core: createLazyRouteContext({
+        core: createMainThreadRequestContext({
           request,
           elasticsearchStart$: of(elasticsearch),
           savedObjectsStart$: of(savedObjects),
@@ -73,19 +75,36 @@ export class InternalWorkerThreadsClient implements WorkerThreadsRequestClient {
       });
     }
 
-    return pool.run(
-      {
-        filename: filenameOrImport,
-        input,
-        request: {
-          headers: request.headers,
-          path: request.url.pathname,
-        },
-      } satisfies Omit<InternalRouteWorkerParams, 'signal'>,
-      {
-        signal: controller.signal,
-      }
-    );
+    const soChannel = new MessageChannel();
+
+    const soClient = await savedObjects.getScopedClient(request);
+
+    const savedObjectsServer = createSavedObjectsRpcServer(soClient)(soChannel.port1);
+
+    return pool
+      .run(
+        {
+          filename: filenameOrImport,
+          input,
+          request: {
+            headers: request.headers,
+            path: request.url.pathname,
+          },
+          rpc: {
+            savedObjects: {
+              namespace: await soClient.getCurrentNamespace(),
+              port: soChannel.port2,
+            },
+          },
+        } satisfies Omit<InternalRouteWorkerParams, 'signal'>,
+        {
+          signal: controller.signal,
+          transferList: [soChannel.port2],
+        }
+      )
+      .finally(() => {
+        savedObjectsServer.destroy();
+      });
   }
   async destroy() {
     this.abortController.abort();

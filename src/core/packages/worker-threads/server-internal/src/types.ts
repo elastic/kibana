@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import {
+  InternalElasticsearchServiceSetup,
+  InternalElasticsearchServiceStart,
+} from '@kbn/core-elasticsearch-server-internal';
 import { FakeRawRequest } from '@kbn/core-http-server';
 import { Worker, WorkerParams } from '@kbn/core-worker-threads-server/src/types';
+import { Logger } from '@kbn/logging';
+import { Observable } from 'rxjs';
+import {
+  InternalUiSettingsServiceSetup,
+  InternalUiSettingsServiceStart,
+} from '@kbn/core-ui-settings-server-internal';
+import { MessagePort } from 'worker_threads';
 
 export type TransferableWorkerService = 'ConfigService' | 'Env' | 'Logger';
 export type WorkerService = 'ConfigService' | 'Env';
@@ -27,6 +38,12 @@ export interface InternalWorkerParams {
 
 export interface InternalRouteWorkerParams extends InternalWorkerParams {
   request: FakeRawRequest;
+  rpc: {
+    savedObjects: {
+      port: MessagePort;
+      namespace: string | undefined;
+    };
+  };
 }
 
 export type InternalRunInWorker<TContext extends Record<string, any> = {}> = (
@@ -40,3 +57,17 @@ export type RunInWorker = <TInput extends WorkerParams, TOutput extends WorkerPa
   workerPromise: Promise<Worker<TInput, TOutput>>,
   input: TInput
 ) => Promise<TOutput>;
+
+export interface InternalWorkerRunContext {
+  core: {
+    elasticsearch: {
+      setup$: Observable<InternalElasticsearchServiceSetup>;
+      start$: Observable<InternalElasticsearchServiceStart>;
+    };
+    uiSettings: {
+      setup$: Observable<InternalUiSettingsServiceSetup>;
+      start$: Observable<InternalUiSettingsServiceStart>;
+    };
+  };
+  logger: Logger;
+}

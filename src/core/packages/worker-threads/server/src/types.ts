@@ -6,14 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ElasticsearchRequestHandlerContext } from '@kbn/core-elasticsearch-server';
+import {
+  ElasticsearchRequestHandlerContext,
+  ElasticsearchServiceSetup,
+  ElasticsearchServiceStart,
+} from '@kbn/core-elasticsearch-server';
+import { KibanaRequest } from '@kbn/core-http-server';
 import { SavedObjectsRequestHandlerContext } from '@kbn/core-saved-objects-server';
 import { UiSettingsRequestHandlerContext } from '@kbn/core-ui-settings-server';
 import { Logger } from '@kbn/logging';
-import { CoreElasticsearchRouteHandlerContext } from '@kbn/core-elasticsearch-server-internal';
-import { CoreSavedObjectsRouteHandlerContext } from '@kbn/core-saved-objects-server-internal';
-import { CoreUiSettingsRouteHandlerContext } from '@kbn/core-ui-settings-server-internal';
-import { KibanaRequest } from '@kbn/core-http-server';
+import { Observable } from 'rxjs';
 
 type Primitive = string | number | boolean | null | undefined;
 
@@ -32,22 +34,19 @@ export interface Worker<
   run: (options: { input: TInput; signal?: AbortSignal } & TContext) => Promise<TOutput>;
 }
 
+export interface BaseWorkerParams {
+  logger: Logger;
+}
+
+export interface RouteWorkerParams extends BaseWorkerParams {
+  core: RouteWorkerCoreRequestContext;
+  request: KibanaRequest;
+}
+
 export type RouteWorker<
   TInput extends WorkerParams = WorkerParams,
   TOutput extends WorkerParams = WorkerParams
-> = Worker<
-  TInput,
-  TOutput,
-  {
-    logger: Logger;
-    core: {
-      elasticsearch: Promise<ElasticsearchRequestHandlerContext>;
-      savedObjects: Promise<SavedObjectsRequestHandlerContext>;
-      uiSettings: Promise<UiSettingsRequestHandlerContext>;
-    };
-    request: KibanaRequest;
-  }
->;
+> = Worker<TInput, TOutput, RouteWorkerParams>;
 
 export interface WorkerThreadsRequestClient {
   run<TInput extends WorkerParams, TOutput extends WorkerParams>(
@@ -61,7 +60,17 @@ export interface WorkerParams {
 }
 
 export interface RouteWorkerCoreRequestContext {
-  elasticsearch: Promise<CoreElasticsearchRouteHandlerContext>;
-  savedObjects: Promise<CoreSavedObjectsRouteHandlerContext>;
-  uiSettings: Promise<CoreUiSettingsRouteHandlerContext>;
+  elasticsearch: Promise<ElasticsearchRequestHandlerContext>;
+  savedObjects: Promise<Pick<SavedObjectsRequestHandlerContext, 'client'>>;
+  uiSettings: Promise<Pick<UiSettingsRequestHandlerContext, 'client'>>;
+}
+
+export interface WorkerRunContext {
+  core: {
+    elasticsearch: {
+      setup$: Observable<ElasticsearchServiceSetup>;
+      start$: Observable<ElasticsearchServiceStart>;
+    };
+  };
+  logger: Logger;
 }
