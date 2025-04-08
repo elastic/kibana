@@ -6,10 +6,10 @@
  */
 
 import React, { lazy } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
-import { LOADING_SKELETON_TEXT_LINES } from './constants';
+import { FACETS_MAX_WIDTH_PX, INTEGRATIONS_GRID_MAX_WIDTH_PX } from './constants';
 import { IntegrationViewFacets } from './view_facets';
 import { IntegrationsFacets } from '../../../constants';
 
@@ -19,8 +19,7 @@ export const PackageListGrid = lazy(async () => ({
     .then((pkg) => pkg.PackageListGrid),
 }));
 
-export interface IntegrationsPageProps {
-  isLoading: boolean;
+export interface IntegrationsGridProps {
   view: IntegrationsFacets;
   availableIntegrations: IntegrationCardItem[];
   installedIntegrations: IntegrationCardItem[];
@@ -28,39 +27,26 @@ export interface IntegrationsPageProps {
   setSearchTerm: (searchTerm: string) => void;
 }
 
-export const IntegrationsPage = React.memo<IntegrationsPageProps>(
-  ({
-    isLoading,
-    view,
-    availableIntegrations,
-    installedIntegrations,
-    searchTerm,
-    setSearchTerm,
-  }) => {
-    if (isLoading) {
-      return (
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiSpacer size="l" />
-          <EuiSkeletonText
-            data-test-subj="loadingIntegrations"
-            isLoading={true}
-            lines={LOADING_SKELETON_TEXT_LINES}
-          />
-        </EuiFlexGroup>
-      );
-    }
+export const IntegrationsGrid = React.memo<IntegrationsGridProps>(
+  ({ view, availableIntegrations, installedIntegrations, searchTerm, setSearchTerm }) => {
     return (
       <EuiFlexGroup direction="column" gutterSize="none">
         <EuiSpacer size="l" />
         <EuiFlexGroup>
-          <IntegrationViewFacets
-            allCount={availableIntegrations.length}
-            installedCount={installedIntegrations.length}
-            selectedFacet={view}
-          />
           <EuiFlexItem
             css={css`
-              max-width: 1200px;
+              max-width: ${FACETS_MAX_WIDTH_PX}px;
+            `}
+          >
+            <IntegrationViewFacets
+              allCount={availableIntegrations.length}
+              installedCount={installedIntegrations.length}
+              selectedFacet={view}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              max-width: ${INTEGRATIONS_GRID_MAX_WIDTH_PX}px;
             `}
           >
             <PackageListGrid
@@ -94,4 +80,4 @@ export const IntegrationsPage = React.memo<IntegrationsPageProps>(
     );
   }
 );
-IntegrationsPage.displayName = 'IntegrationsPage';
+IntegrationsGrid.displayName = 'IntegrationsGrid';

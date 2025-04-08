@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexItem, EuiFacetGroup, EuiFacetButton } from '@elastic/eui';
+import { EuiFacetGroup, EuiFacetButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
@@ -35,47 +35,41 @@ export function IntegrationViewFacets({ allCount, installedCount, selectedFacet 
   const { navigateTo } = useNavigation();
 
   return (
-    <EuiFlexItem
-      css={css`
-        max-width: 216px;
-      `}
-    >
-      <EuiFacetGroup>
-        <EuiFacetButton
-          css={css`
-            padding-inline: 0px;
-          `}
-          id="integrationsAll"
-          quantity={allCount}
-          isSelected={selectedFacet === IntegrationsFacets.available}
-          data-test-subj={'configurations.integrationsAll'}
-          onClick={() =>
-            navigateTo({
-              deepLinkId: SecurityPageName.configurationsIntegrations,
-              path: 'browse',
-            })
-          }
-        >
-          {ALL}
-        </EuiFacetButton>
-        <EuiFacetButton
-          css={css`
-            padding-inline: 0px;
-          `}
-          id="integrationsInstalled"
-          quantity={installedCount}
-          isSelected={selectedFacet === IntegrationsFacets.installed}
-          data-test-subj={'configurations.integrationsInstalled'}
-          onClick={() =>
-            navigateTo({
-              deepLinkId: SecurityPageName.configurationsIntegrations,
-              path: 'installed',
-            })
-          }
-        >
-          {INSTALLED}
-        </EuiFacetButton>
-      </EuiFacetGroup>
-    </EuiFlexItem>
+    <EuiFacetGroup>
+      <EuiFacetButton
+        css={css`
+          padding-inline: 0px;
+        `}
+        id="integrationsAll"
+        quantity={allCount}
+        isSelected={selectedFacet === IntegrationsFacets.available}
+        data-test-subj={'configurations.integrationsAll'}
+        onClick={() =>
+          navigateTo({
+            deepLinkId: SecurityPageName.configurationsIntegrations,
+            path: 'browse',
+          })
+        }
+      >
+        {ALL}
+      </EuiFacetButton>
+      <EuiFacetButton
+        css={css`
+          padding-inline: 0px;
+        `}
+        id="integrationsInstalled"
+        quantity={installedCount}
+        isSelected={selectedFacet === IntegrationsFacets.installed}
+        data-test-subj={'configurations.integrationsInstalled'}
+        onClick={() =>
+          navigateTo({
+            deepLinkId: SecurityPageName.configurationsIntegrations,
+            path: 'installed',
+          })
+        }
+      >
+        {INSTALLED}
+      </EuiFacetButton>
+    </EuiFacetGroup>
   );
 }

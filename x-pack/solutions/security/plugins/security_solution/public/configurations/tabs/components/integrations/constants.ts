@@ -16,4 +16,5 @@ export const AVAILABLE_INTEGRATIONS = [
 export const RETURN_APP_ID = 'returnAppId';
 export const RETURN_PATH = 'returnPath';
 
-export const LOADING_SKELETON_TEXT_LINES = 10; // 10 lines of text
+export const FACETS_MAX_WIDTH_PX = 216;
+export const INTEGRATIONS_GRID_MAX_WIDTH_PX = 1200;

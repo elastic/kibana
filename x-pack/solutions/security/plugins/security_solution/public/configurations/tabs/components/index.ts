@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IntegrationsPage } from './integrations';
+export { IntegrationsPage, IntegrationsSkeleton } from './integrations';
