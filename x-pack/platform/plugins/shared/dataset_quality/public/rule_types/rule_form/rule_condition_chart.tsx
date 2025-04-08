@@ -10,6 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import React from 'react';
+import rison from '@kbn/rison';
 import { PreviewChartResponse } from '../../../common/api_types';
 import { useKibanaContextForPlugin } from '../../utils';
 import { ChartPreview } from './chart_preview';
@@ -60,7 +61,7 @@ export function RuleConditionChart({
             start: timeRange?.from,
             end: timeRange?.to,
             interval: interval || `${timeSize}${timeUnit}`,
-            groupBy: ['_index'],
+            groupBy: rison.encodeArray(Array.isArray(groupBy) ? groupBy : [groupBy]),
           },
         }
       );

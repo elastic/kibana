@@ -9,13 +9,14 @@ import * as t from 'io-ts';
 import { PreviewChartResponse } from '../../../common/api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getChartPreview } from '../../rule_types/get_chart_preview';
+import { groupByRt } from '../../types/default_api_types';
 
 const degradedDocsChartPreviewRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/rule_types/degraded_docs/chart_preview',
   params: t.type({
     query: t.type({
       index: t.string,
-      groupBy: t.string,
+      groupBy: groupByRt,
       start: t.string,
       end: t.string,
       interval: t.string,
@@ -40,7 +41,6 @@ const degradedDocsChartPreviewRoute = createDatasetQualityServerRoute({
     const degradedDocsChartPreview = await getChartPreview({
       esClient,
       ...params.query,
-      groupBy: [params.query.groupBy],
     });
 
     return { ...degradedDocsChartPreview };

@@ -5,12 +5,9 @@
  * 2.0.
  */
 import { IScopedClusterClient } from '@kbn/core/server';
-import { MappingRuntimeField, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  DATASET_QUALITY_RULE_RUNTIME_FIELD_MAPPING,
-  DATASET_QUALITY_RULE_RUNTIME_FIELD_NAME,
-} from '../../common/constants';
+import { extractIndexNameFromBackingIndex } from '../../common/utils';
 
 // TODO: Check this limit
 const DEFAULT_GROUPS = 1000;
@@ -53,7 +50,7 @@ export async function fetchEsQuery({
   const aggs = {
     ...(groupBy.length > 0
       ? {
-          series: {
+          dataStreams: {
             ...(groupBy.length === 1
               ? {
                   terms: {
@@ -87,10 +84,6 @@ export async function fetchEsQuery({
         ...(must ? { must } : {}),
       },
     },
-    runtime_mappings: {
-      [DATASET_QUALITY_RULE_RUNTIME_FIELD_NAME]:
-        DATASET_QUALITY_RULE_RUNTIME_FIELD_MAPPING as MappingRuntimeField,
-    },
     aggs,
   });
 
@@ -98,27 +91,30 @@ export async function fetchEsQuery({
     (esResult.aggregations?.dataStreams?.buckets as estypes.AggregationsStringTermsBucketKeys[]) ||
     [];
 
-  return (
-    dataStreamBuckets.map((bucket) => {
-      // TODO: rework this, when its not multi_terms
-      const groupByFields =
-        groupBy.length === 1
-          ? { [groupBy[0]]: [bucket.key] }
-          : bucket.key.reduce(
-              (obj: Record<string, string>, bucketKey: string, bucketIndex: number) => ({
-                ...obj,
-                [groupBy[bucketIndex]]: bucketKey,
-              }),
-              {}
-            );
-
-      const bucketKey = Array.isArray(bucket.key) ? bucket.key : [bucket.key];
-
+  // Group values by dataStream name instead of backing index name
+  const groupedDataStreams = dataStreamBuckets.reduce(
+    (acc: Record<string, { bucketKey: string[]; docCount: number }>, bucket) => {
+      const dataStream = Array.isArray(bucket.key)
+        ? extractIndexNameFromBackingIndex(bucket.key[0]) // We will keep _index as our first groupBy element by default
+        : extractIndexNameFromBackingIndex(bucket.key);
+      const key = Array.isArray(bucket.key) ? [dataStream, ...bucket.key.slice(1)] : [dataStream];
       return {
-        docCount: bucket.doc_count,
-        groupByFields,
-        bucketKey,
+        ...acc,
+        [`${dataStream},${bucket.key.slice(1).join(',')}`]: {
+          bucketKey: key,
+          docCount: (acc[dataStream]?.docCount ?? 0) + bucket.doc_count,
+        },
       };
-    }) ?? []
+    },
+    {} as Record<string, { bucketKey: string[]; docCount: number }>
   );
+
+  return Object.keys(groupedDataStreams).reduce((obj, bucket) => {
+    obj[groupedDataStreams[bucket].bucketKey.join(',')] = {
+      docCount: groupedDataStreams[bucket].docCount,
+      bucketKey: groupedDataStreams[bucket].bucketKey,
+    };
+
+    return obj;
+  }, {} as Record<string, { bucketKey: string[]; docCount: number }>);
 }

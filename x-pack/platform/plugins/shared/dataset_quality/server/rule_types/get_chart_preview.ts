@@ -18,6 +18,7 @@ interface DataStreamTotals {
 }
 
 const NUM_SERIES = 5;
+const DEFAULT_GROUPS = 1000;
 
 export const getFilteredBarSeries = (barSeries: PreviewChartResponse['series']) => {
   const sortedSeries = barSeries.sort((a, b) => {
@@ -28,8 +29,6 @@ export const getFilteredBarSeries = (barSeries: PreviewChartResponse['series']) 
 
   return sortedSeries.slice(0, NUM_SERIES);
 };
-
-const DEFAULT_GROUPS = 1000;
 
 export async function getChartPreview({
   esClient,
@@ -126,9 +125,12 @@ export async function getChartPreview({
     []) as estypes.AggregationsStringTermsBucket[];
 
   const seriesDataMap: Record<string, DataStreamTotals[]> = seriesBuckets.reduce((acc, bucket) => {
-    const bucketKey = Array.isArray(bucket.key)
-      ? bucket.key.join('_')
+    const dataStream = Array.isArray(bucket.key)
+      ? extractIndexNameFromBackingIndex(bucket.key[0]) // We will keep _index as our first groupBy element by default
       : extractIndexNameFromBackingIndex(bucket.key);
+    const bucketKey = Array.isArray(bucket.key)
+      ? [dataStream, ...bucket.key.slice(1)]
+      : [dataStream];
     bucket.timeseries.buckets.forEach(
       (timeseriesBucket: {
         key: number;

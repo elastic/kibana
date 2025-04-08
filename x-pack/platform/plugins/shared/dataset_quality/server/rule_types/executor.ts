@@ -17,7 +17,6 @@ import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
 import { THRESHOLD_MET_GROUP } from '../../common/alerting/constants';
 import { _IGNORED } from '../../common/es_fields';
 import { generateContext } from './context';
-import { fetchEsQuery } from './fetch_es_query';
 import {
   ALERT_EVALUATION_CONDITIONS,
   ALERT_TITLE,
@@ -29,6 +28,7 @@ import {
   type DatasetQualityRuleTypeState,
   type TimeUnitChar,
 } from './types';
+import { getDocsStats } from './get_docs_stats';
 
 export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
   const sForPlural = time !== 0 && time > 1 ? 's' : '';
@@ -84,38 +84,15 @@ export const getRuleExecutor = () =>
       const { dateStart, dateEnd } = getTimeRange(`${params.timeSize}${params.timeUnit}`);
       const index = params.name;
 
-      // Total docs in dataStream
-      const dataStreamTotalDocsResults = (
-        await fetchEsQuery({
-          index,
-          dateStart,
-          groupBy: params.groupBy ?? [],
-          services: {
-            scopedClusterClient,
-          },
-        })
-      ).reduce((obj, bucket) => {
-        obj[bucket.bucketKey] = bucket.docCount;
-        return obj;
-      }, {} as Record<string, number>);
-
-      // docs in dataStream with ignored field
-      const datasetQualityIndicatorResults = (
-        await fetchEsQuery({
-          index,
-          dateStart,
-          groupBy: params.groupBy ?? [],
-          query: {
-            must: { exists: { field: _IGNORED } },
-          },
-          services: {
-            scopedClusterClient,
-          },
-        })
-      ).map((bucket) => ({
-        ...bucket,
-        percentage: (bucket.docCount / dataStreamTotalDocsResults[bucket.bucketKey] ?? 0) * 100,
-      }));
+      const datasetQualityDegradedResults = await getDocsStats({
+        index,
+        dateStart,
+        groupBy: params.groupBy ?? [],
+        query: {
+          must: { exists: { field: _IGNORED } },
+        },
+        scopedClusterClient,
+      });
 
       const unmetGroupValues: Record<string, string> = {};
       const compareFn = ComparatorFns.get(params.comparator as Comparator);
@@ -131,8 +108,9 @@ export const getRuleExecutor = () =>
       }
 
       let generatedAlerts = 0;
-      for (const groupResult of datasetQualityIndicatorResults) {
-        const { bucketKey, percentage, groupByFields } = groupResult;
+      for (const groupResult of datasetQualityDegradedResults) {
+        const { bucketKey, percentage } = groupResult;
+        const groupByFields = params.groupBy ?? [];
         const alertId = bucketKey.join('_');
         const met = compareFn(percentage, params.threshold);
 
