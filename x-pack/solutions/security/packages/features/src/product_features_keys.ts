@@ -115,10 +115,6 @@ export enum ProductFeatureAssistantKey {
    * Enables Elastic AI Assistant
    */
   assistant = 'assistant',
-  /**
-   * Indicates product_line: 'ai_soc', product_tier: 'search_ai_lake'
-   */
-  configurations = 'configurations',
 }
 
 export enum ProductFeatureAttackDiscoveryKey {
