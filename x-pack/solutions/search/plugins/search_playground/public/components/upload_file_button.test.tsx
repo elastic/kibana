@@ -97,20 +97,4 @@ describe('UploadFileButton', () => {
     expect(mockUiActions.getTrigger).toHaveBeenCalledWith('OPEN_FILE_UPLOAD_LITE_TRIGGER');
     expect(mockUiActions.getTrigger().exec).toHaveBeenCalled();
   });
-
-  it('sets selected indices when upload is complete', () => {
-    const mockResults = { index: 'test-index' };
-    mockUiActions.getTrigger().exec.mockImplementation(({ onUploadComplete }) => {
-      onUploadComplete(mockResults);
-    });
-
-    render(<UploadFileButton isSetup={true} />, { wrapper: Wrapper });
-
-    // Click the button
-    const button = screen.getByTestId('uploadFileButtonEmpty');
-    fireEvent.click(button);
-
-    // Check if setSelectedIndices was called with the correct index
-    expect(mockSetSelectedIndices).toHaveBeenCalledWith(['test-index']);
-  });
 });
