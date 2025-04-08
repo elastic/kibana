@@ -132,8 +132,8 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
                         return (double) intersection.size() / union.size();
                       }
                       Set tagsQuery = new HashSet(params.tags);
-                      Set tagsDoc = new HashSet(doc.containsKey('tags.keyword') ? doc['tags.keyword'].values : []);
-                      return jaccardSimilarity(tagsQuery, tagsDoc);
+                      Set tagsDoc = new HashSet(doc.containsKey("kibana.alert.rule.tags") && !doc.get("kibana.alert.rule.tags").empty ? doc.get("kibana.alert.rule.tags") : []);
+                      return 1.0 + jaccardSimilarity(tagsQuery, tagsDoc);
                     `),
                     params: {
                       tags,
@@ -166,7 +166,7 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
                         }
                       }
 
-                      return jaccardSimilarity(instanceIdQuery, instanceIdDoc);
+                      return 1.0 + jaccardSimilarity(instanceIdQuery, instanceIdDoc);
                     `),
                     params: {
                       instanceId,
@@ -176,6 +176,7 @@ export function useBuildRelatedAlertsQuery({ alert }: Props): QueryDslQueryConta
                 weight: 5,
               },
             ],
+            score_mode: 'multiply',
             boost_mode: 'sum',
           },
         },
