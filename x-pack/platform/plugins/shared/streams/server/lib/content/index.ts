@@ -15,6 +15,7 @@ import {
 import AdmZip from 'adm-zip';
 import path from 'path';
 import { Readable } from 'stream';
+import { pick } from 'lodash';
 
 export async function parseArchive(archive: Readable): Promise<ContentPack> {
   const zip: AdmZip = await new Promise((resolve, reject) => {
@@ -70,7 +71,10 @@ export async function generateArchive(manifest: ContentPackManifest, objects: Co
     }
   });
 
-  zip.addFile(path.join(rootDir, 'manifest.yml'), Buffer.from(YAML.stringify(manifest)));
+  zip.addFile(
+    path.join(rootDir, 'manifest.yml'),
+    Buffer.from(YAML.stringify(pick(manifest, ['name', 'description', 'version'])))
+  );
 
   return zip.toBufferPromise();
 }
