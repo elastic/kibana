@@ -21,7 +21,6 @@ import type { DiscoverStateContainer } from '../../application/main/state_manage
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
   onUpdateESQLQuery?: DiscoverStateContainer['actions']['updateESQLQuery'];
-  setDocViewerAccordionState: (param: Record<string, boolean>) => void;
 }
 
 /**
@@ -32,7 +31,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
   onUpdateESQLQuery,
   query,
   rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
-  setDocViewerAccordionState,
   ...props
 }) => {
   const { dataView, setExpandedDoc } = props;
@@ -50,7 +48,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
       query,
       updateESQLQuery: onUpdateESQLQuery,
       setExpandedDoc,
-      setDocViewerAccordionState,
     });
   }, [
     customRowAdditionalLeadingControls,
@@ -59,7 +56,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = ({
     onUpdateESQLQuery,
     query,
     setExpandedDoc,
-    setDocViewerAccordionState,
   ]);
 
   const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');

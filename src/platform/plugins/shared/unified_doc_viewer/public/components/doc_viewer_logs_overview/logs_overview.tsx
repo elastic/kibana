@@ -23,7 +23,7 @@ import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_sectio
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
-  docViewerAccordionState?: Record<string, boolean>;
+  docViewerAccordionState?: Record<'stacktrace' | 'quality_issues' | undefined, boolean>;
   renderStreamsField?: (deps: StreamsFeatureRenderDeps) => JSX.Element;
 };
 
@@ -44,6 +44,7 @@ export function LogsOverview({
   const stacktraceFields = getStacktraceFields(hit as LogDocument);
   const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
   const isStacktraceSectionExpanded = docViewerAccordionState?.stacktrace ?? false;
+  const isQualityIssuesSectionExpanded = docViewerAccordionState?.quality_issues ?? false;
 
   return (
     <FieldActionsProvider
@@ -60,7 +61,7 @@ export function LogsOverview({
         doc={hit}
         renderStreamsField={renderStreamsField}
       />
-      <LogsOverviewDegradedFields rawDoc={hit.raw} />
+      <LogsOverviewDegradedFields rawDoc={hit.raw} isExpanded={isQualityIssuesSectionExpanded} />
       {isStacktraceAvailable && (
         <LogsOverviewStacktraceSection
           hit={hit}

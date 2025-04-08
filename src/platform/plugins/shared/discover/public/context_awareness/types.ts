@@ -84,11 +84,6 @@ export interface DocViewerExtensionParams {
    * The record being displayed in the doc viewer
    */
   record: DataTableRecord;
-
-  /**
-   * Todo:
-   */
-  docViewerAccordionState: Record<string, boolean>;
 }
 
 /**
@@ -191,7 +186,6 @@ export interface RowControlsExtensionParams {
    * @param record
    */
   setExpandedDoc?: (record: DataTableRecord) => void;
-  setDocViewerAccordionState?: (param: Record<string, boolean>) => void;
 }
 
 /**

@@ -108,7 +108,13 @@ export const datasetQualityLinkTitle = i18n.translate(
   }
 );
 
-export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord['raw'] }) => {
+export const LogsOverviewDegradedFields = ({
+  rawDoc,
+  isExpanded,
+}: {
+  rawDoc: DataTableRecord['raw'];
+  isExpanded: boolean;
+}) => {
   const { ignored_field_values: ignoredFieldValues = {}, fields: sourceFields = {} } = rawDoc;
   const countOfDegradedFields = Object.keys(ignoredFieldValues)?.length;
 
@@ -191,7 +197,7 @@ export const LogsOverviewDegradedFields = ({ rawDoc }: { rawDoc: DataTableRecord
         id={accordionId}
         buttonContent={accordionTitle}
         paddingSize="m"
-        initialIsOpen={false}
+        initialIsOpen={isExpanded}
         extraAction={<DatasetQualityLink urlService={urlService} dataStream={dataStream} />}
         data-test-subj="unifiedDocViewLogsOverviewDegradedFieldsAccordion"
       >
