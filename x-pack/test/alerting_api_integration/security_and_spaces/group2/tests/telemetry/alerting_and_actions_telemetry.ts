@@ -563,6 +563,13 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
 
       // number of rules that has tags
       expect(telemetry.count_rules_with_tags).to.equal(18);
+
+      // number of rules that has linked dashboards
+      expect(telemetry.count_rules_with_linked_dashboards).to.equal(0);
+
+      // number of rules that has investigation guide
+      expect(telemetry.count_rules_with_investigation_guide).to.equal(0);
+
       // rules grouped by notify when
       expect(telemetry.count_rules_by_notify_when.on_action_group_change).to.equal(0);
       expect(telemetry.count_rules_by_notify_when.on_active_alert).to.equal(3);
