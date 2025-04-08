@@ -16,13 +16,6 @@ const badgeProps = [
   { color: 'hollow', children: 'Badge 4' },
 ];
 
-const badgePropsWithElement = [
-  { color: 'hollow', children: <span>{'Badge 1 with element'}</span> },
-  { color: 'hollow', children: <span>{'Badge 2 with element'}</span> },
-  { color: 'hollow', children: <span>{'Badge 3 with element'}</span> },
-  { color: 'hollow', children: <span>{'Badge 4 with element'}</span> },
-];
-
 describe('ExpandableBadgeGroup', () => {
   it('renders all badges when initialBadgeLimit is not set', () => {
     render(<ExpandableBadgeGroup badges={badgeProps} />);
