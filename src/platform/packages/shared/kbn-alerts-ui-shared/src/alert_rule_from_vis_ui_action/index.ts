@@ -74,7 +74,9 @@ export const getAlertRuleFromVisUiAction =
           ? `${fieldName} == "${values[0]}"`
           : `(${values
               .map((v) =>
-                v ? `${evaluateFieldName(fieldName)} == ${typeof v === 'number' ? v : '${v}'}` : ''
+                v
+                  ? `${evaluateFieldName(fieldName)} == ${typeof v === 'number' ? v : `"${v}"`}`
+                  : ''
               )
               .filter(Boolean)
               .join(' OR ')})`

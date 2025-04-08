@@ -39,9 +39,7 @@ interface IndexPatternSelectState {
   searchValue: string | undefined;
 }
 
-// Needed for React.lazy
-// eslint-disable-next-line import/no-default-export
-export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
+export class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 

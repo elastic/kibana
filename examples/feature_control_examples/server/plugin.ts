@@ -56,6 +56,7 @@ export class FeatureControlsPluginExample
       {
         path: '/internal/my_plugin/read',
         validate: false,
+        security: { authz: { requiredPrivileges: ['my_closed_example_api'] } },
       },
       async (context, request, response) => {
         return response.ok({

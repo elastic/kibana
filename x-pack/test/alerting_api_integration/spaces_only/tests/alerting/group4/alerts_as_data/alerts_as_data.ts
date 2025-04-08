@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { omit } from 'lodash';
@@ -39,14 +39,14 @@ import {
   EVENT_KIND,
   SPACE_IDS,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
+import type { TaskManagerDoc } from '../../../../../common/lib';
 import {
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
   ObjectRemover,
-  TaskManagerDoc,
 } from '../../../../../common/lib';
 import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 

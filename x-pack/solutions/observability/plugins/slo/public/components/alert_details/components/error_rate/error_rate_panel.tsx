@@ -55,7 +55,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="loading" />;
+    return <EuiLoadingChart size="m" data-test-subj="loading" />;
   }
 
   if (!slo) {

@@ -13,7 +13,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { IconChartMetric } from '@kbn/chart-icons';
 import { AccessorConfig } from '@kbn/visualization-ui-components';
-import { isNumericFieldForDatatable } from '../../../common/expressions/datatable/utils';
+import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { layerTypes } from '../../../common/layer_types';
 import type { FormBasedPersistedState } from '../../datasources/form_based/types';
 import { getSuggestions } from './suggestions';
@@ -26,7 +26,11 @@ import {
   UserMessage,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
+import {
+  DimensionEditor,
+  DimensionEditorAdditionalSection,
+  DimensionEditorDataExtraComponent,
+} from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -92,6 +96,7 @@ const getMetricLayerConfiguration = (
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
+  const canCollapseBy = isMetricNumeric && props.state.collapseFn;
 
   return {
     groups: [
@@ -182,7 +187,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: canCollapseBy ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -573,6 +578,10 @@ export const getMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  DimensionEditorDataExtraComponent(props) {
+    return <DimensionEditorDataExtraComponent {...props} />;
   },
 
   DimensionEditorComponent(props) {
