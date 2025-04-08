@@ -1382,8 +1382,7 @@ describe('rules_list with show only capability', () => {
   });
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/203179
-describe.skip('MaintenanceWindowsMock', () => {
+describe('MaintenanceWindowsMock', () => {
   beforeEach(() => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([]);
 
@@ -1456,11 +1455,10 @@ describe.skip('MaintenanceWindowsMock', () => {
 
     renderWithProviders(<RulesList />);
 
-    await expect(
-      screen.findByText('Rule notifications are stopped while maintenance windows are running.')
-    ).rejects.toThrow();
-
-    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1));
+    expect(
+      screen.queryByText('Rule notifications are stopped while maintenance windows are running.')
+    ).not.toBeInTheDocument();
   });
 
   it('shows MaintenanceWindowCallout for a specific category', async () => {

@@ -18,22 +18,31 @@ import { z } from '@kbn/zod';
 
 import { AlertSuppressionDuration } from '../common_attributes.gen';
 
+/**
+ * The field on which the cardinality is applied.
+ */
 export type ThresholdCardinality = z.infer<typeof ThresholdCardinality>;
 export const ThresholdCardinality = z.array(
   z.object({
+    /**
+     * The field on which to calculate and compare the cardinality.
+     */
     field: z.string(),
+    /**
+     * The threshold value from which an alert is generated based on unique number of values of cardinality.field.
+     */
     value: z.number().int().min(0),
   })
 );
 
 /**
- * Threshold value
+ * The threshold value from which an alert is generated.
  */
 export type ThresholdValue = z.infer<typeof ThresholdValue>;
 export const ThresholdValue = z.number().int().min(1);
 
 /**
- * Field to aggregate on
+ * The field on which the threshold is applied. If you specify an empty array ([]), alerts are generated when the query returns at least the number of results specified in the value field.
  */
 export type ThresholdField = z.infer<typeof ThresholdField>;
 export const ThresholdField = z.union([z.string(), z.array(z.string())]);
@@ -65,6 +74,9 @@ export const ThresholdWithCardinality = z.object({
   cardinality: ThresholdCardinality,
 });
 
+/**
+ * Defines alert suppression configuration.
+ */
 export type ThresholdAlertSuppression = z.infer<typeof ThresholdAlertSuppression>;
 export const ThresholdAlertSuppression = z.object({
   duration: AlertSuppressionDuration,

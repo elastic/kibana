@@ -14,7 +14,16 @@ export function initRoutes(core: CoreSetup<PluginStartDependencies>) {
 
   // This route mirrors existing `GET /api/features` route except that it also returns all deprecated features.
   router.get(
-    { path: '/internal/features_provider/features', validate: false },
+    {
+      path: '/internal/features_provider/features',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: false,
+    },
     async (context, request, response) => {
       const [, pluginDeps] = await core.getStartServices();
       return response.ok({

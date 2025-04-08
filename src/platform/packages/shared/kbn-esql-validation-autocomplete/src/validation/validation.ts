@@ -10,7 +10,7 @@
 import {
   AstProviderFn,
   ESQLAst,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -53,7 +53,7 @@ import type {
 } from './types';
 
 import { validate as validateJoinCommand } from './commands/join';
-import { validate as validateMetricsCommand } from './commands/metrics';
+import { validate as validateTimeseriesCommand } from './commands/metrics';
 
 /**
  * ES|QL validation public API
@@ -213,9 +213,9 @@ function validateCommand(
   }
 
   switch (commandDef.name) {
-    case 'metrics': {
-      const metrics = command as ESQLAstMetricsCommand;
-      const metricsCommandErrors = validateMetricsCommand(metrics, references);
+    case 'ts': {
+      const metrics = command as ESQLAstTimeseriesCommand;
+      const metricsCommandErrors = validateTimeseriesCommand(metrics, references);
       messages.push(...metricsCommandErrors);
       break;
     }
@@ -393,7 +393,7 @@ export function validateColumnForCommand(
     if (!references.variables.has(column.name) && !isParametrized(column)) {
       messages.push(errors.unknownColumn(column));
     }
-  } else if (!getColumnExists(column, references)) {
+  } else if (!getColumnExists(column, references) && !isParametrized(column)) {
     messages.push(errors.unknownColumn(column));
   }
 
