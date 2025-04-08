@@ -144,7 +144,7 @@ export function StreamStatsPanel({ definition }: StreamStatsPanelProps) {
                       'xpack.streams.streamDetailLifecycle.ingestionRateDetails',
                       {
                         defaultMessage:
-                          'Estimated average (stream total size divided by the number of days since creation).',
+                          'Approximate average (stream total size divided by the number of days since creation).',
                       }
                     )}
                     position="right"

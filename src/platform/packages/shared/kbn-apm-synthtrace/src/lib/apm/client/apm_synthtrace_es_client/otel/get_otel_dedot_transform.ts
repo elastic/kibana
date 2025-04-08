@@ -26,7 +26,7 @@ function removeAttributes(obj: Record<string, any>, attributes: string[]): ApmOt
     )
   );
 }
-export function getDedotTransform(keepFlattenedFields: boolean = false) {
+export function getOtelDedotTransform(keepFlattenedFields: boolean = false) {
   return new Transform({
     objectMode: true,
     transform(document: ApmOtelFields, encoding, callback) {
