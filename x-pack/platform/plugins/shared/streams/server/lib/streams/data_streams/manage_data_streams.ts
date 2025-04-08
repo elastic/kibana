@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 
@@ -112,9 +112,7 @@ export async function updateDataStreamsLifecycle({
       () =>
         esClient.indices.putDataLifecycle({
           name: names,
-          lifecycle: {
-            data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-          },
+          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
         }),
       { logger }
     );
