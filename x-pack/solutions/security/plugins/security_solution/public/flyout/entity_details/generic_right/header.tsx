@@ -80,7 +80,7 @@ const HeaderTags = ({
   );
 };
 
-interface UniversalEntityFlyoutHeaderProps {
+interface GenericEntityFlyoutHeaderProps {
   entity: EntityEcs;
   source: GenericEntityRecord;
 }
@@ -90,17 +90,14 @@ enum GenericEntityType {
   container = 'container',
 }
 
-export const UniversalEntityIconByType: Record<GenericEntityType | EntityType, IconType> = {
+export const GenericEntityIconByType: Record<GenericEntityType | EntityType, IconType> = {
   ...EntityIconByType,
   container: 'container',
 };
 
 const isDate = (value: unknown): value is Date => value instanceof Date;
 
-export const UniversalEntityFlyoutHeader = ({
-  entity,
-  source,
-}: UniversalEntityFlyoutHeaderProps) => {
+export const GenericEntityFlyoutHeader = ({ entity, source }: GenericEntityFlyoutHeaderProps) => {
   const { euiTheme } = useEuiTheme();
 
   const docTimestamp = source?.['@timestamp'];
@@ -121,7 +118,7 @@ export const UniversalEntityFlyoutHeader = ({
           <EuiFlexItem grow={false}>
             <FlyoutTitle
               title={entity?.name}
-              iconType={UniversalEntityIconByType[entity?.type] || 'globe'}
+              iconType={GenericEntityIconByType[entity?.type] || 'globe'}
               iconColor="primary"
             />
           </EuiFlexItem>

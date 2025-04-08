@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  UNIVERSAL_ENTITY_FLYOUT_OPENED,
+  GENERIC_ENTITY_FLYOUT_OPENED,
   uiMetricService,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
@@ -17,8 +17,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useGetGenericEntity } from './hooks/use_get_generic_entity';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 import { useGenericEntityCriticality } from './hooks/use_generic_entity_criticality';
-import { UniversalEntityFlyoutHeader } from './header';
-import { UniversalEntityFlyoutContent } from './content';
+import { GenericEntityFlyoutHeader } from './header';
+import { GenericEntityFlyoutContent } from './content';
 
 interface CommonError {
   body: {
@@ -37,18 +37,18 @@ export const isCommonError = (error: unknown): error is CommonError => {
   return true;
 };
 
-export interface UniversalEntityPanelProps {
+export interface GenericEntityPanelProps {
   entityDocId: string;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }
 
-export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'universal-entity-panel';
-  params: UniversalEntityPanelProps;
+export interface GenericEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
+  key: 'generic-entity-panel';
+  params: GenericEntityPanelProps;
 }
 
-export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps) => {
+export const GenericEntityPanel = ({ entityDocId }: GenericEntityPanelProps) => {
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const { getAssetCriticality } = useGenericEntityCriticality({
     enabled: !!getGenericEntity.data?._source?.entity.id,
@@ -59,7 +59,7 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
 
   useEffect(() => {
     if (getGenericEntity.data?._id) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, UNIVERSAL_ENTITY_FLYOUT_OPENED);
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, GENERIC_ENTITY_FLYOUT_OPENED);
     }
   }, [getGenericEntity.data?._id]);
 
@@ -80,7 +80,7 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
           title={
             <h2>
               <FormattedMessage
-                id="xpack.securitySolution.universalEntityFlyout.errorTitle"
+                id="xpack.securitySolution.genericEntityFlyout.errorTitle"
                 defaultMessage="Unable to load entity"
               />
             </h2>
@@ -89,7 +89,7 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
             isCommonError(getGenericEntity.error) ? (
               <p>
                 <FormattedMessage
-                  id="xpack.securitySolution.universalEntityFlyout.errorBody"
+                  id="xpack.securitySolution.genericEntityFlyout.errorBody"
                   defaultMessage="{error} {statusCode}: {body}"
                   values={{
                     error: getGenericEntity.error.body.error,
@@ -111,10 +111,10 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
   return (
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
-      <UniversalEntityFlyoutHeader entity={entity} source={source} />
-      <UniversalEntityFlyoutContent source={source} />
+      <GenericEntityFlyoutHeader entity={entity} source={source} />
+      <GenericEntityFlyoutContent source={source} />
     </>
   );
 };
 
-UniversalEntityPanel.displayName = 'UniversalEntityPanel';
+GenericEntityPanel.displayName = 'GenericEntityPanel';

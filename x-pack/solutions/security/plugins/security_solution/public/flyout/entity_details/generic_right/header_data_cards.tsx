@@ -59,7 +59,7 @@ export const HeaderDataCards = ({
     () => [
       {
         title: i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.criticalityLabel',
+          'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.criticalityLabel',
           {
             defaultMessage: 'Criticality',
           }
@@ -102,7 +102,7 @@ export const HeaderDataCards = ({
       },
       {
         title: i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.typeLabel',
+          'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.typeLabel',
           {
             defaultMessage: 'Type',
           }
@@ -111,7 +111,7 @@ export const HeaderDataCards = ({
       },
       {
         title: i18n.translate(
-          'xpack.securitySolution.universalEntityFlyout.flyoutHeader.headerDataBoxes.subtypeLabel',
+          'xpack.securitySolution.genericEntityFlyout.flyoutHeader.headerDataBoxes.subtypeLabel',
           {
             defaultMessage: 'Sub Type',
           }

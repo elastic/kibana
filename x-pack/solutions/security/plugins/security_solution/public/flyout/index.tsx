@@ -9,8 +9,8 @@ import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
 import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
-import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
-import { UniversalEntityPanel } from './entity_details/universal_right';
+import type { GenericEntityPanelExpandableFlyoutProps } from './entity_details/generic_right';
+import { GenericEntityPanel } from './entity_details/generic_right';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
@@ -53,7 +53,7 @@ import {
   UserPanelKey,
   HostPanelKey,
   ServicePanelKey,
-  UniversalEntityPanelKey,
+  GenericEntityPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
@@ -185,9 +185,9 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: UniversalEntityPanelKey,
+    key: GenericEntityPanelKey,
     component: (props) => (
-      <UniversalEntityPanel {...(props as UniversalEntityPanelExpandableFlyoutProps).params} />
+      <GenericEntityPanel {...(props as GenericEntityPanelExpandableFlyoutProps).params} />
     ),
   },
   {
