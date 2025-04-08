@@ -141,10 +141,16 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
 
       let filters = [...searchFilters];
 
-      if (query.query.trim() === '' && searchFilters?.length === 0 && originEventIds.length > 0) {
+      if ((query.query.trim() === '' || searchFilters.length > 0) && originEventIds.length > 0) {
         filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
           return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
         }, searchFilters);
+      }
+
+      if (query.query.trim() !== '' && searchFilters.length === 0 && originEventIds.length > 0) {
+        query.query = `(${query.query})${originEventIds
+          .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
+          .join('')}`;
       }
 
       onInvestigateInTimeline?.(query, filters, timeRange);

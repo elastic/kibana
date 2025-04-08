@@ -159,7 +159,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
       await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
       await timelinePage.ensureTimelineIsOpen();
-      await timelinePage.waitForEvents();
+      await timelinePage.isTimelineEmpty();
     });
   });
 }

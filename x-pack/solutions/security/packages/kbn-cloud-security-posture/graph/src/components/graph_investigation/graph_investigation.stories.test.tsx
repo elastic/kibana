@@ -341,7 +341,7 @@ describe.skip('GraphInvestigation Component', () => {
       // Assert
       expect(onInvestigateInTimeline).toHaveBeenCalled();
       expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
-        query: 'host1',
+        query: '(host1) OR event.id: "1" OR event.id: "2"',
         language: 'kuery',
       });
       expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
