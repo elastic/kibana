@@ -194,5 +194,6 @@
     "@kbn/response-ops-rule-params",
     "@kbn/inference-common",
     "@kbn/aiops-change-point-detection",
+    "@kbn/scout-info",
   ]
 }

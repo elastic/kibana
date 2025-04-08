@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 import { services } from './services';
@@ -22,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [resolve(__dirname, './tests/session_concurrent_limit')],
     services,
     servers: xPackAPITestsConfig.get('servers'),
