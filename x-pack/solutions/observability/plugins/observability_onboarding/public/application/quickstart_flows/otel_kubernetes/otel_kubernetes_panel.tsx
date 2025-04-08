@@ -303,7 +303,12 @@ spec:
                     { defaultMessage: 'Annotate all resources in a namespace' }
                   )}
                 >
-                  <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                  <EuiCodeBlock
+                    paddingSize="m"
+                    language="bash"
+                    isCopyable={true}
+                    data-test-subj="observabilityOnboardingOtelKubernetesPanelAnnotateAllResourcesSnippet"
+                  >
                     {`kubectl annotate namespace my-namespace instrumentation.opentelemetry.io/inject-${idSelected}="${namespace}/elastic-instrumentation"`}
                   </EuiCodeBlock>
                 </EuiAccordion>
@@ -322,7 +327,12 @@ spec:
                   )}
                 </p>
                 <EuiSpacer />
-                <EuiCodeBlock paddingSize="m" language="bash" isCopyable={true}>
+                <EuiCodeBlock
+                  paddingSize="m"
+                  language="bash"
+                  isCopyable={true}
+                  data-test-subj="observabilityOnboardingOtelKubernetesPanelRestartDeploymentSnippet"
+                >
                   {`kubectl rollout restart deployment myapp -n my-namespace
 
 kubectl describe pod <myapp-pod-name> -n my-namespace`}
