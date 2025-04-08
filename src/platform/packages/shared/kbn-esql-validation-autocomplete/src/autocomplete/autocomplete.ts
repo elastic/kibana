@@ -88,15 +88,15 @@ export async function suggest(
   context: EditorContext,
   astProvider: AstProviderFn,
   resourceRetriever?: ESQLCallbacks
-): Promise<SuggestionRawDefinition[]> {
+): Promise<{ suggestions: SuggestionRawDefinition[] }> {
   // Partition out to inner ast / ast context for the latest command
   const innerText = fullText.substring(0, offset);
   const correctedQuery = correctQuerySyntax(innerText, context);
-  const { ast } = await astProvider(correctedQuery);
+  const { ast, timings } = await astProvider(correctedQuery);
   const astContext = getAstContext(innerText, ast, offset);
 
   if (astContext.type === 'comment') {
-    return [];
+    return { suggestions: [], timings };
   }
 
   // build the correct query to fetch the list of fields
@@ -138,50 +138,62 @@ export async function suggest(
         );
       }
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommand);
-      return [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions];
+      return {
+        suggestions: [...sourceCommandsSuggestions, ...recommendedQueriesSuggestions],
+        timings,
+      };
     }
 
-    return suggestions.filter((def) => !isSourceCommand(def));
+    return { suggestions: suggestions.filter((def) => !isSourceCommand(def)), timings };
   }
 
   if (astContext.type === 'expression') {
-    return getSuggestionsWithinCommandExpression(
-      innerText,
-      ast,
-      astContext,
-      getSources,
-      getFieldsByType,
-      getFieldsMap,
-      getPolicies,
-      getPolicyMetadata,
-      getVariables,
-      resourceRetriever?.getPreferences,
-      resourceRetriever,
-      supportsControls
-    );
+    return {
+      suggestions: await getSuggestionsWithinCommandExpression(
+        innerText,
+        ast,
+        astContext,
+        getSources,
+        getFieldsByType,
+        getFieldsMap,
+        getPolicies,
+        getPolicyMetadata,
+        getVariables,
+        resourceRetriever?.getPreferences,
+        resourceRetriever,
+        supportsControls
+      ),
+      timings,
+    };
   }
   if (astContext.type === 'function') {
-    return getFunctionArgsSuggestions(
-      innerText,
-      ast,
-      astContext,
-      getFieldsByType,
-      getFieldsMap,
-      fullText,
-      offset,
-      getVariables,
-      supportsControls
-    );
+    return {
+      suggestions: await getFunctionArgsSuggestions(
+        innerText,
+        ast,
+        astContext,
+        getFieldsByType,
+        getFieldsMap,
+        fullText,
+        offset,
+        getVariables,
+        supportsControls
+      ),
+      timings,
+    };
   }
   if (astContext.type === 'list') {
-    return getListArgsSuggestions(
-      innerText,
-      ast,
-      astContext,
-      getFieldsByType,
-      getFieldsMap,
-      getPolicyMetadata
-    );
+    return {
+      suggestions: await getListArgsSuggestions(
+        innerText,
+        ast,
+        astContext,
+        getFieldsByType,
+        getFieldsMap,
+        getPolicyMetadata
+      ),
+      timings,
+    };
   }
   return [];
 }

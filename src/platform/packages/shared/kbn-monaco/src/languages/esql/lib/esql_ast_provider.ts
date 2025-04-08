@@ -58,6 +58,8 @@ export class ESQLAstAdapter {
     // console.log(`validation ended`, end);
     // console.log(`validation took ${Date.now() - start}`);
     console.log(`-------------------------------------`);
+    console.log('validation');
+    console.log(`-------------------------------------`);
     console.log('time_to_request_parse', timings.parseRequested - start);
     console.log('time_to_worker', timings.parseStart - start);
     console.log('time_to_parse', timings.parseEnd - timings.parseStart);
@@ -94,12 +96,28 @@ export class ESQLAstAdapter {
     const getAstFn = await this.getAstWorker(model);
     const fullText = model.getValue();
     const offset = monacoPositionToOffset(fullText, position);
-    const suggestions = await suggest(fullText, offset, context, getAstFn, this.callbacks);
+    const start = Date.now();
+    const { suggestions, timings } = await suggest(
+      fullText,
+      offset,
+      context,
+      getAstFn,
+      this.callbacks
+    );
     for (const s of suggestions) {
       (s as SuggestionRawDefinitionWithMonacoRange).range = s.rangeToReplace
         ? offsetRangeToMonacoRange(fullText, s.rangeToReplace)
         : undefined;
     }
+    const end = Date.now();
+    console.log(`-------------------------------------`);
+    console.log(`autocomplete`);
+    console.log(`-------------------------------------`);
+    console.log('time_to_request_parse', timings.parseRequested - start);
+    console.log('time_to_worker', timings.parseStart - start);
+    console.log('time_to_parse', timings.parseEnd - timings.parseStart);
+    console.log('time_to_main', timings.astReceived - timings.parseEnd);
+    console.log('time_to_build_suggestions', end - timings.astReceived);
     return suggestions;
   }
 }
