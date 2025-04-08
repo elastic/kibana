@@ -83,7 +83,7 @@ describe('esql query helpers', () => {
       expect(idxPattern18).toBe('foo-{{mm-dd_yy}}');
 
       const idxPattern19 = getIndexPatternFromESQLQuery('FROM foo-1::data');
-      expect(idxPattern19).toBe('foo-1');
+      expect(idxPattern19).toBe('foo-1::data');
     });
   });
 

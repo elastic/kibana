@@ -28,18 +28,7 @@ export function getIndexPatternFromESQLQuery(esql?: string) {
   const sourceCommand = ast.find(({ name }) => ['from', 'ts'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
   const indices = args.filter((arg) => arg.sourceType === 'index');
-  return indices
-    ?.map(({ index, cluster }) => {
-      const indexName = cluster
-        ? `${cluster.valueUnquoted}:${index?.valueUnquoted}`
-        : index?.valueUnquoted;
-      if (indexName) {
-        return indexName;
-      }
-      return undefined;
-    })
-    .filter((index) => index !== undefined)
-    .join(',');
+  return indices?.map((index) => index.name).join(',');
 }
 
 // For ES|QL we consider stats and keep transformational command
