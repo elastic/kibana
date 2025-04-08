@@ -1,5 +1,5 @@
 # -----
-# Source: project-controller/blob/main/internal/project/esproject/config/roles.yml
+# Copy from elasticsearch-controller helm values
 # -----
 viewer:
   cluster: ['manage_own_api_key', 'read_pipeline']
