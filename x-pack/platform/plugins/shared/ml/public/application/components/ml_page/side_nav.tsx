@@ -16,6 +16,7 @@ import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
 import type { MlRoute } from '../../routing';
 import { ML_PAGES } from '../../../../common/constants/locator';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 export interface Tab {
   id: string;
@@ -36,6 +37,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
   const navigateToPath = useNavigateToPath();
 
   const mlFeaturesDisabled = !isFullLicense();
+  const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
 
   const [globalState] = useUrlState('_g');
 
@@ -92,60 +94,68 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
           },
         ],
       },
-      {
-        id: 'anomaly_detection_section',
-        name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
-          defaultMessage: 'Anomaly Detection',
-        }),
-        disabled: disableLinks,
-        items: [
-          {
-            id: 'anomaly_explorer',
-            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
-              defaultMessage: 'Anomaly Explorer',
-            }),
-            disabled: disableLinks,
-            pathId: ML_PAGES.ANOMALY_EXPLORER,
-            testSubj: 'mlMainTab anomalyExplorer',
-          },
-          {
-            id: 'single_metric_viewer',
-            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.singleMetricViewerText', {
-              defaultMessage: 'Single Metric Viewer',
-            }),
-            pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
-            disabled: disableLinks,
-            testSubj: 'mlMainTab singleMetricViewer',
-          },
-        ],
-      },
-      {
-        id: 'data_frame_analytics_section',
-        name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
-          defaultMessage: 'Data Frame Analytics',
-        }),
-        disabled: disableLinks,
-        items: [
-          {
-            id: 'data_frame_analytics_results_explorer',
-            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
-              defaultMessage: 'Results Explorer',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
-          },
-          {
-            id: 'data_frame_analytics_job_map',
-            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
-            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
-              defaultMessage: 'Analytics Map',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab dataFrameAnalyticsMap',
-          },
-        ],
-      },
+      ...(isADEnabled
+        ? [
+            {
+              id: 'anomaly_detection_section',
+              name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
+                defaultMessage: 'Anomaly Detection',
+              }),
+              disabled: disableLinks || !isADEnabled,
+              items: [
+                {
+                  id: 'anomaly_explorer',
+                  name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
+                    defaultMessage: 'Anomaly Explorer',
+                  }),
+                  disabled: disableLinks || !isADEnabled,
+                  pathId: ML_PAGES.ANOMALY_EXPLORER,
+                  testSubj: 'mlMainTab anomalyExplorer',
+                },
+                {
+                  id: 'single_metric_viewer',
+                  name: i18n.translate('xpack.ml.navMenu.anomalyDetection.singleMetricViewerText', {
+                    defaultMessage: 'Single Metric Viewer',
+                  }),
+                  pathId: ML_PAGES.SINGLE_METRIC_VIEWER,
+                  disabled: disableLinks || !isADEnabled,
+                  testSubj: 'mlMainTab singleMetricViewer',
+                },
+              ],
+            },
+          ]
+        : []),
+      ...(isDFAEnabled
+        ? [
+            {
+              id: 'data_frame_analytics_section',
+              name: i18n.translate('xpack.ml.navMenu.dataFrameAnalyticsTabLinkText', {
+                defaultMessage: 'Data Frame Analytics',
+              }),
+              disabled: disableLinks || !isDFAEnabled,
+              items: [
+                {
+                  id: 'data_frame_analytics_results_explorer',
+                  pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+                  name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.resultsExplorerText', {
+                    defaultMessage: 'Results Explorer',
+                  }),
+                  disabled: disableLinks || !isDFAEnabled,
+                  testSubj: 'mlMainTab dataFrameAnalyticsResultsExplorer',
+                },
+                {
+                  id: 'data_frame_analytics_job_map',
+                  pathId: ML_PAGES.DATA_FRAME_ANALYTICS_MAP,
+                  name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.analyticsMapText', {
+                    defaultMessage: 'Analytics Map',
+                  }),
+                  disabled: disableLinks || !isDFAEnabled,
+                  testSubj: 'mlMainTab dataFrameAnalyticsMap',
+                },
+              ],
+            },
+          ]
+        : []),
     ];
 
     mlTabs.push({
@@ -193,7 +203,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
     });
 
     return mlTabs;
-  }, [mlFeaturesDisabled]);
+  }, [mlFeaturesDisabled, isADEnabled, isDFAEnabled]);
 
   const getTabItem: (tab: Tab) => EuiSideNavItemType<unknown> = useCallback(
     (tab: Tab) => {
