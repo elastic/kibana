@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter, EuiPanel } from '@elastic/eui';
+import { TakeActionButton } from './components/take_action_button';
 
 export const FLYOUT_FOOTER_TEST_ID = 'ai-for-soc-alert-flyout-footer';
 
@@ -17,7 +18,9 @@ export const PanelFooter = () => (
   <EuiFlyoutFooter data-test-subj={FLYOUT_FOOTER_TEST_ID}>
     <EuiPanel color="transparent">
       <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-        <EuiFlexItem grow={false} />
+        <EuiFlexItem grow={false}>
+          <TakeActionButton />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   </EuiFlyoutFooter>
