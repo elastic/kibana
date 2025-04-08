@@ -27,16 +27,14 @@ export class LockManagerService {
     callback: () => Promise<T>,
     {
       metadata,
-      waitForLock,
     }: {
       metadata?: Record<string, any>;
-      waitForLock?: boolean;
     } = {}
   ) {
     const [coreStart] = await this.coreSetup.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const logger = this.logger.get('LockManager');
 
-    return withLock({ esClient, logger, lockId, metadata, waitForLock }, callback);
+    return withLock<T>({ esClient, logger, lockId, metadata }, callback);
   }
 }

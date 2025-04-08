@@ -29,6 +29,7 @@ describe('model', () => {
   const baseState: BaseState = {
     controlState: '42',
     retryCount: 0,
+    skipRetryReset: false,
     retryDelay: 0,
     logs: [],
     skipDocumentMigration: false,

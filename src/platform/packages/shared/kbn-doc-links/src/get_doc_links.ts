@@ -862,6 +862,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       proxiesSettings: `${FLEET_DOCS}fleet-agent-proxy-support.html`,
       unprivilegedMode: `${FLEET_DOCS}elastic-agent-unprivileged.html#unprivileged-change-mode`,
       httpMonitoring: `${FLEET_DOCS}agent-policy.html#change-policy-enable-agent-monitoring`,
+      agentLevelLogging: `${FLEET_DOCS}monitor-elastic-agent.html#change-logging-level`,
     },
     integrationDeveloper: {
       upload: `${INTEGRATIONS_DEV_DOCS}upload-a-new-integration.html`,
@@ -983,6 +984,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     synonyms: {
       synonymsAPIDocumentation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/synonyms-apis.html`,
+    },
+    queryRules: {
+      queryRulesAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/group/endpoint-query_rules`,
     },
   });
 };
