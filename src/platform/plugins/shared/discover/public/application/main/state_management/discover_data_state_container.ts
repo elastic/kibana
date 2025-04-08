@@ -222,26 +222,7 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        mergeMap(async ({ options }) => {
-          const currentTab = getCurrentTab();
-
-          // If we are returning to a tab and this is the initial query, use the existing
-          // searchSessionId & time range so that we can re-use the existing request from cache
-          const searchSessionId =
-            (options.fetchMore && searchSessionManager.getCurrentSearchSessionId()) ||
-            currentTab.dataRequestParams.searchSessionId ||
-            searchSessionManager.getNextSearchSessionId();
-
-          internalState.dispatch(
-            injectCurrentTab(internalStateActions.setDataRequestParams)({
-              dataRequestParams: {
-                timeRangeAbsolute: timefilter.getAbsoluteTime(),
-                timeRangeRelative: timefilter.getTime(),
-                searchSessionId,
-              },
-            })
-          );
-
+        mergeMap(async ({ options, searchSessionId }) => {
           const commonFetchDeps = {
             initialFetchStatus: getInitialFetchStatus(),
             inspectorAdapters,
@@ -273,13 +254,23 @@ export function getDataStateContainer({
             return;
           }
 
+          internalState.dispatch(
+            injectCurrentTab(internalStateActions.setDataRequestParams)({
+              dataRequestParams: {
+                timeRangeAbsolute: timefilter.getAbsoluteTime(),
+                timeRangeRelative: timefilter.getTime(),
+                searchSessionId,
+              },
+            })
+          );
+
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
             dataView: getSavedSearch().searchSource.getField('index'),
             query: appStateContainer.getState().query,
           });
 
-          const { id: currentTabId, resetDefaultProfileState } = currentTab;
+          const { id: currentTabId, resetDefaultProfileState } = getCurrentTab();
           const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
