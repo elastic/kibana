@@ -73,7 +73,9 @@ export async function createMcpServer({
         ),
       query: z
         .string()
-        .describe('Return Salesforce documents that relate to this query to search content semantically'),
+        .describe(
+          'Return Salesforce documents that relate to this query to search content semantically'
+        ),
       createdAfter: z
         .string()
         .optional()

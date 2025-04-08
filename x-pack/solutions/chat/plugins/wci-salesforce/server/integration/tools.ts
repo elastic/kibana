@@ -16,7 +16,6 @@ import { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase, Account } from './types';
 
-
 interface SearchParams {
   size?: number;
   createdAfter?: string;
@@ -74,7 +73,7 @@ const baseObjectMappings: Record<string, string> = {
  * @param esClient - Elasticsearch client
  * @param logger - Logger instance
  * @param indexName - Index name to query
- * @param filters - Search filters 
+ * @param filters - Search filters
  */
 export async function searchDocs({
   esClient,
@@ -95,7 +94,7 @@ export async function searchDocs({
   let query: QueryDslQueryContainer = {};
   if (objects?.includes('support_case')) {
     query = buildQuery(params, baseObjectMappings, 'support_case');
-  } else if (objects?.includes('account')){
+  } else if (objects?.includes('account')) {
     query = buildQuery(params, baseObjectMappings, 'account');
   } else {
     query = buildQuery(params, baseObjectMappings);
