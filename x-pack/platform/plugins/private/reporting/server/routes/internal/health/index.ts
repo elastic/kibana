@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const AIActionTypeIds = ['.bedrock', '.gen-ai', '.gemini', '.inference'];
+export { registerHealthRoute } from './health';

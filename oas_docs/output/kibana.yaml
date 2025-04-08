@@ -22533,54 +22533,6 @@ paths:
       summary: Get Timelines or Timeline templates
       tags:
         - Security Timeline API
-  /api/upgrade_assistant/add_query_default_field/{index}:
-    get:
-      description: |
-        In Elasticsearch 7.0 and later, some query types, such as simple query string, have a limit to the number of fields they can query against. To configure the cap in Elasticsearch, set the `indices.query.bool.max_clause_count` cluster setting, which is 1024 by default.
-        For indices with more fields than the cap, add the `index.query.default_field` index setting to inform Elasticsearch which fields to use by default when no field is specified for a query. Use the add default field API to add the `index.query.default_field` setting to an Elasticsearch index.
-        To add the `index.query.default_field` index setting to the specified index, Kibana generates an array of all fields from the index mapping. The fields contain the types specified in `fieldTypes`. Kibana appends any other fields specified in `otherFields` to the array of default fields.
-      operationId: get-upgrade-default
-      requestBody:
-        content:
-          application/json:
-            examples:
-              addQueryDefaultFieldExampleRequest1:
-                description: Run `GET /api/upgrade_assistant/add_query_default_field/myIndex` to add the `index.query.default_field` setting to an Elasticsearch index.
-                value: |-
-                  {
-                    "fieldTypes": ["text", "keyword"], 
-                    "otherFields": ["myField.*"] 
-                  }
-            schema:
-              type: object
-              properties:
-                fieldTypes:
-                  description: |
-                    An array of Elasticsearch field types that generate the list of fields.
-                  type: array
-                otherFields:
-                  description: |
-                    An optional array of additional field names, dot-delimited.
-                  type: array
-              required:
-                - fieldTypes
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  acknowledged:
-                    type: boolean
-          description: Indicates a successful call.
-        '400':
-          description: Indicates that the index already has the `index.query.default_field` setting. No changes are made to the index.
-      summary: Add a default field
-      tags:
-        - upgrade
-      x-state: Technical Preview
   /api/upgrade_assistant/reindex/{index}:
     get:
       description: |
