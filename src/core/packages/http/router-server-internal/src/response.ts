@@ -29,7 +29,7 @@ import mime from 'mime';
 import { filterObject } from './filter_object';
 
 interface KibanaResponseFromOptions {
-  filterPath?: string | string[];
+  filterPath?: string[];
 }
 
 /**
@@ -48,7 +48,6 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
   public static from(response: KibanaResponse, { filterPath }: KibanaResponseFromOptions) {
     let body = response.payload;
     if (filterPath?.length && isPlainObject(body)) {
-      if (!Array.isArray(filterPath)) filterPath = [filterPath];
       body = filterObject(body, filterPath);
     }
     return new KibanaResponse(response.status, body, response.options);

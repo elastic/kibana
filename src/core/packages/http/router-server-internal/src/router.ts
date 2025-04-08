@@ -210,9 +210,9 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           requestContext: `${request.route.method} ${request.route.path}`,
         });
       }
-      if (!route.options.httpResource && request.query.filter_path) {
+      if (!route.options.httpResource && request.query.filter_path?.length) {
         kibanaResponse = KibanaResponse.from(kibanaResponse, {
-          filterPath: request.query.filter_path,
+          filterPath: request.query.filter_path.split(','),
         });
       }
       return hapiResponseAdapter.handle(kibanaResponse);

@@ -8,26 +8,56 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
+import { isPlainObject } from 'lodash';
 
 /**
- * Somewhat safe way of picking a subset of keys...
+ * Behaviour is based on the ES `filter_path` query selector that can reduce
+ * the amount of data sent over the wire by specifying paths to include.
+ *
+ * @note Special behaviour with arrays: the filter path "ignores" arrays and will
+ *       attempt to apply keys to objects inside arrays as though they do not
+ *       exist. For example: [{a: 1}, {a: 2, b: 3}], ["a"] => [{a: 1}, {a: 2}]
+ *
+ * @note See https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#common-options-response-filtering
  */
-export function filterObject(o: object, paths: string[]): object {
-  const result = {};
+export function filterObject(obj: object, paths: readonly string[] | string[][]): object {
+  let result = Array.isArray(obj) ? [] : {};
+
   for (const path of paths) {
-    const keys = path.split('.');
-    let current = o;
-    const validPath = keys.every((key) => {
-      if (Object.hasOwn(current, key)) {
+    const keys = Array.isArray(path) ? path : path.split('.');
+    let current = obj;
+
+    for (let x = 0; x < keys.length; x++) {
+      const key = keys[x];
+      if (isPlainObject(current) && Object.hasOwn(current, key)) {
         current = (current as { [k: string]: object })[key];
-        return true;
-      } else {
-        return false;
+        if (x === keys.length - 1) {
+          set(result, keys.join('.'), current);
+        }
+      } else if (Array.isArray(current)) {
+        const arrResult: unknown[] = [];
+        const subKeys = keys.slice(x);
+        for (const item of current) {
+          const itemResult = filterObject(item, [subKeys]);
+          if (
+            (isPlainObject(itemResult) && Object.keys(itemResult).length) ||
+            (Array.isArray(itemResult) && itemResult.length)
+          ) {
+            arrResult.push(itemResult);
+          }
+        }
+        if (arrResult.length) {
+          if (x === 0) {
+            result = arrResult;
+          } else {
+            set(result, keys.slice(0, x).join('.'), arrResult);
+          }
+        }
+        break;
       }
-    });
-    if (validPath) {
-      set(result, path, current);
+      break;
     }
   }
+
   return result;
 }
