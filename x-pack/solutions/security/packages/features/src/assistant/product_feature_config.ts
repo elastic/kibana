@@ -33,4 +33,15 @@ export const assistantDefaultProductFeaturesConfig: Record<
       AssistantSubFeatureId.manageGlobalKnowledgeBase,
     ],
   },
+  [ProductFeatureAssistantKey.configurations]: {
+    privileges: {
+      all: {
+        ui: ['ai-assistant'],
+      },
+    },
+    subFeatureIds: [
+      AssistantSubFeatureId.updateAnonymization,
+      AssistantSubFeatureId.manageGlobalKnowledgeBase,
+    ],
+  },
 };
