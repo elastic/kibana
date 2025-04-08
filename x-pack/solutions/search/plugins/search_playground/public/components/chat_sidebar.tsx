@@ -5,22 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useWatch } from 'react-hook-form';
 import { docLinks } from '../../common/doc_links';
 import { EditContextPanel } from './edit_context/edit_context_panel';
-import { ChatForm, ChatFormFields } from '../types';
-import { useManagementLink } from '../hooks/use_management_link';
 import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
 export const ChatSidebar: React.FC = () => {
