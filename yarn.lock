@@ -5046,6 +5046,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-user-settings-browser@link:src/core/packages/user-settings/browser":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-user-settings-server-internal@link:src/core/packages/user-settings/server-internal":
   version "0.0.0"
   uid ""

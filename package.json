@@ -419,6 +419,7 @@
     "@kbn/core-user-profile-server": "link:src/core/packages/user-profile/server",
     "@kbn/core-user-profile-server-internal": "link:src/core/packages/user-profile/server-internal",
     "@kbn/core-user-profile-server-mocks": "link:src/core/packages/user-profile/server-mocks",
+    "@kbn/core-user-settings-browser": "link:src/core/packages/user-settings/browser",
     "@kbn/core-user-settings-server": "link:src/core/packages/user-settings/server",
     "@kbn/core-user-settings-server-internal": "link:src/core/packages/user-settings/server-internal",
     "@kbn/core-user-settings-server-mocks": "link:src/core/packages/user-settings/server-mocks",
