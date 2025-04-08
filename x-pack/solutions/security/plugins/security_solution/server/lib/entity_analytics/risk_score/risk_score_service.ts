@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ExperimentalFeatures } from '../../../../common';
 import type {
+  GetRiskScoreSpikesResponse,
   RiskScoresCalculationResponse,
   RiskScoresPreviewResponse,
 } from '../../../../common/api/entity_analytics';
@@ -39,6 +40,7 @@ export interface RiskScoreService {
   getRiskInputsIndex: ({ dataViewId }: { dataViewId: string }) => Promise<RiskInputsIndexResponse>;
   scheduleLatestTransformNow: () => Promise<void>;
   refreshRiskScoreIndex: () => Promise<void>;
+  getRiskScoreSpikes: () => Promise<GetRiskScoreSpikesResponse['spikes']>;
 }
 
 export interface RiskScoreServiceFactoryParams {
@@ -99,4 +101,5 @@ export const riskScoreServiceFactory = ({
   scheduleLatestTransformNow: () =>
     scheduleLatestTransformNow({ namespace: spaceId, esClient, logger }),
   refreshRiskScoreIndex: () => riskScoreDataClient.refreshRiskScoreIndex(),
+  getRiskScoreSpikes: () => riskScoreDataClient.getRiskScoreSpikes(),
 });
