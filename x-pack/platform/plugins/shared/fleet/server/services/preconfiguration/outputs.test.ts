@@ -53,7 +53,7 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
   'bumpAllAgentPoliciesForOutput'
 );
 
-describe('output preconfiguration', () => {
+describe('Outputs preconfiguration', () => {
   let logstashSecretHash: string;
 
   beforeEach(async () => {
@@ -79,7 +79,7 @@ describe('output preconfiguration', () => {
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
     const serviceTokenHash = (await hashSecret('secretServiceToken')) as string;
-    const serviceKibanaAPIKeyHash = (await hashSecret('secretKibanaAPIKey')) as string;
+
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
         {
