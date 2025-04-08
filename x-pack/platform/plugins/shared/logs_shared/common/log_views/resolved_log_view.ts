@@ -126,16 +126,17 @@ const resolveKibanaAdvancedSettingReference = async (
   const indices = (await logSourcesService.getLogSources())
     .map((logSource) => logSource.indexPattern)
     .join(',');
-  const createDataViewPromise = dataViewsService.createDataViewLazy({
-    id: `log-view-${logViewId}`,
-    name: logViewAttributes.name,
-    title: indices,
-    timeFieldName: TIMESTAMP_FIELD,
-    allowNoIndex: true,
-  });
-  const dataViewReference = await createDataViewPromise.catch((error) => {
-    throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
-  });
+  const dataViewReference = await dataViewsService
+    .createDataViewLazy({
+      id: `log-view-${logViewId}`,
+      name: logViewAttributes.name,
+      title: indices,
+      timeFieldName: TIMESTAMP_FIELD,
+      allowNoIndex: true,
+    })
+    .catch((error) => {
+      throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
+    });
 
   return {
     indices,
