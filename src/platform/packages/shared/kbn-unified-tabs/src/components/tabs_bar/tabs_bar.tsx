@@ -16,6 +16,7 @@ import type { TabItem, TabsServices } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
+import { TabsBarMenu } from '../tabs_bar_menu';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -27,6 +28,7 @@ export type TabsBarProps = Pick<
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
+  recentlyClosedItems: TabItem[];
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
@@ -35,6 +37,7 @@ export type TabsBarProps = Pick<
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
+  recentlyClosedItems,
   maxItemsCount,
   tabContentId,
   getTabMenuItems,
@@ -82,7 +85,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       alignItems="center"
       gutterSize="s"
       css={css`
-        padding-right: ${euiTheme.size.xs};
+        padding-right: ${euiTheme.size.base};
       `}
     >
       <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
@@ -130,12 +133,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          color="text"
-          aria-label="Tabs menu placeholder"
-          title="Tabs menu placeholder"
-          onClick={() => alert('TODO: Implement tabs menu')}
+        <TabsBarMenu
+          openedItems={items}
+          selectedItem={selectedItem}
+          onSelectOpenedTab={onSelect}
+          recentlyClosedItems={recentlyClosedItems}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

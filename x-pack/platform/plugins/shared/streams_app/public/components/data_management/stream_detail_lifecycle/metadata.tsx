@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
   IngestStreamGetResponse,
   isDisabledLifecycle,
@@ -42,7 +40,6 @@ import { formatIngestionRate } from './helpers/format_bytes';
 
 export function RetentionMetadata({
   definition,
-  ilmLocator,
   lifecycleActions,
   openEditModal,
   stats,
@@ -50,7 +47,6 @@ export function RetentionMetadata({
   statsError,
 }: {
   definition: IngestStreamGetResponse;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
@@ -99,7 +95,7 @@ export function RetentionMetadata({
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
-      <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
+      <IlmLink lifecycle={lifecycle} />
     </EuiBadge>
   ) : null;
 
@@ -179,7 +175,7 @@ export function RetentionMetadata({
         })}
         tip={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateDetails', {
           defaultMessage:
-            'Estimated average (stream total size divided by the number of days since creation).',
+            'Approximate average (stream total size divided by the number of days since creation).',
         })}
         value={
           statsError ? (
