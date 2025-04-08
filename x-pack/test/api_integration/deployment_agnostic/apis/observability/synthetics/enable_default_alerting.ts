@@ -274,6 +274,9 @@ const defaultAlertRules = {
     throttle: null,
     apiKeyOwner: 'any',
     apiKeyCreatedByUser: true,
+    artifacts: {
+      dashboards: [],
+    },
     createdBy: 'any',
     updatedBy: 'any',
     muteAll: false,
