@@ -38,7 +38,7 @@ import {
 import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { get, isEmpty, isEqual, isNil, omitBy } from 'lodash';
 import React, { useEffect, useRef } from 'react';
-import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
+import { BehaviorSubject, map, merge, switchMap } from 'rxjs';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { VISUALIZE_APP_NAME, VISUALIZE_EMBEDDABLE_TYPE } from '../../common/constants';
 import { VIS_EVENT_TO_TRIGGER } from './events';
@@ -175,22 +175,15 @@ export const getVisualizeEmbeddableFactory: (deps: {
       uuid,
       parentApi,
       serializeState: () => {
-        return {
-          savedVis: vis$.getValue().serialize(),
-          ...timeRangeManager.getLatestState(),
-          ...titleManager.getLatestState(),
-          ...(runtimeState.savedObjectProperties ?? {}),
-          ...(runtimeState.savedObjectId ? { savedObjectId: runtimeState.savedObjectId } : {}),
-          ...(dynamicActionsManager?.getLatestState() ?? {}),
-        }
+        return serializeVisualizeEmbeddable(savedObjectId$.getValue(), linkedToLibrary);
       },
-      latestRuntimeState$: combineLatest([
-        ...(dynamicActionsManager ? [dynamicActionsManager.latestState$] : []),
+      anyStateChange$: merge(
+        ...(dynamicActionsManager ? [dynamicActionsManager.anyStateChange$] : []),
         savedObjectId$,
         serializedVis$,
-        titleManager.latestState$,
-        timeRangeManager.latestState$,
-      ]),
+        titleManager.anyStateChange$,
+        timeRangeManager.anyStateChange$,
+      ).pipe(map(() =>  undefined)),
       getComparators: () => {
         return {
           ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
@@ -220,15 +213,15 @@ export const getVisualizeEmbeddableFactory: (deps: {
         };
       },
       onReset: (lastSaved) => {
-        if ((lastSaved as VisualizeSavedVisInputState)?.savedVis) {
-          serializedVis$.next((lastSaved as VisualizeSavedVisInputState)!.savedVis);
+        if (lastSaved && (lastSaved.rawState as VisualizeSavedVisInputState)?.savedVis) {
+          serializedVis$.next((lastSaved.rawState as VisualizeSavedVisInputState)!.savedVis);
         }
-        if ((lastSaved as VisualizeSavedObjectInputState)?.savedObjectId) {
-          savedObjectId$.next((lastSaved as VisualizeSavedObjectInputState)!.savedObjectId);
+        if (lastSaved && (lastSaved.rawState as VisualizeSavedObjectInputState)?.savedObjectId) {
+          savedObjectId$.next((lastSaved.rawState as VisualizeSavedObjectInputState)!.savedObjectId);
         };
-        dynamicActionsManager?.reinitializeState(lastSaved ?? {});
-        timeRangeManager.reinitializeState(lastSaved);
-        titleManager.reinitializeState(lastSaved);
+        dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
+        timeRangeManager.reinitializeState(lastSaved?.rawState);
+        titleManager.reinitializeState(lastSaved?.rawState);
       },
     });
 

@@ -49,5 +49,5 @@ export interface StateManager<StateType extends object> {
   getLatestState: () => StateType;
   reinitializeState: (newState?: Partial<StateType>) => void;
   api: SettersOf<StateType> & SubjectsOf<StateType>;
-  latestState$: Observable<StateType>;
+  anyStateChange$: Observable<void>;
 }

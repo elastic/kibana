@@ -9,11 +9,12 @@
 
 import {
   PublishesUnsavedChanges,
+  SerializedPanelState,
   StateComparators,
   areComparatorsEqual,
 } from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
-import { Observable, combineLatestWith, debounceTime, map, of } from 'rxjs';
+import { Observable, debounceTime, map, of } from 'rxjs';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 
 const UNSAVED_CHANGES_DEBOUNCE = 100;
@@ -24,14 +25,14 @@ export const initializeUnsavedChanges = <SerializedStateType extends object = ob
   parentApi,
   getComparators,
   serializeState,
-  latestRuntimeState$,
+  anyStateChange$,
 }: {
   uuid: string;
   parentApi: unknown;
-  latestRuntimeState$: Observable<unknown>;
-  serializeState: () => SerializedStateType;
+  anyStateChange$: Observable<void>;
+  serializeState: () => SerializedPanelState<SerializedStateType>;
   getComparators: () => StateComparators<SerializedStateType>;
-  onReset: (newState?: SerializedStateType) => MaybePromise<void>;
+  onReset: (lastSavedState?: SerializedPanelState<SerializedStateType>) => MaybePromise<void>;
 }): PublishesUnsavedChanges => {
   if (!apiHasLastSavedChildState<SerializedStateType>(parentApi)) {
     return {
@@ -39,21 +40,18 @@ export const initializeUnsavedChanges = <SerializedStateType extends object = ob
       resetUnsavedChanges: () => Promise.resolve(),
     };
   }
-  const hasUnsavedChanges$ = latestRuntimeState$.pipe(
-    // Ignore the latest runtime state and compare with serialized state instead.
-    map(() => serializeState()),
-    combineLatestWith(
-      parentApi.lastSavedStateForChild$(uuid).pipe(map((panelState) => panelState?.rawState))
-    ),
+  const hasUnsavedChanges$ = anyStateChange$.pipe(
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
-    map(([latestState, lastSavedState]) => {
+    map(() => {
+      const latestState = serializeState().rawState;
+      const lastSavedState = parentApi.getLastSavedStateForChild(uuid)?.rawState;
       return !areComparatorsEqual(getComparators(), lastSavedState, latestState);
     })
   );
 
   const resetUnsavedChanges = async () => {
     const lastSavedState = parentApi.getLastSavedStateForChild(uuid);
-    await onReset(lastSavedState?.rawState);
+    await onReset(lastSavedState);
   };
 
   return { hasUnsavedChanges$, resetUnsavedChanges };

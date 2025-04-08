@@ -63,6 +63,13 @@ export const areComparatorsEqual = <StateType extends object = object>(
     const lastSavedValue = lastSavedState?.[key as keyof StateType];
     const currentValue = latestState?.[key as keyof StateType];
 
+    const areEqual = runComparator(comparator, lastSavedState, latestState, lastSavedValue, currentValue);;
+    if (!areEqual) {
+      console.log(`${key} not equal`)
+      console.log('lastSavedValue: ', lastSavedValue);
+      console.log('currentValue: ', currentValue);
+    }
+
     return runComparator(comparator, lastSavedState, latestState, lastSavedValue, currentValue);
   });
 };

@@ -29,7 +29,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
     type: SEARCH_EMBEDDABLE_ID,
     buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
-      const timeRangeManager = initializeTimeRangeManager(initialState);
+      const timeRangeManager = initializeTimeRangeManager(initialState.rawState);
       const defaultDataView = await services.dataViews.getDefaultDataView();
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>(
         defaultDataView ? [defaultDataView] : undefined
@@ -47,15 +47,20 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         );
       }
 
-      const serializeState = (): SearchSerializedState => ({
-        ...timeRangeManager.getLatestState(),
-      });
+      function serializeState() {
+        return {
+          rawState: {
+            ...timeRangeManager.getLatestState(),
+          },
+          // references: if this embeddable had any references - this is where we would extract them.
+        };
+      }
 
       const unsavedChangesApi = initializeUnsavedChanges({
         uuid,
         parentApi,
         serializeState,
-        latestRuntimeState$: timeRangeManager.latestState$,
+        anyStateChange$: timeRangeManager.anyStateChange$,
         getComparators: () => {
           /**
            * comparators are provided in a callback to allow embeddables to change how their state is compared based
@@ -70,7 +75,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
            * function here before resetting. onReset can be async so to support a potential async deserialize function.
            */
   
-          timeRangeManager.reinitializeState(lastSaved);
+          timeRangeManager.reinitializeState(lastSaved?.rawState);
         },
       });
   
@@ -80,10 +85,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         dataLoading$,
         ...unsavedChangesApi,
         ...timeRangeManager.api,
-        serializeState: () => ({
-          rawState: serializeState(),
-          // references: if this embeddable had any references - this is where we would extract them.
-        }),
+        serializeState,
       });
 
       const count$ = new BehaviorSubject<number>(0);
