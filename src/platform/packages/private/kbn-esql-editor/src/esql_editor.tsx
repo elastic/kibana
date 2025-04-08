@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { isEqual } from 'lodash';
+import { isEqual, memoize } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -27,7 +27,6 @@ import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
-import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { fixESQLQueryWithVariables } from '@kbn/esql-utils';
 import { createPortal } from 'react-dom';

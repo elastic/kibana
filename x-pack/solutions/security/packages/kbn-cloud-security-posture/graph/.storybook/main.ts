@@ -8,7 +8,7 @@
 import { defaultConfig, StorybookConfig } from '@kbn/storybook';
 import type { Configuration } from 'webpack';
 import { merge as webpackMerge } from 'webpack-merge';
-import merge from 'lodash/merge';
+import { merge } from 'lodash';
 // eslint-disable-next-line import/no-nodejs-modules
 import { resolve } from 'path';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 

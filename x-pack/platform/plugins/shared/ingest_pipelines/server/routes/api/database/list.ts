@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import sortBy from 'lodash/sortBy';
+import { sortBy } from 'lodash';
 import { deserializeGeoipDatabase, type GeoipDatabaseFromES } from './serialization';
 import { API_BASE_PATH } from '../../../../common/constants';
 import { RouteDependencies } from '../../../types';
