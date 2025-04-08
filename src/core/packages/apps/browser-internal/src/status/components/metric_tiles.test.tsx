@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import { MetricTile } from './metric_tiles';
 import { Metric } from '../lib';
 
@@ -49,28 +50,34 @@ const metricWithMeta: Metric = {
 };
 
 describe('MetricTile', () => {
-  it('correct displays an untyped metric', () => {
-    const component = shallow(<MetricTile metric={untypedMetric} />);
-    expect(component).toMatchSnapshot();
+  it('correctly displays an untyped metric', () => {
+    render(<MetricTile metric={untypedMetric} />);
+    expect(screen.getByText('A metric')).toBeInTheDocument();
+    expect(screen.getByText('1.8')).toBeInTheDocument();
   });
 
-  it('correct displays a byte metric', () => {
-    const component = shallow(<MetricTile metric={byteMetric} />);
-    expect(component).toMatchSnapshot();
+  it('correctly displays a byte metric', () => {
+    render(<MetricTile metric={byteMetric} />);
+    expect(screen.getByText('Heap Total')).toBeInTheDocument();
+    expect(screen.getByText('1501560832')).toBeInTheDocument();
   });
 
-  it('correct displays a float metric', () => {
-    const component = shallow(<MetricTile metric={floatMetric} />);
-    expect(component).toMatchSnapshot();
+  it('correctly displays a float metric', () => {
+    render(<MetricTile metric={floatMetric} />);
+    expect(screen.getByText('Load')).toBeInTheDocument();
+    expect(screen.getByText('4.0537109375, 3.36669921875, 3.1220703125')).toBeInTheDocument();
   });
 
-  it('correct displays a time metric', () => {
-    const component = shallow(<MetricTile metric={timeMetric} />);
-    expect(component).toMatchSnapshot();
+  it('correctly displays a time metric', () => {
+    render(<MetricTile metric={timeMetric} />);
+    expect(screen.getByText('Response Time Max')).toBeInTheDocument();
+    expect(screen.getByText('1234')).toBeInTheDocument();
   });
 
   it('correctly displays a metric with metadata', () => {
-    const component = shallow(<MetricTile metric={metricWithMeta} />);
-    expect(component).toMatchSnapshot();
+    render(<MetricTile metric={metricWithMeta} />);
+    expect(screen.getByText('Delay')).toBeInTheDocument();
+    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText('Percentiles')).toBeInTheDocument();
   });
 });
