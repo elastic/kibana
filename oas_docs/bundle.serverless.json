@@ -1113,13 +1113,15 @@
                           "type": "array"
                         },
                         "investigation_guide": {
+                          "additionalProperties": false,
                           "properties": {
                             "blob": {
-                              "description": "The content of the investigation guide.",
                               "type": "string"
                             }
                           },
-                          "description": "Provides instructions for investigating alerts created by the rule.",
+                          "required": [
+                            "blob"
+                          ],
                           "type": "object"
                         }
                       },
@@ -2223,13 +2225,15 @@
                         "type": "array"
                       },
                       "investigation_guide": {
+                        "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "description": "The content of the investigation guide.",
                             "type": "string"
                           }
                         },
-                        "description": "Provides instructions for investigating alerts created by the rule.",
+                        "required": [
+                          "blob"
+                        ],
                         "type": "object"
                       }
                     },
@@ -2901,13 +2905,15 @@
                           "type": "array"
                         },
                         "investigation_guide": {
+                          "additionalProperties": false,
                           "properties": {
                             "blob": {
-                              "description": "The content of the investigation guide.",
                               "type": "string"
                             }
                           },
-                          "description": "Provides instructions for investigating alerts created by the rule.",
+                          "required": [
+                            "blob"
+                          ],
                           "type": "object"
                         }
                       },
@@ -3854,13 +3860,15 @@
                         "type": "array"
                       },
                       "investigation_guide": {
+                        "additionalProperties": false,
                         "properties": {
                           "blob": {
-                            "description": "The content of the investigation guide.",
                             "type": "string"
                           }
                         },
-                        "description": "Provides instructions for investigating alerts created by the rule.",
+                        "required": [
+                          "blob"
+                        ],
                         "type": "object"
                       }
                     },
@@ -4263,13 +4271,15 @@
                           "type": "array"
                         },
                         "investigation_guide": {
+                          "additionalProperties": false,
                           "properties": {
                             "blob": {
-                              "description": "The content of the investigation guide.",
                               "type": "string"
                             }
                           },
-                          "description": "Provides instructions for investigating alerts created by the rule.",
+                          "required": [
+                            "blob"
+                          ],
                           "type": "object"
                         }
                       },
@@ -6210,13 +6220,15 @@
                           "type": "array"
                         },
                         "investigation_guide": {
+                          "additionalProperties": false,
                           "properties": {
                             "blob": {
-                              "description": "The content of the investigation guide.",
                               "type": "string"
                             }
                           },
-                          "description": "Provides instructions for investigating alerts created by the rule.",
+                          "required": [
+                            "blob"
+                          ],
                           "type": "object"
                         }
                       },

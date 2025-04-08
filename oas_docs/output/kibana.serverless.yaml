@@ -954,11 +954,11 @@ paths:
                             - id
                         type: array
                       investigation_guide:
+                        additionalProperties: false
+                        type: object
                         properties:
                           blob:
                             type: string
-                        additionalProperties: false
-                        type: object
                         required:
                           - blob
                   consumer:
@@ -1795,11 +1795,11 @@ paths:
                           - id
                       type: array
                     investigation_guide:
+                      additionalProperties: false
+                      type: object
                       properties:
                         blob:
                           type: string
-                      additionalProperties: false
-                      type: object
                       required:
                         - blob
                 consumer:
@@ -2347,11 +2347,11 @@ paths:
                             - id
                         type: array
                       investigation_guide:
+                        additionalProperties: false
+                        type: object
                         properties:
                           blob:
                             type: string
-                        additionalProperties: false
-                        type: object
                         required:
                           - blob
                   consumer:
@@ -3064,11 +3064,11 @@ paths:
                           - id
                       type: array
                     investigation_guide:
+                      additionalProperties: false
+                      type: object
                       properties:
                         blob:
                           type: string
-                      additionalProperties: false
-                      type: object
                       required:
                         - blob
                 flapping:
@@ -3377,11 +3377,11 @@ paths:
                             - id
                         type: array
                       investigation_guide:
+                        additionalProperties: false
+                        type: object
                         properties:
                           blob:
                             type: string
-                        additionalProperties: false
-                        type: object
                         required:
                           - blob
                   consumer:
@@ -4788,11 +4788,11 @@ paths:
                             - id
                         type: array
                       investigation_guide:
+                        additionalProperties: false
+                        type: object
                         properties:
                           blob:
                             type: string
-                        additionalProperties: false
-                        type: object
                         required:
                           - blob
                   consumer:
