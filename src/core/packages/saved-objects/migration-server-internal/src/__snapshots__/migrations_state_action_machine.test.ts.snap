@@ -43,6 +43,11 @@ Object {
                         "type": "deprecated-type-3",
                       },
                     },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
+                      },
+                    },
                   ],
                 },
               },
@@ -169,6 +174,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "deprecated-type-3",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
                       },
                     },
                   ],
@@ -301,6 +311,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "deprecated-type-3",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
                       },
                     },
                   ],
@@ -437,6 +452,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "deprecated-type-3",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
                       },
                     },
                   ],
@@ -611,6 +631,11 @@ Object {
                         "type": "deprecated-type-3",
                       },
                     },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
+                      },
+                    },
                   ],
                 },
               },
@@ -748,6 +773,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "deprecated-type-3",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "investigation",
                       },
                     },
                   ],
