@@ -24,6 +24,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_WEBSITE_URL = meta.elasticWebsiteUrl;
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
+  const ELASTIC_DOCS = meta.docsWebsiteUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
@@ -41,11 +42,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const isServerless = buildFlavor === 'serverless';
 
   return deepFreeze({
-    settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
+    settings: `${ELASTIC_DOCS}reference/kibana/configuration-reference`,
     elasticStackGetStarted: isServerless
-      ? `${SERVERLESS_DOCS}intro.html`
-      : `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
-    apiReference: `${ELASTIC_WEBSITE_URL}guide/en/starting-with-the-elasticsearch-platform-and-its-solutions/current/api-reference.html`,
+      ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
+      : `${ELASTIC_DOCS}get-started`,
+    apiReference: `${ELASTIC_DOCS}apis`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
@@ -643,7 +644,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       slackApiAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-web-api`,
       teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
       connectors: `${KIBANA_DOCS}action-types.html`,
-      legacyRuleApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201550`,
     },
     taskManager: {
       healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
@@ -978,9 +978,6 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     inferenceManagement: {
       inferenceAPIDocumentation: `${ELASTIC_WEBSITE_URL}docs/api/doc/elasticsearch/operation/operation-inference-put`,
-    },
-    cases: {
-      legacyApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-201004`,
     },
     synonyms: {
       synonymsAPIDocumentation: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/current/synonyms-apis.html`,
