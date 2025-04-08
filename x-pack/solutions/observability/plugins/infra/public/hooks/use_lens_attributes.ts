@@ -72,7 +72,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
         query: Query | AggregateQuery;
         lastReloadRequestTime?: number;
       }) =>
-      () => {
+      (openInNewTab: boolean) => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {
           navigateToPrefilledEditor(
@@ -83,7 +83,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
               lastReloadRequestTime,
             },
             {
-              openInNewTab: true,
+              openInNewTab,
             }
           );
         }
@@ -127,7 +127,7 @@ export const useLensAttributes = (params: UseLensAttributesParams) => {
   };
 };
 
-const getOpenInLensAction = (onExecute: () => void): Action => {
+const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action => {
   return {
     id: 'openInLens',
     getDisplayName(_context: ActionExecutionContext): string {
@@ -142,9 +142,16 @@ const getOpenInLensAction = (onExecute: () => void): Action => {
     async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
       return true;
     },
-    async execute(_context: ActionExecutionContext): Promise<void> {
-      onExecute();
+    async execute(_context: ActionExecutionContext, event): Promise<void> {
+      if (isModifiedEvent(event)) {
+        onExecute(true);
+      } else {
+        onExecute(false);
+      }
     },
     order: 100,
   };
 };
+
+const isModifiedEvent = (event: MouseEvent) =>
+  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
