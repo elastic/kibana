@@ -77,14 +77,19 @@ export function ClassicStreamDetailManagement({
     };
   }
 
-  tabs.advanced = {
-    content: (
-      <UnmanagedElasticsearchAssets definition={definition} refreshDefinition={refreshDefinition} />
-    ),
-    label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
-      defaultMessage: 'Advanced',
-    }),
-  };
+  if (definition.privileges.manage) {
+    tabs.advanced = {
+      content: (
+        <UnmanagedElasticsearchAssets
+          definition={definition}
+          refreshDefinition={refreshDefinition}
+        />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.advancedTab', {
+        defaultMessage: 'Advanced',
+      }),
+    };
+  }
 
   if (!isValidManagementSubTab(tab)) {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'enrich' } }} />;
