@@ -10,6 +10,7 @@ import pLimit from 'p-limit';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { uniq } from 'lodash';
 import pRetry from 'p-retry';
+import { errors } from '@elastic/elasticsearch';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
 import { waitForKbModel } from '../inference_endpoint';
@@ -40,7 +41,7 @@ export async function populateMissingSemanticTextFieldMigration({
   await lmService
     .withLock(PLUGIN_STARTUP_LOCK_ID, async () => {
       const hasKbIndex = await esClient.asInternalUser.indices.exists({
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
       });
 
       if (!hasKbIndex) {
@@ -87,7 +88,7 @@ async function populateMissingSemanticTextFieldRecursively({
   const response = await esClient.asInternalUser.search<KnowledgeBaseEntry>({
     size: 100,
     track_total_hits: true,
-    index: [resourceNames.aliases.kb],
+    index: [resourceNames.writeIndexAlias.kb],
     query: {
       bool: {
         must_not: {
@@ -124,7 +125,7 @@ async function populateMissingSemanticTextFieldRecursively({
 
       return esClient.asInternalUser.update({
         refresh: 'wait_for',
-        index: resourceNames.aliases.kb,
+        index: resourceNames.writeIndexAlias.kb,
         id: hit._id,
         doc: {
           ...hit._source,
@@ -155,7 +156,7 @@ async function isKnowledgeBaseSemanticTextCompatible({
   esClient: { asInternalUser: ElasticsearchClient };
 }): Promise<boolean> {
   const indexSettingsResponse = await esClient.asInternalUser.indices.getSettings({
-    index: resourceNames.aliases.kb,
+    index: resourceNames.writeIndexAlias.kb,
   });
 
   const results = Object.entries(indexSettingsResponse);
@@ -181,4 +182,17 @@ async function isKnowledgeBaseSemanticTextCompatible({
   );
 
   return false;
+}
+
+export function isSemanticTextUnsupportedError(error: Error) {
+  const semanticTextUnsupportedError =
+    'The [sparse_vector] field type is not supported on indices created on versions 8.0 to 8.10';
+
+  const isSemanticTextUnspported =
+    error instanceof errors.ResponseError &&
+    (error.message.includes(semanticTextUnsupportedError) ||
+      // @ts-expect-error
+      error.meta?.body?.error?.caused_by?.reason.includes(semanticTextUnsupportedError));
+
+  return isSemanticTextUnspported;
 }
