@@ -10,6 +10,7 @@ import { css } from '@emotion/css';
 import { EuiFlexItem, EuiPanel, useEuiTheme, euiScrollBarStyles } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import { ConversationEventChanges } from '../../../../common/chat_events';
+import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ChatInputForm } from './chat_input_form';
@@ -43,12 +44,23 @@ export const Chat: React.FC<ChatProps> = ({
   onConversationUpdate,
   connectorId,
 }) => {
-  const { sendMessage, conversationEvents, progressionEvents, chatStatus } = useConversation({
+  const { conversation } = useConversation({ conversationId });
+  const {
+    sendMessage,
+    conversationEvents,
+    setConversationEvents,
+    progressionEvents,
+    status: chatStatus,
+  } = useChat({
     conversationId,
     connectorId,
     agentId,
     onConversationUpdate,
   });
+
+  useEffect(() => {
+    setConversationEvents(conversation?.events ?? []);
+  }, [conversation, setConversationEvents]);
 
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);

@@ -11,12 +11,11 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConversationEventChanges } from '../../../../common/chat_events';
 import { Chat } from './chat';
-import { ChatHeader } from './chat_header';
+import { ChatHeader } from './header_bar/chat_header';
 import { ConversationPanel } from './conversations_panel/conversation_panel';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useKibana } from '../../hooks/use_kibana';
-import { useAgent } from '../../hooks/use_agent';
 
 const newConversationId = 'new';
 
@@ -41,8 +40,6 @@ export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, con
   } = useKibana();
 
   const currentUser = useCurrentUser();
-
-  const { agent } = useAgent({ agentId });
   const { conversations, refresh: refreshConversations } = useConversationList({ agentId });
 
   const onConversationUpdate = useCallback(
@@ -89,7 +86,11 @@ export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, con
           justifyContent="center"
           responsive={false}
         >
-          <ChatHeader connectorId={connectorId} agent={agent} onConnectorChange={setConnectorId} />
+          <ChatHeader
+            connectorId={connectorId}
+            conversationId={conversationId}
+            onConnectorChange={setConnectorId}
+          />
           <Chat
             agentId={agentId}
             conversationId={conversationId}
