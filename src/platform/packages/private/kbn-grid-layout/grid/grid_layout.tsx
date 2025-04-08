@@ -100,16 +100,16 @@ export const GridLayout = ({
      * The only thing that should cause the entire layout to re-render is adding a new row;
      * this subscription ensures this by updating the `rowCount` state when it changes.
      */
-        const rowCountSubscription = gridLayoutStateManager.gridLayout$
-        .pipe(
-          skip(1), // we initialized `rowCount` above, so skip the initial emit
-          map((newLayout) => newLayout.length),
-          distinctUntilChanged()
-        )
-        .subscribe((newRowCount) => {
-          setRowCount(newRowCount);
-        });
-  
+    const rowCountSubscription = gridLayoutStateManager.gridLayout$
+      .pipe(
+        skip(1), // we initialized `rowCount` above, so skip the initial emit
+        map((newLayout) => newLayout.length),
+        distinctUntilChanged()
+      )
+      .subscribe((newRowCount) => {
+        setRowCount(newRowCount);
+      });
+
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
      * mobile view and a static (non-interactable) grid layout
