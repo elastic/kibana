@@ -147,8 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.api.createDataFrameAnalyticsJob(testData.job as DataFrameAnalyticsConfig);
 
-          await ml.navigation.navigateToMl();
-          await ml.navigation.navigateToDataFrameAnalytics();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(testData.job.id as string, 1);
           await ml.dataFrameAnalyticsTable.cloneJob(testData.job.id as string);
@@ -235,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'should display the created job in the analytics table'
           );
-          await ml.dataFrameAnalyticsCreation.navigateToJobManagementPage();
+          await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
           await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
           await ml.dataFrameAnalyticsTable.filterWithSearchString(cloneJobId, 1);
         });
