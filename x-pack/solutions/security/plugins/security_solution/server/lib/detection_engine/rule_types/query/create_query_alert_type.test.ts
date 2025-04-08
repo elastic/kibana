@@ -18,6 +18,7 @@ import { sampleDocNoSortId } from '../__mocks__/es_results';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { docLinksServiceMock } from '@kbn/core/server/mocks';
 import { hasTimestampFields } from '../utils/utils';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine';
 
@@ -44,6 +45,7 @@ jest.mock('../utils/get_list_client', () => ({
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();
   const licensing = licensingMock.createSetup();
+  const docLinks = docLinksServiceMock.createSetupContract();
   const publicBaseUrl = 'http://somekibanabaseurl.com';
   const mockedStatusLogger = ruleExecutionLogMock.forExecutors.create();
   const ruleStatusLogger = () => Promise.resolve(mockedStatusLogger);
@@ -55,6 +57,7 @@ describe('Custom Query Alerts', () => {
 
   const securityRuleTypeWrapper = createSecurityRuleTypeWrapper({
     actions,
+    docLinks,
     lists,
     logger,
     config: createMockConfig(),
