@@ -9,6 +9,7 @@ import React, { FC } from 'react';
 import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { noSearchResultsIllustrationLight, noSearchResultsIllustrationDark } from '@kbn/shared-svg';
 
 interface PopoverPlaceholderProps {
   basePath: string;
@@ -23,7 +24,7 @@ export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
 
   return (
     <EuiFlexGroup
-      style={{ minHeight: 300 }}
+      css={{ minHeight: 300 }}
       data-test-subj="nav-search-no-results"
       direction="column"
       gutterSize="xs"
@@ -36,9 +37,11 @@ export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
             defaultMessage: 'Illustration of black hole',
           })}
           size="fullWidth"
-          url={`${basePath}illustration_product_no_search_results_${
-            colorMode === 'DARK' ? 'dark' : 'light'
-          }.svg`}
+          src={
+            colorMode === 'DARK'
+              ? noSearchResultsIllustrationDark
+              : noSearchResultsIllustrationLight
+          }
         />
 
         {customPlaceholderMessage ?? (
