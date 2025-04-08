@@ -665,7 +665,7 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       if (typeof field === 'string') {
         return !INVALID_ACCESSORS.includes(field);
       }
-      return field !== undefined;
+      return true;
     });
   }
 
