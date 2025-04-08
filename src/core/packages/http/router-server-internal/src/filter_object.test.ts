@@ -40,6 +40,16 @@ test.each([
     input: [{ a: [1, 2] }, ['a.0']],
     output: {},
   },
+  {
+    name: 'heavily nested arrays',
+    input: [[[[[[{ a: 1 }]]]]], ['a']],
+    output: [[[[[{ a: 1 }]]]]],
+  },
+  {
+    name: 'heavily nested arrays part 2',
+    input: [{ a: [[[[[{ b: 1 }, { c: 2 }]]]]] }, ['a.b']],
+    output: { a: [[[[[{ b: 1 }]]]]] },
+  },
 ])('traverse arrays: $name', ({ input: [a, b], output }) => {
   expect(filterObject(a, b as string[])).toEqual(output);
 });

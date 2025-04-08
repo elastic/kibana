@@ -11,7 +11,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 
 /**
- * Behaviour is based on the ES `filter_path` query selector that can reduce
+ * Based on the ES `filter_path` query selector that can reduce
  * the amount of data sent over the wire by specifying paths to include.
  *
  * @note Special behaviour with arrays: the filter path "ignores" arrays and will
