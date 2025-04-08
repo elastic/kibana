@@ -65,35 +65,35 @@ export async function createMcpServer({
     name: 'search',
     description: 'Searches through Salesforce data sources using a semantic query',
     schema: {
-      dataSource: z
-        .string()
-        .describe(
-          `what Salesforce object type to search through. Can only be a out of these ${dataSources}`
-        ),
-      semanticQuery: z
-        .string()
+      objects: z
+        .array(z.string())
         .optional()
-        .describe('Natural language query to search case content semantically'),
+        .describe(
+          `Return what type of Salesforce documents to search through. Can only be a out of these ${dataSources}`
+        ),
+      query: z
+        .string()
+        .describe('Return Salesforce documents that relate to this query to search content semantically'),
       createdAfter: z
         .string()
         .optional()
-        .describe('Return cases created after this date (format: YYYY-MM-DD)'),
+        .describe('Return documents created after this date (format: YYYY-MM-DD)'),
       createdBefore: z
         .string()
         .optional()
-        .describe('Return cases created before this date (format: YYYY-MM-DD)'),
+        .describe('Return documents created before this date (format: YYYY-MM-DD)'),
       updatedAfter: z
         .string()
         .optional()
-        .describe('Return cases updated after this date (format: YYYY-MM-DD)'),
+        .describe('Return documents updated after this date (format: YYYY-MM-DD)'),
       updatedBefore: z
         .string()
         .optional()
-        .describe('Return cases updated before this date (format: YYYY-MM-DD)'),
+        .describe('Return documents updated before this date (format: YYYY-MM-DD)'),
     },
     execute: async ({
-      dataSource,
-      semanticQuery,
+      objects,
+      query,
       createdAfter,
       createdBefore,
       updatedAfter,
@@ -105,17 +105,15 @@ export async function createMcpServer({
           logger,
           integrationId,
           indexName: index,
-          dataSource,
-          params: {
-            semanticQuery,
+          filters: {
+            query,
+            objects,
             createdAfter,
             createdBefore,
             updatedAfter,
             updatedBefore,
           },
         });
-
-        logger.info(`Retrieved ${content.length} support cases`);
 
         return toolResultFactory.contentList(content);
       } catch (e) {
@@ -145,8 +143,6 @@ export async function createMcpServer({
           dataSource,
           id,
         });
-
-        logger.info(`Retrieved ${content.length} support cases`);
 
         return toolResultFactory.contentList(content);
       } catch (e) {
@@ -268,7 +264,6 @@ export async function createMcpServer({
 
         logger.info(`Retrieved ${caseContent.length} support cases`);
 
-        logger.info(() => `Case content: ${JSON.stringify(caseContent)}`);
         return toolResultFactory.contentList(caseContent);
       } catch (e) {
         return toolResultFactory.error(`Error fetching cases: ${e.message}`);

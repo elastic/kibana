@@ -16,11 +16,13 @@ import { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { SupportCase, Account } from './types';
 
+
 interface SearchParams {
   size?: number;
   createdAfter?: string;
   createdBefore?: string;
-  semanticQuery?: string;
+  query?: string;
+  objects?: string[];
   updatedAfter?: string;
   updatedBefore?: string;
 }
@@ -72,30 +74,28 @@ const baseObjectMappings: Record<string, string> = {
  * @param esClient - Elasticsearch client
  * @param logger - Logger instance
  * @param indexName - Index name to query
- * @param dataSource - data source to search through
- * @param params - Search parameters including optional sorting configuration
+ * @param filters - Search filters 
  */
 export async function searchDocs({
   esClient,
   logger,
   integrationId,
   indexName,
-  dataSource,
-  params = {},
+  filters = {},
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   integrationId: string;
   indexName: string;
-  dataSource: string;
-  params: SearchParams;
+  filters: SearchParams;
 }): Promise<ToolContentResult[]> {
-  const size = params.size || 10;
+  const size = filters.size || 10;
+  const { objects, ...params } = filters;
 
   let query: QueryDslQueryContainer = {};
-  if (dataSource == 'support_case') {
+  if (objects?.includes('support_case')) {
     query = buildQuery(params, baseObjectMappings, 'support_case');
-  } else if (dataSource == 'account') {
+  } else if (objects?.includes('account')){
     query = buildQuery(params, baseObjectMappings, 'account');
   } else {
     query = buildQuery(params, baseObjectMappings);
@@ -551,7 +551,7 @@ function buildQuery(
 
   Object.entries(params).forEach(([field, value]) => {
     if (value) {
-      if (field === 'semanticQuery') {
+      if (field === 'query') {
         addSemanticQuery(mustClauses, value);
       } else if (field === 'createdAfter' || field === 'createdBefore') {
         if (!mustClauses.some((clause) => clause.range && clause.range.created_at !== undefined)) {
