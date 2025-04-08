@@ -22,6 +22,8 @@ import { getTransactionFieldConfiguration } from './resources/get_transaction_fi
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 import { RootTransactionProvider } from './hooks/use_root_transaction';
+import { TraceWaterfall } from '../components/trace_waterfall';
+
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
 };
@@ -36,6 +38,7 @@ export function TransactionOverview({
 }: TransactionOverviewProps) {
   const parsedDoc = getTraceDocumentOverview(hit);
   const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
+  const traceId = parsedDoc[TRACE_ID_FIELD];
 
   const detailTitle = i18n.translate(
     'unifiedDocViewer.observability.traces.transactionOverview.title',
@@ -45,7 +48,7 @@ export function TransactionOverview({
   );
 
   return (
-    <RootTransactionProvider traceId={parsedDoc[TRACE_ID_FIELD]} indexPattern={tracesIndexPattern}>
+    <RootTransactionProvider traceId={traceId} indexPattern={tracesIndexPattern}>
       <FieldActionsProvider
         columns={columns}
         filter={filter}
@@ -74,6 +77,12 @@ export function TransactionOverview({
             <>
               <EuiSpacer size="m" />
               <TransactionDurationSummary duration={transactionDuration} />
+            </>
+          )}
+          {traceId && (
+            <>
+              <EuiSpacer size="m" />
+              <TraceWaterfall document={parsedDoc} displayType="transaction" />
             </>
           )}
         </EuiPanel>

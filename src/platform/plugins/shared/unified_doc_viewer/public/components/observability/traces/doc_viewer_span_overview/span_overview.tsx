@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +22,7 @@ import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
+import { TraceWaterfall } from '../components/trace_waterfall';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
@@ -35,14 +36,12 @@ export function SpanOverview({
   onRemoveColumn,
   transactionIndexPattern,
 }: SpanOverviewProps) {
-  const parsedDoc = getTraceDocumentOverview(hit);
+  const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
+  const transaction = parsedDoc[TRANSACTION_ID_FIELD];
 
   return (
-    <TransactionProvider
-      transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
-      indexPattern={transactionIndexPattern}
-    >
+    <TransactionProvider transactionId={transaction} indexPattern={transactionIndexPattern}>
       <FieldActionsProvider
         columns={columns}
         filter={filter}
@@ -75,6 +74,12 @@ export function SpanOverview({
             <>
               <EuiSpacer size="m" />
               <SpanDurationSummary duration={spanDuration} />
+            </>
+          )}
+          {transaction && (
+            <>
+              <EuiSpacer size="m" />
+              <TraceWaterfall document={parsedDoc} displayType="span" />
             </>
           )}
         </EuiPanel>
