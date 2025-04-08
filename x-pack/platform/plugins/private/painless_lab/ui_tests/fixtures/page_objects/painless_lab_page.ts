@@ -30,21 +30,19 @@ export class PainlessLab {
     await this.page.testSubj.locator('painless_lab').waitFor({ state: 'visible' });
   }
 
-  async setCodeEditorValue(value: string, nthIndex?: any) {
+  async setCodeEditorValue(value: string, nthIndex?: number): Promise<void> {
     await this.page.evaluate(
-      ([editorIndex, codeEditorValue]) => {
-        // The monaco property is guaranteed to exist as it's value is provided in @kbn/monaco for this specific purpose, see {@link src/platform/packages/shared/kbn-monaco/src/register_globals.ts}
+      ({ editorIndex, codeEditorValue }) => {
         const editor = window.MonacoEnvironment!.monaco!.editor;
         const textModels = editor.getModels();
 
         if (editorIndex !== undefined) {
           textModels[editorIndex].setValue(codeEditorValue);
         } else {
-          // when specific model instance is unknown, update all models returned
           textModels.forEach((model) => model.setValue(codeEditorValue));
         }
       },
-      [nthIndex, value]
+      { editorIndex: nthIndex, codeEditorValue: value }
     );
   }
 
