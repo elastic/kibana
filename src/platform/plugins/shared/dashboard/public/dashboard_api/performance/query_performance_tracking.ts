@@ -128,12 +128,28 @@ function reportPerformanceMetrics({
 
   const groupedPerformanceMarkers = getPerformanceTrackersGroupedById('Lens');
 
-  const measurements = Object.values(groupedPerformanceMarkers).map((group) => {
+  const measurements = Object.entries(groupedPerformanceMarkers).map(([id, group]) => {
+    const markerName = group[0].name.split(':').slice(0, -1).join(':');
+
     const preFlightStart = group.find((marker) => marker.name.endsWith(':preFlight'))?.startTime;
     const renderStart = group.find((marker) => marker.name.endsWith(':renderStart'))?.startTime;
     const renderComplete = group.find((marker) =>
       marker.name.endsWith(':renderComplete')
     )?.startTime;
+
+    if (preFlightStart && renderStart) {
+      performance.measure(`${markerName}:preFlightDuration`, {
+        start: preFlightStart,
+        end: renderStart,
+      });
+    }
+
+    if (renderComplete && renderStart) {
+      performance.measure(`${markerName}:renderDuration`, {
+        start: renderStart,
+        end: renderComplete,
+      });
+    }
 
     return {
       preFlightDuration: preFlightStart && renderStart ? renderStart - preFlightStart : 0,
