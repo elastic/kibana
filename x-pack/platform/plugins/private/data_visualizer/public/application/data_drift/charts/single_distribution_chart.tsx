@@ -46,7 +46,13 @@ export const SingleDistributionChart = ({
     <Chart>
       <Tooltip body={DataComparisonChartTooltipBody} />
 
-      <Settings baseTheme={chartBaseTheme} locale={i18n.getLocale()} />
+      <Settings
+        baseTheme={chartBaseTheme}
+        theme={{
+          axes: { gridLine: { horizontal: { visible: false }, vertical: { visible: false } } }, // Hide grid lines
+        }}
+        locale={i18n.getLocale()}
+      />
       <Axis
         id="vertical"
         position={Position.Left}
