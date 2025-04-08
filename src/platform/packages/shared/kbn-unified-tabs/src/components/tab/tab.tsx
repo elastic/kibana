@@ -21,6 +21,7 @@ import {
   type EuiThemeComputed,
   type DraggableProvidedDragHandleProps,
   keys,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -62,6 +63,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelectedTabKeyDown,
   } = props;
   const { euiTheme } = useEuiTheme();
+  const [tabLabelId] = useState(() => htmlIdGenerator()());
   const tabInteractiveElementRef = useRef<HTMLDivElement | null>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
@@ -69,10 +71,6 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close session',
-  });
-
-  const tabButtonAriaLabel = i18n.translate('unifiedTabs.tabButtonAriaLabel', {
-    defaultMessage: 'Click to select, double-click to edit session name, or drag to reorder',
   });
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
@@ -194,10 +192,10 @@ export const Tab: React.FC<TabProps> = (props) => {
         <>
           <div
             ref={tabInteractiveElementRef}
-            aria-label={tabButtonAriaLabel}
             {...dragHandleProps}
             {...getTabAttributes(item, tabContentId)}
             data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
+            aria-labelledby={tabLabelId}
             role="tab"
             tabIndex={isSelected ? 0 : -1}
             aria-haspopup="true"
@@ -208,7 +206,7 @@ export const Tab: React.FC<TabProps> = (props) => {
           >
             <div css={getTabContentCss(euiTheme)}>
               <div css={getTabLabelContainerCss(euiTheme)} className="unifiedTabs__tabLabel">
-                <EuiText color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
+                <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
                   {item.label}
                 </EuiText>
               </div>
