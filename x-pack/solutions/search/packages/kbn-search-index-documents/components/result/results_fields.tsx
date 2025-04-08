@@ -39,7 +39,6 @@ export const ResultFields: React.FC<Props> = ({ documentId, fields, isExpanded }
           })}
         </EuiTableHeaderCell>
       </EuiTableHeader>
-
       <EuiTableBody>
         {fields.map((field) => (
           <ResultField
