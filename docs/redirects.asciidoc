@@ -1134,3 +1134,7 @@ Refer to {api-kibana}/group/endpoint-cases[cases API].
 
 Refer to {api-kibana}/group/endpoint-ml[machine learning APIs].
 
+[role="exclude",id="upgrade-assistant-api-default-field"]
+== Add default field API
+
+This API was removed in 7.13.0. Refer to <<upgrade-assistant-api>>.
