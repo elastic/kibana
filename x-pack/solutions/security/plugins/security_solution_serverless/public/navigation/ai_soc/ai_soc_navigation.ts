@@ -15,8 +15,8 @@ import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/lin
 
 import { type SecurityProductTypes } from '../../../common/config';
 import { ProductLine } from '../../../common/product';
-import { AiForTheSocIcon } from './icons';
 import { createStackManagementNavigationTree } from '../stack_management_navigation';
+import { AiForTheSocIcon } from './icons';
 
 const SOLUTION_NAME = i18n.translate(
   'xpack.securitySolutionServerless.socNavLinks.projectType.title',
@@ -65,9 +65,7 @@ export const createAiSocNavigationTree$ = (): Rx.Observable<NavigationTreeDefini
               },
             ],
             renderAs: 'panelOpener',
-            spaceAfter: null,
           },
-
           {
             id: 'configurations',
             spaceBefore: null,

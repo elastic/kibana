@@ -19,10 +19,9 @@ import { usePanel } from './context';
 
 interface Props {
   item: ChromeProjectNavigationNode;
-  parentIsAccordion?: boolean;
 }
 
-export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
+export const PanelNavItem: FC<Props> = ({ item }) => {
   const { navigateToUrl } = useServices();
   const { close: closePanel } = usePanel();
   const { id, icon, deepLink, openInNewTab, isExternalLink, renderItem } = item;
@@ -46,7 +45,7 @@ export const PanelNavItem: FC<Props> = ({ item, parentIsAccordion }) => {
   ) : (
     <EuiListGroupItem
       key={id}
-      label={parentIsAccordion ? <SubItemTitle item={item} /> : item.title}
+      label={<SubItemTitle item={item} />}
       wrapText
       className={classNames(
         'sideNavPanelLink',
