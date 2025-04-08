@@ -65,7 +65,7 @@ export function RetentionMetadata({
         button={
           <EuiToolTip
             content={
-              !definition.privileges.manage
+              !definition.privileges.lifecycle
                 ? i18n.translate(
                     'xpack.streams.entityDetailViewWithoutParams.editDataRetention.insufficientPrivileges',
                     {
