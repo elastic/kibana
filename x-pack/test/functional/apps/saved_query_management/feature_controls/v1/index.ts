@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Feature controls', function () {
+  describe('Saved query management - Feature controls', function () {
     loadTestFile(require.resolve('./security'));
   });
 }

@@ -8,7 +8,8 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Saved query management', function () {
-    loadTestFile(require.resolve('./feature_controls'));
+  describe('discover - group 1', function () {
+    loadTestFile(require.resolve('./reporting')); // 6 min
+    loadTestFile(require.resolve('./reporting_embeddable')); // 8 min
   });
 }
