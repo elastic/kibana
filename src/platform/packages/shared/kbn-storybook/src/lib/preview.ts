@@ -57,6 +57,9 @@ const preview: Preview = {
       },
     },
   },
+  parameters: {
+    a11y: { test: 'error' },
+  },
 };
 
 // eslint-disable-next-line import/no-default-export
