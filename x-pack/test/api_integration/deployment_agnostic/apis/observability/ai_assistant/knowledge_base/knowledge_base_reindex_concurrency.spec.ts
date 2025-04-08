@@ -7,12 +7,14 @@
 
 import expect from '@kbn/expect';
 import { times } from 'lodash';
+import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
   setupKnowledgeBase,
   deleteKbIndices,
   addSampleDocsToInternalKb,
+  getConcreteWriteIndexFromAlias,
 } from '../utils/knowledge_base';
 import { createOrUpdateIndexAssets } from '../utils/index_assets';
 import { animalSampleDocs } from '../utils/sample_docs';
@@ -76,28 +78,35 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when running multiple re-index operations in sequence', () => {
+      const iterations = 20;
       let results: Array<{ status: number; result: boolean; errorMessage: string | undefined }>;
 
       before(async () => {
         results = [];
-        for (const _ of times(20)) {
+        for (const _ of times(iterations)) {
           results.push(await reIndexKnowledgeBase());
         }
       });
 
-      it('makes 20 requests', async () => {
-        expect(results).to.have.length(20);
+      it(`makes ${iterations} requests`, async () => {
+        expect(results).to.have.length(iterations);
       });
 
       it('every re-index operation succeeds', async () => {
         const successResults = results.filter((result) => result.status === 200);
-        expect(successResults).to.have.length(20);
+        expect(successResults).to.have.length(iterations);
         expect(successResults.every((r) => r.result === true)).to.be(true);
       });
 
       it('no requests should fail', async () => {
         const failures = results.filter((result) => result.status !== 200);
         expect(failures).to.have.length(0);
+      });
+
+      it('should increment the write index sequence number', async () => {
+        const writeIndex = await getConcreteWriteIndexFromAlias(es);
+        const sequenceNumber = (iterations + 1).toString().padStart(6, '0'); // e.g. 000021
+        expect(writeIndex).to.be(`${resourceNames.writeIndexAlias.kb}-${sequenceNumber}`);
       });
     });
   });

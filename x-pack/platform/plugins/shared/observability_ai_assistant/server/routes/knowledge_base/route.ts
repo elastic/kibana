@@ -113,9 +113,10 @@ const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  handler: async (resources): Promise<void> => {
+  handler: async (resources): Promise<{ result: boolean }> => {
     const client = await resources.service.getClient({ request: resources.request });
-    await client.reIndexKnowledgeBaseWithLock();
+    const result = await client.reIndexKnowledgeBaseWithLock();
+    return { result };
   },
 });
 
