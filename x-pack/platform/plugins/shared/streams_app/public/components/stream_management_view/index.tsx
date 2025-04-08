@@ -5,21 +5,27 @@
  * 2.0.
  */
 import React from 'react';
-import { useKibana } from '../../hooks/use_kibana';
+import { i18n } from '@kbn/i18n';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StreamDetailManagement } from '../data_management/stream_detail_management';
-import { StreamDetailContextProvider } from '../../hooks/use_stream_detail';
+import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 
 export function StreamManagementView() {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
-
   const {
-    path: { key: name },
+    path: { key, tab },
   } = useStreamsAppParams('/{key}/management/{tab}', true);
 
-  return (
-    <StreamDetailContextProvider name={name} streamsRepositoryClient={streamsRepositoryClient}>
-      <StreamDetailManagement />;
-    </StreamDetailContextProvider>
-  );
+  useStreamsAppBreadcrumbs(() => {
+    return [
+      {
+        title: i18n.translate('xpack.streams.streamManagementView.title', {
+          defaultMessage: 'Manage stream',
+        }),
+        path: `/{key}/management/{tab}`,
+        params: { path: { key, tab } },
+      } as const,
+    ];
+  }, [key, tab]);
+
+  return <StreamDetailManagement />;
 }

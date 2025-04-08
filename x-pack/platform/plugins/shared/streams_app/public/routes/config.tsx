@@ -34,6 +34,9 @@ const streamsAppRoutes = {
       </StreamsAppRouterBreadcrumb>
     ),
     children: {
+      '/': {
+        element: <StreamListView />,
+      },
       '/{key}': {
         element: (
           <StreamRoot>
@@ -71,9 +74,6 @@ const streamsAppRoutes = {
             }),
           },
         },
-      },
-      '/': {
-        element: <StreamListView />,
       },
     },
   },
