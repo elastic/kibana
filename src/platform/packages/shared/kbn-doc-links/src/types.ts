@@ -527,6 +527,7 @@ export interface DocLinks {
     proxiesSettings: string;
     unprivilegedMode: string;
     httpMonitoring: string;
+    agentLevelLogging: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -645,6 +646,10 @@ export interface DocLinks {
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
+  };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
   };
 }
 
