@@ -15,12 +15,15 @@ const KEY_FIELDS: Array<keyof ApmOtelFields> = [
   'resource.attributes.agent.name',
   'resource.attributes.service.name',
   'resource.attributes.deployment.environment',
+  'resource.attributes.service.instance.id',
+  'resource.attributes.telemetry.sdk.name',
+  'resource.attributes.telemetry.sdk.language',
   'attributes.span.destination.service.resource',
-  'attributes.service.target.type',
   'attributes.event.outcome',
   'attributes.span.name',
   'attributes.service.target.name',
   'attributes.service.target.type',
+  'scope.attributes.service.framework.name',
 ];
 
 const METRICSET_NAME = 'service_destination';
