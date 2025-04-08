@@ -10,7 +10,7 @@
 const SERVERLESS_ONLY = ['@svlSecurity', '@svlOblt', '@svlSearch', '@svlChat'];
 const ESS_ONLY = ['@ess'];
 // svlChat is truly serverless only and doesn't have a stateful counterpart
-const DEPLOYMENT_AGNOSTIC = SERVERLESS_ONLY.filter((t) => t !== '@svlChat').concat(ESS_ONLY);
+const DEPLOYMENT_AGNOSTIC = ['@ess', '@svlSecurity', '@svlOblt', '@svlSearch'];
 const PERFORMANCE = ['@perf'];
 
 export const tags = {
