@@ -50,6 +50,10 @@ export class DiscoverSearchSessionManager {
     this.searchSessionId$ = this.deps.session.getSession$();
   }
 
+  restartSearchSession(searchSessionId: string) {
+    this.deps.session.start(searchSessionId);
+  }
+
   /**
    * Get next session id by either starting or restoring a session.
    * When navigating away from the restored session {@link SEARCH_SESSION_ID_QUERY_PARAM} is removed from the URL using history.replace

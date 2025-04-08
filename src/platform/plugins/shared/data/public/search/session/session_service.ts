@@ -438,13 +438,14 @@ export class SessionService {
   }
 
   /**
-   * Start a new search session
+   * Start a new search session. If a sessionId is provided, it will be used, otherwise a uuid will
+   * be generated for the sessionId.
    * @returns sessionId
    */
-  public start() {
+  public start(sessionId?: string) {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
 
-    this.state.transitions.start({ appName: this.currentApp });
+    this.state.transitions.start({ appName: this.currentApp, sessionId });
 
     return this.getSessionId()!;
   }

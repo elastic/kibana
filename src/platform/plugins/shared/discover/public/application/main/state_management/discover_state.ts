@@ -587,7 +587,7 @@ export function getDiscoverStateContainer({
   const fetchData = (initial: boolean = false) => {
     addLog('fetchData', { initial });
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
-      dataStateContainer.fetch();
+      dataStateContainer.fetch(initial);
     }
   };
 

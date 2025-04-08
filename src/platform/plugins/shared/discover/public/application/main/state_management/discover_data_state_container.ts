@@ -45,7 +45,7 @@ export type DataTotalHits$ = BehaviorSubject<DataTotalHitsMsg>;
 
 export type DataRefetch$ = Subject<DataRefetchMsg>;
 
-export type DataRefetchMsg = 'reset' | 'fetch_more' | undefined;
+export type DataRefetchMsg = 'reset' | 'fetch_more' | 'initial' | undefined;
 
 export interface DataMsg {
   fetchStatus: FetchStatus;
@@ -72,7 +72,7 @@ export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
    */
-  fetch: () => void;
+  fetch: (initial?: boolean) => void;
   /**
    * Fetch more data from ES
    */
@@ -209,6 +209,7 @@ export function getDataStateContainer({
       options: {
         reset: val === 'reset',
         fetchMore: val === 'fetch_more',
+        initial: val === 'initial',
       },
       searchSessionId:
         (val === 'fetch_more' && searchSessionManager.getCurrentSearchSessionId()) ||
@@ -222,7 +223,30 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        mergeMap(async ({ options, searchSessionId }) => {
+        mergeMap(async ({ options }) => {
+          const currentTab = getCurrentTab();
+
+          // If we are returning to a tab and this is the initial query, use the existing
+          // searchSessionId & time range so that we can re-use the existing request from cache
+          const searchSessionId =
+            (options.fetchMore && searchSessionManager.getCurrentSearchSessionId()) ||
+            (options.initial && currentTab.dataRequestParams.searchSessionId) ||
+            searchSessionManager.getNextSearchSessionId();
+
+          if (searchSessionId === currentTab.dataRequestParams.searchSessionId) {
+            searchSessionManager.restartSearchSession(searchSessionId);
+          } else {
+            internalState.dispatch(
+              injectCurrentTab(internalStateActions.setDataRequestParams)({
+                dataRequestParams: {
+                  timeRangeAbsolute: timefilter.getAbsoluteTime(),
+                  timeRangeRelative: timefilter.getTime(),
+                  searchSessionId,
+                },
+              })
+            );
+          }
+
           const commonFetchDeps = {
             initialFetchStatus: getInitialFetchStatus(),
             inspectorAdapters,
@@ -254,22 +278,13 @@ export function getDataStateContainer({
             return;
           }
 
-          internalState.dispatch(
-            injectCurrentTab(internalStateActions.setDataRequestParams)({
-              dataRequestParams: {
-                timeRangeAbsolute: timefilter.getAbsoluteTime(),
-                timeRangeRelative: timefilter.getTime(),
-              },
-            })
-          );
-
           await profilesManager.resolveDataSourceProfile({
             dataSource: appStateContainer.getState().dataSource,
             dataView: getSavedSearch().searchSource.getField('index'),
             query: appStateContainer.getState().query,
           });
 
-          const { id: currentTabId, resetDefaultProfileState } = getCurrentTab();
+          const { id: currentTabId, resetDefaultProfileState } = currentTab;
           const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, currentTabId);
           const dataView = currentDataView$.getValue();
           const defaultProfileState = dataView
@@ -356,7 +371,7 @@ export function getDataStateContainer({
     };
   }
 
-  const fetchQuery = async (resetQuery?: boolean) => {
+  const fetchQuery = async (initialQuery?: boolean) => {
     const query = appStateContainer.getState().query;
     const currentDataView = getSavedSearch().searchSource.getField('index');
 
@@ -367,8 +382,8 @@ export function getDataStateContainer({
       }
     }
 
-    if (resetQuery) {
-      refetch$.next('reset');
+    if (initialQuery) {
+      refetch$.next('initial');
     } else {
       refetch$.next(undefined);
     }
