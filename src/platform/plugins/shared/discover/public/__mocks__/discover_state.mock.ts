@@ -55,16 +55,18 @@ export function getDiscoverStateMock({
       ...(toasts && withNotifyOnErrors(toasts)),
     });
   runtimeStateManager = runtimeStateManager ?? createRuntimeStateManager();
+  const internalState = createInternalStateStore({
+    services,
+    customizationContext,
+    runtimeStateManager,
+    urlStateStorage: stateStorageContainer,
+  });
   const container = getDiscoverStateContainer({
+    tabId: internalState.getState().tabs.allIds[0],
     services,
     customizationContext,
     stateStorageContainer,
-    internalState: createInternalStateStore({
-      services,
-      customizationContext,
-      runtimeStateManager,
-      urlStateStorage: stateStorageContainer,
-    }),
+    internalState,
     runtimeStateManager,
   });
   if (savedSearch !== false) {

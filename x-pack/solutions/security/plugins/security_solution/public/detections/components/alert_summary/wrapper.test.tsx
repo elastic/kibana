@@ -18,13 +18,19 @@ import {
 } from './wrapper';
 import { useKibana } from '../../../common/lib/kibana';
 import { TestProviders } from '../../../common/mock';
+import { useAddIntegrationsUrl } from '../../../common/hooks/use_add_integrations_url';
+import { useIntegrationsLastActivity } from '../../hooks/alert_summary/use_integrations_last_activity';
+import { ADD_INTEGRATIONS_BUTTON_TEST_ID } from './integrations/integration_section';
 import { SEARCH_BAR_TEST_ID } from './search_bar/search_bar_section';
+import { KPIS_SECTION } from './kpis/kpis_section';
 
 jest.mock('../../../common/components/search_bar', () => ({
   // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
   SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
 }));
 jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/hooks/use_add_integrations_url');
+jest.mock('../../hooks/alert_summary/use_integrations_last_activity');
 
 const packages: PackageListItem[] = [
   {
@@ -46,6 +52,7 @@ describe('<Wrapper />', () => {
             clearInstanceCache: jest.fn(),
           },
         },
+        http: { basePath: { prepend: jest.fn() } },
       },
     });
 
@@ -85,11 +92,18 @@ describe('<Wrapper />', () => {
   });
 
   it('should render the content if the dataView is created correctly', async () => {
+    (useAddIntegrationsUrl as jest.Mock).mockReturnValue({ onClick: jest.fn() });
+    (useIntegrationsLastActivity as jest.Mock).mockReturnValue({
+      isLoading: true,
+      lastActivities: {},
+    });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         data: {
           dataViews: {
-            create: jest.fn().mockReturnValue({ id: 'id', toSpec: jest.fn() }),
+            create: jest
+              .fn()
+              .mockReturnValue({ getIndexPattern: jest.fn(), id: 'id', toSpec: jest.fn() }),
             clearInstanceCache: jest.fn(),
           },
           query: { filterManager: { getFilters: jest.fn() } },
@@ -113,7 +127,9 @@ describe('<Wrapper />', () => {
 
       expect(getByTestId(DATA_VIEW_LOADING_PROMPT_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(CONTENT_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(ADD_INTEGRATIONS_BUTTON_TEST_ID)).toBeInTheDocument();
       expect(getByTestId(SEARCH_BAR_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(KPIS_SECTION)).toBeInTheDocument();
     });
   });
 });

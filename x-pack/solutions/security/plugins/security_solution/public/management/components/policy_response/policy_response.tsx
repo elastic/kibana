@@ -39,6 +39,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
 
     & .euiTreeView__nodeLabel {
       width: 100%;
+      user-select: text;
+      cursor: text;
     }
   }
 
@@ -67,6 +69,8 @@ const StyledEuiTreeView = styled(EuiTreeView)`
     & .euiTreeView__nodeLabel {
       & .euiText {
         font-size: ${({ theme }) => theme.eui.euiFontSize};
+        user-select: text;
+        cursor: text;
       }
     }
   }

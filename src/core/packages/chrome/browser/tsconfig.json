@@ -23,7 +23,8 @@
     "@kbn/core-application-browser",
     "@kbn/deeplinks-security",
     "@kbn/deeplinks-fleet",
-    "@kbn/deeplinks-shared"
+    "@kbn/deeplinks-shared",
+    "@kbn/deeplinks-chat"
   ],
   "exclude": [
     "target/**/*",

@@ -21,7 +21,7 @@ import { Ast } from '@kbn/interpreter';
 import { LayoutDirection } from '@elastic/charts';
 import { hasIcon } from '@kbn/visualization-ui-components';
 import { CollapseArgs, CollapseFunction } from '../../../common/expressions';
-import { CollapseExpressionFunction } from '../../../common/expressions/collapse/types';
+import { CollapseExpressionFunction } from '../../../common/expressions/defs/collapse/types';
 import { DatasourceLayers } from '../../types';
 import { showingBar } from './metric_visualization';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor } from './visualization';
@@ -139,7 +139,9 @@ export const toExpression = (
     };
   };
 
-  const collapseExpressionFunction = state.collapseFn
+  const canCollapseBy = state.collapseFn && isMetricNumeric;
+
+  const collapseExpressionFunction = canCollapseBy
     ? buildExpressionFunction<CollapseExpressionFunction>(
         'lens_collapse',
         getCollapseFnArguments()
@@ -154,7 +156,7 @@ export const toExpression = (
     secondaryPrefix: state.secondaryPrefix,
     max: state.maxAccessor,
     breakdownBy:
-      state.breakdownByAccessor && !state.collapseFn ? state.breakdownByAccessor : undefined,
+      state.breakdownByAccessor && !canCollapseBy ? state.breakdownByAccessor : undefined,
     trendline: trendlineExpression ? [trendlineExpression] : [],
     subtitle: state.subtitle ?? undefined,
     progressDirection: showingBar(state)
