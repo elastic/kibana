@@ -11,17 +11,15 @@ import { ALERTS_SUMMARY_PROMPT, GET_STARTED_PAGE } from '../constants';
 import { ALERT_SUMMARY_URL, ALERTS_URL, RULES_LANDING_URL } from '../../../urls/navigation';
 
 const testPageAccess = () => {
-  it('should display the alerts summary prompt when visiting the Alerts Summary page', () => {
+  it('should show page or redirect depending on capabilities', () => {
     visit(ALERT_SUMMARY_URL);
     cy.get(ALERTS_SUMMARY_PROMPT).should('exist');
-  });
 
-  it('should redirect to Get Started page when visiting the Alerts page', () => {
+    // should redirect out from alerts to get started page
     visit(ALERTS_URL);
     cy.get(GET_STARTED_PAGE).should('exist');
-  });
 
-  it('should redirect to Get Started page when visiting the Rules page', () => {
+    // should redirect out from rules to get started page
     visit(RULES_LANDING_URL);
     cy.get(GET_STARTED_PAGE).should('exist');
   });
@@ -33,13 +31,11 @@ describe('Capabilities', { tags: '@serverless' }, () => {
       login('admin');
     });
 
-    describe('Page access checks', () => {
-      testPageAccess();
-    });
+    testPageAccess();
   });
 
   describe('User with siem v1 role', () => {
-    const v1Role = {
+    const roleDescriptor = {
       elasticsearch: {
         indices: [
           {
@@ -61,7 +57,7 @@ describe('Capabilities', { tags: '@serverless' }, () => {
 
     before(() => {
       cy.task('createServerlessCustomRole', {
-        v1Role,
+        roleDescriptor,
         roleName: 'siemv1',
       });
     });
@@ -74,13 +70,11 @@ describe('Capabilities', { tags: '@serverless' }, () => {
       cy.task('deleteServerlessCustomRole', 'siemv1');
     });
 
-    describe('Page access checks', () => {
-      testPageAccess();
-    });
+    testPageAccess();
   });
 
   describe('User with siem v2 role', () => {
-    const v2Role = {
+    const roleDescriptor = {
       elasticsearch: {
         indices: [
           {
@@ -102,7 +96,7 @@ describe('Capabilities', { tags: '@serverless' }, () => {
 
     before(() => {
       cy.task('createServerlessCustomRole', {
-        v2Role,
+        roleDescriptor,
         roleName: 'siemV2',
       });
     });
@@ -115,8 +109,6 @@ describe('Capabilities', { tags: '@serverless' }, () => {
       cy.task('deleteServerlessCustomRole', 'siemV2');
     });
 
-    describe('Page access checks', () => {
-      testPageAccess();
-    });
+    testPageAccess();
   });
 });
