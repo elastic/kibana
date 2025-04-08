@@ -9,7 +9,7 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand = ESQLCommand | ESQLAstTimeseriesCommand | ESQLAstJoinCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -88,7 +88,7 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
+export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
   sources: ESQLSource[];
 }
 
