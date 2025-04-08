@@ -14,7 +14,7 @@ import {
   SynthtraceDynamicTemplate,
 } from '@kbn/apm-synthtrace-client';
 
-export function getDynamicTemplateTransform() {
+export function getOtelDynamicTemplateTransform() {
   return new Transform({
     objectMode: true,
     transform(document: ESDocumentWithOperation<ApmOtelFields>, encoding, callback) {
