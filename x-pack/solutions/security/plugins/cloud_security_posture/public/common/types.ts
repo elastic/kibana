@@ -25,3 +25,9 @@ export interface FindingsBaseESQueryConfig {
 }
 
 export type Sort<T> = NonNullable<Criteria<T>['sort']>;
+
+export type VulnerabilityGroupingMultiValueOptions =
+  | 'vulnerability.id'
+  | 'package.name'
+  | 'package.version'
+  | 'package.fixed_version';
