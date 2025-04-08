@@ -8,9 +8,8 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('feature controls', function () {
-    this.tags('skipFirefox');
-    loadTestFile(require.resolve('./discover_security'));
-    loadTestFile(require.resolve('./discover_spaces'));
+  describe('discover - group 1', function () {
+    loadTestFile(require.resolve('./reporting'));
+    loadTestFile(require.resolve('./reporting_embeddable'));
   });
 }

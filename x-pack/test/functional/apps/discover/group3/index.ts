@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('discover', function () {
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./preserve_url'));
-    loadTestFile(require.resolve('./async_scripted_fields'));
-    loadTestFile(require.resolve('./reporting'));
-    loadTestFile(require.resolve('./reporting_embeddable'));
-    loadTestFile(require.resolve('./error_handling'));
+  describe('discover - group 3', function () {
     loadTestFile(require.resolve('./saved_queries'));
     loadTestFile(require.resolve('./saved_searches'));
     loadTestFile(require.resolve('./visualize_field'));
