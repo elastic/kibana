@@ -52,9 +52,6 @@ export const RulePage = (props: RulePageProps) => {
   `;
 
   const onSaveInternal = useCallback(() => {
-      ...formData,
-      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
-    });
     onSave({
       ...formData,
       ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
