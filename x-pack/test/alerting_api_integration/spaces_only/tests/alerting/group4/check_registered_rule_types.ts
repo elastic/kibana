@@ -68,7 +68,6 @@ export default function createRegisteredRuleTypeTests({ getService }: FtrProvide
         'apm.anomaly',
         'apm.error_rate',
         'apm.transaction_error_rate',
-        'attack-discovery',
       ];
 
       expect(

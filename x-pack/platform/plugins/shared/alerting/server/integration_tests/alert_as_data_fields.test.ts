@@ -64,7 +64,6 @@ const ruleTypes: string[] = [
   'siem.thresholdRule',
   'siem.newTermsRule',
   'siem.notifications',
-  'attack-discovery',
 ];
 
 describe('Alert as data fields checks', () => {
