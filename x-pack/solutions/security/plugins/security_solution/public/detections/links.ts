@@ -29,9 +29,6 @@ export const alertsLink: LinkItem = {
 };
 
 export const alertSummaryLink: LinkItem = {
-  id: SecurityPageName.alertSummary,
-  path: ALERT_SUMMARY_PATH,
-  title: ALERT_SUMMARY,
   capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.external_detections`]],
   globalNavPosition: 3,
   globalSearchKeywords: [
@@ -40,4 +37,7 @@ export const alertSummaryLink: LinkItem = {
     }),
   ],
   hideTimeline: true,
+  id: SecurityPageName.alertSummary,
+  path: ALERT_SUMMARY_PATH,
+  title: ALERT_SUMMARY,
 };
