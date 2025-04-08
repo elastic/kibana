@@ -8,6 +8,7 @@
 import React from 'react';
 import {
   EuiCodeBlock,
+  EuiListGroup,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
@@ -18,20 +19,29 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type ChangelogEntry, formatChangelog } from '../utils';
+import { type ChangelogChange, type ChangelogEntry, formatChangelog } from '../utils';
 
 interface Props {
   changelog: ChangelogEntry[];
+  breakingChanges: ChangelogChange[];
   isLoading: boolean;
   onClose: () => void;
 }
 
 export const ChangelogModal: React.FunctionComponent<Props> = ({
   changelog,
+  breakingChanges,
   isLoading,
   onClose,
 }) => {
   const changelogText = formatChangelog(changelog);
+  const breakingChangesList = breakingChanges.map(({ link, description }) => {
+    return {
+      label: description,
+      href: link,
+      external: true,
+    };
+  });
 
   return (
     <EuiModal maxWidth={true} onClose={onClose} data-test-subj="integrations.changelogModal">
@@ -39,6 +49,7 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
         <EuiModalHeaderTitle>{'Changelog'}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
+        <EuiListGroup listItems={breakingChangesList} />
         <EuiSkeletonText
           lines={10}
           size="s"
