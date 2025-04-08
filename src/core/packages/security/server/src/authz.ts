@@ -10,7 +10,7 @@
 export enum AuthzOptOutReason {
   DelegateToESClient = 'Route delegates authorization to the scoped ES client',
   DelegateToSOClient = 'Route delegates authorization to the scoped SO client',
-  ServeStaticFiles = 'Serving static files that do not require authorization',
+  ServeStaticFiles = 'Route serves static files that do not require authorization',
 }
 
 export class AuthzDisabled {
@@ -29,3 +29,25 @@ export class AuthzDisabled {
   );
   static readonly serveStaticFiles = AuthzDisabled.fromReason(AuthzOptOutReason.ServeStaticFiles);
 }
+
+
+export const unwindNestedSecurityPrivileges = <
+  T extends Array<string | { allOf?: string[]; anyOf?: string[] }>
+>(
+  privileges: T
+): string[] =>
+  privileges.reduce((acc: string[], privilege) => {
+    if (typeof privilege === 'object') {
+      if (privilege.allOf?.length) {
+        acc.push(...privilege.allOf);
+      }
+
+      if (privilege?.anyOf?.length) {
+        acc.push(...privilege.anyOf);
+      }
+    } else if (typeof privilege === 'string') {
+      acc.push(privilege);
+    }
+
+    return acc;
+  }, []);
