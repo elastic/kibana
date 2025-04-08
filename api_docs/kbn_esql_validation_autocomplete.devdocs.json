@@ -336,8 +336,8 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
+            "section": "def-common.ESQLAstTimeseriesCommand",
+            "text": "ESQLAstTimeseriesCommand"
           },
           " | ",
           {
@@ -380,8 +380,8 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
+            "section": "def-common.ESQLAstTimeseriesCommand",
+            "text": "ESQLAstTimeseriesCommand"
           },
           " | ",
           {
@@ -432,8 +432,8 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
+            "section": "def-common.ESQLAstTimeseriesCommand",
+            "text": "ESQLAstTimeseriesCommand"
           },
           " | ",
           {
@@ -598,8 +598,8 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
+            "section": "def-common.ESQLAstTimeseriesCommand",
+            "text": "ESQLAstTimeseriesCommand"
           },
           " | ",
           {

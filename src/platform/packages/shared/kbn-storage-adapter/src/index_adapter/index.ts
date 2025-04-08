@@ -244,8 +244,7 @@ export class StorageIndexAdapter<
     if (simulateIndexTemplateResponse.template.mappings) {
       await this.esClient.indices.putMapping({
         index: name,
-        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
-        body: simulateIndexTemplateResponse.template.mappings,
+        ...simulateIndexTemplateResponse.template.mappings,
       });
     }
   }
@@ -398,6 +397,16 @@ export class StorageIndexAdapter<
     refresh = 'wait_for',
     ...request
   }): Promise<StorageClientBulkResponse> => {
+    if (operations.length === 0) {
+      this.logger.debug(`Bulk request with 0 operations is a noop`);
+      return Promise.resolve({
+        errors: false,
+        items: [],
+        took: 0,
+        ingest_took: 0,
+      });
+    }
+
     this.logger.debug(`Processing ${operations.length} bulk operations`);
 
     const bulkOperations = operations.flatMap((operation): BulkOperationContainer[] => {
