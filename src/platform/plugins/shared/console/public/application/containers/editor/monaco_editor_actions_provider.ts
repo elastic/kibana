@@ -38,6 +38,7 @@ import {
   shouldTriggerSuggestions,
   trackSentRequests,
   getRequestFromEditor,
+  isInsideTripleQuotes,
 } from './utils';
 
 import type { AdjustedParsedRequest } from './types';
@@ -783,7 +784,10 @@ export class MonacoEditorActionsProvider {
     return this.editor.getPosition() ?? { lineNumber: 1, column: 1 };
   }
 
-  private async isPositionInsideScript(model, position): Promise<boolean> {
+  private async isPositionInsideScript(
+    model: monaco.editor.ITextModel,
+    position: monaco.Position
+  ): Promise<boolean> {
     const selectedRequests = await this.getSelectedParsedRequests();
 
     for (const request of selectedRequests) {
@@ -798,7 +802,7 @@ export class MonacoEditorActionsProvider {
           endColumn: position.column,
         });
 
-        if (this.isInsideTripleQuote(requestContentBefore)) {
+        if (isInsideTripleQuotes(requestContentBefore)) {
           return true;
         }
       }

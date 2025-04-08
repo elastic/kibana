@@ -471,7 +471,7 @@ export const hasUnclosedQuote = (lineContent: string): boolean => {
   return insideString;
 };
 
-export const isInsideTripleQuote = (text: string) => {
+export const isInsideTripleQuotes = (text: string) => {
   let insideTripleQuote = false;
   let i = 0;
 
