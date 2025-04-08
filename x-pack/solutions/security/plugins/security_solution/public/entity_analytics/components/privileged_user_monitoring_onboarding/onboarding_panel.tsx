@@ -16,14 +16,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import { ONBOARDING_VIDEO_SOURCE } from '../../../common/constants';
 import { AddDataSourcePanel } from './add_data_source';
-
 export const PrivilegedUserMonitoringOnboardingPanel = () => {
   return (
     <EuiPanel paddingSize="none">
       <EuiPanel paddingSize="xl" color="subdued" hasShadow={false} hasBorder={false}>
-        <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xl">
+        <EuiFlexGroup
+          direction="row"
+          justifyContent="spaceBetween"
+          gutterSize="xl"
+          alignItems="center"
+        >
           <EuiFlexItem grow={1} paddingSize="xl">
             <EuiPanel paddingSize="s" hasShadow={false} hasBorder={false} color="subdued">
               <EuiFlexGroup justifyContent="spaceBetween" direction="column">
@@ -81,19 +86,20 @@ export const PrivilegedUserMonitoringOnboardingPanel = () => {
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
-            <EuiFlexGroup justifyContent="spaceAround">
-              <iframe
-                className="eui-alignMiddle"
-                style={{ border: '8px solid #FF007F' }} // DELETE THIS LINE WHEN THE VIDEO IS READY
-                allowFullScreen
-                height="240px"
-                width="427px"
-                referrerPolicy="no-referrer"
-                sandbox="allow-scripts allow-same-origin"
-                src={ONBOARDING_VIDEO_SOURCE}
-                title={'????????'} // TODO
-              />
-            </EuiFlexGroup>
+            <iframe
+              css={css`
+                height: auto;
+                width: 100%;
+                aspect-ratio: 16 / 9;
+                max-width: 480px;
+              `}
+              className="eui-alignMiddle"
+              style={{ border: '8px solid #FF007F' }} // DELETE THIS LINE WHEN THE VIDEO IS READY
+              referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin"
+              src={ONBOARDING_VIDEO_SOURCE}
+              title={'????????'} // TODO
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
