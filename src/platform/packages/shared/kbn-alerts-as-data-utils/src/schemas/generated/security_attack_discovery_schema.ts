@@ -68,7 +68,7 @@ export const schemaGeoPoint = rt.union([
 ]);
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
-const SecurityAttackdiscoveryAlertRequired = rt.type({
+const SecurityAttackDiscoveryAlertRequired = rt.type({
   '@timestamp': schemaDate,
   'kibana.alert.attack_discovery.alert_ids': schemaStringArray,
   'kibana.alert.attack_discovery.alerts_context_count': schemaNumber,
@@ -93,7 +93,7 @@ const SecurityAttackdiscoveryAlertRequired = rt.type({
   'kibana.space_ids': schemaStringArray,
 });
 // prettier-ignore
-const SecurityAttackdiscoveryAlertOptional = rt.partial({
+const SecurityAttackDiscoveryAlertOptional = rt.partial({
   'event.action': schemaString,
   'event.kind': schemaString,
   'event.original': schemaString,
@@ -140,6 +140,6 @@ const SecurityAttackdiscoveryAlertOptional = rt.partial({
 });
 
 // prettier-ignore
-export const SecurityAttackdiscoveryAlertSchema = rt.intersection([SecurityAttackdiscoveryAlertRequired, SecurityAttackdiscoveryAlertOptional, AlertSchema, EcsSchema]);
+export const SecurityAttackDiscoveryAlertSchema = rt.intersection([SecurityAttackDiscoveryAlertRequired, SecurityAttackDiscoveryAlertOptional, AlertSchema, EcsSchema]);
 // prettier-ignore
-export type SecurityAttackdiscoveryAlert = rt.TypeOf<typeof SecurityAttackdiscoveryAlertSchema>;
+export type SecurityAttackDiscoveryAlert = rt.TypeOf<typeof SecurityAttackDiscoveryAlertSchema>;

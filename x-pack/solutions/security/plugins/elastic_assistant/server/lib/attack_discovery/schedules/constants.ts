@@ -6,11 +6,11 @@
  */
 
 import { IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { AttackDiscoveryAlert } from './types';
+import { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
 import { attackDiscoveryAlertFieldMap } from './fields';
 
-export const ATTACK_DISCOVERY_ALERTS_AAD_CONFIG: IRuleTypeAlerts<AttackDiscoveryAlert> = {
-  context: 'security.attackdiscovery',
+export const ATTACK_DISCOVERY_ALERTS_AAD_CONFIG: IRuleTypeAlerts<SecurityAttackDiscoveryAlert> = {
+  context: 'security.attack-discovery',
   mappings: { fieldMap: attackDiscoveryAlertFieldMap },
   isSpaceAware: true,
   shouldWrite: true,
