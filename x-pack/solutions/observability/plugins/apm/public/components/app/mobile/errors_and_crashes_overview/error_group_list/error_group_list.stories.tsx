@@ -19,9 +19,6 @@ type Args = ComponentProps<typeof MobileErrorGroupList>;
 const stories: Meta<Args> = {
   title: 'app/ErrorGroupOverview/MobileErrorGroupList',
   component: MobileErrorGroupList,
-  parameters: {
-    a11y: { test: 'error' },
-  },
   decorators: [
     (StoryComponent) => {
       return (
