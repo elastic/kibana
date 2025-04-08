@@ -6,7 +6,6 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 import { enableAttackDiscoverySchedulesRoute } from './enable';
 import { serverMock } from '../../../__mocks__/server';
@@ -35,10 +34,7 @@ describe('enableAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.elasticAssistant.getRegisteredFeatures.mockReturnValue({
-      ...defaultAssistantFeatures,
-      assistantAttackDiscoverySchedulingEnabled: true,
-    });
+    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     enableAttackDiscoverySchedulesRoute(server.router);
   });
 
@@ -81,13 +77,9 @@ describe('enableAttackDiscoverySchedulesRoute', () => {
     });
   });
 
-  describe('Capabilities', () => {
-    it('returns a 404 if scheduling feature is not registered', async () => {
-      context.elasticAssistant.getRegisteredFeatures.mockReturnValue({
-        ...defaultAssistantFeatures,
-        assistantAttackDiscoverySchedulingEnabled: false,
-      });
-
+  describe('Disabled feature flag', () => {
+    it('should return a 404 if scheduling feature is not registered', async () => {
+      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
       const response = await server.inject(
         enableAttackDiscoverySchedulesRequest('schedule-4'),
         requestContextMock.convertContext(context)

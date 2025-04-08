@@ -346,7 +346,7 @@ export const updateAttackDiscoverySchedulesRequest = (
 
 export const enableAttackDiscoverySchedulesRequest = (id: string) =>
   requestMock.create({
-    method: 'put',
+    method: 'post',
     path: ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE,
     params: { id },
   });

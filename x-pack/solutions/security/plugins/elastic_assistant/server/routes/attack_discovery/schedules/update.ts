@@ -20,6 +20,7 @@ import { ATTACK_DISCOVERY_SCHEDULES_BY_ID } from '../../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { convertAlertingRuleToSchedule } from './utils/convert_alerting_rule_to_schedule';
 import { performChecks } from '../../helpers';
+import { isFeatureAvailable } from './utils/is_feature_available';
 
 export const updateAttackDiscoverySchedulesRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -61,9 +62,13 @@ export const updateAttackDiscoverySchedulesRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
 
-        // Perform license, authenticated user and Attack Discovery Schedule FF checks
+        // Check if scheduling feature available
+        if (!(await isFeatureAvailable(ctx))) {
+          return response.notFound();
+        }
+
+        // Perform license and authenticated user
         const checkResponse = await performChecks({
-          capability: 'assistantAttackDiscoverySchedulingEnabled',
           context: ctx,
           request,
           response,

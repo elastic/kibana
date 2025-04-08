@@ -6,7 +6,6 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 
 import { findAttackDiscoverySchedulesRoute } from './find';
@@ -60,10 +59,7 @@ describe('findAttackDiscoverySchedulesRoute', () => {
     context.elasticAssistant.getAttackDiscoverySchedulingDataClient.mockResolvedValue(
       mockSchedulingDataClient
     );
-    context.elasticAssistant.getRegisteredFeatures.mockReturnValue({
-      ...defaultAssistantFeatures,
-      assistantAttackDiscoverySchedulingEnabled: true,
-    });
+    context.core.featureFlags.getBooleanValue.mockResolvedValue(true);
     findAttackDiscoverySchedulesRoute(server.router);
     findAttackDiscoverySchedule.mockResolvedValue(
       getInternalFindAttackDiscoverySchedulesMock([
@@ -116,13 +112,9 @@ describe('findAttackDiscoverySchedulesRoute', () => {
     });
   });
 
-  describe('Capabilities', () => {
-    it('returns a 404 if scheduling feature is not registered', async () => {
-      context.elasticAssistant.getRegisteredFeatures.mockReturnValue({
-        ...defaultAssistantFeatures,
-        assistantAttackDiscoverySchedulingEnabled: false,
-      });
-
+  describe('Disabled feature flag', () => {
+    it('should return a 404 if scheduling feature is not registered', async () => {
+      context.core.featureFlags.getBooleanValue.mockResolvedValue(false);
       const response = await server.inject(
         findAttackDiscoverySchedulesRequest(),
         requestContextMock.convertContext(context)
