@@ -10,6 +10,8 @@ import { useKibana } from '../../common/lib/kibana';
 import { ASSISTANT_FEATURE_ID } from '../../../common/constants';
 
 export interface UseAssistantAvailability {
+  // True when product_line: 'ai_soc', product_tier: 'search_ai_lake'
+  isAI4SOC: boolean;
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
   // When true, the Assistant is hidden and unavailable
@@ -44,6 +46,7 @@ export const useAssistantAvailability = (): UseAssistantAvailability => {
     capabilities.actions?.save === true;
 
   return {
+    isAI4SOC: capabilities.siemV2.configurations,
     hasAssistantPrivilege,
     hasConnectorsAllPrivilege,
     hasConnectorsReadPrivilege,
