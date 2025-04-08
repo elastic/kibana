@@ -8,10 +8,31 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
+import { CoreSetup } from '@kbn/core/server';
 import { resourceNames } from '..';
-import { createKbConcreteIndex } from '../create_or_update_index_assets';
+import { createKbConcreteIndex } from '../startup_migrations/create_or_update_index_assets';
+import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
-export async function reIndexKnowledgeBase({
+export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant:kb_reindexing';
+export async function reIndexKnowledgeBaseWithLock({
+  core,
+  logger,
+  esClient,
+}: {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  logger: Logger;
+  esClient: {
+    asInternalUser: ElasticsearchClient;
+  };
+}): Promise<boolean> {
+  const lmService = new LockManagerService(core, logger);
+  return lmService.withLock(KB_REINDEXING_LOCK_ID, () =>
+    reIndexKnowledgeBase({ logger, esClient })
+  );
+}
+
+async function reIndexKnowledgeBase({
   logger,
   esClient,
 }: {
@@ -19,32 +40,12 @@ export async function reIndexKnowledgeBase({
   esClient: {
     asInternalUser: ElasticsearchClient;
   };
-}): Promise<void> {
+}): Promise<boolean> {
   logger.debug('Initiating knowledge base re-indexing...');
 
   try {
     const originalIndex = resourceNames.concreteIndexName.kb;
     const tempIndex = `${resourceNames.aliases.kb}-000002`;
-
-    const indexSettingsResponse = await esClient.asInternalUser.indices.getSettings({
-      index: originalIndex,
-    });
-
-    const indexSettings = indexSettingsResponse[originalIndex].settings;
-    const createdVersion = parseInt(indexSettings?.index?.version?.created ?? '', 10);
-
-    // Check if the index was created before version 8.11
-    const versionThreshold = 8110000; // Version 8.11.0
-    if (createdVersion >= versionThreshold) {
-      logger.debug(
-        `Knowledge base index "${originalIndex}" was created in version ${createdVersion}, and does not require re-indexing. Semantic text field is already supported. Aborting`
-      );
-      return;
-    }
-
-    logger.info(
-      `Knowledge base index was created in ${createdVersion} and must be re-indexed in order to support semantic_text field. Re-indexing now...`
-    );
 
     // Create temporary index
     logger.debug(`Creating temporary index "${tempIndex}"...`);
@@ -82,11 +83,10 @@ export async function reIndexKnowledgeBase({
     logger.debug(`Deleting temporary index "${tempIndex}"...`);
     await esClient.asInternalUser.indices.delete({ index: tempIndex });
 
-    logger.info(
-      'Re-indexing knowledge base completed successfully. Semantic text field is now supported.'
-    );
+    logger.info('Re-indexing knowledge base completed successfully');
+    return true;
   } catch (error) {
-    throw new Error(`Failed to reindex knowledge base: ${error.message}`);
+    throw new Error(`Failed to re-index knowledge base: ${error.message}`);
   }
 }
 
