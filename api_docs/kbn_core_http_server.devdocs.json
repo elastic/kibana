@@ -3558,6 +3558,10 @@
               },
               {
                 "plugin": "reporting",
+                "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/health/health.ts"
+              },
+              {
+                "plugin": "reporting",
                 "path": "x-pack/platform/plugins/private/reporting/server/routes/internal/management/jobs.ts"
               },
               {
@@ -4099,6 +4103,10 @@
               {
                 "plugin": "searchPlayground",
                 "path": "x-pack/solutions/search/plugins/search_playground/server/routes.ts"
+              },
+              {
+                "plugin": "searchQueryRules",
+                "path": "x-pack/solutions/search/plugins/search_query_rules/server/routes.ts"
               },
               {
                 "plugin": "searchSynonyms",
@@ -10802,7 +10810,8 @@
             "label": "anyRequired",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "AnyRequiredCondition",
+              " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
             "deprecated": false,
@@ -10816,7 +10825,8 @@
             "label": "allRequired",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "AllRequiredCondition",
+              " | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/route.ts",
             "deprecated": false,
@@ -16336,6 +16346,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.AllRequiredCondition",
+        "type": "Type",
+        "tags": [],
+        "label": "AllRequiredCondition",
+        "description": [],
+        "signature": [
+          "(string | { anyOf: string[]; })[]"
+        ],
+        "path": "src/core/packages/http/server/src/router/route.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-server.AnyKibanaRequest",
         "type": "Type",
         "tags": [],
@@ -16348,6 +16373,21 @@
           ">"
         ],
         "path": "src/core/packages/http/server/src/router/request.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-server.AnyRequiredCondition",
+        "type": "Type",
+        "tags": [],
+        "label": "AnyRequiredCondition",
+        "description": [],
+        "signature": [
+          "(string | { allOf: string[]; })[]"
+        ],
+        "path": "src/core/packages/http/server/src/router/route.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

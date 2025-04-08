@@ -2658,11 +2658,13 @@
         "label": "ObservabilityEsQueryRequest",
         "description": [],
         "signature": [
-          "{ params?: any[] | undefined; filter?: ",
+          "{ params?: ",
+          "FieldValue",
+          "[] | undefined; filter?: ",
           "QueryDslQueryContainer",
-          " | undefined; query: string; profile?: boolean | undefined; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
+          " | undefined; query: string; profile?: boolean | undefined; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
           "EsqlTableValuesContainer",
-          ">> | undefined; drop_null_columns?: boolean | undefined; }"
+          ">> | undefined; drop_null_columns?: boolean | undefined; include_ccs_metadata?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
         "deprecated": false,
