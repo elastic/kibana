@@ -74,6 +74,10 @@ function locateIndexPatterns(
 ): ContentPackSavedObject {
   const content = object;
 
+  if (content.type === 'index-pattern') {
+    content.attributes = options.indexPattern(content.attributes);
+  }
+
   if (content.type === 'dashboard') {
     const attributes = content.attributes as DashboardAttributes;
     const panels = (JSON.parse(attributes.panelsJSON) as SavedDashboardPanel[]).map((panel) =>

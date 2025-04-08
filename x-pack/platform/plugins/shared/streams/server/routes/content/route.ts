@@ -7,27 +7,24 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod';
-import {
-  createConcatStream,
-  createListStream,
-  createMapStream,
-  createPromiseFromStreams,
-} from '@kbn/utils';
+import { createConcatStream, createListStream, createPromiseFromStreams } from '@kbn/utils';
 import { installManagedIndexPattern } from '@kbn/fleet-plugin/server/services/epm/kibana/assets/install';
 import {
   ContentPackEntry,
-  INDEX_PLACEHOLDER,
   contentPackIncludedObjectsSchema,
-  findIndexPatterns,
   isIncludeAll,
-  replaceIndexPatterns,
 } from '@kbn/content-packs-schema';
 import { Asset } from '../../../common';
 import { DashboardAsset, DashboardLink } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
 import { StatusError } from '../../lib/streams/errors/status_error';
 import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
-import { generateArchive, parseArchive } from '../../lib/content';
+import {
+  generateArchive,
+  parseArchive,
+  prepareForExport,
+  prepareForImport,
+} from '../../lib/content';
 
 const exportContentRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/content/export 2023-10-31',
@@ -44,7 +41,7 @@ const exportContentRoute = createServerRoute({
       name: z.string(),
       description: z.string(),
       version: z.string(),
-      pattern_replacements: z.record(z.string(), z.string()),
+      replaced_patterns: z.array(z.string()),
       include: contentPackIncludedObjectsSchema,
     }),
   }),
@@ -86,28 +83,18 @@ const exportContentRoute = createServerRoute({
       includeReferencesDeep: true,
     });
 
-    const objects: ContentPackEntry[] = await createPromiseFromStreams([
+    const savedObjects: ContentPackEntry[] = await createPromiseFromStreams([
       exportStream,
-      createMapStream((object: ContentPackEntry) => {
-        if (object.type === 'dashboard') {
-          const patterns = findIndexPatterns(object);
-          const replacements = {
-            ...params.body.pattern_replacements,
-            ...patterns
-              .filter((pattern) => pattern.startsWith(params.path.name))
-              .reduce((acc, pattern) => {
-                acc[pattern] = pattern.replace(params.path.name, INDEX_PLACEHOLDER);
-                return acc;
-              }, {} as Record<string, string>),
-          };
-
-          return replaceIndexPatterns(object, replacements);
-        }
-        return object;
-      }),
       createConcatStream([]),
     ]);
-    const archive = await generateArchive(params.body, objects);
+    const archive = await generateArchive(
+      params.body,
+      prepareForExport({
+        savedObjects,
+        source: params.path.name,
+        replacedPatterns: params.body.replaced_patterns,
+      })
+    );
 
     return response.ok({
       body: archive,
@@ -163,28 +150,15 @@ const importContentRoute = createServerRoute({
       savedObjectsImporter: importer,
     });
 
-    const { successResults, errors } = await importer.import({
-      readStream: createListStream(
-        contentPack.entries
-          .filter(
-            (entry) =>
-              isIncludeAll(params.body.include) ||
-              (entry.type === 'dashboard' &&
-                params.body.include.objects.dashboards.includes(entry.id))
-          )
-          .map((entry) => {
-            const patterns = findIndexPatterns(entry);
-            const replacements = patterns
-              .filter((pattern) => pattern.startsWith(INDEX_PLACEHOLDER))
-              .reduce((acc, pattern) => {
-                acc[pattern] = pattern.replace(INDEX_PLACEHOLDER, params.path.name);
-                return acc;
-              }, {} as Record<string, string>);
+    const savedObjects = prepareForImport({
+      target: params.path.name,
+      include: params.body.include,
+      savedObjects: contentPack.entries,
+    });
 
-            return replaceIndexPatterns(entry, replacements);
-          })
-      ),
-      createNewCopies: true,
+    const { successResults, errors } = await importer.import({
+      readStream: createListStream(savedObjects),
+      createNewCopies: false,
       overwrite: true,
     });
 

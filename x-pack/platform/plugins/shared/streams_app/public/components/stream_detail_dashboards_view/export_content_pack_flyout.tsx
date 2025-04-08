@@ -9,12 +9,7 @@ import React, { useState } from 'react';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import {
-  ContentPackEntry,
-  INDEX_PLACEHOLDER,
-  findIndexPatterns,
-  isIndexPlaceholder,
-} from '@kbn/content-packs-schema';
+import { ContentPackEntry, findIndexPatterns, isIndexPlaceholder } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -70,7 +65,7 @@ export function ExportContentPackFlyout({
               name: definition.stream.name,
               description: '',
               version: '1.0.0',
-              pattern_replacements: {},
+              replaced_patterns: [],
               include: { all: {} },
             },
           },
@@ -96,9 +91,7 @@ export function ExportContentPackFlyout({
   const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
     []
   );
-  const [indexPatternReplacements, setIndexPatternReplacements] = useState<Record<string, boolean>>(
-    {}
-  );
+  const [replacedIndexPatterns, setReplacedIndexPatterns] = useState<Record<string, boolean>>({});
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -137,12 +130,12 @@ export function ExportContentPackFlyout({
                   </p>
                   {
                     <EuiCheckboxGroup
-                      idToSelectedMap={indexPatternReplacements}
+                      idToSelectedMap={replacedIndexPatterns}
                       onChange={(id) =>
-                        setIndexPatternReplacements({
-                          ...indexPatternReplacements,
+                        setReplacedIndexPatterns({
+                          ...replacedIndexPatterns,
                           ...{
-                            [id]: !indexPatternReplacements[id],
+                            [id]: !replacedIndexPatterns[id],
                           },
                         })
                       }
@@ -183,12 +176,9 @@ export function ExportContentPackFlyout({
                   return;
                 }
 
-                const replacements = Object.keys(indexPatternReplacements).reduce((acc, index) => {
-                  if (indexPatternReplacements[index]) {
-                    acc[index] = INDEX_PLACEHOLDER;
-                  }
-                  return acc;
-                }, {} as Record<string, string>);
+                const replacedPatterns = Object.entries(replacedIndexPatterns)
+                  .filter(([, selected]) => selected)
+                  .map(([pattern]) => pattern);
 
                 const manifest = {
                   name: definition.stream.name,
@@ -203,7 +193,7 @@ export function ExportContentPackFlyout({
                       path: { name: definition.stream.name },
                       body: {
                         ...manifest,
-                        pattern_replacements: replacements,
+                        replaced_patterns: replacedPatterns,
                         include: {
                           objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
                         },

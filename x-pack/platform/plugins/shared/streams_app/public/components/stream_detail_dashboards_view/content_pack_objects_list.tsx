@@ -19,7 +19,7 @@ export function ContentPackObjectsList({
 }) {
   return (
     <EuiBasicTable
-      items={objects}
+      items={objects.filter(({ type }) => type === 'dashboard')}
       itemId={(entry: ContentPackEntry) => entry.id}
       columns={[
         {

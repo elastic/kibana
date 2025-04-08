@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/common/content_management/v2';
+import type { DataViewSavedObjectAttrs } from '@kbn/data-views-plugin/common/data_views';
 
 export interface ContentPackManifest {
   name: string;
@@ -26,9 +27,10 @@ export interface ContentPack extends ContentPackManifest {
 }
 
 type ContentPackDashboard = SavedObject<DashboardAttributes>;
-export type ContentPackSavedObject = ContentPackDashboard;
+type ContentPackDataView = SavedObject<DataViewSavedObjectAttrs>;
+export type ContentPackSavedObject = ContentPackDashboard | ContentPackDataView;
 
-export type ContentPackEntry = ContentPackDashboard;
+export type ContentPackEntry = ContentPackSavedObject;
 
 export interface ContentPackIncludeObjects {
   objects: {
@@ -40,7 +42,7 @@ export interface ContentPackIncludeAll {
   all: {};
 }
 
-type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
+export type ContentPackIncludedObjects = ContentPackIncludeObjects | ContentPackIncludeAll;
 
 const contentPackIncludeObjectsSchema = z.object({
   objects: z.object({ dashboards: z.array(z.string()) }),
