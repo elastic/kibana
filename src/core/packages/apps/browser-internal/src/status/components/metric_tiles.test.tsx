@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom';
 import { MetricTile } from './metric_tiles';
 import { Metric } from '../lib';
 
@@ -50,34 +49,42 @@ const metricWithMeta: Metric = {
 };
 
 describe('MetricTile', () => {
-  it('correctly displays an untyped metric', () => {
+  it('correct displays an untyped metric', () => {
     render(<MetricTile metric={untypedMetric} />);
+    expect(screen.getByTestId('serverMetric-a-metric')).toBeInTheDocument();
     expect(screen.getByText('A metric')).toBeInTheDocument();
-    expect(screen.getByText('1.8')).toBeInTheDocument();
+    expect(screen.getByText('1.80')).toBeInTheDocument();
   });
-
-  it('correctly displays a byte metric', () => {
+  it('correct displays a byte metric', () => {
     render(<MetricTile metric={byteMetric} />);
+    expect(screen.getByTestId('serverMetric-heap-total')).toBeInTheDocument();
     expect(screen.getByText('Heap Total')).toBeInTheDocument();
-    expect(screen.getByText('1501560832')).toBeInTheDocument();
+    expect(screen.getByText('1.40 GB')).toBeInTheDocument();
   });
 
-  it('correctly displays a float metric', () => {
+  it('correct displays a float metric', () => {
     render(<MetricTile metric={floatMetric} />);
     expect(screen.getByText('Load')).toBeInTheDocument();
-    expect(screen.getByText('4.0537109375, 3.36669921875, 3.1220703125')).toBeInTheDocument();
+    expect(screen.getByText('4.05, 3.37, 3.12')).toBeInTheDocument();
   });
 
-  it('correctly displays a time metric', () => {
-    render(<MetricTile metric={timeMetric} />);
-    expect(screen.getByText('Response Time Max')).toBeInTheDocument();
-    expect(screen.getByText('1234')).toBeInTheDocument();
+  it('correct displays a time metric', () => {
+    const { getByTestId } = render(<MetricTile metric={timeMetric} />);
+    const card = getByTestId('serverMetric-response-time-max');
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveTextContent('Response Time Max');
+    expect(card).toHaveTextContent('1234.00 ms');
   });
 
   it('correctly displays a metric with metadata', () => {
-    render(<MetricTile metric={metricWithMeta} />);
-    expect(screen.getByText('Delay')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('Percentiles')).toBeInTheDocument();
+    const { getByTestId } = render(<MetricTile metric={metricWithMeta} />);
+    const card = getByTestId('serverMetric-delay');
+    expect(card).toBeInTheDocument();
+    expect(card).toHaveTextContent('Delay avg');
+    expect(card).toHaveTextContent('1.00 ms');
+    expect(card).toHaveTextContent('Percentiles');
+    expect(card).toHaveTextContent('50: 1.00 ms; 95: 5.00 ms; 99: 10.00 ms', {
+      normalizeWhitespace: true,
+    });
   });
 });
