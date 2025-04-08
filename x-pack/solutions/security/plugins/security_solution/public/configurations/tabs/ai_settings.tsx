@@ -6,9 +6,11 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { AIForSOCSettingsManagement } from '@kbn/elastic-assistant';
-import type { ManagementSettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
-import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
+import {
+  AIForSOCSettingsManagement,
+  CONVERSATIONS_TAB,
+  type ManagementSettingsTabs,
+} from '@kbn/elastic-assistant';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';

@@ -107,6 +107,7 @@ export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
     }, [onTabChange, currentTab, tabsConfig]);
     return (
       <EuiFlexGroup
+        data-test-subj="AIForSOCSettingsManagement"
         css={css`
           margin-top: ${euiTheme.size.l};
         `}

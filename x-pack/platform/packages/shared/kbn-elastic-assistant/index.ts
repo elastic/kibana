@@ -169,3 +169,5 @@ export {
   YOUR_ANONYMIZATION_SETTINGS,
 } from './impl/knowledge_base/translations';
 export { AIForSOCSettingsManagement } from './impl/assistant/settings/ai_for_soc_settings_management';
+export { CONVERSATIONS_TAB } from './impl/assistant/settings/const';
+export type { ManagementSettingsTabs } from './impl/assistant/settings/types';
