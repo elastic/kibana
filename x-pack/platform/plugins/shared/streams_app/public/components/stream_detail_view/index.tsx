@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
 import { IngestStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';

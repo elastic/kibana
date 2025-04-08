@@ -8,6 +8,6 @@
  */
 
 import * as helpers from './helpers';
-import { validationMetricsCommandTestSuite } from './test_suites/validation.command.metrics';
+import { validationTimeseriesCommandTestSuite } from './test_suites/validation.command.metrics';
 
-validationMetricsCommandTestSuite(helpers.setup);
+validationTimeseriesCommandTestSuite(helpers.setup);

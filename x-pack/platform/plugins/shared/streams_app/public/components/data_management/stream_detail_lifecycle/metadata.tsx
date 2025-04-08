@@ -175,7 +175,7 @@ export function RetentionMetadata({
         })}
         tip={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateDetails', {
           defaultMessage:
-            'Estimated average (stream total size divided by the number of days since creation).',
+            'Approximate average (stream total size divided by the number of days since creation).',
         })}
         value={
           statsError ? (
