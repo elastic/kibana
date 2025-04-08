@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { last } from 'lodash';
@@ -14,6 +13,11 @@ import { CoreSetup } from '@kbn/core/server';
 import { resourceNames } from '..';
 import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
+import {
+  addIndexWriteBlock,
+  hasIndexWriteBlock,
+  removeIndexWriteBlock,
+} from './index_write_block_utils';
 
 export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant:kb_reindexing';
 export async function reIndexKnowledgeBaseWithLock({
@@ -26,7 +30,7 @@ export async function reIndexKnowledgeBaseWithLock({
   esClient: {
     asInternalUser: ElasticsearchClient;
   };
-}): Promise<void> {
+}): Promise<boolean> {
   const lmService = new LockManagerService(core, logger);
   return lmService.withLock(KB_REINDEXING_LOCK_ID, () =>
     reIndexKnowledgeBase({ logger, esClient })
@@ -39,9 +43,24 @@ async function reIndexKnowledgeBase({
 }: {
   logger: Logger;
   esClient: { asInternalUser: ElasticsearchClient };
-}): Promise<void> {
+}): Promise<boolean> {
   logger.debug('Initializing re-indexing of knowledge base...');
-  await waitForWriteBlockToBeRemoved({ esClient, logger, index: resourceNames.writeIndexAlias.kb });
+  if (await hasIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb })) {
+    throw new Error(
+      `Write block is already set on the knowledge base index: ${resourceNames.writeIndexAlias.kb}`
+    );
+  }
+  const activeReindexingTask = await getActiveReindexingTaskId(
+    esClient,
+    resourceNames.writeIndexAlias.kb
+  );
+
+  if (activeReindexingTask) {
+    throw new Error(
+      `Re-indexing task "${activeReindexingTask}" is already in progress for the knowledge base index: ${resourceNames.writeIndexAlias.kb}`
+    );
+  }
+
   await addIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
 
   try {
@@ -50,7 +69,7 @@ async function reIndexKnowledgeBase({
   } catch (error) {
     if (error instanceof ReIndexAbortedError) {
       logger.warn(`Re-indexing knowledge base aborted: ${error.message}`);
-      return;
+      return false;
     }
 
     logger.error(`Re-indexing knowledge base failed: ${error.message}`);
@@ -58,6 +77,8 @@ async function reIndexKnowledgeBase({
   } finally {
     await removeIndexWriteBlock({ esClient, index: resourceNames.writeIndexAlias.kb });
   }
+
+  return true;
 }
 
 async function _reIndexKnowledgeBase({
@@ -116,7 +137,7 @@ async function getCurrentWriteIndexName(esClient: { asInternalUser: Elasticsearc
   );
 
   const currentWriteIndexName = Object.entries(response).find(
-    ([index, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index
+    ([, aliasInfo]) => aliasInfo.aliases[resourceNames.writeIndexAlias.kb]?.is_write_index
   )?.[0];
 
   return currentWriteIndexName;
@@ -142,14 +163,6 @@ export function getNextWriteIndexName(currentWriteIndexName: string | undefined)
   return `${resourceNames.writeIndexAlias.kb}-${nextIndexSequenceNumber}`;
 }
 
-export function isKnowledgeBaseIndexWriteBlocked(error: any) {
-  return (
-    error instanceof EsErrors.ResponseError &&
-    error.message.includes(`cluster_block_exception`) &&
-    error.message.includes(resourceNames.writeIndexAlias.kb)
-  );
-}
-
 async function getCurrentAndNextWriteIndexNames({
   esClient,
   logger,
@@ -165,116 +178,28 @@ async function getCurrentAndNextWriteIndexNames({
     );
   }
 
-  try {
-    logger.debug(`Creating new write index "${nextWriteIndexName}"`);
-    await esClient.asInternalUser.indices.create({ index: nextWriteIndexName });
-  } catch (error) {
-    if (
-      error instanceof EsErrors.ResponseError &&
-      error?.body?.error?.type === 'resource_already_exists_exception'
-    ) {
-      const existingTaskId = await getOngoingReindexTaskId(esClient, currentWriteIndexName);
-      if (!existingTaskId) {
-        throw new ReIndexAbortedError(`The target index "${nextWriteIndexName}" already exists.`);
-      }
-
-      logger.info(
-        `Reindex operation already in progress (Task ID: ${existingTaskId}). Waiting for it to complete...`
-      );
-      await waitForReIndexTaskToComplete({ esClient, taskId: existingTaskId, logger });
-      throw new ReIndexAbortedError(
-        `Re-indexing was aborted because another re-index operation was in progress`
-      );
-    }
-  }
+  logger.debug(`Creating new write index "${nextWriteIndexName}"`);
+  await esClient.asInternalUser.indices.create({ index: nextWriteIndexName });
 
   return { currentWriteIndexName, nextWriteIndexName };
 }
 
-function removeIndexWriteBlock({
-  esClient,
-  index,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  index: string;
-}) {
-  return esClient.asInternalUser.indices.putSettings({
-    index,
-    body: { 'index.blocks.write': false },
-  });
-}
-
-async function getOngoingReindexTaskId(
+async function getActiveReindexingTaskId(
   esClient: { asInternalUser: ElasticsearchClient },
   indexName: string
 ) {
-  return pRetry(
-    async () => {
-      const response = await esClient.asInternalUser.tasks.list({
-        detailed: true,
-        actions: ['indices:data/write/reindex'],
-      });
-
-      for (const node of Object.values(response.nodes ?? {})) {
-        for (const [taskId, task] of Object.entries(node.tasks)) {
-          if (task.description?.includes(indexName)) {
-            return taskId;
-          }
-        }
-      }
-
-      throw new Error('Re-index task not found. Maybe it is not running.');
-    },
-    { retries: 5, minTimeout: 500, factor: 1 }
-  ).catch(() => {
-    // if task id was not found after 5 retries, then return undefined
-    return undefined;
+  const response = await esClient.asInternalUser.tasks.list({
+    detailed: true,
+    actions: ['indices:data/write/reindex'],
   });
-}
 
-async function addIndexWriteBlock({
-  esClient,
-  index,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  index: string;
-}) {
-  await esClient.asInternalUser.indices.addBlock({ index, block: 'write' });
-}
-
-async function hasIndexWriteBlock({
-  esClient,
-  index,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  index: string;
-}) {
-  const response = await esClient.asInternalUser.indices.getSettings({ index });
-  const writeBlockSetting = Object.values(response)[0]?.settings?.index?.blocks?.write;
-  return writeBlockSetting === 'true' || writeBlockSetting === true;
-}
-
-export async function waitForWriteBlockToBeRemoved({
-  esClient,
-  logger,
-  index,
-}: {
-  esClient: { asInternalUser: ElasticsearchClient };
-  logger: Logger;
-  index: string;
-}) {
-  return pRetry(
-    async () => {
-      const isBlocked = await hasIndexWriteBlock({ esClient, index });
-      if (isBlocked) {
-        logger.debug(`Waiting for the write block to be removed from "${index}"...`);
-        throw new Error(
-          'Waiting for the re-index operation to complete and the write block to be removed...'
-        );
+  for (const node of Object.values(response.nodes ?? {})) {
+    for (const [taskId, task] of Object.entries(node.tasks)) {
+      if (task.description?.includes(indexName)) {
+        return taskId;
       }
-    },
-    { forever: true, maxTimeout: 10000 }
-  );
+    }
+  }
 }
 
 async function waitForReIndexTaskToComplete({

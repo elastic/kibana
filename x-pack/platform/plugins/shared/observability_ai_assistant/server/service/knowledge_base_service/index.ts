@@ -30,10 +30,10 @@ import {
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
-import { isKnowledgeBaseIndexWriteBlocked } from './reindex_knowledge_base';
 import { reIndexKnowledgeBaseWithLock } from './reindex_knowledge_base';
 import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 import { isSemanticTextUnsupportedError } from '../startup_migrations/populate_missing_semantic_text_field_migration';
+import { isKnowledgeBaseIndexWriteBlocked } from './index_write_block_utils';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
