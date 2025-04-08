@@ -359,7 +359,6 @@ describe('EditOutputFlyout', () => {
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost');
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).not.toBeNull();
 
     expect(utils.queryByTestId('advancedSSLOptionsButton')).not.toBeNull();
     fireEvent.click(utils.getByTestId('advancedSSLOptionsButton'));
@@ -409,13 +408,11 @@ describe('EditOutputFlyout', () => {
     );
 
     expect(utils.queryByTestId('settingsOutputsFlyout.kibanaURLInput')).toBeNull();
-    expect(utils.queryByTestId('kibanaAPIKeySecretInput')).toBeNull();
 
     fireEvent.click(utils.getByTestId('syncIntegrationsSwitch'));
     expect(
       (utils.getByTestId('settingsOutputsFlyout.kibanaURLInput') as HTMLInputElement).value
     ).toEqual('http://localhost:5601');
-    expect((utils.getByTestId('kibanaAPIKeySecretInput') as HTMLInputElement).value).toEqual('key');
 
     fireEvent.click(utils.getByText('Save and apply settings'));
 

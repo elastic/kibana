@@ -255,10 +255,6 @@ describe('output preconfiguration', () => {
               id: '101112',
               hash: serviceTokenHash,
             },
-            kibana_api_key: {
-              id: '131415',
-              hash: serviceKibanaAPIKeyHash,
-            },
             ssl: {
               key: {
                 id: '789',
@@ -277,7 +273,6 @@ describe('output preconfiguration', () => {
           is_preconfigured: true,
           secrets: {
             service_token: 'secretServiceToken',
-            kibana_api_key: 'secretKibanaAPIKey',
           },
         },
       ];
@@ -900,7 +895,6 @@ describe('output preconfiguration', () => {
           is_preconfigured: true,
           secrets: {
             service_token: 'secretServiceToken', // no change
-            kibana_api_key: 'secretKibanaAPIKey',
           },
         },
       ]);
@@ -1060,7 +1054,6 @@ describe('output preconfiguration', () => {
           is_preconfigured: true,
           secrets: {
             service_token: 'secretServiceToken',
-            kibana_api_key: 'secretKibanaAPIKey',
             ssl: { key: 'secretKey' },
           },
         },
