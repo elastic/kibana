@@ -15,7 +15,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
 import { THRESHOLD_MET_GROUP } from '../../common/alerting/constants';
-import { _IGNORED } from '../../common/es_fields';
+import { INDEX, _IGNORED } from '../../common/es_fields';
 import { generateContext } from './context';
 import {
   ALERT_EVALUATION_CONDITIONS,
@@ -110,7 +110,14 @@ export const getRuleExecutor = () =>
       let generatedAlerts = 0;
       for (const groupResult of datasetQualityDegradedResults) {
         const { bucketKey, percentage } = groupResult;
-        const groupByFields = params.groupBy ?? [];
+        const groupByFields: Record<string, string> = bucketKey.reduce((acc, field, i) => {
+          const fieldName = (params.groupBy ?? [])[i];
+          return {
+            ...acc,
+            [fieldName === INDEX ? 'dataStream' : fieldName]: `${field}`, // _index is reserved for the actual alerts index
+          };
+        }, {});
+
         const alertId = bucketKey.join('_');
         const met = compareFn(percentage, params.threshold);
 
