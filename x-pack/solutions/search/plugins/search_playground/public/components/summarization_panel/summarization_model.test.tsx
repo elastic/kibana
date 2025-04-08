@@ -60,6 +60,7 @@ describe('SummarizationModel', () => {
       <SummarizationModel selectedModel={models[1]} models={models} onSelect={jest.fn()} />
     );
 
+    expect(getByTestId('aiConnectorTitle')).toBeInTheDocument();
     expect(getByTestId('summarizationModelSelect')).toBeInTheDocument();
   });
 });

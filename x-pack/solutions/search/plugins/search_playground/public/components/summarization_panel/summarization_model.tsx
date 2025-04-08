@@ -102,6 +102,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
   return (
     <EuiFormRow
       css={{ '.euiFormLabel': { display: 'flex', alignItems: 'center' } }}
+      data-test-subj="aiConnectorTitle"
       label={
         <>
           <FormattedMessage
