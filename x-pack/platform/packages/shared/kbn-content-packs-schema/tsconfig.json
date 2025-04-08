@@ -17,7 +17,8 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/core",
     "@kbn/es-query",
-    "@kbn/lens-plugin"
+    "@kbn/lens-plugin",
+    "@kbn/zod"
   ],
   "exclude": [
     "target/**/*"
