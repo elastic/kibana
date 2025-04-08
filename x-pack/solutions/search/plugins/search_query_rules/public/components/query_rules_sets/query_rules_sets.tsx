@@ -12,24 +12,27 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
+import { useTableData } from '../../hooks/use_table_data';
+import { QueryRulesSetsSearch } from './query_rules_sets_search';
 
 export const QueryRulesSets = () => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
+  const [searchKey, setSearchKey] = useState('');
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: queryRulesData } = useFetchQueryRulesSets({ from, size: pageSize });
+
+  const { filteredData, pagination } = useTableData(
+    queryRulesData?.data,
+    searchKey,
+    pageIndex,
+    pageSize
+  );
 
   if (!queryRulesData) {
     return null;
   }
 
-  const pagination = {
-    initialPageSize: 25,
-    pageSizeOptions: [10, 25, 50],
-    ...queryRulesData._meta,
-    pageSize,
-    pageIndex,
-  };
   const columns: Array<EuiBasicTableColumn<QueryRulesListRulesetsQueryRulesetListItem>> = [
     {
       field: 'ruleset_id',
@@ -59,15 +62,18 @@ export const QueryRulesSets = () => {
   ];
 
   return (
-    <EuiBasicTable
-      data-test-subj="queryRulesSetTable"
-      items={queryRulesData.data}
-      columns={columns}
-      pagination={pagination}
-      onChange={({ page: changedPage }) => {
-        setPageIndex(changedPage.index);
-        setPageSize(changedPage.size);
-      }}
-    />
+    <>
+      <QueryRulesSetsSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+      <EuiBasicTable
+        data-test-subj="queryRulesSetTable"
+        items={filteredData} // Use filtered data from hook
+        columns={columns}
+        pagination={pagination}
+        onChange={({ page: changedPage }) => {
+          setPageIndex(changedPage.index);
+          setPageSize(changedPage.size);
+        }}
+      />
+    </>
   );
 };
