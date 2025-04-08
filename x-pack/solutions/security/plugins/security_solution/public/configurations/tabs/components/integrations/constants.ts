@@ -6,11 +6,11 @@
  */
 
 export const AVAILABLE_INTEGRATIONS = [
-  'splunk', // in PR
+  'crowdstrike',
   'google_secops', // labelled edr/xdr
   'microsoft_sentinel', // labelled edr/xdr
   'sentinel_one',
-  'crowdstrike',
+  'splunk', // in PR
 ];
 
 export const RETURN_APP_ID = 'returnAppId';
