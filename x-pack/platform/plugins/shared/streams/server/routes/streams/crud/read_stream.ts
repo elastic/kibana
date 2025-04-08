@@ -49,7 +49,7 @@ export async function readStream({
   }
 
   // These queries are only relavant for IngestStreams
-  const [ancestors, dataStream] = await Promise.all([
+  const [ancestors, dataStream, privileges] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name).catch((e) => {
       if (e.statusCode === 404) {
@@ -57,17 +57,20 @@ export async function readStream({
       }
       throw e;
     }),
+    streamsClient.getPrivileges(name),
   ]);
 
   if (isUnwiredStreamDefinition(streamDefinition)) {
     return {
       stream: streamDefinition,
-      elasticsearch_assets: dataStream
-        ? await getUnmanagedElasticsearchAssets({
-            dataStream,
-            scopedClusterClient,
-          })
-        : undefined,
+      privileges,
+      elasticsearch_assets:
+        dataStream && privileges.manage
+          ? await getUnmanagedElasticsearchAssets({
+              dataStream,
+              scopedClusterClient,
+            })
+          : undefined,
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
@@ -78,6 +81,7 @@ export async function readStream({
   const body: WiredStreamGetResponse = {
     stream: streamDefinition,
     dashboards,
+    privileges,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: getInheritedFieldsFromAncestors(ancestors),
   };
