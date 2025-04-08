@@ -247,14 +247,14 @@ Tests are found in files named with the following convention: `validation.some-d
 Here is an example of a block in the new test format.
 
 ```ts
-describe('METRICS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
+describe('TS <sources> [ <aggregates> [ BY <grouping> ]]', () => {
   test('errors on invalid command start', async () => {
     const { expectErrors } = await setup();
 
     await expectErrors('m', [
-      "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'metrics', 'row', 'show'}",
+      "SyntaxError: mismatched input 'm' expecting {'explain', 'from', 'meta', 'ts', 'row', 'show'}",
     ]);
-    await expectErrors('metrics ', [
+    await expectErrors('ts ', [
       "SyntaxError: mismatched input '<EOF>' expecting {UNQUOTED_SOURCE, QUOTED_STRING}",
     ]);
   });
