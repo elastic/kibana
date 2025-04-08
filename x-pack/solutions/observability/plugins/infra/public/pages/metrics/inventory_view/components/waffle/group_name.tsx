@@ -9,12 +9,11 @@ import { EuiButtonEmpty, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type {
   InfraWaffleMapGroup,
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
-
 
 interface Props {
   onDrilldown: (filter: string) => void;
