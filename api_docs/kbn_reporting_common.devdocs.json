@@ -1553,6 +1553,17 @@
           },
           {
             "parentPluginId": "@kbn/reporting-common",
+            "id": "def-common.INTERNAL_ROUTES.HEALTH",
+            "type": "string",
+            "tags": [],
+            "label": "HEALTH",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-reporting/common/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-common",
             "id": "def-common.INTERNAL_ROUTES.GENERATE_PREFIX",
             "type": "string",
             "tags": [],
