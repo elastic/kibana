@@ -289,13 +289,13 @@ export function useFetchAgentsData() {
 
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
-          const newAllTags = agentTagsResponse.data.items;
+          const newAllTags = [...agentTagsResponse.data.items, NO_TAGS_VALUE];
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
           // - Tags are modified (add, remove, edit)
           if (!allTags || refreshTags || !isEqual(newAllTags, allTags)) {
-            setAllTags([...newAllTags, NO_TAGS_VALUE]);
+            setAllTags(newAllTags);
           }
 
           setAgentsOnCurrentPage(agentsResponse.data.items);
