@@ -420,3 +420,8 @@ This page has been deleted. Refer to <<osquery>>.
 == Alerts and Actions
 
 This page has been deleted. Refer to <<alerting-getting-started>>.
+
+[role="exclude",id="upgrade-assistant-api-default-field"]
+== Add default field API
+
+This API was removed in 7.13.0. Refer to <<upgrade-assistant-api>>.
