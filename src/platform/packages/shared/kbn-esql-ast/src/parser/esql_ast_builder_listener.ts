@@ -27,7 +27,7 @@ import {
   type EnrichCommandContext,
   type WhereCommandContext,
   default as esql_parser,
-  type MetricsCommandContext,
+  type TimeSeriesCommandContext,
   IndexPatternContext,
   InlinestatsCommandContext,
   JoinCommandContext,
@@ -54,7 +54,7 @@ import {
   getMatchField,
   getEnrichClauses,
 } from './walkers';
-import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
+import type { ESQLAst, ESQLAstTimeseriesCommand } from '../types';
 import { createJoinCommand } from './factories/join';
 import { createDissectCommand } from './factories/dissect';
 import { createGrokCommand } from './factories/grok';
@@ -128,12 +128,12 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
   }
 
   /**
-   * Exit a parse tree produced by `esql_parser.metricsCommand`.
+   * Exit a parse tree produced by `esql_parser.timeseriesCommand`.
    * @param ctx the parse tree
    */
-  exitMetricsCommand(ctx: MetricsCommandContext): void {
-    const node: ESQLAstMetricsCommand = {
-      ...createAstBaseItem('metrics', ctx),
+  exitTimeSeriesCommand(ctx: TimeSeriesCommandContext): void {
+    const node: ESQLAstTimeseriesCommand = {
+      ...createAstBaseItem('ts', ctx),
       type: 'command',
       args: [],
       sources: ctx
