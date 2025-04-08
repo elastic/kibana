@@ -43,16 +43,11 @@ export async function suggest({
     await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
     true
   );
-  const lastCharacterTyped = innerText[innerText.length - 1];
-
-  const controlSuggestions =
-    lastCharacterTyped !== '?'
-      ? getControlSuggestionIfSupported(
-          Boolean(supportsControls),
-          ESQLVariableType.FUNCTIONS,
-          getVariables
-        )
-      : [];
+  const controlSuggestions = getControlSuggestionIfSupported(
+    Boolean(supportsControls),
+    ESQLVariableType.FUNCTIONS,
+    getVariables
+  );
 
   switch (pos) {
     case 'expression_without_assignment':
