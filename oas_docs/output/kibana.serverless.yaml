@@ -66,6 +66,7 @@ tags:
       Configure APM source maps. A source map allows minified files to be mapped back to original source code--allowing you to maintain the speed advantage of minified code, without losing the ability to quickly and easily debug your application.
       For best results, uploading source maps should become a part of your deployment procedure, and not something you only do when you see unhelpful errors. That's because uploading source maps after errors happen won't make old errors magically readable--errors must occur again for source mapping to occur.
     name: APM sourcemaps
+  - name: CCR Remote synced integrations
   - name: connectors
     description: |
       Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems. Alerting rules can use connectors to run actions when rule conditions are met.
@@ -22994,6 +22995,8 @@ paths:
                           type: string
                         hasRolloutPeriod:
                           type: boolean
+                        is_automatic:
+                          type: boolean
                         latestErrors:
                           items:
                             additionalProperties: false
@@ -37708,6 +37711,96 @@ paths:
       summary: Update a proxy
       tags:
         - Fleet proxies
+  /api/fleet/remote_synced_integrations/status:
+    get:
+      description: '[Required authorization] Route required privileges: fleet-settings-read AND integrations-read.'
+      operationId: get-fleet-remote-synced-integrations-status
+      parameters: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                type: object
+                properties:
+                  custom_assets:
+                    additionalProperties:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        type:
+                          type: string
+                      required:
+                        - type
+                        - name
+                        - package_name
+                        - package_version
+                        - sync_status
+                    type: object
+                  error:
+                    type: string
+                  integrations:
+                    items:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        error:
+                          type: string
+                        id:
+                          type: string
+                        package_name:
+                          type: string
+                        package_version:
+                          type: string
+                        sync_status:
+                          enum:
+                            - completed
+                            - synchronizing
+                            - failed
+                          type: string
+                        updated_at:
+                          type: string
+                      required:
+                        - sync_status
+                    type: array
+                required:
+                  - integrations
+        '400':
+          content:
+            application/json:
+              schema:
+                additionalProperties: false
+                description: Generic Error
+                type: object
+                properties:
+                  attributes: {}
+                  error:
+                    type: string
+                  errorType:
+                    type: string
+                  message:
+                    type: string
+                  statusCode:
+                    type: number
+                required:
+                  - message
+                  - attributes
+      summary: Get CCR Remote synced integrations status
+      tags:
+        - CCR Remote synced integrations
   /api/fleet/service_tokens:
     post:
       description: '[Required authorization] Route required privileges: fleet-agents-all.'
@@ -43191,8 +43284,37 @@ paths:
                                 minLength: 1
                                 type: string
                               type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - kql
+                              type: array
                           required:
                             - dashboards
+                            - queries
                         - type: object
                           properties:
                             stream:
@@ -44251,8 +44373,37 @@ paths:
                                 minLength: 1
                                 type: string
                               type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - kql
+                              type: array
                           required:
                             - dashboards
+                            - queries
                         - type: object
                           properties:
                             stream:
@@ -45164,8 +45315,37 @@ paths:
                             minLength: 1
                             type: string
                           type: array
+                        queries:
+                          items:
+                            allOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    minLength: 1
+                                    type: string
+                                  title:
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - id
+                                  - title
+                              - type: object
+                                properties:
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - query
+                                required:
+                                  - kql
+                          type: array
                       required:
                         - dashboards
+                        - queries
                     - type: object
                       properties:
                         stream:
@@ -47604,6 +47784,243 @@ paths:
                 - not: {}
       responses: {}
       summary: Link a dashboard to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/queries:
+    get:
+      description: Fetches all queries linked to a stream that are visible to the current user in the current space.
+      operationId: get-streams-name-queries
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream queries
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/queries/_bulk:
+    post:
+      description: Bulk update queries of a stream. Can add new queries and delete existing ones.
+      operationId: post-streams-name-queries-bulk
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                operations:
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          index:
+                            allOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    minLength: 1
+                                    type: string
+                                  title:
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - id
+                                  - title
+                              - type: object
+                                properties:
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - query
+                                required:
+                                  - kql
+                        required:
+                          - index
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          delete:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                            required:
+                              - id
+                        required:
+                          - delete
+                  type: array
+              required:
+                - operations
+      responses: {}
+      summary: Bulk update queries
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/queries/{queryId}:
+    delete:
+      description: Remove a query from a stream. Noop if the query is not found on the stream.
+      operationId: delete-streams-name-queries-queryid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: queryId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Remove a query from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Adds a query to a stream. Noop if the query is already present on the stream.
+      operationId: put-streams-name-queries-queryid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: queryId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    query:
+                      minLength: 1
+                      type: string
+                  required:
+                    - query
+                title:
+                  minLength: 1
+                  type: string
+              required:
+                - title
+                - kql
+      responses: {}
+      summary: Upsert a query to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events:
+    get:
+      description: Read the significant events
+      operationId: get-streams-name-significant-events
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+            format: date-time
+            type: string
+        - in: query
+          name: to
+          required: true
+          schema:
+            format: date-time
+            type: string
+        - in: query
+          name: bucketSize
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Read the significant events
       tags:
         - streams
       x-state: Technical Preview

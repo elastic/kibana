@@ -46,6 +46,39 @@ export function useAddUrlFilters() {
   );
 }
 
+export function useViewPolicies() {
+  const { toUrlParams, urlParams } = useUrlParams();
+  const history = useHistory();
+
+  const addViewPolicies = useCallback(
+    (packageName: string) => {
+      history.push({
+        search: toUrlParams(
+          {
+            ...omit(urlParams, 'viewPolicies'),
+            ...(packageName ? { viewPolicies: packageName } : {}),
+          },
+          {
+            skipEmptyString: true,
+          }
+        ),
+      });
+    },
+    [urlParams, toUrlParams, history]
+  );
+
+  const selectedPackageViewPolicies = useMemo(() => {
+    if (typeof urlParams.viewPolicies === 'string') {
+      return urlParams.viewPolicies;
+    }
+  }, [urlParams]);
+
+  return {
+    addViewPolicies,
+    selectedPackageViewPolicies,
+  };
+}
+
 export function useUrlFilters(): InstalledIntegrationsFilter {
   const { urlParams } = useUrlParams();
 

@@ -4157,59 +4157,6 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.ESQLAstMetricsCommand",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESQLAstMetricsCommand",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/esql-ast",
-            "scope": "common",
-            "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLCommand",
-            "text": "ESQLCommand"
-          },
-          "<\"metrics\">"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-ast",
-            "id": "def-common.ESQLAstMetricsCommand.sources",
-            "type": "Array",
-            "tags": [],
-            "label": "sources",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-ast",
-                "scope": "common",
-                "docId": "kibKbnEsqlAstPluginApi",
-                "section": "def-common.ESQLSource",
-                "text": "ESQLSource"
-              },
-              "[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.ESQLAstQueryExpression",
         "type": "Interface",
         "tags": [],
@@ -4259,6 +4206,59 @@
                 "docId": "kibKbnEsqlAstPluginApi",
                 "section": "def-common.ESQLAstCommand",
                 "text": "ESQLAstCommand"
+              },
+              "[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.ESQLAstTimeseriesCommand",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLAstTimeseriesCommand",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLAstTimeseriesCommand",
+            "text": "ESQLAstTimeseriesCommand"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/esql-ast",
+            "scope": "common",
+            "docId": "kibKbnEsqlAstPluginApi",
+            "section": "def-common.ESQLCommand",
+            "text": "ESQLCommand"
+          },
+          "<\"ts\">"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLAstTimeseriesCommand.sources",
+            "type": "Array",
+            "tags": [],
+            "label": "sources",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-ast",
+                "scope": "common",
+                "docId": "kibKbnEsqlAstPluginApi",
+                "section": "def-common.ESQLSource",
+                "text": "ESQLSource"
               },
               "[]"
             ],
@@ -4970,14 +4970,15 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ESQLSource.cluster",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "cluster",
             "description": [
               "\nRepresents the cluster part of the source identifier. Empty string if not\npresent.\n\n```\nFROM [<cluster>:]<index>\n```"
             ],
             "signature": [
-              "string | undefined"
+              "ESQLStringLiteral",
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -4986,14 +4987,32 @@
           {
             "parentPluginId": "@kbn/esql-ast",
             "id": "def-common.ESQLSource.index",
-            "type": "string",
+            "type": "Object",
             "tags": [],
             "label": "index",
             "description": [
               "\nRepresents the index part of the source identifier. Unescaped and unquoted.\n\n```\nFROM [<cluster>:]<index>\n```"
             ],
             "signature": [
-              "string | undefined"
+              "ESQLStringLiteral",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ESQLSource.selector",
+            "type": "Object",
+            "tags": [],
+            "label": "selector",
+            "description": [
+              "\nRepresents the selector (component) part of the source identifier.\n\n```\nFROM <index>[::<selector>]\n```"
+            ],
+            "signature": [
+              "ESQLStringLiteral",
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/types.ts",
             "deprecated": false,
@@ -6197,8 +6216,8 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
+            "section": "def-common.ESQLAstTimeseriesCommand",
+            "text": "ESQLAstTimeseriesCommand"
           },
           " | ",
           {
@@ -6266,8 +6285,8 @@
             "pluginId": "@kbn/esql-ast",
             "scope": "common",
             "docId": "kibKbnEsqlAstPluginApi",
-            "section": "def-common.ESQLAstMetricsCommand",
-            "text": "ESQLAstMetricsCommand"
+            "section": "def-common.ESQLAstTimeseriesCommand",
+            "text": "ESQLAstTimeseriesCommand"
           },
           " | ",
           {
@@ -6731,9 +6750,9 @@
             "label": "string",
             "description": [],
             "signature": [
-              "(node: ",
+              "(node: Pick<",
               "ESQLStringLiteral",
-              ") => string"
+              ", \"valueUnquoted\" | \"unquoted\">) => string"
             ],
             "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
             "deprecated": false,
@@ -6747,7 +6766,9 @@
                 "label": "node",
                 "description": [],
                 "signature": [
-                  "ESQLStringLiteral"
+                  "Pick<",
+                  "ESQLStringLiteral",
+                  ", \"valueUnquoted\" | \"unquoted\">"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-ast/src/pretty_print/leaf_printer.ts",
                 "deprecated": false,
