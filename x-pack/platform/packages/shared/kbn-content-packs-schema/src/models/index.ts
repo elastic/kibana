@@ -30,13 +30,13 @@ export type ContentPackSavedObject = ContentPackDashboard;
 
 export type ContentPackEntry = ContentPackDashboard;
 
-interface ContentPackIncludeObjects {
+export interface ContentPackIncludeObjects {
   objects: {
     dashboards: string[];
   };
 }
 
-interface ContentPackIncludeAll {
+export interface ContentPackIncludeAll {
   all: {};
 }
 
