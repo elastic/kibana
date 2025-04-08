@@ -166,8 +166,7 @@ LABEL org.label-schema.build-date="{{dockerBuildDate}}" \
   org.opencontainers.image.version="{{version}}"
 
 {{#ubi}}
-RUN mkdir /licenses && \
-    cp LICENSE.txt /licenses/LICENSE
+RUN mkdir /licenses && ln LICENSE.txt /licenses/LICENSE
 {{/ubi}}
 
 ENTRYPOINT ["/bin/tini", "--"]
