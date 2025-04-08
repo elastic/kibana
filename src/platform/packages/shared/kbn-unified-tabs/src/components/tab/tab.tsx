@@ -21,7 +21,7 @@ import {
   type EuiThemeComputed,
   type DraggableProvidedDragHandleProps,
   keys,
-  htmlIdGenerator,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -63,7 +63,7 @@ export const Tab: React.FC<TabProps> = (props) => {
     onSelectedTabKeyDown,
   } = props;
   const { euiTheme } = useEuiTheme();
-  const [tabLabelId] = useState(() => htmlIdGenerator()());
+  const tabLabelId = useGeneratedHtmlId({ prefix: 'tabLabel' });
   const tabInteractiveElementRef = useRef<HTMLDivElement | null>(null);
   const [isInlineEditActive, setIsInlineEditActive] = useState<boolean>(false);
   const [showPreview, setShowPreview] = useState<boolean>(false);
