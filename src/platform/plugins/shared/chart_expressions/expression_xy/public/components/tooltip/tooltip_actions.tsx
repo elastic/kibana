@@ -227,13 +227,13 @@ export const getTooltipActions = (
               );
 
               const { table, row } = xSeriesPoint;
-              const xColumn = table.columns.find((col) => col.id === xAccessor);
+              const xColumn = getColumnByAccessor(xAccessor.toString(), table.columns);
 
               // Get the field name and value for the Y axis
               const selectedYValues = selectedValues.length ? selectedValues : [firstSeries];
               const thresholdValues = selectedYValues.reduce((result, value) => {
                 const { yAccessor } = value.seriesIdentifier;
-                const yColumn = table.columns.find((col) => col.id === yAccessor);
+                const yColumn = getColumnByAccessor(yAccessor.toString(), table.columns);
                 if (!yColumn || !yColumn.meta.sourceParams) return result;
                 const { sourceField } = yColumn.meta.sourceParams;
                 const yValue = table.rows[row][yAccessor] as number;

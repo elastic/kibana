@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import { Trigger } from '.';
 
+export const ALERT_RULE_TRIGGER = 'alertRule';
+
 export const alertRuleTrigger: Trigger = {
-  id: 'alertRule',
-  title:'alert rule trigger',
-  description: 'alert rule trigger',
+  id: ALERT_RULE_TRIGGER,
+  title: i18n.translate('uiActions.triggers.dashboard.alertRule.title', {
+    defaultMessage: 'Add alert rule',
+  }),
+  description: i18n.translate('uiActions.triggers.dashboard.alertRule.description', {
+    defaultMessage: 'Create an alert rule from this dashboard panel',
+  }),
 };

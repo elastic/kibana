@@ -11,13 +11,13 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { ExpressionWrapper } from '../expression_wrapper';
 import { LensInternalApi, LensApi, LensEmbeddableStartServices } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
 import { addLog } from '../logger';
-import { i18n } from '@kbn/i18n';
 
 export function LensEmbeddableComponent({
   internalApi,

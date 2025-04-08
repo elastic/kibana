@@ -35,7 +35,8 @@ import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getAlertRuleFromVisUiAction } from '@kbn/alerts-ui-shared';
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -413,10 +414,22 @@ export class Plugin
   }
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
+    const createAlertRuleAction = async () => {
+      const { AlertRuleFromVisAction } = await import('@kbn/alerts-ui-shared');
+      const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
+      return action;
+    };
+
     plugins.uiActions.addTriggerActionAsync(
-      'alertRule',
-      'alertRule',
-      getAlertRuleFromVisUiAction(this.ruleTypeRegistry, this.actionTypeRegistry)
+      ALERT_RULE_TRIGGER,
+      ALERT_RULE_TRIGGER,
+      createAlertRuleAction
+    );
+
+    plugins.uiActions.addTriggerActionAsync(
+      CONTEXT_MENU_TRIGGER,
+      ALERT_RULE_TRIGGER,
+      createAlertRuleAction
     );
 
     return {

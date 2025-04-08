@@ -380,6 +380,14 @@ export interface LensInspectorAdapters {
   adapters$: PublishingSubject<Adapters>;
 }
 
+export interface LensAlertRulesApi {
+  createAlertRule: (
+    initialValues: Partial<RuleFormData>,
+    ruleTypeRegistry: TypeRegistry<RuleTypeModel>,
+    actionTypeRegistry: TypeRegistry<ActionTypeModel>
+  ) => void;
+}
+
 export type LensApi = Simplify<
   DefaultEmbeddableApi<LensSerializedState, LensRuntimeState> &
     // This is used by actions to operate the edit action
@@ -414,7 +422,8 @@ export type LensApi = Simplify<
     // Let the container know when the data has been loaded/updated
     LensInspectorAdapters &
     LensRequestHandlersProps &
-    LensApiCallbacks
+    LensApiCallbacks &
+    LensAlertRulesApi
 >;
 
 // This is an API only used internally to the embeddable but not exported elsewhere
@@ -455,7 +464,6 @@ export type LensInternalApi = Simplify<
       updateBlockingError: (newBlockingError: Error | undefined) => void;
       resetAllMessages: () => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
-      createAlertRule: (initialValues: Partial<RuleFormData>) => void;
     }
 >;
 

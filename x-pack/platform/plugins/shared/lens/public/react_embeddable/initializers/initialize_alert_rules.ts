@@ -12,12 +12,12 @@ import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { getDateRange } from '@kbn/timerange';
 import { TimeRange } from '@kbn/es-query';
 import { unitsMap } from '@kbn/datemath';
-import type { LensInternalApi } from '../types';
+import type { LensAlertRulesApi, LensInternalApi } from '../types';
 
 export function initializeAlertRules(
   { alertRuleInitialValues$, isRuleFormVisible$, alertingTypeRegistries$ }: LensInternalApi,
   parentApi: unknown
-) {
+): { api: LensAlertRulesApi } {
   return {
     api: {
       createAlertRule: (

@@ -14,8 +14,7 @@ import {
   VALUE_CLICK_TRIGGER,
   MULTI_VALUE_CLICK_TRIGGER,
 } from '@kbn/embeddable-plugin/public';
-
-const ALERT_RULE: "alertRule" = 'alertRule'
+import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 
 export interface VisEventToTrigger {
   ['applyFilter']: typeof APPLY_FILTER_TRIGGER;
@@ -23,7 +22,7 @@ export interface VisEventToTrigger {
   ['filter']: typeof VALUE_CLICK_TRIGGER;
   ['multiFilter']: typeof MULTI_VALUE_CLICK_TRIGGER;
   ['tableRowContextMenuClick']: typeof ROW_CLICK_TRIGGER;
-  ['alertRule']: typeof ALERT_RULE;
+  ['alertRule']: typeof ALERT_RULE_TRIGGER;
 }
 
 export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
@@ -32,5 +31,5 @@ export const VIS_EVENT_TO_TRIGGER: VisEventToTrigger = {
   filter: VALUE_CLICK_TRIGGER,
   multiFilter: MULTI_VALUE_CLICK_TRIGGER,
   tableRowContextMenuClick: ROW_CLICK_TRIGGER,
-  alertRule: 'alertRule',
+  alertRule: ALERT_RULE_TRIGGER,
 };

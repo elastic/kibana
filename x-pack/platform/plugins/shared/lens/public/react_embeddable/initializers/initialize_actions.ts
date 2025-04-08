@@ -26,10 +26,7 @@ import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { partition } from 'lodash';
 import { Visualization } from '../..';
-import {
-  combineQueryAndFilters,
-  getLayerMetaInfoFromVis,
-} from '../../app_plugin/show_underlying_data';
+import { combineQueryAndFilters, getLayerMetaInfo } from '../../app_plugin/show_underlying_data';
 import { TableInspectorAdapter } from '../../editor_frame_service/types';
 
 import { Datasource, IndexPatternMap } from '../../types';
@@ -76,7 +73,7 @@ function getViewUnderlyingDataArgs({
   timeRange: TimeRange;
   esQueryConfig: EsQueryConfig;
 }) {
-  const { error, meta } = getLayerMetaInfoFromVis(
+  const { error, meta } = getLayerMetaInfo(
     activeDatasource,
     activeDatasourceState,
     activeVisualization,
