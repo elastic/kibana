@@ -207,7 +207,40 @@ const importContentRoute = createServerRoute({
   },
 });
 
+const previewContentRoute = createServerRoute({
+  endpoint: 'POST /api/streams/{name}/content/preview 2023-10-31',
+  options: {
+    access: 'public',
+    summary: 'Import content into a stream',
+    description: 'Links content objects to a stream.',
+    body: {
+      accepts: 'multipart/form-data',
+      maxBytes: 2000000,
+      output: 'stream',
+    },
+  },
+  params: z.object({
+    path: z.object({
+      name: z.string(),
+    }),
+    body: z.object({
+      content: z.instanceof(Readable),
+    }),
+  }),
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  async handler({ params }) {
+    return await parseArchive(params.body.content);
+  },
+});
+
 export const contentRoutes = {
   ...exportContentRoute,
   ...importContentRoute,
+  ...previewContentRoute,
 };

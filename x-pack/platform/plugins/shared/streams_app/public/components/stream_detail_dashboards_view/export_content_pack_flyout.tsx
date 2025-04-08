@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { saveAs } from '@elastic/filesaver';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
+  ContentPack,
   ContentPackEntry,
   INDEX_PLACEHOLDER,
   findIndexPatterns,
@@ -31,12 +32,10 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as zip from '@zip.js/zip.js';
 import { uniq } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ContentPackObjectsList } from './content_pack_objects_list';
-import { readArchiveObjects } from './content_pack/read_archive_objects';
 
 export function ExportContentPackFlyout({
   definition,
@@ -48,6 +47,7 @@ export function ExportContentPackFlyout({
   onExport: () => void;
 }) {
   const {
+    core: { http },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -61,7 +61,7 @@ export function ExportContentPackFlyout({
         return;
       }
 
-      const contentPack = await streamsRepositoryClient.fetch(
+      const contentPackRaw = await streamsRepositoryClient.fetch(
         'POST /api/streams/{name}/content/export 2023-10-31',
         {
           params: {
@@ -78,13 +78,28 @@ export function ExportContentPackFlyout({
         }
       );
 
-      const reader = new zip.ZipReader(new zip.BlobReader(new Blob([contentPack])));
-      const objects = await readArchiveObjects(reader);
-      const indexPatterns = uniq(objects.flatMap((object) => findIndexPatterns(object))).filter(
-        (index) => !isIndexPlaceholder(index)
+      const body = new FormData();
+      body.append(
+        'content',
+        new File([contentPackRaw], 'archive.zip', { type: 'application/zip' })
       );
 
-      return { contentPack, objects, indexPatterns };
+      const contentPackParsed = await http.post<ContentPack>(
+        `/api/streams/${definition.stream.name}/content/preview`,
+        {
+          body,
+          headers: {
+            // Important to be undefined, it forces proper headers to be set for FormData
+            'Content-Type': undefined,
+          },
+        }
+      );
+
+      const indexPatterns = uniq(
+        contentPackParsed.entries.flatMap((object) => findIndexPatterns(object))
+      ).filter((index) => !isIndexPlaceholder(index));
+
+      return { contentPackRaw, contentPackParsed, indexPatterns };
     },
     [definition, streamsRepositoryClient]
   );
@@ -111,7 +126,7 @@ export function ExportContentPackFlyout({
       <EuiFlyoutBody>
         {isLoadingContentPack ? (
           <EuiLoadingSpinner />
-        ) : !exportResponse ? null : exportResponse.objects ? (
+        ) : !exportResponse ? null : exportResponse.contentPackParsed.entries ? (
           <>
             <EuiSpacer />
 
@@ -155,7 +170,7 @@ export function ExportContentPackFlyout({
             <EuiSpacer />
 
             <ContentPackObjectsList
-              objects={exportResponse.objects}
+              objects={exportResponse.contentPackParsed.entries}
               onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
             />
           </>

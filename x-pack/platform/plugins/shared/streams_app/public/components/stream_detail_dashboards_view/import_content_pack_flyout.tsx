@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { ContentPackEntry } from '@kbn/content-packs-schema';
+import { ContentPack, ContentPackEntry } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,10 +22,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import * as zip from '@zip.js/zip.js';
 import { useKibana } from '../../hooks/use_kibana';
 import { ContentPackObjectsList } from './content_pack_objects_list';
-import { readArchiveObjects } from './content_pack/read_archive_objects';
 
 export function ImportContentPackFlyout({
   definition,
@@ -72,9 +70,21 @@ export function ImportContentPackFlyout({
 
               setFile(archiveFile);
 
-              const reader = new zip.ZipReader(new zip.BlobReader(archiveFile));
-              const objects = await readArchiveObjects(reader);
-              setContentPackObjects(objects);
+              const body = new FormData();
+              body.append('content', archiveFile);
+
+              const contentPackParsed = await http.post<ContentPack>(
+                `/api/streams/${definition.stream.name}/content/preview`,
+                {
+                  body,
+                  headers: {
+                    // Important to be undefined, it forces proper headers to be set for FormData
+                    'Content-Type': undefined,
+                  },
+                }
+              );
+
+              setContentPackObjects(contentPackParsed.entries);
             } else {
               setFile(null);
             }
