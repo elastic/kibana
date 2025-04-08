@@ -53,7 +53,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
         ],
       },
     },
-    rescore: {
+    rescorer: {
       __template: {
         rescore: {
           query: {
@@ -138,7 +138,7 @@ export const retriever = (specService: SpecDefinitionsService) => {
       inference_id: '',
       inference_text: '',
       field: '{field}',
-      window_size: 10,
+      rank_window_size: 10,
       min_score: 0,
       filter: {
         __scope_link: 'GLOBAL.query',
