@@ -393,7 +393,7 @@ export class GlobalVisitorContext<
     input: types.VisitorInput<Methods, 'visitForkCommand'>
   ): types.VisitorOutput<Methods, 'visitForkCommand'> {
     const context = new contexts.ForkCommandVisitorContext(this, node, parent);
-    return this.visitWithSpecificContext('visitChangePointCommand', context, input);
+    return this.visitWithSpecificContext('visitForkCommand', context, input);
   }
 
   // #endregion
