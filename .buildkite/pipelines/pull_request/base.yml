@@ -15,7 +15,7 @@ steps:
       preemptible: true
       diskSizeGb: 125
     key: build
-    if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
+    # if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
     timeout_in_minutes: 90
     retry:
       automatic:
