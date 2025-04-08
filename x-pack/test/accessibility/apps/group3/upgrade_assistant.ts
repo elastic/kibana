@@ -12,7 +12,7 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService, getPageObjects }: FtrProviderContext) {
+export default function upgradeAssistantPage({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['upgradeAssistant', 'common']);
   const a11y = getService('a11y');
   const testSubjects = getService('testSubjects');
@@ -20,7 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const log = getService('log');
 
-  describe('Upgrade Assistant Accessibility', () => {
+  describe('Upgrade Assistant Accessibility', function () {
+    // Only run this test in 8 as the deprecation we are testing is only available in 8
+    this.onlyEsVersion('8');
+
     before(async () => {
       await PageObjects.upgradeAssistant.navigateToPage();
 

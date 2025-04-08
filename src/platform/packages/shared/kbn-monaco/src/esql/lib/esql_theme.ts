@@ -54,7 +54,8 @@ export const buildESQLTheme = ({
       // commands
       ...buildRuleGroup(
         [
-          'dev_metrics',
+          'dev_time_series',
+          'dev_rerank',
           'dev_fork',
           'metadata',
           'mv_expand',
