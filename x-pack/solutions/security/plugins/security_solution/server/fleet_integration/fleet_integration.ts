@@ -59,6 +59,7 @@ import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
 import type { ProductFeaturesService } from '../lib/product_features_service/product_features_service';
 import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
+import { catchAndWrapError } from '../endpoint/utils';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
@@ -275,7 +276,8 @@ export const getPackagePolicyUpdateCallback = (
         endpointIntegrationData,
         (await endpointServices
           .getInternalFleetServices()
-          .packagePolicy.get(soClient, endpointIntegrationData.id as string)) as PolicyData,
+          .packagePolicy.get(soClient, endpointIntegrationData.id as string)
+          .catch(catchAndWrapError)) as PolicyData,
         featureUsageService
       );
     }
