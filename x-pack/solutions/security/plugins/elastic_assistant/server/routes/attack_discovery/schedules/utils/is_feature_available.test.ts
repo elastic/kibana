@@ -24,7 +24,7 @@ describe('isFeatureAvailable', () => {
   });
 
   it('should call feature flags service with the correct attributes', async () => {
-    isFeatureAvailable(mockContext);
+    void isFeatureAvailable(mockContext);
 
     expect(getBooleanValueMock).toHaveBeenCalledWith(
       'securitySolution.assistantAttackDiscoverySchedulingEnabled',
