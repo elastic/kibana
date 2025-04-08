@@ -38,6 +38,7 @@ import {
   isDissectProcessor,
   getDefaultFormStateByType,
   isDateProcessor,
+  SPECIALISED_TYPES,
 } from '../utils';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 import {
@@ -48,6 +49,8 @@ import {
 } from '../state_management/stream_enrichment_state_machine';
 import { ProcessorMetrics } from '../state_management/simulation_state_machine';
 import { DateProcessorForm } from './date';
+import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
+import { ConfigDrivenProcessorType } from './config_driven/types';
 
 export function AddProcessorPanel() {
   const { euiTheme } = useEuiTheme();
@@ -171,6 +174,9 @@ export function AddProcessorPanel() {
             {type === 'date' && <DateProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
+            {!SPECIALISED_TYPES.includes(type) && (
+              <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
+            )}
           </EuiForm>
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
             <ProcessorErrors metrics={processorMetrics} />
@@ -357,6 +363,9 @@ export function EditProcessorPanel({ processorRef, processorMetrics }: EditProce
             {type === 'date' && <DateProcessorForm />}
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
+            {!SPECIALISED_TYPES.includes(type) && (
+              <ConfigDrivenProcessorFields type={type as ConfigDrivenProcessorType} />
+            )}
           </EuiForm>
           <EuiHorizontalRule margin="m" />
           <EuiButton

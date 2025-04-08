@@ -21,53 +21,18 @@ import {
   Position,
   ScaleType,
   Settings,
-  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui';
 
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
 import {
   type FeatureImportanceBaseline,
   isRegressionFeatureImportanceBaseline,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { useMlKibana } from '../../../../../contexts/kibana';
 import type { DecisionPathPlotData } from './use_classification_path_data';
 import { formatSingleValue } from '../../../../../formatters/format_value';
-const { euiColorFullShade, euiColorMediumShade } = euiVars;
-const axisColor = euiColorMediumShade;
-
-const baselineStyle: LineAnnotationStyle = {
-  line: {
-    strokeWidth: 1,
-    stroke: euiColorFullShade,
-    opacity: 0.75,
-  },
-};
-
-const axes: RecursivePartial<AxisStyle> = {
-  axisLine: {
-    stroke: axisColor,
-  },
-  tickLabel: {
-    fontSize: 10,
-    fill: axisColor,
-  },
-  tickLine: {
-    stroke: axisColor,
-  },
-  gridLine: {
-    horizontal: {
-      dash: [1, 2],
-    },
-    vertical: {
-      strokeWidth: 0,
-    },
-  },
-};
-const theme: PartialTheme = {
-  axes,
-};
 
 interface DecisionPathChartProps {
   decisionPathData: DecisionPathPlotData;
@@ -88,6 +53,73 @@ export const DecisionPathChart = ({
   maxDomain,
   baseline,
 }: DecisionPathChartProps) => {
+  const {
+    services: {
+      charts: {
+        theme: { useChartsBaseTheme },
+      },
+    },
+  } = useMlKibana();
+
+  const { euiTheme } = useEuiTheme();
+
+  const baseTheme = useChartsBaseTheme();
+
+  const { baselineStyle, theme } = useMemo<{
+    baselineStyle: LineAnnotationStyle;
+    theme: PartialTheme;
+  }>(() => {
+    const euiColorFullShade = euiTheme.colors.fullShade;
+    const euiColorMediumShade = euiTheme.colors.mediumShade;
+    const axisColor = euiColorMediumShade;
+
+    const axes: RecursivePartial<AxisStyle> = {
+      axisLine: {
+        stroke: axisColor,
+      },
+      tickLabel: {
+        fontSize: 10,
+        fill: axisColor,
+      },
+      tickLine: {
+        stroke: axisColor,
+      },
+      gridLine: {
+        horizontal: {
+          dash: [1, 2],
+        },
+        vertical: {
+          strokeWidth: 0,
+        },
+      },
+    };
+
+    return {
+      baselineStyle: {
+        line: {
+          strokeWidth: 1,
+          stroke: euiColorFullShade,
+          opacity: 0.75,
+        },
+      },
+      theme: {
+        axes,
+        lineSeriesStyle: {
+          line: {
+            visible: true,
+            strokeWidth: 1,
+          },
+          point: {
+            visible: 'always',
+          },
+        },
+        chartMargins: {
+          top: 10,
+        },
+      },
+    };
+  }, [euiTheme]);
+
   const regressionBaselineData: LineAnnotationDatum[] | undefined = useMemo(
     () =>
       baseline && isRegressionFeatureImportanceBaseline(baseline)
@@ -129,13 +161,7 @@ export const DecisionPathChart = ({
       <Chart
         size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
       >
-        <Settings
-          theme={theme}
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
-          rotation={90}
-          locale={i18n.getLocale()}
-        />
+        <Settings theme={theme} baseTheme={baseTheme} rotation={90} locale={i18n.getLocale()} />
         {regressionBaselineData && (
           <LineAnnotation
             id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"

@@ -138,9 +138,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
             />
           ) : (
             <>
-              {isLoading && (
-                <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />
-              )}
+              {isLoading && <EuiLoadingChart size="m" data-test-subj="sliEventsChartLoading" />}
 
               {!isLoading && (
                 <EventsAreaChart

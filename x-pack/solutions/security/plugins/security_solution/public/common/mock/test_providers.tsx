@@ -88,7 +88,7 @@ export const TestProvidersComponent = ({
                         <CellActionsProvider
                           getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                         >
-                          <EuiProvider>
+                          <EuiProvider highContrastMode={false}>
                             <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                           </EuiProvider>
                         </CellActionsProvider>
@@ -149,7 +149,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                     <CellActionsProvider
                       getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                     >
-                      <EuiProvider>
+                      <EuiProvider highContrastMode={false}>
                         <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                       </EuiProvider>
                     </CellActionsProvider>
