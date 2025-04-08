@@ -51,10 +51,10 @@ export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelPr
 export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps) => {
   const { getGenericEntity } = useGetGenericEntity(entityDocId);
   const { getAssetCriticality } = useGenericEntityCriticality({
-    idField: 'entity.id',
-    // @ts-ignore since this query is only enabled when the data exists, we can safely assume that idValue won't be undefined
-    idValue: getGenericEntity.data?._source?.entity.id,
     enabled: !!getGenericEntity.data?._source?.entity.id,
+    idField: 'entity.id',
+    // @ts-ignore since this query is only enabled when the entity.id exists, we can safely assume that idValue won't be undefined
+    idValue: getGenericEntity.data?._source?.entity.id,
   });
 
   useEffect(() => {
@@ -63,13 +63,10 @@ export const UniversalEntityPanel = ({ entityDocId }: UniversalEntityPanelProps)
     }
   }, [getGenericEntity.data?._id]);
 
-  console.log(getGenericEntity.data?._source?.entity.id);
-
-
   if (getGenericEntity.isLoading || getAssetCriticality.isLoading) {
     return (
       <>
-        <EuiLoadingSpinner size="m" style={{ position: 'absolute', inset: '50%' }} />
+        <EuiLoadingSpinner size="m" css={{ position: 'absolute', inset: '50%' }} />
       </>
     );
   }

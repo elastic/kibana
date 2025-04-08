@@ -6,66 +6,80 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import { EuiBadge, EuiBadgeGroup, EuiPopover } from '@elastic/eui';
 import type { EuiBadgeProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface ExpandableBadgeGroupProps {
-  /** Array of EuiBadges to display */
   badges: EuiBadgeProps[];
-  /** The initial number of badges to show before expanding. Defaults to 'all' if not set */
   initialBadgeLimit?: number | 'all';
-  /** The maximum height of the badge group in pixels. If not set the expandable container will not have inner scrolling */
   maxHeight?: number;
 }
 
-/**
- * A component that displays a group of badges with a limited initial display and an expansion option.
- *
- * The component initially shows a limited number of badges (or all if `initialBadgeLimit` is not set) and provides a "+n" badge to expand and show all badges.
- * The badge group is scrollable if the badges exceed the `maxHeight`.
- */
 export const ExpandableBadgeGroup = ({
   badges,
   initialBadgeLimit = 'all',
   maxHeight,
 }: ExpandableBadgeGroupProps) => {
-  const [visibleBadgesCount, setVisibleBadgesCount] = useState<number | 'all'>(initialBadgeLimit);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const togglePopover = () => setIsPopoverOpen((prev) => !prev);
+  const closePopover = () => setIsPopoverOpen(false);
 
-  // Calculate the number of remaining badges. If 'all' badges are shown, the remaining count is 0.
-  const remainingCount = visibleBadgesCount === 'all' ? 0 : badges.length - visibleBadgesCount;
-  const maxScrollHeight = maxHeight ? `${maxHeight}px` : 'initial';
+  const visibleBadgesCount = initialBadgeLimit === 'all' ? badges.length : initialBadgeLimit;
+  const remainingCount = badges.length - visibleBadgesCount;
 
-  const badgeElements = useMemo(
-    () => badges.map((badge, index) => <EuiBadge key={index} {...badge} />),
-    [badges]
+  const visibleBadges = useMemo(
+    () =>
+      badges
+        .slice(0, visibleBadgesCount)
+        .map((badge, index) => <EuiBadge key={`visible-${index}`} {...badge} />),
+    [badges, visibleBadgesCount]
+  );
+
+  const hiddenBadges = useMemo(
+    () =>
+      badges
+        .slice(visibleBadgesCount)
+        .map((badge, index) => <EuiBadge key={`hidden-${index}`} {...badge} />),
+    [badges, visibleBadgesCount]
   );
 
   return (
-    <EuiBadgeGroup
-      gutterSize="s"
-      style={{
-        maxHeight: maxScrollHeight,
-        overflowY: 'auto',
-      }}
-    >
-      {
-        // Show all badges if 'all' is set, otherwise show the first `badgesToShow` badges
-        visibleBadgesCount === 'all' ? badgeElements : badgeElements.slice(0, visibleBadgesCount)
-      }
-      {
-        // Show the expand badge if there are remaining badges to show
-        remainingCount > 0 && visibleBadgesCount !== 'all' && (
-          <EuiBadge
-            color="hollow"
-            onClick={() => setVisibleBadgesCount('all')}
-            onClickAriaLabel={i18n.translate(
-              'xpack.securitySolution.expandableBadgeGroup.expandBadgeAriaLabel',
-              { defaultMessage: 'Expand Remaining Badges' }
-            )}
-          >{`+${remainingCount}`}</EuiBadge>
-        )
-      }
+    <EuiBadgeGroup gutterSize="s">
+      {visibleBadges}
+
+      {remainingCount > 0 && (
+        <EuiPopover
+          button={
+            <EuiBadge
+              color="hollow"
+              onClick={togglePopover}
+              onClickAriaLabel={i18n.translate(
+                'xpack.securitySolution.expandableBadgeGroup.expandBadgeAriaLabel',
+                { defaultMessage: 'Expand Remaining Badges' }
+              )}
+            >
+              {`+${remainingCount}`}
+            </EuiBadge>
+          }
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          anchorPosition="downCenter"
+        >
+          <div
+            style={{
+              maxWidth: 700,
+              maxHeight: maxHeight ? `${maxHeight}px` : 'none',
+              overflowY: maxHeight ? 'auto' : 'visible',
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '4px',
+            }}
+          >
+            {hiddenBadges}
+          </div>
+        </EuiPopover>
+      )}
     </EuiBadgeGroup>
   );
 };

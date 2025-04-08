@@ -29,12 +29,10 @@ import { assetCriticalityOptions } from '../../../entity_analytics/components/as
 import { ResponsiveDataCards } from './components/responsive_data_cards';
 
 export const HeaderDataCards = ({
-  // criticality,
   id,
   subType,
   type,
 }: {
-  // criticality?: CriticalityLevelWithUnassigned;
   id: string;
   subType: string;
   type: string;
@@ -46,26 +44,13 @@ export const HeaderDataCards = ({
 
   const criticality = getAssetCriticality.data?.criticality_level;
 
-  // const [selectValue, setSelectValue] = useState<CriticalityLevelWithUnassigned>(
-  //   getAssetCriticality.data?.criticality_level || 'unassigned'
-  // );
-
-  // useEffect(() => {
-  //   if (!getAssetCriticality.data?.criticality_level) {
-  //     setSelectValue('unassigned');
-  //   } else {
-  //     setSelectValue(getAssetCriticality.data.criticality_level);
-  //   }
-  // }, [getAssetCriticality.data?.criticality_level]);
-
   const assignCriticality = useCallback(
     (value: CriticalityLevelWithUnassigned) => {
-      const t = assignAssetCriticality.mutate({
+      assignAssetCriticality.mutate({
         criticalityLevel: value,
         idField: 'entity.id',
         idValue: id,
       });
-      console.log(t);
     },
     [assignAssetCriticality, id]
   );
@@ -94,9 +79,8 @@ export const HeaderDataCards = ({
               compressed
               hasDividers
               options={assetCriticalityOptions}
-              valueOfSelected={criticality}
+              valueOfSelected={criticality || 'unassigned'}
               onChange={(newValue) => {
-                // setSelectValue(newValue);
                 assignCriticality(newValue);
               }}
             />
@@ -135,7 +119,7 @@ export const HeaderDataCards = ({
         description: <EuiTextTruncate text={subType || ''} />,
       },
     ],
-    [selectValue, id, subType, type, assignCriticality, criticality]
+    [id, subType, type, assignCriticality, criticality]
   );
 
   return <ResponsiveDataCards cards={cards} collapseWidth={750} />;

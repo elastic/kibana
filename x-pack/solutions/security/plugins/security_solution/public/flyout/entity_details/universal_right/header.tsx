@@ -20,7 +20,7 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 const initialBadgeLimit = 3;
-const maxBadgeContainerHeight = undefined;
+const maxBadgeContainerHeight = 200;
 
 const HeaderTags = ({
   tags = [],
@@ -139,12 +139,7 @@ export const UniversalEntityFlyoutHeader = ({
               </>
             )}
           </div>
-          <HeaderDataCards
-            id={entity.id}
-            type={entity.type}
-            subType={entity.sub_type}
-            criticality={source.asset.criticality}
-          />
+          <HeaderDataCards id={entity.id} type={entity.type} subType={entity.sub_type} />
         </>
       </FlyoutHeader>
     </>

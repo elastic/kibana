@@ -39,7 +39,7 @@ export const useGenericEntityCriticality = ({
     useEntityAnalyticsRoutes();
 
   const genericEntityAssetCriticalityQueryKey = [QUERY_KEY, idField, idValue];
-  console.log(enabled);
+
   const getAssetCriticality = useQuery<AssetCriticalityRecord>({
     queryKey: genericEntityAssetCriticalityQueryKey,
     queryFn: () =>
@@ -47,7 +47,8 @@ export const useGenericEntityCriticality = ({
         idField,
         idValue,
       }),
-    // retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
+    retry: false,
+    retryOnMount: false,
     enabled,
   });
 
@@ -55,7 +56,7 @@ export const useGenericEntityCriticality = ({
     AssetCriticalityRecord | DeleteAssetCriticalityResponse,
     unknown,
     AssignCriticalityMutationParams,
-    unknown
+    { previousData?: AssetCriticalityRecord | null }
   >({
     mutationFn: (params) => {
       if (params.criticalityLevel === 'unassigned') {
@@ -73,23 +74,33 @@ export const useGenericEntityCriticality = ({
         refresh: 'wait_for',
       });
     },
-    onSuccess: (data) => {
+    onMutate: async (params) => {
+      await queryClient.cancelQueries(genericEntityAssetCriticalityQueryKey);
+
+      const previousData = queryClient.getQueryData<AssetCriticalityRecord | null>(
+        genericEntityAssetCriticalityQueryKey
+      );
+
+      queryClient.setQueryData(genericEntityAssetCriticalityQueryKey, {
+        criticality_level: params.criticalityLevel,
+      });
+
+      return { previousData };
+    },
+
+    onError: (_error, _params, context) => {
+      if (context?.previousData !== undefined) {
+        queryClient.setQueryData(genericEntityAssetCriticalityQueryKey, context.previousData);
+      }
+    },
+
+    onSuccess: () => {
       queryClient.invalidateQueries(genericEntityAssetCriticalityQueryKey);
-      console.log(data);
-      // const queryData = 'deleted' in data ? null : data;
-      // QC.setQueryData(QUERY_KEY, queryData);
-      // onChange?.();
     },
   });
 
-  // const was404 = query.isError && query.error.body.statusCode === 404;
-  // const returnedData = query.isSuccess && query.data != null;
-  // const status = was404 || !returnedData ? 'create' : 'update';
-
   return {
-    // status,
     getAssetCriticality,
     assignAssetCriticality,
-    // privileges,
   };
 };

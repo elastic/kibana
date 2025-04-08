@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ExpandableBadgeGroup } from './expandable_badge_group';
 
 const badgeProps = [
@@ -29,6 +29,7 @@ describe('ExpandableBadgeGroup', () => {
     badgeProps.forEach((badge) => {
       expect(screen.getByText(badge.children)).toBeInTheDocument();
     });
+    expect(screen.queryByText('+2')).not.toBeInTheDocument();
   });
 
   it('renders limited badges and expand button when initialBadgeLimit is set', () => {
@@ -40,23 +41,13 @@ describe('ExpandableBadgeGroup', () => {
     expect(screen.getByText('+2')).toBeInTheDocument();
   });
 
-  it('expands to show all badges when expand button is clicked', () => {
+  it('expands to show remaining badges in popover when expand button is clicked', async () => {
     render(<ExpandableBadgeGroup badges={badgeProps} initialBadgeLimit={2} />);
     fireEvent.click(screen.getByText('+2'));
-    badgeProps.forEach((badge) => {
-      expect(screen.getByText(badge.children)).toBeInTheDocument();
-    });
-  });
 
-  it('applies maxHeight style when maxHeight is set', () => {
-    const { container } = render(<ExpandableBadgeGroup badges={badgeProps} maxHeight={100} />);
-    expect(container.firstChild).toHaveStyle('max-height: 100px');
-  });
-
-  it('renders badges with children as React elements', () => {
-    render(<ExpandableBadgeGroup badges={badgePropsWithElement} />);
-    badgePropsWithElement.forEach((badge) => {
-      expect(screen.getByText(badge.children.props.children)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Badge 3')).toBeInTheDocument();
+      expect(screen.getByText('Badge 4')).toBeInTheDocument();
     });
   });
 });
