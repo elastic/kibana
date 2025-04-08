@@ -24,7 +24,17 @@ export class ESQLAstAdapter {
 
   private async getAstWorker(model: monaco.editor.ITextModel) {
     const worker = await this.worker(model.uri);
-    return worker.getAst;
+    return async (...args) => {
+      const start = Date.now();
+      // console.log('AST requested (main thread)', Date.now());
+      const res = await worker.getAst(...args);
+      // console.log('AST received (main thread)', Date.now());
+      const end = Date.now();
+
+      res.timings.parseRequested = start;
+      res.timings.astReceived = end;
+      return res;
+    };
   }
 
   async getAst(model: monaco.editor.ITextModel, code?: string) {
@@ -35,7 +45,24 @@ export class ESQLAstAdapter {
   async validate(model: monaco.editor.ITextModel, code: string) {
     const getAstFn = await this.getAstWorker(model);
     const text = code ?? model.getValue();
-    const { errors, warnings } = await validateQuery(text, getAstFn, undefined, this.callbacks);
+    const start = Date.now();
+    // console.log(`validation started`, start);
+    const { errors, warnings, timings } = await validateQuery(
+      text,
+      getAstFn,
+      undefined,
+      this.callbacks
+    );
+    // console.log(threadTimings);
+    const end = Date.now();
+    // console.log(`validation ended`, end);
+    // console.log(`validation took ${Date.now() - start}`);
+    console.log(`-------------------------------------`);
+    console.log('time_to_request_parse', timings.parseRequested - start);
+    console.log('time_to_worker', timings.parseStart - start);
+    console.log('time_to_parse', timings.parseEnd - timings.parseStart);
+    console.log('time_to_main', timings.astReceived - timings.parseEnd);
+    console.log('time_to_validate', end - timings.astReceived);
     const monacoErrors = wrapAsMonacoMessages(text, errors);
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };

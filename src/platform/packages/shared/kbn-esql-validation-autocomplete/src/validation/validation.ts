@@ -102,7 +102,7 @@ export async function validateQuery(
           }
         : error
     );
-  return { errors: filteredErrors, warnings: result.warnings };
+  return { errors: filteredErrors, warnings: result.warnings, timings: result.timings };
 }
 
 /**
@@ -188,6 +188,7 @@ async function validateAst(
   return {
     errors: [...parsingResult.errors, ...messages.filter(({ type }) => type === 'error')],
     warnings: messages.filter(({ type }) => type === 'warning'),
+    timings: parsingResult.timings,
   };
 }
 

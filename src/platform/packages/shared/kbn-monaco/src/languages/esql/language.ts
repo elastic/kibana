@@ -70,6 +70,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         _token: monaco.CancellationToken,
         context: monaco.languages.SignatureHelpContext
       ) {
+        return;
         const astAdapter = new ESQLAstAdapter(
           (...uris) => workerProxyService.getWorker(uris),
           callbacks
@@ -85,6 +86,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         position: monaco.Position,
         token: monaco.CancellationToken
       ) {
+        return;
         const astAdapter = new ESQLAstAdapter(
           (...uris) => workerProxyService.getWorker(uris),
           callbacks
@@ -101,6 +103,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         position: monaco.Position,
         context: monaco.languages.CompletionContext
       ): Promise<monaco.languages.CompletionList> {
+        return { suggestions: [] };
         const astAdapter = new ESQLAstAdapter(
           (...uris) => workerProxyService.getWorker(uris),
           callbacks

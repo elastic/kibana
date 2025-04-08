@@ -43,10 +43,21 @@ export class ESQLWorker implements BaseWorkerDefinition {
   }
 
   getAst(text: string | undefined) {
+    const start = Date.now();
+    // window.PARSING_STARTED = start;
+    // console.log('parsing started (worker)', start);
     const rawAst = parse(text, { withFormatting: true });
+    const end = Date.now();
+    // window.PARSING_FINISHED = start;
+    // console.log('parsing finished (worker)', end);
+    // console.log(`parsing and AST construction took ${end - start}`);
     return {
       ast: rawAst.root.commands,
       errors: rawAst.errors.map(inlineToMonacoErrors),
+      timings: {
+        parseStart: start,
+        parseEnd: end,
+      },
     };
   }
 }

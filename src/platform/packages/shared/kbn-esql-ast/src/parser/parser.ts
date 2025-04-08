@@ -118,6 +118,7 @@ export interface ParseResult {
 }
 
 export const parse = (text: string | undefined, options: ParseOptions = {}): ParseResult => {
+  // console.log('parsing', text);
   try {
     if (text == null) {
       const commands: ESQLAstQueryExpression['commands'] = [];
@@ -131,7 +132,11 @@ export const parse = (text: string | undefined, options: ParseOptions = {}): Par
       parseListener
     );
 
+    // const start = performance.now();
+
     parser[GRAMMAR_ROOT_RULE]();
+    // const end = performance.now();
+    // console.log('antlr/ast took', end - start);
 
     const errors = errorListener.getErrors();
     const { ast: commands } = parseListener.getAst();
