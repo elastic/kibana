@@ -14,7 +14,7 @@ import type {
 import { contentRefBuilder, ContentRefSourceType } from '@kbn/wci-common';
 import { ToolContentResult } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { SupportCase, Account } from './types';
+import type { SupportCase, Account, BaseObject } from './types';
 
 interface SearchParams {
   size?: number;
@@ -106,7 +106,7 @@ export async function searchDocs({
     size,
   };
 
-  const response = await esClient.search<SearchResponse>(searchRequest);
+  const response = await esClient.search<SearchResponse<BaseObject>>(searchRequest);
 
   const contextFields = [
     { field: 'id', type: 'keyword' },
@@ -121,9 +121,10 @@ export async function searchDocs({
   });
 
   const contentFragments = response.hits.hits.map((hit) => {
-    const source = hit._source;
+    const source = hit._source as BaseObject;
 
     return {
+      type: 'text' as const,
       reference: createRef(`case:${hit._id!}`),
       content: contextFields.reduce<ToolContentResult['content']>((content, { field }) => {
         const fieldPath = field.split('.');
@@ -133,7 +134,7 @@ export async function searchDocs({
           value =
             fieldPath.length > 1
               ? getNestedValue(source, fieldPath)
-              : (source[field as keyof SearchResponse] || '').toString();
+              : (source[field as keyof BaseObject] || '').toString();
         }
 
         content[field] = value;
@@ -186,7 +187,7 @@ export async function getById({
 
   logger.info(`Retrieving document from ${indexName} with id: ${JSON.stringify(id)}`);
 
-  const response = await esClient.search<SearchResponse>(searchRequest);
+  const response = await esClient.search<SearchResponse<BaseObject>>(searchRequest);
 
   const contextFields = [
     { field: 'title', type: 'keyword' },
@@ -200,7 +201,7 @@ export async function getById({
   });
 
   const contentFragments = response.hits.hits.map((hit) => {
-    const source = hit._source;
+    const source = hit._source as BaseObject;
 
     return {
       reference: createRef(`case:${hit._id!}`),
@@ -212,7 +213,7 @@ export async function getById({
           value =
             fieldPath.length > 1
               ? getNestedValue(source, fieldPath)
-              : (source[field as keyof SearchResponse] || '').toString();
+              : (source[field as keyof BaseObject] || '').toString();
         }
 
         content[field] = value;
