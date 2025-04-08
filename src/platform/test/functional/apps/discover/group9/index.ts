@@ -13,7 +13,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover/group3', function () {
+  describe('discover/group9', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });
@@ -24,8 +24,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       );
     });
 
-    loadTestFile(require.resolve('./_default_columns')); // 2 min
-    loadTestFile(require.resolve('./_drag_drop')); // 1 min
-    loadTestFile(require.resolve('./_request_counts')); // 6 min
+    loadTestFile(require.resolve('./_doc_viewer')); // 7 min
+    loadTestFile(require.resolve('./_panels_toggle')); // 5 min
   });
 }
