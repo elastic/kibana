@@ -12,7 +12,7 @@ import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
 
-export interface xChartProps {
+export interface ChartProps {
   theme?: PartialTheme;
   baseTheme: Theme;
 }
