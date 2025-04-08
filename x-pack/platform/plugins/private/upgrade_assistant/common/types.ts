@@ -57,6 +57,7 @@ export interface ReindexStatusResponse {
     isReadonly: boolean;
     isFrozen: boolean;
     isInDataStream: boolean;
+    isFollowerIndex: boolean;
   };
   warnings?: IndexWarning[];
   reindexOp?: ReindexOperation;

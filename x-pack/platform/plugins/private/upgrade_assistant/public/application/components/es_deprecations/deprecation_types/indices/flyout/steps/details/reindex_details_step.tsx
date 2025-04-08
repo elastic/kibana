@@ -67,7 +67,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
 
   const { loadingState, status: reindexStatus, hasRequiredPrivileges, meta } = reindexState;
   const { status: updateIndexStatus } = updateIndexState;
-  const { indexName, isFrozen, isClosedIndex, isReadonly } = meta;
+  const { indexName, isFrozen, isClosedIndex, isReadonly, isFollowerIndex } = meta;
   const loading = loadingState === LoadingState.Loading;
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
@@ -101,7 +101,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const isLargeIndex = indexSizeInBytes > 1073741824;
 
   const canShowActionButtons = !isCompleted && !hasFetchFailed && hasRequiredPrivileges;
-  const canShowReindexButton = canShowActionButtons && !reindexExcluded;
+  const canShowReindexButton = canShowActionButtons && !reindexExcluded && !isFollowerIndex;
   const canShowReadonlyButton = canShowActionButtons && !readOnlyExcluded && !isReadonly;
 
   return (
@@ -204,6 +204,29 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                   defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
                 />
               </p>
+              {isFollowerIndex && (
+                <>
+                  <EuiCallOut
+                    title={
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexTitle"
+                        defaultMessage="Follower index detected"
+                      />
+                    }
+                    color="primary"
+                    iconType="iInCircle"
+                    data-test-subj="followerIndexCallout"
+                  >
+                    <p>
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexText"
+                        defaultMessage="This is a follower index. For follower indices, only the 'Mark as read-only' option is available. Reindexing follower indices is not supported."
+                      />
+                    </p>
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              )}
               <EuiDescriptionList
                 rowGutterSize="m"
                 listItems={getDefaultGuideanceText({
