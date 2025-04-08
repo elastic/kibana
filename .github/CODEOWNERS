@@ -1253,11 +1253,11 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/test_suites/common/visualizations/ @elastic/kibana-visualizations
 /x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
-src/platform/packages/shared/kbn-monaco/src/esql @elastic/kibana-esql
 
 # ESQL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
 /src/platform/test/functional/services/esql.ts @elastic/kibana-esql
+src/platform/packages/shared/kbn-monaco/src/languages/esql @elastic/kibana-esql
 
 # Global Experience
 
