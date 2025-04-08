@@ -19,6 +19,7 @@ import {
   EuiTabbedContentTab,
   useEuiTheme,
   EuiFlexGroup,
+  EuiMarkdownFormat,
 } from '@elastic/eui';
 import {
   AlertStatus,
@@ -291,6 +292,29 @@ export function AlertDetails() {
       }),
       'data-test-subj': 'metadataTab',
       content: metadataTab,
+    },
+    {
+      id: 'investigationguide',
+      name: (
+        <>
+          <FormattedMessage
+            id="xpack.observability.alertDetails.tab.investigationGuideLabel"
+            defaultMessage="Investigation Guide"
+          />
+          &nbsp;
+          <BetaBadge size="s" iconType="beta" style={{ verticalAlign: 'middle' }} />
+        </>
+      ),
+      'data-test-subj': 'investigationGuideTab',
+      disabled: !rule?.artifacts?.investigation_guide?.blob,
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <EuiMarkdownFormat>
+            {(rule?.artifacts?.investigation_guide?.blob as string) ?? ''}
+          </EuiMarkdownFormat>
+        </>
+      ),
     },
     {
       id: RELATED_ALERTS_TAB_ID,
