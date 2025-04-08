@@ -48,7 +48,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
         value: {
           enabled: true,
           endpoint: { inference_id: 'inference_id' },
-          kbState: KnowledgeBaseState.ENDPOINT_CREATED,
+          kbState: KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT,
         },
         loading: false,
         refresh: jest.fn(),
