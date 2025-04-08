@@ -9,24 +9,27 @@ import React, { useMemo } from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import type { ConversationEvent } from '../../../../common/conversation_events';
+import type { ProgressionEvent } from '../../../../common/chat_events';
 import { getChartConversationItems } from '../../utils/get_chart_conversation_items';
 import { ChatConversationItem } from './chat_conversation_item';
 import type { ChatStatus } from '../../hooks/use_chat';
 
 interface ChatConversationProps {
   conversationEvents: ConversationEvent[];
+  progressionEvents: ProgressionEvent[];
   chatStatus: ChatStatus;
   currentUser: AuthenticatedUser | undefined;
 }
 
 export const ChatConversation: React.FC<ChatConversationProps> = ({
   conversationEvents,
+  progressionEvents,
   chatStatus,
   currentUser,
 }) => {
   const conversationItems = useMemo(() => {
-    return getChartConversationItems({ conversationEvents, chatStatus });
-  }, [conversationEvents, chatStatus]);
+    return getChartConversationItems({ conversationEvents, progressionEvents, chatStatus });
+  }, [conversationEvents, progressionEvents, chatStatus]);
 
   return (
     <EuiCommentList>

@@ -5,24 +5,27 @@
  * 2.0.
  */
 
+import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { parseToolName } from '@kbn/wci-common';
-import type { McpProvider, McpClient } from '@kbn/wci-server';
+import type { McpClientProvider, McpClient } from '@kbn/wci-server';
 import type { Logger } from '@kbn/core/server';
-import { IntegrationTool, IntegrationToolInputSchema } from './types';
+import { GatewayTool, GatewayToolInputSchema } from './types';
 import { listClientsTools } from './utils';
 
 /**
- * A request-bound
+ * Represents a "session" against all registered MCP servers.
+ * Allows to aggregate and list tools from all servers,
+ * and to close the connectors to all of them in a single call.
  */
 export interface McpGatewaySession {
   /**
    * List all available tools from all connected integrations.
    */
-  listTools(): Promise<IntegrationTool[]>;
+  listTools(): Promise<GatewayTool[]>;
   /**
    * Execute a tool from a specific integration.
    */
-  executeTool(serverToolName: string, params: IntegrationToolInputSchema): Promise<unknown>;
+  executeTool(serverToolName: string, params: GatewayToolInputSchema): Promise<CallToolResult>;
   /**
    * Close the session and disconnect from all integrations.
    */
@@ -30,13 +33,13 @@ export interface McpGatewaySession {
 }
 
 export class McpGatewaySessionImpl implements McpGatewaySession {
-  private readonly providers: McpProvider[];
+  private readonly providers: McpClientProvider[];
   private readonly logger: Logger;
 
   private sessionClients: Record<string, McpClient> = {};
   private connected = false;
 
-  constructor({ providers, logger }: { providers: McpProvider[]; logger: Logger }) {
+  constructor({ providers, logger }: { providers: McpClientProvider[]; logger: Logger }) {
     this.providers = providers;
     this.logger = logger;
   }
@@ -59,12 +62,13 @@ export class McpGatewaySessionImpl implements McpGatewaySession {
     this.connected = true;
   }
 
-  async listTools(): Promise<IntegrationTool[]> {
+  async listTools(): Promise<GatewayTool[]> {
     await this.ensureConnected();
+    // TODO: memoize / cache
     return listClientsTools({ clients: this.sessionClients, logger: this.logger });
   }
 
-  async executeTool(serverToolName: string, params: IntegrationToolInputSchema) {
+  async executeTool(serverToolName: string, params: GatewayToolInputSchema) {
     await this.ensureConnected();
 
     const { integrationId, toolName } = parseToolName(serverToolName);
@@ -72,10 +76,13 @@ export class McpGatewaySessionImpl implements McpGatewaySession {
     if (!client) {
       throw new Error(`Client not found: ${integrationId}`);
     }
-    return client.callTool({
+
+    const response = await client.callTool({
       name: toolName,
       arguments: params,
     });
+
+    return response as CallToolResult;
   }
 
   async close() {
