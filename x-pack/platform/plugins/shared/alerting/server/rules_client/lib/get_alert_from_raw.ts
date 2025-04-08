@@ -123,6 +123,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
     snoozeSchedule,
     lastRun,
     isSnoozedUntil: DoNotUseIsSnoozedUntil,
+    artifacts,
     ...partialRawRule
   } = rawRule;
 
@@ -169,7 +170,7 @@ function getPartialRuleFromRaw<Params extends RuleTypeParams>(
           omitGeneratedValues,
         })
       : [],
-    artifacts: injectReferencesIntoArtifacts(opts.id, rawRule.artifacts, opts.references || []),
+    artifacts: injectReferencesIntoArtifacts(opts.id, artifacts, opts.references || []),
     params: injectReferencesIntoParams(
       opts.id,
       opts.ruleType,
