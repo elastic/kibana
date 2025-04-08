@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiCode, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
@@ -17,27 +17,33 @@ const LimitRows = (key: string, value: any) => {
 };
 
 export const Debug = ({ payload }: { payload: unknown }) => {
-  const { euiTheme } = useEuiTheme();
+  const { wrapperStyles, contentStyles } = useStyles();
 
   return (
-    <EuiCode
-      css={css({
-        padding: 0,
-        width: '100%',
-        height: '100%',
-      })}
-    >
-      <pre
-        data-test-subj="canvasDebug__content"
-        css={css({
-          width: '100%',
-          height: '100%',
-          overflow: 'auto',
-          padding: euiTheme.size.base,
-        })}
-      >
+    <EuiCode css={wrapperStyles}>
+      <pre data-test-subj="canvasDebug__content" css={contentStyles}>
         {JSON.stringify(payload, LimitRows, 2)}
       </pre>
     </EuiCode>
   );
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return {
+      wrapperStyles: css({
+        padding: 0,
+        width: '100%',
+        height: '100%',
+      }),
+      contentStyles: css({
+        width: '100%',
+        height: '100%',
+        overflow: 'auto',
+        padding: euiTheme.size.base,
+      }),
+    };
+  }, [euiTheme]);
+  return styles;
 };

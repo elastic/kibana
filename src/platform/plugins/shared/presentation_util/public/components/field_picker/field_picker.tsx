@@ -44,7 +44,7 @@ export const FieldPicker = ({
   ...other
 }: FieldPickerProps) => {
   const initialSelection = useRef(selectedFieldName);
-  const { euiTheme } = useEuiTheme();
+  const { selectableStyles } = useStyles();
 
   const [typesFilter, setTypesFilter] = useState<string[]>([]);
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
@@ -121,15 +121,7 @@ export const FieldPicker = ({
       className={classNames({
         fieldPickerSelectableLoading: selectableProps?.isLoading,
       })}
-      css={css({
-        height: '360px',
-        '.presFieldPicker__fieldButton[aria-checked=true]': {
-          backgroundColor: euiTheme.colors.backgroundBasePrimary,
-        },
-        '.euiSelectableMessage': {
-          height: '100%',
-        },
-      })}
+      css={selectableStyles}
       emptyMessage={i18n.translate('presentationUtil.fieldPicker.noFieldsLabel', {
         defaultMessage: 'No matching fields',
       })}
@@ -173,6 +165,24 @@ export const FieldPicker = ({
       )}
     </EuiSelectable>
   );
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return {
+      selectableStyles: css({
+        height: '360px',
+        '.presFieldPicker__fieldButton[aria-checked=true]': {
+          backgroundColor: euiTheme.colors.backgroundBasePrimary,
+        },
+        '.euiSelectableMessage': {
+          height: '100%',
+        },
+      }),
+    };
+  }, [euiTheme]);
+  return styles;
 };
 
 // required for dynamic import using React.lazy()

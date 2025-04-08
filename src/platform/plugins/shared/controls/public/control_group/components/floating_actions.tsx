@@ -8,15 +8,15 @@
  */
 
 import classNames from 'classnames';
-import React, { FC, ReactElement, useEffect, useState } from 'react';
+import React, { FC, ReactElement, useEffect, useMemo, useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import { Subscription, switchMap } from 'rxjs';
 
 import { ViewMode, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { AnyApiAction } from '@kbn/presentation-panel-plugin/public/panel_actions/types';
-import { css } from '@emotion/react';
-import { useEuiTheme } from '@elastic/eui';
 import { uiActionsService } from '../../services/kibana_services';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from '../../actions/controls_hover_trigger';
 
@@ -116,21 +116,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
   }, [api, viewMode, disabledActions]);
 
-  const { euiTheme } = useEuiTheme();
+  const { wrapperStyles, floatingActionsStyles } = useStyles();
 
   return (
-    <div
-      css={css({
-        position: 'relative',
-        '&:hover, &:focus-within': {
-          '.presentationUtil__floatingActions': {
-            opacity: 1,
-            visibility: 'visible',
-            transition: `visibility ${euiTheme.animation.fast}, opacity ${euiTheme.animation.fast}`,
-          },
-        },
-      })}
-    >
+    <div css={wrapperStyles}>
       {children}
       {isEnabled && floatingActions.length > 0 && (
         <div
@@ -138,16 +127,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
             apiHasUniqueId(api) ? api.uuid : v4()
           }`}
           className={classNames('presentationUtil__floatingActions', className)}
-          css={css({
-            opacity: 0,
-            visibility: 'hidden',
-            // slower transition on hover leave in case the user accidentally stops hover
-            transition: `visibility ${euiTheme.animation.slow}, opacity ${euiTheme.animation.slow}`,
-            position: 'absolute',
-            right: euiTheme.size.xs,
-            top: `-${euiTheme.size.l}`,
-            zIndex: euiTheme.levels.toast,
-          })}
+          css={floatingActionsStyles}
         >
           <>
             {floatingActions.map((action) =>
@@ -161,4 +141,33 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       )}
     </div>
   );
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return {
+      wrapperStyles: css({
+        position: 'relative',
+        '&:hover, &:focus-within': {
+          '.presentationUtil__floatingActions': {
+            opacity: 1,
+            visibility: 'visible',
+            transition: `visibility ${euiTheme.animation.fast}, opacity ${euiTheme.animation.fast}`,
+          },
+        },
+      }),
+      floatingActionsStyles: css({
+        opacity: 0,
+        visibility: 'hidden',
+        // slower transition on hover leave in case the user accidentally stops hover
+        transition: `visibility ${euiTheme.animation.slow}, opacity ${euiTheme.animation.slow}`,
+        position: 'absolute',
+        right: euiTheme.size.xs,
+        top: `-${euiTheme.size.l}`,
+        zIndex: euiTheme.levels.toast,
+      }),
+    };
+  }, [euiTheme]);
+  return styles;
 };

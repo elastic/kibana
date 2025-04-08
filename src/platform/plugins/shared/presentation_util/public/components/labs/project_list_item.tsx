@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiFlexGroup,
@@ -37,7 +37,7 @@ export interface Props {
 export const ProjectListItem = ({ project, onStatusChange }: Props) => {
   const { id, status, isActive, name, description, solutions } = project;
   const { isEnabled, isOverride } = status;
-  const { euiTheme } = useEuiTheme();
+  const { projectListItemStyles, pendingChangesIndicatorStyles, solutionsStyles } = useStyles();
 
   return (
     <EuiFlexItem
@@ -45,47 +45,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
         'projectListItem--isOverridden': isOverride,
         'projectListItem--isOverriddenEnabled': isOverride && isEnabled,
       })}
-      css={css({
-        position: 'relative',
-        background: euiTheme.colors.emptyShade,
-        padding: euiTheme.size.l,
-        minWidth: '500px',
-        '+ .projectListItem:after': {
-          position: 'absolute',
-          top: 0,
-          right: 0,
-          left: 0,
-          height: '1px',
-          background: euiTheme.colors.lightShade,
-          content: '""',
-        },
-
-        '&.projectListItem--isOverridden:before': {
-          position: 'absolute',
-          top: euiTheme.size.l,
-          left: '4px',
-          bottom: euiTheme.size.l,
-          width: '4px',
-          background: euiTheme.colors.success,
-          content: '""',
-        },
-        '.euiSwitch__label': {
-          width: '100%',
-        },
-        '.euiFlyout &': {
-          padding: `${euiTheme.size.l} ${euiTheme.size.xs}`,
-
-          '&:first-child': {
-            paddingTop: 0,
-          },
-          '&.projectListItem--isOverridden:before': {
-            left: `-${euiTheme.size.s}`,
-          },
-          '&.projectListItem--isOverridden:first-child:before': {
-            top: 0,
-          },
-        },
-      })}
+      css={projectListItemStyles}
     >
       <EuiFlexGroup gutterSize="m" responsive={false}>
         <EuiFlexItem>
@@ -95,13 +55,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
                 <h2>
                   {name}
                   {isOverride ? (
-                    <span
-                      css={css({
-                        marginLeft: euiTheme.size.s,
-                        position: 'relative',
-                        top: '-1px',
-                      })}
-                    >
+                    <span css={pendingChangesIndicatorStyles}>
                       <EuiIconTip
                         content={strings.getOverriddenIconTipLabel()}
                         position="top"
@@ -114,7 +68,7 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <div css={css({ textTransform: 'capitalize' })}>
+              <div css={solutionsStyles}>
                 {solutions.map((solution) => (
                   <EuiBadge key={solution}>{solution}</EuiBadge>
                 ))}
@@ -165,4 +119,62 @@ export const ProjectListItem = ({ project, onStatusChange }: Props) => {
       </EuiFlexGroup>
     </EuiFlexItem>
   );
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(() => {
+    return {
+      projectListItemStyles: css({
+        position: 'relative',
+        background: euiTheme.colors.emptyShade,
+        padding: euiTheme.size.l,
+        minWidth: '500px',
+        '+ .projectListItem:after': {
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          left: 0,
+          height: '1px',
+          background: euiTheme.colors.lightShade,
+          content: '""',
+        },
+
+        '&.projectListItem--isOverridden:before': {
+          position: 'absolute',
+          top: euiTheme.size.l,
+          left: '4px',
+          bottom: euiTheme.size.l,
+          width: '4px',
+          background: euiTheme.colors.success,
+          content: '""',
+        },
+        '.euiSwitch__label': {
+          width: '100%',
+        },
+        '.euiFlyout &': {
+          padding: `${euiTheme.size.l} ${euiTheme.size.xs}`,
+
+          '&:first-child': {
+            paddingTop: 0,
+          },
+          '&.projectListItem--isOverridden:before': {
+            left: `-${euiTheme.size.s}`,
+          },
+          '&.projectListItem--isOverridden:first-child:before': {
+            top: 0,
+          },
+        },
+      }),
+      pendingChangesIndicatorStyles: css({
+        marginLeft: euiTheme.size.s,
+        position: 'relative',
+        top: '-1px',
+      }),
+      solutionsStyles: css({
+        textTransform: 'capitalize',
+      }),
+    };
+  }, [euiTheme]);
+  return styles;
 };
