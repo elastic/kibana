@@ -24,7 +24,7 @@ import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { ImportContentPackFlyout } from './import_content_pack_flyout';
 import { ExportContentPackFlyout } from './export_content_pack_flyout';
-import { FeatureFlagStreamsContentPackSupportEnabled } from '../../../common/feature_flags';
+import { FeatureFlagStreamsContentPackUIEnabled } from '../../../common/feature_flags';
 import { useKibana } from '../../hooks/use_kibana';
 
 export function StreamDetailDashboardsView({
@@ -59,7 +59,7 @@ export function StreamDetailDashboardsView({
     core: { featureFlags },
   } = useKibana();
 
-  const renderContentPackItems = featureFlags.getBooleanValue(FeatureFlagStreamsContentPackSupportEnabled, false);
+  const renderContentPackItems = featureFlags.getBooleanValue(FeatureFlagStreamsContentPackUIEnabled, false);
 
   return (
     <EuiFlexGroup direction="column">
