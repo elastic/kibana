@@ -114,10 +114,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   assistantModelEvaluation: false,
 
-  /**
-   * Enables the Attack Discovery Scheduling functionality and API endpoint`.
-   */
-  assistantAttackDiscoverySchedulingEnabled: false,
 
   /**
    * Enables advanced ESQL generation for the Assistant.
