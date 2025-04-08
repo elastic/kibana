@@ -202,6 +202,7 @@ export const simulationMachine = setup({
           actions: [{ type: 'mapField', params: ({ event }) => event }],
         },
         'simulation.fields.unmap': {
+          target: 'assertingSimulationRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
         },
       },
@@ -237,10 +238,20 @@ export const simulationMachine = setup({
           streamName: context.streamName,
           absoluteTimeRange: context.dateRangeRef.getSnapshot().context.absoluteTimeRange,
         }),
-        onDone: {
-          target: 'assertingSimulationRequirements',
-          actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
-        },
+        onDone: [
+          {
+            guard: {
+              type: 'hasProcessors',
+              params: ({ context }) => ({ processors: context.processors }),
+            },
+            target: 'assertingSimulationRequirements',
+            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+          },
+          {
+            target: 'idle',
+            actions: [{ type: 'storeSamples', params: ({ event }) => ({ samples: event.output }) }],
+          },
+        ],
         onError: {
           target: 'idle',
           actions: [
