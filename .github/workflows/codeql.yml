@@ -27,7 +27,7 @@ jobs:
         ref: ${{ matrix.branch }}
 
     - name: Initialize CodeQL
-      uses: github/codeql-action/init@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
+      uses: github/codeql-action/init@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
@@ -51,7 +51,7 @@ jobs:
       run: echo "CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES=true" >> "$GITHUB_ENV"
 
     - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
+      uses: github/codeql-action/analyze@45775bd8235c68ba998cffa5171334d58593da47 # v3.28.15
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: ${{ env.CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES }}

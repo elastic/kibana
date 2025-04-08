@@ -160,7 +160,6 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:upgrade-agentless-deployments-task',
         'fleet:upgrade_action:retry',
         'logs-data-telemetry',
-        'obs-ai-assistant:knowledge-base-migration',
         'osquery:telemetry-configs',
         'osquery:telemetry-packs',
         'osquery:telemetry-saved-queries',
