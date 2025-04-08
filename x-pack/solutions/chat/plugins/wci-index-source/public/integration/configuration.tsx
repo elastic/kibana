@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
 import { useFieldArray, Controller } from 'react-hook-form';
 import {
   EuiTextArea,
@@ -42,8 +41,6 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   const [query, setQuery] = useState('');
   const [options, setOptions] = useState([] as string[]);
 
-  let searchTimeout;
-
   const contextFieldsArray = useFieldArray({
     control,
     name: 'configuration.fields.contextFields',
@@ -58,14 +55,14 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   ];
 
   const { generateSchema } = useGenerateSchema();
-  const { isLoading, autocompleteQuery } = useIndexNameAutocomplete();
+  const { isLoading, data } = useIndexNameAutocomplete({ query });
+  const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
 
-  const [selectedOptions, setSelected] = useState([] as EuiComboBoxOptionOption[]);
-
-  const onChange = (selectedOptions) => {
-    setSelected(selectedOptions);
+  const onChange = (onChangeSelectedOptions: EuiComboBoxOptionOption[]) => {
+    setSelected(onChangeSelectedOptions);
   };
 
+<<<<<<< HEAD
   useDebounce(
     () => {
       const result: string[] = [];
@@ -86,6 +83,10 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   const onSearchChange = (searchValue: string) => {
     setQuery(searchValue);
     console.log(`onSearchChange with ${searchValue}`);
+=======
+  const onSearchChange = (searchValue: string) => {
+    setQuery(searchValue);
+>>>>>>> 136806faabc (One step forward)
   };
 
   const onSchemaGenerated = useCallback(
@@ -159,15 +160,16 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 isLoading={isLoading}
                 selectedOptions={selectedOptions}
                 singleSelection={{ asPlainText: true }}
-                options={options.map((option) => ({ label: option, key: option }))}
+                options={data.map((option) => ({ label: option, key: option }))}
                 onChange={onChange}
+                fullWidth={true}
                 onSearchChange={onSearchChange}
                 append={
                   <EuiButtonEmpty
                     size="xs"
                     iconType="gear"
                     onClick={() => {
-                      if (selectedOptions.length == 0) return;
+                      if (selectedOptions.length === 0) return;
                       if (!selectedOptions[0].key) return;
 
                       generateSchema(
@@ -228,7 +230,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           </EuiFormRow>
         ) : (
           filterFieldsArray.fields.map((filterField, index) => (
-            <EuiPanel paddingSize="s" key={filterField.id} style={{ marginBottom: '8px' }}>
+            <EuiPanel paddingSize="s" key={filterField.id} css={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiFormRow label="Field name">
@@ -323,7 +325,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
           </EuiFormRow>
         ) : (
           contextFieldsArray.fields.map((contextField, index) => (
-            <EuiPanel paddingSize="s" key={contextField.id} style={{ marginBottom: '8px' }}>
+            <EuiPanel paddingSize="s" key={contextField.id} css={{ marginBottom: '8px' }}>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem>
                   <EuiFormRow label="Field name">

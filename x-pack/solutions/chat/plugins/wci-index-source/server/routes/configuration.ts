@@ -82,12 +82,16 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
     async (ctx, request, res) => {
       try {
         const { elasticsearch } = await ctx.core;
-        const pattern = request.query.index || '';
+        let pattern = request.query.index || '';
+
+        if (pattern.length >= 3) {
+          pattern = `${pattern}*`;
+        }
 
         const esClient = elasticsearch.client.asCurrentUser;
 
         const response = await esClient.cat.indices({
-          index: [`${pattern}*`],
+          index: [pattern],
           h: 'index',
           expand_wildcards: 'open',
           format: 'json',
