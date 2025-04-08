@@ -8,11 +8,17 @@
 import React, { useState } from 'react';
 
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
-import { useTableData } from '../../hooks/use_table_data';
+import { useQueryRulesSetsTableData } from '../../hooks/use_query_rules_sets_table_data';
 import { QueryRulesSetsSearch } from './query_rules_sets_search';
 
 export const QueryRulesSets = () => {
@@ -22,7 +28,7 @@ export const QueryRulesSets = () => {
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: queryRulesData } = useFetchQueryRulesSets({ from, size: pageSize });
 
-  const { filteredData, pagination } = useTableData(
+  const { queryRulesSetsFilteredData, pagination } = useQueryRulesSetsTableData(
     queryRulesData?.data,
     searchKey,
     pageIndex,
@@ -62,18 +68,22 @@ export const QueryRulesSets = () => {
   ];
 
   return (
-    <>
-      <QueryRulesSetsSearch searchKey={searchKey} setSearchKey={setSearchKey} />
-      <EuiBasicTable
-        data-test-subj="queryRulesSetTable"
-        items={filteredData} // Use filtered data from hook
-        columns={columns}
-        pagination={pagination}
-        onChange={({ page: changedPage }) => {
-          setPageIndex(changedPage.index);
-          setPageSize(changedPage.size);
-        }}
-      />
-    </>
+    <EuiFlexGroup direction="column">
+      <EuiFlexItem>
+        <QueryRulesSetsSearch searchKey={searchKey} setSearchKey={setSearchKey} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiBasicTable
+          data-test-subj="queryRulesSetTable"
+          items={queryRulesSetsFilteredData} // Use filtered data from hook
+          columns={columns}
+          pagination={pagination}
+          onChange={({ page: changedPage }) => {
+            setPageIndex(changedPage.index);
+            setPageSize(changedPage.size);
+          }}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

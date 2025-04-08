@@ -10,17 +10,17 @@ import { Pagination } from '@elastic/eui';
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
 
 interface UseTableDataReturn {
-  filteredData: QueryRulesListRulesetsQueryRulesetListItem[];
+  queryRulesSetsFilteredData: QueryRulesListRulesetsQueryRulesetListItem[];
   pagination: Pagination;
 }
 
-export const useTableData = (
+export const useQueryRulesSetsTableData = (
   data: QueryRulesListRulesetsQueryRulesetListItem[] | undefined,
   searchKey: string,
   pageIndex: number,
   pageSize: number
 ): UseTableDataReturn => {
-  const filteredData = useMemo(() => {
+  const queryRulesSetsFilteredData = useMemo(() => {
     if (!data) return [];
     return data.filter((item) => item.ruleset_id.toLowerCase().includes(searchKey.toLowerCase()));
   }, [data, searchKey]);
@@ -29,11 +29,11 @@ export const useTableData = (
     () => ({
       pageIndex,
       pageSize,
-      totalItemCount: filteredData.length,
+      totalItemCount: queryRulesSetsFilteredData.length,
       pageSizeOptions: [10, 25, 50],
     }),
-    [filteredData.length, pageIndex, pageSize]
+    [queryRulesSetsFilteredData.length, pageIndex, pageSize]
   );
 
-  return { filteredData, pagination };
+  return { queryRulesSetsFilteredData, pagination };
 };
