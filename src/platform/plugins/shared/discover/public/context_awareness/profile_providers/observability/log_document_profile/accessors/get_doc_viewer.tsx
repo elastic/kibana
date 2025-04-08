@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { UnifiedDocViewerLogsOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
 import type { LogDocumentProfileProvider } from '../profile';
+import type { LogOverViewAccordionExpandedValue } from '../../logs_data_source_profile/profile';
 
 export const createGetDocViewer =
   (services: ProfileProviderServices): LogDocumentProfileProvider['profile']['getDocViewer'] =>
@@ -35,20 +36,33 @@ export const createGetDocViewer =
           }),
           order: 0,
           component: function LogOverviewTab(props) {
-            const [initialAccordionSection] = useState(() =>
-              context.initialLogOverviewAccordionSection$.getValue()
-            );
+            const [initialAccordionSection, setAccordionSection] =
+              useState<LogOverViewAccordionExpandedValue>(
+                context.initialLogOverviewAccordionSection$.getValue()
+              );
 
             useEffect(() => {
-              context.initialLogOverviewAccordionSection$.next(undefined);
+              const subscription = context.initialLogOverviewAccordionSection$.subscribe(
+                (value: 'stacktrace' | 'quality_issues') => {
+                  setAccordionSection(value);
+                }
+              );
+
+              return () => {
+                subscription.unsubscribe();
+              };
             }, []);
+
+            const accordionState = React.useMemo(() => {
+              if (!initialAccordionSection) return {};
+              return { [initialAccordionSection]: true };
+            }, [initialAccordionSection]);
 
             return (
               <UnifiedDocViewerLogsOverview
                 {...props}
-                docViewerAccordionState={
-                  initialAccordionSection ? { [initialAccordionSection]: true } : {}
-                }
+                key={initialAccordionSection} // Force remount when section changes
+                docViewerAccordionState={accordionState}
                 renderAIAssistant={logsAIAssistantFeature?.render}
                 renderStreamsField={streamsFeature?.renderStreamsField}
               />

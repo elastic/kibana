@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { RowControlRowProps } from '@kbn/discover-utils';
 import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
 import type { AggregateQuery } from '@kbn/es-query';
@@ -20,7 +21,7 @@ export const getRowAdditionalLeadingControls: LogsDataSourceProfileProvider['pro
     (prev, { context }) =>
     (params) => {
       const additionalControls = prev(params) || [];
-      const { updateESQLQuery, query, setExpandedDoc, setDocViewerAccordionState } = params;
+      const { updateESQLQuery, query, setExpandedDoc } = params;
 
       const isDegradedDocsControlEnabled = isOfAggregateQueryType(query)
         ? queryContainsMetadataIgnored(query)

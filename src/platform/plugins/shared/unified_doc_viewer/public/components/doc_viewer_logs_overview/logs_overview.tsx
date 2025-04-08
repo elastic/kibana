@@ -23,7 +23,7 @@ import { LogsOverviewStacktraceSection } from './logs_overview_stacktrace_sectio
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: (deps: ObservabilityLogsAIAssistantFeatureRenderDeps) => JSX.Element;
-  docViewerAccordionState?: Record<'stacktrace' | 'quality_issues' | undefined, boolean>;
+  docViewerAccordionState?: Partial<Record<'stacktrace' | 'quality_issues', boolean>>;
   renderStreamsField?: (deps: StreamsFeatureRenderDeps) => JSX.Element;
 };
 
