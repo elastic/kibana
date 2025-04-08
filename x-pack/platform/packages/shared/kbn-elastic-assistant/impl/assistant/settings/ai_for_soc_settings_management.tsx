@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -47,8 +47,18 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
-  ({ dataViews, onTabChange, currentTab: selectedSettingsTab }) => {
-    const { http } = useAssistantContext();
+  ({ dataViews, onTabChange, currentTab }) => {
+    const { http, selectedSettingsTab, setSelectedSettingsTab } = useAssistantContext();
+
+    useEffect(() => {
+      if (selectedSettingsTab) {
+        // selectedSettingsTab can be selected from Conversations > System Prompts > Add System Prompt
+        onTabChange?.(selectedSettingsTab);
+        // set to null after nav change as to not persist the tab
+        setSelectedSettingsTab(null);
+      }
+    }, [onTabChange, selectedSettingsTab, setSelectedSettingsTab]);
+
     const { data: connectors } = useLoadConnectors({
       http,
     });
@@ -89,13 +99,12 @@ export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
     const tabs = useMemo(() => {
       return tabsConfig.map((t) => ({
         ...t,
-        'data-test-subj': `settingsPageTab-${t.id}`,
         onClick: () => {
           onTabChange?.(t.id);
         },
-        isSelected: t.id === selectedSettingsTab,
+        isSelected: t.id === currentTab,
       }));
-    }, [onTabChange, selectedSettingsTab, tabsConfig]);
+    }, [onTabChange, currentTab, tabsConfig]);
     return (
       <EuiFlexGroup
         css={css`
@@ -109,29 +118,30 @@ export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
                 key={id}
                 label={label}
                 onClick={onClick}
+                data-test-subj={`settingsPageTab-${id}`}
                 isActive={isSelected}
                 size="s"
               />
             ))}
           </EuiListGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          {selectedSettingsTab === CONNECTORS_TAB && <AIForSOCConnectorSettingsManagement />}
-          {selectedSettingsTab === CONVERSATIONS_TAB && (
+        <EuiFlexItem data-test-subj={`tab-${currentTab}`}>
+          {currentTab === CONNECTORS_TAB && <AIForSOCConnectorSettingsManagement />}
+          {currentTab === CONVERSATIONS_TAB && (
             <ConversationSettingsManagement
               connectors={connectors}
               defaultConnector={defaultConnector}
             />
           )}
-          {selectedSettingsTab === SYSTEM_PROMPTS_TAB && (
+          {currentTab === SYSTEM_PROMPTS_TAB && (
             <SystemPromptSettingsManagement
               connectors={connectors}
               defaultConnector={defaultConnector}
             />
           )}
-          {selectedSettingsTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
-          {selectedSettingsTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
-          {selectedSettingsTab === KNOWLEDGE_BASE_TAB && (
+          {currentTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
+          {currentTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
+          {currentTab === KNOWLEDGE_BASE_TAB && (
             <KnowledgeBaseSettingsManagement dataViews={dataViews} />
           )}
         </EuiFlexItem>

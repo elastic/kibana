@@ -13,7 +13,7 @@ import { useSearchParams } from 'react-router-dom-v5-compat';
 import { SecurityPageName } from '../../../common/constants';
 import { useKibana, useNavigation } from '../../common/lib/kibana';
 
-export const AISettings: React.FC<{}> = () => {
+export const AISettings: React.FC = () => {
   const { navigateTo } = useNavigation();
   const {
     application: {
