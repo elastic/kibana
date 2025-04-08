@@ -18,10 +18,12 @@ import {
   useEuiTheme,
   euiScrollBarStyles,
   EuiSpacer,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ConversationSummary } from '../../../../common/conversations';
 import { sortAndGroupConversations } from '../../utils/sort_and_group_conversations';
+import { AgentBlock } from './conversations_panel/agent_block';
 
 interface ConversationListProps {
   conversations: ConversationSummary[];
@@ -72,7 +74,7 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   const scrollBarStyles = euiScrollBarStyles(theme);
 
   const titleClassName = css`
-    text-transform: uppercase;
+    text-transform: capitalize;
     font-weight: ${theme.euiTheme.font.weight.bold};
   `;
 
@@ -94,11 +96,22 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiText size="s" className={titleClassName}>
-            {i18n.translate('xpack.workchatApp.conversationList.conversationTitle', {
-              defaultMessage: 'Conversations',
-            })}
-          </EuiText>
+          <AgentBlock />
+          <EuiSpacer />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="list" />
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <EuiText size="s" className={titleClassName}>
+                {i18n.translate('xpack.workchatApp.conversationList.conversationTitle', {
+                  defaultMessage: 'Conversations',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiSpacer size="s" />
         </EuiFlexItem>
         <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
