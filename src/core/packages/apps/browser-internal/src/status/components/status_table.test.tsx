@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { render } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import type { StatusInfoServiceStatus as ServiceStatus } from '@kbn/core-status-common';
@@ -28,10 +29,59 @@ const createServiceStatus = (parts: Partial<ServiceStatus> = {}): ServiceStatus 
 
 describe('StatusTable', () => {
   it('renders when statuses is provided', () => {
-    const { container } = render(
+    const component = mountWithIntl(
       <StatusTable statuses={[{ id: 'plugin:1', state, original: createServiceStatus() }]} />
     );
-    expect(container).toMatchSnapshot();
+    const table = component.find('EuiInMemoryTable');
+    expect(table.prop('columns')).toEqual([
+      {
+        align: 'center',
+        field: 'state',
+        name: 'Status',
+        render: expect.any(Function),
+        sortable: expect.any(Function),
+        width: '100px',
+      },
+      {
+        field: 'id',
+        name: 'ID',
+        sortable: true,
+      },
+      {
+        field: 'state',
+        name: 'Status summary',
+        render: expect.any(Function),
+      },
+      {
+        align: 'right',
+        isExpander: true,
+        name: expect.any(Object), // Matches the <EuiScreenReaderOnly> component
+        render: expect.any(Function),
+        width: '40px',
+      },
+    ]);
+    expect(table.prop('items')).toEqual([
+      {
+        id: 'plugin:1',
+        original: {
+          level: 'available',
+          summary: 'Ready',
+        },
+        state: {
+          id: 'available',
+          message: 'Ready',
+          title: 'green',
+          uiColor: 'success',
+        },
+      },
+    ]);
+    expect(table.prop('sorting')).toEqual({
+      sort: {
+        direction: 'asc',
+        field: 'state',
+      },
+    });
+    expect(table.prop('data-test-subj')).toBe('statusBreakdown');
   });
 
   it('renders empty when statuses is not provided', () => {
