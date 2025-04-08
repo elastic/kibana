@@ -17,8 +17,9 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiText,
   useEuiTheme,
+  EuiIconTip,
+  EuiText,
 } from '@elastic/eui';
 import {
   AreaSeries,
@@ -60,11 +61,22 @@ export function IngestionRate({
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={3}>
             <EuiText>
-              <h5>
+                <h5>
                 {i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRatePanel', {
                   defaultMessage: 'Ingestion rate',
                 })}
-              </h5>
+                <EuiIconTip
+                  content={i18n.translate(
+                  'xpack.streams.streamDetailLifecycle.ingestionRatePanelTooltip',
+                  {
+                    defaultMessage:
+                    'Approximate average. Interval adjusts dynamically based on the time range. Calculated using the average document size in the stream, multiplied with the number of documents in the time bucket.',
+                  }
+                  )}
+                  position="right"
+                />
+                </h5>
+              
             </EuiText>
           </EuiFlexItem>
 
