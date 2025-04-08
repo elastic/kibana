@@ -390,6 +390,7 @@ export class ObservabilityAIAssistantClient {
                       numeric_labels: {},
                       systemMessage,
                       messages: initialMessagesWithAddedMessages,
+                      archived: false,
                     })
                   ).pipe(
                     map((conversationCreated): ConversationCreateEvent => {
@@ -614,7 +615,7 @@ export class ObservabilityAIAssistantClient {
     updates,
   }: {
     conversationId: string;
-    updates: Partial<{ public: boolean }>;
+    updates: Partial<{ public: boolean; archived: boolean }>;
   }): Promise<Conversation> => {
     const conversation = await this.get(conversationId);
     if (!conversation) {
@@ -623,6 +624,7 @@ export class ObservabilityAIAssistantClient {
 
     const updatedConversation: Conversation = merge({}, conversation, {
       ...(updates.public !== undefined && { public: updates.public }),
+      ...(updates.archived !== undefined && { archived: updates.archived }),
     });
 
     return this.update(conversationId, updatedConversation);
@@ -642,6 +644,7 @@ export class ObservabilityAIAssistantClient {
         id: v4(),
       },
       public: false,
+      archived: false,
     });
   };
 
