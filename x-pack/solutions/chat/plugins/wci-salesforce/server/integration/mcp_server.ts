@@ -132,7 +132,7 @@ export async function createMcpServer({
       dataSource: z
         .string()
         .describe(
-          `what Salesforce object type to search through. Can only be a out of these ${dataSources}`
+          `what Salesforce object type to search through. Supported object types ${dataSources}`
         ),
     },
     execute: async ({ id, dataSource }) => {
