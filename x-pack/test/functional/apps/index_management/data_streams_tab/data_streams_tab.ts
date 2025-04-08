@@ -287,6 +287,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(await testSubjects.getVisibleText('indexModeValue')).to.be(indexModeName);
         await testSubjects.click('closeDetailsButton');
 
+        // Perform rollover so that last backing index has a correct index mode
+        await es.indices.rollover({
+          alias: TEST_DS_NAME,
+        });
+
         // Navigate to the data streams tab
         await pageObjects.indexManagement.changeTabs('data_streamsTab');
         await pageObjects.header.waitUntilLoadingHasFinished();
