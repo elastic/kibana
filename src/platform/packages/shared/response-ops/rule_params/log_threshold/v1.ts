@@ -74,30 +74,16 @@ const timeUnitSchema = schema.oneOf([
 const timeSizeSchema = schema.number();
 const groupBySchema = schema.arrayOf(schema.string());
 
-const RequiredRuleParamsSchema = schema.object(
+const countRuleParamsSchema = schema.object(
   {
+    criteria: countCriteriaSchema,
     // NOTE: "count" would be better named as "threshold", but this would require a
     // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
     count: ThresholdSchema,
     timeUnit: timeUnitSchema,
     timeSize: timeSizeSchema,
     logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
-  },
-  { unknowns: 'ignore' }
-);
-
-const OptionalRuleParamsSchema = schema.object(
-  {
     groupBy: schema.maybe(groupBySchema),
-  },
-  { unknowns: 'ignore' }
-);
-
-const countRuleParamsSchema = schema.object(
-  {
-    criteria: countCriteriaSchema,
-    ...RequiredRuleParamsSchema.getPropSchemas(),
-    ...OptionalRuleParamsSchema.getPropSchemas(),
   },
   { unknowns: 'ignore' }
 );
@@ -105,8 +91,13 @@ const countRuleParamsSchema = schema.object(
 const ratioRuleParamsSchema = schema.object(
   {
     criteria: ratioCriteriaSchema,
-    ...RequiredRuleParamsSchema.getPropSchemas(),
-    ...OptionalRuleParamsSchema.getPropSchemas(),
+    // NOTE: "count" would be better named as "threshold", but this would require a
+    // migration of encrypted saved objects, so we'll keep "count" until it's problematic.
+    count: ThresholdSchema,
+    timeUnit: timeUnitSchema,
+    timeSize: timeSizeSchema,
+    logView: persistedLogViewReferenceSchema, // Alerts are only compatible with persisted Log Views
+    groupBy: schema.maybe(groupBySchema),
   },
   { unknowns: 'ignore' }
 );
