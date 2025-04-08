@@ -67,16 +67,13 @@ import { continueConversation } from './operators/continue_conversation';
 import { convertInferenceEventsToStreamingEvents } from './operators/convert_inference_events_to_streaming_events';
 import { extractMessages } from './operators/extract_messages';
 import { getGeneratedTitle } from './operators/get_generated_title';
-import {
-  reIndexKnowledgeBaseAndPopulateMissingSemanticTextField,
-  scheduleKbSemanticTextMigrationTask,
-} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { populateMissingSemanticTextFieldMigration } from '../startup_migrations/populate_missing_semantic_text_field_migration';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
 import { apmInstrumentation } from './operators/apm_instrumentation';
-import { reIndexKnowledgeBase } from '../knowledge_base_service/reindex_knowledge_base';
 import { waitForKbModel } from '../inference_endpoint';
+import { reIndexKnowledgeBaseWithLock } from '../knowledge_base_service/reindex_knowledge_base';
 
 const MAX_FUNCTION_CALLS = 8;
 
@@ -701,14 +698,18 @@ export class ObservabilityAIAssistantClient {
             `The knowledge base contains existing entries and will therefore be re-indexed.`
           );
           await waitForKbModel({ esClient, logger, config: this.dependencies.config });
-          await reIndexKnowledgeBase({ logger, esClient });
+          await reIndexKnowledgeBaseWithLock({ core, logger, esClient });
         }
 
         // schedule a task to populate missing semantic_text field
-        const [_, pluginsStart] = await core.getStartServices();
-        await scheduleKbSemanticTextMigrationTask({
-          taskManager: pluginsStart.taskManager,
+        await populateMissingSemanticTextFieldMigration({
+          core,
           logger,
+          config: this.dependencies.config,
+        }).catch((e) => {
+          this.dependencies.logger.error(
+            `Failed to populate missing semantic text fields: ${e.message}`
+          );
         });
       })
       .catch((error) => {
@@ -723,21 +724,21 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
-  reIndexKnowledgeBase = () => {
-    return reIndexKnowledgeBase({
+  reIndexKnowledgeBaseWithLock = () => {
+    return reIndexKnowledgeBaseWithLock({
+      core: this.dependencies.core,
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
     });
   };
 
-  reIndexKnowledgeBaseAndPopulateMissingSemanticTextField = () => {
-    return reIndexKnowledgeBaseAndPopulateMissingSemanticTextField({
-      esClient: this.dependencies.esClient,
+  populateMissingSemanticTextFieldMigration = () => {
+    return populateMissingSemanticTextFieldMigration({
+      core: this.dependencies.core,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
   };
-
   addUserInstruction = async ({
     entry,
   }: {

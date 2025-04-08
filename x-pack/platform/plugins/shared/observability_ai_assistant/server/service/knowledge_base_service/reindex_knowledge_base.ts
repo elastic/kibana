@@ -10,9 +10,30 @@ import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { last } from 'lodash';
 import pRetry from 'p-retry';
+import { CoreSetup } from '@kbn/core/server';
 import { resourceNames } from '..';
+import { LockManagerService } from '../distributed_lock_manager/lock_manager_service';
+import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 
-export async function reIndexKnowledgeBase({
+export const KB_REINDEXING_LOCK_ID = 'observability_ai_assistant:kb_reindexing';
+export async function reIndexKnowledgeBaseWithLock({
+  core,
+  logger,
+  esClient,
+}: {
+  core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+  logger: Logger;
+  esClient: {
+    asInternalUser: ElasticsearchClient;
+  };
+}): Promise<void> {
+  const lmService = new LockManagerService(core, logger);
+  return lmService.withLock(KB_REINDEXING_LOCK_ID, () =>
+    reIndexKnowledgeBase({ logger, esClient })
+  );
+}
+
+async function reIndexKnowledgeBase({
   logger,
   esClient,
 }: {

@@ -115,7 +115,7 @@ const reIndexKnowledgeBase = createObservabilityAIAssistantServerRoute({
   },
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
-    return client.reIndexKnowledgeBase();
+    await client.reIndexKnowledgeBaseWithLock();
   },
 });
 
@@ -134,7 +134,7 @@ const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerR
       throw notImplemented();
     }
 
-    return client.reIndexKnowledgeBaseAndPopulateMissingSemanticTextField();
+    return client.populateMissingSemanticTextFieldMigration();
   },
 });
 
@@ -340,6 +340,7 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
 });
 
 export const knowledgeBaseRoutes = {
+  ...reIndexKnowledgeBase,
   ...semanticTextMigrationKnowledgeBase,
   ...setupKnowledgeBase,
   ...resetKnowledgeBase,
