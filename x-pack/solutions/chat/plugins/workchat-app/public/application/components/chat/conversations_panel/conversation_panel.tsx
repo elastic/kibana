@@ -5,65 +5,45 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, type MouseEvent } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/css';
 import {
   EuiText,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiButton,
   useEuiTheme,
   euiScrollBarStyles,
   EuiSpacer,
   EuiIcon,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ConversationSummary } from '../../../../common/conversations';
-import { sortAndGroupConversations } from '../../utils/sort_and_group_conversations';
-import { AgentBlock } from './conversations_panel/agent_block';
+import type { ConversationSummary } from '../../../../../common/conversations';
+import { sortAndGroupConversations } from '../../../utils/sort_and_group_conversations';
+import { AgentBlock } from './agent_block';
+import { ConversationGroup } from './conversation_group';
 
-interface ConversationListProps {
+interface ConversationPanelProps {
+  agentId: string;
   conversations: ConversationSummary[];
   activeConversationId?: string;
   onConversationSelect?: (conversationId: string) => void;
   onNewConversationSelect?: () => void;
 }
 
-const scrollContainerClassName = (scrollBarStyles: string) => css`
-  overflow-y: auto;
-  ${scrollBarStyles}
-`;
-
-const fullHeightClassName = css`
-  height: 100%;
-`;
-
-const containerClassName = css`
-  height: 100%;
-  width: 100%;
-`;
-
-const pageSectionContentClassName = css`
-  width: 100%;
-  display: flex;
-  flex-grow: 1;
-  height: 100%;
-  max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
-`;
-
-export const ConversationList: React.FC<ConversationListProps> = ({
+export const ConversationPanel: React.FC<ConversationPanelProps> = ({
+  agentId,
   conversations,
   activeConversationId,
   onConversationSelect,
   onNewConversationSelect,
 }) => {
   const handleConversationClick = useCallback(
-    (e: MouseEvent<HTMLButtonElement> | MouseEvent<HTMLAnchorElement>, conversationId: string) => {
+    (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>, conversationId: string) => {
       if (onConversationSelect) {
-        e.preventDefault();
+        event.preventDefault();
         onConversationSelect(conversationId);
       }
     },
@@ -73,9 +53,38 @@ export const ConversationList: React.FC<ConversationListProps> = ({
   const theme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(theme);
 
+  const containerClassName = css`
+    height: 100%;
+    width: 100%;
+  `;
+
   const titleClassName = css`
     text-transform: capitalize;
     font-weight: ${theme.euiTheme.font.weight.bold};
+  `;
+
+  const pageSectionContentClassName = css`
+    width: 100%;
+    display: flex;
+    flex-grow: 1;
+    height: 100%;
+    max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
+    background-color: ${theme.euiTheme.colors.backgroundBasePlain};
+    padding: ${theme.euiTheme.size.base} 0;
+  `;
+
+  const sectionBlockPaddingCLassName = css`
+    padding: 0 ${theme.euiTheme.size.base};
+  `;
+
+  const scrollContainerClassName = css`
+    overflow-y: auto;
+    padding: 0 ${theme.euiTheme.size.base};
+    ${scrollBarStyles}
+  `;
+
+  const createButtonRuleClassName = css`
+    margin-bottom: ${theme.euiTheme.size.base};
   `;
 
   const conversationGroups = useMemo(() => {
@@ -95,11 +104,11 @@ export const ConversationList: React.FC<ConversationListProps> = ({
         gutterSize="none"
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <AgentBlock />
-          <EuiSpacer />
+        <EuiFlexItem grow={false} className={sectionBlockPaddingCLassName}>
+          <AgentBlock agentId={agentId} />
+          <EuiSpacer size="l" />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} className={sectionBlockPaddingCLassName}>
           <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiIcon type="list" />
@@ -112,42 +121,35 @@ export const ConversationList: React.FC<ConversationListProps> = ({
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
         </EuiFlexItem>
-        <EuiFlexItem grow className={scrollContainerClassName(scrollBarStyles)}>
+        <EuiFlexItem grow className={scrollContainerClassName}>
           <EuiFlexGroup
             direction="column"
             className={containerClassName}
             gutterSize="none"
             responsive={false}
           >
-            {conversationGroups.map(({ conversations: groupConversations, dateLabel }) => {
-              return (
-                <EuiFlexItem grow={false} key={dateLabel}>
-                  <EuiPanel hasBorder={false} hasShadow={false} color="transparent" paddingSize="s">
-                    <EuiText size="s">
-                      <h4>{dateLabel}</h4>
-                    </EuiText>
-                  </EuiPanel>
-                  <EuiListGroup flush={false} gutterSize="none" className={fullHeightClassName}>
-                    {groupConversations.map((conversation) => (
-                      <EuiListGroupItem
-                        key={conversation.id}
-                        onClick={(event) => handleConversationClick(event, conversation.id)}
-                        label={conversation.title}
-                        size="s"
-                        isActive={conversation.id === activeConversationId}
-                        showToolTip
-                      />
-                    ))}
-                  </EuiListGroup>
-                  <EuiSpacer size="s" />
-                </EuiFlexItem>
-              );
-            })}
+            {conversationGroups.map(({ conversations: groupConversations, dateLabel }, index) => (
+              <>
+                <ConversationGroup
+                  key={dateLabel}
+                  conversations={groupConversations}
+                  dateLabel={dateLabel}
+                  activeConversationId={activeConversationId}
+                  onConversationClick={handleConversationClick}
+                />
+                {index < conversationGroups.length - 1 && (
+                  <EuiSpacer key={dateLabel + '-spacer'} size="m" />
+                )}
+              </>
+            ))}
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          <EuiHorizontalRule size="full" margin="none" className={createButtonRuleClassName} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false} className={sectionBlockPaddingCLassName}>
           <EuiButton
             iconType="newChat"
             onClick={() => onNewConversationSelect && onNewConversationSelect()}

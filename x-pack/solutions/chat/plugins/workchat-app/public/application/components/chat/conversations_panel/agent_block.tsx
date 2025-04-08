@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, type MouseEvent } from 'react';
+import React from 'react';
 import { css } from '@emotion/css';
 import {
   EuiText,
-  EuiTitle,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiButton,
   useEuiTheme,
-  euiScrollBarStyles,
-  EuiSpacer,
   EuiHealth,
   EuiAvatar,
+  EuiSkeletonText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { Agent } from '../../../../../common/agents';
+import { useAgent } from '../../../hooks/use_agent';
 
-export const AgentBlock: React.FC<{ agent: Agent }> = ({ agent }) => {
-  //
+interface AgentBlockProps {
+  agentId: string;
+}
 
+export const AgentBlock: React.FC<AgentBlockProps> = ({ agentId }) => {
+  const { agent } = useAgent({ agentId });
   const { euiTheme } = useEuiTheme();
 
+  const agentNameClassName = css`
+    font-weight: ${euiTheme.font.weight.semiBold};
+  `;
+
   return (
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+    <EuiFlexGroup direction="row" alignItems="center" gutterSize="m">
       <EuiFlexItem grow={false}>
-        <EuiAvatar name="assistant" size="l" type="user" />
+        <EuiAvatar name={agent?.name ?? 'Assistant'} size="l" type="user" />
       </EuiFlexItem>
       <EuiFlexItem grow>
         <EuiFlexGroup
@@ -43,14 +43,11 @@ export const AgentBlock: React.FC<{ agent: Agent }> = ({ agent }) => {
           justifyContent="center"
         >
           <EuiFlexItem grow={false}>
-            <EuiText
-              size="s"
-              className={css`
-                font-weight: ${euiTheme.font.weight.semiBold};
-              `}
-            >
-              Assistant name
-            </EuiText>
+            <EuiSkeletonText lines={1} size="s" isLoading={agent === undefined}>
+              <EuiText size="s" className={agentNameClassName}>
+                {agent?.name}
+              </EuiText>
+            </EuiSkeletonText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiHealth color="success">

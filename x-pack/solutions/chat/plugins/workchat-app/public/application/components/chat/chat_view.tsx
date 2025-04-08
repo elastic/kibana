@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConversationEventChanges } from '../../../../common/chat_events';
 import { Chat } from './chat';
 import { ChatHeader } from './chat_header';
-import { ConversationList } from './conversation_list';
+import { ConversationPanel } from './conversations_panel/conversation_panel';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useConversationList } from '../../hooks/use_conversation_list';
 import { useKibana } from '../../hooks/use_kibana';
@@ -65,8 +65,9 @@ export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, con
       grow={false}
       panelled={false}
     >
-      <KibanaPageTemplate.Sidebar paddingSize="none">
-        <ConversationList
+      <KibanaPageTemplate.Sidebar paddingSize="none" minWidth={280}>
+        <ConversationPanel
+          agentId={agentId}
           conversations={conversations}
           activeConversationId={conversationId}
           onConversationSelect={(newConvId) => {
