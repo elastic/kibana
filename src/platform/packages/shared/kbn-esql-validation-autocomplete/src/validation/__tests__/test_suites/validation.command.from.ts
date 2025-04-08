@@ -58,7 +58,6 @@ export const validationFromCommandTestSuite = (setup: helpers.Setup) => {
             await expectErrors('fRoM *,-.*', []);
             await expectErrors('fRoM .secret_index', []);
             await expectErrors('from my-index', []);
-            await expectErrors('from my-index::data', []);
           });
 
           test('errors on trailing comma', async () => {

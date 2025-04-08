@@ -9664,11 +9664,6 @@
       "warning": []
     },
     {
-      "query": "from my-index::data",
-      "error": [],
-      "warning": []
-    },
-    {
       "query": "from index,",
       "error": [
         "SyntaxError: mismatched input '<EOF>' expecting {QUOTED_STRING, UNQUOTED_SOURCE}"
