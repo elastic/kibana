@@ -5,36 +5,10 @@
  * 2.0.
  */
 
-import {
-  EQL_RULE_TYPE_ID,
-  ESQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/securitysolution-rules';
 import { ProductFeatureSecurityKey, SecuritySubFeatureId } from '../product_features_keys';
-import { APP_ID, LEGACY_NOTIFICATIONS_ID, SERVER_APP_ID } from '../constants';
+import { APP_ID } from '../constants';
 import type { DefaultSecurityProductFeaturesConfig } from './types';
 
-const SECURITY_RULE_TYPES = [
-  LEGACY_NOTIFICATIONS_ID,
-  ESQL_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  SAVED_QUERY_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-  NEW_TERMS_RULE_TYPE_ID,
-];
-
-const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
-  ruleTypeId,
-  consumers: [SERVER_APP_ID],
-}));
 /**
  * App features privileges configuration for the Security Solution Kibana Feature app.
  * These are the configs that are shared between both offering types (ess and serverless).
@@ -73,10 +47,6 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
   [ProductFeatureSecurityKey.detections]: {
-    management: {
-      insightsAndAlerting: ['triggersActions'],
-    },
-    alerting: alertingFeatures,
     privileges: {
       all: {
         ui: ['detections'],
@@ -87,28 +57,10 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
           'cloud-defend-read',
           'bulkGetUserProfiles',
         ],
-        alerting: {
-          rule: { all: alertingFeatures },
-          alert: { all: alertingFeatures },
-        },
-        management: {
-          insightsAndAlerting: ['triggersActions'],
-        },
       },
       read: {
         ui: ['detections'],
         api: ['cloud-security-posture-read', 'cloud-defend-read', 'bulkGetUserProfiles'],
-        alerting: {
-          rule: {
-            read: alertingFeatures,
-          },
-          alert: {
-            all: alertingFeatures,
-          },
-        },
-        management: {
-          insightsAndAlerting: ['triggersActions'],
-        },
       },
     },
   },
