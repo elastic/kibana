@@ -98,8 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('job creation loads the geo wizard for the source data', async () => {
       await ml.testExecution.logTestStep('job creation loads the job management page');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.testExecution.logTestStep('job creation loads the new job source selection page');
       await ml.jobManagement.navigateToNewJobSourceSelection();
@@ -209,8 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.createJobAndWaitForCompletion();
 
       await ml.testExecution.logTestStep('job creation displays the created job in the job list');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.jobTable.filterWithSearchString(jobId, 1);
 
@@ -329,8 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.jobWizardCommon.createJobAndWaitForCompletion();
 
       await ml.testExecution.logTestStep('job cloning displays the created job in the job list');
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToJobManagement();
+      await ml.navigation.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
       await ml.jobTable.filterWithSearchString(jobIdClone, 1);
 

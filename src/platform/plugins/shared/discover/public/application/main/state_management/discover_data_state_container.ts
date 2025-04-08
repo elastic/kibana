@@ -365,8 +365,6 @@ export function getDataStateContainer({
       .subscribe();
 
     return () => {
-      abortController?.abort();
-      abortControllerFetchMore?.abort();
       subscription.unsubscribe();
     };
   }
