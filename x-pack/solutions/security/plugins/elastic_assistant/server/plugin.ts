@@ -7,7 +7,10 @@
 
 import { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
 
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG,
+  AssistantFeatures,
+} from '@kbn/elastic-assistant-common';
 import { ReplaySubject, type Subject } from 'rxjs';
 import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { events } from './lib/telemetry/event_based_telemetry';
@@ -90,12 +93,31 @@ export class ElasticAssistantPlugin
 
     registerRoutes(router, this.logger, this.getElserId);
 
-    // Register Attack Discovery Schedule type
-    plugins.alerting.registerType(
-      getAttackDiscoveryScheduleType({
-        logger: this.logger,
+    // The featureFlags service is not available in the core setup, so we need
+    // to wait for the start services to be available to read the feature flags.
+    // This can take a while, but the plugin setup phase cannot run for a long time.
+    // As a workaround, this promise does not block the setup phase.
+    core
+      .getStartServices()
+      .then(([{ featureFlags }]) => {
+        // read all feature flags:
+        void Promise.all([
+          featureFlags.getBooleanValue(ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG, false),
+          // add more feature flags here
+        ]).then(([assistantAttackDiscoverySchedulingEnabled]) => {
+          if (assistantAttackDiscoverySchedulingEnabled) {
+            // Register Attack Discovery Schedule type
+            plugins.alerting.registerType(
+              getAttackDiscoveryScheduleType({
+                logger: this.logger,
+              })
+            );
+          }
+        });
       })
-    );
+      .catch((error) => {
+        this.logger.error(`error in security assistant plugin setup: ${error}`);
+      });
 
     return {
       actions: plugins.actions,
