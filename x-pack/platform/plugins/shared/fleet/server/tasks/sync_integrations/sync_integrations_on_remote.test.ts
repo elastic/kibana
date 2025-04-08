@@ -8,9 +8,12 @@
 import { PackageNotFoundError } from '../../errors';
 import { outputService } from '../../services';
 
+import { installCustomAsset } from './custom_assets';
+
 import { syncIntegrationsOnRemote } from './sync_integrations_on_remote';
 
 jest.mock('../../services');
+jest.mock('./custom_assets');
 
 const outputServiceMock = outputService as jest.Mocked<typeof outputService>;
 
@@ -49,6 +52,7 @@ describe('syncIntegrationsOnRemote', () => {
       warn: jest.fn(),
       info: jest.fn(),
     };
+    (installCustomAsset as jest.Mock).mockClear();
   });
 
   it('should throw error if multiple synced integrations ccr indices exist', async () => {
@@ -88,6 +92,24 @@ describe('syncIntegrationsOnRemote', () => {
                   updated_at: '2021-01-01T00:00:00.000Z',
                 },
               ],
+              custom_assets: {
+                'component_template:logs-system.auth@custom': {
+                  is_deleted: false,
+                  name: 'logs-system.auth@custom',
+                  package_name: 'system',
+                  package_version: '0.1.0',
+                  template: {},
+                  type: 'component_template',
+                },
+                'ingest_pipeline:logs-system.auth@custom': {
+                  is_deleted: false,
+                  name: 'logs-system.auth@custom',
+                  package_name: 'system',
+                  package_version: '0.1.0',
+                  pipeline: {},
+                  type: 'ingest_pipeline',
+                },
+              },
             },
           },
         ],
@@ -403,5 +425,29 @@ describe('syncIntegrationsOnRemote', () => {
     );
 
     expect(packageClientMock.installPackage).not.toHaveBeenCalled();
+  });
+
+  it('should install custom assets', async () => {
+    getIndicesMock.mockResolvedValue({
+      'fleet-synced-integrations-ccr-remote1': {},
+    });
+    searchMock.mockResolvedValue(getSyncedIntegrationsCCRDoc(true));
+    packageClientMock.getInstallation.mockImplementation(() => ({
+      install_status: 'installed',
+      version: '2.2.0',
+    }));
+    packageClientMock.installPackage.mockResolvedValue({
+      status: 'installed',
+    });
+
+    await syncIntegrationsOnRemote(
+      esClientMock,
+      {} as any,
+      packageClientMock,
+      abortController,
+      loggerMock
+    );
+
+    expect(installCustomAsset).toHaveBeenCalledTimes(2);
   });
 });

@@ -258,6 +258,7 @@ export default function searchSolutionNavigation({
         'enterpriseSearchContent:webCrawlers',
         'build',
         'searchPlayground',
+        'searchSynonyms:synonyms',
         'enterpriseSearchApplications:searchApplications',
         'relevance',
         'searchInferenceEndpoints:inferenceEndpoints',

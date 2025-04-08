@@ -10,7 +10,7 @@
 import type { Filter } from '@kbn/es-query';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 

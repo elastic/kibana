@@ -7,12 +7,7 @@
 
 import { useMemo } from 'react';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
-import {
-  installationStatuses,
-  useGetPackagesQuery,
-  useGetSettingsQuery,
-} from '@kbn/fleet-plugin/public';
-import { useKibana } from '../../../common/lib/kibana';
+import { installationStatuses, useGetPackagesQuery } from '@kbn/fleet-plugin/public';
 
 // We hardcode these here for now as we currently do not have any other way to filter out all the unwanted integrations.
 const AI_FOR_SOC_INTEGRATIONS = [
@@ -35,7 +30,7 @@ export interface UseFetchIntegrationsResult {
   /**
    * The AI for SOC not-installed integrations (see list in the constant above)
    */
-  availablePackage: PackageListItem[];
+  availablePackages: PackageListItem[];
 }
 
 /**
@@ -48,26 +43,17 @@ export interface UseFetchIntegrationsResult {
  * - crowdstrike
  */
 export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
-  const { fleet } = useKibana().services;
-  const isAuthorizedToFetchSettings = fleet?.authz.fleet.readSettings;
-  const { isFetchedAfterMount: isSettingsFetched } = useGetSettingsQuery({
-    enabled: isAuthorizedToFetchSettings,
+  // TODO this might need to be revisited once the integration make it out of prerelease
+  //  The issue will be that users will see prerelease versions and not the GA ones
+  const { data: allPackages, isLoading } = useGetPackagesQuery({
+    prerelease: true,
   });
-  const shouldFetchPackages = !isAuthorizedToFetchSettings || isSettingsFetched;
-  const { data: allPackages, isLoading } = useGetPackagesQuery(
-    {
-      prerelease: true,
-    },
-    {
-      enabled: shouldFetchPackages,
-    }
-  );
 
   const aiForSOCPackages: PackageListItem[] = useMemo(
     () => (allPackages?.items || []).filter((pkg) => AI_FOR_SOC_INTEGRATIONS.includes(pkg.name)),
     [allPackages]
   );
-  const availablePackage: PackageListItem[] = useMemo(
+  const availablePackages: PackageListItem[] = useMemo(
     () => aiForSOCPackages.filter((pkg) => pkg.status === installationStatuses.NotInstalled),
     [aiForSOCPackages]
   );
@@ -83,10 +69,10 @@ export const useFetchIntegrations = (): UseFetchIntegrationsResult => {
 
   return useMemo(
     () => ({
-      isLoading,
+      availablePackages,
       installedPackages,
-      availablePackage,
+      isLoading,
     }),
-    [isLoading, installedPackages, availablePackage]
+    [availablePackages, installedPackages, isLoading]
   );
 };

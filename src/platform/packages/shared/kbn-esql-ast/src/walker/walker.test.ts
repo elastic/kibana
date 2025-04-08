@@ -27,7 +27,7 @@ import {
 import { walk, Walker } from './walker';
 
 test('can walk all functions', () => {
-  const { root } = parse('METRICS index a(b(c(foo)))');
+  const { root } = parse('TS index | EVAL a(b(c(foo)))');
   const functions: string[] = [];
 
   walk(root, {
@@ -38,7 +38,7 @@ test('can walk all functions', () => {
 });
 
 test('can find assignment expression', () => {
-  const query = 'METRICS source var0 = bucket(bytes, 1 hour)';
+  const query = 'TS source | STATS var0 = bucket(bytes, 1 hour)';
   const { root } = parse(query);
   const functions: ESQLFunction[] = [];
 
@@ -208,7 +208,7 @@ describe('structurally can walk all nodes', () => {
         });
 
         test('iterates through all sources', () => {
-          const { ast } = parse('METRICS index, index2, index3, index4');
+          const { ast } = parse('TS index, index2, index3, index4');
           const sources: ESQLSource[] = [];
 
           walk(ast, {

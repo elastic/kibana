@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
-import { schema, TypeOf } from '@kbn/config-schema';
-import { ActionType } from '@kbn/actions-plugin/server';
-import { FixtureStartDeps, FixtureSetupDeps } from './plugin';
+import type { CoreSetup } from '@kbn/core/server';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { ActionType } from '@kbn/actions-plugin/server';
+import type { FixtureStartDeps, FixtureSetupDeps } from './plugin';
 import {
   getTestSubActionConnector,
   getTestSubActionConnectorWithoutSubActions,
@@ -178,7 +179,7 @@ function getHookedActionType() {
         source: config.source,
       };
       logger.info(`running hook pre-save for ${JSON.stringify(body)}`);
-      await services.scopedClusterClient.asInternalUser.index({
+      await services.scopedClusterClient.asCurrentUser.index({
         index: config.index,
         refresh: 'wait_for',
         body,
@@ -205,7 +206,7 @@ function getHookedActionType() {
         source: config.source,
       };
       logger.info(`running hook post-save for ${JSON.stringify(body)}`);
-      await services.scopedClusterClient.asInternalUser.index({
+      await services.scopedClusterClient.asCurrentUser.index({
         index: config.index,
         refresh: 'wait_for',
         body,
@@ -221,7 +222,7 @@ function getHookedActionType() {
         source: config.source,
       };
       logger.info(`running hook post-delete for ${JSON.stringify(body)}`);
-      await services.scopedClusterClient.asInternalUser.index({
+      await services.scopedClusterClient.asCurrentUser.index({
         index: config.index,
         refresh: 'wait_for',
         body,

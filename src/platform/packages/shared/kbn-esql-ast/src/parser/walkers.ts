@@ -29,7 +29,6 @@ import {
   type FieldContext,
   type FieldsContext,
   type AggFieldsContext,
-  type FromCommandContext,
   FunctionContext,
   IntegerLiteralContext,
   IsNullContext,
@@ -57,7 +56,6 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
   InlineCastContext,
-  IndexPatternContext,
   InlinestatsCommandContext,
   MatchExpressionContext,
   MatchBooleanExpressionContext,
@@ -65,7 +63,6 @@ import {
   EntryExpressionContext,
 } from '../antlr/esql_parser';
 import {
-  createSource,
   createColumn,
   createOption,
   nonNullable,
@@ -109,11 +106,6 @@ import {
 import { firstItem, lastItem } from '../visitor/utils';
 import { Builder } from '../builder';
 import { getPosition } from './helpers';
-
-export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstItem[] {
-  const fromContexts = ctx.getTypedRuleContexts(IndexPatternContext);
-  return fromContexts.map((sourceCtx) => createSource(sourceCtx));
-}
 
 function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext {
   const context = new ParserRuleContext();

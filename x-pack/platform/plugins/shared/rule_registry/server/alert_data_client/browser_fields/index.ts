@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FieldDescriptor } from '@kbn/data-views-plugin/server';
-import { BrowserFields, BrowserField } from '../../../common';
+import type { FieldDescriptor } from '@kbn/data-views-plugin/server';
+import type { BrowserFields, BrowserField } from '../../../common';
 
 const getFieldCategory = (fieldCapability: FieldDescriptor) => {
   const name = fieldCapability.name.split('.');

@@ -9,7 +9,7 @@
 
 export type ESQLAst = ESQLAstCommand[];
 
-export type ESQLAstCommand = ESQLCommand | ESQLAstMetricsCommand | ESQLAstJoinCommand;
+export type ESQLAstCommand = ESQLCommand | ESQLAstTimeseriesCommand | ESQLAstJoinCommand;
 
 export type ESQLAstNode = ESQLAstCommand | ESQLAstExpression | ESQLAstItem;
 
@@ -88,10 +88,8 @@ export interface ESQLCommand<Name = string> extends ESQLAstBaseItem<Name> {
   args: ESQLAstItem[];
 }
 
-export interface ESQLAstMetricsCommand extends ESQLCommand<'metrics'> {
+export interface ESQLAstTimeseriesCommand extends ESQLCommand<'ts'> {
   sources: ESQLSource[];
-  aggregates?: ESQLAstField[];
-  grouping?: ESQLAstField[];
 }
 
 export interface ESQLAstJoinCommand extends ESQLCommand<'join'> {
@@ -291,7 +289,7 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * FROM [<cluster>:]<index>
    * ```
    */
-  cluster?: string;
+  cluster?: ESQLStringLiteral | undefined;
 
   /**
    * Represents the index part of the source identifier. Unescaped and unquoted.
@@ -300,7 +298,16 @@ export interface ESQLSource extends ESQLAstBaseItem {
    * FROM [<cluster>:]<index>
    * ```
    */
-  index?: string;
+  index?: ESQLStringLiteral | undefined;
+
+  /**
+   * Represents the selector (component) part of the source identifier.
+   *
+   * ```
+   * FROM <index>[::<selector>]
+   * ```
+   */
+  selector?: ESQLStringLiteral | undefined;
 }
 
 export interface ESQLColumn extends ESQLAstBaseItem {
@@ -404,6 +411,18 @@ export interface ESQLStringLiteral extends ESQLAstBaseItem {
 
   value: string;
   valueUnquoted: string;
+
+  /**
+   * Whether the string was parsed as "unqouted" and/or can be pretty-printed
+   * unquoted, i.e. in the source text it did not have any quotes (not single ",
+   * not triple """) quotes. This happens in FROM command source parsing, the
+   * cluster and selector can be unquoted strings:
+   *
+   * ```
+   * FROM <cluster>:index:<selector>
+   * ```
+   */
+  unquoted?: boolean;
 }
 
 // @internal

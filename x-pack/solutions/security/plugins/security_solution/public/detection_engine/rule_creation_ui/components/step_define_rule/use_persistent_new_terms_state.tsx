@@ -10,7 +10,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import { isNewTermsRule } from '../../../../../common/detection_engine/utils';
 import type { FormHook } from '../../../../shared_imports';
 import { useFormData } from '../../../../shared_imports';
-import { type DefineStepRule } from '../../../../detections/pages/detection_engine/rules/types';
+import { type DefineStepRule } from '../../../common/types';
 import {
   type NewTermsFields,
   type HistoryWindowStart,
