@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment/moment';
+import moment from 'moment';
 import { calculateAuto } from '@kbn/calculate-auto';
 
 export function getBucketSizeFromTimeRangeAndBucketCount(

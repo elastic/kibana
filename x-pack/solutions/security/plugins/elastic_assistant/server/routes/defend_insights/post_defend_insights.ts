@@ -6,7 +6,7 @@
  */
 
 import type { IKibanaResponse } from '@kbn/core/server';
-import moment from 'moment/moment';
+import moment from 'moment';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   DEFEND_INSIGHTS,

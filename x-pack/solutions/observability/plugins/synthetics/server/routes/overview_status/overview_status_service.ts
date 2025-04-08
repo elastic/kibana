@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment/moment';
+import moment from 'moment';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';

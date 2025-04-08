@@ -12,7 +12,7 @@ import { MonitorInspectResponse } from '@kbn/synthetics-plugin/public/apps/synth
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ProjectAPIKeyResponse } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/get_api_key';
-import moment from 'moment/moment';
+import moment from 'moment';
 import { omit } from 'lodash';
 import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';

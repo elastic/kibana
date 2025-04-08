@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { EcsError } from '@elastic/ecs';
-import moment from 'moment/moment';
+import moment from 'moment';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { FetchActionResponsesResult } from '../..';
 import type {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import url from 'url';
-import moment from 'moment/moment';
+import moment from 'moment';
 import { synthtrace } from '../../../synthtrace';
 import { generateMobileData } from './generate_mobile.data';
 

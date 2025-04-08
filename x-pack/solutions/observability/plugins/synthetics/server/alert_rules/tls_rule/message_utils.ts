@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment/moment';
+import moment from 'moment';
 import { IBasePath } from '@kbn/core-http-server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import {

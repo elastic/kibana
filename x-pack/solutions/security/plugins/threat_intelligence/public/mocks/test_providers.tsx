@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment/moment';
+import moment from 'moment';
 import React, { FC, PropsWithChildren } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';

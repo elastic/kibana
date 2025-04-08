@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
-import type { Duration } from 'moment/moment';
+import type { Duration } from 'moment';
 import { capitalize, get, memoize, pick } from 'lodash';
 import {
   FIELD_FORMAT_IDS,

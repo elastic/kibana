@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment/moment';
+import moment from 'moment';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';

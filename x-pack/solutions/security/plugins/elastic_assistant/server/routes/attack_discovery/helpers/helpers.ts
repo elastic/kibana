@@ -16,9 +16,8 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
-import { Moment } from 'moment';
+import { Moment, default as moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import moment from 'moment/moment';
 import { uniq } from 'lodash/fp';
 
 import dateMath from '@kbn/datemath';

@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { RoleCredentials, SamlAuthProviderType } from '@kbn/ftr-common-functional-services';
-import moment from 'moment/moment';
+import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit, omitBy } from 'lodash';
 import {

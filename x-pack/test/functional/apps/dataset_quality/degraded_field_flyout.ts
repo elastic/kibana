@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import moment from 'moment/moment';
+import moment from 'moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
 import { DatasetQualityFtrProviderContext } from './config';
 import {

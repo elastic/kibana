@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment/moment';
+import moment from 'moment';
 import type { SearchConfigSchema, SearchSessionsConfigSchema } from './server/config';
 
 export const getMockSearchConfig = ({
