@@ -57,8 +57,9 @@ import {
   ReauthorizeTransformResponseSchema,
   BulkUpgradePackagesRequestSchema,
   BulkUpgradePackagesResponseSchema,
-  GetOneBulkUpgradePackagesRequestSchema,
-  GetOneBulkUpgradePackagesResponseSchema,
+  GetOneBulkOperationPackagesRequestSchema,
+  GetOneBulkOperationPackagesResponseSchema,
+  BulkUninstallPackagesRequestSchema,
 } from '../../types';
 import type { FleetConfigType } from '../../config';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
@@ -88,7 +89,11 @@ import {
   deletePackageKibanaAssetsHandler,
   installPackageKibanaAssetsHandler,
 } from './kibana_assets_handler';
-import { postBulkUpgradePackagesHandler, getOneBulkUpgradePackagesHandler } from './bulk_handler';
+import {
+  postBulkUpgradePackagesHandler,
+  postBulkUninstallPackagesHandler,
+  getOneBulkOperationPackagesHandler,
+} from './bulk_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -482,6 +487,60 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
       );
 
     router.versioned
+      .post({
+        path: EPM_API_ROUTES.BULK_UNINSTALL_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Bulk uninstall packages`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: BulkUninstallPackagesRequestSchema,
+            response: {
+              200: {
+                body: () => BulkUpgradePackagesResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        postBulkUninstallPackagesHandler
+      );
+
+    router.versioned
+      .get({
+        path: EPM_API_ROUTES.BULK_UNINSTALL_INFO_PATTERN,
+        security: INSTALL_PACKAGES_SECURITY,
+        summary: `Get Bulk uninstall packages details`,
+        options: {
+          tags: ['oas-tag:Elastic Package Manager (EPM)'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetOneBulkOperationPackagesRequestSchema,
+            response: {
+              200: {
+                body: () => GetOneBulkOperationPackagesResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        getOneBulkOperationPackagesHandler
+      );
+
+    router.versioned
       .get({
         path: EPM_API_ROUTES.BULK_UPGRADE_INFO_PATTERN,
         security: INSTALL_PACKAGES_SECURITY,
@@ -494,10 +553,10 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
         {
           version: API_VERSIONS.public.v1,
           validate: {
-            request: GetOneBulkUpgradePackagesRequestSchema,
+            request: GetOneBulkOperationPackagesRequestSchema,
             response: {
               200: {
-                body: () => GetOneBulkUpgradePackagesResponseSchema,
+                body: () => GetOneBulkOperationPackagesResponseSchema,
               },
               400: {
                 body: genericErrorResponse,
@@ -505,7 +564,7 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
             },
           },
         },
-        getOneBulkUpgradePackagesHandler
+        getOneBulkOperationPackagesHandler
       );
   }
 

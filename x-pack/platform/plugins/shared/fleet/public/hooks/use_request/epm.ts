@@ -32,11 +32,12 @@ import type {
 } from '../../types';
 import type {
   BulkUpgradePackagesRequest,
-  BulkUpgradePackagesResponse,
+  BulkOperationPackagesResponse,
   FleetErrorResponse,
   GetEpmDataStreamsResponse,
-  GetOneBulkUpgradePackagesResponse,
+  GetOneBulkOperationPackagesResponse,
   GetStatsResponse,
+  BulkUninstallPackagesRequest,
 } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
@@ -309,7 +310,7 @@ export const sendBulkInstallPackages = (
 };
 
 export const sendBulkUpgradePackagesForRq = (params: BulkUpgradePackagesRequest) => {
-  return sendRequestForRq<BulkUpgradePackagesResponse>({
+  return sendRequestForRq<BulkOperationPackagesResponse>({
     path: epmRouteService.getBulkUpgradePath(),
     method: 'post',
     version: API_VERSIONS.public.v1,
@@ -317,9 +318,26 @@ export const sendBulkUpgradePackagesForRq = (params: BulkUpgradePackagesRequest)
   });
 };
 
+export const sendBulkUninstallPackagesForRq = (params: BulkUninstallPackagesRequest) => {
+  return sendRequestForRq<BulkOperationPackagesResponse>({
+    path: epmRouteService.getBulkUninstallPath(),
+    method: 'post',
+    version: API_VERSIONS.public.v1,
+    body: params,
+  });
+};
+
 export const sendGetOneBulkUpgradePackagesForRq = (taskId: string) => {
-  return sendRequestForRq<GetOneBulkUpgradePackagesResponse>({
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
     path: epmRouteService.getOneBulkUpgradePath(taskId),
+    method: 'get',
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendGetOneBulkUninstallPackagesForRq = (taskId: string) => {
+  return sendRequestForRq<GetOneBulkOperationPackagesResponse>({
+    path: epmRouteService.getOneBulkUninstallPath(taskId),
     method: 'get',
     version: API_VERSIONS.public.v1,
   });
