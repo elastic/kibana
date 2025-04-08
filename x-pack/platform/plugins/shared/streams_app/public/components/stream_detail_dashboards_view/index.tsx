@@ -59,7 +59,10 @@ export function StreamDetailDashboardsView({
     core: { featureFlags },
   } = useKibana();
 
-  const renderContentPackItems = featureFlags.getBooleanValue(FeatureFlagStreamsContentPackUIEnabled, false);
+  const renderContentPackItems = featureFlags.getBooleanValue(
+    FeatureFlagStreamsContentPackUIEnabled,
+    false
+  );
 
   return (
     <EuiFlexGroup direction="column">
@@ -98,8 +101,8 @@ export function StreamDetailDashboardsView({
               setQuery(nextQuery.queryText);
             }}
           />
-          
-          { renderContentPackItems &&
+
+          {renderContentPackItems && (
             <EuiButton
               data-test-subj="streamsAppStreamDetailExportContentPackButton"
               iconType="exportAction"
@@ -112,9 +115,9 @@ export function StreamDetailDashboardsView({
                 defaultMessage: 'Export content pack',
               })}
             </EuiButton>
-          }
-          
-          { renderContentPackItems ? 
+          )}
+
+          {renderContentPackItems ? (
             <EuiPopover
               button={
                 <EuiButton
@@ -175,7 +178,7 @@ export function StreamDetailDashboardsView({
                 ]}
               />
             </EuiPopover>
-          :
+          ) : (
             <EuiButton
               data-test-subj="streamsAppStreamDetailAddDashboardButton"
               iconType="plusInCircle"
@@ -187,7 +190,7 @@ export function StreamDetailDashboardsView({
                 defaultMessage: 'Add a dashboard',
               })}
             </EuiButton>
-          }
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>

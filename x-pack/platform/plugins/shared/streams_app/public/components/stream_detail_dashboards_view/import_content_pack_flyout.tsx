@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { ContentPack, ContentPackEntry } from '@kbn/content-packs-schema';
+import { ContentPackEntry } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
