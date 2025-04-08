@@ -25,7 +25,7 @@ export const ChatSidebar: React.FC = () => {
     },
     {
       title: i18n.translate('xpack.searchPlayground.sidebar.contextTitle', {
-        defaultMessage: 'Context',
+        defaultMessage: 'Playground context',
       }),
       extraAction: (
         <EuiLink
