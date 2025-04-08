@@ -266,6 +266,8 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<ExperimentalConfigKeys>;
 
+const disableExperimentalPrefix = 'disable:' as const;
+
 /**
  * Parses the string value used in `xpack.securitySolution.enableExperimental` kibana configuration,
  * which should be a string of values delimited by a comma (`,`)
@@ -280,14 +282,14 @@ export const parseExperimentalConfigValue = (
   const invalidKeys: string[] = [];
 
   for (let value of configValue) {
-    const isNegated = value.startsWith('!');
-    if (isNegated) {
-      value = value.replace('!', '');
+    const isDisabled = value.startsWith(disableExperimentalPrefix);
+    if (isDisabled) {
+      value = value.replace(disableExperimentalPrefix, '');
     }
     if (!allowedKeys.includes(value as keyof ExperimentalFeatures)) {
       invalidKeys.push(value);
     } else {
-      enabledFeatures[value as keyof ExperimentalFeatures] = isNegated ? false : true;
+      enabledFeatures[value as keyof ExperimentalFeatures] = isDisabled ? false : true;
     }
   }
 
