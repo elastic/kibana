@@ -53391,11 +53391,11 @@
                   "name": {
                     "type": "string"
                   },
-                  "pattern_replacements": {
-                    "additionalProperties": {
+                  "replaced_patterns": {
+                    "items": {
                       "type": "string"
                     },
-                    "type": "object"
+                    "type": "array"
                   },
                   "version": {
                     "type": "string"
@@ -53405,7 +53405,7 @@
                   "name",
                   "description",
                   "version",
-                  "pattern_replacements",
+                  "replaced_patterns",
                   "include"
                 ],
                 "type": "object"
@@ -53473,7 +53473,7 @@
     },
     "/api/streams/{name}/content/preview": {
       "post": {
-        "description": "Links content objects to a stream.",
+        "description": "Returns a json representation of a content pack.",
         "operationId": "post-streams-name-content-preview",
         "parameters": [
           {
@@ -53512,7 +53512,7 @@
           }
         },
         "responses": {},
-        "summary": "Import content into a stream",
+        "summary": "Preview a content pack",
         "tags": [
           "streams"
         ]
