@@ -36,6 +36,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Readable } from 'stream';
 import type { Mutable } from 'utility-types';
+import { SENTINEL_ONE_AGENT_INDEX_PATTERN } from '../../../../../../common/endpoint/service/response_actions/sentinel_one';
 import type {
   SentinelOneKillProcessScriptArgs,
   SentinelOneProcessListScriptArgs,
@@ -72,6 +73,7 @@ import type {
   SentinelOneActionRequestCommonMeta,
   SentinelOneActivityDataForType80,
   SentinelOneActivityEsDoc,
+  SentinelOneAgentEsDoc,
   SentinelOneGetFileRequestMeta,
   SentinelOneGetFileResponseMeta,
   SentinelOneIsolationRequestMeta,
@@ -127,8 +129,103 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
-    // TODO: implement sentinelone agent policy info.
-    return [];
+    const esClient = this.options.esClient;
+    const spaceId = this.options.spaceId;
+    const fleetServices = this.options.endpointService.getInternalFleetServices(spaceId);
+    const soClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
+    const policyInfo: LogsEndpointAction['agent']['policy'] = [];
+
+    // TODO: PT need to think about data namespacing and if we need to use it here.
+
+    // Get the latest ingested document for each agent ID
+    const s1AgentsEsResults = await esClient
+      .search<SentinelOneAgentEsDoc, { most_recent: SentinelOneAgentEsDoc }>({
+        index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+        query: {
+          bool: {
+            filter: [{ terms: { 'sentinel_one.agent.agent.id': agentIds } }],
+          },
+        },
+        collapse: {
+          field: 'sentinel_one.agent.agent.id',
+          inner_hits: {
+            name: 'most_recent',
+            size: 1,
+            _source: ['agent', 'sentinel_one.agent.agent.id'],
+            sort: [{ 'event.created': 'desc' }],
+          },
+        },
+        _source: false,
+      })
+      .catch(catchAndWrapError);
+
+    this.log.debug(
+      () =>
+        `SentinelOne Agent records found in [${SENTINEL_ONE_AGENT_INDEX_PATTERN}]:\n${stringify(
+          s1AgentsEsResults
+        )}`
+    );
+
+    const s1AgentIdToElasticAgentIdMap: Record<string, string> = s1AgentsEsResults.hits.hits.reduce(
+      (acc, s1AgentEsDoc) => {
+        const doc = s1AgentEsDoc.inner_hits?.most_recent.hits.hits[0]._source;
+
+        if (doc) {
+          acc[doc.sentinel_one.agent.agent.id] = doc.agent.id;
+        }
+
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+
+    // Get the Agent records from fleet in order to determine the agent policy id
+    const fleetAgents = await fleetServices.agent
+      .getByIds(Object.values(s1AgentIdToElasticAgentIdMap), { ignoreMissing: true })
+      .catch(catchAndWrapError);
+    const fleetAgentIdToAgentPolicyIdMap: Record<string, string> = {};
+    const agentPolicyIds = new Set<string>([]);
+
+    for (const fleetAgent of fleetAgents) {
+      if (fleetAgent.policy_id) {
+        fleetAgentIdToAgentPolicyIdMap[fleetAgent.id] = fleetAgent.policy_id;
+        agentPolicyIds.add(fleetAgent.policy_id);
+      }
+    }
+
+    // Get list of SentinelOne Integration policies
+    const integrationPolicies = await fleetServices.packagePolicy
+      .list(soClient, {
+        kuery: `ingest-package-policies.package.name: "sentinel_one" AND ingest-package-policies.policy_ids: (${Array.from(
+          agentPolicyIds.values()
+        )
+          .map((id) => `"${id}"`)
+          .join(' OR ')})`,
+      })
+      .catch(catchAndWrapError);
+
+    const agentPolicyIdToIntegrationPolicyIdMap: Record<string, string> = {};
+
+    for (const integrationPolicy of integrationPolicies.items) {
+      for (const agentPolicyId of integrationPolicy.policy_ids) {
+        agentPolicyIdToIntegrationPolicyIdMap[agentPolicyId] = integrationPolicy.id;
+      }
+    }
+
+    for (const s1AgentId of agentIds) {
+      const elasticAgentId = s1AgentIdToElasticAgentIdMap[s1AgentId];
+      const agentPolicyId = fleetAgentIdToAgentPolicyIdMap[elasticAgentId];
+      const integrationPolicyId = agentPolicyIdToIntegrationPolicyIdMap[agentPolicyId];
+
+      policyInfo.push({
+        agentId: s1AgentId,
+        elasticAgentId,
+        agentPolicyId,
+        integrationPolicyId,
+      });
+    }
+
+    return policyInfo;
   }
 
   private async handleResponseActionCreation<

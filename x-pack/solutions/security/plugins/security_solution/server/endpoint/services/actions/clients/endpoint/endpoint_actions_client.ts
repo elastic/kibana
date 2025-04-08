@@ -76,7 +76,9 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     const policyInfo: LogsEndpointAction['agent']['policy'] = [];
 
     // Get a list of Agent records so we can identify the Agent Policy ID
-    const agents = await fleetServices.agent.getByIds(agentIds, { ignoreMissing: true });
+    const agents = await fleetServices.agent
+      .getByIds(agentIds, { ignoreMissing: true })
+      .catch(catchAndWrapError);
 
     this.log.debug(() => `Agent records for ids [${agentIds.join(' | ')}]:\n${stringify(agents)}`);
 
@@ -113,6 +115,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       if (agent.policy_id) {
         policyInfo.push({
           agentId: agent.id,
+          elasticAgentId: agent.id,
           agentPolicyId: agent.policy_id,
           integrationPolicyId: agentPolicyToIntegrationPolicyMap[agent.policy_id].id,
         });

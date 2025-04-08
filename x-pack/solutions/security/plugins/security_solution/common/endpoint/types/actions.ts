@@ -145,7 +145,10 @@ export interface LogsEndpointAction<
      * Added in support of space awareness.
      */
     policy: Array<{
+      /** The agent id running on the host */
       agentId: string;
+      /** The elastic agent id that ingested the data. This will be different from `agentId` for 3rd party EDRs */
+      elasticAgentId: string;
       integrationPolicyId: string;
       agentPolicyId: string;
     }>;
