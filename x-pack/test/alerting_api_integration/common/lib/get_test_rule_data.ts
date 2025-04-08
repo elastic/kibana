@@ -17,7 +17,7 @@ export function getTestRuleData(overwrites = {}) {
     notify_when: 'onThrottleInterval',
     actions: [],
     params: {},
-    /* TODO: uncomment once artifacts is available
+    /* TODO: uncomment once artifacts is added to schema by https://github.com/elastic/kibana/pull/216292
     artifacts: {
       dashboards: [
         {
