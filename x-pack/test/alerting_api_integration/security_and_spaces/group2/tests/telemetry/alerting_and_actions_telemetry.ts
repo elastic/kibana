@@ -259,7 +259,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             notify_when: 'onActiveAlert',
             throttle: null,
             params: {
-              index: '.kibana-alerting-test-data',
+              index: 'kibana-alerting-test-data',
               reference: 'test',
             },
             actions: [

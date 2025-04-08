@@ -221,7 +221,7 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       await esClient.indices.putIndexTemplate({
         name: featureMapEntry.data_stream,
-        // @ts-expect-error
+        // @ts-expect-error elasticsearch@9.0.0 https://github.com/elastic/elasticsearch-js/issues/2584
         body: indexTemplateBody,
         _meta: {
           has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,

@@ -7,11 +7,11 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import {
+  ILM_LOCATOR_ID,
   IlmLocatorParams,
   Phases,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
   IngestStreamGetResponse,
   IngestStreamLifecycle,
@@ -55,6 +55,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
+import { useKibana } from '../../../hooks/use_kibana';
 import { rolloverCondition } from './helpers/rollover_condition';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { useWiredStreams } from '../../../hooks/use_wired_streams';
@@ -69,7 +70,6 @@ interface ModalOptions {
   getIlmPolicies: () => Promise<PolicyFromES[]>;
   definition: IngestStreamGetResponse;
   updateInProgress: boolean;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }
 
 export function EditLifecycleModal({
@@ -231,9 +231,15 @@ function IlmModal({
   updateLifecycle,
   updateInProgress,
   getIlmPolicies,
-  ilmLocator,
   definition,
 }: ModalOptions) {
+  const {
+    dependencies: {
+      start: { share },
+    },
+  } = useKibana();
+
+  const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
   const existingLifecycle = definition.stream.ingest.lifecycle;
   const [selectedPolicy, setSelectedPolicy] = useState(
     isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
