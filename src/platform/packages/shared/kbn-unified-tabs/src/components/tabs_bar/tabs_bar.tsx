@@ -187,7 +187,12 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           <EuiFlexItem grow={false} css={growingFlexItemCss}>
             <div ref={setTabsContainerElement} role="tablist" css={tabsContainerCss}>
               <EuiDragDropContext onDragEnd={onDragEnd}>
-                <EuiDroppable droppableId={DROPPABLE_ID} direction="horizontal" css={droppableCss}>
+                <EuiDroppable
+                  droppableId={DROPPABLE_ID}
+                  direction="horizontal"
+                  css={droppableCss}
+                  grow
+                >
                   {() =>
                     items.map((item, index) => (
                       <EuiDraggable
