@@ -106,7 +106,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
         <>
           <FormattedMessage
             id="xpack.searchPlayground.sidebar.summarizationModel.label"
-            defaultMessage="Model"
+            defaultMessage="AI Connector"
           />{' '}
         </>
       }

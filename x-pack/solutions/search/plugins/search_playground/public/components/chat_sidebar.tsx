@@ -32,7 +32,7 @@ export const ChatSidebar: React.FC = () => {
   const panels = [
     {
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
-        defaultMessage: 'Model settings',
+        defaultMessage: 'LLM settings',
       }),
       children: <SummarizationPanel />,
       extraAction: (
