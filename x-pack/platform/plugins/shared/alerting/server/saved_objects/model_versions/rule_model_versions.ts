@@ -46,7 +46,7 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
   '5': {
     changes: [],
     schemas: {
-      forwardCompatibility: rawRuleSchemaV4.extends({}, { unknowns: 'ignore' }),
+      forwardCompatibility: rawRuleSchemaV5.extends({}, { unknowns: 'ignore' }),
       create: rawRuleSchemaV5,
     },
   },

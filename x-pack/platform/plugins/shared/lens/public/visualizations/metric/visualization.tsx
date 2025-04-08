@@ -26,7 +26,11 @@ import {
   UserMessage,
 } from '../../types';
 import { GROUP_ID, LENS_METRIC_ID } from './constants';
-import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
+import {
+  DimensionEditor,
+  DimensionEditorAdditionalSection,
+  DimensionEditorDataExtraComponent,
+} from './dimension_editor';
 import { Toolbar } from './toolbar';
 import { generateId } from '../../id_generator';
 import { toExpression } from './to_expression';
@@ -92,6 +96,7 @@ const getMetricLayerConfiguration = (
   };
 
   const isBucketed = (op: OperationMetadata) => op.isBucketed;
+  const canCollapseBy = isMetricNumeric && props.state.collapseFn;
 
   return {
     groups: [
@@ -182,7 +187,7 @@ const getMetricLayerConfiguration = (
           ? [
               {
                 columnId: props.state.breakdownByAccessor,
-                triggerIconType: props.state.collapseFn ? ('aggregate' as const) : undefined,
+                triggerIconType: canCollapseBy ? ('aggregate' as const) : undefined,
               },
             ]
           : [],
@@ -573,6 +578,10 @@ export const getMetricVisualization = ({
 
   ToolbarComponent(props) {
     return <Toolbar {...props} />;
+  },
+
+  DimensionEditorDataExtraComponent(props) {
+    return <DimensionEditorDataExtraComponent {...props} />;
   },
 
   DimensionEditorComponent(props) {
