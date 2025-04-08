@@ -8,7 +8,6 @@ import { EuiFlexGroup, EuiButton, EuiBadgeGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { IngestStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
-import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { LoadingPanel } from '../loading_panel';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
@@ -36,20 +35,6 @@ export function EntityDetailViewWithoutParams({
   definition: IngestStreamGetResponse;
 }) {
   const router = useStreamsAppRouter();
-
-  useStreamsAppBreadcrumbs(() => {
-    if (!entity.displayName) {
-      return [];
-    }
-
-    return [
-      {
-        title: entity.displayName,
-        path: `/{key}`,
-        params: { path: { key: entity.id } },
-      } as const,
-    ];
-  }, [entity.displayName, entity.id]);
 
   if (!entity.displayName) {
     return <LoadingPanel />;

@@ -12,6 +12,25 @@ import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_v
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
 import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
+import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
+
+export function StreamRoot({ children }: { children: React.ReactNode }) {
+  const {
+    path: { key },
+  } = useStreamsAppParams('/{key}', true);
+
+  useStreamsAppBreadcrumbs(() => {
+    return [
+      {
+        title: key,
+        path: `/{key}`,
+        params: { path: { key } },
+      },
+    ];
+  }, [key]);
+
+  return children;
+}
 
 export function StreamDetailView() {
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;

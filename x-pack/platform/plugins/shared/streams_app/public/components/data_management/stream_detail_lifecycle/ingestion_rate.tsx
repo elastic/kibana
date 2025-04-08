@@ -96,7 +96,7 @@ export function IngestionRate({
       <EuiFlexGroup
         justifyContent="center"
         alignItems="center"
-        style={{ width: '100%', minHeight: '250px' }}
+        css={{ width: '100%', minHeight: '250px' }}
         direction="column"
         gutterSize="xs"
       >

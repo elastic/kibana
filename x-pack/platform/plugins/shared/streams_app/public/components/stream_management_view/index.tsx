@@ -15,7 +15,7 @@ export function StreamManagementView() {
 
   const {
     path: { key: name },
-  } = useStreamsAppParams('/{key}/management', true);
+  } = useStreamsAppParams('/{key}/management/{tab}', true);
 
   return (
     <StreamDetailContextProvider name={name} streamsRepositoryClient={streamsRepositoryClient}>
