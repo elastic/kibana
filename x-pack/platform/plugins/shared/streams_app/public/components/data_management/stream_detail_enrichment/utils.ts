@@ -48,13 +48,19 @@ const defaultDateProcessorFormState: () => DateFormState = () => ({
   if: ALWAYS_CONDITION,
 });
 
-const WELL_KNOWN_TEXT_FIELDS = ['message', 'body.text', 'error.message', 'event.original'];
+const WELL_KNOWN_TEXT_FIELDS = [
+  'message',
+  'body.text',
+  'error.message',
+  'event.original',
+  'attributes.exception.message',
+];
 
 const getDefaultTextField = (sampleDocs: FlattenRecord[]) => {
   const stringFieldCounts = sampleDocs
     .map((doc) =>
       Object.keys(doc).filter(
-        (key) => typeof doc[key] === 'string' && WELL_KNOWN_TEXT_FIELDS.includes(key)
+        (key) => doc[key] && typeof doc[key] === 'string' && WELL_KNOWN_TEXT_FIELDS.includes(key)
       )
     )
     .reduce((acc, keys) => {
@@ -64,9 +70,18 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[]) => {
       return acc;
     }, {} as Record<string, number>);
 
-  const sortedFields = Object.entries(stringFieldCounts).sort(([, countA], [, countB]) => {
-    return countB - countA;
-  });
+  // sort by count descending first, then by order of field in WELL_KNOWN_TEXT_FIELDS
+  const sortedFields = Object.entries(stringFieldCounts).sort(
+    ([fieldA, countA], [fieldB, countB]) => {
+      const countSorting = countB - countA;
+      if (countSorting !== 0) {
+        return countSorting;
+      }
+      const indexA = WELL_KNOWN_TEXT_FIELDS.indexOf(fieldA);
+      const indexB = WELL_KNOWN_TEXT_FIELDS.indexOf(fieldB);
+      return indexA - indexB;
+    }
+  );
   const mostCommonField = sortedFields[0];
   return mostCommonField ? mostCommonField[0] : '';
 };
