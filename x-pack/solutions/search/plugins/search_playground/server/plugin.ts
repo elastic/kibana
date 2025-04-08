@@ -24,6 +24,10 @@ import {
 } from './types';
 import { defineRoutes } from './routes';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+import {
+  createPlaygroundSavedObjectType,
+  PLAYGROUND_SAVED_OBJECT_TYPE,
+} from './playground_saved_object/playground_saved_object';
 
 export class SearchPlaygroundPlugin
   implements
@@ -45,6 +49,9 @@ export class SearchPlaygroundPlugin
     { features }: SearchPlaygroundPluginSetupDependencies
   ) {
     this.logger.debug('searchPlayground: Setup');
+
+    core.savedObjects.registerType(createPlaygroundSavedObjectType());
+
     const router = core.http.createRouter();
 
     defineRoutes({ router, logger: this.logger, getStartServices: core.getStartServices });
@@ -66,8 +73,8 @@ export class SearchPlaygroundPlugin
           api: [PLUGIN_ID],
           catalogue: [PLUGIN_ID],
           savedObject: {
-            all: [],
-            read: [],
+            all: [PLAYGROUND_SAVED_OBJECT_TYPE],
+            read: [PLAYGROUND_SAVED_OBJECT_TYPE],
           },
           ui: [],
         },
@@ -75,7 +82,7 @@ export class SearchPlaygroundPlugin
           disabled: true,
           savedObject: {
             all: [],
-            read: [],
+            read: [PLAYGROUND_SAVED_OBJECT_TYPE],
           },
           ui: [],
         },
