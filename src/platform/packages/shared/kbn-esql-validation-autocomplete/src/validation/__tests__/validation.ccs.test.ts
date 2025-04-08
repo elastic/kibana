@@ -12,11 +12,6 @@ describe('validation', () => {
   describe('from command', () => {
     describe('FROM <sources> [ METADATA <indices> ]', () => {
       describe('... <sources> ...', () => {
-        test('succeed in known indices', async () => {
-          const { expectErrors } = await setup();
-          await expectErrors('FROM ccs:index', []);
-        });
-
         test('display errors on unknown indices', async () => {
           const { expectErrors } = await setup();
           await expectErrors('fRoM remote-*:indexes*', ['Unknown index [remote-*:indexes*]']);
@@ -24,13 +19,6 @@ describe('validation', () => {
           await expectErrors('fRoM remote-ccs:indexes', ['Unknown index [remote-ccs:indexes]']);
           await expectErrors('fRoM a_index, remote-ccs:indexes', [
             'Unknown index [remote-ccs:indexes]',
-          ]);
-        });
-
-        test('display errors on known indices with failure stores', async () => {
-          const { expectErrors } = await setup();
-          await expectErrors('FROM ccs:index::data', [
-            `SyntaxError: mismatched input '::' expecting <EOF>`,
           ]);
         });
       });

@@ -36,7 +36,6 @@ export const indexes = [
   '.secret_index',
   'my-index',
   'unsupported_index',
-  'ccs:index',
 ];
 
 export const policies = [

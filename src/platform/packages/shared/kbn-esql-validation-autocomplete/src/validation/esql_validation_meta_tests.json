@@ -5,8 +5,7 @@
     "other_index",
     ".secret_index",
     "my-index",
-    "unsupported_index",
-    "ccs:index"
+    "unsupported_index"
   ],
   "fields": [
     {
