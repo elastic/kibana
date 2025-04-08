@@ -67,6 +67,7 @@ interface DurationDistributionChartProps {
   status: FETCH_STATUS;
   eventType: ProcessorEvent.span | ProcessorEvent.transaction;
   dataTestSubPrefix?: string;
+  showAxisTitle?: boolean;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -109,6 +110,7 @@ export function DurationDistributionChart({
   status,
   eventType,
   dataTestSubPrefix,
+  showAxisTitle = true,
 }: DurationDistributionChartProps) {
   const chartThemes = useChartThemes();
   const { euiTheme } = useEuiTheme();
@@ -251,9 +253,13 @@ export function DurationDistributionChart({
           />
           <Axis
             id="x-axis"
-            title={i18n.translate('kbnApmUiShared.durationDistributionChart.latencyLabel', {
-              defaultMessage: 'Latency',
-            })}
+            title={
+              showAxisTitle
+                ? i18n.translate('kbnApmUiShared.durationDistributionChart.latencyLabel', {
+                    defaultMessage: 'Latency',
+                  })
+                : ''
+            }
             position={Position.Bottom}
             tickFormat={xAxisTickFormat}
             gridLine={{ visible: false }}
@@ -262,9 +268,11 @@ export function DurationDistributionChart({
             id="y-axis"
             domain={yAxisDomain}
             title={
-              eventType === ProcessorEvent.transaction
-                ? NUMBER_OF_TRANSACTIONS_LABEL
-                : NUMBER_OF_SPANS_LABEL
+              showAxisTitle
+                ? eventType === ProcessorEvent.transaction
+                  ? NUMBER_OF_TRANSACTIONS_LABEL
+                  : NUMBER_OF_SPANS_LABEL
+                : ''
             }
             position={Position.Left}
             ticks={yTicks}
