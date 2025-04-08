@@ -6,14 +6,29 @@
  */
 
 import type { FC } from 'react';
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import type { GetRiskScoreSpikesResponse, SpikeEntity } from '../../../common/api/entity_analytics';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import _ from 'lodash';
+import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
+import type { EntityIdentifierFields } from '../../../common/entity_analytics/types';
+import { EntityType } from '../../../common/entity_analytics/types';
+import {
+  type GetRiskScoreSpikesResponse,
+  type SpikeEntity,
+} from '../../../common/api/entity_analytics';
 import { FlyoutHeader } from '../shared/components/flyout_header';
 import { FlyoutBody } from '../shared/components/flyout_body';
+import { FlyoutRiskSummary } from '../../entity_analytics/components/risk_summary_flyout/risk_summary';
+import { HOST_PANEL_RISK_SCORE_QUERY_ID } from '../entity_details/host_right';
+import { USER_PANEL_RISK_SCORE_QUERY_ID } from '../entity_details/user_right';
+import { SERVICE_PANEL_RISK_SCORE_QUERY_ID } from '../entity_details/service_right';
+import type { RiskScoreState } from '../../entity_analytics/api/hooks/use_risk_score';
+import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
+import { useNavigateToServiceDetails } from '../entity_details/service_right/hooks/use_navigate_to_service_details';
+import { useNavigateToHostDetails } from '../entity_details/host_right/hooks/use_navigate_to_host_details';
+import { useNavigateToUserDetails } from '../entity_details/user_right/hooks/use_navigate_to_user_details';
 
 export interface RiskScoreSpikeDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'risk-score-spike-details';
@@ -27,6 +42,171 @@ export interface RiskScoreSpikeDetailsPanelProps extends Record<string, unknown>
   spikes: GetRiskScoreSpikesResponse;
 }
 
+const useOpenDetailsPanel = ({
+  entityType,
+  identifierField,
+  identifier,
+  riskScoreState,
+}: {
+  identifierField: EntityIdentifierFields;
+  identifier: string;
+  entityType: EntityType;
+  riskScoreState: RiskScoreState<typeof entityType>;
+}) => {
+  const scopeId = useMemo(() => {
+    return `${entityType}-${identifier}`;
+  }, [entityType, identifier]);
+
+  const riskData =
+    ((riskScoreState && riskScoreState?.data?.length) || 0) > 0
+      ? riskScoreState!.data![0] // eslint-disable-line @typescript-eslint/no-non-null-assertion
+      : undefined;
+
+  const isRiskScoreExist = !!_.get(riskData, `${entityType}.risk`);
+
+  const { hasMisconfigurationFindings } = useHasMisconfigurations(identifierField, identifier);
+  const hasNonClosedAlerts = false;
+
+  const { openDetailsPanel: openDetailsPanelUser } = useNavigateToUserDetails({
+    userName: identifier,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasNonClosedAlerts,
+    isPreviewMode: true,
+    contextID: 'UserEntityOverview',
+  });
+
+  const { openDetailsPanel: openDetailsPanelHost } = useNavigateToHostDetails({
+    hostName: identifier,
+    scopeId,
+    isRiskScoreExist,
+    hasMisconfigurationFindings,
+    hasVulnerabilitiesFindings: false,
+    hasNonClosedAlerts,
+    isPreviewMode: true,
+    contextID: 'HostEntityOverview',
+  });
+
+  const { openDetailsPanel: openDetailsPanelService } = useNavigateToServiceDetails({
+    serviceName: identifier,
+    scopeId,
+    isRiskScoreExist,
+    isPreviewMode: true,
+    contextID: 'ServiceEntityOverview',
+  });
+
+  if (entityType === EntityType.user) {
+    return openDetailsPanelUser;
+  }
+  if (entityType === EntityType.host) {
+    return openDetailsPanelHost;
+  }
+  return openDetailsPanelService;
+};
+
+const SpikeSummaryPanel: React.FC<{ spike: SpikeEntity }> = ({ spike }) => {
+  let entityType: EntityType = EntityType.host;
+  let queryId: string = HOST_PANEL_RISK_SCORE_QUERY_ID;
+
+  if (spike.identifierKey === 'user.name') {
+    entityType = EntityType.user;
+    queryId = USER_PANEL_RISK_SCORE_QUERY_ID;
+  } else if (spike.identifierKey === 'service.name') {
+    entityType = EntityType.service;
+    queryId = SERVICE_PANEL_RISK_SCORE_QUERY_ID;
+  }
+
+  const filterQuery = useMemo(() => {
+    return {
+      terms: {
+        [spike.identifierKey]: [spike.identifier],
+      },
+    };
+  }, [spike.identifier, spike.identifierKey]);
+
+  const riskScoreState = useRiskScore({
+    riskEntity: entityType,
+    filterQuery,
+    onlyLatest: false,
+    pagination: {
+      cursorStart: 0,
+      querySize: 1,
+    },
+  });
+
+  const openDetailsPanel = useOpenDetailsPanel({
+    identifierField: spike.identifierKey as EntityIdentifierFields,
+    identifier: spike.identifier,
+    entityType,
+    riskScoreState,
+  });
+
+  let iconType = 'user';
+
+  if (entityType === EntityType.host) {
+    iconType = 'storage';
+  } else if (entityType === EntityType.service) {
+    iconType = 'apmApp';
+  }
+
+  return (
+    <EuiFlexItem>
+      <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
+        <EuiFlexGroup direction="column" gutterSize="m">
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup direction="column" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiText>
+                  <h3>
+                    <EuiIcon type={iconType} /> {spike.identifier}
+                  </h3>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup alignItems="flexStart" gutterSize="s">
+                  {!!spike.baseline && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="warning" iconType="warning">
+                        <FormattedMessage
+                          id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.spikeAboveBaseline"
+                          defaultMessage="Score +{spike} above baseline"
+                          values={{ spike: Math.round(spike.spike) }}
+                        />
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                  {!spike.baseline && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="success" iconType="asterisk">
+                        <FormattedMessage
+                          id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.spikeAboveBaseline"
+                          defaultMessage="New score"
+                        />
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <FlyoutRiskSummary
+              entityType={entityType}
+              riskScoreData={riskScoreState}
+              recalculatingScore={false}
+              queryId={queryId}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={false}
+              isLinkEnabled={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlexItem>
+  );
+};
+
 /**
  * Panel to be displayed in the RiskScoreSpikeDetails details expandable flyout right section
  */
@@ -34,139 +214,7 @@ export const RiskScoreSpikeDetailsPanel: FC<RiskScoreSpikeDetailsPanelProps> = m
   ({ spikes }) => {
     const { spikesAboveBaseline = [], newScoreSpikes = [] } = spikes;
 
-    const newScoreSpikeColumns: Array<EuiBasicTableColumn<SpikeEntity>> = [
-      {
-        field: 'identifierKey',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.type"
-            defaultMessage="Type"
-          />
-        ),
-        truncateText: true,
-        render: (field: string, record: SpikeEntity) => {
-          let type: string = 'unknown';
-
-          switch (field) {
-            case 'user.name':
-              type = 'user';
-              break;
-            case 'host.name':
-              type = 'host';
-              break;
-            case 'service.name':
-              type = 'service';
-              break;
-          }
-
-          return (
-            <EuiText
-              color="subdued"
-              size="s"
-              data-test-subj={`score-spikes-callout-${type}-type`}
-              data-entity-type={type}
-            >
-              {type}
-            </EuiText>
-          );
-        },
-      },
-      {
-        field: 'identifier',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.name"
-            defaultMessage="Name"
-          />
-        ),
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'spike',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.score"
-            defaultMessage="Score"
-          />
-        ),
-        sortable: true,
-        truncateText: true,
-      },
-    ];
-
-    const spikesAboveBaslineColumns: Array<EuiBasicTableColumn<SpikeEntity>> = [
-      {
-        field: 'identifierKey',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.type"
-            defaultMessage="Type"
-          />
-        ),
-        truncateText: true,
-        render: (field: string, record: SpikeEntity) => {
-          let type: string = 'unknown';
-
-          switch (field) {
-            case 'user.name':
-              type = 'user';
-              break;
-            case 'host.name':
-              type = 'host';
-              break;
-            case 'service.name':
-              type = 'service';
-              break;
-          }
-
-          return (
-            <EuiText
-              color="subdued"
-              size="s"
-              data-test-subj={`score-spikes-callout-${type}-type`}
-              data-entity-type={type}
-            >
-              {type}
-            </EuiText>
-          );
-        },
-      },
-      {
-        field: 'identifier',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.name"
-            defaultMessage="Name"
-          />
-        ),
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'baseline',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.baseline"
-            defaultMessage="Baseline"
-          />
-        ),
-        sortable: true,
-        truncateText: true,
-      },
-      {
-        field: 'spike',
-        name: (
-          <FormattedMessage
-            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.spike"
-            defaultMessage="Score"
-          />
-        ),
-        sortable: true,
-        truncateText: true,
-      },
-    ];
-
+    const combinedSpikes = [...spikesAboveBaseline, ...newScoreSpikes];
     return (
       <>
         <FlyoutHeader hasBorder>
@@ -181,46 +229,9 @@ export const RiskScoreSpikeDetailsPanel: FC<RiskScoreSpikeDetailsPanelProps> = m
         </FlyoutHeader>
         <FlyoutBody>
           <EuiFlexGroup direction="column" gutterSize="m">
-            <EuiFlexItem>
-              <EuiText>
-                <h3>
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.newEntitiesTitle"
-                    defaultMessage="New entitities with a high score"
-                  />
-                </h3>
-              </EuiText>
-              <EuiBasicTable
-                items={newScoreSpikes}
-                columns={newScoreSpikeColumns}
-                noItemsMessage={
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.noNewEntities"
-                    defaultMessage="No new entities with score spikes"
-                  />
-                }
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiText>
-                <h3>
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.newEntitiesTitle"
-                    defaultMessage="Spikes in risk score"
-                  />
-                </h3>
-              </EuiText>
-              <EuiBasicTable
-                items={spikesAboveBaseline}
-                columns={spikesAboveBaslineColumns}
-                noItemsMessage={
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.noNewEntities"
-                    defaultMessage="No new entities with spikes above baseline"
-                  />
-                }
-              />
-            </EuiFlexItem>
+            {combinedSpikes.map((spike: SpikeEntity) => (
+              <SpikeSummaryPanel spike={spike} />
+            ))}
           </EuiFlexGroup>
         </FlyoutBody>
       </>
