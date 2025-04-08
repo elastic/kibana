@@ -34,6 +34,7 @@ export function filterObject(obj: object, paths: readonly string[] | string[][])
         if (x === keys.length - 1) {
           set(result, keys.join('.'), current);
         }
+        continue;
       } else if (Array.isArray(current)) {
         const arrResult: unknown[] = [];
         const subKeys = keys.slice(x);
