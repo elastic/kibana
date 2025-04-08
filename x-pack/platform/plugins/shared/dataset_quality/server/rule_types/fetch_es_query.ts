@@ -7,7 +7,7 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
-import { extractIndexNameFromBackingIndex } from '../../common/utils';
+import { extractKey } from './extract_key';
 
 // TODO: Check this limit
 const DEFAULT_GROUPS = 1000;
@@ -94,15 +94,15 @@ export async function fetchEsQuery({
   // Group values by dataStream name instead of backing index name
   const groupedDataStreams = dataStreamBuckets.reduce(
     (acc: Record<string, { bucketKey: string[]; docCount: number }>, bucket) => {
-      const dataStream = Array.isArray(bucket.key)
-        ? extractIndexNameFromBackingIndex(bucket.key[0]) // We will keep _index as our first groupBy element by default
-        : extractIndexNameFromBackingIndex(bucket.key);
-      const key = Array.isArray(bucket.key) ? [dataStream, ...bucket.key.slice(1)] : [dataStream];
+      const key = extractKey({
+        groupBy,
+        bucketKey: Array.isArray(bucket.key) ? bucket.key : [bucket.key],
+      });
       return {
         ...acc,
-        [`${dataStream},${bucket.key.slice(1).join(',')}`]: {
+        [key.join(',')]: {
           bucketKey: key,
-          docCount: (acc[dataStream]?.docCount ?? 0) + bucket.doc_count,
+          docCount: (acc[key.join(',')]?.docCount ?? 0) + bucket.doc_count,
         },
       };
     },

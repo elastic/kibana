@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { Coordinate } from '../../common/types';
 import { PreviewChartResponse } from '../../common/api_types';
-import { extractIndexNameFromBackingIndex } from '../../common/utils';
+import { extractKey } from './extract_key';
 
 interface DataStreamTotals {
   x: Coordinate['x'];
@@ -125,12 +125,10 @@ export async function getChartPreview({
     []) as estypes.AggregationsStringTermsBucket[];
 
   const seriesDataMap: Record<string, DataStreamTotals[]> = seriesBuckets.reduce((acc, bucket) => {
-    const dataStream = Array.isArray(bucket.key)
-      ? extractIndexNameFromBackingIndex(bucket.key[0]) // We will keep _index as our first groupBy element by default
-      : extractIndexNameFromBackingIndex(bucket.key);
-    const bucketKey = Array.isArray(bucket.key)
-      ? [dataStream, ...bucket.key.slice(1)]
-      : [dataStream];
+    const bucketKey = extractKey({
+      groupBy,
+      bucketKey: Array.isArray(bucket.key) ? bucket.key : [bucket.key],
+    });
     bucket.timeseries.buckets.forEach(
       (timeseriesBucket: {
         key: number;
@@ -141,10 +139,10 @@ export async function getChartPreview({
         const totalCount = timeseriesBucket.doc_count ?? 0;
         const ignoredCount = timeseriesBucket.ignored_fields?.doc_count ?? 0;
 
-        if (acc[bucketKey]) {
-          acc[bucketKey].push({ x, totalCount, ignoredCount });
+        if (acc[bucketKey.join(',')]) {
+          acc[bucketKey.join(',')].push({ x, totalCount, ignoredCount });
         } else {
-          acc[bucketKey] = [{ x, totalCount, ignoredCount }];
+          acc[bucketKey.join(',')] = [{ x, totalCount, ignoredCount }];
         }
       }
     );
