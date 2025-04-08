@@ -117,7 +117,7 @@ export const OverviewPage: FC = () => {
   } = useMlKibana();
   const { colorMode } = useEuiTheme();
   const isDarkTheme = colorMode === 'DARK';
-  const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.guide;
   const trainedModelsDocLink = docLinks.links.ml.trainedModels;
   const navigateToPath = useNavigateToPath();
@@ -415,45 +415,49 @@ export const OverviewPage: FC = () => {
       </EuiPageBody>
       <EuiHorizontalRule />
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <OverviewFooterItem
-            icon="dashboardApp"
-            title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
-              defaultMessage: 'Manage ML Assets',
-            })}
-            description={i18n.translate('xpack.ml.overview.manageMlAssetsDescription', {
-              defaultMessage: 'Overview of your ML jobs, memory usage, and notifications.',
-            })}
-            docLink={helpLink}
-            callToAction={
-              <EuiLink onClick={navigateToStackManagementMLOverview}>
-                {i18n.translate('xpack.ml.overview.goToManagmentLink', {
-                  defaultMessage: 'Go to Management',
-                })}
-              </EuiLink>
-            }
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <OverviewFooterItem
-            icon="machineLearningApp"
-            title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
-              defaultMessage: 'Trained Models',
-            })}
-            description={i18n.translate('xpack.ml.overview.trainedModelsDescription', {
-              defaultMessage:
-                'Add or manage Trained Models. See deployment stats or add a new deployment.',
-            })}
-            docLink={trainedModelsDocLink}
-            callToAction={
-              <EuiLink onClick={navigateToTrainedModels}>
-                {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
-                  defaultMessage: 'Manage Trained Models',
-                })}
-              </EuiLink>
-            }
-          />
-        </EuiFlexItem>
+        {isADEnabled || isNLPEnabled || isDFAEnabled ? (
+          <EuiFlexItem>
+            <OverviewFooterItem
+              icon="dashboardApp"
+              title={i18n.translate('xpack.ml.overview.manageMlAssetsTitle', {
+                defaultMessage: 'Manage ML Assets',
+              })}
+              description={i18n.translate('xpack.ml.overview.manageMlAssetsDescription', {
+                defaultMessage: 'Overview of your ML jobs, memory usage, and notifications.',
+              })}
+              docLink={helpLink}
+              callToAction={
+                <EuiLink onClick={navigateToStackManagementMLOverview}>
+                  {i18n.translate('xpack.ml.overview.goToManagmentLink', {
+                    defaultMessage: 'Go to Management',
+                  })}
+                </EuiLink>
+              }
+            />
+          </EuiFlexItem>
+        ) : null}
+        {isNLPEnabled || isDFAEnabled ? (
+          <EuiFlexItem>
+            <OverviewFooterItem
+              icon="machineLearningApp"
+              title={i18n.translate('xpack.ml.overview.trainedModelsTitle', {
+                defaultMessage: 'Trained Models',
+              })}
+              description={i18n.translate('xpack.ml.overview.trainedModelsDescription', {
+                defaultMessage:
+                  'Add or manage Trained Models. See deployment stats or add a new deployment.',
+              })}
+              docLink={trainedModelsDocLink}
+              callToAction={
+                <EuiLink onClick={navigateToTrainedModels}>
+                  {i18n.translate('xpack.ml.overview.manageTrainedModelsLink', {
+                    defaultMessage: 'Manage Trained Models',
+                  })}
+                </EuiLink>
+              }
+            />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem>
           <OverviewFooterItem
             icon="documentation"
