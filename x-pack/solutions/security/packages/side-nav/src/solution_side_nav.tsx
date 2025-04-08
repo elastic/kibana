@@ -18,7 +18,7 @@ import {
   EuiButtonIcon,
   EuiIcon,
 } from '@elastic/eui';
-import partition from 'lodash/fp/partition';
+import { partition } from 'lodash/fp';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';

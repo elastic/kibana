@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import get from 'lodash/fp/get';
+import { get } from 'lodash/fp';
 import type { Filter } from '@kbn/es-query';
 import type {
   ThreatMapping,
