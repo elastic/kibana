@@ -18,7 +18,8 @@
     "@kbn/core",
     "@kbn/es-query",
     "@kbn/lens-plugin",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/data-views-plugin"
   ],
   "exclude": [
     "target/**/*"
