@@ -9,7 +9,7 @@ import { StreamUpsertRequest } from '@kbn/streams-schema';
 import expect from '@kbn/expect';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
-type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards'> & { name: string };
+type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards' | 'queries'> & { name: string };
 
 const streams: StreamPutItem[] = [
   {
@@ -168,6 +168,7 @@ export async function createStreams(apiClient: StreamsSupertestRepositoryClient)
           body: {
             ...stream,
             dashboards: [],
+            queries: [],
           } as StreamUpsertRequest,
           path: { name },
         },

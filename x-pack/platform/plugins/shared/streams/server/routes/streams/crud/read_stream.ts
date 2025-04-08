@@ -14,6 +14,7 @@ import {
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
+import { partition } from 'lodash';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { StreamsClient } from '../../../lib/streams/client';
 import {
@@ -21,6 +22,8 @@ import {
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
+import { DashboardLink } from '../../../../common/assets';
+import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({
   name,
@@ -33,19 +36,26 @@ export async function readStream({
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
 }): Promise<StreamGetResponse> {
-  const [streamDefinition, dashboards] = await Promise.all([
+  const [streamDefinition, dashboardsAndQueries] = await Promise.all([
     streamsClient.getStream(name),
-    assetClient.getAssetIds({
-      entityId: name,
-      entityType: 'stream',
-      assetType: 'dashboard',
-    }),
+    await assetClient.getAssetLinks(name, ['dashboard', 'query']),
   ]);
+
+  const [dashboardLinks, queryLinks] = partition(
+    dashboardsAndQueries,
+    (asset): asset is DashboardLink => asset[ASSET_TYPE] === 'dashboard'
+  );
+
+  const dashboards = dashboardLinks.map((dashboard) => dashboard['asset.id']);
+  const queries = queryLinks.map((query) => {
+    return query.query;
+  });
 
   if (isGroupStreamDefinition(streamDefinition)) {
     return {
       stream: streamDefinition,
       dashboards,
+      queries,
     };
   }
 
@@ -72,6 +82,7 @@ export async function readStream({
       data_stream_exists: !!dataStream,
       effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
+      queries,
       inherited_fields: {},
     };
   }
@@ -84,6 +95,7 @@ export async function readStream({
   const body: WiredStreamGetResponse = {
     stream: streamDefinition,
     dashboards,
+    queries,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: inheritedFields,
   };

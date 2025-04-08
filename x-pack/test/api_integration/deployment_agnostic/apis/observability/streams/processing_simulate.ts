@@ -10,7 +10,6 @@
 import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { errors as esErrors } from '@elastic/elasticsearch';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -478,6 +477,58 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(grokMetrics.failed_rate).to.be(0);
       });
 
+      it('should gracefully return mappings simulation errors', async () => {
+        const response = await simulateProcessingForStream(apiClient, 'logs.test', {
+          processing: [
+            {
+              id: 'draft',
+              grok: {
+                field: 'message',
+                patterns: ['%{TIMESTAMP_ISO8601:@timestamp}'],
+                if: { always: {} },
+              },
+            },
+          ],
+          documents: [createTestDocument('2025-04-04 00:00:00,000')], // This date doesn't exactly match the mapping for @timestamp
+        });
+
+        expect(response.body.documents[0].errors).to.eql([
+          {
+            message:
+              'The processor is not additive to the documents. It might update fields [@timestamp]',
+            processor_id: 'draft',
+            type: 'non_additive_processor_failure',
+          },
+          {
+            message:
+              "Some field types might not be compatible with this document: [1:15] failed to parse field [@timestamp] of type [date] in document with id '0'. Preview of field's value: '2025-04-04 00:00:00,000'",
+            type: 'field_mapping_failure',
+          },
+        ]);
+        expect(response.body.documents[0].status).to.be('failed');
+
+        // Simulate detected fields mapping issue
+        const detectedFieldsFailureResponse = await simulateProcessingForStream(
+          apiClient,
+          'logs.test',
+          {
+            processing: [basicGrokProcessor],
+            documents: [createTestDocument()],
+            detected_fields: [
+              { name: 'parsed_timestamp', type: 'boolean' }, // Incompatible type
+            ],
+          }
+        );
+
+        expect(detectedFieldsFailureResponse.body.documents[0].errors).to.eql([
+          {
+            type: 'field_mapping_failure',
+            message: `Some field types might not be compatible with this document: [1:44] failed to parse field [parsed_timestamp] of type [boolean] in document with id '0'. Preview of field's value: '${TEST_TIMESTAMP}'`,
+          },
+        ]);
+        expect(detectedFieldsFailureResponse.body.documents[0].status).to.be('failed');
+      });
+
       it('should return the is_non_additive_simulation simulation flag', async () => {
         const [additiveParsingResponse, nonAdditiveParsingResponse] = await Promise.all([
           simulateProcessingForStream(apiClient, 'logs.test', {
@@ -504,27 +555,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(additiveParsingResponse.body.is_non_additive_simulation).to.be(false);
         expect(nonAdditiveParsingResponse.body.is_non_additive_simulation).to.be(true);
-      });
-    });
-
-    describe('Failed simulations', () => {
-      it('should fail with incompatible detected field mappings', async () => {
-        const response = await simulateProcessingForStream(
-          apiClient,
-          'logs.test',
-          {
-            processing: [basicGrokProcessor],
-            documents: [createTestDocument()],
-            detected_fields: [
-              { name: 'attributes.parsed_timestamp', type: 'boolean' }, // Incompatible type
-            ],
-          },
-          400
-        );
-
-        expect((response.body as esErrors.ResponseError['body']).message).to.contain(
-          'The detected field types might not be compatible with these documents.'
-        );
       });
     });
   });
