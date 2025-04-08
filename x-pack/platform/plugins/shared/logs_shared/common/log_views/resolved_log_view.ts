@@ -59,16 +59,17 @@ const resolveLegacyReference = async (
   }
 
   const indices = logViewAttributes.logIndices.indexName;
-  const createDataViewLazyPromise = dataViewsService.createDataViewLazy({
-    id: `log-view-${logViewId}`,
-    name: logViewAttributes.name,
-    title: indices,
-    timeFieldName: TIMESTAMP_FIELD,
-    allowNoIndex: true,
-  });
-  const dataViewReference = await createDataViewLazyPromise.catch((error) => {
-    throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
-  });
+  const dataViewReference = await dataViewsService
+    .createDataViewLazy({
+      id: `log-view-${logViewId}`,
+      name: logViewAttributes.name,
+      title: indices,
+      timeFieldName: TIMESTAMP_FIELD,
+      allowNoIndex: true,
+    })
+    .catch((error) => {
+      throw new ResolveLogViewError(`Failed to create Data View reference: ${error}`, error);
+    });
 
   return {
     indices,
