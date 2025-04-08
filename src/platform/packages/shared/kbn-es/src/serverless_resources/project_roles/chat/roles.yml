@@ -1,5 +1,5 @@
 # -----
-# Copy from elasticsearch-controller helm values
+# Copy from internal roles config in elasticsearch-controller
 # -----
 viewer:
   cluster: ['manage_own_api_key', 'read_pipeline']

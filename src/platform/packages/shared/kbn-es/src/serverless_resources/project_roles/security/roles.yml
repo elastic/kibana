@@ -1,5 +1,5 @@
 # -----
-# Copy from elasticsearch-controller helm values
+# Copy from internal roles config in elasticsearch-controller
 # -----
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
