@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { saveAs } from '@elastic/filesaver';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import {
-  ContentPack,
   ContentPackEntry,
   INDEX_PLACEHOLDER,
   findIndexPatterns,
@@ -36,6 +35,7 @@ import { uniq } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ContentPackObjectsList } from './content_pack_objects_list';
+import { contentPreview } from './content/content_preview';
 
 export function ExportContentPackFlyout({
   definition,
@@ -78,30 +78,19 @@ export function ExportContentPackFlyout({
         }
       );
 
-      const body = new FormData();
-      body.append(
-        'content',
-        new File([contentPackRaw], 'archive.zip', { type: 'application/zip' })
-      );
-
-      const contentPackParsed = await http.post<ContentPack>(
-        `/api/streams/${definition.stream.name}/content/preview`,
-        {
-          body,
-          headers: {
-            // Important to be undefined, it forces proper headers to be set for FormData
-            'Content-Type': undefined,
-          },
-        }
-      );
+      const contentPack = await contentPreview({
+        http,
+        definition,
+        file: new File([contentPackRaw], 'archive.zip', { type: 'application/zip' }),
+      });
 
       const indexPatterns = uniq(
-        contentPackParsed.entries.flatMap((object) => findIndexPatterns(object))
+        contentPack.entries.flatMap((object) => findIndexPatterns(object))
       ).filter((index) => !isIndexPlaceholder(index));
 
-      return { contentPackRaw, contentPackParsed, indexPatterns };
+      return { contentPack, indexPatterns };
     },
-    [definition, streamsRepositoryClient]
+    [definition, streamsRepositoryClient, http]
   );
 
   const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
@@ -126,7 +115,7 @@ export function ExportContentPackFlyout({
       <EuiFlyoutBody>
         {isLoadingContentPack ? (
           <EuiLoadingSpinner />
-        ) : !exportResponse ? null : exportResponse.contentPackParsed.entries ? (
+        ) : !exportResponse ? null : exportResponse.contentPack.entries ? (
           <>
             <EuiSpacer />
 
@@ -170,7 +159,7 @@ export function ExportContentPackFlyout({
             <EuiSpacer />
 
             <ContentPackObjectsList
-              objects={exportResponse.contentPackParsed.entries}
+              objects={exportResponse.contentPack.entries}
               onSelectionChange={(objects) => setSelectedContentPackObjects(objects)}
             />
           </>

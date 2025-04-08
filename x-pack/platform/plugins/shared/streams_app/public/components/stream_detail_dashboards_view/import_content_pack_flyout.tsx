@@ -24,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { ContentPackObjectsList } from './content_pack_objects_list';
+import { contentPreview } from './content/content_preview';
 
 export function ImportContentPackFlyout({
   definition,
@@ -70,19 +71,11 @@ export function ImportContentPackFlyout({
 
               setFile(archiveFile);
 
-              const body = new FormData();
-              body.append('content', archiveFile);
-
-              const contentPackParsed = await http.post<ContentPack>(
-                `/api/streams/${definition.stream.name}/content/preview`,
-                {
-                  body,
-                  headers: {
-                    // Important to be undefined, it forces proper headers to be set for FormData
-                    'Content-Type': undefined,
-                  },
-                }
-              );
+              const contentPackParsed = await contentPreview({
+                http,
+                definition,
+                file: archiveFile,
+              });
 
               setContentPackObjects(contentPackParsed.entries);
             } else {
