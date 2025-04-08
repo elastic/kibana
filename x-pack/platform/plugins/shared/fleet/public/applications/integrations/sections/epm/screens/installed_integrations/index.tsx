@@ -17,7 +17,10 @@ import { useInstalledIntegrations } from './hooks/use_installed_integrations';
 import { useUrlFilters, useViewPolicies } from './hooks/use_url_filters';
 import { InstalledIntegrationsSearchBar } from './components/installed_integrations_search_bar';
 import type { InstalledPackageUIPackageListItem } from './types';
-import { BulkActionContextProvider, useBulkActions } from './hooks/use_bulk_actions';
+import {
+  BulkActionContextProvider,
+  useInstalledIntegrationsActions,
+} from './hooks/use_installed_integrations_actions';
 import { PackagePoliciesPanel } from './components/package_policies_panel';
 
 const ContentWrapper = styled.div`
@@ -31,7 +34,7 @@ const InstalledIntegrationsPageContent: React.FunctionComponent = () => {
   const filters = useUrlFilters();
   const { selectedPackageViewPolicies } = useViewPolicies();
   const pagination = useUrlPagination();
-  const { upgradingIntegrations, uninstallingIntegrations } = useBulkActions();
+  const { upgradingIntegrations, uninstallingIntegrations } = useInstalledIntegrationsActions();
   const {
     installedPackages,
     countPerStatus,

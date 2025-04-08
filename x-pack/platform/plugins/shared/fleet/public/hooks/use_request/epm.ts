@@ -259,8 +259,8 @@ export const useGetFileByPath = (filePath: string) => {
 };
 
 export const useGetFileByPathQuery = (filePath: string) => {
-  return useQuery<SendRequestResponse<string>, RequestError>(['get-file', filePath], () =>
-    sendRequest<string>({
+  return useQuery<string, RequestError>(['get-file', filePath], () =>
+    sendRequestForRq<string>({
       path: epmRouteService.getFilePath(filePath),
       method: 'get',
       version: API_VERSIONS.public.v1,
@@ -343,11 +343,26 @@ export const sendGetOneBulkUninstallPackagesForRq = (taskId: string) => {
   });
 };
 
+/**
+ * @deprecated use sendRemovePackageForRq instead
+ */
 export function sendRemovePackage(
   { pkgName, pkgVersion }: DeletePackageRequest['params'],
   query?: DeletePackageRequest['query']
 ) {
   return sendRequest<DeletePackageResponse>({
+    path: epmRouteService.getRemovePath(pkgName, pkgVersion),
+    method: 'delete',
+    version: API_VERSIONS.public.v1,
+    query,
+  });
+}
+
+export function sendRemovePackageForRq(
+  { pkgName, pkgVersion }: DeletePackageRequest['params'],
+  query?: DeletePackageRequest['query']
+) {
+  return sendRequestForRq<DeletePackageResponse>({
     path: epmRouteService.getRemovePath(pkgName, pkgVersion),
     method: 'delete',
     version: API_VERSIONS.public.v1,
