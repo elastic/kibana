@@ -207,7 +207,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     suggest: suggestForShow,
   },
   {
-    name: 'metrics',
+    name: 'ts',
     hidden: true,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.metricsDoc', {
       defaultMessage:
@@ -219,7 +219,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         'When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
     declaration: '',
-    examples: ['METRICS index', 'METRICS index, index2'],
+    examples: ['TS index', 'TS index, index2'],
     suggest: () => [],
   },
   {
