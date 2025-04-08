@@ -441,6 +441,9 @@ export function getDiscoverStateContainer({
       savedSearchContainer.updateTimeRange();
     });
 
+    // Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
+    const unsubscribeSavedSearchUrlTracking = savedSearchContainer.initUrlTracking();
+
     // initialize app state container, syncing with _g and _a part of the URL
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
 
@@ -493,6 +496,7 @@ export function getDiscoverStateContainer({
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();
+      unsubscribeSavedSearchUrlTracking();
       filterUnsubscribe.unsubscribe();
       timefilerUnsubscribe.unsubscribe();
     };

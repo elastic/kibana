@@ -9,7 +9,6 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import { useUrlTracking } from '../../hooks/use_url_tracking';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
 import { setBreadcrumbs } from '../../../../utils/breadcrumbs';
@@ -34,12 +33,10 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
 
-  useUrlTracking(stateContainer);
-
   /**
    * Adhoc data views functionality
    */
-  useAdHocDataViews({ stateContainer, services });
+  useAdHocDataViews();
 
   /**
    * State changes (data view, columns), when a text base query result is returned
