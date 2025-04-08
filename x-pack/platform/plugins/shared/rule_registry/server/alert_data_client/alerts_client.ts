@@ -1217,7 +1217,7 @@ export class AlertsClient {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
 
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: indices?.length ? indices : '.alerts-*',
+      pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
       includeEmptyFields,
