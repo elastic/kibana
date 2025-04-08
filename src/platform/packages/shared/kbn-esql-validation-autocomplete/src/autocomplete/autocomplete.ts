@@ -116,6 +116,7 @@ export async function suggest(
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
+  // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
   const lastCharacterTyped = innerText[innerText.length - 1];
   let controlSuggestions: SuggestionRawDefinition[] = [];
   if (lastCharacterTyped === '?') {
