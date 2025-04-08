@@ -8,12 +8,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiBadgeGroup, EuiButton } from '@elastic/eui';
 import { IngestStreamGetResponse, isUnwiredStreamDefinition } from '@kbn/streams-schema';
-import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailOverview } from '../stream_detail_overview';
-import { StreamDetailContextProvider, useStreamDetail } from '../../hooks/use_stream_detail';
-import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
+import { useStreamDetail } from '../../hooks/use_stream_detail';
 import { ClassicStreamBadge, LifecycleBadge } from '../stream_badges';
 import { StreamsAppPageTemplate } from '../streams_app_page_template';
 import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
@@ -54,30 +52,6 @@ export type StreamDetailTabName = keyof StreamDetailTabs;
 
 function isValidStreamDetailTab(value: string): value is StreamDetailTabName {
   return ['overview', 'dashboards'].includes(value as StreamDetailTabName);
-}
-
-export function StreamRoot({ children }: { children: React.ReactNode }) {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
-
-  const {
-    path: { key },
-  } = useStreamsAppParams('/{key}', true);
-
-  useStreamsAppBreadcrumbs(() => {
-    return [
-      {
-        title: key,
-        path: `/{key}`,
-        params: { path: { key } },
-      },
-    ];
-  }, [key]);
-
-  return (
-    <StreamDetailContextProvider name={key} streamsRepositoryClient={streamsRepositoryClient}>
-      {children}
-    </StreamDetailContextProvider>
-  );
 }
 
 export function StreamDetailView() {
