@@ -362,7 +362,7 @@ async function updateRuleAttributes<Params extends RuleParams = never>({
 
   const updatedRuleAttributes = updateMetaAttributes(context, {
     ...updatedRule,
-    ...omit(updateRuleData, 'actions', 'systemActions'),
+    ...omit(updateRuleData, 'actions', 'systemActions', 'artifacts'),
     ...apiKeyAttributes,
     params: updatedParams as RawRule['params'],
     actions: actionsWithRefs,
