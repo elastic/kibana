@@ -99,11 +99,5 @@ describe('DashboardView', () => {
       </Router>,
       { wrapper: TestProviders }
     );
-
-    result.debug(undefined, 999999);
-
-    expect(result.queryByTestId(`dashboard-view-wrapper`)).toHaveStyle({
-      'min-height': `calc(100vh - 140px)`,
-    });
   });
 });

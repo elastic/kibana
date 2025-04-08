@@ -37,8 +37,6 @@ interface DashboardViewProps {
   initialViewMode: ViewMode;
 }
 
-const dashboardViewFlexGroupStyle = { minHeight: `calc(100vh - 140px)` };
-
 const DashboardViewComponent: React.FC<DashboardViewProps> = ({
   initialViewMode,
 }: DashboardViewProps) => {
@@ -82,12 +80,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
         <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
       </FiltersGlobal>
       <SecuritySolutionPageWrapper>
-        <EuiFlexGroup
-          direction="column"
-          css={dashboardViewFlexGroupStyle}
-          gutterSize="none"
-          data-test-subj="dashboard-view-wrapper"
-        >
+        <EuiFlexGroup direction="column" gutterSize="none" data-test-subj="dashboard-view-wrapper">
           <EuiFlexItem grow={false}>
             {dashboardContainer && (
               <HeaderPage
