@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/css';
 import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConversationEventChanges } from '../../../../common/chat_events';
 import { Chat } from './chat';
@@ -19,16 +19,6 @@ import { useKibana } from '../../hooks/use_kibana';
 
 const newConversationId = 'new';
 
-const pageSectionContentClassName = css`
-  width: 100%;
-  display: flex;
-  flex-grow: 1;
-  padding-top: 0;
-  padding-bottom: 0;
-  height: 100%;
-  max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
-`;
-
 interface WorkchatChatViewProps {
   agentId: string;
   conversationId: string | undefined;
@@ -38,6 +28,19 @@ export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, con
   const {
     services: { application },
   } = useKibana();
+
+  const { euiTheme } = useEuiTheme();
+
+  const pageSectionContentClassName = css`
+    width: 100%;
+    display: flex;
+    flex-grow: 1;
+    padding-top: 0;
+    padding-bottom: 0;
+    height: 100%;
+    max-block-size: calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)));
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+  `;
 
   const currentUser = useCurrentUser();
   const { conversations, refresh: refreshConversations } = useConversationList({ agentId });

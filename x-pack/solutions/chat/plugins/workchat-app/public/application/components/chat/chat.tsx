@@ -30,6 +30,9 @@ const fullHeightClassName = css`
 
 const conversationPanelClass = css`
   min-height: 100%;
+  max-width: 850px;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
 const scrollContainerClassName = (scrollBarStyles: string) => css`
