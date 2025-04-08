@@ -10,21 +10,24 @@ import { ScoutPage, Locator, expect } from '@kbn/scout';
 const PAGE_URL = 'security/alerts';
 
 export class AlertsTablePage {
+  public detectionsAlertsContainer: Locator;
   public alertRow: Locator;
-  public alertsTable: Locator;
+  public alertsTableBody: Locator;
 
   constructor(private readonly page: ScoutPage) {
+    this.detectionsAlertsContainer = this.page.testSubj.locator('detectionsAlertsPage');
     this.alertRow = this.page.locator('div.euiDataGridRow');
-    this.alertsTable = this.page.testSubj.locator('alertsTable');
+    this.alertsTableBody = this.page.testSubj
+      .locator('alertsTable')
+      .locator(`[data-test-subj='euiDataGridBody']`);
   }
 
   async navigate() {
-    return this.page.gotoApp(PAGE_URL);
+    await this.page.gotoApp(PAGE_URL);
   }
 
   async expandAlertDetailsFlyout(ruleName: string) {
-    await this.page.waitForLoadingIndicatorHidden();
-    await this.alertsTable.waitFor({ state: 'visible' });
+    await this.alertsTableBody.waitFor({ state: 'visible' });
     // Filter alert by unique rule name
     const row = this.alertRow.filter({ hasText: ruleName });
     await expect(

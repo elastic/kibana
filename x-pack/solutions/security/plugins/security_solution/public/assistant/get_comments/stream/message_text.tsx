@@ -33,6 +33,7 @@ interface Props {
   content: string;
   contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
+  contentReferencesDisabled: boolean; // Disables parsing of content references
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -107,11 +108,13 @@ const loadingCursorPlugin = () => {
 interface GetPluginDependencies {
   contentReferences: StreamingOrFinalContentReferences;
   contentReferencesVisible: boolean;
+  contentReferencesDisabled: boolean;
 }
 
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
+  contentReferencesDisabled,
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -164,7 +167,7 @@ const getPluginDependencies = ({
       loadingCursorPlugin,
       customCodeBlockLanguagePlugin,
       ...parsingPlugins,
-      contentReferenceParser({ contentReferences }),
+      ...(!contentReferencesDisabled ? [contentReferenceParser({ contentReferences })] : []),
     ],
     processingPluginList: processingPlugins,
   };
@@ -175,6 +178,7 @@ export function MessageText({
   content,
   contentReferences,
   contentReferencesVisible,
+  contentReferencesDisabled,
   index,
   'data-test-subj': dataTestSubj,
 }: Props) {
@@ -187,8 +191,9 @@ export function MessageText({
       getPluginDependencies({
         contentReferences,
         contentReferencesVisible,
+        contentReferencesDisabled,
       }),
-    [contentReferences, contentReferencesVisible]
+    [contentReferences, contentReferencesVisible, contentReferencesDisabled]
   );
 
   return (
