@@ -51,7 +51,13 @@ describe('useQueryRulesSetsTableData', () => {
     );
 
     expect(result.current.queryRulesSetsFilteredData).toEqual([
-      { ruleset_id: 'ruleset-02', description: 'Second ruleset' },
+      {
+        ruleset_id: 'ruleset-02',
+        description: 'Second ruleset',
+        rule_total_count: 8,
+        rule_criteria_types_counts: { typeA: 4, typeB: 4 },
+        rule_type_counts: { type1: 5, type2: 3 },
+      },
     ]);
   });
 

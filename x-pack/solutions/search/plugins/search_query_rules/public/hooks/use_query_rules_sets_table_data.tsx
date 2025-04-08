@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { Pagination } from '@elastic/eui';
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
 
-interface UseTableDataReturn {
+interface UseQueryRulesSetsTableDataProps {
   queryRulesSetsFilteredData: QueryRulesListRulesetsQueryRulesetListItem[];
   pagination: Pagination;
 }
@@ -19,7 +19,7 @@ export const useQueryRulesSetsTableData = (
   searchKey: string,
   pageIndex: number,
   pageSize: number
-): UseTableDataReturn => {
+): UseQueryRulesSetsTableDataProps => {
   const queryRulesSetsFilteredData = useMemo(() => {
     if (!data) return [];
     return data.filter((item) => item.ruleset_id.toLowerCase().includes(searchKey.toLowerCase()));
