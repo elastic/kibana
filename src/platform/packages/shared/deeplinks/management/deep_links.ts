@@ -28,7 +28,10 @@ export type IntegrationsDeepLinkId = IntegrationsAppId | FleetAppId | OsQueryApp
 // Management
 export type ManagementAppId = typeof MANAGEMENT_APP_ID;
 export type ManagementId =
+  | 'ad_settings'
   | 'aiAssistantManagementSelection'
+  | 'analytics'
+  | 'anomaly_detection'
   | 'securityAiAssistantManagement'
   | 'observabilityAiAssistantManagement'
   | 'api_keys'
@@ -47,6 +50,7 @@ export type ManagementId =
   | 'maintenanceWindows'
   | 'migrate_data'
   | 'objects'
+  | 'overview'
   | 'pipelines'
   | 'remote_clusters'
   | 'reporting'
@@ -57,7 +61,9 @@ export type ManagementId =
   | 'settings'
   | 'snapshot_restore'
   | 'spaces'
+  | 'supplied_configurations'
   | 'tags'
+  | 'trained_models'
   | 'transform'
   | 'triggersActions'
   | 'triggersActionsConnectors'
