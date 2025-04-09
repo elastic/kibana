@@ -118,7 +118,7 @@ export const getPreloadedState = ({
   const state: LensAppState = {
     ...initialState,
     isLoading: true,
-    query,
+    query: query as Query,
     // Do not use app-specific filters from previous app,
     // only if Lens was opened with the intention to visualize a field (e.g. coming from Discover)
     filters: !initialContext
