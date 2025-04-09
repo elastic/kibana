@@ -20,7 +20,6 @@ import { WelcomeMessageConnectors } from './welcome_message_connectors';
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import { StarterPrompts } from './starter_prompts';
 import { useKibana } from '../hooks/use_kibana';
-
 const fullHeightClassName = css`
   height: 100%;
 `;
