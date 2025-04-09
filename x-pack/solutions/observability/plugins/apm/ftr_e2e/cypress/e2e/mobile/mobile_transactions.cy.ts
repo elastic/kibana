@@ -21,46 +21,40 @@ const mobileTransactionsPageHref = url.format({
 });
 
 describe('Mobile transactions page', () => {
-  beforeEach(() => {
-    cy.loginAsViewerUser();
+  before(() => {
+    synthtrace.index(
+      generateMobileData({
+        from: new Date(start).getTime(),
+        to: new Date(end).getTime(),
+      })
+    );
   });
 
-  describe('when data is loaded', () => {
-    before(() => {
-      synthtrace.index(
-        generateMobileData({
-          from: new Date(start).getTime(),
-          to: new Date(end).getTime(),
-        })
-      );
-    });
+  beforeEach(() => {
+    cy.loginAsViewerUser();
+    cy.visitKibana(mobileTransactionsPageHref);
+    cy.waitUntilPageContentIsLoaded();
+  });
 
-    after(() => {
-      synthtrace.clean();
-    });
+  after(() => {
+    synthtrace.clean();
+  });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/207040
-    describe.skip('when click on tab shows correct table', () => {
-      it('shows version tab', () => {
-        cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmAppVersionTab').click();
-        cy.getByTestSubj('apmAppVersionTab').should('have.attr', 'aria-selected', 'true');
-        cy.url().should('include', 'mobileSelectedTab=app_version_tab');
-      });
+  it('when click on version tab shows correct table', () => {
+    cy.getByTestSubj('apmAppVersionTab').click();
+    cy.getByTestSubj('apmAppVersionTab').should('have.attr', 'aria-selected', 'true');
+    cy.url().should('include', 'mobileSelectedTab=app_version_tab');
+  });
 
-      it('shows OS version tab', () => {
-        cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmOsVersionTab').click();
-        cy.getByTestSubj('apmOsVersionTab').should('have.attr', 'aria-selected', 'true');
-        cy.url().should('include', 'mobileSelectedTab=os_version_tab');
-      });
+  it('when click on OS version tab shows correct table', () => {
+    cy.getByTestSubj('apmOsVersionTab').click();
+    cy.getByTestSubj('apmOsVersionTab').should('have.attr', 'aria-selected', 'true');
+    cy.url().should('include', 'mobileSelectedTab=os_version_tab');
+  });
 
-      it('shows devices tab', () => {
-        cy.visitKibana(mobileTransactionsPageHref);
-        cy.getByTestSubj('apmDevicesTab').click();
-        cy.getByTestSubj('apmDevicesTab').should('have.attr', 'aria-selected', 'true');
-        cy.url().should('include', 'mobileSelectedTab=devices_tab');
-      });
-    });
+  it('when click on devices tab shows correct table', () => {
+    cy.getByTestSubj('apmDevicesTab').click();
+    cy.getByTestSubj('apmDevicesTab').should('have.attr', 'aria-selected', 'true');
+    cy.url().should('include', 'mobileSelectedTab=devices_tab');
   });
 });
