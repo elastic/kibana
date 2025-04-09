@@ -30,7 +30,6 @@
     "@kbn/ebt-tools",
     "@kbn/core-application-common",
     "@kbn/rule-data-utils",
-    "@kbn/alerting-plugin",
   ],
   "exclude": ["target/**/*"]
 }
