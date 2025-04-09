@@ -35,7 +35,7 @@ export class CoreInjectionService {
   ): interfaces.Container {
     const fork = container.createChild();
     if (id) {
-      fork.onDeactivation(id, () => fork.unbindAll());
+      fork.onDeactivation(id, () => void setTimeout(() => fork.unbindAll()));
     }
 
     return this.getContainer(id, fork);
