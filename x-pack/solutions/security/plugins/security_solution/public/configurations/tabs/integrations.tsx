@@ -10,8 +10,7 @@ import { EuiSkeletonLoading } from '@elastic/eui';
 import type { AvailablePackagesHookType } from '@kbn/fleet-plugin/public';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect } from 'react-router-dom';
-import { CONFIGURATIONS_PATH } from '../../../common/constants';
-import { AVAILABLE_INTEGRATIONS } from './components/integrations/constants';
+import { AI4DSOC_ALLOWED_INTEGRATIONS, CONFIGURATIONS_PATH } from '../../../common/constants';
 import { useEnhancedIntegrationCards } from './hooks/use_enhanced_integration_cards';
 import { ConfigurationTabs, IntegrationsFacets } from '../constants';
 import { IntegrationsPage, IntegrationsSkeleton } from './components';
@@ -28,7 +27,7 @@ export const ConfigurationsIntegrationsHome = React.memo<IntegrationsPageProps>(
     });
 
     const allowedIntegrations = filteredCards.filter((card) =>
-      AVAILABLE_INTEGRATIONS.includes(card.name)
+      AI4DSOC_ALLOWED_INTEGRATIONS.includes(card.name)
     );
 
     const { available, installed } = useEnhancedIntegrationCards(allowedIntegrations);

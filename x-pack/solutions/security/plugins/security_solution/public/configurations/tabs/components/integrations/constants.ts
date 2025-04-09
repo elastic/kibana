@@ -5,14 +5,6 @@
  * 2.0.
  */
 
-export const AVAILABLE_INTEGRATIONS = [
-  'crowdstrike',
-  'google_secops', // labelled edr/xdr
-  'microsoft_sentinel', // labelled edr/xdr
-  'sentinel_one',
-  'splunk', // in PR
-];
-
 export const RETURN_APP_ID = 'returnAppId';
 export const RETURN_PATH = 'returnPath';
 
