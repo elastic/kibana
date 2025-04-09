@@ -81,6 +81,16 @@ export function SloGroupBy({ onStateChange, state, loading }: Props) {
       },
     },
     {
+      label: i18n.translate('xpack.slo.list.groupBy.sloId', {
+        defaultMessage: 'SLO definition id',
+      }),
+      checked: groupBy === 'slo.id',
+      value: 'slo.id',
+      onClick: () => {
+        handleChangeGroupBy('slo.id');
+      },
+    },
+    {
       label: i18n.translate('xpack.slo.list.groupBy.sloInstanceId', {
         defaultMessage: 'SLO instance id',
       }),
