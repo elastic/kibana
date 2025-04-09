@@ -44,6 +44,7 @@ const Container = styled.div<IContainerStyleProps>`
   position: relative;
   display: block;
   user-select: none;
+  min-height: 44px;
   padding-top: ${({ theme }) => theme.euiTheme.size.s};
   padding-bottom: ${({ theme }) => theme.euiTheme.size.m};
   margin-right: ${(props) => props.timelineMargins.right}px;
@@ -202,7 +203,7 @@ function NameLabel({ item }: { item: IWaterfallSpanOrTransaction }) {
         name = `${item.doc.span.composite.count}${compositePrefix} ${name}`;
       }
       return (
-        <EuiText style={{ overflow: 'hidden' }} size="s">
+        <EuiText css={{ overflow: 'hidden' }} size="s">
           <TruncateWithTooltip content={name} text={name} />
         </EuiText>
       );

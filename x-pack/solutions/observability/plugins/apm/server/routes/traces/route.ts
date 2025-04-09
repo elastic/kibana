@@ -5,29 +5,31 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { toNumberRt } from '@kbn/io-ts-utils';
+import * as t from 'io-ts';
 import { TraceSearchType } from '../../../common/trace_explorer';
+import type { Span } from '../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, probabilityRt, rangeRt } from '../default_api_types';
+import { getSpan } from '../transactions/get_span';
 import { getTransaction } from '../transactions/get_transaction';
+import { getTransactionByName } from '../transactions/get_transaction_by_name';
 import {
-  type TransactionDetailRedirectInfo,
   getRootTransactionByTraceId,
+  type TransactionDetailRedirectInfo,
 } from '../transactions/get_transaction_by_trace';
+import type { FocusedTraceItems } from './build_focused_trace_items';
+import { buildFocusedTraceItems } from './build_focused_trace_items';
 import type { TopTracesPrimaryStatsResponse } from './get_top_traces_primary_stats';
 import { getTopTracesPrimaryStats } from './get_top_traces_primary_stats';
 import type { TraceItems } from './get_trace_items';
 import { getTraceItems } from './get_trace_items';
 import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
-import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getSpan } from '../transactions/get_span';
-import type { Transaction } from '../../../typings/es_schemas/ui/transaction';
-import type { Span } from '../../../typings/es_schemas/ui/span';
-import { getTransactionByName } from '../transactions/get_transaction_by_name';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -111,6 +113,45 @@ const tracesByIdRoute = createApmServerRoute({
       traceItems,
       entryTransaction,
     };
+  },
+});
+
+const tracesByIdSummaryRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/traces/{traceId}/focused',
+  params: t.type({
+    path: t.type({
+      traceId: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      t.partial({ maxTraceItems: toNumberRt }),
+      t.type({ focusedTraceItemId: t.string }),
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (
+    resources
+  ): Promise<{
+    traceItems?: FocusedTraceItems;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params, config, logger } = resources;
+    const { traceId } = params.path;
+    const { start, end, focusedTraceItemId } = params.query;
+
+    const traceItems = await getTraceItems({
+      traceId,
+      config,
+      apmEventClient,
+      start,
+      end,
+      maxTraceItemsFromUrlParam: params.query.maxTraceItems,
+      logger,
+    });
+
+    const focusedTraceItems = buildFocusedTraceItems({ traceItems, focusedTraceItemId });
+
+    return { traceItems: focusedTraceItems };
   },
 });
 
@@ -319,4 +360,5 @@ export const traceRouteRepository = {
   ...transactionFromTraceByIdRoute,
   ...spanFromTraceByIdRoute,
   ...transactionByNameRoute,
+  ...tracesByIdSummaryRoute,
 };

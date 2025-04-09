@@ -127,7 +127,7 @@ function getLegendValues(transactionOrSpan: WaterfallTransaction | WaterfallSpan
   };
 }
 
-function getTransactionItem(
+export function getTransactionItem(
   transaction: WaterfallTransaction,
   linkedChildrenCount: number = 0
 ): IWaterfallTransaction {
@@ -148,7 +148,7 @@ function getTransactionItem(
   };
 }
 
-function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0): IWaterfallSpan {
+export function getSpanItem(span: WaterfallSpan, linkedChildrenCount: number = 0): IWaterfallSpan {
   return {
     docType: 'span',
     doc: span,

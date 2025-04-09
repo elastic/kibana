@@ -64,9 +64,11 @@ import { getSpanLinksCountById } from '../span_links/get_linked_children';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 
+export type TraceDoc = WaterfallTransaction | WaterfallSpan;
+
 export interface TraceItems {
   exceedsMax: boolean;
-  traceDocs: Array<WaterfallTransaction | WaterfallSpan>;
+  traceDocs: TraceDoc[];
   errorDocs: WaterfallError[];
   spanLinksCountById: Record<string, number>;
   traceDocsTotal: number;
