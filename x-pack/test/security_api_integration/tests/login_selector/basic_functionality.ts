@@ -6,6 +6,7 @@
  */
 
 import { readFileSync } from 'fs';
+import type { Response } from 'supertest';
 import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
@@ -22,7 +23,6 @@ import {
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
-import type { Response } from 'supertest';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
