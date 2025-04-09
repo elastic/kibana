@@ -12,7 +12,7 @@ import { HomeIntegrationSection } from './home_integration_section';
 
 export const WorkChatHomeView: React.FC<{}> = () => {
   return (
-    <KibanaPageTemplate panelled>
+    <KibanaPageTemplate panelled data-test-subj="workChatHomePage">
       <KibanaPageTemplate.Header pageTitle="WorkChat" />
 
       <HomeAgentSection />
