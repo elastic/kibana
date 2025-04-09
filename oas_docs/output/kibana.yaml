@@ -51129,17 +51129,17 @@ paths:
                         - all
                 name:
                   type: string
-                pattern_replacements:
-                  additionalProperties:
+                replaced_patterns:
+                  items:
                     type: string
-                  type: object
+                  type: array
                 version:
                   type: string
               required:
                 - name
                 - description
                 - version
-                - pattern_replacements
+                - replaced_patterns
                 - include
       responses: {}
       summary: Export stream content
@@ -51181,7 +51181,7 @@ paths:
         - streams
   /api/streams/{name}/content/preview:
     post:
-      description: Links content objects to a stream.
+      description: Returns a json representation of a content pack.
       operationId: post-streams-name-content-preview
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51207,7 +51207,7 @@ paths:
               required:
                 - content
       responses: {}
-      summary: Import content into a stream
+      summary: Preview a content pack
       tags:
         - streams
   /api/streams/{name}/dashboards:
