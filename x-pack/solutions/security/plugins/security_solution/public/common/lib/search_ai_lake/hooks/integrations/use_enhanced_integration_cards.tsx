@@ -38,7 +38,11 @@ export const getCategoryBadgeIfAny = (categories: string[]): string | null => {
 
 export const applyCategoryBadgeAndStyling = (
   card: IntegrationCardItem,
-  callerView: IntegrationsFacets
+  callerView: IntegrationsFacets,
+  options?: {
+    showInstallationStatus?: boolean;
+    showCompressedInstallationStatus?: boolean;
+  }
 ): IntegrationCardItem => {
   const returnPath = `${CONFIGURATIONS_PATH}/integrations/${callerView}`;
   const url = addPathParamToUrl(card.url, returnPath);
@@ -46,6 +50,8 @@ export const applyCategoryBadgeAndStyling = (
   return {
     ...card,
     url,
+    showInstallationStatus: options?.showInstallationStatus,
+    showCompressedInstallationStatus: options?.showCompressedInstallationStatus,
     showDescription: false,
     showReleaseBadge: false,
     extraLabelsBadges: categoryBadge
@@ -62,7 +68,9 @@ export const applyCategoryBadgeAndStyling = (
   };
 };
 
-const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
+const applyCustomDisplayOrder = (
+  integrationsList: IntegrationCardItem[]
+): IntegrationCardItem[] => {
   return integrationsList.sort(
     (a, b) =>
       FEATURED_INTEGRATION_SORT_ORDER.indexOf(a.id) - FEATURED_INTEGRATION_SORT_ORDER.indexOf(b.id)
@@ -70,13 +78,20 @@ const applyCustomDisplayOrder = (integrationsList: IntegrationCardItem[]) => {
 };
 
 export const useEnhancedIntegrationCards = (
-  integrationsList: IntegrationCardItem[]
+  integrationsList: IntegrationCardItem[],
+  options?: {
+    showInstallationStatus?: boolean;
+    showCompressedInstallationStatus?: boolean;
+  }
 ): { available: IntegrationCardItem[]; installed: IntegrationCardItem[] } => {
   const sorted = applyCustomDisplayOrder(integrationsList);
 
   const available = useMemo(
-    () => sorted.map((card) => applyCategoryBadgeAndStyling(card, IntegrationsFacets.available)),
-    [sorted]
+    () =>
+      sorted.map((card) =>
+        applyCategoryBadgeAndStyling(card, IntegrationsFacets.available, options)
+      ),
+    [sorted, options]
   );
 
   const installed = useMemo(
