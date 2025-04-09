@@ -266,4 +266,58 @@ describe('Reindex deprecation flyout', () => {
       );
     });
   });
+
+  describe('follower index', () => {
+    it('displays follower index callout and only shows mark as read-only button when index is a follower index', async () => {
+      httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
+        reindexOp: null,
+        warnings: [],
+        hasRequiredPrivileges: true,
+        meta: {
+          ...defaultReindexStatusMeta,
+          isFollowerIndex: true,
+        },
+      });
+
+      await act(async () => {
+        testBed = await setupElasticsearchPage(httpSetup);
+      });
+
+      testBed.component.update();
+
+      const { actions, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt('reindex', 0);
+
+      // Verify follower index callout is displayed
+      expect(exists('followerIndexCallout')).toBe(true);
+
+      // Verify only mark as read-only button is available (no reindex button)
+      expect(exists('startIndexReadonlyButton')).toBe(true);
+      expect(exists('startReindexingButton')).toBe(false);
+    });
+
+    it('shows both mark as read-only and reindex buttons for regular (non-follower) indices', async () => {
+      httpRequestsMockHelpers.setReindexStatusResponse(MOCK_REINDEX_DEPRECATION.index!, {
+        reindexOp: null,
+        warnings: [],
+        hasRequiredPrivileges: true,
+        meta: {
+          ...defaultReindexStatusMeta,
+          isFollowerIndex: false,
+        },
+      });
+
+      const { actions, exists } = testBed;
+
+      await actions.table.clickDeprecationRowAt('reindex', 0);
+
+      // Verify follower index callout is not displayed
+      expect(exists('followerIndexCallout')).toBe(false);
+
+      // Verify both buttons are available for regular indices
+      expect(exists('startIndexReadonlyButton')).toBe(true);
+      expect(exists('startReindexingButton')).toBe(true);
+    });
+  });
 });
