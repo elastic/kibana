@@ -99,6 +99,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 notify_when: 'onThrottleInterval',
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
+                artifacts: { dashboards: [] },
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: match.execution_status,
@@ -279,6 +280,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 params: {},
                 created_by: 'elastic',
                 api_key_created_by_user: null,
+                artifacts: {
+                  dashboards: [],
+                },
                 revision: 0,
                 throttle: '1m',
                 updated_by: 'elastic',
@@ -370,6 +374,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 snooze_schedule: [],
                 is_snoozed_until: null,
@@ -377,6 +382,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 snooze_schedule: [],
                 is_snoozed_until: null,
@@ -453,6 +459,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchFirst, 'updatedAt')).to.eql({
                 id: createdAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 execution_status: matchFirst.execution_status,
                 snooze_schedule: [],
@@ -461,6 +468,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(omit(matchSecond, 'updatedAt')).to.eql({
                 id: createdSecondAlert.id,
                 actions: [],
+                artifacts: { dashboards: [] },
                 tags: [myTag],
                 execution_status: matchSecond.execution_status,
                 snooze_schedule: [],
