@@ -43,7 +43,7 @@ export const createGetDocViewer =
 
             useEffect(() => {
               const subscription = context.initialLogOverviewAccordionSection$.subscribe(
-                (value: 'stacktrace' | 'quality_issues') => {
+                (value: LogOverViewAccordionExpandedValue) => {
                   setAccordionSection(value);
                 }
               );
