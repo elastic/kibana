@@ -33,103 +33,172 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
   const alertsAsDataIndex =
     '.internal.alerts-observability.test.alerts.dynamic.templates.alerts-default-000001';
 
-  describe('alerts as data dynamic templates', function () {
+  describe('dynamic templates', function () {
     this.tags('skipFIPS');
-    afterEach(async () => {
-      await objectRemover.removeAll();
-      await es.deleteByQuery({
-        index: alertsAsDataIndex,
-        query: { match_all: {} },
-        conflicts: 'proceed',
+    describe('alerts as data fields limit', function () {
+      afterEach(async () => {
+        await objectRemover.removeAll();
+        await es.deleteByQuery({
+          index: alertsAsDataIndex,
+          query: { match_all: {} },
+          conflicts: 'proceed',
+        });
+      });
+
+      it(`should add the dynamic fields`, async () => {
+        // First run doesn't add the dynamic fields
+        const createdRule = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.always-firing-alert-as-data-with-dynamic-templates',
+              schedule: { interval: '1d' },
+              throttle: null,
+              params: {},
+              actions: [],
+            })
+          );
+        expect(createdRule.status).to.eql(200);
+        const ruleId = createdRule.body.id;
+        objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
+
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
+
+        const existingFields = alertFieldMap;
+        const numberOfExistingFields = Object.keys(existingFields).length;
+        // there is no way to get the real number of fields from ES.
+        // Eventhough we have only as many as alertFieldMap fields,
+        // ES counts the each childs of the nested objects and multi_fields as seperate fields.
+        // therefore we add 9 to get the real number.
+        const nestedObjectsAndMultiFields = 9;
+        // Number of free slots that we want to have, so we can add dynamic fields as many
+        const numberofFreeSlots = 3;
+        const totalFields =
+          numberOfExistingFields + nestedObjectsAndMultiFields + numberofFreeSlots;
+
+        const dummyFields: Record<PropertyName, MappingProperty> = {};
+        for (let i = 0; i < TOTAL_FIELDS_LIMIT - totalFields; i++) {
+          const key = `${i}`.padStart(4, '0');
+          dummyFields[key] = { type: 'keyword' };
+        }
+        // add dummyFields to the index mappings, so it will reach the fields limits.
+        await es.indices.putMapping({
+          index: alertsAsDataIndex,
+          properties: dummyFields,
+          dynamic: false,
+        });
+
+        await supertestWithoutAuth
+          .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              schedule: { interval: '1d' },
+              throttle: null,
+              params: {
+                dynamic_fields: { 'host.id': '1', 'host.name': 'host-1' },
+              },
+              actions: [],
+              enabled: undefined,
+              rule_type_id: undefined,
+              consumer: undefined,
+            })
+          )
+          .expect(200);
+
+        const runSoon = await supertestWithoutAuth
+          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
+          .set('kbn-xsrf', 'foo');
+        expect(runSoon.status).to.eql(204);
+
+        await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
+
+        // Query for alerts
+        const alerts = await queryForAlertDocs<Alert>();
+        const alert = alerts[0];
+
+        // host.name is ignored
+        expect(alert._ignored).to.eql(['kibana.alert.dynamic.host.name']);
+
+        const mapping = await es.indices.getMapping({ index: alertsAsDataIndex });
+        const dynamicFiled = get(
+          mapping[alertsAsDataIndex],
+          'mappings.properties.kibana.properties.alert.properties.dynamic.properties.host.properties.id.type'
+        );
+
+        // new dynamic field has been added
+        expect(dynamicFiled).to.eql('text');
       });
     });
 
-    it(`should add the dynamic fields`, async () => {
-      // First run doesn't add the dynamic fields
-      const createdRule = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            rule_type_id: 'test.always-firing-alert-as-data-with-dynamic-templates',
-            schedule: { interval: '1d' },
-            throttle: null,
-            params: {},
-            actions: [],
-          })
-        );
-      expect(createdRule.status).to.eql(200);
-      const ruleId = createdRule.body.id;
-      objectRemover.add(Spaces.space1.id, ruleId, 'rule', 'alerting');
-
-      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 1 }]]));
-
-      const existingFields = alertFieldMap;
-      const numberOfExistingFields = Object.keys(existingFields).length;
-      // there is no way to get the real number of fields from ES.
-      // Eventhough we have only as many as alertFieldMap fields,
-      // ES counts the each childs of the nested objects and multi_fields as seperate fields.
-      // therefore we add 9 to get the real number.
-      const nestedObjectsAndMultiFields = 9;
-      // Number of free slots that we want to have, so we can add dynamic fields as many
-      const numberofFreeSlots = 3;
-      const totalFields = numberOfExistingFields + nestedObjectsAndMultiFields + numberofFreeSlots;
-
-      const dummyFields: Record<PropertyName, MappingProperty> = {};
-      for (let i = 0; i < TOTAL_FIELDS_LIMIT - totalFields; i++) {
-        const key = `${i}`.padStart(4, '0');
-        dummyFields[key] = { type: 'keyword' };
-      }
-      // add dummyFields to the index mappings, so it will reach the fields limits.
-      await es.indices.putMapping({
-        index: alertsAsDataIndex,
-        properties: dummyFields,
-        dynamic: false,
+    describe.only('index field limits', () => {
+      afterEach(async () => {
+        await es.indices.delete({
+          index: 'index-fields-limit-test-index',
+        });
+        await es.indices.deleteIndexTemplate({
+          name: 'index-fields-limit-test-template',
+        });
       });
-
-      await supertestWithoutAuth
-        .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
-        .set('kbn-xsrf', 'foo')
-        .send(
-          getTestRuleData({
-            schedule: { interval: '1d' },
-            throttle: null,
-            params: {
-              dynamic_fields: { 'host.id': '1', 'host.name': 'host-1' },
+      it('should return an exceeded limit error', async () => {
+        const template = await es.indices.putIndexTemplate({
+          name: 'index-fields-limit-test-template',
+          template: {
+            mappings: {
+              properties: {
+                '@timestamp': {
+                  type: 'date',
+                },
+                'field-2': {
+                  type: 'keyword',
+                },
+                'field-3': {
+                  type: 'keyword',
+                },
+                'field-4': {
+                  type: 'keyword',
+                },
+                'field-5': {
+                  type: 'keyword',
+                },
+              },
             },
-            actions: [],
-            enabled: undefined,
-            rule_type_id: undefined,
-            consumer: undefined,
-          })
-        )
-        .expect(200);
+            settings: {
+              'index.mapping.total_fields.limit': 5,
+              'index.mapping.total_fields.ignore_dynamic_beyond_limit': true,
+            },
+          },
+          index_patterns: ['index-fields-limit-test-*'],
+        });
 
-      const runSoon = await supertestWithoutAuth
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${ruleId}/_run_soon`)
-        .set('kbn-xsrf', 'foo');
-      expect(runSoon.status).to.eql(204);
+        expect(template).to.eql({ acknowledged: true });
 
-      await waitForEventLogDocs(ruleId, new Map([['execute', { equal: 2 }]]));
+        const index = await es.indices.create({
+          index: 'index-fields-limit-test-index',
+        });
 
-      // Query for alerts
-      const alerts = await queryForAlertDocs<Alert>();
-      const alert = alerts[0];
+        expect(index).to.eql({
+          acknowledged: true,
+          index: 'index-fields-limit-test-index',
+          shards_acknowledged: true,
+        });
 
-      // host.name is ignored
-      expect(alert._ignored).to.eql(['kibana.alert.dynamic.host.name']);
-
-      const mapping = await es.indices.getMapping({ index: alertsAsDataIndex });
-      const dynamicFiled = get(
-        mapping[alertsAsDataIndex],
-        'mappings.properties.kibana.properties.alert.properties.dynamic.properties.host.properties.id.type'
-      );
-
-      // new dynamic field has been added
-      expect(dynamicFiled).to.eql('text');
+        try {
+          await es.indices.putMapping({
+            index: 'index-fields-limit-test-index',
+            properties: {
+              'field-6': {
+                type: 'keyword',
+              },
+            },
+          });
+        } catch (e) {
+          expect(e.message).to.contain('Limit of total fields [5] has been exceeded');
+        }
+      });
     });
   });
-
   async function queryForAlertDocs<T>(): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index: alertsAsDataIndex,
