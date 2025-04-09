@@ -19,10 +19,10 @@ import {
   EuiPanel,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { appPaths } from '../../app_paths';
-import { i18n } from '@kbn/i18n';
 
 export const HomeAgentSection: React.FC<{}> = () => {
   const { createWorkchatUrl, navigateToWorkchatUrl } = useNavigation();

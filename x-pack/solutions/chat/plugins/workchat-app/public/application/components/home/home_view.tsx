@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { HomeAgentSection } from './home_agent_section';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { HomeAgentSection } from './home_agent_section';
 import { HomeConversationHistorySection } from './home_conversation_history';
 
 const headerButtons = [
