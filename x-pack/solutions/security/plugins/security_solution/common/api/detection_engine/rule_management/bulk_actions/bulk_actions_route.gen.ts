@@ -243,8 +243,8 @@ export const NormalizedRuleAction = z
 /**
   * Edits rule actions of rules.
 
-- `add_rule_actions` adds rule actions to rules. If a rule action already exists for a rule, no changes are made.
-- `set_rule_actions` sets rule actions for rules. If the set of rule actions is the same as the existing rule actions, no changes are made.
+- `add_rule_actions` adds rule actions to rules. This action is non-idempotent, meaning that even if the same rule action already exists for a rule, it will be added again with a new unique ID.
+- `set_rule_actions` sets rule actions for rules. This action is non-idempotent, meaning that even if the same set of rule actions already exists for a rule, it will be set again and the actions will receive new unique IDs.
 
   */
 export type BulkActionEditPayloadRuleActions = z.infer<typeof BulkActionEditPayloadRuleActions>;
