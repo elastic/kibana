@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import {
   fetch$,
   initializeTimeRangeManager,
+  timeRangeComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
@@ -23,7 +24,6 @@ import { SEARCH_EMBEDDABLE_ID } from './constants';
 import { getCount } from './get_count';
 import { SearchApi, Services, SearchSerializedState } from './types';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { timeRangeComparators } from '@kbn/presentation-publishing/interfaces/fetch/time_range_manager';
 
 export const getSearchEmbeddableFactory = (services: Services) => {
   const factory: EmbeddableFactory<SearchSerializedState, SearchApi> = {
