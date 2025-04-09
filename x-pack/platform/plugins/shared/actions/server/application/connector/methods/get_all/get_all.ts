@@ -19,7 +19,7 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import type { Connector, ConnectorWithExtraFindData } from '../../types';
+import type { ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
 
 interface GetAllHelperOpts {
@@ -111,22 +111,9 @@ async function getAllHelper({
     );
   }
 
-  const inMemoryConnectorsIds: Set<string> = new Set(
-    inMemoryConnectors.map((connector) => connector.id)
-  );
-
-  const merged = await filterInferenceConnectors(esClient, [
+  const mergedResult = [
     ...savedObjectsActions,
-    ...inMemoryConnectors,
-  ]);
-
-  const isInMemoryConnector = (connector: Connector): connector is InMemoryConnector => {
-    return inMemoryConnectorsIds.has(connector.id);
-  };
-
-  const mergedResult = merged
-    .map((connector) => {
-      if (!isInMemoryConnector(connector)) return connector;
+    ...(await filterInferenceConnectors(esClient, inMemoryConnectors)).map((connector) => {
       return {
         id: connector.id,
         actionTypeId: connector.actionTypeId,
@@ -136,8 +123,8 @@ async function getAllHelper({
         isSystemAction: connector.isSystemAction,
         ...(connector.exposeConfig ? { config: connector.config } : {}),
       };
-    })
-    .sort((a, b) => a.name.localeCompare(b.name));
+    }),
+  ].sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({
     kibanaIndices,
@@ -264,8 +251,8 @@ async function injectExtraFindData({
  */
 export async function filterInferenceConnectors(
   esClient: ElasticsearchClient,
-  connectors: Connector[]
-): Promise<Connector[]> {
+  connectors: InMemoryConnector[]
+): Promise<InMemoryConnector[]> {
   let result = connectors;
 
   if (result.some((connector) => connector.actionTypeId === '.inference')) {
