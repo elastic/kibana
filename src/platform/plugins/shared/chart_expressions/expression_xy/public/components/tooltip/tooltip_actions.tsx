@@ -126,8 +126,6 @@ export const getTooltipActions = (
   const hasXAxis = dataLayers.every((l) => l.xAccessor);
   const isTimeViz = isTimeChart(dataLayers);
 
-  if (!hasSplitAccessors && !hasXAxis) return;
-
   const xSeriesActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> =
     !isEsqlMode && hasXAxis
       ? [
@@ -191,10 +189,10 @@ export const getTooltipActions = (
         ]
       : [];
 
-  const alertRulesTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> = hasXAxis
+  const alertRulesTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> = isEsqlMode
     ? [
         {
-          disabled: () => !hasXAxis,
+          disabled: () => false,
           label: (_, [firstSeries]: XYTooltipValue[]) =>
             i18n.translate('expressionXY.tooltipActions.addAlertRule', {
               defaultMessage: 'Add alert rule',
@@ -224,7 +222,7 @@ export const getTooltipActions = (
               formatFactory
             );
 
-            const { table, row } = xSeriesPoint;
+            const { table } = xSeriesPoint;
             const xColumn = getColumnByAccessor(xAccessor.toString(), table.columns);
 
             // Get the field name and value for the Y axis
@@ -234,7 +232,7 @@ export const getTooltipActions = (
               const yColumn = getColumnByAccessor(yAccessor.toString(), table.columns);
               if (!yColumn || !yColumn.meta.sourceParams) return result;
               const { sourceField } = yColumn.meta.sourceParams;
-              const yValue = table.rows[row][yAccessor] as number;
+              const yValue = value.value as number;
               return {
                 ...result,
                 // If there is no sourceField, wrap the Y axis label in {curly braces} to let the user set the field name manually
@@ -247,7 +245,10 @@ export const getTooltipActions = (
             const timeField = isTimeViz && xSourceField ? String(xSourceField) : 'timestamp';
 
             // If there are split accessors, get their values. For non-time vizzes, treat the X axis as a split accessor.
-            const splitValues: Record<string, Array<string | number | null | undefined>> = isTimeViz
+            const splitValues: Record<
+              string,
+              Array<string | number | null | undefined>
+            > = isTimeViz || !hasXAxis
               ? {}
               : {
                   // If there is no sourceField, wrap the X axis label in {curly braces} to let the user set the field name manually

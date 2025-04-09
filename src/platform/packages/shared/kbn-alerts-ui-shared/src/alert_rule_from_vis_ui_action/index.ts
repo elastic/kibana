@@ -11,7 +11,7 @@ import { pick } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { ALERT_RULE_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
-import { hasBlockingError } from '@kbn/presentation-publishing';
+import { apiIsOfType, hasBlockingError } from '@kbn/presentation-publishing';
 import type { LensApi } from '@kbn/lens-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
@@ -51,9 +51,10 @@ export class AlertRuleFromVisAction implements Action<Context> {
   public getIconType = () => 'bell';
 
   public async isCompatible({ embeddable }: Context) {
-    const { isLensApi } = await import('@kbn/lens-plugin/public');
-    if (!isLensApi(embeddable) || hasBlockingError(embeddable)) return false;
-    return true;
+    const isLensApi = apiIsOfType(embeddable, 'lens');
+    if (!isLensApi || hasBlockingError(embeddable)) return false;
+    const query = embeddable.query$.getValue();
+    return Boolean(query && 'esql' in query);
   }
 
   public getDisplayName = () =>
@@ -110,7 +111,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
       : i18n.translate('alertsUIShared.alertRuleFromVis.thresholdComment', {
           defaultMessage:
             'Threshold automatically generated from the selected {thresholdValues, plural, one {value} other {values} } on the chart. This rule will generate an alert based on the following conditions:',
-          values: { thresholdValues: thresholdValues.length },
+          values: { thresholdValues: Object.keys(thresholdValues).length },
         });
 
     const splitValueQueries = Object.entries(splitValues).map(([fieldName, values]) => {
