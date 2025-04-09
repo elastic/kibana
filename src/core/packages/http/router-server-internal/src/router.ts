@@ -216,7 +216,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
         });
       }
       if (filterPath?.length) {
-        kibanaResponse = KibanaResponse.from(kibanaResponse, { filterPath });
+        kibanaResponse = KibanaResponse.from(kibanaResponse, { filterPathsFromBody: filterPath });
       }
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
