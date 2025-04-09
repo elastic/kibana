@@ -21,7 +21,6 @@ xpack.spaces.maxSpaces: 1
 
 ## Disable plugins that belong to other solutions
 xpack.apm.enabled: false
-xpack.entities_data_access.enabled: false
 xpack.infra.enabled: false
 xpack.inventory.enabled: false
 xpack.observability.enabled: false
