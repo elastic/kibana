@@ -54,3 +54,5 @@ const environmentsRoute = createApmServerRoute({
     return { environments };
   },
 });
+
+export const environmentsRouteRepository = environmentsRoute;
