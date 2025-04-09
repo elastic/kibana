@@ -49,7 +49,7 @@ export const WORKFLOW_INSIGHTS = {
       description: i18n.translate(
         'xpack.securitySolution.endpointDetails.workflowInsights.survey.text',
         {
-          defaultMessage: "How's the Automatic Troubleshooting working for you? ",
+          defaultMessage: 'How is Automatic Troubleshooting working for you? ',
         }
       ),
       callToAction: i18n.translate(
