@@ -660,10 +660,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
   }
 
   function fieldsSafe(fields: Array<string | number | undefined>) {
-    const INVALID_ACCESSORS = ['__proto__', 'prototype'];
     return fields.every((field) => {
       if (typeof field === 'string') {
-        return !INVALID_ACCESSORS.includes(field);
+        return field !== '__proto__' && field !== 'prototype';
       }
       return true;
     });
