@@ -32,6 +32,10 @@ import { INDEX } from '../../../common/es_fields';
 import { useKibanaContextForPlugin } from '../../utils';
 import { RuleConditionChart } from './rule_condition_chart';
 
+const degradedDocsLabel = i18n.translate('xpack.datasetQuality.rule.degradedDocsLabel', {
+  defaultMessage: 'degraded docs',
+});
+
 export const defaultRuleParams: Partial<DatasetQualityRuleParams> = {
   comparator: COMPARATORS.GREATER_THAN,
   threshold: [3],
@@ -225,7 +229,7 @@ export const RuleForm: React.FunctionComponent<
       />
       {dataViewError && (
         <>
-          <EuiFormErrorText data-test-subj="datasetQualityRuleDataViewError" alignItems="end">
+          <EuiFormErrorText data-test-subj="datasetQualityRuleDataViewError">
             {dataViewError}
           </EuiFormErrorText>
           <EuiSpacer size="s" />
@@ -234,8 +238,8 @@ export const RuleForm: React.FunctionComponent<
 
       <EuiExpression
         data-test-subj="datasetQualityRuleCountExpression"
-        description={'PERCENTAGE'}
-        value={'degraded docs'} // TODO: Check if this should be translatable
+        description={'PERCENTAGE'} // TODO: Should it be PERCENTAGE or RATE
+        value={degradedDocsLabel}
         display="columns"
         onClick={() => {}}
         disabled={true}
