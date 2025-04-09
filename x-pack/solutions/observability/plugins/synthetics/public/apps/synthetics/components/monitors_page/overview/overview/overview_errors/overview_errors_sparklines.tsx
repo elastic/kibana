@@ -31,6 +31,7 @@ export const OverviewErrorsSparklines = ({ from, to }: Props) => {
   return (
     <ExploratoryViewEmbeddable
       id="overviewErrorsSparklines"
+      dataTestSubj="overviewErrorsSparklines"
       reportType="kpi-over-time"
       axisTitlesVisibility={{ x: false, yRight: false, yLeft: false }}
       legendIsVisible={false}
