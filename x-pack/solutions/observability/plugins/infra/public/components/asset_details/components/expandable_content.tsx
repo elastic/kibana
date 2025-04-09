@@ -14,10 +14,11 @@ import useToggle from 'react-use/lib/useToggle';
 import type { Field } from '../tabs/metadata/utils';
 
 interface ExpandableContentProps {
+  fieldName?: string;
   values?: Field['value'];
 }
 export const ExpandableContent = (props: ExpandableContentProps) => {
-  const { values } = props;
+  const { fieldName, values } = props;
   const [isExpanded, toggle] = useToggle(false);
   const showLessRef = useRef<HTMLAnchorElement | null>(null);
   const showMoreRef = useRef<HTMLAnchorElement | null>(null);
@@ -50,15 +51,17 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
           <>
             <EuiLink
               data-test-subj="infraAssetDetailsExpandableContentCountMoreLink"
+              aria-label={i18n.translate('xpack.infra.assetDetails.metadata.seeMore.ariaLabel', {
+                defaultMessage: 'See {count} more {fieldName}',
+                values: { fieldName, count: others.length },
+              })}
               onClick={handleToggle}
               ref={showMoreRef}
             >
               <FormattedMessage
                 id="xpack.infra.assetDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"
-                values={{
-                  count: others.length,
-                }}
+                values={{ count: others.length }}
               />
             </EuiLink>
           </>
