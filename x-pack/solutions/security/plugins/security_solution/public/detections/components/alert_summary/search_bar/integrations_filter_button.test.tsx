@@ -9,6 +9,7 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
+  FILTER_KEY,
   INTEGRATION_BUTTON_TEST_ID,
   IntegrationFilterButton,
   INTEGRATIONS_LIST_TEST_ID,
@@ -74,12 +75,12 @@ describe('<IntegrationFilterButton />', () => {
             alias: null,
             disabled: false,
             index: undefined,
-            key: 'kibana.alert.rule.name',
+            key: FILTER_KEY,
             negate: true,
             params: { query: 'firstKey' },
             type: 'phrase',
           },
-          query: { match_phrase: { 'kibana.alert.rule.name': 'firstKey' } },
+          query: { match_phrase: { [FILTER_KEY]: 'firstKey' } },
         },
       ]);
     });
@@ -92,12 +93,12 @@ describe('<IntegrationFilterButton />', () => {
           alias: null,
           disabled: false,
           index: undefined,
-          key: 'kibana.alert.rule.name',
+          key: FILTER_KEY,
           negate: true,
           params: { query: 'secondKey' },
           type: 'phrase',
         },
-        query: { match_phrase: { 'kibana.alert.rule.name': 'secondKey' } },
+        query: { match_phrase: { [FILTER_KEY]: 'secondKey' } },
       },
     ]);
     const setFilters = jest.fn();

@@ -27,5 +27,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/reporting-public",
     "@kbn/presentation-publishing",
+    "@kbn/reporting-common",
+    "@kbn/es-query",
   ]
 }

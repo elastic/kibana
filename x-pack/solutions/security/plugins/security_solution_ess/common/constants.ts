@@ -13,7 +13,7 @@ import {
 
 // List of product features that are disabled in different offering (eg. Serverless).
 const DISABLED_PRODUCT_FEATURES: ProductFeatureKeyType[] = [
-  ProductFeatureSecurityKey.alertsSummary,
+  ProductFeatureSecurityKey.externalDetections,
   ProductFeatureSecurityKey.configurations,
 ];
 
