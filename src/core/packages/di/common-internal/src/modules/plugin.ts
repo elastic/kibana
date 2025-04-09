@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import { ContainerModule, type interfaces } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import { Global, OnSetup } from '@kbn/core-di';
@@ -49,17 +50,20 @@ export class PluginModule extends ContainerModule {
       scope
         .bind(Context)
         .toConstantValue(container)
-        .onDeactivation(() => {
-          try {
-            container.unbind(id);
-            // eslint-disable-next-line no-empty
-          } catch {}
-        });
+        .onDeactivation(
+          once(() => {
+            try {
+              container.unbind(id);
+              // eslint-disable-next-line no-empty
+            } catch {}
+          })
+        );
+      scope.get(Context);
 
       container
         .bind(id)
         .toConstantValue(scope)
-        .onDeactivation(() => scope.unbindAll());
+        .onDeactivation(once(() => scope.unbindAll()));
     }
 
     return container.get(id);
