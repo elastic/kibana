@@ -24,23 +24,23 @@ import { useAgentList } from '../../hooks/use_agent_list';
 import { appPaths } from '../../app_paths';
 import { i18n } from '@kbn/i18n';
 
-export const HomeAgentSection: React.FC<{}> = () => {
+export const HomeAssistantsSection: React.FC<{}> = () => {
   const { createWorkchatUrl, navigateToWorkchatUrl } = useNavigation();
   const { agents } = useAgentList();
 
-  const agentTiles = agents.map((agent) => {
+  const assistantTiles = agents.map((assistant) => {
     return (
-      <EuiPanel key={agent.id} paddingSize="m" hasBorder={true}>
+      <EuiPanel key={assistant.id} paddingSize="m" hasBorder={true}>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiAvatar size="l" name={agent.name} />
+            <EuiAvatar size="l" name={assistant.name} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
               iconType="gear"
               color="text"
               onClick={() => {
-                navigateToWorkchatUrl(appPaths.agents.edit({ agentId: agent.id }));
+                navigateToWorkchatUrl(appPaths.agents.edit({ agentId: assistant.id }));
               }}
             />
           </EuiFlexItem>
@@ -49,14 +49,14 @@ export const HomeAgentSection: React.FC<{}> = () => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiLink
-              href={createWorkchatUrl(appPaths.chat.new({ agentId: agent.id }))}
+              href={createWorkchatUrl(appPaths.chat.new({ agentId: assistant.id }))}
               style={{ fontWeight: 'bold' }}
             >
-              {agent.name}
+              {assistant.name}
             </EuiLink>
             <EuiSpacer size="s" />
             <EuiText size="xs" color="subdued">
-              {agent.description}
+              {assistant.description}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -70,15 +70,15 @@ export const HomeAgentSection: React.FC<{}> = () => {
         <EuiIcon type="users" size="m" />
         <EuiTitle size="xxs">
           <h4>
-            {i18n.translate('workchatApp.home.agents.title', {
-              defaultMessage: 'Agents',
+            {i18n.translate('workchatApp.home.assistants.title', {
+              defaultMessage: 'Assistants',
             })}
           </h4>
         </EuiTitle>
       </EuiFlexGroup>
 
       <EuiSpacer />
-      <EuiFlexGrid columns={3}>{agentTiles}</EuiFlexGrid>
+      <EuiFlexGrid columns={3}>{assistantTiles}</EuiFlexGrid>
       <EuiSpacer />
     </EuiFlexItem>
   );
