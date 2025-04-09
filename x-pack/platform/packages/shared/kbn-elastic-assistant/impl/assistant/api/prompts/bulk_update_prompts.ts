@@ -20,7 +20,7 @@ export const bulkUpdatePrompts = async (
   http: HttpSetup,
   prompts: PerformPromptsBulkActionRequestBody,
   toasts?: IToasts
-) => {
+): Promise<PerformPromptsBulkActionResponse | { success: false }> => {
   try {
     const result = await http.fetch<PerformPromptsBulkActionResponse>(
       ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
@@ -56,5 +56,6 @@ export const bulkUpdatePrompts = async (
         },
       }),
     });
+    return { success: false };
   }
 };

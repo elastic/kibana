@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { PolicySelectionItem, PoliciesSelectorProps } from './policies_selector';
-export { PoliciesSelector } from './policies_selector';
+export const QUERY_RULES_SETS_QUERY_KEY = 'query-rules-sets-fetch';
