@@ -130,11 +130,10 @@ export function ControlBar() {
                 data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
                 size="s"
                 target="_blank"
-                href={router.link('/{key}/{tab}/{subtab}', {
+                href={router.link('/{key}/management/{tab}', {
                   path: {
                     key: routingAppState.childUnderEdit?.child.destination!,
-                    tab: 'management',
-                    subtab: 'route',
+                    tab: 'route',
                   },
                 })}
               >
