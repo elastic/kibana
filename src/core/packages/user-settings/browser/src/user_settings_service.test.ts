@@ -310,7 +310,8 @@ describe('UserSettingsService', () => {
     it('should return the error when user subscribes to the updateError$', (done) => {
       mockedUserProfile.partialUpdate.mockRejectedValue(new Error(errorMessage));
       userSettingsService.getUpdateErrors$().subscribe((err) => {
-        expect(err.message).toBe(errorMessage);
+        expect(key in err).toBe(true);
+        expect(err[key].message).toBe(errorMessage);
         done();
       });
 
@@ -323,6 +324,9 @@ describe('UserSettingsService', () => {
       const mockFn = jest.fn();
       userSettingsService.getUpdate$().subscribe(mockFn);
       userSettingsService.getUpdateErrors$().subscribe((err) => {
+        expect(key in err).toBe(true);
+        expect(err[key].message).toBe(errorMessage);
+
         expect(userSettingsService.get(key)).toBe(value);
         expect(mockFn).toHaveBeenCalledTimes(2);
         expect(mockFn).toHaveBeenNthCalledWith(1, {

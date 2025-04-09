@@ -77,7 +77,8 @@ export interface IUserSettingsService {
 
   /**
    * Returns an Observable that notifies subscribers of each error while trying to update
-   * the settings, containing the actual Error class.
+   * the settings in a key value format. The key is the setting name and the value is the error.
+   *
    */
-  getUpdateErrors$: () => Observable<Error>;
+  getUpdateErrors$: () => Observable<Record<string, Error>>;
 }

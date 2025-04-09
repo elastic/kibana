@@ -14,14 +14,15 @@ import { UserProfileData } from '@kbn/core-user-profile-common';
 import { IUserSettingsService, UserSettingsMeta } from './types';
 import { debounceAsync } from './utils';
 
+const UPDATE_DEBOUNCE_TIMEOUT = 1000;
+const SETTING_DELIMITER = ':';
+
 export class UserSettingsService implements IUserSettingsService {
   protected cache: Map<string, any>;
   protected meta: Map<string, UserSettingsMeta>;
   private update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
-  private updateErrors$ = new Subject<Error>();
+  private updateErrors$ = new Subject<Record<string, Error>>();
   protected userSettingUpdater;
-
-  private settingDelimiter = ':';
 
   constructor(
     private userProfile: UserProfileService,
@@ -32,7 +33,7 @@ export class UserSettingsService implements IUserSettingsService {
     this.meta = new Map<string, UserSettingsMeta>();
     this.userSettingUpdater = debounceAsync<<D extends UserProfileData>(data: D) => Promise<void>>(
       this.userProfile.partialUpdate,
-      1000
+      UPDATE_DEBOUNCE_TIMEOUT
     );
   }
 
@@ -40,8 +41,8 @@ export class UserSettingsService implements IUserSettingsService {
     const isSpaceAware = this.meta.get(key)?.isSpaceAware;
 
     return isSpaceAware
-      ? [key, this.spaceId].join(this.settingDelimiter)
-      : [key].join(this.settingDelimiter);
+      ? [key, this.spaceId].join(SETTING_DELIMITER)
+      : [key].join(SETTING_DELIMITER);
   }
 
   public isRegistered(key: string) {
@@ -144,7 +145,9 @@ export class UserSettingsService implements IUserSettingsService {
       // revert Changes
       this.cache.set(fullSettingName, valueBeforeUpdate);
       this.update$.next({ key, newValue: valueBeforeUpdate, oldValue: newValue });
-      this.updateErrors$.next(error);
+      this.updateErrors$.next({
+        [key]: error,
+      });
     });
 
     return true;
@@ -161,7 +164,7 @@ export class UserSettingsService implements IUserSettingsService {
     return this.update$.asObservable();
   }
 
-  getUpdateErrors$(): Observable<Error> {
+  getUpdateErrors$(): Observable<Record<string, Error>> {
     return this.updateErrors$.asObservable();
   }
 }
