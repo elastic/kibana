@@ -11,7 +11,7 @@ import type { StreamsAppRouter, StreamsAppRoutes } from '../routes/config';
 import { streamsAppRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
 
-interface StatefulStreamsAppRouter extends StreamsAppRouter {
+export interface StatefulStreamsAppRouter extends StreamsAppRouter {
   push<T extends PathsOf<StreamsAppRoutes>>(
     path: T,
     ...params: TypeAsArgs<TypeOf<StreamsAppRoutes, T>>
