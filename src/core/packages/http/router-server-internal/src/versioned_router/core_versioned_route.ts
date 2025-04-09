@@ -35,7 +35,8 @@ import {
   readVersion,
   removeQueryVersion,
 } from './route_version_utils';
-import { injectResponseHeaders, injectVersionHeader } from '../util';
+import { injectVersionHeader } from '../util';
+import { injectResponseHeaders } from '../response';
 import { validRouteSecurity } from '../security_route_config_validator';
 
 import { resolvers } from './handler_resolvers';
@@ -213,11 +214,11 @@ export class CoreVersionedRoute implements VersionedRoute {
       return injectVersionHeader(version, error);
     }
 
-    let response = await handler.fn(kibanaRequest, responseFactory);
+    const response = await handler.fn(kibanaRequest, responseFactory);
 
     // we don't want to overwrite the header value
     if (handler.options.options?.deprecated && !response.options.headers?.warning) {
-      response = injectResponseHeaders(
+      injectResponseHeaders(
         {
           warning: getWarningHeaderMessageFromRouteDeprecation(
             handler.options.options.deprecated,

@@ -8,7 +8,7 @@
  */
 
 import { IKibanaResponse } from '@kbn/core-http-server';
-import { kibanaResponseFactory } from './response';
+import { injectResponseHeaders, kibanaResponseFactory } from './response';
 
 describe('kibanaResponseFactory', () => {
   describe('status codes', () => {
@@ -153,5 +153,18 @@ describe('kibanaResponseFactory', () => {
         expect(result.options.headers).toHaveProperty('content-type', 'custom');
       });
     });
+  });
+});
+
+describe('injectResponseHeaders', () => {
+  it('injects an empty value as expected', () => {
+    const response = kibanaResponseFactory.ok();
+    injectResponseHeaders({}, response);
+    expect(response.options.headers).toEqual({});
+  });
+  it('merges values as expected', () => {
+    const response = kibanaResponseFactory.ok({ headers: { foo: 'true', bar: 'false' } });
+    injectResponseHeaders({ foo: 'false', baz: 'true' }, response);
+    expect(response.options.headers).toEqual({ foo: 'false', bar: 'false', baz: 'true' });
   });
 });

@@ -33,7 +33,7 @@ import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import { Env } from '@kbn/config';
 import { CoreVersionedRouter } from './versioned_router';
 import { CoreKibanaRequest, getProtocolFromRequest } from './request';
-import { KibanaResponse, kibanaResponseFactory } from './response';
+import { filterResponseBody, kibanaResponseFactory } from './response';
 import { HapiResponseAdapter } from './response_adapter';
 import { wrapErrors } from './error_wrapper';
 import { formatErrorMeta } from './util';
@@ -206,7 +206,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       if (!route.options.httpResource) {
         ({ filterPath } = validateGlobalApiOpts(request));
       }
-      let kibanaResponse = await handler(request);
+      const kibanaResponse = await handler(request);
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
           headers: kibanaResponse.options.headers,
@@ -215,9 +215,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           requestContext: `${request.route.method} ${request.route.path}`,
         });
       }
-      if (filterPath?.length) {
-        kibanaResponse = KibanaResponse.from(kibanaResponse, { filterPathsFromBody: filterPath });
-      }
+      if (filterPath?.length) filterResponseBody(filterPath, kibanaResponse);
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
       // capture error

@@ -8,6 +8,7 @@
  */
 
 import { Stream } from 'stream';
+import type { Mutable } from 'utility-types';
 import type {
   IKibanaResponse,
   HttpResponsePayload,
@@ -23,14 +24,11 @@ import type {
   KibanaSuccessResponseFactory,
   KibanaResponseFactory,
   LifecycleResponseFactory,
+  ResponseHeaders,
 } from '@kbn/core-http-server';
 import { isPlainObject } from 'lodash';
 import mime from 'mime';
 import { filterObject } from './filter_object';
-
-interface KibanaResponseFromOptions {
-  filterPathsFromBody?: string[];
-}
 
 /**
  * A response data object, expected to returned as a result of {@link RequestHandler} execution
@@ -44,14 +42,29 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
     public readonly payload?: T,
     public readonly options: HttpResponseOptions = {}
   ) {}
+}
 
-  public static from(response: KibanaResponse, { filterPathsFromBody }: KibanaResponseFromOptions) {
-    let body = response.payload;
-    if (filterPathsFromBody?.length && isPlainObject(body)) {
-      body = filterObject(body, filterPathsFromBody);
-    }
-    return new KibanaResponse(response.status, body, response.options);
+/**
+ * @note mutates the response object
+ * @internal
+ */
+export function filterResponseBody(filterPaths: string[], response: IKibanaResponse): void {
+  const mutableResponse = response as Mutable<IKibanaResponse>;
+  if (filterPaths?.length && isPlainObject(mutableResponse.payload)) {
+    mutableResponse.payload = filterObject(mutableResponse.payload, filterPaths);
   }
+}
+
+/**
+ * @note mutates the response object
+ * @internal
+ */
+export function injectResponseHeaders(headers: ResponseHeaders, response: IKibanaResponse): void {
+  const mutableResponse = response as Mutable<IKibanaResponse>;
+  mutableResponse.options.headers = {
+    ...mutableResponse.options.headers,
+    ...headers,
+  };
 }
 
 const successResponseFactory: KibanaSuccessResponseFactory = {
