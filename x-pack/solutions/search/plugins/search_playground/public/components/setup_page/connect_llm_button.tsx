@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiText, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -49,17 +49,19 @@ export const ConnectLLMButton: React.FC = () => {
   return (
     <>
       {connectors?.length ? (
-        <EuiButtonEmpty
-          iconType="checkInCircleFilled"
-          color="success"
-          onClick={handleSetupGenAiConnector}
-          data-test-subj="successConnectLLMButton"
-        >
-          <FormattedMessage
-            id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
-            defaultMessage="LLM connected"
-          />
-        </EuiButtonEmpty>
+        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="successConnectLLMButton">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="checkInCircleFilled" color="success" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="success">
+              <FormattedMessage
+                id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
+                defaultMessage="LLM connected"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : (
         <EuiButton
           iconType="sparkles"
