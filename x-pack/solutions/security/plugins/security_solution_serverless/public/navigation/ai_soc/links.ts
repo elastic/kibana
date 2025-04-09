@@ -22,13 +22,13 @@ export const configurationsLink: NodeDefinition<AppDeepLinkId, string, string> =
   renderAs: 'panelOpener',
   children: [
     {
-      link: `securitySolutionUI:configurations-ai_settings`,
+      link: `securitySolutionUI:configurations-integrations`,
     },
     {
       link: `securitySolutionUI:configurations-basic_rules`,
     },
     {
-      link: `securitySolutionUI:configurations-integrations`,
+      link: `securitySolutionUI:configurations-ai_settings`,
     },
   ],
 };
