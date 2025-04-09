@@ -25,6 +25,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/data-views-plugin",
     "@kbn/search-types",
-    "@kbn/utility-types"
+    "@kbn/utility-types",
+    "@kbn/alerting-plugin"
   ]
 }
