@@ -24,6 +24,7 @@ import {
 import * as previewAnnotations from '../../../.storybook/preview';
 import { NOTIFICATIONS_ADD_ERROR_ACTION } from '../../../.storybook/constants';
 import { USE_FETCH_GRAPH_DATA_REFRESH_ACTION } from '../mock/constants';
+import { mockDataView } from '../mock/data_view.mock';
 
 setProjectAnnotations(previewAnnotations);
 
@@ -112,7 +113,7 @@ const isSearchBarVisible = (container: HTMLElement) => {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/206646
-describe.skip('GraphInvestigation Component', () => {
+describe('GraphInvestigation Component', () => {
   beforeEach(() => {
     for (const key in actionMocks) {
       if (Object.prototype.hasOwnProperty.call(actionMocks, key)) {
@@ -274,7 +275,7 @@ describe.skip('GraphInvestigation Component', () => {
   });
 
   describe('investigateInTimeline', () => {
-    it('calls onInvestigateInTimeline action', () => {
+    it('empty query and no filters - calls onInvestigateInTimeline action with event.id', () => {
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
@@ -323,7 +324,7 @@ describe.skip('GraphInvestigation Component', () => {
       ]);
     });
 
-    it(`query doesn't include event id in filters input when onInvestigateInTimeline callback`, async () => {
+    it('query and no filters - calls onInvestigateInTimeline action with event.id in the query but not in the filters', async () => {
       // Arrange
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
@@ -342,6 +343,63 @@ describe.skip('GraphInvestigation Component', () => {
       expect(onInvestigateInTimeline).toHaveBeenCalled();
       expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
         query: '(host1) OR event.id: "1" OR event.id: "2"',
+        language: 'kuery',
+      });
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
+    });
+
+    it('empty query and empty originEventIds - calls onInvestigateInTimeline with empty filters', () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+        initialState: {
+          dataView: mockDataView,
+          originEventIds: [],
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        },
+      });
+
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '',
+        language: 'kuery',
+      });
+      // Should have empty filters since there are no originEventIds
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
+    });
+
+    it('query and empty originEventIds - calls onInvestigateInTimeline with only the query', async () => {
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+        initialState: {
+          dataView: mockDataView,
+          originEventIds: [],
+          timeRange: {
+            from: 'now-15m',
+            to: 'now',
+          },
+        },
+      });
+
+      const queryInput = getByTestId('queryInput');
+      await userEvent.type(queryInput, 'host1');
+      const querySubmitBtn = getByTestId('querySubmitButton');
+      querySubmitBtn.click();
+
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      // Query should remain unchanged since there are no originEventIds to add
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: 'host1',
         language: 'kuery',
       });
       expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
