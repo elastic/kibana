@@ -77,11 +77,11 @@ export class SearchConnectorsPlugin
         getStartServices: coreSetup.getStartServices,
         log: this.logger.get(),
       });
+      registerStatsRoutes({ ...plugins, router, log: this.logger.get() });
+      registerMappingRoute({ ...plugins, router, log: this.logger.get() });
+      registerSearchRoute({ ...plugins, router, log: this.logger.get() });
+      registerApiKeysRoutes({ ...plugins, router });
     }
-    registerStatsRoutes({ ...plugins, router, log: this.logger.get() });
-    registerMappingRoute({ ...plugins, router, log: this.logger.get() });
-    registerSearchRoute({ ...plugins, router, log: this.logger.get() });
-    registerApiKeysRoutes({ ...plugins, router });
     return {
       getConnectorTypes: () => this.connectors,
     };
