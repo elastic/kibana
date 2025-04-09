@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
 
         // check Other Tools section
-        await solutionNavigation.sidenav.openPanel('otherTools', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('otherTools');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('otherTools');
           expect(isOpen).to.be(true);
@@ -56,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // check Machine Learning section
-        await solutionNavigation.sidenav.openPanel('machine_learning-landing', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('machine_learning-landing');
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('machine_learning-landing');
           expect(isOpen).to.be(true);
