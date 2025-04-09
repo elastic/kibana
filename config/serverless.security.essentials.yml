@@ -1,4 +1,2 @@
 # Security Essentials tier config
 
-# TODO: Remove this before merging
-telemetry.labels.unknown: 123
