@@ -9,7 +9,6 @@ import React from 'react';
 
 import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { PluginTemplateWrapper } from '../../common/components/plugin_template_wrapper';
 import { CenteredLoadingSpinner } from '../../common/components/centered_loading_spinner';
 import { useSpaceId } from '../../common/hooks/use_space_id';
 import { PAGE_CONTENT_WIDTH } from '../constants';
@@ -23,31 +22,25 @@ export const OnboardingPage = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   if (!spaceId) {
-    return (
-      <PluginTemplateWrapper>
-        <CenteredLoadingSpinner size="l" topOffset="10em" />
-      </PluginTemplateWrapper>
-    );
+    return <CenteredLoadingSpinner size="l" topOffset="10em" />;
   }
 
   return (
     <OnboardingContextProvider spaceId={spaceId}>
-      <PluginTemplateWrapper paddingSize="none" data-test-subj="onboarding-hub-page">
-        <OnboardingAVCBanner />
-        <KibanaPageTemplate.Section
-          grow={true}
-          restrictWidth={PAGE_CONTENT_WIDTH}
-          paddingSize="xl"
-          bottomBorder="extended"
-          style={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
-        >
-          <OnboardingRouter />
-        </KibanaPageTemplate.Section>
-        <EuiSpacer size="l" />
-        <KibanaPageTemplate.Section grow={true} restrictWidth={PAGE_CONTENT_WIDTH} paddingSize="xl">
-          <OnboardingFooter />
-        </KibanaPageTemplate.Section>
-      </PluginTemplateWrapper>
+      <OnboardingAVCBanner />
+      <KibanaPageTemplate.Section
+        grow={true}
+        restrictWidth={PAGE_CONTENT_WIDTH}
+        paddingSize="xl"
+        bottomBorder="extended"
+        style={{ backgroundColor: euiTheme.colors.backgroundBaseSubdued }}
+      >
+        <OnboardingRouter />
+      </KibanaPageTemplate.Section>
+      <EuiSpacer size="l" />
+      <KibanaPageTemplate.Section grow={true} restrictWidth={PAGE_CONTENT_WIDTH} paddingSize="xl">
+        <OnboardingFooter />
+      </KibanaPageTemplate.Section>
     </OnboardingContextProvider>
   );
 });

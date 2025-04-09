@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
 import { type CspSecuritySolutionContext } from '@kbn/cloud-security-posture-plugin/public';
@@ -16,7 +16,6 @@ import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
 import { SpyRoute } from '../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../common/components/filters_global';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { useOnExpandableFlyoutClose } from '../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 // This exists only for the type signature cast
@@ -33,16 +32,17 @@ const cspSecuritySolutionContext: CspSecuritySolutionContext = {
 
 const CloudSecurityPosture = () => {
   const { cloudSecurityPosture } = useKibana().services;
-  const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
+  const CloudSecurityPostureRouter = useMemo(
+    () => cloudSecurityPosture.getCloudSecurityPostureRouter(),
+    [cloudSecurityPosture]
+  );
 
   return (
-    <PluginTemplateWrapper>
-      <TrackApplicationView viewId="cloud_security_posture">
-        <SecuritySolutionPageWrapper noPadding noTimeline>
-          <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
-        </SecuritySolutionPageWrapper>
-      </TrackApplicationView>
-    </PluginTemplateWrapper>
+    <TrackApplicationView viewId="cloud_security_posture">
+      <SecuritySolutionPageWrapper noPadding noTimeline>
+        <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
+      </SecuritySolutionPageWrapper>
+    </TrackApplicationView>
   );
 };
 

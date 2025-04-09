@@ -6,7 +6,7 @@
  */
 
 import type { FC, PropsWithChildren } from 'react';
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { Tracker } from '../types';
 
 interface TelemetryProviderProps {
@@ -19,7 +19,8 @@ export const TelemetryContextProvider: FC<PropsWithChildren<TelemetryProviderPro
   children,
   tracker,
 }) => {
-  return <TelemetryContext.Provider value={{ tracker }}>{children}</TelemetryContext.Provider>;
+  const value = useMemo(() => ({ tracker }), [tracker]);
+  return <TelemetryContext.Provider value={value}>{children}</TelemetryContext.Provider>;
 };
 
 export const useTelemetryContext = () => {

@@ -199,6 +199,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           services,
           store,
           usageCollection,
+          subPluginRoutes: [],
           children: <ManagementSettings />,
         });
       },

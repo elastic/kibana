@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import classNames from 'classnames';
-import React, { FC, useState, useMemo, useEffect } from 'react';
+import React, { FC, useState, useMemo, useEffect, useCallback } from 'react';
 
 import {
   EuiAvatarProps,
@@ -95,217 +95,254 @@ const generateId = htmlIdGenerator('SolutionNav');
 /**
  * A wrapper around `EuiSideNav` that includes the appropriate title with optional solution logo.
  */
-export const SolutionNav: FC<SolutionNavProps> = ({
-  children,
-  headingProps,
-  icon,
-  isOpenOnDesktop = false,
-  items,
-  mobileBreakpoints = ['xs', 's'],
-  closeFlyoutButtonPosition = 'outside',
-  name,
-  onCollapse,
-  canBeCollapsed = true,
-  ...rest
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
-  const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
-  const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
+export const SolutionNav: FC<SolutionNavProps> = React.memo(
+  ({
+    children,
+    headingProps,
+    icon,
+    isOpenOnDesktop = false,
+    items,
+    mobileBreakpoints = ['xs', 's'],
+    closeFlyoutButtonPosition = 'outside',
+    name,
+    onCollapse,
+    canBeCollapsed = true,
+    ...rest
+  }) => {
+    const { euiTheme } = useEuiTheme();
+    const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
+    const isMediumBreakpoint = useIsWithinBreakpoints(['m']);
+    const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
 
-  // This is used for both the `EuiSideNav` and `EuiFlyout` toggling
-  const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
-  const toggleOpenOnMobile = () => {
-    setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
-  };
+    const [isSideNavOpenOnMobile, setIsSideNavOpenOnMobile] = useState(false);
+    const toggleOpenOnMobile = useCallback(() => {
+      setIsSideNavOpenOnMobile((prev) => !prev);
+    }, []);
 
-  const isHidden = isLargerBreakpoint && !isOpenOnDesktop && canBeCollapsed;
-  const isCustomSideNav = !!children;
+    const isHidden = isLargerBreakpoint && !isOpenOnDesktop && canBeCollapsed;
+    const isCustomSideNav = !!children;
 
-  const sideNavClasses = classNames('kbnSolutionNav', {
-    'kbnSolutionNav--hidden': isHidden,
-  });
+    const sideNavClasses = useMemo(
+      () =>
+        classNames('kbnSolutionNav', {
+          'kbnSolutionNav--hidden': isHidden,
+        }),
+      [isHidden]
+    );
 
-  // Create the avatar and titles.
-  const headingID = headingProps?.id || generateId('heading');
-  const HeadingElement = headingProps?.element || 'h2';
+    const headingID = useMemo(() => headingProps?.id || generateId('heading'), [headingProps?.id]);
 
-  const titleText = (
-    <EuiTitle
-      size="xs"
-      id={headingID}
-      data-test-subj={headingProps?.['data-test-subj']}
-      css={css`
+    const sideNavContent = useMemo(() => {
+      if (isCustomSideNav) return children;
+      if (!items) return null;
+      return (
+        <EuiSideNav
+          aria-labelledby={headingID}
+          aria-hidden={isHidden}
+          items={setTabIndex(items, isHidden)}
+          mobileBreakpoints={[]}
+          {...rest}
+        />
+      );
+    }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
+
+    const navWidth = useMemo(() => {
+      if (isLargerBreakpoint) {
+        return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
+      }
+      if (isMediumBreakpoint) {
+        return isSideNavOpenOnMobile || !canBeCollapsed ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
+      }
+      return '0';
+    }, [
+      euiTheme.size.xxl,
+      isOpenOnDesktop,
+      isSideNavOpenOnMobile,
+      canBeCollapsed,
+      isMediumBreakpoint,
+      isLargerBreakpoint,
+    ]);
+
+    const overFlowScroll = useEuiOverflowScroll('y');
+    const euiMinBreakpoint = useEuiMinBreakpoint('m');
+
+    const styles = useMemo(
+      () => ({
+        solutionNav: css`
+          display: flex;
+          flex-direction: column;
+          ${overFlowScroll};
+          ${euiMinBreakpoint} {
+            width: ${FLYOUT_SIZE_CSS};
+            padding: ${euiTheme.size.l};
+          }
+        `,
+        solutionNavHidden: css`
+          pointer-events: none;
+          opacity: 0;
+          ${euiCanAnimate} {
+            transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
+          }
+        `,
+      }),
+      [
+        euiTheme.size.l,
+        euiTheme.animation.fast,
+        euiTheme.animation.resistance,
+        overFlowScroll,
+        euiMinBreakpoint,
+      ]
+    );
+
+    const flyoutStyles = useMemo(
+      () => css`
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        .kbnSolutionNav {
+          flex: auto;
+        }
+      `,
+      [euiTheme.colors.backgroundBasePlain]
+    );
+
+    const avatarStyles = useMemo(
+      () => css`
+        margin-right: ${euiTheme.size.m};
+        align-self: flex-start;
+      `,
+      [euiTheme.size.m]
+    );
+
+    const titleStyles = useMemo(
+      () => css`
         display: inline-flex;
         align-items: center;
-      `}
-    >
-      <HeadingElement>
-        {icon && (
-          <KibanaSolutionAvatar
-            css={css`
-              margin-right: ${euiTheme.size.m};
-              align-self: flex-start;
-            `}
-            iconType={icon}
-            name={name}
-          />
-        )}
-        <strong>
-          <FormattedMessage
-            id="sharedUXPackages.solutionNav.mobileTitleText"
-            defaultMessage="{solutionName} {menuText}"
-            values={{
-              solutionName: name || 'Navigation',
-              menuText: isSmallerBreakpoint
-                ? i18n.translate('sharedUXPackages.solutionNav.menuText', {
-                    defaultMessage: 'menu',
-                  })
-                : '',
-            }}
-          />
-        </strong>
-      </HeadingElement>
-    </EuiTitle>
-  );
-
-  // Create the side nav content
-  const sideNavContent = useMemo(() => {
-    if (isCustomSideNav) {
-      return children;
-    }
-
-    if (!items) {
-      return null;
-    }
-
-    return (
-      <EuiSideNav
-        aria-labelledby={headingID}
-        aria-hidden={isHidden}
-        items={setTabIndex(items, isHidden)}
-        mobileBreakpoints={[]} // prevent EuiSideNav to apply mobile version, already implemented here
-        {...rest}
-      />
+      `,
+      []
     );
-  }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
-  const navWidth = useMemo(() => {
-    if (isLargerBreakpoint) {
-      return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
-    }
-    if (isMediumBreakpoint) {
-      return isSideNavOpenOnMobile || !canBeCollapsed ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
-    }
-    return '0';
-  }, [
-    euiTheme,
-    isOpenOnDesktop,
-    isSideNavOpenOnMobile,
-    canBeCollapsed,
-    isMediumBreakpoint,
-    isLargerBreakpoint,
-  ]);
-  const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
-  // Setting a global CSS variable with the nav width
-  // so that other pages have it available when needed.
-  useEffect(() => {
-    setGlobalCSSVariables({
-      '--kbnSolutionNavOffset': navWidth,
-    });
-  }, [navWidth, setGlobalCSSVariables]);
-
-  const styles = {
-    solutionNav: css`
-      display: flex;
-      flex-direction: column;
-
-      ${useEuiOverflowScroll('y')};
-
-      ${useEuiMinBreakpoint('m')} {
-        width: ${FLYOUT_SIZE_CSS};
-        padding: ${euiTheme.size.l};
-      }
-    `,
-    solutionNavHidden: css`
-      pointer-events: none;
-      opacity: 0;
-
-      ${euiCanAnimate} {
-        transition: opacity ${euiTheme.animation.fast} ${euiTheme.animation.resistance};
-      }
-    `,
-  };
-  return (
-    <>
-      {isSmallerBreakpoint && (
-        // @ts-expect-error Mismatch in collapsible vs unconllapsible props
-        <EuiCollapsibleNavGroup
-          className={sideNavClasses}
-          css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
-          paddingSize="none"
-          background="none"
-          title={titleText}
-          titleElement="span"
-          isCollapsible={canBeCollapsed}
-          initialIsOpen={false}
+    const titleText = useMemo(() => {
+      const HeadingElement = headingProps?.element || 'h2';
+      return (
+        <EuiTitle
+          size="xs"
+          id={headingID}
+          data-test-subj={headingProps?.['data-test-subj']}
+          css={titleStyles}
         >
-          <EuiPanel color="transparent" paddingSize="s">
-            {sideNavContent}
-          </EuiPanel>
-        </EuiCollapsibleNavGroup>
-      )}
-      {isMediumBreakpoint && (
-        <>
-          {(isSideNavOpenOnMobile || !canBeCollapsed) && (
-            <EuiFlyout
-              ownFocus={false}
-              outsideClickCloses
-              onClose={() => setIsSideNavOpenOnMobile(false)}
-              side="left"
-              size={FLYOUT_SIZE}
-              closeButtonPosition={closeFlyoutButtonPosition}
-              css={css`
-                // Put the page background color in the flyout version too
-                background-color: ${euiTheme.colors.backgroundBasePlain};
+          <HeadingElement>
+            {icon && <KibanaSolutionAvatar css={avatarStyles} iconType={icon} name={name} />}
+            <strong>
+              <FormattedMessage
+                id="sharedUXPackages.solutionNav.mobileTitleText"
+                defaultMessage="{solutionName} {menuText}"
+                values={{
+                  solutionName: name || 'Navigation',
+                  menuText: isSmallerBreakpoint
+                    ? i18n.translate('sharedUXPackages.solutionNav.menuText', {
+                        defaultMessage: 'menu',
+                      })
+                    : '',
+                }}
+              />
+            </strong>
+          </HeadingElement>
+        </EuiTitle>
+      );
+    }, [headingID, headingProps, icon, isSmallerBreakpoint, name, titleStyles, avatarStyles]);
 
-                .kbnSolutionNav {
-                  flex: auto; // Override default EuiPageSideBar flex CSS when in a flyout
-                }
-              `}
-              hideCloseButton={!canBeCollapsed}
-            >
-              <EuiPageSidebar
-                className={sideNavClasses}
-                css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
-                hasEmbellish={true}
-              >
-                {titleText}
-                <EuiSpacer size="l" />
-                {sideNavContent}
-              </EuiPageSidebar>
-            </EuiFlyout>
-          )}
-          {canBeCollapsed && (
-            <SolutionNavCollapseButton isCollapsed={true} onClick={toggleOpenOnMobile} />
-          )}
-        </>
-      )}
-      {isLargerBreakpoint && (
-        <>
-          <div
-            css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
-            className={sideNavClasses}
-          >
+    const onClose = useCallback(() => setIsSideNavOpenOnMobile(false), []);
+
+    const sidebarStyles = useMemo(
+      () => [styles.solutionNav, isHidden && styles.solutionNavHidden],
+      [isHidden, styles.solutionNav, styles.solutionNavHidden]
+    );
+
+    const flyoutComponent = useMemo(
+      () => (
+        <EuiFlyout
+          ownFocus={false}
+          outsideClickCloses
+          onClose={onClose}
+          side="left"
+          size={FLYOUT_SIZE}
+          closeButtonPosition={closeFlyoutButtonPosition}
+          css={flyoutStyles}
+          hideCloseButton={!canBeCollapsed}
+        >
+          <EuiPageSidebar className={sideNavClasses} css={sidebarStyles} hasEmbellish={true}>
             {titleText}
             <EuiSpacer size="l" />
             {sideNavContent}
-          </div>
-          {canBeCollapsed && (
-            <SolutionNavCollapseButton isCollapsed={!isOpenOnDesktop} onClick={onCollapse} />
-          )}
-        </>
-      )}
-    </>
-  );
-};
+          </EuiPageSidebar>
+        </EuiFlyout>
+      ),
+      [
+        closeFlyoutButtonPosition,
+        canBeCollapsed,
+        flyoutStyles,
+        sideNavClasses,
+        sidebarStyles,
+        titleText,
+        sideNavContent,
+        onClose,
+      ]
+    );
+
+    const collapseButton = useMemo(
+      () => <SolutionNavCollapseButton isCollapsed={!isOpenOnDesktop} onClick={onCollapse} />,
+      [isOpenOnDesktop, onCollapse]
+    );
+
+    // Set global CSS variables
+    const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
+    useEffect(() => {
+      setGlobalCSSVariables({
+        '--kbnSolutionNavOffset': navWidth,
+      });
+    }, [navWidth, setGlobalCSSVariables]);
+
+    return (
+      <>
+        {isSmallerBreakpoint && (
+          <EuiCollapsibleNavGroup
+            className={sideNavClasses}
+            css={sidebarStyles}
+            paddingSize="none"
+            background="none"
+            title={titleText}
+            titleElement="span"
+            isCollapsible={canBeCollapsed as true}
+            initialIsOpen={false}
+          >
+            <EuiPanel color="transparent" paddingSize="s">
+              {sideNavContent}
+            </EuiPanel>
+          </EuiCollapsibleNavGroup>
+        )}
+        {isMediumBreakpoint && (
+          <>
+            {(isSideNavOpenOnMobile || !canBeCollapsed) && flyoutComponent}
+            {canBeCollapsed && (
+              <SolutionNavCollapseButton isCollapsed={true} onClick={toggleOpenOnMobile} />
+            )}
+          </>
+        )}
+        {isLargerBreakpoint && (
+          <>
+            <div
+              css={[styles.solutionNav, isHidden && styles.solutionNavHidden]}
+              className={sideNavClasses}
+            >
+              {titleText}
+              <EuiSpacer size="l" />
+              {sideNavContent}
+            </div>
+            {canBeCollapsed && collapseButton}
+          </>
+        )}
+      </>
+    );
+  }
+);
+
+SolutionNav.displayName = 'SolutionNav';

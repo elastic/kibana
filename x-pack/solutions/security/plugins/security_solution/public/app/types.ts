@@ -29,7 +29,7 @@ export interface RenderAppProps
   extends Omit<AppMountParameters, 'appBasePath' | 'onAppLeave' | 'setHeaderActionMenu'> {
   services: StartServices;
   store: Store<State, Action>;
-  subPluginRoutes?: RouteProps[];
+  subPluginRoutes: RouteProps[];
   usageCollection?: UsageCollectionSetup;
   children?: React.ReactNode;
 }

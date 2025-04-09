@@ -11,21 +11,18 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SIEM_MIGRATIONS_RULES_PATH, SecurityPageName } from '../../common/constants';
 import { MigrationRulesPage } from './rules/pages';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 export const SiemMigrationsRoutes = () => {
   return (
-    <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsRules}>
-        <Routes>
-          <Route
-            path={`${SIEM_MIGRATIONS_RULES_PATH}/:migrationId?`}
-            component={MigrationRulesPage}
-          />
-        </Routes>
-      </SecurityRoutePageWrapper>
-    </PluginTemplateWrapper>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsRules}>
+      <Routes>
+        <Route
+          path={`${SIEM_MIGRATIONS_RULES_PATH}/:migrationId?`}
+          component={MigrationRulesPage}
+        />
+      </Routes>
+    </SecurityRoutePageWrapper>
   );
 };
 

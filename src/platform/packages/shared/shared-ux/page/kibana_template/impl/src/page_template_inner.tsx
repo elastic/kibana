@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import React, { useMemo, FC, memo } from 'react';
 import classNames from 'classnames';
 import { EuiPageTemplate } from '@elastic/eui';
 
@@ -25,67 +25,69 @@ const getClasses = (template?: string, className?: string) => {
 /**
  * A thin wrapper around EuiPageTemplate with a few Kibana specific additions
  */
-export const KibanaPageTemplateInner: FC<Props> = ({
-  className,
-  pageHeader,
-  children,
-  isEmptyState,
-  pageSideBar,
-  pageSideBarProps,
-  emptyPageBody,
-  ...rest
-}) => {
-  let header;
+export const KibanaPageTemplateInner: FC<Props> = memo(
+  ({
+    className,
+    pageHeader,
+    children,
+    isEmptyState,
+    pageSideBar,
+    pageSideBarProps,
+    emptyPageBody,
+    ...rest
+  }) => {
+    const classes = useMemo(() => getClasses(undefined, className), [className]);
 
-  if (isEmptyState && pageHeader && !children) {
-    const { iconType, pageTitle, description, rightSideItems } = pageHeader;
-    const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
-    const body = description ? <p>{description}</p> : undefined;
-    children = (
-      <EuiPageTemplate.EmptyPrompt
-        iconType={iconType}
-        iconColor="" // This is likely a solution or app logo, so keep it multi-color
-        title={title}
-        body={body}
-        actions={rightSideItems}
-      />
-    );
-  } else if (pageHeader) {
-    header = <EuiPageTemplate.Header {...pageHeader} />;
-  }
-
-  // NOTE: with emptyPageBody, page contents are replaced entirely with the provided element
-  if (isEmptyState && emptyPageBody) {
-    children = emptyPageBody;
-  }
-
-  let sideBar;
-  if (pageSideBar) {
-    const sideBarProps = { ...pageSideBarProps };
-    sideBarProps.sticky = true;
-    sideBar = <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
-  }
-
-  const classes = getClasses(undefined, className);
-
-  return (
-    <EuiPageTemplate
-      className={classes}
-      // Note: Once all pages have been converted to this new component,
-      // the following props can be removed to allow the template to auto-handle
-      // the fixed header and banner heights.
-      offset={0}
-      minHeight={
-        header ? 'calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)))' : 0
+    const header = useMemo(() => {
+      if (isEmptyState && pageHeader && !children) {
+        return null;
+      } else if (pageHeader) {
+        return <EuiPageTemplate.Header {...pageHeader} />;
       }
-      grow={header ? false : undefined}
-      {...rest}
-    >
-      {sideBar}
-      {header}
-      {children}
-    </EuiPageTemplate>
-  );
-};
+    }, [pageHeader, children, isEmptyState]);
+
+    const minHeight = header
+      ? 'calc(100vh - var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0)))'
+      : 0;
+    const grow = header ? false : undefined;
+
+    const sideBar = useMemo(() => {
+      if (!pageSideBar) return null;
+      const sideBarProps = { ...pageSideBarProps, sticky: true };
+      return <EuiPageTemplate.Sidebar {...sideBarProps}>{pageSideBar}</EuiPageTemplate.Sidebar>;
+    }, [pageSideBar, pageSideBarProps]);
+
+    const content = useMemo(() => {
+      if (isEmptyState && pageHeader && !children) {
+        const { iconType, pageTitle, description, rightSideItems } = pageHeader;
+        const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
+        const body = description ? <p>{description}</p> : undefined;
+        return (
+          <EuiPageTemplate.EmptyPrompt
+            iconType={iconType}
+            iconColor="" // This is likely a solution or app logo, so keep it multi-color
+            title={title}
+            body={body}
+            actions={rightSideItems}
+          />
+        );
+      } else if (isEmptyState && emptyPageBody) {
+        return emptyPageBody;
+      } else {
+        return children;
+      }
+    }, [children, emptyPageBody, isEmptyState, pageHeader]);
+
+    return (
+      <EuiPageTemplate className={classes} minHeight={minHeight} grow={grow} {...rest}>
+        {header}
+        {sideBar}
+        {content}
+      </EuiPageTemplate>
+    );
+  }
+);
+
+KibanaPageTemplateInner.displayName = 'KibanaPageTemplateInner';
 
 export const KibanaPageTemplateWithSolutionNav = withSolutionNav(KibanaPageTemplateInner);

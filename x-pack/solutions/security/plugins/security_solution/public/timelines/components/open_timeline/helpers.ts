@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useCallback } from 'react';
 import { set } from '@kbn/safer-lodash-set/fp';
 import { getOr } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
@@ -305,89 +306,92 @@ export const useQueryTimelineById = () => {
   const { resetDiscoverAppState } = useDiscoverInTimelineContext();
   const updateTimeline = useUpdateTimeline();
 
-  return ({
-    activeTimelineTab = TimelineTabs.query,
-    duplicate = false,
-    graphEventId = '',
-    timelineId,
-    timelineType,
-    onError,
-    onOpenTimeline,
-    openTimeline = true,
-    savedSearchId,
-  }: QueryTimelineById) => {
-    if (timelineId == null) {
-      updateTimeline({
-        id: TimelineId.active,
-        duplicate: false,
-        notes: [],
-        from: DEFAULT_FROM_MOMENT.toISOString(),
-        to: DEFAULT_TO_MOMENT.toISOString(),
-        timeline: {
-          ...timelineDefaults,
-          columns: defaultUdtHeaders,
+  return useCallback(
+    ({
+      activeTimelineTab = TimelineTabs.query,
+      duplicate = false,
+      graphEventId = '',
+      timelineId,
+      timelineType,
+      onError,
+      onOpenTimeline,
+      openTimeline = true,
+      savedSearchId,
+    }: QueryTimelineById) => {
+      if (timelineId == null) {
+        updateTimeline({
           id: TimelineId.active,
-          activeTab: activeTimelineTab,
-          show: openTimeline,
-          initialized: true,
-          savedSearchId: savedSearchId ?? null,
-          excludedRowRendererIds:
-            timelineType !== TimelineTypeEnum.template
-              ? timelineDefaults.excludedRowRendererIds
-              : [],
-        },
-      });
-      resetDiscoverAppState();
-    } else {
-      return Promise.resolve(resolveTimeline(timelineId))
-        .then((result) => {
-          if (!result) return;
-
-          const { timeline, notes } = formatTimelineResponseToModel(
-            result.timeline,
-            duplicate,
-            timelineType
-          );
-
-          if (onOpenTimeline != null) {
-            onOpenTimeline(timeline);
-          } else if (updateTimeline) {
-            const { from, to } = normalizeTimeRange({
-              from: getOr(null, 'dateRange.start', timeline),
-              to: getOr(null, 'dateRange.end', timeline),
-            });
-            updateTimeline({
-              duplicate,
-              from,
-              id: TimelineId.active,
-              notes,
-              resolveTimelineConfig: {
-                outcome: result.outcome,
-                alias_target_id: result.alias_target_id,
-                alias_purpose: result.alias_purpose,
-              },
-              timeline: {
-                ...timeline,
-                activeTab: activeTimelineTab,
-                graphEventId,
-                show: openTimeline,
-                dateRange: { start: from, end: to },
-                savedSearchId: timeline.savedSearchId,
-              },
-              to,
-              // The query has already been resolved before
-              // when the response was mapped to a model.
-              // No need to do that again.
-              preventSettingQuery: true,
-            });
-            return resetDiscoverAppState(timeline.savedSearchId);
-          }
-        })
-        .catch((error) => {
-          if (onError != null) {
-            onError(error, timelineId);
-          }
+          duplicate: false,
+          notes: [],
+          from: DEFAULT_FROM_MOMENT.toISOString(),
+          to: DEFAULT_TO_MOMENT.toISOString(),
+          timeline: {
+            ...timelineDefaults,
+            columns: defaultUdtHeaders,
+            id: TimelineId.active,
+            activeTab: activeTimelineTab,
+            show: openTimeline,
+            initialized: true,
+            savedSearchId: savedSearchId ?? null,
+            excludedRowRendererIds:
+              timelineType !== TimelineTypeEnum.template
+                ? timelineDefaults.excludedRowRendererIds
+                : [],
+          },
         });
-    }
-  };
+        resetDiscoverAppState();
+      } else {
+        return Promise.resolve(resolveTimeline(timelineId))
+          .then((result) => {
+            if (!result) return;
+
+            const { timeline, notes } = formatTimelineResponseToModel(
+              result.timeline,
+              duplicate,
+              timelineType
+            );
+
+            if (onOpenTimeline != null) {
+              onOpenTimeline(timeline);
+            } else if (updateTimeline) {
+              const { from, to } = normalizeTimeRange({
+                from: getOr(null, 'dateRange.start', timeline),
+                to: getOr(null, 'dateRange.end', timeline),
+              });
+              updateTimeline({
+                duplicate,
+                from,
+                id: TimelineId.active,
+                notes,
+                resolveTimelineConfig: {
+                  outcome: result.outcome,
+                  alias_target_id: result.alias_target_id,
+                  alias_purpose: result.alias_purpose,
+                },
+                timeline: {
+                  ...timeline,
+                  activeTab: activeTimelineTab,
+                  graphEventId,
+                  show: openTimeline,
+                  dateRange: { start: from, end: to },
+                  savedSearchId: timeline.savedSearchId,
+                },
+                to,
+                // The query has already been resolved before
+                // when the response was mapped to a model.
+                // No need to do that again.
+                preventSettingQuery: true,
+              });
+              return resetDiscoverAppState(timeline.savedSearchId);
+            }
+          })
+          .catch((error) => {
+            if (onError != null) {
+              onError(error, timelineId);
+            }
+          });
+      }
+    },
+    [resetDiscoverAppState, updateTimeline]
+  );
 };

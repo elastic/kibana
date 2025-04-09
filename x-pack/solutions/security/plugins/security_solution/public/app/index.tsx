@@ -26,8 +26,7 @@ export const renderApp = ({
   render(
     <SecurityApp history={history} services={services} store={store} theme$={theme$}>
       <ApplicationUsageTrackingProvider>
-        {children ??
-          (subPluginRoutes && <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />)}
+        <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element

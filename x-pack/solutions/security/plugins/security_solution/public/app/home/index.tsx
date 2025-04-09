@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { memo } from 'react';
 import { useLocation } from 'react-router-dom';
 
 import { DragDropContextWrapper } from '../../common/components/drag_and_drop/drag_drop_context_wrapper';
@@ -32,7 +32,7 @@ interface HomePageProps {
   children: React.ReactNode;
 }
 
-const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
+const HomePageComponent: React.FC<HomePageProps> = memo(({ children }) => {
   const { pathname } = useLocation();
   const { browserFields } = useInitSourcerer(getScopeFromPath(pathname));
   useUrlState();
@@ -52,20 +52,16 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
     <SecuritySolutionAppWrapper id="security-solution-app" className="kbnAppWrapper">
       <ConsoleManager>
         <TourContextProvider>
-          <>
-            <GlobalHeader />
-            <DragDropContextWrapper browserFields={browserFields}>
-              {children}
-            </DragDropContextWrapper>
-            <HelpMenu />
-            <TopValuesPopover />
-            <AssistantOverlay />
-          </>
+          <GlobalHeader />
+          <DragDropContextWrapper browserFields={browserFields}>{children}</DragDropContextWrapper>
+          <HelpMenu />
+          <TopValuesPopover />
+          <AssistantOverlay />
         </TourContextProvider>
       </ConsoleManager>
     </SecuritySolutionAppWrapper>
   );
-};
+});
 
 HomePageComponent.displayName = 'HomePage';
 

@@ -11,15 +11,12 @@ import { AttackDiscoveryPage } from './pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { ATTACK_DISCOVERY_PATH } from '../../common/constants';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 export const AttackDiscoveryRoutes = () => (
-  <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
-      <AttackDiscoveryPage />
-    </SecurityRoutePageWrapper>
-  </PluginTemplateWrapper>
+  <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
+    <AttackDiscoveryPage />
+  </SecurityRoutePageWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [

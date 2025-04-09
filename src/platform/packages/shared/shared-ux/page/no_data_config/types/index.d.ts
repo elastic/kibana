@@ -15,7 +15,6 @@ import type {
   NoDataPageServices,
   NoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-no-data-types';
-
 export type NoDataConfigPageKibanaDependencies = NoDataPageKibanaDependencies;
 export type NoDataConfigPageServices = NoDataPageServices;
 export type NoDataConfig = NoDataPageProps;

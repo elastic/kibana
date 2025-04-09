@@ -39,13 +39,16 @@ const ThreatIntelligence = memo(() => {
     http,
     application: { capabilities },
   } = useKibana().services;
-  const ThreatIntelligencePlugin = threatIntelligence.getComponent();
+  const ThreatIntelligencePlugin = useMemo(
+    () => threatIntelligence.getComponent(),
+    [threatIntelligence]
+  );
 
   const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
   const sourcererDataView = useSourcererDataView();
 
-  const securitySolutionStore = getStore() as Store;
+  const securitySolutionStore = useMemo(() => getStore() as Store, []);
 
   const canWriteBlocklist = useUserPrivileges().endpointPrivileges.canWriteBlocklist;
 

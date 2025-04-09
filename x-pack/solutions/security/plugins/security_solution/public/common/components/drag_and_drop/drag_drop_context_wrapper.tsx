@@ -11,7 +11,6 @@ import type { DragStart, DropResult } from '@hello-pangea/dnd';
 import { DragDropContext } from '@hello-pangea/dnd';
 import { useDispatch } from 'react-redux';
 import type { Dispatch } from 'redux';
-import deepEqual from 'fast-deep-equal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
 import type { BrowserFields } from '../../containers/source';
@@ -160,11 +159,7 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
 
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
-export const DragDropContextWrapper = React.memo(
-  DragDropContextWrapperComponent,
-  // prevent re-renders when data providers are added or removed, but all other props are the same
-  (prevProps, nextProps) => deepEqual(prevProps.children, nextProps.children)
-);
+export const DragDropContextWrapper = React.memo(DragDropContextWrapperComponent);
 
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 

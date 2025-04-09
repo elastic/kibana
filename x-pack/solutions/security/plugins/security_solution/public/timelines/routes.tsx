@@ -8,18 +8,15 @@
 import React from 'react';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { SecurityPageName } from '../app/types';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { TIMELINES_PATH } from '../../common/constants';
 import { Timelines } from './pages';
 
 const TimelinesRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.timelines}>
-      <Timelines />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.timelines}>
+    <Timelines />
+  </TrackApplicationView>
 );
 
 export const routes: SecuritySubPluginRoutes = [

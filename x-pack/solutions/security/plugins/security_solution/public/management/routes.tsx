@@ -12,26 +12,21 @@ import { SecurityPageName } from '../app/types';
 import { ManagementContainer } from './pages';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { CurrentLicense } from '../common/components/current_license';
-import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { ManageLandingPage } from './pages/landing';
 
 const ManagementLanding = () => (
-  <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.administration} redirectOnMissing>
-      <ManageLandingPage />
-    </SecurityRoutePageWrapper>
-  </PluginTemplateWrapper>
+  <SecurityRoutePageWrapper pageName={SecurityPageName.administration} redirectOnMissing>
+    <ManageLandingPage />
+  </SecurityRoutePageWrapper>
 );
 
 /**
  * Returns the React Router Routes for the management area
  */
 const ManagementRoutes = () => (
-  <PluginTemplateWrapper>
-    <CurrentLicense>
-      <ManagementContainer />
-    </CurrentLicense>
-  </PluginTemplateWrapper>
+  <CurrentLicense>
+    <ManagementContainer />
+  </CurrentLicense>
 );
 
 export const routes: SecuritySubPluginRoutes = [

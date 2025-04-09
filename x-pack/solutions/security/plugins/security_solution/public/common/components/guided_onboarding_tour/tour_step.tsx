@@ -38,6 +38,29 @@ const StyledTourStep = styled(EuiTourStep)<EuiTourStepProps & { tourId: Security
   }
 `;
 
+const TourContent = React.memo(
+  ({
+    content,
+    imageConfig,
+  }: {
+    content: React.ReactNode;
+    imageConfig?: { altText: string; src: string };
+  }) => (
+    <>
+      <EuiText size="s">
+        <p>{content}</p>
+      </EuiText>
+      {imageConfig && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
+        </>
+      )}
+    </>
+  )
+);
+TourContent.displayName = 'TourContent';
+
 export const SecurityTourStep = React.memo(
   ({ children, onClick, step, tourId }: SecurityTourStep) => {
     const { activeStep, incrementStep, isTourShown } = useTourContext();
@@ -51,96 +74,89 @@ export const SecurityTourStep = React.memo(
       (state) => (getTimeline(state, TimelineId.active) ?? timelineDefaults).show
     );
     const onClickNext = useCallback(
-      // onClick should call incrementStep itself
       () => (onClick ? onClick() : incrementStep(tourId)),
       [incrementStep, onClick, tourId]
     );
 
-    // EUI bug, will remove once bug resolve. will link issue here as soon as i have it
     const onKeyDown = useCallback((e: React.KeyboardEvent<HTMLButtonElement>) => {
       if (e.key === 'Enter') {
         e.stopPropagation();
       }
     }, []);
 
-    // steps in Cases app are out of context.
-    // If we mount this step, we know we need to render it
-    // we are also managing the context on the siem end in the background
+    const onFinish = useCallback(() => null, []);
+
     const overrideContext = isStepExternallyMounted(tourId, step);
 
-    if (
-      tourStep == null ||
-      ((step !== activeStep || !isTourShown(tourId)) && !overrideContext) ||
-      showTimeline
-    ) {
-      return children ? children : null;
-    }
     const {
       anchor,
       content,
       imageConfig,
       dataTestSubj,
       hideNextButton = false,
+      title,
       ...rest
-    } = tourStep;
-    const footerAction: EuiTourStepProps['footerAction'] = !hideNextButton ? (
-      <EuiButtonEmpty
-        onClick={onClickNext}
-        onKeyDown={onKeyDown}
-        size="xs"
-        color="text"
-        flush="right"
-        data-test-subj="onboarding--securityTourNextStepButton"
-        tour-step="nextButton"
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
-          defaultMessage="Next"
-        />
-      </EuiButtonEmpty>
-    ) : (
-      <>
-        {/* Passing empty element instead of undefined. If undefined "Skip tour" button is shown, we do not want that*/}
-      </>
+    } = tourStep ?? {};
+
+    const footerAction: EuiTourStepProps['footerAction'] = useMemo(
+      () =>
+        !hideNextButton ? (
+          <EuiButtonEmpty
+            onClick={onClickNext}
+            onKeyDown={onKeyDown}
+            size="xs"
+            color="text"
+            flush="right"
+            data-test-subj="onboarding--securityTourNextStepButton"
+            tour-step="nextButton"
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.guided_onboarding.nextStep.buttonLabel"
+              defaultMessage="Next"
+            />
+          </EuiButtonEmpty>
+        ) : null,
+      [hideNextButton, onClickNext, onKeyDown]
     );
 
-    const commonProps = {
-      ...rest,
-      content: (
-        <>
-          <EuiText size="s">
-            <p>{content}</p>
-          </EuiText>
-          {imageConfig && (
-            <>
-              <EuiSpacer size="m" />
-              <EuiImage alt={imageConfig.altText} src={imageConfig.src} size="fullWidth" />
-            </>
-          )}
-        </>
-      ),
-      footerAction,
-      // we would not have mounted this component if it was not open
-      isStepOpen: true,
-      // guided onboarding does not allow skipping tour through the steps
-      onFinish: () => null,
-      stepsTotal: securityTourConfig[tourId].length,
-      panelProps: {
-        'data-test-subj': dataTestSubj,
-      },
-    };
+    const commonProps = useMemo(
+      () => ({
+        ...rest,
+        content: <TourContent content={content} imageConfig={imageConfig} />,
+        footerAction,
+        isStepOpen: true,
+        onFinish,
+        stepsTotal: securityTourConfig[tourId].length,
+        panelProps: {
+          'data-test-subj': dataTestSubj,
+        },
+        step,
+        title,
+      }),
+      [rest, content, imageConfig, footerAction, tourId, dataTestSubj, onFinish, step, title]
+    );
+
+    if (
+      tourStep == null ||
+      ((step !== activeStep || !isTourShown(tourId)) && !overrideContext) ||
+      showTimeline
+    ) {
+      return <>{children}</>;
+    }
 
     // tour step either needs children or an anchor element
     //  see type EuiTourStepAnchorProps
     return anchor != null ? (
       <>
         <StyledTourStep tourId={tourId} {...commonProps} anchor={anchor} />
-        <>{children}</>
+        {children}
       </>
     ) : children != null ? (
-      <StyledTourStep tourId={tourId} {...commonProps}>
-        {children}
-      </StyledTourStep>
+      <>
+        <StyledTourStep tourId={tourId} {...commonProps}>
+          {children}
+        </StyledTourStep>
+      </>
     ) : null;
   }
 );
@@ -164,7 +180,9 @@ export const GuidedOnboardingTourStep = React.memo(
     ...props
   }: GuidedOnboardingTourStep) => {
     return isTourAnchor ? (
-      <SecurityTourStepAnchor {...props}>{children}</SecurityTourStepAnchor>
+      <>
+        <SecurityTourStepAnchor {...props}>{children}</SecurityTourStepAnchor>
+      </>
     ) : (
       <>{children}</>
     );
@@ -176,7 +194,9 @@ const SecurityTourStepAnchor = React.memo(({ children, ...props }: SecurityTourS
   const { hidden: allStepsHidden } = useTourContext();
   const hiddenByFlyout = useHiddenByFlyout({ tourId: props.tourId, step: props.step });
   return !allStepsHidden && !hiddenByFlyout ? (
-    <SecurityTourStep {...props}>{children}</SecurityTourStep>
+    <>
+      <SecurityTourStep {...props}>{children}</SecurityTourStep>
+    </>
   ) : (
     <>{children}</>
   );
