@@ -16,10 +16,12 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiButton,
+  EuiImage,
 } from '@elastic/eui';
 import type { SpikeEntity } from '../../../common/api/entity_analytics';
 import { FlyoutLoading } from '../shared/components/flyout_loading';
 import { RiskScoreSpikeBadges } from './badges';
+import entityImage from './img/entity_high.png';
 
 export interface InvestigateRiskScoreSpikeExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'investigate-risk-score-spike';
@@ -76,6 +78,13 @@ export const InvestigateRiskScoreSpikeLeftPanel = ({
           <EuiSpacer size="xl" />
           <EuiFlexGroup justifyContent="center">
             <EuiFlexItem grow={false}>
+              <EuiImage
+                size="m"
+                hasShadow={false}
+                hasBorder={false}
+                alt="Entity"
+                url={entityImage}
+              />
               <EuiButton
                 iconType="arrowRight"
                 iconSide="right"
@@ -84,6 +93,7 @@ export const InvestigateRiskScoreSpikeLeftPanel = ({
                 }}
                 isDisabled={!connectorId}
                 size="m"
+                css={{ maxWidth: '200px' }}
               >
                 {'Begin Investigation'}
               </EuiButton>
