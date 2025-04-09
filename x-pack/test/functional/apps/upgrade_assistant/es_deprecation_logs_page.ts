@@ -17,6 +17,8 @@ export default function upgradeAssistantESDeprecationLogsPageFunctionalTests({
   const es = getService('es');
 
   describe('ES deprecation logs flyout', function () {
+    // Only run this test in 8 as the deprecation we are testing is only available in 8
+    this.onlyEsVersion('8');
     this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {

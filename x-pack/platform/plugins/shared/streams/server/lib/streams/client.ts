@@ -11,7 +11,7 @@ import {
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IScopedClusterClient, Logger } from '@kbn/core/server';
+import { type IScopedClusterClient, type KibanaRequest, type Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   Condition,
@@ -71,6 +71,7 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
+import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -93,6 +94,20 @@ function isDefinitionNotFoundError(error: unknown): error is DefinitionNotFoundE
   return error instanceof DefinitionNotFoundError;
 }
 
+/*
+ * When calling into Elasticsearch, the stack trace is lost.
+ * If we create an error before calling, and append it to
+ * any stack of the caught error, we get a more useful stack
+ * trace.
+ */
+function wrapEsCall<T>(p: Promise<T>): Promise<T> {
+  const error = new Error();
+  return p.catch((caughtError) => {
+    caughtError.stack += error.stack;
+    throw caughtError;
+  });
+}
+
 export class StreamsClient {
   constructor(
     private readonly dependencies: {
@@ -101,6 +116,7 @@ export class StreamsClient {
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;
+      request: KibanaRequest;
     }
   ) {}
 
@@ -136,6 +152,7 @@ export class StreamsClient {
     await this.upsertStream({
       request: {
         dashboards: [],
+        queries: [],
         stream: omit(rootStreamDefinition, 'name'),
       },
       name: rootStreamDefinition.name,
@@ -150,10 +167,11 @@ export class StreamsClient {
    * such as data streams. That means it deletes all data
    * belonging to wired streams.
    *
-   * It does NOT delete ingest streams.
+   * It does NOT delete unwired streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
     const isEnabled = await this.isStreamsEnabled();
+
     if (!isEnabled) {
       return { acknowledged: true, result: 'noop' };
     }
@@ -243,7 +261,7 @@ export class StreamsClient {
     request: StreamUpsertRequest;
   }): Promise<UpsertStreamResponse> {
     const stream: StreamDefinition = { ...request.stream, name };
-    const { dashboards } = request;
+    const { dashboards, queries } = request;
     const { result, parentDefinition } = await this.validateAndUpsertStream({
       definition: stream,
     });
@@ -275,6 +293,7 @@ export class StreamsClient {
           name: parentId,
           request: {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
@@ -295,12 +314,19 @@ export class StreamsClient {
       }
     }
 
-    await this.dependencies.assetClient.syncAssetList({
-      entityId: stream.name,
-      entityType: 'stream',
-      assetIds: dashboards,
-      assetType: 'dashboard',
-    });
+    const queryLinks = queries.map((query) => ({
+      [ASSET_ID]: query.id,
+      [ASSET_TYPE]: 'query' as const,
+      query,
+    }));
+
+    await this.dependencies.assetClient.syncAssetList(stream.name, [
+      ...dashboards.map((dashboard) => ({
+        [ASSET_ID]: dashboard,
+        [ASSET_TYPE]: 'dashboard' as const,
+      })),
+      ...queryLinks,
+    ]);
 
     return { acknowledged: true, result };
   }
@@ -689,28 +715,69 @@ export class StreamsClient {
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
-    return this.dependencies.scopedClusterClient.asCurrentUser.indices
-      .getDataStream({ name })
-      .then((response) => {
-        if (response.data_streams.length === 0) {
-          throw new errors.ResponseError({
-            meta: {
-              aborted: false,
-              attempts: 1,
-              connection: null,
-              context: null,
-              name: 'resource_not_found_exception',
-              request: {} as unknown as DiagnosticResult['meta']['request'],
-            },
-            warnings: [],
-            body: 'resource_not_found_exception',
-            statusCode: 404,
-          });
-        }
+    return wrapEsCall(
+      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({ name })
+    ).then((response) => {
+      if (response.data_streams.length === 0) {
+        throw new errors.ResponseError({
+          meta: {
+            aborted: false,
+            attempts: 1,
+            connection: null,
+            context: null,
+            name: 'resource_not_found_exception',
+            request: {} as unknown as DiagnosticResult['meta']['request'],
+          },
+          warnings: [],
+          body: 'resource_not_found_exception',
+          statusCode: 404,
+        });
+      }
 
-        const dataStream = response.data_streams[0];
-        return dataStream;
+      const dataStream = response.data_streams[0];
+      return dataStream;
+    });
+  }
+
+  /**
+   * Checks whether the user has the required privileges to manage the stream.
+   * Managing a stream means updating the stream properties. It does not
+   * include the dashboard links.
+   */
+  async getPrivileges(name: string) {
+    const privileges =
+      await this.dependencies.scopedClusterClient.asCurrentUser.security.hasPrivileges({
+        cluster: [
+          'manage_index_templates',
+          'manage_ingest_pipelines',
+          'manage_pipeline',
+          'read_pipeline',
+        ],
+        index: [
+          {
+            names: [name],
+            privileges: [
+              'read',
+              'write',
+              'create',
+              'manage',
+              'monitor',
+              'manage_data_stream_lifecycle',
+              'manage_ilm',
+            ],
+          },
+        ],
       });
+
+    return {
+      manage:
+        Object.values(privileges.cluster).every((privilege) => privilege === true) &&
+        Object.values(privileges.index[name]).every((privilege) => privilege === true),
+      monitor: privileges.index[name].monitor,
+      lifecycle:
+        privileges.index[name].manage_data_stream_lifecycle && privileges.index[name].manage_ilm,
+      simulate: privileges.cluster.read_pipeline && privileges.index[name].create,
+    };
   }
 
   /**
@@ -774,8 +841,9 @@ export class StreamsClient {
    * stored definition).
    */
   private async getUnmanagedDataStreams(): Promise<UnwiredStreamDefinition[]> {
-    const response =
-      await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream();
+    const response = await wrapEsCall(
+      this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
+    );
 
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
@@ -859,12 +927,7 @@ export class StreamsClient {
       await deleteStreamObjects({ scopedClusterClient, name: definition.name, logger });
     }
 
-    await assetClient.syncAssetList({
-      entityId: definition.name,
-      entityType: 'stream',
-      assetType: 'dashboard',
-      assetIds: [],
-    });
+    await assetClient.syncAssetList(definition.name, []);
 
     await this.dependencies.storageClient.delete({ id: definition.name });
   }

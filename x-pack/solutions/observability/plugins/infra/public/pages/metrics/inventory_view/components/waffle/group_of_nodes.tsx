@@ -60,7 +60,13 @@ export const GroupOfNodes = React.memo<Props>(
 
     return (
       <GroupOfNodesContainer style={{ width }}>
-        <GroupName group={group} onDrilldown={onDrilldown} isChild={isChild} options={options} />
+        <GroupName
+          group={group}
+          onDrilldown={onDrilldown}
+          isChild={isChild}
+          options={options}
+          nodeType={nodeType}
+        />
         <Nodes>
           {group.width ? (
             group.nodes.map((node) => (
