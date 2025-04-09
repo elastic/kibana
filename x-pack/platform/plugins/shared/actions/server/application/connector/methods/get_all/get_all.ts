@@ -19,7 +19,7 @@ import { findConnectorsSo, searchConnectorsSo } from '../../../../data/connector
 import type { GetAllParams, InjectExtraFindDataParams } from './types';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import { connectorFromSavedObject, isConnectorDeprecated } from '../../lib';
-import type { ConnectorWithExtraFindData } from '../../types';
+import type { Connector, ConnectorWithExtraFindData } from '../../types';
 import type { GetAllUnsecuredParams } from './types/params';
 
 interface GetAllHelperOpts {
@@ -111,18 +111,33 @@ async function getAllHelper({
     );
   }
 
-  const mergedResult = [
+  const inMemoryConnectorsIds: Set<string> = new Set(
+    inMemoryConnectors.map((connector) => connector.id)
+  );
+
+  const merged = await filterInferenceConnectors(esClient, [
     ...savedObjectsActions,
-    ...inMemoryConnectors.map((inMemoryConnector) => ({
-      id: inMemoryConnector.id,
-      actionTypeId: inMemoryConnector.actionTypeId,
-      name: inMemoryConnector.name,
-      isPreconfigured: inMemoryConnector.isPreconfigured,
-      isDeprecated: isConnectorDeprecated(inMemoryConnector),
-      isSystemAction: inMemoryConnector.isSystemAction,
-      ...(inMemoryConnector.exposeConfig ? { config: inMemoryConnector.config } : {}),
-    })),
-  ].sort((a, b) => a.name.localeCompare(b.name));
+    ...inMemoryConnectors,
+  ]);
+
+  const isInMemoryConnector = (connector: Connector): connector is InMemoryConnector => {
+    return inMemoryConnectorsIds.has(connector.id);
+  };
+
+  const mergedResult = merged
+    .map((connector) => {
+      if (!isInMemoryConnector(connector)) return connector;
+      return {
+        id: connector.id,
+        actionTypeId: connector.actionTypeId,
+        name: connector.name,
+        isPreconfigured: connector.isPreconfigured,
+        isDeprecated: isConnectorDeprecated(connector),
+        isSystemAction: connector.isSystemAction,
+        ...(connector.exposeConfig ? { config: connector.config } : {}),
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
 
   const connectors = await injectExtraFindData({
     kibanaIndices,
@@ -237,4 +252,38 @@ async function injectExtraFindData({
     // @ts-expect-error aggegation type is not specified
     referencedByCount: aggregationResult.aggregations[connector.id].doc_count,
   }));
+}
+
+/**
+ * Filters out inference connectors that do not have an endpoint.
+ * It requires a connector config in order to retrieve the inference id.
+ *
+ * @param esClient
+ * @param connectors
+ * @returns
+ */
+export async function filterInferenceConnectors(
+  esClient: ElasticsearchClient,
+  connectors: Connector[]
+): Promise<Connector[]> {
+  let result = connectors;
+
+  if (result.some((connector) => connector.actionTypeId === '.inference')) {
+    try {
+      // Get all inference endpoints to filter out inference connector without endpoints
+      const inferenceEndpoints = await esClient.inference.get();
+      result = result.filter((connector) => {
+        if (connector.actionTypeId !== '.inference') return true;
+
+        const inferenceEndpoint = inferenceEndpoints.endpoints.find(
+          (endpoint) => endpoint.inference_id === connector.config?.inferenceId
+        );
+        return inferenceEndpoint !== undefined;
+      });
+    } catch (e) {
+      // If we can't get the inference endpoints, we just return all connectors
+    }
+  }
+
+  return result;
 }

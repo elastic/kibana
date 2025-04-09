@@ -34,28 +34,7 @@ export const getAllConnectorsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const actionsClient = (await context.actions).getActionsClient();
-        let result = await actionsClient.getAll();
-
-        if (result.some((connector) => connector.actionTypeId === '.inference')) {
-          try {
-            // Get all inference endpoints to filter out inference connectors without endpoints
-            const inferenceEndpoints = await (
-              await context.core
-            ).elasticsearch.client.asInternalUser.inference.get();
-
-            result = result.filter((connector) => {
-              if (connector.actionTypeId !== '.inference') return true;
-
-              const inferenceEndpoint = inferenceEndpoints.endpoints.find(
-                (endpoint) => endpoint.inference_id === connector.config?.inferenceId
-              );
-              return inferenceEndpoint !== undefined;
-            });
-          } catch (e) {
-            // If we can't get the inference endpoints, we just return all connectors
-          }
-        }
-
+        const result = await actionsClient.getAll();
         const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });
       })
