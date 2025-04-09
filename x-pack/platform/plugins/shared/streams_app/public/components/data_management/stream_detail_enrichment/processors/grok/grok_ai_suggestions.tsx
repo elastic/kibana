@@ -29,13 +29,17 @@ import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import useObservable from 'react-use/lib/useObservable';
+import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/css';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useStreamDetail } from '../../../../../hooks/use_stream_detail';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { useSimulatorSelector } from '../../state_management/stream_enrichment_state_machine';
 import { selectPreviewDocuments } from '../../state_management/simulation_state_machine/selectors';
+
+const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
 
 const RefreshButton = ({
   generatePatterns,
@@ -152,6 +156,9 @@ function useAIFeatures() {
   };
 }
 
+export type SuggestionsResponse =
+  APIReturnType<'POST /internal/streams/{name}/processing/_suggestions'>;
+
 function InnerGrokAiSuggestions({
   previewDocuments,
   genAiConnectors,
@@ -175,9 +182,7 @@ function InnerGrokAiSuggestions({
 
   const [isLoadingSuggestions, setSuggestionsLoading] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState<Error | undefined>();
-  const [suggestions, setSuggestions] = useState<
-    { patterns: string[]; simulations: any[] } | undefined
-  >();
+  const [suggestions, setSuggestions] = useState<SuggestionsResponse | undefined>();
   const [blocklist, setBlocklist] = useState<Set<string>>(new Set());
 
   const abortController = useAbortController();
@@ -210,7 +215,7 @@ function InnerGrokAiSuggestions({
       .then((response) => {
         finishTrackingAndReport(
           response.patterns.length || 0,
-          response.simulations.map((item) => item.success_rate)
+          response.simulations.map((simulation) => simulation.documents_metrics.parsed_rate)
         );
         setSuggestions(response);
         setSuggestionsLoading(false);
@@ -249,7 +254,7 @@ function InnerGrokAiSuggestions({
   const filteredSuggestions = suggestions?.patterns
     .map((pattern, i) => ({
       pattern,
-      success_rate: suggestions.simulations[i].success_rate,
+      success_rate: suggestions.simulations[i].documents_metrics.parsed_rate,
       detected_fields_count: suggestions.simulations[i].detected_fields.length,
     }))
     .filter(
@@ -273,6 +278,14 @@ function InnerGrokAiSuggestions({
     // if all suggestions are in the blocklist or already in the patterns, just show the generation button, but no message
     content = null;
   }
+
+  const isManagedAIConnector = INTERNAL_INFERENCE_CONNECTORS.includes(currentConnector || '');
+  const [isManagedAiConnectorCalloutDismissed, setManagedAiConnectorCalloutDismissed] =
+    useLocalStorage('streams:managedAiConnectorCalloutDismissed', false);
+
+  const onDismissManagedAiConnectorCallout = useCallback(() => {
+    setManagedAiConnectorCalloutDismissed(true);
+  }, [setManagedAiConnectorCalloutDismissed]);
 
   if (filteredSuggestions && filteredSuggestions.length) {
     content = (
@@ -381,6 +394,17 @@ function InnerGrokAiSuggestions({
           />
         </EuiFlexGroup>
       </EuiFlexItem>
+      {!isManagedAiConnectorCalloutDismissed && isManagedAIConnector && (
+        <EuiCallOut onDismiss={onDismissManagedAiConnectorCallout}>
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.managedConnectorTooltip',
+            {
+              defaultMessage:
+                'Generating patterns is powered by a preconfigured LLM. Additional charges apply',
+            }
+          )}
+        </EuiCallOut>
+      )}
     </>
   );
 }

@@ -400,6 +400,27 @@ export class BasicPrettyPrinter {
         ? ''
         : (opts.lowercaseCommands ? node.commandType : node.commandType.toUpperCase()) + ' ';
 
+      if (cmd === 'FORK') {
+        const branches = node.args
+          .map((branch) => {
+            if (Array.isArray(branch) || branch.type !== 'query') {
+              return undefined;
+            }
+
+            return ctx.visitSubQuery(branch);
+          })
+          .filter(Boolean) as string[];
+
+        const spaces = (n: number) => ' '.repeat(n);
+
+        const branchSeparator = opts.multiline ? `)\n${spaces(4)}(` : `) (`;
+
+        return this.decorateWithComments(
+          ctx.node,
+          `FORK${opts.multiline ? `\n${spaces(4)}` : ' '}(${branches.join(branchSeparator)})`
+        );
+      }
+
       let args = '';
       let options = '';
 
@@ -423,7 +444,16 @@ export class BasicPrettyPrinter {
 
     .on('visitQuery', (ctx) => {
       const opts = this.opts;
-      const cmdSeparator = opts.multiline ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
+
+      let parentNode;
+      if (ctx.parent?.node && !Array.isArray(ctx.parent.node)) {
+        parentNode = ctx.parent.node;
+      }
+
+      const useMultiLine =
+        opts.multiline && !Array.isArray(parentNode) && parentNode?.name !== 'fork';
+
+      const cmdSeparator = useMultiLine ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
       let text = '';
 
       for (const cmd of ctx.visitCommands()) {
