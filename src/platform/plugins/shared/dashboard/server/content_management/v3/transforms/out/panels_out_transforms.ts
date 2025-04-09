@@ -44,8 +44,17 @@ function injectPanelReferences(
   references: SavedObjectReference[] = []
 ) {
   return panels.map((panel) => {
-    const panelsWithSavedObjectIdInjected = injectPanelSavedObjectId(panel, references);
-    return injectPanelEmbeddableReferences(panelsWithSavedObjectIdInjected, embeddable, references);
+    if (!panel.panelIndex) return panel;
+    // some older dashboards may not have references prefixed with the panel index
+    // so if we don't find any references for the panel id, use all the references
+    const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
+    const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
+    const panelsWithSavedObjectIdInjected = injectPanelSavedObjectId(panel, panelReferences);
+    return injectPanelEmbeddableReferences(
+      panelsWithSavedObjectIdInjected,
+      embeddable,
+      panelReferences
+    );
   });
 }
 
@@ -54,8 +63,6 @@ function injectPanelEmbeddableReferences(
   embeddable: EmbeddableStart,
   references: SavedObjectReference[] = []
 ) {
-  if (!panel.panelIndex) return panel;
-
   const state = embeddable.inject({ type: panel.type, ...panel.panelConfig }, references);
   const { type, ...injectedPanelConfig } = state;
   return {
@@ -65,13 +72,8 @@ function injectPanelEmbeddableReferences(
 }
 
 function injectPanelSavedObjectId(panel: DashboardPanel, references: SavedObjectReference[]) {
-  if (!panel.panelIndex) return panel;
   if (!panel.panelRefName) return panel;
-  const filteredReferences = getReferencesForPanelId(panel.panelIndex, references);
-  const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
-  const matchingReference = panelReferences.find(
-    (reference) => reference.name === panel.panelRefName
-  );
+  const matchingReference = references.find((reference) => reference.name === panel.panelRefName);
 
   if (!matchingReference) {
     throw new Error(`Could not find reference "${panel.panelRefName}"`);
