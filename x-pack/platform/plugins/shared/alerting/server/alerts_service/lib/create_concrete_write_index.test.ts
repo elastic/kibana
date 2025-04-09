@@ -707,15 +707,15 @@ describe('createConcreteWriteIndex', () => {
 
           expect(logger.info).toHaveBeenNthCalledWith(
             1,
-            'total_fields.limit of .alerts-test.alerts-default has been increased form 2500 to 2501'
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2500 to 2501'
           );
           expect(logger.info).toHaveBeenNthCalledWith(
             2,
-            'total_fields.limit of .alerts-test.alerts-default has been increased form 2501 to 2503'
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2501 to 2503'
           );
           expect(logger.info).toHaveBeenNthCalledWith(
             3,
-            'total_fields.limit of .alerts-test.alerts-default has been increased form 2503 to 2506'
+            'total_fields.limit of .alerts-test.alerts-default has been increased from 2503 to 2506'
           );
         } else {
           clusterClient.indices.putMapping
@@ -779,16 +779,102 @@ describe('createConcreteWriteIndex', () => {
           // The first call to logger.info is in createAliasStream, therefore we start testing from 2nd
           expect(logger.info).toHaveBeenNthCalledWith(
             2,
-            'total_fields.limit of alias_2 has been increased form 2500 to 2501'
+            'total_fields.limit of alias_2 has been increased from 2500 to 2501'
           );
           expect(logger.info).toHaveBeenNthCalledWith(
             3,
-            'total_fields.limit of alias_2 has been increased form 2501 to 2503'
+            'total_fields.limit of alias_2 has been increased from 2501 to 2503'
           );
           expect(logger.info).toHaveBeenNthCalledWith(
             4,
-            'total_fields.limit of alias_2 has been increased form 2503 to 2506'
+            'total_fields.limit of alias_2 has been increased from 2503 to 2506'
           );
+        }
+      });
+
+      it(`should stop increasing the limit after 100 attemps`, async () => {
+        const existingIndexTemplate = {
+          name: 'test-template',
+          index_template: {
+            index_patterns: ['test*'],
+            composed_of: ['test-mappings'],
+            template: {
+              settings: {
+                auto_expand_replicas: '0-1',
+                hidden: true,
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: `.alerts-empty-default`,
+                },
+                'index.mapping.total_fields.limit': 1800,
+              },
+              mappings: {
+                dynamic: false,
+              },
+            },
+          },
+        };
+
+        clusterClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [existingIndexTemplate],
+        });
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+
+        if (useDataStream) {
+          clusterClient.indices.putMapping.mockRejectedValue(
+            new Error('Limit of total fields [2501] has been exceeded')
+          );
+
+          await expect(
+            createConcreteWriteIndex({
+              logger,
+              esClient: clusterClient,
+              indexPatterns: IndexPatterns,
+              totalFieldsLimit: 2500,
+              dataStreamAdapter,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            '"Limit of total fields [2501] has been exceeded"'
+          );
+
+          expect(logger.info).toHaveBeenCalledTimes(100);
+        }
+      });
+
+      it(`should not increase the limit when the index template is not found`, async () => {
+        clusterClient.indices.getIndexTemplate.mockResolvedValue({
+          index_templates: [],
+        });
+        clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+        clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+        clusterClient.indices.simulateIndexTemplate.mockImplementation(
+          async () => SimulateTemplateResponse
+        );
+
+        if (useDataStream) {
+          clusterClient.indices.putMapping
+            .mockRejectedValueOnce(new Error('Limit of total fields [2500] has been exceeded'))
+            .mockResolvedValue({ acknowledged: true });
+
+          await expect(
+            createConcreteWriteIndex({
+              logger,
+              esClient: clusterClient,
+              indexPatterns: IndexPatterns,
+              totalFieldsLimit: 2500,
+              dataStreamAdapter,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            '"Limit of total fields [2500] has been exceeded"'
+          );
+
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+          expect(logger.info).not.toHaveBeenCalled();
         }
       });
 
@@ -848,7 +934,7 @@ describe('createConcreteWriteIndex', () => {
 
           expect(logger.info).not.toHaveBeenCalled();
           expect(logger.error).toHaveBeenCalledWith(
-            'An error occured while incresing total_fields.limit of .alerts-test.alerts-default - generic error',
+            'An error occured while increasing total_fields.limit of .alerts-test.alerts-default - generic error',
             error
           );
         } else {
@@ -869,7 +955,7 @@ describe('createConcreteWriteIndex', () => {
           );
 
           expect(logger.error).toHaveBeenCalledWith(
-            'An error occured while incresing total_fields.limit of alias_1 - generic error',
+            'An error occured while increasing total_fields.limit of alias_1 - generic error',
             error
           );
         }

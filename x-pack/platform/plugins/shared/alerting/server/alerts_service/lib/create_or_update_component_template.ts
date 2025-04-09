@@ -12,7 +12,7 @@ import type {
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
-import { updateIndexTemplateFiledsLimit } from './update_index_template_fileds_limit';
+import { updateIndexTemplateFieldsLimit } from './update_index_template_fields_limit';
 
 interface CreateOrUpdateComponentTemplateOpts {
   logger: Logger;
@@ -49,7 +49,7 @@ const getIndexTemplatesUsingComponentTemplate = async (
     async (template: IndicesGetIndexTemplateIndexTemplateItem) => {
       await retryTransientEsErrors(
         () =>
-          updateIndexTemplateFiledsLimit({
+          updateIndexTemplateFieldsLimit({
             esClient,
             template,
             limit: totalFieldsLimit,

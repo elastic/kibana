@@ -7,7 +7,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/types';
 
-export const updateIndexTemplateFiledsLimit = ({
+export const updateIndexTemplateFieldsLimit = ({
   esClient,
   template,
   limit,
