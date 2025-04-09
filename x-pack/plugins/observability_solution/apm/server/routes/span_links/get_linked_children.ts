@@ -79,7 +79,7 @@ async function fetchLinkedChildrenOfSpan({
                       should: [
                         ...termQuery(SPAN_LINKS_SPAN_ID, spanId),
                         ...termQuery(OTEL_SPAN_LINKS_SPAN_ID, spanId),
-                      ],,
+                      ],
                     },
                   },
                 ]
