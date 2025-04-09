@@ -18,6 +18,8 @@ import {
   type InternalStateThunkActionCreator,
 } from '../internal_state';
 import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
+import { APP_STATE_URL_KEY } from '../../../../../../common';
+import { GLOBAL_STATE_URL_KEY } from '../../discover_global_state_container';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -52,47 +54,46 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
 
     if (selectedItem?.id !== currentTab.id) {
       const previousTabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTab.id);
+      const previousTabStateContainer = previousTabRuntimeState.stateContainer$.getValue();
 
-      previousTabRuntimeState.stateContainer$.getValue()?.actions.stopSyncing();
+      previousTabStateContainer?.actions.stopSyncing();
 
-      updatedTabs = updatedTabs.map((tab) =>
-        tab.id === currentTab.id
-          ? {
-              ...tab,
-              globalState: urlStateStorage.get('_g') ?? undefined,
-              appState: urlStateStorage.get('_a') ?? undefined,
-            }
-          : tab
-      );
+      updatedTabs = updatedTabs.map((tab) => {
+        if (tab.id !== currentTab.id) {
+          return tab;
+        }
+
+        const {
+          time: timeRange,
+          refreshInterval,
+          filters,
+        } = previousTabStateContainer?.globalState.get() ?? {};
+
+        return { ...tab, lastPersistedGlobalState: { timeRange, refreshInterval, filters } };
+      });
+
+      await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
+      await urlStateStorage.set(APP_STATE_URL_KEY, null);
 
       const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
-
-      if (nextTab) {
-        await urlStateStorage.set('_g', nextTab.globalState);
-        await urlStateStorage.set('_a', nextTab.appState);
-      } else {
-        await urlStateStorage.set('_g', null);
-        await urlStateStorage.set('_a', null);
-      }
-
       const nextTabRuntimeState = selectedItem
         ? selectTabRuntimeState(runtimeStateManager, selectedItem.id)
         : undefined;
       const nextTabStateContainer = nextTabRuntimeState?.stateContainer$.getValue();
 
-      if (nextTabStateContainer) {
+      if (nextTab && nextTabStateContainer) {
         const {
-          time,
+          timeRange,
           refreshInterval,
           filters: globalFilters,
-        } = nextTabStateContainer.globalState.get() ?? {};
+        } = nextTab.lastPersistedGlobalState;
         const { filters: appFilters, query } = nextTabStateContainer.appState.getState();
 
-        services.timefilter.setTime(time ?? services.timefilter.getTimeDefaults());
+        services.timefilter.setTime(timeRange ?? services.timefilter.getTimeDefaults());
         services.timefilter.setRefreshInterval(
           refreshInterval ?? services.timefilter.getRefreshIntervalDefaults()
         );
-        services.filterManager.setGlobalFilters(globalFilters ?? []);
+        services.filterManager.setGlobalFilters(cloneDeep(globalFilters ?? []));
         services.filterManager.setAppFilters(cloneDeep(appFilters ?? []));
         services.data.query.queryString.setQuery(
           query ?? services.data.query.queryString.getDefaultQuery()
