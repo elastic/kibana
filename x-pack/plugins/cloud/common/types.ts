@@ -8,3 +8,8 @@
 export interface ElasticsearchConfigType {
   elasticsearch_url?: string;
 }
+
+export interface OtelSpanLink {
+  span_id: Array<string | undefined>;
+  trace_id: Array<string | undefined>;
+}
