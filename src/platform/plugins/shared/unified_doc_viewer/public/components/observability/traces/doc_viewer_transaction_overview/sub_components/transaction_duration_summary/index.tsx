@@ -123,8 +123,9 @@ export function TransactionDurationSummary({
                 markerCurrentEvent={transaction.duration}
                 hasData={!latencyChartLoading}
                 status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
-                showAxisTitle={false}
                 eventType={ProcessorEvent.transaction} // TODO PUEDE SER SPAN?
+                showAxisTitle={false}
+                showLegend={false}
                 dataTestSubPrefix="docViewerTransactionOverview"
               />
             )}

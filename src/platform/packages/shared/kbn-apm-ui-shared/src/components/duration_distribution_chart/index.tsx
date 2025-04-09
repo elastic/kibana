@@ -68,6 +68,7 @@ interface DurationDistributionChartProps {
   eventType: ProcessorEvent.span | ProcessorEvent.transaction;
   dataTestSubPrefix?: string;
   showAxisTitle?: boolean;
+  showLegend?: boolean;
 }
 
 const getAnnotationsStyle = (color = 'gray'): LineAnnotationStyle => ({
@@ -111,6 +112,7 @@ export function DurationDistributionChart({
   eventType,
   dataTestSubPrefix,
   showAxisTitle = true,
+  showLegend = true,
 }: DurationDistributionChartProps) {
   const chartThemes = useChartThemes();
   const { euiTheme } = useEuiTheme();
@@ -200,7 +202,7 @@ export function DurationDistributionChart({
               ...chartThemes.theme,
             ]}
             baseTheme={chartThemes.baseTheme}
-            showLegend={true}
+            showLegend={showLegend}
             legendPosition={Position.Bottom}
             onBrushEnd={onChartSelection}
             locale={i18n.getLocale()}
