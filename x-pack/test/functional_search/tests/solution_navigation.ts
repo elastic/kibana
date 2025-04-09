@@ -258,6 +258,7 @@ export default function searchSolutionNavigation({
         'enterpriseSearchContent:webCrawlers',
         'build',
         'searchPlayground',
+        'searchSynonyms:synonyms',
         'enterpriseSearchApplications:searchApplications',
         'relevance',
         'searchInferenceEndpoints:inferenceEndpoints',
@@ -265,7 +266,7 @@ export default function searchSolutionNavigation({
         'maps',
         'graph',
         'project_settings_project_nav',
-        'ml:modelManagement',
+        'management:trained_models',
         'stack_management',
         'monitoring',
       ]);

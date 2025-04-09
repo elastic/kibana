@@ -77,8 +77,6 @@ export function StreamDetailSignificantEventsView({
 
   const [isSuggestionFlyoutOpen, setIsSuggestionFlyoutOpen] = useState(false);
 
-  const [isSuggestionsLoading, setIsSuggestionsLoading] = useState(false);
-
   const [queryToEdit, setQueryToEdit] = useState<StreamQueryKql | undefined>();
 
   const controller = useAbortController();
@@ -92,8 +90,6 @@ export function StreamDetailSignificantEventsView({
     if (!name || !connectorId) {
       return undefined;
     }
-
-    setIsSuggestionsLoading(true);
 
     return lastValueFrom(
       streams.streamsRepositoryClient.stream(
@@ -133,9 +129,6 @@ export function StreamDetailSignificantEventsView({
           }),
           error,
         });
-      })
-      .finally(() => {
-        setIsSuggestionsLoading(false);
       });
   }, [controller, streams.streamsRepositoryClient, name, connectorId, notifications]);
 

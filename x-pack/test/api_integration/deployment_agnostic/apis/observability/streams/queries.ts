@@ -17,7 +17,6 @@ import { disableStreams, enableStreams, getQueries, putStream } from './helpers/
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const esClient = getService('es');
   let apiClient: StreamsSupertestRepositoryClient;
 
   const STREAM_NAME = 'logs.queries-test';
@@ -165,15 +164,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(getQueriesResponse.queries).to.eql([]);
     });
 
-    it('deletes an inexistant query successfully', async () => {
+    it('throws when deleting an inexistant query', async () => {
       const queryId = v4();
-      const deleteQueryResponse = await apiClient
+      await apiClient
         .fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
           params: { path: { name: STREAM_NAME, queryId } },
         })
-        .expect(200)
-        .then((res) => res.body);
-      expect(deleteQueryResponse.acknowledged).to.be(true);
+        .expect(404);
 
       const getQueriesResponse = await getQueries(apiClient, STREAM_NAME);
       expect(getQueriesResponse.queries).to.eql([]);

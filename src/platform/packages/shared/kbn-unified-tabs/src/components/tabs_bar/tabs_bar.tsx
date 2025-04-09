@@ -12,9 +12,11 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab, type TabProps } from '../tab';
-import type { TabItem } from '../../types';
+import type { TabItem, TabsServices } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
+import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
+import { TabsBarMenu } from '../tabs_bar_menu';
 
 const growingFlexItemCss = css`
   min-width: 0;
@@ -22,24 +24,29 @@ const growingFlexItemCss = css`
 
 export type TabsBarProps = Pick<
   TabProps,
-  'getTabMenuItems' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
+  'getTabMenuItems' | 'getPreviewData' | 'onLabelEdited' | 'onSelect' | 'onClose' | 'tabContentId'
 > & {
   items: TabItem[];
   selectedItem: TabItem | null;
+  recentlyClosedItems: TabItem[];
   maxItemsCount?: number;
+  services: TabsServices;
   onAdd: () => Promise<void>;
 };
 
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
+  recentlyClosedItems,
   maxItemsCount,
   tabContentId,
   getTabMenuItems,
+  services,
   onAdd,
   onLabelEdited,
   onSelect,
   onClose,
+  getPreviewData,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [tabsContainerWithPlusElement, setTabsContainerWithPlusElement] =
@@ -72,16 +79,13 @@ export const TabsBar: React.FC<TabsBarProps> = ({
     }
   }, [selectedItem]);
 
-  return (
+  const mainTabsBarContent = (
     <EuiFlexGroup
-      role="tablist"
-      data-test-subj="unifiedTabs_tabsBar"
       responsive={false}
       alignItems="center"
       gutterSize="s"
       css={css`
-        background-color: ${euiTheme.colors.lightestShade};
-        padding-right: ${euiTheme.size.xs};
+        padding-right: ${euiTheme.size.base};
       `}
     >
       <EuiFlexItem ref={setTabsContainerWithPlusElement} grow css={growingFlexItemCss}>
@@ -96,18 +100,19 @@ export const TabsBar: React.FC<TabsBarProps> = ({
               css={tabsContainerCss}
             >
               {items.map((item) => (
-                <EuiFlexItem key={item.id} grow={false}>
-                  <Tab
-                    item={item}
-                    isSelected={selectedItem?.id === item.id}
-                    tabContentId={tabContentId}
-                    tabsSizeConfig={tabsSizeConfig}
-                    getTabMenuItems={getTabMenuItems}
-                    onLabelEdited={onLabelEdited}
-                    onSelect={onSelect}
-                    onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
-                  />
-                </EuiFlexItem>
+                <Tab
+                  key={item.id}
+                  item={item}
+                  isSelected={selectedItem?.id === item.id}
+                  tabContentId={tabContentId}
+                  tabsSizeConfig={tabsSizeConfig}
+                  services={services}
+                  getTabMenuItems={getTabMenuItems}
+                  getPreviewData={getPreviewData}
+                  onLabelEdited={onLabelEdited}
+                  onSelect={onSelect}
+                  onClose={items.length > 1 ? onClose : undefined} // prevents closing the last tab
+                />
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -128,14 +133,19 @@ export const TabsBar: React.FC<TabsBarProps> = ({
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="boxesVertical"
-          color="text"
-          aria-label="Tabs menu placeholder"
-          title="Tabs menu placeholder"
-          onClick={() => alert('TODO: Implement tabs menu')}
+        <TabsBarMenu
+          openedItems={items}
+          selectedItem={selectedItem}
+          onSelectOpenedTab={onSelect}
+          recentlyClosedItems={recentlyClosedItems}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
+  );
+
+  return (
+    <TabsBarWithBackground role="tablist" data-test-subj="unifiedTabs_tabsBar" services={services}>
+      {mainTabsBarContent}
+    </TabsBarWithBackground>
   );
 };

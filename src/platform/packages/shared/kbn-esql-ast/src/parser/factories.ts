@@ -33,6 +33,9 @@ import {
   InputNamedOrPositionalParamContext,
   IdentifierOrParameterContext,
   StringContext,
+  InputNamedOrPositionalDoubleParamsContext,
+  InputDoubleParamsContext,
+  SelectorStringContext,
 } from '../antlr/esql_parser';
 import { DOUBLE_TICKS_REGEX, SINGLE_BACKTICK, TICKS_REGEX } from './constants';
 import type {
@@ -59,9 +62,12 @@ import type {
   ESQLBinaryExpression,
   BinaryExpressionOperator,
   ESQLCommand,
+  ESQLParamKinds,
+  ESQLStringLiteral,
 } from '../types';
 import { parseIdentifier, getPosition } from './helpers';
 import { Builder, type AstNodeParserFields } from '../builder';
+import { LeafPrinter } from '../pretty_print';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
@@ -84,6 +90,18 @@ const createParserFields = (ctx: ParserRuleContext): AstNodeParserFields => ({
   location: getPosition(ctx.start, ctx.stop),
   incomplete: Boolean(ctx.exception),
 });
+
+const createParserFieldsFromTerminalNode = (node: TerminalNode): AstNodeParserFields => {
+  const text = node.getText();
+  const symbol = node.symbol;
+  const fields: AstNodeParserFields = {
+    text,
+    location: getPosition(symbol, symbol),
+    incomplete: false,
+  };
+
+  return fields;
+};
 
 export const createCommand = <
   Name extends string,
@@ -135,7 +153,9 @@ export function createFakeMultiplyLiteral(
   };
 }
 
-export function createLiteralString(ctx: StringContext): ESQLLiteral {
+export function createLiteralString(
+  ctx: Pick<StringContext, 'QUOTED_STRING'> & ParserRuleContext
+): ESQLStringLiteral {
   const quotedString = ctx.QUOTED_STRING()?.getText() ?? '""';
   const isTripleQuoted = quotedString.startsWith('"""') && quotedString.endsWith('"""');
   let valueUnquoted = isTripleQuoted ? quotedString.slice(3, -3) : quotedString.slice(1, -1);
@@ -289,13 +309,15 @@ export const createBinaryExpression = (
 
 export const createIdentifierOrParam = (ctx: IdentifierOrParameterContext) => {
   const identifier = ctx.identifier();
+
   if (identifier) {
     return createIdentifier(identifier);
-  } else {
-    const parameter = ctx.parameter();
-    if (parameter) {
-      return createParam(parameter);
-    }
+  }
+
+  const parameter = ctx.parameter() ?? ctx.doubleParameter();
+
+  if (parameter) {
+    return createParam(parameter);
   }
 };
 
@@ -307,19 +329,27 @@ export const createIdentifier = (identifier: IdentifierContext): ESQLIdentifier 
 };
 
 export const createParam = (ctx: ParseTree) => {
-  if (ctx instanceof InputParamContext) {
-    return Builder.param.unnamed(createParserFields(ctx));
-  } else if (ctx instanceof InputNamedOrPositionalParamContext) {
+  if (ctx instanceof InputParamContext || ctx instanceof InputDoubleParamsContext) {
+    const isDoubleParam = ctx instanceof InputDoubleParamsContext;
+    const paramKind: ESQLParamKinds = isDoubleParam ? '??' : '?';
+
+    return Builder.param.unnamed(createParserFields(ctx), { paramKind });
+  } else if (
+    ctx instanceof InputNamedOrPositionalParamContext ||
+    ctx instanceof InputNamedOrPositionalDoubleParamsContext
+  ) {
+    const isDoubleParam = ctx instanceof InputNamedOrPositionalDoubleParamsContext;
+    const paramKind: ESQLParamKinds = isDoubleParam ? '??' : '?';
     const text = ctx.getText();
-    const value = text.slice(1);
+    const value = text.slice(isDoubleParam ? 2 : 1);
     const valueAsNumber = Number(value);
     const isPositional = String(valueAsNumber) === value;
     const parserFields = createParserFields(ctx);
 
     if (isPositional) {
-      return Builder.param.positional({ value: valueAsNumber }, parserFields);
+      return Builder.param.positional({ paramKind, value: valueAsNumber }, parserFields);
     } else {
-      return Builder.param.named({ value }, parserFields);
+      return Builder.param.named({ paramKind, value }, parserFields);
     }
   }
 };
@@ -425,34 +455,6 @@ function sanitizeSourceString(ctx: ParserRuleContext) {
   return contextText;
 }
 
-const unquoteIndexString = (indexString: string): string => {
-  const isStringQuoted = indexString[0] === '"';
-
-  if (!isStringQuoted) {
-    return indexString;
-  }
-
-  // If wrapped by triple double quotes, simply remove them.
-  if (indexString.startsWith(`"""`) && indexString.endsWith(`"""`)) {
-    return indexString.slice(3, -3);
-  }
-
-  // If wrapped by double quote, remove them and unescape the string.
-  if (indexString[indexString.length - 1] === '"') {
-    indexString = indexString.slice(1, -1);
-    indexString = indexString
-      .replace(/\\"/g, '"')
-      .replace(/\\r/g, '\r')
-      .replace(/\\n/g, '\n')
-      .replace(/\\t/g, '\t')
-      .replace(/\\\\/g, '\\');
-    return indexString;
-  }
-
-  // This should never happen, but if it does, return the original string.
-  return indexString;
-};
-
 export function sanitizeIdentifierString(ctx: ParserRuleContext) {
   const result =
     getUnquotedText(ctx)?.getText() ||
@@ -494,38 +496,66 @@ export function createPolicy(token: Token, policy: string): ESQLSource {
   };
 }
 
-export function createSource(
+const visitUnquotedOrQuotedString = (ctx: SelectorStringContext): ESQLStringLiteral => {
+  const unquotedCtx = ctx.UNQUOTED_SOURCE();
+
+  if (unquotedCtx) {
+    const valueUnquoted = unquotedCtx.getText();
+    const quotedString = LeafPrinter.string({ valueUnquoted });
+
+    return Builder.expression.literal.string(
+      valueUnquoted,
+      {
+        name: quotedString,
+        unquoted: true,
+      },
+      createParserFieldsFromTerminalNode(unquotedCtx)
+    );
+  }
+
+  return createLiteralString(ctx);
+};
+
+export function visitSource(
   ctx: ParserRuleContext,
   type: 'index' | 'policy' = 'index'
 ): ESQLSource {
   const text = sanitizeSourceString(ctx);
 
-  let cluster: string = '';
-  let index: string = '';
+  let cluster: ESQLStringLiteral | undefined;
+  let index: ESQLStringLiteral | undefined;
+  let selector: ESQLStringLiteral | undefined;
 
   if (ctx instanceof IndexPatternContext) {
-    const clusterString = ctx.clusterString();
-    const indexString = ctx.indexString();
+    const clusterStringCtx = ctx.clusterString();
+    const indexStringCtx = ctx.indexString();
+    const selectorStringCtx = ctx.selectorString();
 
-    if (clusterString) {
-      cluster = clusterString.getText();
+    if (clusterStringCtx) {
+      cluster = visitUnquotedOrQuotedString(clusterStringCtx);
     }
-    if (indexString) {
-      index = indexString.getText();
-      index = unquoteIndexString(index);
+    if (indexStringCtx) {
+      index = visitUnquotedOrQuotedString(indexStringCtx);
+    }
+    if (selectorStringCtx) {
+      selector = visitUnquotedOrQuotedString(selectorStringCtx);
     }
   }
 
-  return {
-    type: 'source',
-    cluster,
-    index,
-    name: text,
-    sourceType: type,
-    location: getPosition(ctx.start, ctx.stop),
-    incomplete: Boolean(ctx.exception || text === ''),
-    text: ctx?.getText(),
-  };
+  return Builder.expression.source.node(
+    {
+      sourceType: type,
+      cluster,
+      index,
+      selector,
+      name: text,
+    },
+    {
+      location: getPosition(ctx.start, ctx.stop),
+      incomplete: Boolean(ctx.exception || text === ''),
+      text: ctx?.getText(),
+    }
+  );
 }
 
 export function createColumnStar(ctx: TerminalNode): ESQLColumn {

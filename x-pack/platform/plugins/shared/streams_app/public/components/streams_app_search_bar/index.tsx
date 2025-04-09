@@ -20,6 +20,7 @@ export interface StreamsAppSearchBarProps {
   placeholder?: string;
   dataViews?: DataView[];
   showQueryInput?: boolean;
+  showSubmitButton?: boolean;
 }
 
 export function StreamsAppSearchBar({
@@ -32,6 +33,7 @@ export function StreamsAppSearchBar({
   placeholder,
   dataViews,
   showQueryInput,
+  showSubmitButton = true,
 }: StreamsAppSearchBarProps) {
   const {
     dependencies: {
@@ -61,7 +63,7 @@ export function StreamsAppSearchBar({
       showFilterBar={false}
       showQueryMenu={false}
       showDatePicker={Boolean(dateRangeFrom && dateRangeTo)}
-      showSubmitButton={true}
+      showSubmitButton={showSubmitButton}
       submitButtonStyle="iconOnly"
       dateRangeFrom={dateRangeFrom}
       dateRangeTo={dateRangeTo}

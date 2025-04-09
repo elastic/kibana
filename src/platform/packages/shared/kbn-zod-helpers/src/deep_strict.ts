@@ -33,6 +33,7 @@ const primitiveTypes = [
   ZodFirstPartyTypeKind.ZodLiteral,
   ZodFirstPartyTypeKind.ZodEnum,
   ZodFirstPartyTypeKind.ZodNativeEnum,
+  ZodFirstPartyTypeKind.ZodDate,
 ] as const;
 
 /**

@@ -9,7 +9,8 @@ import type { EuiSelectOption } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import * as i18n from './translations';
 
-import type { TimeframePreviewOptions } from '../../../../detections/pages/detection_engine/rules/types';
+import type { TimeframePreviewOptions } from '../../../common/types';
+
 /**
  * Determines whether or not to display noise warning.
  * Is considered noisy if alerts/hour rate > 1

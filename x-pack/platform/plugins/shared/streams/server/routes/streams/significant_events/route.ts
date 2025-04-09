@@ -10,7 +10,6 @@ import {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, notFound } from '@hapi/boom';
-import { buildEsQuery } from '@kbn/es-query';
 import { ChangePointType } from '@kbn/es-types/src';
 import { ServerSentEventBase } from '@kbn/sse-utils';
 import {
@@ -29,7 +28,7 @@ import {
   generateSignificantEventDefinitions,
 } from './generate_signifcant_events';
 
-const stringToDate = z.string().transform((arg) => new Date(arg));
+const dateFromString = z.string().pipe(z.coerce.date());
 
 function createSearchRequest({
   from,
@@ -87,7 +86,7 @@ const previewSignificantEventsRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/significant_events/_preview',
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({ from: stringToDate, to: stringToDate, bucketSize: z.string() }),
+    query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: streamQueryKqlSchema,
     }),
@@ -246,7 +245,11 @@ const readSignificantEventsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/significant_events 2023-10-31',
   params: z.object({
     path: z.object({ name: z.string() }),
-    query: z.object({ from: stringToDate, to: stringToDate, bucketSize: z.string() }),
+    query: z.object({
+      from: dateFromString,
+      to: dateFromString,
+      bucketSize: z.string(),
+    }),
   }),
 
   options: {
@@ -271,7 +274,7 @@ const readSignificantEventsRoute = createServerRoute({
 
     const isStreamEnabled = await streamsClient.isStreamsEnabled();
     if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
+      throw badRequest('Streams are not enabled');
     }
 
     const { name } = params.path;
@@ -329,22 +332,6 @@ const readSignificantEventsRoute = createServerRoute({
     return significantEvents;
   },
 });
-
-function buildQuery(kql: string) {
-  try {
-    return buildEsQuery(
-      undefined,
-      {
-        query: kql,
-        language: 'kuery',
-      },
-      [],
-      { allowLeadingWildcards: true }
-    );
-  } catch (err) {
-    return { match_all: {} };
-  }
-}
 
 export const significantEventsRoutes = {
   ...readSignificantEventsRoute,

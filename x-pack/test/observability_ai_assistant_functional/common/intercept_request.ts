@@ -9,6 +9,7 @@ import { WebDriver } from 'selenium-webdriver';
 
 interface ResponseFactory {
   fail: (reason?: string) => ['Fetch.failRequest', { requestId: string }];
+  continue: () => ['Fetch.continueRequest', { requestId: string }];
 }
 
 export async function interceptRequest(
@@ -31,6 +32,7 @@ export async function interceptRequest(
                 'Fetch.failRequest',
                 { requestId: parsed.params.requestId, errorReason: 'Failed' },
               ],
+              continue: () => ['Fetch.continueRequest', { requestId: parsed.params.requestId }],
             }),
             innerResolve
           )

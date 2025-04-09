@@ -65,28 +65,34 @@ export function useSignificantEventsApi({
             );
           },
           removeQuery: async (id) => {
-            await streamsRepositoryClient.fetch('DELETE /api/streams/{name}/queries/{queryId}', {
-              signal,
-              params: {
-                path: {
-                  name,
-                  queryId: id,
+            await streamsRepositoryClient.fetch(
+              'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
+              {
+                signal,
+                params: {
+                  path: {
+                    name,
+                    queryId: id,
+                  },
                 },
-              },
-            });
+              }
+            );
           },
           bulk: async (operations) => {
-            await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk', {
-              signal,
-              params: {
-                path: {
-                  name,
+            await streamsRepositoryClient.fetch(
+              'POST /api/streams/{name}/queries/_bulk 2023-10-31',
+              {
+                signal,
+                params: {
+                  path: {
+                    name,
+                  },
+                  body: {
+                    operations,
+                  },
                 },
-                body: {
-                  operations,
-                },
-              },
-            });
+              }
+            );
           },
         };
   }, [name, signal, streamsRepositoryClient]);

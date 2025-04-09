@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, memo, useCallback } from 'react';
-import { EuiForm } from '@elastic/eui';
+import { EuiForm, euiBreakpoint, useEuiTheme, useEuiOverflowScroll } from '@elastic/eui';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import {
@@ -15,6 +15,7 @@ import {
 } from '@kbn/unified-search-plugin/public';
 
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { css } from '@emotion/react';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -61,6 +62,9 @@ export function LayerPanels(
   const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );
+
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const dispatchLens = useLensDispatch();
 
@@ -252,7 +256,20 @@ export function LayerPanels(
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
   return (
-    <EuiForm className="lnsConfigPanel">
+    <EuiForm
+      css={css`
+        .lnsApp & {
+          padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
+            calc(400px + ${euiTheme.size.base});
+          margin-left: -400px;
+          ${useEuiOverflowScroll('y')}
+          ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+            padding-left: ${euiTheme.size.base};
+            margin-left: 0;
+          }
+        }
+      `}
+    >
       {layerIds.map((layerId, layerIndex) => {
         const { hidden, groups } = activeVisualization.getConfiguration({
           layerId,

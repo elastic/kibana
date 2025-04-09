@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { Logger } from '@kbn/core/server';
-import { TaskManagerConfig } from '../config';
-import { Metrics, createMetricsAggregators, createMetricsStream } from './metrics_stream';
-import { TaskPollingLifecycle } from '../polling_lifecycle';
-import { TaskManagerMetricsCollector } from './task_metrics_collector';
+import type { Observable } from 'rxjs';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerConfig } from '../config';
+import type { Metrics } from './metrics_stream';
+import { createMetricsAggregators, createMetricsStream } from './metrics_stream';
+import type { TaskPollingLifecycle } from '../polling_lifecycle';
+import type { TaskManagerMetricsCollector } from './task_metrics_collector';
 export type { Metrics } from './metrics_stream';
 
 interface MetricsStreamOpts {

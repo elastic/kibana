@@ -14,7 +14,7 @@ export type {
   KibanaUrl,
   EsClient,
   KbnClient,
-  SamlSessionManager,
+  SamlAuth,
 } from './core_fixtures';
 
 export { esArchiverFixture } from './es_archiver';

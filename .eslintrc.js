@@ -280,7 +280,7 @@ const RESTRICTED_IMPORTS = [
 module.exports = {
   root: true,
 
-  extends: ['plugin:@elastic/eui/recommended', '@kbn/eslint-config'],
+  extends: ['@kbn/eslint-config'],
 
   overrides: [
     /**
@@ -1011,6 +1011,17 @@ module.exports = {
       },
     },
     {
+      files: [
+        'x-pack/solutions/observability/plugins/apm/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/infra/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/profiling/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'x-pack/solutions/observability/plugins/observability_shared/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+      ],
+      rules: {
+        '@kbn/eui-a11y/eui_elements_should_have_aria_label_or_aria_labelledby_props': 'warn',
+      },
+    },
+    {
       // require explicit return types in route handlers for performance reasons
       files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
       rules: {
@@ -1451,6 +1462,7 @@ module.exports = {
       files: [
         'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
+        'x-pack/solutions/security/packages/kbn-scout-security/src/playwright/**/*.ts',
         'src/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
@@ -1635,11 +1647,9 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
       },
     },
-
     /**
      * ResponseOps overrides
      */
-
     {
       files: [
         'src/platform/packages/shared/response-ops/**/*.{ts, tsx}',
@@ -1648,6 +1658,25 @@ module.exports = {
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/stack_connectors/**/*.{ts, tsx}',
         'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/rule_registry/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts, tsx}',
+        'x-pack/solutions/observability/packages/kbn-alerts-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-ui-shared/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerting-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-cases-components/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-actions-types/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-alerts-as-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-grouping/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rrule/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-rule-data-utils/**/*.{ts, tsx}',
+        'src/platform/packages/shared/kbn-triggers-actions-ui-types/**/*.{ts, tsx}',
+        'x-pack/platform/packages/shared/kbn-alerting-comparators/**/*.{ts, tsx}',
+        'x-pack/platform/plugins/shared/embeddable_alerts_table/**/*.{ts,tsx}',
+        'x-pack/test/alerting_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/cases_api_integration/**/*.{ts, tsx}',
+        'x-pack/test/rule_registry/**/*.{ts, tsx}',
+        'x-pack/test/api_integration/apis/cases/**/*.{ts, tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',

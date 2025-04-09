@@ -35,14 +35,17 @@ import {
   STREAM_NAME,
 } from './fields';
 import { AssetStorageSettings } from './storage_settings';
+import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
   queryEmptyString: boolean;
 }
 
+type TermQueryFieldValue = string | boolean | number | null;
+
 function termQuery<T extends string>(
   field: T,
-  value: string | boolean | number | undefined | null,
+  value: TermQueryFieldValue | undefined,
   opts: TermQueryOpts = { queryEmptyString: true }
 ): QueryDslQueryContainer[] {
   if (value === null || value === undefined || (!opts.queryEmptyString && value === '')) {
@@ -54,13 +57,17 @@ function termQuery<T extends string>(
 
 function termsQuery<T extends string>(
   field: T,
-  values: Array<string | boolean | number | undefined | null> | null | undefined
+  values: Array<TermQueryFieldValue | undefined> | null | undefined
 ): QueryDslQueryContainer[] {
   if (values === null || values === undefined || values.length === 0) {
     return [];
   }
 
-  return [{ terms: { [field]: values } }];
+  const filteredValues = values.filter(
+    (value) => value !== undefined
+  ) as unknown as TermQueryFieldValue[];
+
+  return [{ terms: { [field]: filteredValues } }];
 }
 
 function getUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
@@ -230,7 +237,11 @@ export class AssetClient {
   async unlinkAsset(name: string, asset: AssetUnlinkRequest) {
     const id = getUuid(name, asset);
 
-    await this.clients.storageClient.delete({ id });
+    const { result } = await this.clients.storageClient.delete({ id });
+
+    if (result === 'not_found') {
+      throw new AssetNotFoundError(`${asset[ASSET_TYPE]} not found`);
+    }
   }
 
   async clean() {

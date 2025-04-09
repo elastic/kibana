@@ -12,14 +12,19 @@ import {
   isWhereExpression,
   isFieldExpression,
   Walker,
+  ESQLCommand,
+  ESQLColumn,
 } from '@kbn/esql-ast';
+import { i18n } from '@kbn/i18n';
 import {
   getFunctionDefinition,
   isFunctionItem,
   isFunctionOperatorParam,
   isLiteralItem,
 } from '../shared/helpers';
-import { FunctionDefinitionTypes } from './types';
+import { FieldType, FunctionDefinitionTypes } from './types';
+import { getMessageFromId } from '../validation/errors';
+import { ESQLRealField } from '../validation/types';
 
 function isAggregation(arg: ESQLAstItem): arg is ESQLFunction {
   return (
@@ -80,3 +85,53 @@ export function checkAggExistence(arg: ESQLFunction): boolean {
 
   return false;
 }
+
+export const ENRICH_MODES = [
+  {
+    name: 'any',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqAnyDoc', {
+      defaultMessage: 'Enrich takes place on any cluster',
+    }),
+  },
+  {
+    name: 'coordinator',
+    description: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.definitions.ccqCoordinatorDoc',
+      {
+        defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
+      }
+    ),
+  },
+  {
+    name: 'remote',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqRemoteDoc', {
+      defaultMessage: 'Enrich takes place on the cluster hosting the target index.',
+    }),
+  },
+];
+
+export const validateColumnForGrokDissect = (
+  command: ESQLCommand,
+  { fields }: { fields: Map<string, ESQLRealField> }
+) => {
+  const acceptedColumnTypes: FieldType[] = ['keyword', 'text'];
+  const astCol = command.args[0] as ESQLColumn;
+  const columnRef = fields.get(astCol.name);
+
+  if (columnRef && !acceptedColumnTypes.includes(columnRef.type)) {
+    return [
+      getMessageFromId({
+        messageId: 'unsupportedColumnTypeForCommand',
+        values: {
+          command: command.name.toUpperCase(),
+          type: acceptedColumnTypes.join(', '),
+          givenType: columnRef.type,
+          column: astCol.name,
+        },
+        locations: astCol.location,
+      }),
+    ];
+  }
+
+  return [];
+};

@@ -44,8 +44,8 @@
     "@kbn/core-saved-objects-server-internal",
     "@kbn/core-analytics-server",
     "@kbn/es-types",
-    "@kbn/sse-utils",
     "@kbn/genai-utils-server",
-    "@kbn/genai-utils-common"
+    "@kbn/genai-utils-common",
+    "@kbn/sse-utils",
   ]
 }

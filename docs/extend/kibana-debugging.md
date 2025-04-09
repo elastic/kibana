@@ -21,7 +21,7 @@ With an application as varied and complex as Kibana has become, it’s not pract
 
 For example, say you implement a brand new feature, plugin or service but don’t quite know how it will impact Kibana’s performance as a whole. APM allows us to not only spot that something is slow, but also hints at why it might be performing slowly. For example, if a function is slow on specific types of inputs, we can see where the time is spent by viewing the trace for that function call in the APM UI.
 
-:::{image} ../images/apm_example_trace.png
+:::{image} images/apm_example_trace.png
 :alt: apm example trace
 :::
 
@@ -103,7 +103,7 @@ The easiest and recommended way of running Kibana with the APM agent locally is 
 
 9. After Kibana starts up, navigate to the APM app, where you should see some transactions.
 
-:::{image} ../images/apm_ui_transactions.png
+:::{image} images/apm_ui_transactions.png
 :alt: apm ui transactions
 :::
 

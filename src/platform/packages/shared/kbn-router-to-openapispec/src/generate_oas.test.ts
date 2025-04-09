@@ -74,7 +74,15 @@ describe('generateOpenApiDocument', () => {
               {
                 method: 'post',
                 path: '/no-xsrf/{id}/{path*}',
-                options: { access: 'public', options: { xsrfRequired: false } },
+                options: {
+                  access: 'public',
+                  options: { xsrfRequired: false },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
               },
             ],
           },
@@ -247,7 +255,14 @@ describe('generateOpenApiDocument', () => {
                     method: 'get',
                     path: '/test',
                     isVersioned: true,
-                    options: { access: 'public' },
+                    options: {
+                      access: 'public',
+                      security: {
+                        authz: {
+                          requiredPrivileges: ['foo'],
+                        },
+                      },
+                    },
                     handlers: [
                       {
                         fn: jest.fn(),
@@ -298,19 +313,46 @@ describe('generateOpenApiDocument', () => {
         versionedRouters: {
           testVersionedRouter1: {
             routes: [
-              { path: '/v1-1', options: { access: 'public', options: { tags: ['oas-tag:v1'] } } },
+              {
+                path: '/v1-1',
+                options: {
+                  access: 'public',
+                  options: { tags: ['oas-tag:v1'] },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
               {
                 path: '/v1-2',
                 options: {
                   access: 'public',
                   options: { tags: ['foo', 'bar', 'oas-tag:v2', 'oas-tag:v3'] },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
             ],
           },
           testVersionedRouter2: {
             routes: [
-              { path: '/v2-1', options: { access: 'public', options: { tags: undefined } } },
+              {
+                path: '/v2-1',
+                options: {
+                  access: 'public',
+                  options: { tags: undefined },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
             ],
           },
         },
@@ -369,6 +411,11 @@ describe('generateOpenApiDocument', () => {
                 options: {
                   access: 'public',
                   options: { availability: { stability: 'experimental' } },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
               {
@@ -376,6 +423,11 @@ describe('generateOpenApiDocument', () => {
                 options: {
                   access: 'public',
                   options: { availability: { stability: 'beta' } },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
               {
@@ -383,12 +435,29 @@ describe('generateOpenApiDocument', () => {
                 options: {
                   access: 'public',
                   options: { availability: { stability: 'stable' } },
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
                 },
               },
             ],
           },
           testVersionedRouter2: {
-            routes: [{ path: '/v2-1', options: { access: 'public' } }],
+            routes: [
+              {
+                path: '/v2-1',
+                options: {
+                  access: 'public',
+                  security: {
+                    authz: {
+                      requiredPrivileges: ['foo'],
+                    },
+                  },
+                },
+              },
+            ],
           },
         },
       });
@@ -471,6 +540,11 @@ describe('generateOpenApiDocument', () => {
             {
               options: {
                 access: 'public',
+                security: {
+                  authz: {
+                    requiredPrivileges: ['foo'],
+                  },
+                },
               },
             },
           ],
