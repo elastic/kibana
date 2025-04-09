@@ -25,11 +25,7 @@ export const request = <T = unknown>({
     ...options,
   });
 };
-<<<<<<< HEAD
-export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-LLM'];
-=======
 export const INTERNAL_INFERENCE_CONNECTORS = ['Elastic-Managed-LLM'];
->>>>>>> 9d6a086e287 (update preconfigured connector name to Elastic Managed LLM)
 export const INTERNAL_CLOUD_CONNECTORS = ['Elastic-Cloud-SMTP'];
 
 export const getConnectors = () =>
