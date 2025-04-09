@@ -42,7 +42,6 @@
     "@kbn/i18n",
     "@kbn/io-ts-utils",
     "@kbn/kibana-react-plugin",
-    "@kbn/lens-embeddable-utils",
     "@kbn/lens-plugin",
     "@kbn/logging",
     "@kbn/react-hooks",
@@ -68,6 +67,9 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/xstate-utils",
+    "@kbn/response-ops-rule-form",
+    "@kbn/chart-icons",
+    "@kbn/charts-theme",
   ],
   "exclude": [
     "target/**/*"
