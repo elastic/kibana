@@ -10,7 +10,10 @@ import { Client } from '@elastic/elasticsearch';
 import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-plugin/server/service/inference_endpoint';
 import { ToolingLog } from '@kbn/tooling-log';
 import { RetryService } from '@kbn/ftr-common-functional-services';
-import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import {
+  Instruction,
+  KnowledgeBaseState,
+} from '@kbn/observability-ai-assistant-plugin/common/types';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
 import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import type { ObservabilityAIAssistantApiClient } from '../../../../services/observability_ai_assistant_api';
@@ -83,7 +86,7 @@ export async function waitForKnowledgeBaseReady({
       endpoint: 'GET /internal/observability_ai_assistant/kb/status',
     });
     expect(res.status).to.be(200);
-    expect(res.body.ready).to.be(true);
+    expect(res.body.kbState).to.be(KnowledgeBaseState.READY);
   });
 }
 
