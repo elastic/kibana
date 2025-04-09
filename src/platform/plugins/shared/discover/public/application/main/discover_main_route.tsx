@@ -10,7 +10,7 @@
 import { useHistory } from 'react-router-dom';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import React from 'react';
 import useUnmount from 'react-use/lib/useUnmount';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
@@ -34,10 +34,7 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import {
-  getDiscoverTabsUrlStateContainer,
-  type DiscoverTabsUrlState,
-} from './state_management/discover_tabs_url_state_container';
+import { getDiscoverTabsUrlStateContainer } from './state_management/discover_tabs_url_state_container';
 
 // TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
 export const TABS_ENABLED = false;
@@ -72,6 +69,21 @@ export const DiscoverMainRoute = ({
         ...withNotifyOnErrors(services.core.notifications.toasts),
       })
   );
+
+  // syncing with the _t part URL
+  const [tabsUrlStateContainer] = useState(() =>
+    getDiscoverTabsUrlStateContainer({
+      stateStorage: urlStateStorage,
+    })
+  );
+
+  useEffect(() => {
+    const stopSync = tabsUrlStateContainer.startUrlSync();
+    return () => {
+      stopSync();
+    };
+  }, [tabsUrlStateContainer]);
+
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
   const [internalState] = useState(() =>
     createInternalStateStore({
@@ -79,6 +91,7 @@ export const DiscoverMainRoute = ({
       customizationContext,
       runtimeStateManager,
       urlStateStorage,
+      tabsUrlStateContainer,
     })
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });
@@ -102,25 +115,6 @@ export const DiscoverMainRoute = ({
       return initializationState;
     }
   );
-
-  const onTabsUrlStateChanged = useCallback((nextState: DiscoverTabsUrlState) => {
-    // TODO: Handle the URL state change for tabs
-  }, []);
-
-  // syncing with the _t part URL
-  const [tabsUrlStateContainer] = useState(() =>
-    getDiscoverTabsUrlStateContainer({
-      stateStorage: urlStateStorage,
-      onChanged: onTabsUrlStateChanged,
-    })
-  );
-
-  useEffect(() => {
-    const stopSync = tabsUrlStateContainer.startUrlSync();
-    return () => {
-      stopSync();
-    };
-  }, [tabsUrlStateContainer]);
 
   useEffect(() => {
     if (!rootProfileState.rootProfileLoading) {

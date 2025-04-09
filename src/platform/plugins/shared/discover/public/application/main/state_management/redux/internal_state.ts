@@ -15,6 +15,7 @@ import {
   createSlice,
   type ThunkAction,
   type ThunkDispatch,
+  createListenerMiddleware,
 } from '@reduxjs/toolkit';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { TabItem } from '@kbn/unified-tabs';
@@ -30,6 +31,7 @@ import {
 import { loadDataViewList, setTabs } from './actions';
 import { selectAllTabs, selectTab } from './selectors';
 import { createTabItem } from './utils';
+import type { DiscoverTabsUrlContainer } from '../discover_tabs_url_state_container';
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
   dataViewId: undefined,
@@ -185,20 +187,45 @@ export const internalStateSlice = createSlice({
   },
 });
 
+const createMiddleware = ({
+  tabsUrlStateContainer,
+}: {
+  tabsUrlStateContainer: DiscoverTabsUrlContainer;
+}) => {
+  const listenerMiddleware = createListenerMiddleware();
+
+  listenerMiddleware.startListening({
+    actionCreator: internalStateSlice.actions.setTabs,
+    effect: async (action) => {
+      const { selectedTabId } = action.payload;
+      // Set the selected tab id as `_t` URL parameter
+      if (selectedTabId && tabsUrlStateContainer.get().selectedTabId !== selectedTabId) {
+        tabsUrlStateContainer.set({ selectedTabId });
+      }
+    },
+  });
+
+  return listenerMiddleware;
+};
+
 export interface InternalStateThunkDependencies {
   services: DiscoverServices;
   customizationContext: DiscoverCustomizationContext;
   runtimeStateManager: RuntimeStateManager;
   urlStateStorage: IKbnUrlStateStorage;
+  tabsUrlStateContainer: DiscoverTabsUrlContainer;
 }
 
 export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
   const store = configureStore({
     reducer: internalStateSlice.reducer,
     middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware({ thunk: { extraArgument: options } }),
+      getDefaultMiddleware({ thunk: { extraArgument: options } }).prepend(
+        createMiddleware(options).middleware
+      ),
   });
 
+  // TODO: Read from URL for initializing the initial selected tab or create a default one
   // TEMPORARY: Create initial default tab
   const defaultTab: TabState = {
     ...defaultTabState,

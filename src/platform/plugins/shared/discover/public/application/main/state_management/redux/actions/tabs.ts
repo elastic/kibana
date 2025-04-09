@@ -18,11 +18,7 @@ import {
   type InternalStateThunkActionCreator,
 } from '../internal_state';
 import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
-import {
-  APP_STATE_URL_KEY,
-  GLOBAL_STATE_URL_KEY,
-  TABS_STATE_URL_KEY,
-} from '../../../../../../common/constants';
+import { APP_STATE_URL_KEY, GLOBAL_STATE_URL_KEY } from '../../../../../../common/constants';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -105,14 +101,6 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
 
         nextTabStateContainer.actions.initializeAndSync();
       }
-    }
-
-    if (
-      selectedItem?.id &&
-      urlStateStorage.get<{ selectedTabId?: string }>(TABS_STATE_URL_KEY)?.selectedTabId !==
-        selectedItem.id
-    ) {
-      await urlStateStorage.set(TABS_STATE_URL_KEY, { selectedTabId: selectedItem.id });
     }
 
     dispatch(

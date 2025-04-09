@@ -23,12 +23,18 @@ export interface DiscoverTabsUrlContainer extends ReduxLikeStateContainer<Discov
   startUrlSync: () => () => void;
 }
 
+/**
+ * Supports two-way sync of the selected tab id with the URL.
+ * Currently, we use it only one way - from internal state to URL.
+ * @param stateStorage
+ * @param onChanged
+ */
 export const getDiscoverTabsUrlStateContainer = ({
   stateStorage,
   onChanged,
 }: {
   stateStorage: IKbnUrlStateStorage;
-  onChanged: (nextState: DiscoverTabsUrlState) => void;
+  onChanged?: (nextState: DiscoverTabsUrlState) => void; // can be called when selectedTabId changes in URL to trigger app state change if needed
 }): DiscoverTabsUrlContainer => {
   const stateContainer = createStateContainer<DiscoverTabsUrlState>({});
 
@@ -47,14 +53,16 @@ export const getDiscoverTabsUrlStateContainer = ({
       storageKey: TABS_STATE_URL_KEY,
     });
 
-    const listener = stateContainer.state$.subscribe((state) => {
-      onChanged(state);
-    });
+    const listener = onChanged
+      ? stateContainer.state$.subscribe((state) => {
+          onChanged(state);
+        })
+      : null;
 
     start();
 
     return () => {
-      listener.unsubscribe();
+      listener?.unsubscribe();
       stop();
     };
   };
