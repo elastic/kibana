@@ -142,12 +142,8 @@ const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action
     async isCompatible(_context: ActionExecutionContext): Promise<boolean> {
       return true;
     },
-    async execute(_context: ActionExecutionContext, event): Promise<void> {
-      if (isModifiedEvent(event)) {
-        onExecute(true);
-      } else {
-        onExecute(false);
-      }
+    async execute({ event }: ActionExecutionContext): Promise<void> {
+      onExecute(event ? isModifiedEvent(event) : false);
     },
     order: 100,
   };

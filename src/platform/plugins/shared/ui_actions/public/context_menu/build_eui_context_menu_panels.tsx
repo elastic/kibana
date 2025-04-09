@@ -57,7 +57,7 @@ const onClick =
         event.preventDefault();
         action.execute(context);
       }
-    } else action.execute(context, event);
+    } else action.execute({ ...context, event: event.nativeEvent });
     close();
   };
 
