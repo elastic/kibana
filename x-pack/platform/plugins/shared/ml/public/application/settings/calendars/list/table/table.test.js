@@ -12,7 +12,7 @@ import { CalendarsListTable } from './table';
 import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../../../contexts/kibana/use_create_url', () => ({
-  useCreateAndNavigateToMlLink: jest.fn(),
+  useCreateAndNavigateToManagementMlLink: jest.fn(),
 }));
 
 const calendars = [
