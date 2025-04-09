@@ -39,6 +39,7 @@ import { wrapErrors } from './error_wrapper';
 import { formatErrorMeta } from './util';
 import { stripIllegalHttp2Headers } from './strip_illegal_http2_headers';
 import { InternalRouteConfig, buildRoute } from './route';
+import { validateGlobalApiOpts } from './validate_global_api_options';
 
 export type ContextEnhancer<
   P,
@@ -201,6 +202,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
   }) {
     const hapiResponseAdapter = new HapiResponseAdapter(responseToolkit);
     try {
+      let filterPath: undefined | string[];
+      if (!route.options.httpResource) {
+        ({ filterPath } = validateGlobalApiOpts(request));
+      }
       let kibanaResponse = await handler(request);
       if (getProtocolFromRequest(request) === 'http2' && kibanaResponse.options.headers) {
         kibanaResponse.options.headers = stripIllegalHttp2Headers({
@@ -210,10 +215,8 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
           requestContext: `${request.route.method} ${request.route.path}`,
         });
       }
-      if (!route.options.httpResource && request.query.filter_path?.length) {
-        kibanaResponse = KibanaResponse.from(kibanaResponse, {
-          filterPath: request.query.filter_path.split(','),
-        });
+      if (filterPath?.length) {
+        kibanaResponse = KibanaResponse.from(kibanaResponse, { filterPath });
       }
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (error) {
