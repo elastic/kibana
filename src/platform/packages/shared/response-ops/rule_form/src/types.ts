@@ -82,7 +82,7 @@ export interface RuleFormState<
   plugins: RuleFormPlugins;
   connectors: ActionConnector[];
   connectorTypes: ActionType[];
-  aadTemplateFields: ActionVariable[];
+  alertFields: ActionVariable[];
   availableRuleTypes: RuleTypeWithDescription[];
   baseErrors?: RuleFormBaseErrors;
   paramsErrors?: RuleFormParamsErrors;
