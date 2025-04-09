@@ -16,12 +16,12 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { css } from '@emotion/react';
 import type {
   INSTRUCTION_VARIANT,
   InstructionVariant,
   InstructionSet,
 } from './instruction_variants';
-import { css } from '@emotion/react';
 import { getDisplayText } from './instruction_variants';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { push } from '../../shared/links/url_helpers';
