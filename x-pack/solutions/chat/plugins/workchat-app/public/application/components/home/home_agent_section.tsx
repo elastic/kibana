@@ -22,6 +22,7 @@ import {
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { appPaths } from '../../app_paths';
+import { i18n } from '@kbn/i18n';
 
 export const HomeAgentSection: React.FC<{}> = () => {
   const { createWorkchatUrl, navigateToWorkchatUrl } = useNavigation();
@@ -68,7 +69,11 @@ export const HomeAgentSection: React.FC<{}> = () => {
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiIcon type="users" size="m" />
         <EuiTitle size="xxs">
-          <h4>Agents</h4>
+          <h4>
+            {i18n.translate('workchatApp.home.agents.title', {
+              defaultMessage: 'Agents',
+            })}
+          </h4>
         </EuiTitle>
       </EuiFlexGroup>
 

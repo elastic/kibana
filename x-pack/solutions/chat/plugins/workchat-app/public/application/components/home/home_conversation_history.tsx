@@ -17,6 +17,7 @@ import { Agent } from '@kbn/workchat-app/common/agents';
 import { sortAndGroupConversations } from '../../utils/sort_and_group_conversations';
 import { sliceRecentConversations } from '../../utils/slice_recent_conversations';
 import { appPaths } from '../../app_paths';
+import { i18n } from '@kbn/i18n';
 
 export const HomeConversationHistorySection: React.FC<{}> = () => {
   const { navigateToWorkchatUrl } = useNavigation();
@@ -87,7 +88,11 @@ export const HomeConversationHistorySection: React.FC<{}> = () => {
       <EuiFlexGroup gutterSize="s" alignItems="center">
         <EuiIcon type="list" size="m" />
         <EuiTitle size="xxs">
-          <h4>Recent conversations</h4>
+          <h4>
+            {i18n.translate('workchatApp.home.recentConversations.title', {
+              defaultMessage: 'Recent conversations',
+            })}
+          </h4>
         </EuiTitle>
       </EuiFlexGroup>
 
