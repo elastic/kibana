@@ -58,40 +58,6 @@ export const getIdError = ({
   }
 };
 
-export const getIdBulkError = ({
-  id,
-  ruleId,
-}: {
-  id: string | undefined | null;
-  ruleId: string | undefined | null;
-}): BulkError => {
-  if (id != null && ruleId != null) {
-    return createBulkErrorObject({
-      id,
-      ruleId,
-      statusCode: 404,
-      message: `id: "${id}" and rule_id: "${ruleId}" not found`,
-    });
-  } else if (id != null) {
-    return createBulkErrorObject({
-      id,
-      statusCode: 404,
-      message: `id: "${id}" not found`,
-    });
-  } else if (ruleId != null) {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: 404,
-      message: `rule_id: "${ruleId}" not found`,
-    });
-  } else {
-    return createBulkErrorObject({
-      statusCode: 404,
-      message: `id or rule_id should have been defined`,
-    });
-  }
-};
-
 export const transformAlertsToRules = (rules: RuleAlertType[]): RuleResponse[] => {
   return rules.map((rule) => internalRuleToAPIResponse(rule));
 };

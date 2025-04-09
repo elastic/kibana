@@ -20,7 +20,6 @@ import {
   getIdError,
   transformFindAlerts,
   transform,
-  getIdBulkError,
   transformAlertsToRules,
   getTupleDuplicateErrorsAndUniqueRules,
   getInvalidConnectors,
@@ -306,90 +305,6 @@ describe('utils', () => {
       const unsafeCast = { data: [{ random: 1 }] } as unknown as PartialRule;
       const output = transform(unsafeCast);
       expect(output).toBeNull();
-    });
-  });
-
-  describe('getIdBulkError', () => {
-    test('outputs message about id and rule_id not being found if both are not null', () => {
-      const error = getIdBulkError({ id: '123', ruleId: '456' });
-      const expected: BulkError = {
-        id: '123',
-        rule_id: '456',
-        error: { message: 'id: "123" and rule_id: "456" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about id not being found if only id is defined and ruleId is undefined', () => {
-      const error = getIdBulkError({ id: '123', ruleId: undefined });
-      const expected: BulkError = {
-        id: '123',
-        error: { message: 'id: "123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about id not being found if only id is defined and ruleId is null', () => {
-      const error = getIdBulkError({ id: '123', ruleId: null });
-      const expected: BulkError = {
-        id: '123',
-        error: { message: 'id: "123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about ruleId not being found if only ruleId is defined and id is undefined', () => {
-      const error = getIdBulkError({ id: undefined, ruleId: 'rule-id-123' });
-      const expected: BulkError = {
-        rule_id: 'rule-id-123',
-        error: { message: 'rule_id: "rule-id-123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about ruleId not being found if only ruleId is defined and id is null', () => {
-      const error = getIdBulkError({ id: null, ruleId: 'rule-id-123' });
-      const expected: BulkError = {
-        rule_id: 'rule-id-123',
-        error: { message: 'rule_id: "rule-id-123" not found', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when both are undefined', () => {
-      const error = getIdBulkError({ id: undefined, ruleId: undefined });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when both are null', () => {
-      const error = getIdBulkError({ id: null, ruleId: null });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when id is null and ruleId is undefined', () => {
-      const error = getIdBulkError({ id: null, ruleId: undefined });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
-    });
-
-    test('outputs message about both being not defined when id is undefined and ruleId is null', () => {
-      const error = getIdBulkError({ id: undefined, ruleId: null });
-      const expected: BulkError = {
-        rule_id: '(unknown id)',
-        error: { message: 'id or rule_id should have been defined', status_code: 404 },
-      };
-      expect(error).toEqual(expected);
     });
   });
 

@@ -153,7 +153,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.errors[0]).toEqual({
-          rule_id: '(unknown id)',
           error: { status_code: 400, message: 'threshold: Required' },
         });
       });
@@ -177,7 +176,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.errors[0]).toEqual({
-          rule_id: '(unknown id)',
           error: {
             message: 'Number of fields must be 3 or less',
             status_code: 400,
@@ -204,7 +202,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.errors[0]).toEqual({
-          rule_id: '(unknown id)',
           error: {
             message: 'threshold.value: Number must be greater than or equal to 1',
             status_code: 400,
@@ -236,7 +233,6 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.errors[0]).toEqual({
-          rule_id: '(unknown id)',
           error: {
             message: 'Cardinality of a field that is being aggregated on is always 1',
             status_code: 400,
