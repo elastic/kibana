@@ -1,7 +1,7 @@
 # Observability Project config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.includedPluginGroups: ['platform', 'observability']
+plugins.allowlistPluginGroups: ['platform', 'observability']
 
 ## Enabled plugins
 xpack.infra.enabled: true

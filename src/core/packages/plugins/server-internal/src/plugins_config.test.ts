@@ -50,9 +50,9 @@ describe('PluginsConfig', () => {
       initialize: true,
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
-      includedPluginGroups: ['search'],
+      allowlistPluginGroups: ['search'],
     };
     const config = new PluginsConfig(rawConfig, env);
-    expect(config.includedPluginGroups).toEqual(['search']);
+    expect(config.allowlistPluginGroups).toEqual(['search']);
   });
 });

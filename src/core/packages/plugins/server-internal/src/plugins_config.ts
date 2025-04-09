@@ -24,8 +24,9 @@ const configSchema = schema.object({
   paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
   /**
    * Defines an array of groups to include when loading plugins.
+   * Plugins from all groups will be taken into account if the parameter is not provided.
    */
-  includedPluginGroups: schema.maybe(
+  allowlistPluginGroups: schema.maybe(
     schema.arrayOf(
       schema.oneOf(
         KIBANA_GROUPS.map((groupName) => schema.literal(groupName)) as [
@@ -75,15 +76,17 @@ export class PluginsConfig {
   public readonly shouldEnableAllPlugins: boolean;
 
   /**
-   * Specify some plugin groups that should NOT be excluded by the discovery mechanism.
+   * Specify an allowlist of plugin groups.
+   * Allows reducing the amount of plugins that are taken into account.
+   * The list will default to "all plugin groups" if the config is not present.
    */
-  public readonly includedPluginGroups: readonly string[];
+  public readonly allowlistPluginGroups: readonly string[];
 
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
-    this.includedPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS, KIBANA_GROUPS);
+    this.allowlistPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS, KIBANA_GROUPS);
     this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
   }
 }

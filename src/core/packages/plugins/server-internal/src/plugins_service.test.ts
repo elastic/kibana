@@ -138,7 +138,7 @@ async function testSetup() {
   pluginsConfig = {
     initialize: true,
     paths: [],
-    includedPluginGroups: ['observability'],
+    allowlistPluginGroups: ['observability'],
   };
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: pluginsConfig });
   const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
@@ -746,7 +746,7 @@ describe('PluginsService', () => {
       expect(mockDiscover).toHaveBeenCalledWith({
         config: {
           additionalPluginPaths: [],
-          includedPluginGroups: ['observability'],
+          allowlistPluginGroups: ['observability'],
           initialize: true,
           pluginSearchPaths: [
             resolve(REPO_ROOT, '..', 'kibana-extra'),

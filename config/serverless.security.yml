@@ -1,7 +1,7 @@
 # Security Project config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.includedPluginGroups: ['platform', 'security']
+plugins.allowlistPluginGroups: ['platform', 'security']
 
 # Ess plugins
 xpack.securitySolutionEss.enabled: false

@@ -73,10 +73,10 @@ export function discover({
     ),
     filter(
       (pkg) =>
-        // if includedPluginGroups is defined
-        !config.includedPluginGroups ||
+        // if allowlistPluginGroups is defined
+        !config.allowlistPluginGroups ||
         // admit those packages that are part of the included groups
-        config.includedPluginGroups.includes(pkg.getGroup())
+        config.allowlistPluginGroups.includes(pkg.getGroup())
     ),
     map((pkg) => {
       log.debug(`Successfully discovered plugin package "${pkg.id}"`);

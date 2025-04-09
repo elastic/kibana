@@ -654,7 +654,7 @@ describe('plugins discovery system', () => {
       });
     });
 
-    it('does not filter if includedPluginGroups is not specified', async () => {
+    it('does not filter if allowlistPluginGroups is not specified', async () => {
       const foo = getMockPackage('foo');
       const bar = getMockPackage('bar');
       const obs = getMockPackage('obs', 'observability');
@@ -669,7 +669,7 @@ describe('plugins discovery system', () => {
 
       const filteredPluginsConfig: PluginsConfigType = {
         ...pluginConfig,
-        includedPluginGroups: undefined, // we make it explicit to illustrate the purpose of the test
+        allowlistPluginGroups: undefined, // we make it explicit to illustrate the purpose of the test
       };
 
       const { plugin$ } = discover({
@@ -704,7 +704,7 @@ describe('plugins discovery system', () => {
 
       const filteredPluginsConfig: PluginsConfigType = {
         ...pluginConfig,
-        includedPluginGroups: ['platform', 'observability'],
+        allowlistPluginGroups: ['platform', 'observability'],
       };
 
       const { plugin$ } = discover({

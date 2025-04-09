@@ -1,7 +1,7 @@
 # Search Project Config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.includedPluginGroups: ['platform', 'search']
+plugins.allowlistPluginGroups: ['platform', 'search']
 
 xpack.search.enabled: false
 xpack.osquery.enabled: false
