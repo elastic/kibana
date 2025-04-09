@@ -16,8 +16,7 @@ import type { LensApi } from '@kbn/lens-plugin/public';
 import type { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { ActionTypeModel, RuleTypeModel } from '../common';
-import type { TypeRegistry } from '../common/type_registry';
+import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../common';
 
 export interface AlertRuleFromVisUIActionData {
   timeField: string;
@@ -34,15 +33,15 @@ interface Context {
 }
 
 export class AlertRuleFromVisAction implements Action<Context> {
-  private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
-  private actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  private ruleTypeRegistry: RuleTypeRegistryContract;
+  private actionTypeRegistry: ActionTypeRegistryContract;
 
   public type = ALERT_RULE_TRIGGER;
   public id = ALERT_RULE_TRIGGER;
 
   constructor(
-    ruleTypeRegistry: TypeRegistry<RuleTypeModel>,
-    actionTypeRegistry: TypeRegistry<ActionTypeModel>
+    ruleTypeRegistry: RuleTypeRegistryContract,
+    actionTypeRegistry: ActionTypeRegistryContract
   ) {
     this.ruleTypeRegistry = ruleTypeRegistry;
     this.actionTypeRegistry = actionTypeRegistry;
@@ -215,7 +214,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
             [String(sourceField)]: i18n.translate(
               'alertsUIShared.alertRuleFromVis.thresholdPlaceholder',
               {
-                defaultMessage: '{THRESHOLD}',
+                defaultMessage: '[THRESHOLD]',
               }
             ),
           };
@@ -233,7 +232,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
             ...result,
             [String(sourceField)]: [
               i18n.translate('alertsUIShared.alertRuleFromVis.splitValuePlaceholder', {
-                defaultMessage: '{VALUE}',
+                defaultMessage: '[VALUE]',
               }),
             ],
           };
@@ -252,20 +251,20 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
 const missingSourceFieldPlaceholder = i18n.translate(
   'alertsUIShared.alertRuleFromVis.fieldNamePlaceholder',
   {
-    defaultMessage: '{FIELD NAME}',
+    defaultMessage: '[FIELD NAME]',
   }
 );
 
 const missingYFieldPlaceholder = i18n.translate(
   'alertsUIShared.alertRuleFromVis.yAxisPlaceholder',
   {
-    defaultMessage: '{Y AXIS}',
+    defaultMessage: '[Y AXIS]',
   }
 );
 
 const missingXFieldPlaceholder = i18n.translate(
   'alertsUIShared.alertRuleFromVis.xAxisPlaceholder',
   {
-    defaultMessage: '{X AXIS}',
+    defaultMessage: '[X AXIS]',
   }
 );

@@ -81,6 +81,7 @@ function getDefaultLensApiMock() {
     getTypeDisplayName: jest.fn(() => 'Lens'),
     setTitle: jest.fn(),
     setHideTitle: jest.fn(),
+    createAlertRule: jest.fn(),
     phase$: new BehaviorSubject<PhaseEvent | undefined>({
       id: faker.string.uuid(),
       status: 'rendered',

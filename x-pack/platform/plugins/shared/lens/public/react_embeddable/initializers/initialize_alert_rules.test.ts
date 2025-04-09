@@ -5,30 +5,27 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { createUnifiedSearchApi, getLensInternalApiMock } from '../mocks';
 import { initializeAlertRules } from './initialize_alert_rules';
-import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
-import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+
+const ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract> = {
+  has: jest.fn(),
+  register: jest.fn(),
+  get: jest.fn(),
+  list: jest.fn(),
+};
+const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
+  has: jest.fn(),
+  register: jest.fn(),
+  get: jest.fn(),
+  list: jest.fn(),
+};
+const internalApiMock = getLensInternalApiMock();
+const parentApiMock = createUnifiedSearchApi();
 
 describe('Alert rules API', () => {
-  const internalApiMock = getLensInternalApiMock();
-  const parentApiMock = createUnifiedSearchApi();
   const { api } = initializeAlertRules(internalApiMock, parentApiMock);
-  const ruleTypeRegistry: jest.Mocked<PublicMethodsOf<RuleTypeRegistry>> = {
-    has: jest.fn(),
-    register: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-    getAllTypes: jest.fn(),
-    ensureRuleTypeEnabled: jest.fn(),
-  };
-  const actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract> = {
-    has: jest.fn(),
-    register: jest.fn(),
-    get: jest.fn(),
-    list: jest.fn(),
-  };
 
   describe('createAlertRule', () => {
     it('should pass initial values to the rule form and open it', () => {

@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { RuleFormData } from '@kbn/response-ops-rule-form';
+import type { RuleFormData, RuleTypeRegistryContract } from '@kbn/response-ops-rule-form';
 import { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import { apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { getDateRange } from '@kbn/timerange';
 import { TimeRange } from '@kbn/es-query';
 import { unitsMap } from '@kbn/datemath';
-import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { LensAlertRulesApi, LensInternalApi } from '../types';
 
 export function initializeAlertRules(
@@ -22,7 +21,7 @@ export function initializeAlertRules(
     api: {
       createAlertRule: (
         initialValues: Partial<RuleFormData>,
-        ruleTypeRegistry: RuleTypeRegistry,
+        ruleTypeRegistry: RuleTypeRegistryContract,
         actionTypeRegistry: ActionTypeRegistryContract
       ) => {
         const { timeRange$ } = apiPublishesUnifiedSearch(parentApi)
