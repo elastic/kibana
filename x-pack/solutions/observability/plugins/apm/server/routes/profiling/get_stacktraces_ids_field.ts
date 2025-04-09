@@ -7,6 +7,7 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery, kqlQuery } from '@kbn/observability-plugin/server';
 import { isEmpty } from 'lodash';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
   ELASTIC_PROFILER_STACK_TRACE_IDS,
   SERVICE_NAME,
@@ -59,15 +60,15 @@ export async function getStacktracesIdsField({
           { exists: { field: ELASTIC_PROFILER_STACK_TRACE_IDS } },
           { exists: { field: TRANSACTION_PROFILER_STACK_TRACE_IDS } },
         ],
-        minimum_should_match: 1,
       },
     },
   });
 
-  const otelElasticProfilerStackTracesIds =
-    response.hits.hits[0]?.fields[ELASTIC_PROFILER_STACK_TRACE_IDS];
+  const field = unflattenKnownApmEventFields(response.hits.hits[0]?.fields, [
+    ELASTIC_PROFILER_STACK_TRACE_IDS,
+  ]);
 
-  if (!isEmpty(otelElasticProfilerStackTracesIds)) {
+  if (!isEmpty(field.elastic.profiler_stack_trace_ids)) {
     return ELASTIC_PROFILER_STACK_TRACE_IDS;
   }
 
