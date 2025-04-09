@@ -167,8 +167,8 @@ const Template: StoryFn<GraphData> = ({ nodes, edges, interactive }: GraphData) 
     <ThemeProvider theme={{ darkMode: false }}>
       <Graph
         css={css`
-          height: 100%;
-          width: 100%;
+          width: 100vw;
+          height: 100vh;
         `}
         nodes={nodes}
         edges={edges}
