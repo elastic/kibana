@@ -28,7 +28,7 @@ describe('InternalStateStore', () => {
       runtimeStateManager,
       urlStateStorage: createKbnUrlStateStorage(),
     });
-    const tabId = store.getState().tabs.allIds[0];
+    const tabId = store.getState().tabs.unsafeCurrentId;
     expect(selectTab(store.getState(), tabId).dataViewId).toBeUndefined();
     expect(
       selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.value
