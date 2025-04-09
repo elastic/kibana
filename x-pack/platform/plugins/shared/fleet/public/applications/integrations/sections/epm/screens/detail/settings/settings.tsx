@@ -483,7 +483,6 @@ export const SettingsPage: React.FC<Props> = memo(
           {isChangelogModalOpen && (
             <ChangelogModal
               changelog={changelog}
-              breakingChanges={breakingChanges}
               isLoading={isChangelogLoading}
               onClose={toggleChangelogModal}
             />

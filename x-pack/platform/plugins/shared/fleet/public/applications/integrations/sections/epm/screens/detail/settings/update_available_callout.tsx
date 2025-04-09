@@ -11,13 +11,13 @@ import { EuiButton, EuiCallOut, EuiCheckbox, EuiSpacer, useGeneratedHtmlId } fro
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { type ChangelogChange } from '../utils';
+import { type ChangelogEntry } from '../utils';
 
 interface UpdateAvailableCalloutProps {
   version: string;
   toggleChangelogModal: () => void;
   breakingChanges: {
-    changes: ChangelogChange[];
+    changes: ChangelogEntry[];
     isUnderstood: boolean;
     toggleIsUnderstood: () => void;
   };
@@ -34,7 +34,7 @@ export const UpdateAvailableCallout = ({
   const breakingChangesTitleClause = ': Action required due to breaking changes';
 
   const defaultBody = 'Upgrade to version {version} to get the latest features.';
-  const breakingChangeBody =
+  const breakingChangesBody =
     'Version {version} includes new features and breaking changes that may affect your current setup. Please review the changes carefully before upgrading.';
 
   return (
@@ -47,7 +47,7 @@ export const UpdateAvailableCallout = ({
     >
       <FormattedMessage
         id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-        defaultMessage={hasBreakingChanges ? breakingChangeBody : defaultBody}
+        defaultMessage={hasBreakingChanges ? breakingChangesBody : defaultBody}
         values={{
           version,
         }}
