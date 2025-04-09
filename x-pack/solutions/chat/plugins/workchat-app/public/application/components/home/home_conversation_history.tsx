@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useMemo } from 'react';
 import {
   EuiLink,
@@ -10,6 +17,7 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentList } from '../../hooks/use_agent_list';
 import { useConversationList } from '../../hooks/use_conversation_list';
@@ -17,7 +25,6 @@ import { Agent } from '../../../../common/agents';
 import { sortAndGroupConversations } from '../../utils/sort_and_group_conversations';
 import { sliceRecentConversations } from '../../utils/slice_recent_conversations';
 import { appPaths } from '../../app_paths';
-import { i18n } from '@kbn/i18n';
 
 export const HomeConversationHistorySection: React.FC<{}> = () => {
   const { navigateToWorkchatUrl } = useNavigation();
