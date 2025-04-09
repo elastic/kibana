@@ -10,7 +10,7 @@ import { useKibana } from '../../common/lib/kibana';
 import { ASSISTANT_FEATURE_ID, SECURITY_FEATURE_ID } from '../../../common/constants';
 
 export interface UseAssistantAvailability {
-  // True when product_line: 'ai_soc', product_tier: 'search_ai_lake'
+  // True when searchAiLake configurations is available
   hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
