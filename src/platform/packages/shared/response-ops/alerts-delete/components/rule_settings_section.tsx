@@ -12,16 +12,19 @@ import { EuiButton, EuiDescribedFormGroup } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { HttpStart } from '@kbn/core/public';
+import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import * as i18n from '../translations';
 
 const ModalComponent = lazy(() => import('./modal'));
 
 interface AlertDeleteDescriptiveFormGroupProps {
   services: { http: HttpStart };
+  categoryIds: AlertDeleteCategoryIds[];
   isDisabled?: boolean;
 }
 export const AlertDeleteDescriptiveFormGroup = ({
   services: { http },
+  categoryIds,
   isDisabled = false,
 }: AlertDeleteDescriptiveFormGroupProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -61,6 +64,7 @@ export const AlertDeleteDescriptiveFormGroup = ({
           onCloseModal={onCloseModal}
           isVisible={isModalOpen}
           isDisabled={isDisabled}
+          categoryIds={categoryIds}
         />
       </Suspense>
     </>

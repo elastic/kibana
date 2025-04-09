@@ -16,7 +16,7 @@ import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
 
 const http = httpServiceMock.createStartContract();
 
-jest.mock('./api_call', () => ({
+jest.mock('./alert_delete_preview_api_call', () => ({
   alertDeletePreviewApiCall: jest.fn(),
 }));
 
@@ -42,7 +42,7 @@ describe('useAlertDeletePreview', () => {
           isInactiveAlertDeleteEnabled: false,
           activeAlertDeleteThreshold: 10,
           inactiveAlertDeleteThreshold: 0,
-          categoryIds: ['category1'],
+          categoryIds: ['observability'],
         }),
       { wrapper }
     );
@@ -73,7 +73,7 @@ describe('useAlertDeletePreview', () => {
           isInactiveAlertDeleteEnabled: false,
           activeAlertDeleteThreshold: 1,
           inactiveAlertDeleteThreshold: 0,
-          categoryIds: ['category1'],
+          categoryIds: ['securitySolution'],
         }),
       { wrapper }
     );

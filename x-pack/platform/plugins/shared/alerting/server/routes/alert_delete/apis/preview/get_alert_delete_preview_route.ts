@@ -45,10 +45,11 @@ export const alertDeletePreviewRoute = (
         const spaceId = rulesClient.getSpaceId();
         const settings = transformRequestToAlertDeletePreviewV1(req.query);
 
-        const { affectedAlertCount } = await alertDeletionClient.previewTask(
+        const affectedAlertCount = await alertDeletionClient.previewTask(
           settings,
           spaceId || 'default'
         );
+
         const response: AlertDeletePreviewResponseV1 = transformAlertDeletePreviewToResponse({
           affectedAlertCount,
         });

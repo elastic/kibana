@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-export const alertDeleteCategoryIdTypes = {
+export const alertDeleteCategoryIds = {
   OBSERVABILITY: 'observability',
   SECURITY_SOLUTION: 'securitySolution',
   MANAGEMENT: 'management',
 } as const;
+
+export type AlertDeleteCategoryIds =
+  | (typeof alertDeleteCategoryIds)[keyof typeof alertDeleteCategoryIds];

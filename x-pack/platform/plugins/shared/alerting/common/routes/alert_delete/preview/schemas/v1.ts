@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { alertDeleteCategoryIdTypes } from '../../../../constants';
+import { alertDeleteCategoryIds } from '../../../../constants';
 
 export const alertDeletePreviewQuerySchema = schema.object({
   is_active_alert_delete_enabled: schema.boolean({
@@ -36,17 +36,21 @@ export const alertDeletePreviewQuerySchema = schema.object({
         'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value, applies only when deletion is enabled',
     },
   }),
-  category_ids: schema.maybe(
-    schema.nullable(
-      schema.arrayOf(
-        schema.oneOf([
-          schema.literal(alertDeleteCategoryIdTypes.SECURITY_SOLUTION),
-          schema.literal(alertDeleteCategoryIdTypes.OBSERVABILITY),
-          schema.literal(alertDeleteCategoryIdTypes.MANAGEMENT),
-        ])
-      )
-    )
-  ),
+  category_ids: schema.oneOf([
+    schema.arrayOf(
+      schema.oneOf([
+        schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
+        schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
+        schema.literal(alertDeleteCategoryIds.MANAGEMENT),
+      ]),
+      {
+        minSize: 2,
+      }
+    ),
+    schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
+    schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
+    schema.literal(alertDeleteCategoryIds.MANAGEMENT),
+  ]),
 });
 
 export const alertDeletePreviewResponseSchema = schema.object({

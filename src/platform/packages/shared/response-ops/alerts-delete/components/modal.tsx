@@ -27,6 +27,7 @@ import {
 } from '@elastic/eui';
 import { HttpStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import * as i18n from '../translations';
 import { ModalThresholdSelector as ThresholdSelector } from './modal_threshold_selector';
 import {
@@ -69,12 +70,14 @@ const getThresholdErrorMessages = (threshold: number, thresholdUnit: EuiSelectOp
 
 export interface AlertDeleteProps {
   services: { http: HttpStart };
+  categoryIds: AlertDeleteCategoryIds[];
   onCloseModal: () => void;
   isVisible: boolean;
   isDisabled?: boolean;
 }
 export const AlertDeleteModal = ({
   services: { http },
+  categoryIds,
   onCloseModal,
   isVisible,
   isDisabled = false,
@@ -107,6 +110,7 @@ export const AlertDeleteModal = ({
       inactiveState.threshold,
       inactiveState.thresholdUnit
     ),
+    categoryIds,
   });
 
   const errorMessages = {

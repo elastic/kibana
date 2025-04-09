@@ -13,8 +13,10 @@ export const transformRequestToAlertDeletePreview = ({
   is_inactive_alert_delete_enabled: isInactiveAlertDeleteEnabled,
   active_alert_delete_threshold: activeAlertDeleteThreshold,
   inactive_alert_delete_threshold: inactiveAlertDeleteThreshold,
-  category_ids: categoryIds,
+  category_ids: _categoryIds,
 }: AlertDeletePreviewQueryV1): RulesSettingsAlertDeleteProperties => {
+  const categoryIds = Array.isArray(_categoryIds) ? _categoryIds : [_categoryIds];
+
   return {
     isActiveAlertDeleteEnabled,
     isInactiveAlertDeleteEnabled,

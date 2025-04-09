@@ -40,7 +40,11 @@ const DefaultStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
   return isFlyoutVisible ? (
     <EuiFlyout type="push" onClose={closeFlyout} maxWidth={440}>
       <EuiFlyoutBody>
-        <AlertDeleteDescriptiveFormGroup services={{ http }} isDisabled={isDisabled} />
+        <AlertDeleteDescriptiveFormGroup
+          services={{ http }}
+          isDisabled={isDisabled}
+          categoryIds={['management']}
+        />
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : (
@@ -72,6 +76,7 @@ const ModalOnlyStory = ({ isDisabled = false }: { isDisabled?: boolean }) => {
       isVisible={isModalVisible}
       onCloseModal={hideModal}
       isDisabled={isDisabled}
+      categoryIds={['observability']}
     />
   ) : (
     <EuiButton onClick={showModal}>Open Modal</EuiButton>

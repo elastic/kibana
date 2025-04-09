@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
+
 export interface RulesSettingsModificationMetadata {
   createdBy: string | null;
   updatedBy: string | null;
@@ -40,7 +42,7 @@ export interface RulesSettingsAlertDeleteProperties {
   isInactiveAlertDeleteEnabled: boolean;
   activeAlertDeleteThreshold: number;
   inactiveAlertDeleteThreshold: number;
-  categoryIds?: string[] | null;
+  categoryIds: AlertDeleteCategoryIds[];
 }
 
 export interface RulesSettingsProperties {
