@@ -69,7 +69,7 @@ export const EditContextPanel: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonGroup
-                legend="Number of documents sent to LLM"
+                legend="Number of documents sent"
                 isFullWidth={true}
                 buttonSize="compressed"
                 options={[
