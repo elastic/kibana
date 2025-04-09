@@ -87,6 +87,9 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
+                artifacts: {
+                  dashboards: [],
+                },
                 actions: [],
                 params: {},
                 created_by: 'elastic',
@@ -99,7 +102,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 notify_when: 'onThrottleInterval',
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
-                artifacts: { dashboards: [] },
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: match.execution_status,
