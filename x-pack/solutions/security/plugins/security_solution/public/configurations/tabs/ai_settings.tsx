@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import {
-  AIForSOCSettingsManagement,
+  SearchAILakeConfigurationsSettingsManagement,
   CONVERSATIONS_TAB,
   type ManagementSettingsTabs,
 } from '@kbn/elastic-assistant';
@@ -46,7 +46,7 @@ export const AISettings: React.FC = () => {
     navigateToApp('home');
   }
   return (
-    <AIForSOCSettingsManagement
+    <SearchAILakeConfigurationsSettingsManagement
       dataViews={dataViews}
       onTabChange={onTabChange}
       currentTab={currentTab}

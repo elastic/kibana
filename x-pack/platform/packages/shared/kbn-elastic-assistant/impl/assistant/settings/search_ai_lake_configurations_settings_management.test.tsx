@@ -13,7 +13,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AIForSOCSettingsManagement } from './ai_for_soc_settings_management';
+import { SearchAILakeConfigurationsSettingsManagement } from './search_ai_lake_configurations_settings_management';
 
 import {
   CONNECTORS_TAB,
@@ -91,16 +91,19 @@ const wrapper = (props: { children: React.ReactNode }) => (
   </I18nProvider>
 );
 
-describe('AIForSOCSettingsManagement', () => {
+describe('SearchAILakeConfigurationsSettingsManagement', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useAssistantContext as jest.Mock).mockImplementation(() => mockContext);
   });
 
   it('Bottom bar is hidden when no pending changes', async () => {
-    const { queryByTestId } = render(<AIForSOCSettingsManagement {...testProps} />, {
-      wrapper,
-    });
+    const { queryByTestId } = render(
+      <SearchAILakeConfigurationsSettingsManagement {...testProps} />,
+      {
+        wrapper,
+      }
+    );
 
     expect(queryByTestId(`bottom-bar`)).not.toBeInTheDocument();
   });
@@ -115,7 +118,7 @@ describe('AIForSOCSettingsManagement', () => {
   ])('%s', (tab) => {
     it('Opens the tab on button click', () => {
       const { getByTestId } = render(
-        <AIForSOCSettingsManagement {...testProps} currentTab={tab} />,
+        <SearchAILakeConfigurationsSettingsManagement {...testProps} currentTab={tab} />,
         {
           wrapper,
         }
@@ -125,7 +128,7 @@ describe('AIForSOCSettingsManagement', () => {
     });
     it('renders with the correct tab open', () => {
       const { getByTestId } = render(
-        <AIForSOCSettingsManagement {...testProps} currentTab={tab} />,
+        <SearchAILakeConfigurationsSettingsManagement {...testProps} currentTab={tab} />,
         {
           wrapper,
         }

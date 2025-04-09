@@ -31,7 +31,7 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
   const defaultAssistantAvailability: AssistantAvailability = {
-    isAI4SOC: false,
+    hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,

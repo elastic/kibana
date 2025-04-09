@@ -36,7 +36,7 @@ describe('AISettings', () => {
     });
   });
 
-  it('renders the AIForSOCSettingsManagement component wiht default Conversations tab when securityAIAssistantEnabled is true', () => {
+  it('renders the SearchAILakeConfigurationsSettingsManagement component wiht default Conversations tab when securityAIAssistantEnabled is true', () => {
     const { getByTestId } = render(
       <MemoryRouter>
         <TestProviders>
@@ -45,7 +45,7 @@ describe('AISettings', () => {
       </MemoryRouter>
     );
 
-    expect(getByTestId('AIForSOCSettingsManagement')).toBeInTheDocument();
+    expect(getByTestId('SearchAILakeConfigurationsSettingsManagement')).toBeInTheDocument();
     expect(getByTestId(`tab-${CONVERSATIONS_TAB}`)).toBeInTheDocument();
   });
   it('onTabChange calls navigateTo with proper tab', () => {

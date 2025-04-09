@@ -212,7 +212,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           return;
         }
 
-        const isAssistantAvailable =
+        const shouldShowAssistantManagement =
           productFeatureKeys?.has(ProductFeatureAssistantKey.assistant) &&
           !productFeatureKeys?.has(ProductFeatureSecurityKey.configurations) &&
           license?.hasAtLeast('enterprise');
@@ -220,7 +220,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           'securityAiAssistantManagement'
         );
 
-        if (!isAssistantAvailable) {
+        if (!shouldShowAssistantManagement) {
           assistantManagementApp?.disable();
         }
       });

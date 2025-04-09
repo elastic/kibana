@@ -99,7 +99,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     }, [closePopover]);
 
     const handleNavigateToSettings = useCallback(() => {
-      if (assistantAvailability.isAI4SOC) {
+      if (assistantAvailability.hasSearchAILakeConfigurations) {
         navigateToApp('securitySolutionUI', {
           deepLinkId: SecurityPageName.configurationsAiSettings,
         });
@@ -109,7 +109,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           path: 'kibana/securityAiAssistantManagement',
         });
       }
-    }, [assistantAvailability.isAI4SOC, navigateToApp, showAssistantOverlay]);
+    }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
 
     const handleNavigateToAnonymization = useCallback(() => {
       showAnonymizationModal();
@@ -117,7 +117,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
     }, [closePopover, showAnonymizationModal]);
 
     const handleNavigateToKnowledgeBase = useCallback(() => {
-      if (assistantAvailability.isAI4SOC) {
+      if (assistantAvailability.hasSearchAILakeConfigurations) {
         navigateToApp('securitySolutionUI', {
           deepLinkId: SecurityPageName.configurationsAiSettings,
           path: `?tab=${KNOWLEDGE_BASE_TAB}`,
@@ -128,7 +128,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
         });
       }
-    }, [assistantAvailability.isAI4SOC, navigateToApp, showAssistantOverlay]);
+    }, [assistantAvailability.hasSearchAILakeConfigurations, navigateToApp, showAssistantOverlay]);
 
     const handleShowAlertsModal = useCallback(() => {
       showAlertSettingsModal();

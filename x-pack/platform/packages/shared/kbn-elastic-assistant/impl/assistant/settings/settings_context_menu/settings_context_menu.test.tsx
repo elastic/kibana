@@ -128,7 +128,10 @@ describe('SettingsContextMenu', () => {
     const mockNavigateToApp = jest.fn();
     render(
       <TestProviders
-        assistantAvailability={{ ...mockAssistantAvailability, isAI4SOC: true }}
+        assistantAvailability={{
+          ...mockAssistantAvailability,
+          hasSearchAILakeConfigurations: true,
+        }}
         providerContext={{ navigateToApp: mockNavigateToApp }}
       >
         <SettingsContextMenu />
@@ -163,7 +166,10 @@ describe('SettingsContextMenu', () => {
     const mockNavigateToApp = jest.fn();
     render(
       <TestProviders
-        assistantAvailability={{ ...mockAssistantAvailability, isAI4SOC: true }}
+        assistantAvailability={{
+          ...mockAssistantAvailability,
+          hasSearchAILakeConfigurations: true,
+        }}
         providerContext={{ navigateToApp: mockNavigateToApp }}
       >
         <SettingsContextMenu />

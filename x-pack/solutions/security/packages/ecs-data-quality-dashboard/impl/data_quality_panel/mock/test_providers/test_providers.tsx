@@ -48,7 +48,7 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockNavigateToApp = jest.fn();
   const mockAssistantAvailability: AssistantAvailability = {
-    isAI4SOC: false,
+    hasSearchAILakeConfigurations: false,
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
     hasConnectorsReadPrivilege: true,

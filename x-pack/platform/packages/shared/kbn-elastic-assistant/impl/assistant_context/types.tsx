@@ -61,7 +61,7 @@ export interface AssistantTelemetry {
 
 export interface AssistantAvailability {
   // True when product_line: 'ai_soc', product_tier: 'search_ai_lake'
-  isAI4SOC: boolean;
+  hasSearchAILakeConfigurations: boolean;
   // True when user is Enterprise, or Security Complete PLI for serverless. When false, the Assistant is disabled and unavailable
   isAssistantEnabled: boolean;
   // When true, the Assistant is hidden and unavailable

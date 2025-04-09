@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -46,7 +46,7 @@ interface Props {
  * Modal for overall Assistant Settings, including conversation settings, quick prompts, system prompts,
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
-export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
+export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = React.memo(
   ({ dataViews, onTabChange, currentTab }) => {
     const { http, selectedSettingsTab, setSelectedSettingsTab } = useAssistantContext();
 
@@ -105,9 +105,37 @@ export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
         isSelected: t.id === currentTab,
       }));
     }, [onTabChange, currentTab, tabsConfig]);
+
+    const renderTabBody = useCallback(() => {
+      switch (currentTab) {
+        case CONNECTORS_TAB:
+          return <AIForSOCConnectorSettingsManagement />;
+        case SYSTEM_PROMPTS_TAB:
+          return (
+            <SystemPromptSettingsManagement
+              connectors={connectors}
+              defaultConnector={defaultConnector}
+            />
+          );
+        case QUICK_PROMPTS_TAB:
+          return <QuickPromptSettingsManagement />;
+        case ANONYMIZATION_TAB:
+          return <AnonymizationSettingsManagement />;
+        case KNOWLEDGE_BASE_TAB:
+          return <KnowledgeBaseSettingsManagement dataViews={dataViews} />;
+        case CONVERSATIONS_TAB:
+        default:
+          return (
+            <ConversationSettingsManagement
+              connectors={connectors}
+              defaultConnector={defaultConnector}
+            />
+          );
+      }
+    }, [connectors, currentTab, dataViews, defaultConnector]);
     return (
       <EuiFlexGroup
-        data-test-subj="AIForSOCSettingsManagement"
+        data-test-subj="SearchAILakeConfigurationsSettingsManagement"
         css={css`
           margin-top: ${euiTheme.size.l};
         `}
@@ -126,29 +154,11 @@ export const AIForSOCSettingsManagement: React.FC<Props> = React.memo(
             ))}
           </EuiListGroup>
         </EuiFlexItem>
-        <EuiFlexItem data-test-subj={`tab-${currentTab}`}>
-          {currentTab === CONNECTORS_TAB && <AIForSOCConnectorSettingsManagement />}
-          {currentTab === CONVERSATIONS_TAB && (
-            <ConversationSettingsManagement
-              connectors={connectors}
-              defaultConnector={defaultConnector}
-            />
-          )}
-          {currentTab === SYSTEM_PROMPTS_TAB && (
-            <SystemPromptSettingsManagement
-              connectors={connectors}
-              defaultConnector={defaultConnector}
-            />
-          )}
-          {currentTab === QUICK_PROMPTS_TAB && <QuickPromptSettingsManagement />}
-          {currentTab === ANONYMIZATION_TAB && <AnonymizationSettingsManagement />}
-          {currentTab === KNOWLEDGE_BASE_TAB && (
-            <KnowledgeBaseSettingsManagement dataViews={dataViews} />
-          )}
-        </EuiFlexItem>
+        <EuiFlexItem data-test-subj={`tab-${currentTab}`}>{renderTabBody()}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
 );
 
-AIForSOCSettingsManagement.displayName = 'AIForSOCSettingsManagement';
+SearchAILakeConfigurationsSettingsManagement.displayName =
+  'SearchAILakeConfigurationsSettingsManagement';
