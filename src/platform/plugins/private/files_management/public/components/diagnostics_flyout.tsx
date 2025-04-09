@@ -116,6 +116,7 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
                 <h3>{i18nTexts.diagnosticsBreakdownsExtension}</h3>
               </EuiTitle>
               <Chart size={{ height: 200, width: '100%' }}>
+                <Settings baseTheme={chartBaseTheme} />
                 <Axis id="y" position={Position.Left} showOverlappingTicks />
                 <Axis id="x" position={Position.Bottom} showOverlappingTicks />
                 <HistogramBarSeries
