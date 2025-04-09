@@ -32,9 +32,11 @@ export const HeaderTitle = memo(() => {
   const { ruleId, ruleName, timestamp } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
   const title = useMemo(() => getAlertTitle({ ruleName }), [ruleName]);
 
+  const date = useMemo(() => new Date(timestamp), [timestamp]);
+
   return (
     <>
-      {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
+      {timestamp && <PreferenceFormattedDate value={date} />}
       <EuiSpacer size="xs" />
       <FlyoutTitle data-test-subj={HEADER_TITLE_TEST_ID} title={title} iconType={'warning'} />
       <EuiSpacer size="m" />
