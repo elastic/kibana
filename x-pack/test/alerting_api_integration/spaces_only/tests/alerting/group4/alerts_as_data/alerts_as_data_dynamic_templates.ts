@@ -132,7 +132,7 @@ export default function createAlertsAsDataDynamicTemplatesTest({ getService }: F
       });
     });
 
-    describe.only('index field limits', () => {
+    describe('index field limits', () => {
       afterEach(async () => {
         await es.indices.delete({
           index: 'index-fields-limit-test-index',
