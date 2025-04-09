@@ -7,10 +7,8 @@
 
 import { SavedObjectsType } from '@kbn/core/server';
 import { SEARCH_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-
+import { PLAYGROUND_SAVED_OBJECT_TYPE } from '../../common';
 import { playgroundAttributesSchema } from './schema/v1/v1';
-
-export const PLAYGROUND_SAVED_OBJECT_TYPE = 'searchPlayground';
 
 export const createPlaygroundSavedObjectType = (): SavedObjectsType => ({
   name: PLAYGROUND_SAVED_OBJECT_TYPE,

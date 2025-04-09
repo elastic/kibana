@@ -23,11 +23,13 @@ import {
   SearchPlaygroundPluginStartDependencies,
 } from './types';
 import { defineRoutes } from './routes';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import {
-  createPlaygroundSavedObjectType,
+  PLAYGROUND_PRIVILEGES,
+  PLUGIN_ID,
+  PLUGIN_NAME,
   PLAYGROUND_SAVED_OBJECT_TYPE,
-} from './playground_saved_object/playground_saved_object';
+} from '../common';
+import { createPlaygroundSavedObjectType } from './playground_saved_object/playground_saved_object';
 
 export class SearchPlaygroundPlugin
   implements
@@ -70,7 +72,13 @@ export class SearchPlaygroundPlugin
       privileges: {
         all: {
           app: ['kibana', PLUGIN_ID],
-          api: [PLUGIN_ID],
+          api: [
+            PLUGIN_ID,
+            PLAYGROUND_PRIVILEGES.create,
+            PLAYGROUND_PRIVILEGES.read,
+            PLAYGROUND_PRIVILEGES.update,
+            PLAYGROUND_PRIVILEGES.delete,
+          ],
           catalogue: [PLUGIN_ID],
           savedObject: {
             all: [PLAYGROUND_SAVED_OBJECT_TYPE],
@@ -80,6 +88,7 @@ export class SearchPlaygroundPlugin
         },
         read: {
           disabled: true,
+          api: [PLUGIN_ID, PLAYGROUND_PRIVILEGES.read],
           savedObject: {
             all: [],
             read: [PLAYGROUND_SAVED_OBJECT_TYPE],
