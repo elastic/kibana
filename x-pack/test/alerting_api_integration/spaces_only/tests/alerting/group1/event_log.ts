@@ -41,6 +41,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   // FLAKY: https://github.com/elastic/kibana/issues/209911
+  // FLAKY: https://github.com/elastic/kibana/issues/217356
   describe.skip('eventLog', () => {
     const objectRemover = new ObjectRemover(supertest);
 
