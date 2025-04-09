@@ -30,6 +30,10 @@ import type { SecuritySubPluginRoutes } from '../app/types';
 import { RulesLandingPage } from './landing';
 import { CoverageOverviewPage } from '../detection_engine/rule_management_ui/pages/coverage_overview';
 import { RuleDetailTabs } from '../detection_engine/rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import {
+  SecurityRoutePageWrapper,
+  withSecurityRoutePageWrapper,
+} from '../common/components/security_route_page_wrapper';
 
 const RulesSubRoutes = [
   {
@@ -64,7 +68,7 @@ const RulesContainerComponent: React.FC = () => {
 
   return (
     <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.rules}>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.rules} redirectOnMissing omitSpyRoute>
         <Routes>
           <Route // Redirect to first tab if none specified
             path="/rules/id/:detailName"
@@ -99,7 +103,7 @@ const RulesContainerComponent: React.FC = () => {
           <Route component={NotFoundPage} />
           <SpyRoute pageName={SecurityPageName.rules} />
         </Routes>
-      </TrackApplicationView>
+      </SecurityRoutePageWrapper>
     </PluginTemplateWrapper>
   );
 };
@@ -117,7 +121,9 @@ const CoverageOverviewRoutes = () => (
 export const routes: SecuritySubPluginRoutes = [
   {
     path: RULES_LANDING_PATH,
-    component: RulesLandingPage,
+    component: withSecurityRoutePageWrapper(RulesLandingPage, SecurityPageName.rulesLanding, {
+      redirectOnMissing: true,
+    }),
   },
   {
     path: RULES_PATH,
@@ -125,6 +131,12 @@ export const routes: SecuritySubPluginRoutes = [
   },
   {
     path: COVERAGE_OVERVIEW_PATH,
-    component: CoverageOverviewRoutes,
+    component: withSecurityRoutePageWrapper(
+      CoverageOverviewRoutes,
+      SecurityPageName.coverageOverview,
+      {
+        redirectOnMissing: true,
+      }
+    ),
   },
 ];
