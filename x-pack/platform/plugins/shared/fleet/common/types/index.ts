@@ -83,6 +83,9 @@ export interface FleetConfigType {
     };
   };
   createArtifactsBulkBatchSize?: number;
+  autoUpgrades?: {
+    retryDelays?: string[];
+  };
 }
 
 // Calling Object.entries(PackagesGroupedByStatus) gave `status: string`

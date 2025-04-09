@@ -9,10 +9,7 @@
 
 import Boom from '@hapi/boom';
 import { tagsToFindOptions } from '@kbn/content-management-utils';
-import {
-  SavedObjectsFindOptions,
-  SavedObjectsFindResult,
-} from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
 import { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
@@ -48,11 +45,12 @@ const searchArgsToSOFindOptions = (
   return {
     type: DASHBOARD_SAVED_OBJECT_TYPE,
     searchFields: options?.onlyTitle ? ['title'] : ['title^3', 'description'],
-    fields: options?.fields ?? ['title', 'description', 'timeRestore'],
+    fields: options?.fields,
     search: query.text,
     perPage: query.limit,
     page: query.cursor ? +query.cursor : undefined,
     defaultSearchOperator: 'AND',
+    namespaces: options?.spaces,
     ...tagsToFindOptions(query.tags),
   };
 };
@@ -79,46 +77,6 @@ export class DashboardStorage {
     this.savedObjectsTagging = savedObjectsTagging;
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
-    this.mSearch = {
-      savedObjectType: DASHBOARD_SAVED_OBJECT_TYPE,
-      additionalSearchFields: [],
-      toItemResult: (ctx: StorageContext, savedObject: SavedObjectsFindResult): DashboardItem => {
-        const transforms = ctx.utils.getTransforms(cmServicesDefinition);
-
-        const { item, error: itemError } = savedObjectToItem(
-          savedObject as SavedObjectsFindResult<DashboardSavedObjectAttributes>,
-          false
-        );
-        if (itemError) {
-          throw Boom.badRequest(`Invalid response. ${itemError.message}`);
-        }
-
-        const validationError = transforms.mSearch.out.result.validate(item);
-        if (validationError) {
-          if (this.throwOnResultValidationError) {
-            throw Boom.badRequest(`Invalid response. ${validationError.message}`);
-          } else {
-            this.logger.warn(`Invalid response. ${validationError.message}`);
-          }
-        }
-
-        // Validate DB response and DOWN transform to the request version
-        const { value, error: resultError } = transforms.mSearch.out.result.down<
-          DashboardItem,
-          DashboardItem
-        >(
-          item,
-          undefined, // do not override version
-          { validate: false } // validation is done above
-        );
-
-        if (resultError) {
-          throw Boom.badRequest(`Invalid response. ${resultError.message}`);
-        }
-
-        return value;
-      },
-    };
   }
 
   private logger: Logger;

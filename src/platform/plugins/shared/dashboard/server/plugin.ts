@@ -49,6 +49,7 @@ interface StartDeps {
 export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
+  private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -142,7 +143,9 @@ export class DashboardPlugin
         });
     }
 
-    return {};
+    return {
+      contentClient: this.contentClient,
+    };
   }
 
   public stop() {}
