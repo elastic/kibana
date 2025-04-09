@@ -68,6 +68,7 @@ import { getAlertSummaryWidgetLazy } from './common/get_rule_alerts_summary';
 import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
 
 import type {
   ActionTypeModel,
@@ -415,7 +416,6 @@ export class Plugin
 
   public start(core: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     const createAlertRuleAction = async () => {
-      const { AlertRuleFromVisAction } = await import('@kbn/alerts-ui-shared');
       const action = new AlertRuleFromVisAction(this.ruleTypeRegistry, this.actionTypeRegistry);
       return action;
     };
