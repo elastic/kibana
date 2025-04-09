@@ -8,9 +8,9 @@
 import React, { useState } from 'react';
 import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { InstalledPackageUIPackageListItem } from '../types';
-import { FormattedMessage } from 'react-intl';
 
 export const ConfirmBulkUninstallModal: React.FunctionComponent<{
   selectedItems: InstalledPackageUIPackageListItem[];

@@ -9,8 +9,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useState } from 'react';
 
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
-
 import { epmRouteService, isVerificationError } from '../../services';
 import type {
   GetCategoriesRequest,
