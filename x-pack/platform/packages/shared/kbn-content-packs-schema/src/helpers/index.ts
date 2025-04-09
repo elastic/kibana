@@ -143,7 +143,7 @@ function traverseLensPanel(panel: LensAttributes, options: TraverseOptions) {
   return panel;
 }
 
-function replaceESQLIndexPattern(esql: string, replacements: Record<string, string>) {
+export function replaceESQLIndexPattern(esql: string, replacements: Record<string, string>) {
   const query = EsqlQuery.fromSrc(esql);
   const sourceCommand = query.ast.commands.find(({ name }) => ['from', 'metrics'].includes(name));
   const args = (sourceCommand?.args ?? []) as ESQLSource[];
