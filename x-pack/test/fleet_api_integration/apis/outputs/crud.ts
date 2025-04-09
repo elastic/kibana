@@ -792,6 +792,35 @@ export default function (providerContext: FtrProviderContext) {
         }
       });
 
+      it('should allow to update kibana_api_key on an existing remote_elasticsearch output', async function () {
+        const res = await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Remote Output With kibana_api_key',
+            type: 'remote_elasticsearch',
+            hosts: ['https://test.fr:443'],
+            sync_integrations: true,
+            kibana_url: 'https://testhost',
+            kibana_api_key: 'aaaa',
+          })
+          .expect(200);
+        const outputId = res.body.item.id;
+        const updatedRes = await supertest
+          .put(`/api/fleet/outputs/${outputId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Remote Output With kibana_api_key',
+            type: 'remote_elasticsearch',
+            hosts: ['https://test.fr:443'],
+            sync_integrations: true,
+            kibana_url: 'https://testhost',
+            kibana_api_key: 'bbbb',
+          })
+          .expect(200);
+        expect(updatedRes.body.item.kibana_api_key).to.equal('bbbb');
+      });
+
       it('should bump all policies in all spaces if updating the default output', async () => {
         const { body: nonDefaultOutput } = await supertest
           .post(`/api/fleet/outputs`)
@@ -1791,6 +1820,21 @@ export default function (providerContext: FtrProviderContext) {
                 key: 'KEY',
               },
             },
+          })
+          .expect(200);
+      });
+
+      it('should allow to create a new remote_elasticsearch output with kibana_api_key field', async function () {
+        await supertest
+          .post(`/api/fleet/outputs`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'My remote ES Output',
+            type: 'remote_elasticsearch',
+            hosts: ['https://test.fr:443'],
+            sync_integrations: true,
+            kibana_url: 'https://testhost',
+            kibana_api_key: 'aaaa',
           })
           .expect(200);
       });
