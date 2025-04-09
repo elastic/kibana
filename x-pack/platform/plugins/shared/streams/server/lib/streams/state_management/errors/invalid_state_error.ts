@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiTitle } from '@elastic/eui';
-import React from 'react';
 
-export function StreamsAppPageHeaderTitle({ title }: { title: React.ReactNode }) {
-  return (
-    <EuiTitle size="l">
-      <h1>{title}</h1>
-    </EuiTitle>
-  );
+import { StatusError } from '../../errors/status_error';
+
+export class InvalidStateError extends StatusError {
+  constructor(message: string) {
+    super(message, 400);
+    this.name = 'InvalidStateError';
+  }
 }

@@ -121,7 +121,7 @@ export const KibanaDeprecationsTable: React.FunctionComponent<Props> = ({
       truncateText: true,
       sortable: true,
       render: (level: KibanaDeprecationDetails['level']) => {
-        return <DeprecationBadge isCritical={level === 'critical'} />;
+        return <DeprecationBadge level={level} />;
       },
     },
     {
