@@ -12,8 +12,11 @@ import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
+  TRANSACTION_NAME_FIELD,
+  TRANSACTION_TYPE_FIELD,
   getTraceDocumentOverview,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
@@ -22,7 +25,6 @@ import { getTransactionFieldConfiguration } from './resources/get_transaction_fi
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 import { RootTransactionProvider } from './hooks/use_root_transaction/use_root_transaction';
-import { useLatencyChart } from './hooks/use_latency_chart';
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
 };
@@ -74,7 +76,16 @@ export function TransactionOverview({
           {transactionDuration && (
             <>
               <EuiSpacer size="m" />
-              <TransactionDurationSummary duration={transactionDuration} />
+              <TransactionDurationSummary
+                transaction={{
+                  duration: transactionDuration,
+                  type: parsedDoc[TRANSACTION_TYPE_FIELD] || '', // TODO split getTraceDocumentOverview in span and transaction?
+                  name: parsedDoc[TRANSACTION_NAME_FIELD] || '',
+                }}
+                service={{
+                  name: parsedDoc[SERVICE_NAME_FIELD],
+                }}
+              />
             </>
           )}
         </EuiPanel>
