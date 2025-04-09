@@ -6,12 +6,17 @@
  */
 
 export {
-  type McpTool,
+  type McpServerTool,
   type McpClient,
-  type McpProvider,
-  type McpClientFactoryFn,
-  toolResult,
+  type McpClientProvider,
+  type McpClientConnectFn,
 } from './src/mcp';
+export {
+  type ToolContentResult,
+  type ContentResultTransportFormat,
+  isContentResultTransportFormat,
+  toolResultFactory,
+} from './src/tool_result';
 export {
   getConnectToInternalServer,
   getConnectToExternalServer,

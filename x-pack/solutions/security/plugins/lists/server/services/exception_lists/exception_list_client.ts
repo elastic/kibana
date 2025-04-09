@@ -1049,32 +1049,21 @@ export class ExceptionListClient {
    * @param options.includeExpiredExceptions include or exclude expired TTL exception items
    * @returns the ndjson of the list and items to export or null if none exists
    */
-  public exportExceptionListAndItems = async ({
-    listId,
-    id,
-    namespaceType,
-    includeExpiredExceptions,
-  }: ExportExceptionListAndItemsOptions): Promise<ExportExceptionListAndItemsReturn | null> => {
+  public exportExceptionListAndItems = async (
+    options: ExportExceptionListAndItemsOptions
+  ): Promise<ExportExceptionListAndItemsReturn | null> => {
     const { savedObjectsClient } = this;
 
     if (this.enableServerExtensionPoints) {
       await this.serverExtensionsClient.pipeRun(
         'exceptionsListPreExport',
-        {
-          id,
-          includeExpiredExceptions,
-          listId,
-          namespaceType,
-        },
+        options,
         this.getServerExtensionCallbackContext()
       );
     }
 
     return exportExceptionListAndItems({
-      id,
-      includeExpiredExceptions,
-      listId,
-      namespaceType,
+      ...options,
       savedObjectsClient,
     });
   };
