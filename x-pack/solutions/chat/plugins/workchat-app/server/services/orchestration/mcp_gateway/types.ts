@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type { Tool } from '@modelcontextprotocol/sdk/types.js';
+import type { CallToolRequest } from '@modelcontextprotocol/sdk/types.js';
 import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 
-export type IntegrationToolInputSchema = Tool['inputSchema'];
+export type GatewayToolInputSchema = CallToolRequest['params']['arguments'];
 
-export interface IntegrationTool {
-  name: string;
-  description: string;
-  inputSchema: JsonSchemaObject;
-}
-
-export interface IntegrationTool {
+export interface GatewayTool {
   name: string;
   description: string;
   inputSchema: JsonSchemaObject;
