@@ -7,13 +7,14 @@
 
 import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { ComparatorFns } from '@kbn/response-ops-rule-params/common/utils';
+import { ComparatorFns, TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUES,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
+import { DATASET_QUALITY_DATASTREAM_NAME } from '../../common/constants';
 import { THRESHOLD_MET_GROUP } from '../../common/alerting/constants';
 import { INDEX, _IGNORED } from '../../common/es_fields';
 import { generateContext } from './context';
@@ -26,7 +27,6 @@ import {
   type DatasetQualityAllowedActionGroups,
   type DatasetQualityRuleParams,
   type DatasetQualityRuleTypeState,
-  type TimeUnitChar,
 } from './types';
 import { getDocsStats } from './get_docs_stats';
 
@@ -114,7 +114,7 @@ export const getRuleExecutor = () =>
           const fieldName = (params.groupBy ?? [])[i];
           return {
             ...acc,
-            [fieldName === INDEX ? 'dataStream' : fieldName]: `${field}`, // _index is reserved for the actual alerts index
+            [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: `${field}`, // _index is reserved for the actual alerts index
           };
         }, {});
 

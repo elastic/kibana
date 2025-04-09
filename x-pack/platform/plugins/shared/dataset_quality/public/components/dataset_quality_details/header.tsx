@@ -65,7 +65,7 @@ export function Header() {
 
   const createMenuItems = [
     {
-      name: i18n.translate('xpack.ingestPipelines.list.table.createPipelineButtonLabel', {
+      name: i18n.translate('xpack.datasetQuality.header.actions.createAlert', {
         defaultMessage: 'Create alert',
       }),
       icon: 'bell',

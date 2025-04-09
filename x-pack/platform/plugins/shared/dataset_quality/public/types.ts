@@ -37,6 +37,8 @@ export interface DatasetQualityPluginStart {
 }
 
 export interface DatasetQualityStartDeps {
+  alerting: AlertingPublicStart;
+  charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
@@ -44,10 +46,8 @@ export interface DatasetQualityStartDeps {
   fieldsMetadata: FieldsMetadataPublicStart;
   lens: LensPublicStart;
   share: SharePluginStart;
-  unifiedSearch: UnifiedSearchPublicPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
-  charts: ChartsPluginStart;
-  alerting: AlertingPublicStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 export interface DatasetQualitySetupDeps {

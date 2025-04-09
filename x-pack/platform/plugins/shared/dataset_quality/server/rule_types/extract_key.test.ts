@@ -11,10 +11,10 @@ describe('extractKey', () => {
   it('returns empty if "_index" is not part of the groupBy', async () => {
     const result = extractKey({
       groupBy: ['host.name', 'source.ip'],
-      bucketKey: [],
+      bucketKey: ['.ds-logs-custom-default-2025.04.08-000001', '127.0.0.1'],
     });
 
-    expect(result).toEqual([]);
+    expect(result).toEqual(['.ds-logs-custom-default-2025.04.08-000001', '127.0.0.1']);
   });
 
   describe('when "_index" is part of the groupBy', () => {

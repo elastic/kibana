@@ -53,7 +53,7 @@ export function RuleConditionChart({
 
   const { loading, data, status } = useFetcher(() => {
     if (dataView && timeRange.from && timeRange.to) {
-      return http?.get<PreviewChartResponse>(
+      return http.get<PreviewChartResponse>(
         '/internal/dataset_quality/rule_types/degraded_docs/chart_preview',
         {
           query: {

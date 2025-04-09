@@ -10,7 +10,7 @@ import { extractIndexNameFromBackingIndex } from '../../common/utils';
 
 /**
  * Extracts the key from the bucket key based on the groupBy fields.
- * If "_index" is not part of the groupBy, an empty array is returned.
+ * If "_index" is not part of the groupBy, bucketKey is returned.
  * Otherwise, it replaces the "_index" value in the bucketKey with the actual dataStream name.
  *
  * @param {Object} params - The parameters object.
@@ -29,7 +29,7 @@ export const extractKey = ({
   bucketKey: string[];
 }): string[] => {
   if (!groupBy.includes(INDEX)) {
-    return [];
+    return bucketKey;
   }
 
   const dataStreamIndex = groupBy.findIndex((group) => group === INDEX);

@@ -27,6 +27,7 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useEffect, useMemo, useState } from 'react';
+import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
 import { Maybe, TimeLabelForData, getDomain } from './chart_preview_helper';
 
 function getTimeZone(uiSettings?: IUiSettingsClient) {
@@ -37,8 +38,6 @@ function getTimeZone(uiSettings?: IUiSettingsClient) {
 
   return kibanaTimeZone;
 }
-
-export type TimeUnitChar = 's' | 'm' | 'h' | 'd';
 
 interface ChartPreviewProps {
   yTickFormat?: TickFormatter;

@@ -30,7 +30,7 @@ export const rangeRt = t.type({
   end: isoToEpochRt,
 });
 
-export const groupByRt = new t.Type<string[], string[], unknown>(
+export const groupByRt = new t.Type<string[], string, unknown>(
   'groupByRt',
   (input: unknown): input is string[] =>
     Array.isArray(input) && input.every((value) => typeof value === 'string'),

@@ -36,5 +36,3 @@ export const ALERT_EVALUATION_CONDITIONS = `${ALERT_NAMESPACE}.evaluation.condit
 export interface AdditionalContext {
   [x: string]: any;
 }
-
-export type TimeUnitChar = 's' | 'm' | 'h' | 'd';

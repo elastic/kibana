@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 
-export const DATASET_QUALITY_AAD_FIELDS = [];
+export const DATASET_QUALITY_AAD_FIELDS = ['_dataStream'];
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';
 export const THRESHOLD_MET_GROUP = {

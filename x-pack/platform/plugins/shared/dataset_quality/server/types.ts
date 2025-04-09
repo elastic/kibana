@@ -16,19 +16,19 @@ import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-
 import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
 
 export interface DatasetQualityPluginSetupDependencies {
-  fleet: FleetSetupContract;
-  telemetry: TelemetryPluginSetup;
-  taskManager: TaskManagerSetupContract;
-  usageCollection?: UsageCollectionSetup;
   alerting?: AlertingServerSetup;
+  fleet: FleetSetupContract;
+  taskManager: TaskManagerSetupContract;
+  telemetry: TelemetryPluginSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 export interface DatasetQualityPluginStartDependencies {
-  fleet: FleetStartContract;
-  telemetry: TelemetryPluginStart;
-  taskManager: TaskManagerStartContract;
-  usageCollection?: UsageCollectionStart;
   alerting?: AlertingServerStart;
+  fleet: FleetStartContract;
+  taskManager: TaskManagerStartContract;
+  telemetry: TelemetryPluginStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

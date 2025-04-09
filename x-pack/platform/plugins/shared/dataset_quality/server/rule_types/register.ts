@@ -28,7 +28,7 @@ import {
   DatasetQualityAllowedActionGroups,
 } from './types';
 
-export const DATASET_QUALITY_REGISTRATION_CONTEXT = 'observability.datasetQuality';
+export const DATASET_QUALITY_REGISTRATION_CONTEXT = 'datasetQuality';
 
 export function DatasetQualityRuleType(): RuleType<
   DatasetQualityRuleParams,
@@ -45,8 +45,8 @@ export function DatasetQualityRuleType(): RuleType<
     name: i18n.translate('xpack.datasetQuality.rule.name', {
       defaultMessage: 'Dataset quality',
     }),
-    // List of fields available in the alert document
-    fieldsForAAD: DATASET_QUALITY_AAD_FIELDS, // What is this? AAD (save info and show later, not trigger and forget) Define specific mapping (data_stream.name, etc)
+    solution: 'stack',
+    fieldsForAAD: DATASET_QUALITY_AAD_FIELDS,
     validate: {
       params: datasetQualityParamsSchema,
     },
@@ -60,7 +60,7 @@ export function DatasetQualityRuleType(): RuleType<
     actionGroups: [THRESHOLD_MET_GROUP],
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
-    minimumLicenseRequired: 'basic', // TODO: Update license
+    minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: getRuleExecutor(),
     doesSetRecoveryContext: true,
@@ -76,7 +76,7 @@ export function DatasetQualityRuleType(): RuleType<
       ],
     },
     alerts: {
-      context: 'stack1',
+      context: DATASET_QUALITY_REGISTRATION_CONTEXT,
       mappings: {
         fieldMap: {
           [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
