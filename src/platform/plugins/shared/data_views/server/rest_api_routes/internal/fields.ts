@@ -26,7 +26,7 @@ export function calculateHash(srcBuffer: Buffer) {
   return hash.digest('hex');
 }
 
-const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
+export const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
@@ -44,6 +44,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       allow_no_index: allowNoIndex,
       include_unmapped: includeUnmapped,
       field_types: fieldTypes,
+      allow_hidden: allowHidden,
     } = request.query;
 
     let parsedFields: string[] = [];
@@ -67,6 +68,7 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
           allow_no_indices: allowNoIndex || false,
           includeUnmapped,
         },
+        allowHidden,
         fieldTypes: parsedFieldTypes,
         ...(parsedFields.length > 0 ? { fields: parsedFields } : {}),
       });
