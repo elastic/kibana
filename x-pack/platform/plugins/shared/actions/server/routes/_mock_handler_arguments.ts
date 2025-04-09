@@ -9,6 +9,7 @@ import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { identity } from 'lodash';
 import type { MethodKeysOf } from '@kbn/utility-types';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ActionsRequestHandlerContext } from '../types';
 import { actionsClientMock } from '../mocks';
 import type { ActionsClientMock } from '../actions_client/actions_client.mock';
@@ -17,8 +18,13 @@ import type { ConnectorType } from '../application/connector/types';
 export function mockHandlerArguments(
   {
     actionsClient = actionsClientMock.create(),
+    esClient = elasticsearchClientMock.createInternalClient(),
     listTypes: listTypesRes = [],
-  }: { actionsClient?: ActionsClientMock; listTypes?: ConnectorType[] },
+  }: {
+    actionsClient?: ActionsClientMock;
+    esClient?: ReturnType<typeof elasticsearchClientMock.createInternalClient>;
+    listTypes?: ConnectorType[];
+  },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
 ): [ActionsRequestHandlerContext, KibanaRequest<unknown, unknown, unknown>, KibanaResponseFactory] {
@@ -37,6 +43,13 @@ export function mockHandlerArguments(
               create: jest.fn(),
             }
           );
+        },
+      },
+      core: {
+        elasticsearch: {
+          client: {
+            asInternalUser: esClient,
+          },
         },
       },
     } as unknown as ActionsRequestHandlerContext,
