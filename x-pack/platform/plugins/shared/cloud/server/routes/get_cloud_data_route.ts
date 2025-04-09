@@ -42,7 +42,7 @@ export const setGetCloudSolutionDataRoute = ({ router }: RouteOptions) => {
           );
           return response.ok({ body: cloudDataSo?.attributes ?? null });
         } catch (err) {
-          return response.notFound()
+          return response.notFound();
         }
       }
     );
