@@ -5,18 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiImage,
-  EuiLink,
-  EuiLoadingSpinner,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiImage, EuiLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
+import { useSvgIllustration } from '@kbn/shared-svg';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { ENVIRONMENT_ALL_VALUE } from '../../../../../common/environment_filter_values';
@@ -33,7 +26,6 @@ const pageHeader = {
 
 export function EntityLink() {
   const router = useApmRouter({ prependBasePath: false });
-  const { colorMode } = useEuiTheme();
   const { services } = useKibana<ApmPluginStartDeps>();
   const { observabilityShared, data } = services;
   const timeRange = data.query.timefilter.timefilter.getTime();
@@ -52,7 +44,7 @@ export function EntityLink() {
   const { data: hasApmData, status: hasApmDataStatus } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');
   }, []);
-
+  const dashboardIllustration = useSvgIllustration('dashboards');
   if (serviceEntitySummaryStatus === FETCH_STATUS.LOADING || isPending(hasApmDataStatus)) {
     return <EuiLoadingSpinner data-test-subj="apmEntityLinkLoadingSpinner" />;
   }
@@ -68,13 +60,7 @@ export function EntityLink() {
       <ObservabilityPageTemplate pageHeader={pageHeader}>
         <EuiEmptyPrompt
           data-test-subj="apmEntityLinkEEMCallout"
-          icon={
-            <EuiImage
-              size="fullWidth"
-              src={colorMode === 'DARK' ? dashboardsDark : dashboardsLight}
-              alt=""
-            />
-          }
+          icon={<EuiImage size="fullWidth" src={dashboardIllustration} alt="" />}
           title={
             <h2>
               {i18n.translate('xpack.apm.entityLink.eemGuide.title', {

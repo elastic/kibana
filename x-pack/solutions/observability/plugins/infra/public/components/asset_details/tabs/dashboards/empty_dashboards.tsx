@@ -7,23 +7,20 @@
 import React from 'react';
 import { EuiEmptyPrompt, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { dashboardsDark, dashboardsLight } from '@kbn/shared-svg';
-import { useIsDarkMode } from '../../../../hooks/use_is_dark_mode';
+import { useSvgIllustration } from '@kbn/shared-svg';
 
 interface Props {
   actions: React.ReactNode;
 }
 
 export function EmptyDashboards({ actions }: Props) {
-  const isDarkMode = useIsDarkMode();
+  const dashboardIllustration = useSvgIllustration('dashboards');
 
   return (
     <EuiEmptyPrompt
       hasShadow={false}
       hasBorder={false}
-      icon={
-        <EuiImage size="fullWidth" src={isDarkMode ? dashboardsDark : dashboardsLight} alt="" />
-      }
+      icon={<EuiImage size="fullWidth" src={dashboardIllustration} alt="" />}
       title={
         <h2>
           {i18n.translate('xpack.infra.assetDetails.dashboards.emptyTitle', {

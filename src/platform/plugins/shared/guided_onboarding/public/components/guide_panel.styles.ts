@@ -16,12 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { UseEuiTheme } from '@elastic/eui/src/services/theme/hooks';
-import {
-  guidedOnboardingPanelBgTop,
-  guidedOnboardingPanelBgTopDark,
-  guidedOnboardingPanelBgBottom,
-  guidedOnboardingPanelBgBottomDark,
-} from '@kbn/shared-svg';
 
 /**
  *
@@ -32,10 +26,12 @@ import {
  */
 export const getGuidePanelStyles = ({
   euiThemeContext,
-  isDarkTheme,
+  topBgIllustration,
+  bottomBgIllustration,
 }: {
   euiThemeContext: UseEuiTheme;
-  isDarkTheme: boolean;
+  topBgIllustration: string;
+  bottomBgIllustration: string;
 }) => {
   const euiTheme = euiThemeContext.euiTheme;
   const flyoutContainerBase = css`
@@ -68,9 +64,7 @@ export const getGuidePanelStyles = ({
     flyoutOverrides: {
       flyoutContainer: css`
         ${flyoutContainerBase};
-        background: ${euiTheme.colors.emptyShade}
-          url(${isDarkTheme ? guidedOnboardingPanelBgTopDark : guidedOnboardingPanelBgTop}) top
-          right no-repeat;
+        background: ${euiTheme.colors.emptyShade} url(${topBgIllustration}) top right no-repeat;
         padding: 0;
       `,
       flyoutContainerError: css`
@@ -116,10 +110,7 @@ export const getGuidePanelStyles = ({
       `,
       flyoutFooter: css`
         border-radius: 0 0 6px 6px;
-        background: url(${isDarkTheme
-            ? guidedOnboardingPanelBgBottomDark
-            : guidedOnboardingPanelBgBottom})
-          0 36px no-repeat;
+        background: url(${bottomBgIllustration}) 0 36px no-repeat;
         padding: 24px 30px;
         height: 125px;
         flex-grow: 0;

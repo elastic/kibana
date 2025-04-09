@@ -14,7 +14,7 @@ import type { Observable } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-
+import { useSvgIllustration } from '@kbn/shared-svg';
 import { ApplicationStart, CoreTheme, NotificationsStart } from '@kbn/core/public';
 import type { GuideState, GuideStep as GuideStepStatus } from '@kbn/guided-onboarding';
 
@@ -58,12 +58,13 @@ export const GuidePanel = ({ api, application, notifications, theme$ }: GuidePan
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { darkMode: isDarkTheme } = useObservable(theme$, { darkMode: false, name: 'amsterdam' });
 
-  const styles = getGuidePanelStyles({ euiThemeContext, isDarkTheme });
+  const topBgIllustration = useSvgIllustration('guidedOnboardingPanelBgTop');
+  const bottomBgIllustration = useSvgIllustration('guidedOnboardingPanelBgBottom');
 
+  const styles = getGuidePanelStyles({ euiThemeContext, topBgIllustration, bottomBgIllustration });
   const toggleGuide = () => {
     setIsGuideOpen((prevIsGuideOpen) => !prevIsGuideOpen);
   };
-
   const handleStepButtonClick = useCallback(
     async (step: GuideStepStatus, stepConfig: StepConfig) => {
       if (pluginState) {

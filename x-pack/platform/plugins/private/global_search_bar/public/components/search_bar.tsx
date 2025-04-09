@@ -61,9 +61,7 @@ const SearchCharLimitExceededMessage = (props: { basePathUrl: string }) => {
     </>
   );
 
-  return (
-    <PopoverPlaceholder basePath={props.basePathUrl} customPlaceholderMessage={charLimitMessage} />
-  );
+  return <PopoverPlaceholder customPlaceholderMessage={charLimitMessage} />;
 };
 
 const EmptyMessage = () => (
@@ -403,7 +401,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       }}
       errorMessage={searchCharLimitExceeded ? <SearchCharLimitExceededMessage {...props} /> : null}
       emptyMessage={<EmptyMessage />}
-      noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
+      noMatchesMessage={<PopoverPlaceholder />}
       popoverProps={{
         zIndex: Number(euiTheme.levels.navigation),
         'data-test-subj': 'nav-search-popover',

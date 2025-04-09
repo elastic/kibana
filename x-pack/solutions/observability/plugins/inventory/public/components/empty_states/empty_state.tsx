@@ -6,7 +6,6 @@
  */
 
 import {
-  COLOR_MODES_STANDARD,
   EuiCallOut,
   EuiEmptyPrompt,
   EuiFlexGroup,
@@ -16,11 +15,10 @@ import {
   EuiLink,
   EuiText,
   EuiTextColor,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { dashboardsLight, dashboardsDark } from '@kbn/shared-svg';
+import { useSvgIllustration } from '@kbn/shared-svg';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { AddData, AssociateServiceLogs } from '../shared/add_data_buttons/buttons';
 import { useKibana } from '../../hooks/use_kibana';
@@ -28,6 +26,7 @@ import type { InventoryAddDataParams } from '../../services/telemetry/types';
 
 export function EmptyState() {
   const { services } = useKibana();
+  const dashboardIllustration = useSvgIllustration('dashboards');
 
   const [isDismissed, setDismissed] = useLocalStorage<boolean>(
     'inventory.emptyStateDismissed',
@@ -40,8 +39,6 @@ export function EmptyState() {
       journey,
     });
   }
-
-  const { colorMode } = useEuiTheme();
 
   return (
     <EuiFlexGroup direction="column">
@@ -78,13 +75,7 @@ export function EmptyState() {
           hasShadow={false}
           hasBorder={false}
           id="inventoryEmptyState"
-          icon={
-            <EuiImage
-              size="fullWidth"
-              src={colorMode === COLOR_MODES_STANDARD.dark ? dashboardsDark : dashboardsLight}
-              alt=""
-            />
-          }
+          icon={<EuiImage size="fullWidth" src={dashboardIllustration} alt="" />}
           title={
             <h2>
               {i18n.translate('xpack.inventory.noEntitiesEmptyState.title', {

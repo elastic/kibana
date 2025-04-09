@@ -6,21 +6,17 @@
  */
 
 import React, { FC } from 'react';
-import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiImage, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { noSearchResultsIllustrationLight, noSearchResultsIllustrationDark } from '@kbn/shared-svg';
+import { useSvgIllustration } from '@kbn/shared-svg';
 
 interface PopoverPlaceholderProps {
-  basePath: string;
   customPlaceholderMessage?: React.ReactNode;
 }
 
-export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
-  basePath,
-  customPlaceholderMessage,
-}) => {
-  const { colorMode } = useEuiTheme();
+export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({ customPlaceholderMessage }) => {
+  const noResultsIllustration = useSvgIllustration('noSearchResults');
 
   return (
     <EuiFlexGroup
@@ -37,11 +33,7 @@ export const PopoverPlaceholder: FC<PopoverPlaceholderProps> = ({
             defaultMessage: 'Illustration of black hole',
           })}
           size="fullWidth"
-          src={
-            colorMode === 'DARK'
-              ? noSearchResultsIllustrationDark
-              : noSearchResultsIllustrationLight
-          }
+          src={noResultsIllustration}
         />
 
         {customPlaceholderMessage ?? (

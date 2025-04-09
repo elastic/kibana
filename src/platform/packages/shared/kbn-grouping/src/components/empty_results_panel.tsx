@@ -10,7 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { noResultsIllustrationLight } from '@kbn/shared-svg';
+import { useSvgIllustration } from '@kbn/shared-svg';
 
 const panelStyle = {
   maxWidth: 500,
@@ -24,6 +24,7 @@ const heights = {
 export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }> = ({
   height = 'tall',
 }) => {
+  const noResultsIllustration = useSvgIllustration('noResults');
   return (
     <EuiPanel color="subdued" data-test-subj="empty-results-panel">
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
@@ -49,7 +50,7 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage size="200px" alt="" src={noResultsIllustrationLight} />
+                <EuiImage size="200px" alt="" src={noResultsIllustration} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
