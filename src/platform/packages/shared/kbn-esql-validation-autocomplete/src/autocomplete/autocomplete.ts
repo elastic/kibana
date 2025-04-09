@@ -116,17 +116,6 @@ export async function suggest(
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
-  // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
-  const lastCharacterTyped = innerText[innerText.length - 1];
-  let controlSuggestions: SuggestionRawDefinition[] = [];
-  if (lastCharacterTyped === '?') {
-    controlSuggestions = getControlSuggestionIfSupported(
-      Boolean(supportsControls),
-      ESQLVariableType.VALUES,
-      getVariables
-    );
-  }
-
   if (astContext.type === 'newCommand') {
     // propose main commands here
     // filter source commands if already defined
@@ -158,6 +147,19 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
+  // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
+  const lastCharacterTyped = innerText[innerText.length - 1];
+  let controlSuggestions: SuggestionRawDefinition[] = [];
+  if (lastCharacterTyped === '?') {
+    controlSuggestions = getControlSuggestionIfSupported(
+      Boolean(supportsControls),
+      ESQLVariableType.VALUES,
+      getVariables
+    );
+
+    return controlSuggestions;
+  }
+
   if (astContext.type === 'expression') {
     const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       innerText,
@@ -173,10 +175,6 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
-    // if the last character is a question mark, I want to suggest only the control variables
-    if (controlSuggestions.length) {
-      return controlSuggestions;
-    }
     return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
@@ -191,10 +189,6 @@ export async function suggest(
       getVariables,
       supportsControls
     );
-    // if the last character is a question mark, I want to suggest only the control variables
-    if (controlSuggestions.length) {
-      return controlSuggestions;
-    }
     return functionsSpecificSuggestions;
   }
   if (astContext.type === 'list') {
@@ -207,7 +201,7 @@ export async function suggest(
       getPolicyMetadata
     );
   }
-  return [...controlSuggestions];
+  return [];
 }
 
 export function getFieldsByTypeRetriever(
