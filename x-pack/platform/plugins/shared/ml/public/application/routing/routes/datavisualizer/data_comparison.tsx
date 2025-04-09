@@ -18,7 +18,6 @@ import { useRouteResolver } from '../../use_resolver';
 import {
   breadcrumbOnClickFactory,
   DATA_DRIFT_BREADCRUMB,
-  DATA_VISUALIZER_BREADCRUMB,
   getBreadcrumbWithUrlForApp,
 } from '../../breadcrumbs';
 import { basicResolvers } from '../../resolvers';
@@ -39,8 +38,9 @@ export const dataDriftRouteFactory = (
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
     getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('DATA_VISUALIZER_BREADCRUMB', navigateToPath, basePath),
     {
-      text: DATA_VISUALIZER_BREADCRUMB.text,
+      text: DATA_DRIFT_BREADCRUMB.text,
       ...(navigateToPath
         ? {
             href: `${basePath}/app/ml${DATA_DRIFT_BREADCRUMB.href}`,
@@ -49,8 +49,8 @@ export const dataDriftRouteFactory = (
         : {}),
     },
     {
-      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftLabel', {
-        defaultMessage: 'Data Drift',
+      text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.dataDriftResultsLabel', {
+        defaultMessage: 'Results',
       }),
     },
   ],

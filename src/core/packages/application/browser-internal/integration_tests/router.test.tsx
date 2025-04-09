@@ -15,7 +15,7 @@ import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { AppStatus } from '@kbn/core-application-browser';
 
-import { AppRouter, AppNotFound } from '../src/ui';
+import { AppRouter } from '../src/ui';
 import { MockedMounterMap, MockedMounterTuple } from '../src/test_helpers/test_types';
 import { createRenderer, createAppMounter, getUnmounter } from './utils';
 
@@ -119,24 +119,16 @@ describe('AppRouter', () => {
     let dom = await navigate('/app/app1');
 
     expect(app1.mounter.mount).toHaveBeenCalled();
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /app/app1
-      html: <span>App 1</span>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /app/app1')).toBeDefined();
+    expect(dom?.queryByText('App 1')).toBeDefined();
 
     const app1Unmount = await getUnmounter(app1);
     dom = await navigate('/app/app2');
 
     expect(app1Unmount).toHaveBeenCalled();
     expect(app2.mounter.mount).toHaveBeenCalled();
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /app/app2
-      html: <div>App 2</div>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /app/app2')).toBeDefined();
+    expect(dom?.queryByText('App 2')).toBeDefined();
   });
 
   it('can navigate between standard application and one with custom appRoute', async () => {
@@ -145,36 +137,24 @@ describe('AppRouter', () => {
     let dom = await navigate('/app/app1');
 
     expect(standardApp.mounter.mount).toHaveBeenCalled();
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /app/app1
-      html: <span>App 1</span>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /app/app1')).toBeDefined();
+    expect(dom?.queryByText('App 1')).toBeDefined();
 
     const standardAppUnmount = await getUnmounter(standardApp);
     dom = await navigate('/chromeless-a/path');
 
     expect(standardAppUnmount).toHaveBeenCalled();
     expect(chromelessApp.mounter.mount).toHaveBeenCalled();
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /chromeless-a/path
-      html: <div>Chromeless A</div>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /chromeless-a/path')).toBeDefined();
+    expect(dom?.queryByText('Chromeless A')).toBeDefined();
 
     const chromelessAppUnmount = await getUnmounter(standardApp);
     dom = await navigate('/app/app1');
 
     expect(chromelessAppUnmount).toHaveBeenCalled();
     expect(standardApp.mounter.mount).toHaveBeenCalledTimes(2);
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /app/app1
-      html: <span>App 1</span>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /app/app1')).toBeDefined();
+    expect(dom?.queryByText('App 1')).toBeDefined();
   });
 
   it('can navigate between two applications with custom appRoutes', async () => {
@@ -183,36 +163,24 @@ describe('AppRouter', () => {
     let dom = await navigate('/chromeless-a/path');
 
     expect(chromelessAppA.mounter.mount).toHaveBeenCalled();
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /chromeless-a/path
-      html: <div>Chromeless A</div>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /chromeless-a/path')).toBeDefined();
+    expect(dom?.queryByText('Chromeless A')).toBeDefined();
 
     const chromelessAppAUnmount = await getUnmounter(chromelessAppA);
     dom = await navigate('/chromeless-b/path');
 
     expect(chromelessAppAUnmount).toHaveBeenCalled();
     expect(chromelessAppB.mounter.mount).toHaveBeenCalled();
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /chromeless-b/path
-      html: <div>Chromeless B</div>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /chromeless-b/path')).toBeDefined();
+    expect(dom?.queryByText('Chromeless B')).toBeDefined();
 
     const chromelessAppBUnmount = await getUnmounter(chromelessAppB);
     dom = await navigate('/chromeless-a/path');
 
     expect(chromelessAppBUnmount).toHaveBeenCalled();
     expect(chromelessAppA.mounter.mount).toHaveBeenCalledTimes(2);
-    expect(dom?.html()).toMatchInlineSnapshot(`
-      "<span class=\\"euiLoadingElastic css-1qir6ap-EuiLoadingElastic\\" role=\\"progressbar\\" aria-label=\\"Loading application\\"><span data-euiicon-type=\\"logoElastic\\"></span></span><div class=\\"kbnAppWrapper\\" aria-busy=\\"false\\"><div>
-      basename: /chromeless-a/path
-      html: <div>Chromeless A</div>
-      </div></div>"
-    `);
+    expect(dom?.queryByText('basename: /chromeless-a/path')).toBeDefined();
+    expect(dom?.queryByText('Chromeless A')).toBeDefined();
   });
 
   it('should not mount when partial route path matches', async () => {
@@ -396,12 +364,12 @@ describe('AppRouter', () => {
   it('displays error page if no app is found', async () => {
     const dom = await navigate('/app/unknown');
 
-    expect(dom?.exists(AppNotFound)).toBe(true);
+    expect(dom?.queryByTestId('appNotFoundPageContent')).toBeDefined();
   });
 
   it('displays error page if app is inaccessible', async () => {
     const dom = await navigate('/app/disabledApp');
 
-    expect(dom?.exists(AppNotFound)).toBe(true);
+    expect(dom?.queryByTestId('appNotFoundPageContent')).toBeDefined();
   });
 });

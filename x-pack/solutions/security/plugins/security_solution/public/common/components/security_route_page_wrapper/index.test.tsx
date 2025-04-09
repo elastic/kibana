@@ -15,9 +15,13 @@ import { generateHistoryMock } from '../../utils/route/mocks';
 import type { LinkInfo } from '../../links';
 import { useLinkInfo } from '../../links';
 import { useUpsellingPage } from '../../hooks/use_upselling';
+import { SpyRoute } from '../../utils/route/spy_routes';
 
 jest.mock('../../links');
 jest.mock('../../hooks/use_upselling');
+jest.mock('../../utils/route/spy_routes', () => ({
+  SpyRoute: jest.fn(() => null),
+}));
 
 const defaultLinkInfo: LinkInfo = {
   id: SecurityPageName.exploreLanding,
@@ -146,5 +150,19 @@ describe('SecurityRoutePageWrapper', () => {
     );
 
     expect(getByTestId(TEST_COMPONENT_SUBJ)).toBeInTheDocument();
+  });
+  it('should not render SpyRoute when omitSpyRoute is set to true', () => {
+    (useLinkInfo as jest.Mock).mockReturnValue(defaultLinkInfo);
+    (useUpsellingPage as jest.Mock).mockReturnValue(undefined);
+
+    render(
+      <SecurityRoutePageWrapper pageName={SecurityPageName.exploreLanding} omitSpyRoute>
+        <TestComponent />
+      </SecurityRoutePageWrapper>,
+      { wrapper: Wrapper }
+    );
+
+    // SpyRoute was mocked, so if omitSpyRoute worked, it should not have been called
+    expect(SpyRoute).not.toHaveBeenCalled();
   });
 });

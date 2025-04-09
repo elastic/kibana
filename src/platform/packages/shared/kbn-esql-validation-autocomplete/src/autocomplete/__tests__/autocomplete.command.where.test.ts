@@ -459,6 +459,27 @@ describe('WHERE <expression>', () => {
           sortText: '11A',
         });
       });
+
+      test('suggests `Create control` option when a questionmark is typed', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM a | WHERE agent.name == ?/', {
+          callbacks: {
+            canSuggestVariables: () => true,
+            getVariables: () => [],
+            getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+          },
+        });
+
+        expect(suggestions).toContainEqual({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: { id: 'esql.control.values.create', title: 'Click to create' },
+          sortText: '1',
+        });
+      });
     });
   });
 });
