@@ -639,6 +639,7 @@ describe('getAll()', () => {
         logger,
         actionTypeRegistry,
         unsecuredSavedObjectsClient,
+        ephemeralExecutionEnqueuer,
         scopedClusterClient,
         kibanaIndices,
         actionExecutor,
