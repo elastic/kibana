@@ -9,18 +9,17 @@
 
 import { UserProfileService } from '@kbn/core-user-profile-browser';
 import { Observable, Subject, concat, defer, filter, map, of } from 'rxjs';
-import { DebouncedFunc, debounce, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { UserProfileData } from '@kbn/core-user-profile-common';
 import { IUserSettingsService, UserSettingsMeta } from './types';
+import { debounceAsync } from './utils';
 
 export class UserSettingsService implements IUserSettingsService {
   protected cache: Map<string, any>;
   protected meta: Map<string, UserSettingsMeta>;
   private update$ = new Subject<{ key: string; newValue: any; oldValue: any }>();
   private updateErrors$ = new Subject<Error>();
-  protected userSettingUpdater: DebouncedFunc<
-    <D extends UserProfileData>(data: D) => Promise<void>
-  >;
+  protected userSettingUpdater;
 
   private settingDelimiter = ':';
 
@@ -31,7 +30,7 @@ export class UserSettingsService implements IUserSettingsService {
   ) {
     this.cache = new Map();
     this.meta = new Map<string, UserSettingsMeta>();
-    this.userSettingUpdater = debounce<<D extends UserProfileData>(data: D) => Promise<void>>(
+    this.userSettingUpdater = debounceAsync<<D extends UserProfileData>(data: D) => Promise<void>>(
       this.userProfile.partialUpdate,
       1000
     );
@@ -42,7 +41,7 @@ export class UserSettingsService implements IUserSettingsService {
 
     return isSpaceAware
       ? [key, this.spaceId].join(this.settingDelimiter)
-      : [this.appId, key].join(this.settingDelimiter);
+      : [key].join(this.settingDelimiter);
   }
 
   public isRegistered(key: string) {
@@ -60,13 +59,17 @@ export class UserSettingsService implements IUserSettingsService {
   }
 
   private deserializeCache(serializedCache: string) {
-    console.log(`Deserializing cache: ${serializedCache}`);
     return new Map<string, any>(JSON.parse(serializedCache));
   }
 
   async remove(key: string): Promise<void> {
     this.assertRegistered(key);
     this.cache.delete(this.getFullSettingName(key));
+    await this.userProfile.partialUpdate({
+      userSettings: {
+        [this.appId]: this.serializeCache(),
+      },
+    });
   }
 
   /**
@@ -79,13 +82,16 @@ export class UserSettingsService implements IUserSettingsService {
     const defaultsCache: Map<string, any> = new Map();
 
     settings.forEach((setting) => {
+      if (this.meta.has(setting.name)) {
+        throw new Error(`Setting ${setting.name} is already registered`);
+      }
       this.meta.set(setting.name, setting);
       defaultsCache.set(this.getFullSettingName(setting.name), setting.defaultValue);
     });
 
     const savedSettingsWrapped = await this.userProfile.getCurrent<{
       userSettings: {
-        [key: string]: string;
+        [appId: string]: string;
       };
     }>({
       dataPath: `userSettings.${this.appId}`,
@@ -95,10 +101,7 @@ export class UserSettingsService implements IUserSettingsService {
       savedSettingsWrapped.data?.userSettings?.[this.appId] ?? '[]'
     );
 
-    console.log({ savedSettings });
-
     this.cache = new Map([...defaultsCache, ...this.cache, ...savedSettings]);
-    console.log({ newCache: this.cache });
   }
 
   get<T>(key: string): T {
@@ -134,14 +137,14 @@ export class UserSettingsService implements IUserSettingsService {
     this.updateCache(key, newValue);
 
     const updatedCacheSerialized = this.serializeCache();
-    this.userSettingUpdater({
+    this.userSettingUpdater?.({
       userSettings: {
         [this.appId]: updatedCacheSerialized,
       },
     }).catch((error) => {
       // revert Changes
       this.cache.set(fullSettingName, valueBeforeUpdate);
-      this.update$.next({ key, oldValue: valueBeforeUpdate, newValue });
+      this.update$.next({ key, newValue: valueBeforeUpdate, oldValue: newValue });
       this.updateErrors$.next(error);
     });
 
