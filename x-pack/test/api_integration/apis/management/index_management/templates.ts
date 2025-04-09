@@ -525,7 +525,7 @@ export default function ({ getService }: FtrProviderContext) {
         const templateName = `template-${getRandomString()}`;
         const payload = getTemplatePayload(templateName);
 
-        await createTemplate(payload).expect(200);
+        await createTemplate({ ...payload, dataStream: {} }).expect(200);
 
         // Matches index template
         await es.indices.createDataStream({ name: dataStreamName });
