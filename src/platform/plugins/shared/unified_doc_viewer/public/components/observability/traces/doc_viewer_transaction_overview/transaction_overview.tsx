@@ -73,7 +73,7 @@ export function TransactionOverview({
             );
           })}
 
-          {transactionDuration && (
+          {transactionDuration !== undefined && (
             <>
               <EuiSpacer size="m" />
               <TransactionDurationSummary
