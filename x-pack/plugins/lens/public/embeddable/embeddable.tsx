@@ -1542,7 +1542,9 @@ export class Embeddable
     }
 
     const { indexPatterns } = await getIndexPatternsObjects(
-      this.savedVis?.references.filter(({ type }) => type === 'index-pattern').map(({ id }) => id) ?? [],
+      this.savedVis?.references
+        .filter(({ type }) => type === 'index-pattern')
+        .map(({ id }) => id) ?? [],
       this.deps.dataViews
     );
     (
