@@ -12,12 +12,8 @@ import { get } from 'lodash';
 import { Env } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
-import { KIBANA_SOLUTIONS, type KibanaSolution } from '@kbn/projects-solutions-groups';
-import {
-  ENABLE_ALL_PLUGINS_CONFIG_PATH,
-  INCLUDED_PLUGIN_GROUPS,
-  EXCLUDED_PLUGIN_GROUPS,
-} from './constants';
+import { KIBANA_GROUPS, type KibanaGroup } from '@kbn/projects-solutions-groups';
+import { ENABLE_ALL_PLUGINS_CONFIG_PATH, INCLUDED_PLUGIN_GROUPS } from './constants';
 
 const configSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),
@@ -27,29 +23,15 @@ const configSchema = schema.object({
    */
   paths: schema.arrayOf(schema.string(), { defaultValue: [] }),
   /**
-   * Defines an array of groups to ignore when loading plugins.
-   */
-  excludedPluginGroups: schema.maybe(
-    schema.arrayOf(
-      schema.oneOf(
-        KIBANA_SOLUTIONS.map((solutionName) => schema.literal(solutionName)) as [
-          Type<KibanaSolution> // This cast is needed because it's different to Type<T>[] :sight:
-        ]
-      ),
-      { defaultValue: [] }
-    )
-  ),
-  /**
-   * Defines an array of groups to NOT ignore when loading plugins.
+   * Defines an array of groups to include when loading plugins.
    */
   includedPluginGroups: schema.maybe(
     schema.arrayOf(
       schema.oneOf(
-        KIBANA_SOLUTIONS.map((solutionName) => schema.literal(solutionName)) as [
-          Type<KibanaSolution> // This cast is needed because it's different to Type<T>[] :sight:
+        KIBANA_GROUPS.map((groupName) => schema.literal(groupName)) as [
+          Type<KibanaGroup> // This cast is needed because it's different to Type<T>[] :sight:
         ]
-      ),
-      { defaultValue: [] }
+      )
     )
   ),
   /**
@@ -93,11 +75,6 @@ export class PluginsConfig {
   public readonly shouldEnableAllPlugins: boolean;
 
   /**
-   * Specify some plugin groups that should be excluded by the discovery mechanism.
-   */
-  public readonly excludedPluginGroups: readonly string[];
-
-  /**
    * Specify some plugin groups that should NOT be excluded by the discovery mechanism.
    */
   public readonly includedPluginGroups: readonly string[];
@@ -106,8 +83,7 @@ export class PluginsConfig {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
-    this.excludedPluginGroups = get(rawConfig, EXCLUDED_PLUGIN_GROUPS, []);
-    this.includedPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS, []);
+    this.includedPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS, KIBANA_GROUPS);
     this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
   }
 }

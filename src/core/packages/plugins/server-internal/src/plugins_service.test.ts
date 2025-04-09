@@ -138,7 +138,6 @@ async function testSetup() {
   pluginsConfig = {
     initialize: true,
     paths: [],
-    excludedPluginGroups: ['observability', 'security', 'search', 'chat'],
     includedPluginGroups: ['observability'],
   };
   config$ = new BehaviorSubject<Record<string, any>>({ plugins: pluginsConfig });
@@ -747,7 +746,6 @@ describe('PluginsService', () => {
       expect(mockDiscover).toHaveBeenCalledWith({
         config: {
           additionalPluginPaths: [],
-          excludedPluginGroups: ['observability', 'security', 'search', 'chat'],
           includedPluginGroups: ['observability'],
           initialize: true,
           pluginSearchPaths: [

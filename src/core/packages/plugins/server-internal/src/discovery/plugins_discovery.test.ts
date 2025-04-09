@@ -44,7 +44,7 @@ const pluginManifestFromPluginPackageMock: jest.Mock = jest.requireMock(
   './plugin_manifest_from_plugin_package'
 ).pluginManifestFromPluginPackage;
 
-function getMockPackage(id: string, group: string = 'common') {
+function getMockPackage(id: string, group: string = 'platform') {
   const relativePath = `packages/${id}`;
   return {
     id,
@@ -654,7 +654,7 @@ describe('plugins discovery system', () => {
       });
     });
 
-    it('filters out plugins from excluded groups', async () => {
+    it('does not filter if includedPluginGroups is not specified', async () => {
       const foo = getMockPackage('foo');
       const bar = getMockPackage('bar');
       const obs = getMockPackage('obs', 'observability');
@@ -669,7 +669,7 @@ describe('plugins discovery system', () => {
 
       const filteredPluginsConfig: PluginsConfigType = {
         ...pluginConfig,
-        excludedPluginGroups: ['observability', 'security'],
+        includedPluginGroups: undefined, // we make it explicit to illustrate the purpose of the test
       };
 
       const { plugin$ } = discover({
@@ -681,13 +681,15 @@ describe('plugins discovery system', () => {
 
       const plugins = await firstValueFrom(plugin$.pipe(toArray()));
 
-      expect(plugins.length).toEqual(2);
+      expect(plugins.length).toEqual(4);
       // plugin discovery sorts them by name
       expect(plugins[0].name).toEqual('bar');
       expect(plugins[1].name).toEqual('foo');
+      expect(plugins[2].name).toEqual('obs');
+      expect(plugins[3].name).toEqual('sec');
     });
 
-    it('does not filter out plugins from included groups', async () => {
+    it('filters out plugins that do not belong to included groups filter out plugins from included groups', async () => {
       const foo = getMockPackage('foo');
       const bar = getMockPackage('bar');
       const obs = getMockPackage('obs', 'observability');
@@ -702,8 +704,7 @@ describe('plugins discovery system', () => {
 
       const filteredPluginsConfig: PluginsConfigType = {
         ...pluginConfig,
-        excludedPluginGroups: ['observability', 'security'],
-        includedPluginGroups: ['observability'],
+        includedPluginGroups: ['platform', 'observability'],
       };
 
       const { plugin$ } = discover({

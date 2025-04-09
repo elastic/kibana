@@ -44,17 +44,15 @@ describe('PluginsConfig', () => {
     expect(config.shouldEnableAllPlugins).toEqual(true);
   });
 
-  it('retrieves included and excluded groups', () => {
+  it('retrieves included plugin groups', () => {
     const env = Env.createDefault(REPO_ROOT, getEnvOptions({ cliArgs: { dev: true } }));
     const rawConfig: PluginsConfigType = {
       initialize: true,
       paths: ['some-path', 'another-path'],
       forceEnableAllPlugins: true,
-      excludedPluginGroups: ['observability', 'security', 'search', 'chat'],
       includedPluginGroups: ['search'],
     };
     const config = new PluginsConfig(rawConfig, env);
-    expect(config.excludedPluginGroups).toEqual(['observability', 'security', 'search', 'chat']);
     expect(config.includedPluginGroups).toEqual(['search']);
   });
 });

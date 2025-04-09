@@ -1,13 +1,10 @@
 # Security Project config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.includedPluginGroups: ['security']
+plugins.includedPluginGroups: ['platform', 'security']
 
 # Ess plugins
 xpack.securitySolutionEss.enabled: false
-
-## Enable uiSettings validations
-xpack.securitySolution.enableUiSettingsValidations: true
 
 ## Disable plugins
 xpack.observabilityAIAssistant.enabled: false

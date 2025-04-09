@@ -1,7 +1,7 @@
 # Chat Project Config
 
 # Make sure the plugins belonging to this project type are loaded
-plugins.includedPluginGroups: ['chat']
+plugins.includedPluginGroups: ['platform', 'chat']
 
 ## Enable the Serverless Chat plugin
 xpack.serverless.chat.enabled: true

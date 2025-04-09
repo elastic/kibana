@@ -1,9 +1,5 @@
 # Common serverless config
 
-## By default, we exclude all solutions' plugins in serverless
-## We let each solution override this by explicitly including their own paths
-plugins.excludedPluginGroups: ['observability', 'security', 'search', 'chat']
-
 interactiveSetup.enabled: false
 newsfeed.enabled: false
 xpack.serverless.plugin.enabled: true

@@ -72,11 +72,10 @@ export function discover({
       })
     ),
     filter(
-      // only admit those packages that ...
       (pkg) =>
-        // ... are NOT under an excluded group
-        !config.excludedPluginGroups.includes(pkg.getGroup()) ||
-        // ... or that are under an explicitly included group
+        // if includedPluginGroups is defined
+        !config.includedPluginGroups ||
+        // admit those packages that are part of the included groups
         config.includedPluginGroups.includes(pkg.getGroup())
     ),
     map((pkg) => {
