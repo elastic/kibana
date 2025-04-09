@@ -421,9 +421,9 @@ describe('EditOutputFlyout', () => {
         'outputR',
         expect.objectContaining({
           sync_integrations: true,
-          secrets: { service_token: '1234', kibana_api_key: 'key' },
+          secrets: { service_token: '1234' },
           service_token: undefined,
-          kibana_api_key: undefined,
+          kibana_api_key: 'key',
           kibana_url: 'http://localhost:5601',
         })
       );
