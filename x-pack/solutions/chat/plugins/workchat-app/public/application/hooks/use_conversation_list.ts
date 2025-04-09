@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { queryKeys } from '../query_keys';
 import { useWorkChatServices } from './use_workchat_service';
 
-export const useConversationList = ({ agentId }: { agentId: string }) => {
+export const useConversationList = ({ agentId }: { agentId?: string }) => {
   const { conversationService } = useWorkChatServices();
 
   const {
@@ -17,7 +17,7 @@ export const useConversationList = ({ agentId }: { agentId: string }) => {
     isLoading,
     refetch: refresh,
   } = useQuery({
-    queryKey: queryKeys.conversations.byAgent(agentId),
+    queryKey: queryKeys.conversations.byAgent(agentId ?? 'all_agents'),
     queryFn: async () => {
       return conversationService.list({ agentId });
     },

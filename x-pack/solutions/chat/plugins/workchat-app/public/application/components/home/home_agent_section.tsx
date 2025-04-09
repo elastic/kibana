@@ -7,64 +7,75 @@
 
 import React from 'react';
 import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
   EuiLink,
   EuiTitle,
-  EuiButton,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  EuiFlexGrid,
+  EuiText,
+  EuiAvatar,
+  EuiPanel,
+  EuiButtonIcon,
 } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { Agent } from '../../../../common/agents';
 import { useNavigation } from '../../hooks/use_navigation';
 import { useAgentList } from '../../hooks/use_agent_list';
-import { useCapabilities } from '../../hooks/use_capabilities';
 import { appPaths } from '../../app_paths';
 
 export const HomeAgentSection: React.FC<{}> = () => {
   const { createWorkchatUrl, navigateToWorkchatUrl } = useNavigation();
   const { agents } = useAgentList();
-  const { showManagement } = useCapabilities();
 
-  const columns: Array<EuiBasicTableColumn<Agent>> = [
-    {
-      field: 'name',
-      name: 'Name',
-      render: (value, agent) => {
-        return (
-          <EuiLink href={createWorkchatUrl(appPaths.chat.new({ agentId: agent.id }))}>
-            {value}
-          </EuiLink>
-        );
-      },
-    },
-    { field: 'description', name: 'Description' },
-    { field: 'user.name', name: 'Created by' },
-  ];
-
-  return (
-    <KibanaPageTemplate.Section>
-      <EuiTitle size="s">
-        <h4>Your agents</h4>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiBasicTable columns={columns} items={agents} />
-      <EuiSpacer />
-      {showManagement && (
-        <EuiFlexGroup justifyContent="flexEnd">
+  const agentTiles = agents.map((agent) => {
+    return (
+      <EuiPanel key={agent.id} paddingSize="m" hasBorder={true}>
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiAvatar size="l" name={agent.name} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="gear"
+              color="text"
               onClick={() => {
-                navigateToWorkchatUrl(appPaths.agents.list);
+                navigateToWorkchatUrl(appPaths.agents.edit({ agentId: agent.id }));
               }}
-            >
-              Go to agent management
-            </EuiButton>
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
-      )}
-    </KibanaPageTemplate.Section>
+        <EuiSpacer size="m" />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiLink
+              href={createWorkchatUrl(appPaths.chat.new({ agentId: agent.id }))}
+              style={{ fontWeight: 'bold' }}
+            >
+              {agent.name}
+            </EuiLink>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued">
+              {agent.description ||
+                'Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.'}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  });
+
+  return (
+    <EuiFlexItem>
+      <EuiFlexGroup gutterSize="s" alignItems="center">
+        <EuiIcon type="users" size="m" />
+        <EuiTitle size="xxs">
+          <h4>Agents</h4>
+        </EuiTitle>
+      </EuiFlexGroup>
+
+      <EuiSpacer />
+      <EuiFlexGrid columns={3}>{agentTiles}</EuiFlexGrid>
+      <EuiSpacer />
+    </EuiFlexItem>
   );
 };

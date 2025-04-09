@@ -8,15 +8,25 @@
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { HomeAgentSection } from './home_agent_section';
-import { HomeIntegrationSection } from './home_integration_section';
+import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { HomeConversationHistorySection } from './home_conversation_history';
+
+const headerButtons = [
+  <EuiButtonEmpty iconType={'questionInCircle'} color="primary" iconSide="left" href="/">
+    Learn more
+  </EuiButtonEmpty>,
+];
 
 export const WorkChatHomeView: React.FC<{}> = () => {
   return (
-    <KibanaPageTemplate panelled>
-      <KibanaPageTemplate.Header pageTitle="WorkChat" />
-
-      <HomeAgentSection />
-      <HomeIntegrationSection />
+    <KibanaPageTemplate>
+      <KibanaPageTemplate.Header pageTitle="WorkChat" rightSideItems={headerButtons} />
+      <KibanaPageTemplate.Section>
+        <EuiFlexGroup gutterSize="l" alignItems="flexStart">
+          <HomeAgentSection />
+          <HomeConversationHistorySection />
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
 };
