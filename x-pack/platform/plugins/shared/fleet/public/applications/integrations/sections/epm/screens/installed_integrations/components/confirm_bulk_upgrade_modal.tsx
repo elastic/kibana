@@ -161,6 +161,7 @@ export const ConfirmBulkUpgradeModal: React.FunctionComponent<{
       <EuiPanel hasShadow={false} hasBorder={false} color="subdued">
         <EuiFormRow fullWidth>
           <EuiSwitch
+            data-test-subj="upgradeIntegrationsPoliciesSwitch"
             checked={updatePolicies}
             onChange={(e) => {
               setUpdatePolicies(e.target.checked);
