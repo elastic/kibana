@@ -120,6 +120,7 @@ export interface ReindexService {
     aliases: Record<string, IndicesAlias>;
     settings?: IndicesIndexSettings;
     isInDataStream: boolean;
+    isFollowerIndex: boolean;
   }>;
 }
 
