@@ -96,7 +96,7 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'ecs.version' },
         { actions: false, id: 'error.code' },
       ]);
-      expect(duplicateAlertIds.size).toBe(0);
+      expect(duplicateAlertIds?.size).toBe(0);
     });
   });
 
@@ -183,7 +183,7 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'ecs.version' },
         { actions: false, id: 'error.code' },
       ]);
-      expect(duplicateAlertIds.size).toBe(0);
+      expect(duplicateAlertIds?.size).toBe(0);
     });
     it('correctly converts ESQL table to grouped ES query hits with duplicates', () => {
       const { results, duplicateAlertIds } = toGroupedEsqlQueryHits(
@@ -256,7 +256,7 @@ describe('ESQL query utils', () => {
         isCountAgg: false,
         isGroupAgg: true,
       });
-      expect(duplicateAlertIds.size).toBe(1);
+      expect(duplicateAlertIds?.size).toBe(1);
     });
     it('correctly converts ESQL table to grouped ES query hits with long alertIds', () => {
       const value5 = [
@@ -389,7 +389,7 @@ describe('ESQL query utils', () => {
         isCountAgg: false,
         isGroupAgg: true,
       });
-      expect(longAlertIds.size).toBe(1);
+      expect(longAlertIds?.size).toBe(1);
     });
     it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null alertIds', () => {
       const { results, rows, cols, duplicateAlertIds } = toGroupedEsqlQueryHits(
@@ -448,7 +448,7 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'ecs.version' },
         { actions: false, id: 'error.code' },
       ]);
-      expect(duplicateAlertIds.size).toBe(0);
+      expect(duplicateAlertIds?.size).toBe(0);
     });
 
     it('correctly converts ESQL table to grouped ES query hits and ignores undefined and null values in the alertId', () => {
@@ -558,7 +558,7 @@ describe('ESQL query utils', () => {
         { actions: false, id: 'ecs.version' },
         { actions: false, id: 'error.code' },
       ]);
-      expect(duplicateAlertIds.size).toBe(0);
+      expect(duplicateAlertIds?.size).toBe(0);
     });
   });
 

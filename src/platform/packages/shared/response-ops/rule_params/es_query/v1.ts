@@ -187,7 +187,7 @@ function isEsqlQueryRule(searchType: EsQueryRuleParams['searchType']) {
 }
 
 // using direct type not allowed, circular reference, so body is typed to any
-function validateParams(anyParams: unknown): string | undefined {
+export function validateParams(anyParams: unknown): string | undefined {
   const {
     esQuery,
     thresholdComparator,
@@ -219,11 +219,6 @@ function validateParams(anyParams: unknown): string | undefined {
     if (threshold && threshold[0] !== 0) {
       return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlThresholdErrorMessage', {
         defaultMessage: '[threshold]: is required to be 0',
-      });
-    }
-    if (groupBy === 'top') {
-      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlInvalidGroupByErrorMessage', {
-        defaultMessage: '[groupBy]: groupBy should be all or row when [searchType] is esqlQuery',
       });
     }
     return;

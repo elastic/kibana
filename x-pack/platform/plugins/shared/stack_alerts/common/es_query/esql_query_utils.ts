@@ -11,6 +11,7 @@ import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugi
 import type { ESQLCommandOption } from '@kbn/esql-ast';
 import { type ESQLAstCommand, parse } from '@kbn/esql-ast';
 import { isOptionItem, isColumnItem } from '@kbn/esql-validation-autocomplete';
+import { ActionGroupId } from './constants';
 
 type EsqlDocument = Record<string, string | null>;
 
@@ -27,11 +28,11 @@ interface EsqlResultColumn {
 
 interface EsqlQueryHits {
   results: ParseAggregationResultsOpts;
-  // Track duplicate and long alertIds, so we can add a warning in the ui
-  duplicateAlertIds: Set<string>;
-  longAlertIds: Set<string>;
   rows: EsqlDocument[];
   cols: Array<{ id: string; actions: boolean }>;
+  // Track duplicate and long alertIds, so we can add a warning
+  duplicateAlertIds?: Set<string>;
+  longAlertIds?: Set<string>;
 }
 
 type EsqlResultRow = Array<string | null>;
@@ -76,7 +77,7 @@ export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
       _index: '',
       _source: document,
     });
-    rows.push(rows.length > 0 ? document : { [ALERT_ID_COLUMN]: 'query matched', ...document });
+    rows.push(rows.length > 0 ? document : { [ALERT_ID_COLUMN]: ActionGroupId, ...document });
   }
 
   return {
@@ -93,8 +94,6 @@ export const toEsqlQueryHits = (table: EsqlTable): EsqlQueryHits => {
         },
       },
     },
-    duplicateAlertIds: new Set<string>(),
-    longAlertIds: new Set<string>(),
     rows,
     cols: getColumnsForPreview(table.columns),
   };

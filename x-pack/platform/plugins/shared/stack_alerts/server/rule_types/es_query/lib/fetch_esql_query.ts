@@ -74,8 +74,8 @@ export async function fetchEsqlQuery({
     isGroupAgg
   );
 
-  if (ruleResultService && duplicateAlertIds.size > 0) {
-    const warning = `Your alerts do not appear to be unique, we noticed multiple rows with the same alert ID. There are duplicates for alert IDs: ${Array.from(
+  if (ruleResultService && duplicateAlertIds && duplicateAlertIds.size > 0) {
+    const warning = `The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: ${Array.from(
       duplicateAlertIds
     ).join('; ')}`;
     ruleResultService.addLastRunWarning(warning);

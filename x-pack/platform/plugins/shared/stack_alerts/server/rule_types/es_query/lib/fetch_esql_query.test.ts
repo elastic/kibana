@@ -265,7 +265,16 @@ describe('fetchEsqlQuery', () => {
       services: {
         logger,
         scopedClusterClient,
-        share: {} as SharePluginStart,
+        // @ts-expect-error
+        share: {
+          url: {
+            locators: {
+              get: jest.fn().mockReturnValue({
+                getRedirectUrl: jest.fn(() => '/app/r?l=DISCOVER_APP_LOCATOR'),
+              } as unknown as LocatorPublic<DiscoverAppLocatorParams>),
+            },
+          },
+        } as SharePluginStart,
         ruleResultService: mockRuleResultService,
       },
       spacePrefix: '',
@@ -274,10 +283,10 @@ describe('fetchEsqlQuery', () => {
     });
 
     expect(mockRuleResultService.addLastRunWarning).toHaveBeenCalledWith(
-      'Your alerts do not appear to be unique, we noticed multiple rows with the same alert ID. There are duplicates for alert IDs: 1.2.0'
+      'The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: 1.2.0'
     );
     expect(mockRuleResultService.setLastRunOutcomeMessage).toHaveBeenCalledWith(
-      'Your alerts do not appear to be unique, we noticed multiple rows with the same alert ID. There are duplicates for alert IDs: 1.2.0'
+      'The query returned multiple rows with the same alert ID. There are duplicate results for alert IDs: 1.2.0'
     );
   });
   describe('generateLink', () => {

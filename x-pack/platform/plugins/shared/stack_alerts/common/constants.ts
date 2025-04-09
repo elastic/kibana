@@ -22,6 +22,3 @@ export const validSourceFields = [
   CONTAINER_ID,
   KUBERNETES_POD_UID,
 ];
-
-export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
-export const ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS = 100;

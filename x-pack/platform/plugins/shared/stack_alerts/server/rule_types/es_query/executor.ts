@@ -33,7 +33,7 @@ import type {
   OnlySearchSourceRuleParams,
   OnlyEsqlQueryRuleParams,
 } from './types';
-import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
+import { ActionGroupId, ConditionMetAlertInstanceId } from '../../../common/es_query';
 import { fetchEsQuery } from './lib/fetch_es_query';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';

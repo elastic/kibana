@@ -57,15 +57,16 @@ const alertingOptions = [
   },
 ];
 
-const getWarning = (duplicateAlertIds: Set<string>, longAlertIds: Set<string>) => {
-  if (duplicateAlertIds.size > 0) {
+const getWarning = (duplicateAlertIds?: Set<string>, longAlertIds?: Set<string>) => {
+  if (duplicateAlertIds && duplicateAlertIds.size > 0) {
     return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowWarning', {
       defaultMessage:
-        'Your alerts do not appear to be unique, we noticed multiple rows with the same alert ID.',
+        'Test returned multiple rows with the same alert ID. Consider updating the query to group on different fields.',
     });
-  } else if (longAlertIds.size > 0) {
+  } else if (longAlertIds && longAlertIds.size > 0) {
     return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowAlertIdWarning', {
-      defaultMessage: 'Your alert IDs are made up of at least {max} fields.',
+      defaultMessage:
+        'The number of fields used to generate the alert ID should be limited to a maximum of 10. ',
       values: {
         max: ALERT_ID_SUGGESTED_MAX,
       },
