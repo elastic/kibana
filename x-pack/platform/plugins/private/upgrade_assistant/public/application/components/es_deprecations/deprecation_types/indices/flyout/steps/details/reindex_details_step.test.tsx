@@ -55,6 +55,7 @@ describe('ReindexDetailsFlyoutStep', () => {
       isFrozen: false,
       isReadonly: false,
       isClosedIndex: false,
+      isFollowerIndex: false,
     },
     hasRequiredPrivileges: true,
     reindexTaskPercComplete: null,

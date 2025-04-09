@@ -68,6 +68,7 @@ describe('ReindexStep', () => {
         isFrozen: false,
         isInDataStream: false,
         isClosedIndex: false,
+        isFollowerIndex: false,
       },
     } as ReindexState,
     deprecation: {

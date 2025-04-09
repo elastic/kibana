@@ -20,6 +20,7 @@ describe('UpdateIndexFlyoutStep', () => {
     isReadonly: false,
     isClosedIndex: false,
     reindexName: 'some_index-reindexed-for-9',
+    isFollowerIndex: false,
   };
 
   const defaultUpdateIndexState: UpdateIndexState = {

@@ -24,6 +24,7 @@ const defaultReindexStatusMeta: ReindexStatusResponse['meta'] = {
   isFrozen: false,
   isReadonly: false,
   isInDataStream: false,
+  isFollowerIndex: false,
 };
 
 describe('Reindex deprecation flyout', () => {

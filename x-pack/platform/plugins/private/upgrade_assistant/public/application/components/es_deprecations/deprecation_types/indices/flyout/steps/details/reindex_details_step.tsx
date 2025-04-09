@@ -78,7 +78,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const { excludedActions = [], indexSizeInBytes = 0 } =
     (deprecation.correctiveAction as ReindexAction) || {};
   const readOnlyExcluded = excludedActions.includes('readOnly');
-  const reindexExcluded = excludedActions.includes('reindex');
+  const reindexExcluded = excludedActions.includes('reindex') || isFollowerIndex;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
@@ -101,7 +101,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const isLargeIndex = indexSizeInBytes > 1073741824;
 
   const canShowActionButtons = !isCompleted && !hasFetchFailed && hasRequiredPrivileges;
-  const canShowReindexButton = canShowActionButtons && !reindexExcluded && !isFollowerIndex;
+  const canShowReindexButton = canShowActionButtons && !reindexExcluded;
   const canShowReadonlyButton = canShowActionButtons && !readOnlyExcluded && !isReadonly;
 
   return (
@@ -198,19 +198,13 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           )}
           {showDefaultGuidance && (
             <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
-                  defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
-                />
-              </p>
               {isFollowerIndex && (
                 <>
                   <EuiCallOut
                     title={
                       <FormattedMessage
                         id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexTitle"
-                        defaultMessage="Follower index detected"
+                        defaultMessage="Unfollow leader index is recomended"
                       />
                     }
                     color="primary"
@@ -220,13 +214,19 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     <p>
                       <FormattedMessage
                         id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.followerIndexText"
-                        defaultMessage="This is a follower index. For follower indices, only the 'Mark as read-only' option is available. Reindexing follower indices is not supported."
+                        defaultMessage="This index is a cross-cluster replication follower index. We recomend you to unfollow the leader index."
                       />
                     </p>
                   </EuiCallOut>
                   <EuiSpacer size="m" />
                 </>
               )}
+              <p>
+                <FormattedMessage
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
+                  defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
+                />
+              </p>
               <EuiDescriptionList
                 rowGutterSize="m"
                 listItems={getDefaultGuideanceText({
