@@ -42,7 +42,7 @@ export interface RulesSettingsAlertDeleteProperties {
   isInactiveAlertDeleteEnabled: boolean;
   activeAlertDeleteThreshold: number;
   inactiveAlertDeleteThreshold: number;
-  categoryIds: AlertDeleteCategoryIds[];
+  categoryIds?: AlertDeleteCategoryIds[];
 }
 
 export interface RulesSettingsProperties {

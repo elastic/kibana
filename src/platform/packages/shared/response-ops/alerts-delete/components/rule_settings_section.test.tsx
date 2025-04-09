@@ -9,19 +9,22 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AlertDeleteRuleSettingsSection } from './rule_settings_section';
+import { AlertDeleteDescriptiveFormGroup } from './rule_settings_section';
 import * as i18n from '../translations';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+
+const http = httpServiceMock.createStartContract();
 
 describe('AlertDeleteRuleSettingsSection', () => {
   it('renders the described form group with the correct title and description', () => {
-    render(<AlertDeleteRuleSettingsSection />);
+    render(<AlertDeleteDescriptiveFormGroup services={{ http }} categoryIds={['management']} />);
     expect(screen.getByText(i18n.RULE_SETTINGS_TITLE)).toBeInTheDocument();
     expect(screen.getByText(i18n.RULE_SETTINGS_DESCRIPTION)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: i18n.RUN_CLEANUP_TASK })).toBeInTheDocument();
   });
 
   it('opens the modal when the cleanup button is clicked', async () => {
-    render(<AlertDeleteRuleSettingsSection />);
+    render(<AlertDeleteDescriptiveFormGroup services={{ http }} categoryIds={['management']} />);
     fireEvent.click(await screen.findByTestId('alert-delete-open-modal-button'));
     expect(await screen.findByTestId('alert-delete-modal')).toBeInTheDocument();
   });

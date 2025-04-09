@@ -36,21 +36,23 @@ export const alertDeletePreviewQuerySchema = schema.object({
         'Threshold (in days) for deleting inactive alerts (recovered/closed/untracked) older than this value, applies only when deletion is enabled',
     },
   }),
-  category_ids: schema.oneOf([
-    schema.arrayOf(
-      schema.oneOf([
-        schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
-        schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
-        schema.literal(alertDeleteCategoryIds.MANAGEMENT),
-      ]),
-      {
-        minSize: 2,
-      }
-    ),
-    schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
-    schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
-    schema.literal(alertDeleteCategoryIds.MANAGEMENT),
-  ]),
+  category_ids: schema.maybe(
+    schema.oneOf([
+      schema.arrayOf(
+        schema.oneOf([
+          schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
+          schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
+          schema.literal(alertDeleteCategoryIds.MANAGEMENT),
+        ]),
+        {
+          minSize: 2,
+        }
+      ),
+      schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
+      schema.literal(alertDeleteCategoryIds.OBSERVABILITY),
+      schema.literal(alertDeleteCategoryIds.MANAGEMENT),
+    ])
+  ),
 });
 
 export const alertDeletePreviewResponseSchema = schema.object({

@@ -875,45 +875,6 @@ export function defineRoutes(
   );
 
   // Remove when we have real routes
-  router.post(
-    {
-      path: '/api/alerts_fixture/preview_alert_deletion',
-      security: {
-        authz: {
-          enabled: false,
-          reason: 'This route is opted out from authorization',
-        },
-      },
-      validate: {
-        body: schema.object({
-          isActiveAlertDeleteEnabled: schema.boolean(),
-          isInactiveAlertDeleteEnabled: schema.boolean(),
-          activeAlertDeleteThreshold: schema.number({ min: 1 }),
-          inactiveAlertDeleteThreshold: schema.number({ min: 1 }),
-          categoryIds: schema.maybe(schema.arrayOf(schema.string())),
-        }),
-      },
-    },
-    async (
-      context: RequestHandlerContext,
-      req: KibanaRequest<any, any, any, any>,
-      res: KibanaResponseFactory
-    ): Promise<IKibanaResponse<any>> => {
-      const [, { spaces }] = await core.getStartServices();
-      const spaceId = spaces ? spaces.spacesService.getSpaceId(req) : 'default';
-      const alerting = await alertingStart;
-
-      try {
-        const result = await alerting.previewAlertDeletion(req.body, spaceId);
-        return res.ok({
-          body: { numAlertsDeleted: result },
-        });
-      } catch (err) {
-        return res.notFound();
-      }
-    }
-  );
-
   router.get(
     {
       path: '/api/alerts_fixture/last_run_alert_deletion',

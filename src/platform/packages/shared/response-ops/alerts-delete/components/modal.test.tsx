@@ -11,6 +11,9 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AlertDeleteModal } from './modal';
 import * as i18n from '../translations';
+import { httpServiceMock } from '@kbn/core/public/mocks';
+
+const http = httpServiceMock.createStartContract();
 
 describe('AlertDelete Modal', () => {
   const closeModalMock = jest.fn();
@@ -20,7 +23,14 @@ describe('AlertDelete Modal', () => {
   });
 
   it('renders the modal with initial state', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />
+    );
 
     expect(screen.getByText(i18n.MODAL_TITLE)).toBeInTheDocument();
     expect(screen.getByText(i18n.MODAL_DESCRIPTION)).toBeInTheDocument();
@@ -34,7 +44,14 @@ describe('AlertDelete Modal', () => {
   });
 
   it('enables the active alerts threshold when the checkbox is checked', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />
+    );
 
     const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
     fireEvent.click(activeCheckbox);
@@ -45,7 +62,14 @@ describe('AlertDelete Modal', () => {
   });
 
   it('enables the inactive alerts threshold when the checkbox is checked', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />
+    );
 
     const inactiveCheckbox = screen.getByTestId('alert-delete-inactive-checkbox');
     fireEvent.click(inactiveCheckbox);
@@ -56,7 +80,14 @@ describe('AlertDelete Modal', () => {
   });
 
   it('validates the delete confirmation input', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />
+    );
 
     const deleteInput = screen.getByTestId('alert-delete-delete-confirmation');
     fireEvent.change(deleteInput, { target: { value: 'wrong-passkey' } });
@@ -74,7 +105,14 @@ describe('AlertDelete Modal', () => {
   });
 
   it('calls closeModal when the cancel button is clicked', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />
+    );
 
     const cancelButton = screen.getByText('Cancel');
     fireEvent.click(cancelButton);
@@ -83,7 +121,14 @@ describe('AlertDelete Modal', () => {
   });
 
   it('submits the form when all validations pass', () => {
-    render(<AlertDeleteModal onCloseModal={closeModalMock} isVisible />);
+    render(
+      <AlertDeleteModal
+        onCloseModal={closeModalMock}
+        isVisible
+        services={{ http }}
+        categoryIds={['management']}
+      />
+    );
 
     const activeCheckbox = screen.getByTestId('alert-delete-active-checkbox');
     fireEvent.click(activeCheckbox);

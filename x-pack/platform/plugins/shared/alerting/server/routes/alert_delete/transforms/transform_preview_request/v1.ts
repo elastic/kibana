@@ -6,6 +6,7 @@
  */
 
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
+import type { AlertDeleteCategoryIds } from '../../../../../common/constants/alert_delete';
 import type { AlertDeletePreviewQueryV1 } from '../../../../../common/routes/alert_delete';
 
 export const transformRequestToAlertDeletePreview = ({
@@ -15,13 +16,18 @@ export const transformRequestToAlertDeletePreview = ({
   inactive_alert_delete_threshold: inactiveAlertDeleteThreshold,
   category_ids: _categoryIds,
 }: AlertDeletePreviewQueryV1): RulesSettingsAlertDeleteProperties => {
-  const categoryIds = Array.isArray(_categoryIds) ? _categoryIds : [_categoryIds];
+  // Accepting single category id or array of category ids because
+  // sending an array of just one element in decoded as a simple string
+  const getCategoryIds = (input: AlertDeleteCategoryIds | AlertDeleteCategoryIds[] | undefined) => {
+    if (!input) return undefined;
+    return Array.isArray(input) ? input : [input];
+  };
 
   return {
     isActiveAlertDeleteEnabled,
     isInactiveAlertDeleteEnabled,
     activeAlertDeleteThreshold,
     inactiveAlertDeleteThreshold,
-    categoryIds,
+    categoryIds: getCategoryIds(_categoryIds),
   };
 };
