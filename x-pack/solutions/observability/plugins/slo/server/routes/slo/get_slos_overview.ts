@@ -6,7 +6,6 @@
  */
 
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { executeWithErrorHandler } from '../../errors';
 import { GetSLOsOverview } from '../../services/get_slos_overview';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
@@ -44,6 +43,6 @@ export const getSLOsOverview = createSloServerRoute({
       racClient
     );
 
-    return await executeWithErrorHandler(() => slosOverview.execute(params?.query ?? {}));
+    return await slosOverview.execute(params?.query ?? {});
   },
 });
