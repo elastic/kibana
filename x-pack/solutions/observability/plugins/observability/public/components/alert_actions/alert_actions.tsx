@@ -33,7 +33,7 @@ import {
 } from '../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../pages/alert_details/alert_details';
 
-export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> = ({
+export function AlertActions({
   observabilityRuleTypeRegistry,
   alert,
   tableId,
@@ -41,7 +41,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
   openAlertInFlyout,
   parentAlert,
   ...rest
-}) => {
+}: GetObservabilityAlertsTableProp<'renderActionsCell'>) {
   const services = useKibana().services;
   const {
     http: {
@@ -214,6 +214,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         css={{
           textAlign: 'center',
         }}
+        grow={false}
       >
         <EuiPopover
           anchorPosition="downLeft"
@@ -243,7 +244,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
       </EuiFlexItem>
     </>
   );
-};
+}
 
 // Default export used for lazy loading
 // eslint-disable-next-line import/no-default-export

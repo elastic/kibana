@@ -72,7 +72,7 @@ export function RelationCol({ alert, parentAlert }: { alert: Alert; parentAlert:
     <EuiDescriptionList
       type="column"
       listItems={relations}
-      style={{ maxWidth: '400px' }}
+      css={{ maxWidth: '400px' }}
       compressed
     />
   );

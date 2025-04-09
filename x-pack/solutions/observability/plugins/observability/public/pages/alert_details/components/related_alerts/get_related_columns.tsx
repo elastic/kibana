@@ -16,45 +16,59 @@ export const RELATED_ACTIONS_COL = 'relatedActions';
 export const getRelatedColumns = (): EuiDataGridColumn[] => {
   return [
     {
+      id: ALERT_STATUS,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
         defaultMessage: 'Alert Status',
       }),
-      id: ALERT_STATUS,
       initialWidth: 120,
+      isSortable: false,
+      actions: false,
     },
     {
+      id: ALERT_RULE_NAME,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.ruleNameColumnDescription', {
         defaultMessage: 'Rule name',
       }),
-      id: ALERT_RULE_NAME,
       initialWidth: 250,
+      isSortable: false,
+      actions: false,
     },
     {
+      id: RELATED_ALERT_REASON,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.reasonDescription', {
         defaultMessage: 'Reason',
       }),
-      id: RELATED_ALERT_REASON,
-      initialWidth: 300,
+      initialWidth: 400,
+      isSortable: false,
+      actions: false,
     },
     {
+      id: RELATION_COL,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.relationColumnDescription', {
         defaultMessage: 'Relation',
       }),
-      id: RELATION_COL,
       initialWidth: 350,
+      isSortable: false,
+      actions: false,
     },
     {
       id: ALERT_CASE_IDS,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.caseIdsColumnDescription', {
         defaultMessage: 'Attached cases',
       }),
+      initialWidth: 150,
+      isSortable: false,
+      actions: false,
     },
     {
+      id: RELATED_ACTIONS_COL,
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.actionsColumnDescription', {
         defaultMessage: 'Actions',
       }),
-      id: RELATED_ACTIONS_COL,
-      initialWidth: 120,
+      initialWidth: 75,
+      isResizable: false,
+      isSortable: false,
+      actions: false,
     },
   ];
 };

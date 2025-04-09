@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLink, EuiText } from '@elastic/eui';
+import { EuiLink, EuiText, EuiFlexGroup } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import {
   ALERT_DURATION,
@@ -140,7 +140,11 @@ export const AlertsTableCellValue: GetObservabilityAlertsTableProp<'renderCellVa
       return <EuiText size="s">{val}</EuiText>;
     },
     [RELATED_ACTIONS_COL]: (val) => {
-      return <AlertActions {...props} />;
+      return (
+        <EuiFlexGroup gutterSize="none">
+          <AlertActions {...props} />
+        </EuiFlexGroup>
+      );
     },
     [ALERT_CASE_IDS]: (value) => {
       return <>{value}</>;
