@@ -103,8 +103,6 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type SideNavigationSection = 'body' | 'footer' | 'callout';
-
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
 export type EuiThemeSize = Exclude<
@@ -413,6 +411,8 @@ export interface NavigationTreeDefinition<
    * */
   callout?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
+
+export type SideNavigationSection = keyof NavigationTreeDefinition;
 
 /**
  * @public
