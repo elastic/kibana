@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, {useMemo} from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { StyleError } from './style_error';
@@ -27,6 +27,18 @@ interface Props {
   svg?: string;
 }
 
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+  const styles = useMemo(
+    () =>
+      css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
+    [euiTheme]
+  );
+  return styles;
+};
+
+
 export function VectorStyleLegend({
   isLinesOnly,
   isPointsOnly,
@@ -36,7 +48,7 @@ export function VectorStyleLegend({
   svg,
 }: Props) {
   const legendRows = [];
-  const { euiTheme } = useEuiTheme();
+  const spacerStyles = useStyles();
 
   for (let i = 0; i < styles.length; i++) {
     const styleMetaDataRequest = styles[i].isDynamic()
@@ -57,7 +69,7 @@ export function VectorStyleLegend({
     );
 
     legendRows.push(
-      <div key={i} css={css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } })}>
+      <div key={i} css={spacerStyles}>
         {row}
       </div>
     );

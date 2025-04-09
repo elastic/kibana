@@ -33,6 +33,8 @@ interface State {
   iconColor: string;
 }
 
+const iconPreviewStyles = css({ height: '150px' });
+
 export class IconPreview extends Component<Props, State> {
   static iconId = `iconPreview`;
   private _isMounted = false;
@@ -190,7 +192,7 @@ export class IconPreview extends Component<Props, State> {
                 id="mapsCustomIconPreview__mapContainer"
                 ref={this._setContainerRef}
                 data-test-subj="mapsCustomIconPreview"
-                css={css({ height: '150px' })}
+                css={iconPreviewStyles}
               />
             </EuiPanel>
             <EuiSpacer size="m" />

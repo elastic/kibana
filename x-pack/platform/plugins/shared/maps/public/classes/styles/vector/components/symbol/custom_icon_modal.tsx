@@ -105,6 +105,16 @@ const strings = {
     }),
 };
 
+const styles = {
+  wrapper: css({
+    maxWidth: '210px',
+    minHeight: '210px',
+  }),
+  iconForm: css({
+    minWidth: '400px',
+  }),
+};
+
 function getFileNameWithoutExt(fileName: string) {
   const splits = fileName.split('.');
   if (splits.length > 1) {
@@ -309,14 +319,7 @@ export class CustomIconModal extends Component<Props, State> {
   private _renderIconPreview() {
     const { svg, isFileInvalid, cutoff, radius } = this.state;
     return svg !== '' ? (
-      <EuiFlexItem
-        className="mapsIconPreview__wrapper"
-        css={css({
-          maxWidth: '210px',
-          minHeight: '210px',
-        })}
-        grow={false}
-      >
+      <EuiFlexItem css={styles.wrapper} grow={false}>
         <IconPreview svg={svg} isSvgInvalid={isFileInvalid} cutoff={cutoff} radius={radius} />
       </EuiFlexItem>
     ) : null;
@@ -340,12 +343,7 @@ export class CustomIconModal extends Component<Props, State> {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" gutterSize="m">
-            <EuiFlexItem
-              css={css`
-                min-width: 400px;
-              `}
-              grow={2}
-            >
+            <EuiFlexItem css={styles.iconForm} grow={2}>
               <EuiFormRow
                 className="mapsCustomIconForm__image"
                 display="rowCompressed"
