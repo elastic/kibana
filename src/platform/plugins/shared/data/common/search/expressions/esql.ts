@@ -346,25 +346,30 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             : undefined;
 
           const allColumns =
-            (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
-              id: name,
-              name,
-              meta: {
-                type: esFieldTypeToKibanaFieldType(type),
-                esType: type,
-                sourceParams:
-                  type === 'date'
-                    ? {
-                        appliedTimeRange,
-                        params: {},
-                        indexPattern,
-                      }
-                    : {
-                        indexPattern,
-                      },
-              },
-              isNull: hasEmptyColumns ? !lookup.has(name) : false,
-            })) ?? [];
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            (body.all_columns ?? body.columns)?.map(({ name, type, original_types }) => {
+              const originalTypes = original_types ?? [];
+              const hasConflict = type === 'unsupported' && originalTypes.length > 1;
+              return {
+                id: name,
+                name,
+                meta: {
+                  type: hasConflict ? 'conflict' : esFieldTypeToKibanaFieldType(type),
+                  esType: type,
+                  sourceParams:
+                    type === 'date'
+                      ? {
+                          appliedTimeRange,
+                          params: {},
+                          indexPattern,
+                        }
+                      : {
+                          indexPattern,
+                        },
+                },
+                isNull: hasEmptyColumns ? !lookup.has(name) : false,
+              };
+            }) ?? [];
 
           const fixedQuery = fixESQLQueryWithVariables(query, input?.esqlVariables ?? []);
           const updatedWithVariablesColumns = mapVariableToColumn(

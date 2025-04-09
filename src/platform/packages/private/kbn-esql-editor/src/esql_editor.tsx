@@ -473,6 +473,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                 return {
                   name: c.name,
                   type: c.meta.esType as FieldType,
+                  hasConflict: c.meta.type === 'conflict',
                 };
               }) || [];
 

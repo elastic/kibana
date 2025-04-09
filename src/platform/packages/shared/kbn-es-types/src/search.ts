@@ -657,6 +657,7 @@ export type InferSearchResponseOf<
 export interface ESQLColumn {
   name: string;
   type: string;
+  original_types?: string[];
 }
 
 export type ESQLRow = unknown[];

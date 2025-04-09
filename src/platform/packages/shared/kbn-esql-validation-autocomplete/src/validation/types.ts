@@ -24,6 +24,7 @@ export interface ESQLRealField {
   name: string;
   type: FieldType;
   isEcs?: boolean;
+  hasConflict?: boolean;
   metadata?: {
     description?: string;
   };
