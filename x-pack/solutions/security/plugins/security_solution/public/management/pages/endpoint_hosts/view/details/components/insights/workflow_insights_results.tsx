@@ -196,7 +196,7 @@ export const WorkflowInsightsResults = ({
           alignItems={'center'}
           data-test-subj={'workflowInsightsSurveySection'}
         >
-          <EuiIcon type="discuss" size="s" />
+          <EuiIcon type="discuss" size="m" />
           <EuiText size={'xs'} data-test-subj={'workflowInsightsSurveyLink'}>
             <p>
               {WORKFLOW_INSIGHTS.issues.survey.description}
