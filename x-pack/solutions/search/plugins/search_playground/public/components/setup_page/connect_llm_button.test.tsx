@@ -86,6 +86,6 @@ describe('ConnectLLMButton', () => {
     });
     const { queryByTestId } = render(<ConnectLLMButton />);
 
-    expect(queryByTestId('successConnectLLMButton')).toBeInTheDocument();
+    expect(queryByTestId('successConnectLLMText')).toBeInTheDocument();
   });
 });

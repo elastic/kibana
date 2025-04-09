@@ -49,7 +49,7 @@ export const ConnectLLMButton: React.FC = () => {
   return (
     <>
       {connectors?.length ? (
-        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="successConnectLLMButton">
+        <EuiFlexGroup alignItems="center" gutterSize="s" data-test-subj="successConnectLLMText">
           <EuiFlexItem grow={false}>
             <EuiIcon type="checkInCircleFilled" color="success" />
           </EuiFlexItem>
