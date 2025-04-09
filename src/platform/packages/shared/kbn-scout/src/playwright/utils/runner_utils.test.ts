@@ -57,52 +57,13 @@ describe('formatTime', () => {
 });
 
 describe('getPlaywrightGrepTag', () => {
-  const mockConfig = {
-    getScoutTestConfig: jest.fn(),
-  };
-
   it('should return the correct tag for serverless mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: true,
-      projectType: 'oblt',
-    });
-
-    const result = getPlaywrightGrepTag(mockConfig as any);
-
-    expect(mockConfig.getScoutTestConfig).toHaveBeenCalled();
+    const result = getPlaywrightGrepTag('serverless=oblt');
     expect(result).toBe('@svlOblt');
   });
 
   it('should return the correct tag for stateful mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: false,
-    });
-
-    const result = getPlaywrightGrepTag(mockConfig as any);
-
-    expect(mockConfig.getScoutTestConfig).toHaveBeenCalled();
+    const result = getPlaywrightGrepTag('stateful');
     expect(result).toBe('@ess');
-  });
-
-  it('should throw an error if projectType is missing in serverless mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: true,
-      projectType: undefined,
-    });
-
-    expect(() => getPlaywrightGrepTag(mockConfig as any)).toThrow(
-      `'projectType' is required to determine tags for 'serverless' mode.`
-    );
-  });
-
-  it('should throw an error if unknown projectType is set in serverless mode', () => {
-    mockConfig.getScoutTestConfig.mockReturnValue({
-      serverless: true,
-      projectType: 'a',
-    });
-
-    expect(() => getPlaywrightGrepTag(mockConfig as any)).toThrow(
-      `No tags found for projectType: 'a'.`
-    );
   });
 });
