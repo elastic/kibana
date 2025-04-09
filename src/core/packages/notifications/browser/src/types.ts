@@ -8,7 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { EuiGlobalToastListToast as EuiToast } from '@elastic/eui';
+import type { EuiBadgeProps, EuiGlobalToastListToast as EuiToast, IconType } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 
 /**
@@ -76,4 +76,43 @@ export interface IToasts {
   addWarning: (toastOrTitle: ToastInput, options?: any) => Toast;
   addDanger: (toastOrTitle: ToastInput, options?: any) => Toast;
   addError: (error: Error, options: ErrorToastOptions) => Toast;
+}
+
+interface BaseNotificationEvent {
+  id: string;
+  timestamp: number;
+  title: string;
+  message: string;
+  isRead: boolean;
+}
+
+export interface NotificationEventTypeData {
+  severity: string;
+  badgeColor?: EuiBadgeProps['color'];
+  iconType?: IconType;
+  eventName: string;
+}
+
+export interface TypedNotificationEvent<T> extends BaseNotificationEvent {
+  typeId: string;
+  metadata?: T;
+}
+
+export type NotificationEvent = BaseNotificationEvent & NotificationEventTypeData;
+
+export interface RegisteredNotificationEventType<T extends Record<string, string>>
+  extends NotificationEventTypeData {
+  typeId: string;
+  actionCallback?: <E extends TypedNotificationEvent<T>>(event: E) => void;
+}
+
+export interface INotificationEvents {
+  get$: () => Observable<NotificationEvent[]>;
+  registerType: <T>(
+    typeId: string,
+    type: NotificationEventTypeData,
+    actionCallback?: (event: TypedNotificationEvent<T>) => void
+  ) => (event: TypedNotificationEvent<T>) => void;
+  notify: (event: NotificationEvent) => void;
+  markAsRead: (eventId: string, isRead: boolean) => void;
 }
