@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["server/**/*", "server/**/*.json", "public/**/*", "common/*"],
+  "include": ["server/**/*", "server/**/*.json", "public/**/*", "common/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/alerting-plugin",

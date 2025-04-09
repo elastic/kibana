@@ -66,7 +66,7 @@ const getWarning = (duplicateAlertIds?: Set<string>, longAlertIds?: Set<string>)
   } else if (longAlertIds && longAlertIds.size > 0) {
     return i18n.translate('xpack.stackAlerts.esQuery.ui.alertPerRowAlertIdWarning', {
       defaultMessage:
-        'The number of fields used to generate the alert ID should be limited to a maximum of 10. ',
+        'The number of fields used to generate the alert ID should be limited to a maximum of {max}. ',
       values: {
         max: ALERT_ID_SUGGESTED_MAX,
       },
