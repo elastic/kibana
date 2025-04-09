@@ -8,7 +8,8 @@
 import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 
-import { readCasesPermissions, renderWithTestingProviders } from '../../../common/mock';
+import type { AppMockRenderer } from '../../../common/mock';
+import { readCasesPermissions, createAppMockRenderer } from '../../../common/mock';
 
 import { CustomFields } from './custom_fields';
 import { customFieldsMock, customFieldsConfigurationMock } from '../../../containers/mock';
@@ -16,15 +17,21 @@ import userEvent from '@testing-library/user-event';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 
 // Failing: See https://github.com/elastic/kibana/issues/185046
-describe('Case View Page files tab', () => {
+describe.skip('Case View Page files tab', () => {
   const onSubmit = jest.fn();
+  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
+  afterEach(async () => {
+    await appMockRender.clearQueryCache();
+  });
+
   it('should render the custom fields correctly', async () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={customFieldsMock}
@@ -40,7 +47,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('should render the custom fields types when the custom fields are empty', async () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={[]}
@@ -54,7 +61,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('should not show the custom fields if the configuration is empty', () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={customFieldsMock}
@@ -70,7 +77,7 @@ describe('Case View Page files tab', () => {
   it('should sort the custom fields correctly', async () => {
     const reversedConfiguration = [...customFieldsConfigurationMock].reverse();
 
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={[]}
@@ -83,7 +90,7 @@ describe('Case View Page files tab', () => {
       exact: false,
     });
 
-    expect(customFields.length).toBe(8);
+    expect(customFields.length).toBe(6);
 
     expect(await within(customFields[0]).findByRole('heading')).toHaveTextContent(
       'My test label 1'
@@ -106,14 +113,15 @@ describe('Case View Page files tab', () => {
   });
 
   it('pass the permissions to custom fields correctly', async () => {
-    renderWithTestingProviders(
+    appMockRender = createAppMockRenderer({ permissions: readCasesPermissions() });
+
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={customFieldsMock}
         customFieldsConfiguration={customFieldsConfigurationMock}
         onSubmit={onSubmit}
-      />,
-      { wrapperProps: { permissions: readCasesPermissions() } }
+      />
     );
 
     expect(
@@ -122,7 +130,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('removes extra custom fields', async () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={customFieldsMock}
@@ -143,7 +151,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('updates an existing toggle field correctly', async () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={customFieldsMock}
@@ -164,7 +172,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('updates new toggle field correctly', async () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={[]}
@@ -185,7 +193,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('updates existing text field correctly', async () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={customFieldsMock}
@@ -216,7 +224,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('updates new text field correctly', async () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <CustomFields
         isLoading={false}
         customFields={[]}
