@@ -43,6 +43,6 @@ export const getSLOStatsOverview = createSloServerRoute({
       racClient
     );
 
-    return await slosOverview.execute(params?.query ?? {})
+    return await slosOverview.execute(params?.query ?? {});
   },
 });
