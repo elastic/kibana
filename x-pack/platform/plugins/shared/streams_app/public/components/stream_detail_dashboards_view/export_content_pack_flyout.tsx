@@ -9,7 +9,12 @@ import React, { useState } from 'react';
 // @ts-expect-error
 import { saveAs } from '@elastic/filesaver';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { ContentPackEntry, findIndexPatterns, isIndexPlaceholder } from '@kbn/content-packs-schema';
+import {
+  ContentPackEntry,
+  ContentPackManifest,
+  findIndexPatterns,
+  isIndexPlaceholder,
+} from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -31,6 +36,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ContentPackObjectsList } from './content_pack_objects_list';
 import { contentPreview } from './content/content_preview';
+import { ContentPackMetadata } from './content_pack_manifest';
 
 export function ExportContentPackFlyout({
   definition,
@@ -49,6 +55,8 @@ export function ExportContentPackFlyout({
       },
     },
   } = useKibana();
+
+  const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
   const { value: exportResponse, loading: isLoadingContentPack } = useStreamsAppFetch(
     async ({ signal }) => {
@@ -83,6 +91,12 @@ export function ExportContentPackFlyout({
         contentPack.entries.flatMap((object) => findIndexPatterns(object))
       ).filter((index) => !isIndexPlaceholder(index));
 
+      setManifest({
+        name: contentPack.name,
+        version: contentPack.version,
+        description: contentPack.description,
+      });
+
       return { contentPack, indexPatterns };
     },
     [definition, streamsRepositoryClient, http]
@@ -110,43 +124,55 @@ export function ExportContentPackFlyout({
           <EuiLoadingSpinner />
         ) : !exportResponse ? null : exportResponse.contentPack.entries ? (
           <>
-            <EuiSpacer />
-
             {exportResponse.indexPatterns.length ? (
-              <EuiCallOut>
-                <details>
-                  <summary>
-                    {i18n.translate('xpack.streams.exportContentFlyout.advancedSettings', {
-                      defaultMessage: 'Advanced settings',
-                    })}
-                  </summary>
-                  <EuiSpacer />
-                  <p>
-                    {i18n.translate('xpack.streams.exportContentFlyout.detectedIndexPatterns', {
-                      defaultMessage:
-                        'We detected index patterns that do not match {streamName}* in the content pack. Check the ones you want to replace with the target stream index on import.',
-                      values: { streamName: definition.stream.name },
-                    })}
-                  </p>
-                  {
-                    <EuiCheckboxGroup
-                      idToSelectedMap={replacedIndexPatterns}
-                      onChange={(id) =>
-                        setReplacedIndexPatterns({
-                          ...replacedIndexPatterns,
-                          ...{
-                            [id]: !replacedIndexPatterns[id],
-                          },
-                        })
-                      }
-                      options={exportResponse.indexPatterns.map((index) => ({
-                        id: index,
-                        label: index,
-                      }))}
-                    />
-                  }
-                </details>
-              </EuiCallOut>
+              <>
+                <EuiCallOut>
+                  <details>
+                    <summary>
+                      {i18n.translate('xpack.streams.exportContentFlyout.advancedSettings', {
+                        defaultMessage: 'Advanced settings',
+                      })}
+                    </summary>
+                    <EuiSpacer />
+                    <p>
+                      {i18n.translate('xpack.streams.exportContentFlyout.detectedIndexPatterns', {
+                        defaultMessage:
+                          'We detected index patterns that do not match {streamName}* in the content pack. Check the ones you want to replace with the target stream index on import.',
+                        values: { streamName: definition.stream.name },
+                      })}
+                    </p>
+                    {
+                      <EuiCheckboxGroup
+                        idToSelectedMap={replacedIndexPatterns}
+                        onChange={(id) =>
+                          setReplacedIndexPatterns({
+                            ...replacedIndexPatterns,
+                            ...{
+                              [id]: !replacedIndexPatterns[id],
+                            },
+                          })
+                        }
+                        options={exportResponse.indexPatterns.map((index) => ({
+                          id: index,
+                          label: index,
+                        }))}
+                      />
+                    }
+                  </details>
+                </EuiCallOut>
+
+                <EuiSpacer />
+              </>
+            ) : null}
+
+            {manifest ? (
+              <ContentPackMetadata
+                manifest={manifest}
+                onChange={(updatedManifest) => {
+                  console.log('ONCHANGE', updatedManifest);
+                  setManifest(updatedManifest);
+                }}
+              />
             ) : null}
 
             <EuiSpacer />
@@ -169,22 +195,16 @@ export function ExportContentPackFlyout({
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
               isLoading={isLoadingContentPack}
-              isDisabled={selectedContentPackObjects.length === 0}
+              isDisabled={selectedContentPackObjects.length === 0 || manifest?.name.length === 0}
               fill
               onClick={async () => {
-                if (!exportResponse || selectedContentPackObjects.length === 0) {
+                if (!exportResponse || !manifest || selectedContentPackObjects.length === 0) {
                   return;
                 }
 
                 const replacedPatterns = Object.entries(replacedIndexPatterns)
                   .filter(([, selected]) => selected)
                   .map(([pattern]) => pattern);
-
-                const manifest = {
-                  name: definition.stream.name,
-                  description: '',
-                  version: '1.0.0',
-                };
 
                 const contentPack = await streamsRepositoryClient.fetch(
                   'POST /api/streams/{name}/content/export 2023-10-31',

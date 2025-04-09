@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
-import { ContentPackEntry } from '@kbn/content-packs-schema';
+import { ContentPackEntry, ContentPackManifest } from '@kbn/content-packs-schema';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -25,6 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { ContentPackObjectsList } from './content_pack_objects_list';
 import { contentPreview } from './content/content_preview';
+import { ContentPackMetadata } from './content_pack_manifest';
 
 export function ImportContentPackFlyout({
   definition,
@@ -45,6 +46,7 @@ export function ImportContentPackFlyout({
   const [selectedContentPackObjects, setSelectedContentPackObjects] = useState<ContentPackEntry[]>(
     []
   );
+  const [manifest, setManifest] = useState<ContentPackManifest | undefined>();
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -77,6 +79,11 @@ export function ImportContentPackFlyout({
                 file: archiveFile,
               });
 
+              setManifest({
+                name: contentPackParsed.name,
+                version: contentPackParsed.version,
+                description: contentPackParsed.description,
+              });
               setContentPackObjects(contentPackParsed.entries);
             } else {
               setFile(null);
@@ -85,8 +92,10 @@ export function ImportContentPackFlyout({
           display={'large'}
         />
 
-        {file ? (
+        {file && manifest ? (
           <>
+            <EuiSpacer />
+            <ContentPackMetadata manifest={manifest} readonly={true} />
             <EuiSpacer />
 
             <ContentPackObjectsList
