@@ -181,6 +181,8 @@ export {
   type IngestUpsertRequest,
   type UnwiredStreamGetResponse,
   type WiredStreamGetResponse,
+  type WiredStreamUpsertRequest,
+  type UnwiredStreamUpsertRequest,
   type UnwiredIngestUpsertRequest,
   type WiredIngestUpsertRequest,
 };
