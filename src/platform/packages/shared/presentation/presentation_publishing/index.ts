@@ -31,6 +31,7 @@ export {
 export { fetch$, useFetchContext, type FetchContext } from './interfaces/fetch/fetch';
 export {
   initializeTimeRangeManager,
+  timeRangeComparators,
   type SerializedTimeRange,
 } from './interfaces/fetch/time_range_manager';
 export { apiPublishesReload, type PublishesReload } from './interfaces/fetch/publishes_reload';

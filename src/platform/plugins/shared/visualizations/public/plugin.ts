@@ -121,7 +121,7 @@ import {
   CONTENT_ID,
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
-import type { VisualizeSerializedState } from './embeddable/types';
+import type { VisualizeSavedObjectInputState } from './embeddable/types';
 import { registerActions } from './actions/register_actions';
 
 /**
@@ -407,14 +407,14 @@ export class VisualizationsPlugin
     });
     embeddable.registerAddFromLibraryType<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
-        const { deserializeState } = await import('./embeddable/state');
-        const initialState = await deserializeState({
-          rawState: { savedObjectId: savedObject.id },
-          references: savedObject.references,
-        });
-        container.addNewPanel<VisualizeSerializedState>({
+        container.addNewPanel<VisualizeSavedObjectInputState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
-          initialState,
+          serializedState: {
+            rawState: {
+              savedObjectId: savedObject.id,
+            },
+            references: savedObject.references,
+          },
         });
       },
       savedObjectType: VISUALIZE_EMBEDDABLE_TYPE,
