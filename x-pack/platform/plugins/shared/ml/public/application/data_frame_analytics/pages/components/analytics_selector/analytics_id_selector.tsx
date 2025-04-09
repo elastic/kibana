@@ -122,7 +122,7 @@ export function AnalyticsIdSelector({
     { model_id?: string; job_id?: string; analysis_type?: string } | undefined
   >();
   const flyoutTitleId = useGeneratedHtmlId({
-    prefix: 'flyoutTitle',
+    prefix: 'jobSelectorFlyout',
   });
   const [analyticsJobs, setAnalyticsJobs] = useState<DataFrameAnalyticsConfig[]>([]);
   const [trainedModels, setTrainedModels] = useState<TrainedModelConfigResponse[]>([]);
