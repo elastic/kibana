@@ -11,7 +11,7 @@ import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
-import { RootTransactionProvider, useRootTransactionContext } from './use_root_transaction';
+import { RootTransactionProvider, useRootTransactionContext } from '.';
 import { TRANSACTION_DURATION_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 
 jest.mock('../../../../../../plugin', () => ({
