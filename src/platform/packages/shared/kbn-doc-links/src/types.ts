@@ -527,6 +527,7 @@ export interface DocLinks {
     proxiesSettings: string;
     unprivilegedMode: string;
     httpMonitoring: string;
+    agentLevelLogging: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
