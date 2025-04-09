@@ -48,27 +48,27 @@ paths:
                 - $ref: '#/components/schemas/BulkEditRules'
             examples:
               example1:
-                summary: Enable - Enable all rules with the test tag
+                summary: 1. Enable all rules with the test tag
                 description: The following request activates all rules with the test tag.
                 value:
                   query: 'alert.attributes.tags: "test"'
                   action: 'enable'
               example2:
-                summary: Enable - Enable a specific rule by ID.
+                summary: 2. Enable a specific rule by ID.
                 description: The following request enables the rule with the specified ID.
                 value:
                   action: 'enable'
                   ids:
                     - '748694f0-6977-4ea5-8384-cd2e39730779'
               example3:
-                summary: Disable - Disable a specific rule by ID
+                summary: 3. Disable a specific rule by ID
                 description: The following request disables the rule with the specified ID.
                 value:
                   action: 'disable'
                   ids:
                     - '748694f0-6977-4ea5-8384-cd2e39730779'
               example4:
-                summary: Duplicate - Duplicate rules with specific IDs
+                summary: 4. Duplicate rules with specific IDs
                 description: The following request duplicates rules with the specified IDs, including exceptions but not expired exceptions.
                 value:
                   action: 'duplicate'
@@ -79,14 +79,14 @@ paths:
                     include_exceptions: true
                     include_expired_exceptions: false
               example5:
-                summary: Delete - Delete a specific rule by ID
+                summary: 5. Delete a specific rule by ID
                 description: The following request deletes the rule with the specified ID.
                 value:
                   action: 'delete'
                   ids:
                     - 'cf4abfd1-7c37-4519-ab0f-5ea5c75fac60'
               example6:
-                summary: Run - Run a specific rule by ID
+                summary: 6. Run a specific rule by ID
                 description: The following request runs the rule with the specified ID within the given date range.
                 value:
                   action: 'run'
@@ -96,14 +96,14 @@ paths:
                     start_date: '2025-03-01T00:00:00.000Z'
                     end_date: '2025-03-10T23:59:59.999Z'
               example7:
-                summary: Export - Export specific rules by ID
+                summary: 7. Export specific rules by ID
                 description: The following request exports the rules with the specified IDs.
                 value:
                   action: 'export'
                   ids:
                     - '748694f0-6977-4ea5-8384-cd2e39730779'
               example8:
-                summary: Edit - dry run - Validate add_index_patterns bulk action
+                summary: 8. dry run - Validate add_index_patterns bulk action
                 description: The following request will validate that the add_index_patterns bulk action can be successfully applied to three rules. The dry_run parameter is specified in query parameters, e.g. POST api/detection_engine/rules/_bulk_action?dry_run=true
                 value:
                   action: 'edit'
@@ -116,7 +116,7 @@ paths:
                     - 'dc015d10-0831-11ed-ac8b-05a222bd8d4a'
                     - 'de8f5af0-0831-11ed-ac8b-05a222bd8d4a'
               example9:
-                summary: Edit - Add a tag to rules (idempotent)
+                summary: 9. Add a tag to rules (idempotent)
                 description: The following request adds the tag "tag-1" to the rules with the specified IDs. If the tag already exists for a rule, no changes are made.
                 value:
                   ids:
@@ -128,7 +128,7 @@ paths:
                       value:
                         - 'tag-1'
               example10:
-                summary: Edit - Add two tags to rules (idempotent)
+                summary: 10. Add two tags to rules (idempotent)
                 description: The following request adds two tags at the same time, tag-1 and tag-2, to the rules that have the IDs sent in the payload. If the tags already exist for a rule, no changes are made.
                 value:
                   ids:
@@ -141,7 +141,7 @@ paths:
                         - 'tag-1'
                         - 'tag-2'
               example11:
-                summary: Edit - Delete a tag from rules (idempotent)
+                summary: 11. Delete a tag from rules (idempotent)
                 description: The following request removes the tag "tag-1" from the rules with the specified IDs. If the tag does not exist for a rule, no changes are made.
                 value:
                   ids:
@@ -153,7 +153,7 @@ paths:
                       value:
                         - 'tag-1'
               example12:
-                summary: Edit - Set (overwrite existing) tags for rules (idempotent)
+                summary: 12. Set (overwrite existing) tags for rules (idempotent)
                 description: The following request sets the tags "tag-1" and "tag-2" for the rules with the specified IDs, overwriting any existing tags. If the set of tags is the same as the existing tags, no changes are made.
                 value:
                   ids:
@@ -166,7 +166,7 @@ paths:
                         - 'tag-1'
                         - 'tag-2'
               example13:
-                summary: Edit - Add index patterns to rules (idempotent)
+                summary: 13. Add index patterns to rules (idempotent)
                 description: The following request adds the index pattern "test-*" to the rules with the specified IDs. If the index pattern already exists for a rule, no changes are made.
                 value:
                   ids:
@@ -178,7 +178,7 @@ paths:
                       value:
                         - 'test-*'
               example14:
-                summary: Edit - Remove index patterns from rules (idempotent)
+                summary: 14. Remove index patterns from rules (idempotent)
                 description: The following request removes the index pattern "test-*" from the rules with the specified IDs. If the index pattern does not exist for a rule, no changes are made.
                 value:
                   ids:
@@ -190,7 +190,7 @@ paths:
                       value:
                         - 'test-*'
               example15:
-                summary: Edit - Set (overwrite existing) index patterns for rules patterns (idempotent)
+                summary: 15. Set (overwrite existing) index patterns for rules patterns (idempotent)
                 description: The following request sets the index patterns "test-*" and "prod-*" for the rules with the specified IDs, overwriting any existing index patterns. If the set of index patterns is the same as the existing index patterns, no changes are made.
                 value:
                   ids:
@@ -202,7 +202,7 @@ paths:
                       value:
                         - 'test-*'
               example16:
-                summary: Edit - Add investigation field to rules
+                summary: 16. Add investigation field to rules
                 description: The following request adds investigation field to the rules with the specified IDs.
                 value:
                   ids:
@@ -215,7 +215,7 @@ paths:
                         field_names:
                           - 'alert.status'
               example17:
-                summary: Edit - Delete investigation fields from rules (idempotent)
+                summary: 17. Delete investigation fields from rules (idempotent)
                 description: The following request deletes investigation fields from the rules with the specified IDs. If the field does not exist for a rule, no changes are made.
                 value:
                   ids:
@@ -228,7 +228,7 @@ paths:
                     - 'field1'
                     - 'field2'
               example18:
-                summary: Edit - Set (overwrite existing) investigation fields for rules (idempotent)
+                summary: 18. Set (overwrite existing) investigation fields for rules (idempotent)
                 description: The following request sets investigation fields for the rules with the specified IDs, overwriting any existing investigation fields. If the set of investigation fields is the same as the existing investigation fields, no changes are made.
                 value:
                   ids:
@@ -241,7 +241,7 @@ paths:
                         - 'field1'
                         - 'field2'
               example19:
-                summary: Edit - Set (overwrite existing) timeline template for rules (idempotent)
+                summary: 19. Set (overwrite existing) timeline template for rules (idempotent)
                 description: The following request sets a timeline template for the rules with the specified IDs. If the same timeline template is already set for a rule, no changes are made.
                 value:
                   action: edit
@@ -253,7 +253,7 @@ paths:
                         timeline_id: 3e827bab-838a-469f-bd1e-5e19a2bff2fd
                         timeline_title: Alerts Involving a Single User Timeline
               example20:
-                summary: Edit - Set (overwrite existing) schedule for rules (idempotent)
+                summary: 20. Set (overwrite existing) schedule for rules (idempotent)
                 description: The following request sets a schedule for the rules with the specified IDs. If the same schedule is already set for a rule, no changes are made.
                 value:
                   ids:
@@ -265,7 +265,7 @@ paths:
                         interval: '1h'
                         lookback: '30m'
               example21:
-                summary: Edit - Add rule actions to rules (non-idempotent)
+                summary: 21. Add rule actions to rules (non-idempotent)
                 description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
                 value:
                   action: edit
@@ -280,7 +280,7 @@ paths:
                               body: The message body
                             group: default
               example22:
-                summary: Edit - Set (overwrite existing) rule actions for rules (non-idempotent)
+                summary: 22. Set (overwrite existing) rule actions for rules (non-idempotent)
                 description: The following request sets rule actions for the rules with the specified IDs. Each action receives its own unique ID.
                 value:
                   action: edit
@@ -295,7 +295,7 @@ paths:
                               body: The message body
                             group: default
               example23:
-                summary: Edit - Add rule actions to rules for a webhook connector
+                summary: 23. Add rule actions to rules for a webhook connector
                 description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
                 value:
                   action: edit
@@ -310,7 +310,7 @@ paths:
                               body: The message body
                             group: default3
               example24:
-                summary: Edit - Add rule actions to rules for an email connector
+                summary: 24. Add rule actions to rules for an email connector
                 description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
                 value:
                   action: edit
@@ -327,7 +327,7 @@ paths:
                               message: The message body
                             group: default3
               example25:
-                summary: Edit - Add rule actions to rules for a slack connector
+                summary: 25. Add rule actions to rules for a slack connector
                 description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
                 value:
                   action: edit
@@ -342,7 +342,7 @@ paths:
                               message: The content of the message
                             group: default3
               example26:
-                summary: Edit - Add rule actions to rules for a PagerDuty connector
+                summary: 26. Add rule actions to rules for a PagerDuty connector
                 description: The following request adds rule actions to the rules with the specified IDs. Each new action receives its own unique ID.
                 value:
                   action: edit
@@ -370,7 +370,7 @@ paths:
                   - $ref: '#/components/schemas/BulkExportActionResponse'
               examples:
                 example1:
-                  summary: Successful response
+                  summary: 1. Successful response
                   description: In this response one rule was updated and one was skipped. Objects returned in attributes.results.skipped will only include rules' id, name, and skip_reason.
                   value:
                     success: true
@@ -440,7 +440,7 @@ paths:
                         succeeded: 1
                         total: 2
                 example2:
-                  summary: Partial failure
+                  summary: 2. Partial failure
                   description: If processing of any rule fails, a partial error outputs the ID and/or name of the affected rule and the corresponding error, as well as successfully processed rules (in the same format as a successful 200 request).
                   value:
                     value:
@@ -546,7 +546,7 @@ paths:
                               - id: '8bc7dad0-9320-11ec-9265-8b772383a08d'
                                 name: 'DNS Tunneling [Duplicate]'
                 example3:
-                  summary: Dry run
+                  summary: 3. Dry run
                   description: The attributes.errors section of the response shows that two rules failed to update and one succeeded. The same results would be returned if you ran the request without dry run mode enabled. Notice that there are no arrays in attributes.results. In dry run mode, rule updates are not applied and saved to Elasticsearch, so the endpoint wouldn’t return results for rules that have been updated, created, or deleted.
                   value:
                     message: 'Bulk edit partially failed'
@@ -576,7 +576,7 @@ paths:
                         skipped: 0
                         total: 3
                 example4:
-                  summary: Set tags successsully for 2 rules
+                  summary: 4. Set tags successsully for 2 rules
                   description: This example presents the successful setting of tags for 2 rules. There was a difference between the set of tags that were being added and the tags that were already set in the rules, that's why the rules were updated.
                   value:
                     success: true
@@ -714,7 +714,7 @@ paths:
                         skipped: 0
                         total: 2
                 example5:
-                  summary: Idempotent behavior of set_tags
+                  summary: 5. Idempotent behavior of set_tags
                   description: This example presents the idempotent behavior of the edit action with set_tags request. Both rules already had exactly the same tags that were being added, so no changes were made in any of them.
                   value:
                     success: true
@@ -737,7 +737,7 @@ paths:
                         skipped: 2
                         total: 2
                 example6:
-                  summary: Idempotent behavior of add_tags
+                  summary: 6. Idempotent behavior of add_tags
                   description: This example presents the idempotent behavior of the edit action with add_tags request. One rule was updated and one was skipped. The rule that was skipped already had all the tags that were being added.
                   value:
                     success: true
@@ -827,7 +827,7 @@ paths:
                         skipped: 1
                         total: 2
                 example7:
-                  summary: Non-idempotent behavior for set_rule_actions
+                  summary: 7. Non-idempotent behavior for set_rule_actions
                   description: This example shows a non-idempotent nature of the set_rule_actions requests. Regardless if the actions are the same as the existing actions for a rule, the actions are always set in the rule and receive a new unique ID.
                   value:
                     success: true
@@ -914,7 +914,7 @@ paths:
                         skipped: 0
                         total: 1
                 example8:
-                  summary: Non-idempotent behavior for add_rule_actions
+                  summary: 8. Non-idempotent behavior for add_rule_actions
                   description: This example shows a non-idempotent nature of the add_rule_actions requests. Regardless if the added action is the same as another existing action for a rule, the new action is added to the rule and receives a new unique ID.
                   value:
                     success: true
@@ -1304,8 +1304,8 @@ components:
       description: |
         Edits rule actions of rules.
 
-        - `add_rule_actions` adds rule actions to rules. If a rule action already exists for a rule, no changes are made.
-        - `set_rule_actions` sets rule actions for rules. If the set of rule actions is the same as the existing rule actions, no changes are made.
+        - `add_rule_actions` adds rule actions to rules. This action is non-idempotent, meaning that even if the same rule action already exists for a rule, it will be added again with a new unique ID.
+        - `set_rule_actions` sets rule actions for rules. This action is non-idempotent, meaning that even if the same set of rule actions already exists for a rule, it will be set again and the actions will receive new unique IDs.
       properties:
         type:
           type: string
