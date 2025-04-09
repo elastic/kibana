@@ -145,6 +145,11 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
       const timeSize = key === 'timeWindowSize' ? value : timeWindowSize;
       const timeUnit = key === 'timeWindowUnit' ? value : timeWindowUnit;
 
+      if (timeUnit === 'm' && parseInt(timeSize, 10) < 5) {
+        setShowTimeWindowWarning(false);
+        return;
+      }
+
       if (timeUnit === 'm' && parseInt(timeSize, 10) <= 20) {
         setShowTimeWindowWarning(true);
       } else {
@@ -230,7 +235,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
               prepend={i18n.TIME_WINDOW}
               data-test-subj="time-window-size-input"
               value={timeWindowSize}
-              min={timeWindowUnit === 'm' ? 5 : 1}
+              min={1}
               step={1}
               onChange={(e) => {
                 handleTimeWindowChange('timeWindowSize', e.target.value);
