@@ -10,11 +10,9 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiPanel,
-  EuiSelect,
   EuiText,
   EuiButtonGroup,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { useController } from 'react-hook-form';
@@ -71,8 +69,9 @@ export const EditContextPanel: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonGroup
-                legend="Default single select button group"
+                legend="Number of documents sent to LLM"
                 isFullWidth={true}
+                buttonSize="compressed"
                 options={[
                   {
                     id: '1',
