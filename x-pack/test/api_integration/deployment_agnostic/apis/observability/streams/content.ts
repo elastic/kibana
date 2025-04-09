@@ -38,7 +38,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    describe('Wired streams update', () => {
+    describe('Wired streams', () => {
       before(async () => {
         await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
         await linkDashboard(apiClient, 'logs', TWO_PANELS_DASHBOARD_ID);
