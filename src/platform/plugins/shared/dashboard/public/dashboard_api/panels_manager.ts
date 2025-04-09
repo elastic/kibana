@@ -146,7 +146,7 @@ export function initializePanelsManager(
   ): Promise<DashboardLayout> => {
     const { panelType: type, serializedState } = panelPackage;
     if (gridData) {
-      return { ...layout$.value, uuid: { gridData, type } };
+      return { ...layout$.value, [uuid]: { gridData: { ...gridData, i: uuid }, type } };
     }
     const getCustomPlacementSettingFunc = getDashboardPanelPlacementSetting(type);
     const customPlacementSettings = getCustomPlacementSettingFunc
