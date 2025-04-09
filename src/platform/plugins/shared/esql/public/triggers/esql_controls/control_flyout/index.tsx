@@ -59,10 +59,10 @@ export function ESQLControlsFlyout({
   );
   const valuesField = useMemo(() => {
     if (initialVariableType === ESQLVariableType.VALUES) {
-      return getValuesFromQueryField(queryString);
+      return getValuesFromQueryField(queryString, cursorPosition);
     }
     return undefined;
-  }, [initialVariableType, queryString]);
+  }, [cursorPosition, initialVariableType, queryString]);
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
   const styling = useMemo(() => getFlyoutStyling(), []);

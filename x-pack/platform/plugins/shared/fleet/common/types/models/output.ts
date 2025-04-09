@@ -133,5 +133,4 @@ interface KafkaOutputSecrets extends BaseSSLSecrets {
 }
 interface RemoteESOutputSecrets extends BaseSSLSecrets {
   service_token?: SOSecret;
-  kibana_api_key?: SOSecret;
 }
