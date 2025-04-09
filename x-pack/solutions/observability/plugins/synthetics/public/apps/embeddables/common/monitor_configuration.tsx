@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -49,6 +50,9 @@ export function MonitorConfiguration({
     mode: 'all',
   });
   const { getValues, formState } = methods;
+  const flyoutTitleId = useGeneratedHtmlId({
+    prefix: 'monitorConfigurationFlyout',
+  });
 
   const onConfirmClick = () => {
     const newFilters = getValues();
@@ -58,10 +62,10 @@ export function MonitorConfiguration({
   };
 
   return (
-    <EuiFlyout onClose={onCancel}>
+    <EuiFlyout onClose={onCancel} aria-labelledby={flyoutTitleId}>
       <EuiFlyoutHeader>
         <EuiTitle>
-          <h2>{title}</h2>
+          <h2 id={flyoutTitleId}>{title}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
