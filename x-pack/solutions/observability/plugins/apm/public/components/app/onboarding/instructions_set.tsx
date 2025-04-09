@@ -16,6 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
+import { css } from '@emotion/react';
 import type {
   INSTRUCTION_VARIANT,
   InstructionVariant,
