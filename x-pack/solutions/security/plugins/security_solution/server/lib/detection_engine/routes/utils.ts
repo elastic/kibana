@@ -5,19 +5,14 @@
  * 2.0.
  */
 
-import { has, snakeCase } from 'lodash/fp';
-import { BadRequestError } from '@kbn/securitysolution-es-utils';
+import { has } from 'lodash/fp';
 
 import type {
-  RouteValidationFunction,
   KibanaResponseFactory,
   CustomHttpResponseOptions,
   HttpResponsePayload,
   ResponseError,
 } from '@kbn/core/server';
-
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { RuleResponseValidationError } from '../rule_management/logic/detection_rules_client/utils';
 
 export interface OutputError {
   message: string;
@@ -101,52 +96,6 @@ export const isImportRegular = (
   return !has('error', importRuleResponse) && has('status_code', importRuleResponse);
 };
 
-export const transformBulkError = (
-  ruleId: string | undefined,
-  err: Error & { statusCode?: number }
-): BulkError => {
-  if (err instanceof CustomHttpRequestError) {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: err.statusCode ?? 400,
-      message: err.message,
-    });
-  } else if (err instanceof BadRequestError) {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: 400,
-      message: err.message,
-    });
-  } else if (err instanceof RuleResponseValidationError) {
-    return createBulkErrorObject({
-      ruleId: err.ruleId,
-      statusCode: 500,
-      message: err.message,
-    });
-  } else {
-    return createBulkErrorObject({
-      ruleId,
-      statusCode: err.statusCode ?? 500,
-      message: err.message,
-    });
-  }
-};
-
-interface Schema {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  validate: (input: any) => { value: any; error?: Error };
-}
-
-export const buildRouteValidation =
-  <T>(schema: Schema): RouteValidationFunction<T> =>
-  (payload: T, { ok, badRequest }) => {
-    const { value, error } = schema.validate(payload);
-    if (error) {
-      return badRequest(error.message);
-    }
-    return ok(value);
-  };
-
 const statusToErrorMessage = (statusCode: number) => {
   switch (statusCode) {
     case 400:
@@ -197,15 +146,3 @@ export class SiemResponseFactory {
 
 export const buildSiemResponse = (response: KibanaResponseFactory) =>
   new SiemResponseFactory(response);
-
-export const convertToSnakeCase = <T extends Record<string, unknown>>(
-  obj: T
-): Partial<T> | null => {
-  if (!obj) {
-    return null;
-  }
-  return Object.keys(obj).reduce((acc, item) => {
-    const newKey = snakeCase(item);
-    return { ...acc, [newKey]: obj[item] };
-  }, {});
-};
