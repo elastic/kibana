@@ -72,6 +72,9 @@ export const i18nStrings = {
     overview: i18n.translate('securitySolutionPackages.navLinks.ml.overview', {
       defaultMessage: 'Overview',
     }),
+    dataVisualizer: i18n.translate('securitySolutionPackages.navLinks.ml.dataVisualizer', {
+      defaultMessage: 'Data visualizer',
+    }),
     notifications: i18n.translate('securitySolutionPackages.navLinks.ml.notifications', {
       defaultMessage: 'Notifications',
     }),
@@ -125,26 +128,6 @@ export const i18nStrings = {
         'securitySolutionPackages.navLinks.ml.modelManagement.trainedModels',
         { defaultMessage: 'Trained models' }
       ),
-    },
-    dataVisualizer: {
-      title: i18n.translate('securitySolutionPackages.navLinks.ml.dataVisualizer', {
-        defaultMessage: 'Data visualizer',
-      }),
-      fileDataVisualizer: i18n.translate(
-        'securitySolutionPackages.navLinks.ml.dataVisualizer.fileDataVisualizer',
-        { defaultMessage: 'File data visualizer' }
-      ),
-      dataViewDataVisualizer: i18n.translate(
-        'securitySolutionPackages.navLinks.ml.dataVisualizer.dataViewDataVisualizer',
-        { defaultMessage: 'Data view data visualizer' }
-      ),
-      esqlDataVisualizer: i18n.translate(
-        'securitySolutionPackages.navLinks.ml.dataVisualizer.esqlDataVisualizer',
-        { defaultMessage: 'ES|QL data visualizer' }
-      ),
-      dataDrift: i18n.translate('securitySolutionPackages.navLinks.ml.dataVisualizer.dataDrift', {
-        defaultMessage: 'Data drift',
-      }),
     },
     aiopsLabs: {
       title: i18n.translate('securitySolutionPackages.navLinks.ml.aiopsLabs', {
