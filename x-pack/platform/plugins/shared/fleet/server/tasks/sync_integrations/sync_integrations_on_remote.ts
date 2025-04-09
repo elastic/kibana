@@ -190,9 +190,8 @@ async function uninstallPackageIfInstalled(
     );
   } catch (error) {
     logger.error(
-      `Failed to uninstall package ${pkg.package_name} with version ${pkg.package_version}: ${error.message}`
+      `Failed to uninstall package ${pkg.package_name} with version ${pkg.package_version} via integration syncing: ${error.message}`
     );
-    return error.message;
   }
 }
 
