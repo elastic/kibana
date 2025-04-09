@@ -33,14 +33,24 @@ export class KibanaClient {
   }
 
   fetch<T>(pathname: string, options: KibanaClientFetchOptions): Promise<T> {
-    const url = Path.join(this.target, pathname);
+    const url = new URL(this.target);
+    const pathSplitted = pathname.split('?');
+    const pathnamePart = pathSplitted[0];
+    const searchPart = pathSplitted[1];
+    if (searchPart) {
+      const searchPartObj = new URLSearchParams(searchPart);
+      for (const [key, value] of searchPartObj.entries()) {
+        url.searchParams.append(key, value);
+      }
+    }
+    url.pathname = Path.join(url.pathname, pathnamePart);
     return fetch(url, {
       ...options,
       headers: {
         ...this.headers,
         ...options.headers,
       },
-      agent: getFetchAgent(url),
+      agent: getFetchAgent(url.toString()),
     }).then(async (response) => {
       if (response.status >= 400) {
         throw new KibanaClientHttpError(
