@@ -56,13 +56,20 @@ export const diffComparators = <StateType extends object = object>(
 export const areComparatorsEqual = <StateType extends object = object>(
   comparators: StateComparators<StateType>,
   lastSavedState?: StateType,
-  latestState?: StateType
+  currentState?: StateType
 ): boolean => {
   return Object.keys(comparators).every((key) => {
     const comparator = comparators[key as keyof StateType];
     const lastSavedValue = lastSavedState?.[key as keyof StateType];
-    const currentValue = latestState?.[key as keyof StateType];
+    const currentValue = currentState?.[key as keyof StateType];
 
-    return runComparator(comparator, lastSavedState, latestState, lastSavedValue, currentValue);
+    const areEqual = runComparator(comparator, lastSavedState, currentState, lastSavedValue, currentValue);;
+    if (!areEqual) {
+      console.log(`${key} not equal`)
+      console.log('lastSavedValue: ', lastSavedValue);
+      console.log('currentValue: ', currentValue);
+    }
+
+    return runComparator(comparator, lastSavedState, currentState, lastSavedValue, currentValue);
   });
 };

@@ -22,7 +22,7 @@ import {
   useStateFromPublishingSubject,
 } from '@kbn/presentation-publishing';
 import React from 'react';
-import { BehaviorSubject, combineLatest } from 'rxjs';
+import { BehaviorSubject, merge } from 'rxjs';
 import { EUI_MARKDOWN_ID } from './constants';
 import { MarkdownEditorApi, MarkdownEditorSerializedState, MarkdownEditorState } from './types';
 
@@ -41,9 +41,8 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
     /**
      * Initialize state managers.
      */
-    const initialMarkdownState = initialState.rawState;
-    const titleManager = initializeTitleManager(initialMarkdownState);
-    const markdownStateManager = initializeStateManager(initialMarkdownState, defaultMarkdownState);
+    const titleManager = initializeTitleManager(initialState.rawState);
+    const markdownStateManager = initializeStateManager(initialState.rawState, defaultMarkdownState);
 
     /**
      * if this embeddable had a difference between its runtime and serialized state, we could define and run a
@@ -51,19 +50,24 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
      * in the deserializeState function.
      */
 
-    const serializeMarkdown = (): MarkdownEditorSerializedState => ({
-      ...titleManager.getLatestState(),
-      ...markdownStateManager.getLatestState(),
-    });
-
+    function serializeState() {
+      return {
+        rawState: {
+          ...titleManager.getLatestState(),
+          ...markdownStateManager.getLatestState(),
+        },
+        // references: if this embeddable had any references - this is where we would extract them.
+      };
+    };
+    
     const unsavedChangesApi = initializeUnsavedChanges({
       uuid,
       parentApi,
-      serializeState: serializeMarkdown,
-      latestRuntimeState$: combineLatest([
-        titleManager.latestState$,
-        markdownStateManager.latestState$,
-      ]),
+      serializeState,
+      anyStateChange$: merge(
+        titleManager.anyStateChange$,
+        markdownStateManager.anyStateChange$,
+      ),
       getComparators: () => {
         /**
          * comparators are provided in a callback to allow embeddables to change how their state is compared based
@@ -78,18 +82,15 @@ export const markdownEmbeddableFactory: EmbeddableFactory<
          * function here before resetting. onReset can be async so to support a potential async deserialize function.
          */
 
-        titleManager.reinitializeState(lastSaved);
-        markdownStateManager.reinitializeState(lastSaved);
+        titleManager.reinitializeState(lastSaved?.rawState);
+        markdownStateManager.reinitializeState(lastSaved?.rawState);
       },
     });
 
     const api = finalizeApi({
       ...unsavedChangesApi,
       ...titleManager.api,
-      serializeState: () => ({
-        rawState: serializeMarkdown(),
-        // references: if this embeddable had any references - this is where we would extract them.
-      }),
+      serializeState,
     });
 
     return {
