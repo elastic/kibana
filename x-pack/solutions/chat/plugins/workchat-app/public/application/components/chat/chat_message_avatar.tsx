@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiLoadingSpinner, EuiAvatar } from '@elastic/eui';
+import { EuiAvatar, EuiLoadingElastic } from '@elastic/eui';
 import { UserAvatar } from '@kbn/user-profile-components';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
@@ -19,7 +19,7 @@ interface ChatMessageAvatarProps {
 
 export function ChatMessageAvatar({ eventType, currentUser, loading }: ChatMessageAvatarProps) {
   if (loading) {
-    return <EuiLoadingSpinner size="xl" />;
+    return <EuiAvatar name="loading" color="subdued" iconType={EuiLoadingElastic} />;
   }
 
   switch (eventType) {
