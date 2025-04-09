@@ -22,7 +22,7 @@ interface SecurityRoutePageWrapperProps {
    * Used primarily in the AI for SOC tier, to allow redirecting to the home page instead of showing the NoPrivileges page.
    */
   redirectIfUnauthorized?: boolean;
-  // Used to disable the SpyRoute for the page if page's children have their own specified.
+  // Used to disable the SpyRoute for the page, if e.g. the page's children have their own SpyRoute specified.
   omitSpyRoute?: boolean;
 }
 
