@@ -7,9 +7,19 @@
 
 import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/css';
-import { EuiPanel, EuiText, useEuiTheme, EuiTabs, EuiTab, useEuiFontSize } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiText,
+  useEuiTheme,
+  EuiTabs,
+  EuiTab,
+  EuiTabbedContentTab,
+  useEuiFontSize,
+  EuiNotificationBadge,
+} from '@elastic/eui';
 import type { ConversationRound } from '../../../utils/conversation_rounds';
 import { RoundTabAnswer } from './round_tab_answer';
+import { RoundTabSources } from './round_tab_sources';
 
 interface ConversationRoundProps {
   round: ConversationRound;
@@ -18,7 +28,7 @@ interface ConversationRoundProps {
 export const ChatConversationRound: React.FC<ConversationRoundProps> = ({ round }) => {
   const { euiTheme } = useEuiTheme();
 
-  const { userMessage } = round;
+  const { userMessage, loading: isRoundLoading, assistantMessage } = round;
 
   const rootPanelClass = css`
     margin-bottom: ${euiTheme.size.xl};
@@ -45,18 +55,35 @@ export const ChatConversationRound: React.FC<ConversationRoundProps> = ({ round 
   const [selectedTabId, setSelectedTabId] = useState('answer');
 
   const tabs = useMemo(() => {
-    return [
-      {
-        id: 'answer',
-        name: 'Answer',
-        append: undefined,
-      },
-    ];
-  }, []);
+    const tabList: Array<Omit<EuiTabbedContentTab, 'content'>> = [];
+
+    // main answer tab, always present
+    tabList.push({
+      id: 'answer',
+      name: 'Answer',
+      append: undefined,
+    });
+
+    // sources tab - only when we got sources and message is not loading
+    if (!isRoundLoading && assistantMessage?.citations.length) {
+      tabList.push({
+        id: 'sources',
+        name: 'Sources',
+        append: (
+          <EuiNotificationBadge size="m" color="subdued">
+            {assistantMessage!.citations.length}
+          </EuiNotificationBadge>
+        ),
+      });
+    }
+
+    return tabList;
+  }, [isRoundLoading, assistantMessage]);
 
   const tabContents = useMemo(() => {
     return {
-      answer: <RoundTabAnswer round={round} />,
+      answer: <RoundTabAnswer key={`round-${round.userMessage.id}-answer-tab`} round={round} />,
+      sources: <RoundTabSources key={`round-${round.userMessage.id}-sources-tab`} round={round} />,
     } as Record<string, React.ReactNode>;
   }, [round]);
 

@@ -10,6 +10,7 @@ import type { AuthenticatedUser } from '@kbn/core/public';
 import type { ConversationEvent } from '../../../../../common/conversation_events';
 import type { ProgressionEvent } from '../../../../../common/chat_events';
 import { getConversationRounds } from '../../../utils/conversation_rounds';
+import { WithFadeIn } from '../../utilities/fade_in';
 import type { ChatStatus } from '../../../hooks/use_chat';
 import { ChatConversationRound } from './conversation_round';
 
@@ -32,7 +33,11 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({
   return (
     <>
       {rounds.map((round) => {
-        return <ChatConversationRound key={round.userMessage.id} round={round} />;
+        return (
+          <WithFadeIn key={round.userMessage.id}>
+            <ChatConversationRound round={round} />
+          </WithFadeIn>
+        );
       })}
     </>
   );
