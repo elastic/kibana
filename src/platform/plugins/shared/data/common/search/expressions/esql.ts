@@ -8,7 +8,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type {
   IKibanaSearchRequest,
@@ -354,7 +354,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                 id: name,
                 name,
                 meta: {
-                  type: hasConflict ? 'conflict' : esFieldTypeToKibanaFieldType(type),
+                  type: hasConflict ? KBN_FIELD_TYPES.CONFLICT : esFieldTypeToKibanaFieldType(type),
                   esType: type,
                   sourceParams:
                     type === 'date'

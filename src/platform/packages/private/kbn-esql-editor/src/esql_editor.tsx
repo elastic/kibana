@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
@@ -473,7 +474,7 @@ export const ESQLEditor = memo(function ESQLEditor({
                 return {
                   name: c.name,
                   type: c.meta.esType as FieldType,
-                  hasConflict: c.meta.type === 'conflict',
+                  hasConflict: c.meta.type === KBN_FIELD_TYPES.CONFLICT,
                 };
               }) || [];
 
