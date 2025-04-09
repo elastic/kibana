@@ -20,9 +20,7 @@ describe('useEnvronmentsFetcher', () => {
       },
       get_environments: {
         aggregations: {
-          environments: {
-            // buckets: [{ key: 'dev' }, { key: 'test' }],
-          },
+          environments: {},
         },
       },
     };
