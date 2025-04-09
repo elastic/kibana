@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiComboBox, EuiExpression, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiExpression,
+  EuiFormRow,
+  EuiSpacer,
+  EuiTitle,
+  EuiFormErrorText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewSelectPopover } from '@kbn/stack-alerts-plugin/public';
 import {
@@ -47,6 +54,7 @@ export const RuleForm: React.FunctionComponent<
   const { comparator, threshold, timeSize, timeUnit, groupBy } = ruleParams;
 
   const [dataView, setDataView] = useState<DataView>();
+  const [dataViewError, setDataViewError] = useState<string>();
   const [preselectedOptions, _] = useState<string[]>(defaultRuleParams.groupBy ?? []);
   const [adHocDataViews, setAdHocDataViews] = useState<DataView[]>(
     metadata?.adHocDataViewList ?? []
@@ -68,6 +76,14 @@ export const RuleForm: React.FunctionComponent<
 
   useEffect(() => {
     const initDataView = async () => {
+      if (!ruleParams.name) {
+        setDataViewError(
+          i18n.translate('xpack.datasetQuality.rule.dataViewErrorNoTimestamp', {
+            defaultMessage: 'A data view is required.',
+          })
+        );
+        return;
+      }
       if (ruleParams.name && !dataView) {
         const savedDataViews = await dataViews.getIdsWithTitle();
         const savedDataViewId = savedDataViews.find((dv) => dv.title === ruleParams.name)?.id;
@@ -151,6 +167,7 @@ export const RuleForm: React.FunctionComponent<
 
   const onSelectDataView = useCallback(
     (newDataView: DataView) => {
+      setDataViewError(undefined);
       updateProperty('name', newDataView.getIndexPattern());
       setDataView(newDataView);
     },
@@ -206,6 +223,14 @@ export const RuleForm: React.FunctionComponent<
           onChangeMetaData({ ...metadata, adHocDataViewList });
         }}
       />
+      {dataViewError && (
+        <>
+          <EuiFormErrorText data-test-subj="datasetQualityRuleDataViewError" alignItems="end">
+            {dataViewError}
+          </EuiFormErrorText>
+          <EuiSpacer size="s" />
+        </>
+      )}
 
       <EuiExpression
         data-test-subj="datasetQualityRuleCountExpression"

@@ -9,6 +9,7 @@ import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { DatasetQualityRuleParams } from './types';
+import { validate } from './rule_form/validate';
 
 export function getRuleType(): RuleTypeModel<DatasetQualityRuleParams> {
   return {
@@ -19,7 +20,7 @@ export function getRuleType(): RuleTypeModel<DatasetQualityRuleParams> {
     iconClass: 'bell',
     documentationUrl: null,
     ruleParamsExpression: lazy(() => import('./rule_form')),
-    validate: () => ({ errors: {} }),
+    validate,
     requiresAppContext: false,
   };
 }
