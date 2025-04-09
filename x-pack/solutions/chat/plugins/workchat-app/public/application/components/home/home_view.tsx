@@ -19,7 +19,7 @@ const headerButtons = [
 
 export const WorkChatHomeView: React.FC<{}> = () => {
   return (
-    <KibanaPageTemplate>
+    <KibanaPageTemplate data-test-subj="workChatHomePage">
       <KibanaPageTemplate.Header pageTitle="WorkChat" rightSideItems={headerButtons} />
       <KibanaPageTemplate.Section>
         <EuiFlexGroup gutterSize="l" alignItems="flexStart">
