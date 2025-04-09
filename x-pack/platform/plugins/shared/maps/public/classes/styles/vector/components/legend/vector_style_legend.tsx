@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, {useMemo} from 'react';
+import React, { useMemo } from 'react';
 import { EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { StyleError } from './style_error';
@@ -27,17 +27,14 @@ interface Props {
   svg?: string;
 }
 
-
 const useStyles = () => {
   const { euiTheme } = useEuiTheme();
   const styles = useMemo(
-    () =>
-      css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
+    () => css({ '&:not(:last-child)': { marginBottom: euiTheme.size.s } }),
     [euiTheme]
   );
   return styles;
 };
-
 
 export function VectorStyleLegend({
   isLinesOnly,

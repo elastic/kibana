@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { VECTOR_STYLES } from '../../../../../../common/constants';
@@ -30,7 +30,7 @@ export function Category({
   symbolId,
   svg,
 }: Props) {
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
 
   function renderIcon() {
     if (styleName === VECTOR_STYLES.LABEL_COLOR) {
@@ -55,12 +55,7 @@ export function Category({
 
   return (
     <EuiFlexGroup direction="row" gutterSize="none">
-      <EuiFlexItem
-        css={css`
-          width: ${euiTheme.size.l};
-        `}
-        grow={false}
-      >
+      <EuiFlexItem css={styles} grow={false}>
         {renderIcon()}
       </EuiFlexItem>
       <EuiFlexItem>
@@ -69,3 +64,10 @@ export function Category({
     </EuiFlexGroup>
   );
 }
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  const styles = useMemo(() => css({ width: euiTheme.size.l }), [euiTheme]);
+  return styles;
+};
