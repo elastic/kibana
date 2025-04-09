@@ -770,12 +770,17 @@ export default ({ getService }: FtrProviderContext) => {
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
           space: 'default',
         });
-        // console.log('hits', resultWithMinScore.rawResponse.hits.hits);
 
         const allScores = resultWithMinScore.rawResponse.hits.hits.map((hit) => {
           return hit._score;
         });
-        allScores.forEach((score) => expect(score >= 11).to.be(true));
+        allScores.forEach((score) => {
+          if (score) {
+            expect(score >= 11).to.be(true);
+          } else {
+            throw new Error('Score is null');
+          }
+        });
 
         expect(resultWithMinScore.rawResponse.hits.total).to.eql(8);
 
