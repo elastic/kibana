@@ -104,6 +104,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj, panelContent
             </EuiFlexItem>
           </EuiFlexGroup>
         )}
+        {navigationTree.callout && <EuiFlexItem>{renderNodes(navigationTree.callout)}</EuiFlexItem>}
         {/* Footer */}
         {navigationTree.footer && (
           <EuiCollapsibleNavBeta.Footer>

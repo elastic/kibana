@@ -437,7 +437,7 @@ export const parseNavigationTree = (
 
   const parseNodesArray = (
     nodes?: RootNavigationItemDefinition[],
-    section: 'body' | 'footer' = 'body',
+    section: 'body' | 'footer' | 'callout' = 'body',
     startIndex = 0
   ): void => {
     if (!nodes) return;
@@ -450,6 +450,7 @@ export const parseNavigationTree = (
 
   parseNodesArray(navigationTreeDef.body, 'body');
   parseNodesArray(navigationTreeDef.footer, 'footer', navigationTreeDef.body?.length ?? 0);
+  parseNodesArray(navigationTreeDef.callout, 'callout', navigationTreeDef.body?.length ?? 0);
 
   return { navigationTree, navigationTreeUI };
 };

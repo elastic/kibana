@@ -8,8 +8,11 @@
 import type { EuiIconProps } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { IconAiForTheSocLazy } from '../../common/lazy_icons';
+import { IconAiForTheSocLazy, IconElasticAiLazy } from '../../common/lazy_icons';
 
 export const AiForTheSocIcon = ({ size = 'm', ...rest }: Omit<EuiIconProps, 'type'>) => {
   return <EuiIcon {...{ type: IconAiForTheSocLazy, size, ...rest }} />;
+};
+export const ElasticAiIcon = ({ size = 'm', ...rest }: Omit<EuiIconProps, 'type'>) => {
+  return <EuiIcon {...{ type: IconElasticAiLazy, size, ...rest }} />;
 };

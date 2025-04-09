@@ -561,6 +561,9 @@ generalLayoutNavTree.body = correctPaths(
 generalLayoutNavTree.footer = correctPaths(
   generalLayoutNavTree.footer as ChromeProjectNavigationNode[]
 );
+generalLayoutNavTree.callout = correctPaths(
+  generalLayoutNavTree.callout as ChromeProjectNavigationNode[]
+);
 
 export const GeneralLayoutStructure = (args: NavigationServices) => {
   const services = storybookMock.getServices(args);

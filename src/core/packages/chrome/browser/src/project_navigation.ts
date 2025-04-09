@@ -405,6 +405,7 @@ export interface NavigationTreeDefinition<
    * or "group" items.
    * */
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  callout?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
 
 /**
@@ -419,6 +420,7 @@ export interface NavigationTreeDefinitionUI {
   id: SolutionId;
   body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
   footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  callout?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
 }
 
 /**
