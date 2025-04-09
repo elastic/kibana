@@ -35,8 +35,8 @@ xpack.legacy_uptime.enabled: false
 xpack.ux.enabled: false
 xpack.search.enabled: false
 xpack.searchAssistant.enabled: false
-xpack.search.connectors.enabled: false
-xpack.search.homepage.enabled: false
+xpack.searchConnectors.enabled: false
+xpack.searchHomepage.enabled: false
 xpack.searchIndices.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
 xpack.searchNotebooks.enabled: false
