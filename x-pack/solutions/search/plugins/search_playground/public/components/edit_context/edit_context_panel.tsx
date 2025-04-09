@@ -83,6 +83,7 @@ export const EditContextPanel: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButtonGroup
+                  data-test-subj="documentSizeButtonGroup"
                   legend="Number of documents sent"
                   isFullWidth={true}
                   buttonSize="compressed"

@@ -66,6 +66,18 @@ describe('EditContextFlyout component tests', () => {
     );
   });
 
+  it('should render the documentSizeButtonGroup with all options', () => {
+    // Check if the EuiButtonGroup is rendered
+    const buttonGroup = screen.getByTestId('documentSizeButtonGroup');
+    expect(buttonGroup).toBeInTheDocument();
+
+    // Check if all options are rendered within the button group
+    expect(buttonGroup).toHaveTextContent('1');
+    expect(buttonGroup).toHaveTextContent('3');
+    expect(buttonGroup).toHaveTextContent('5');
+    expect(buttonGroup).toHaveTextContent('10');
+  });
+
   it('should see the context fields', async () => {
     expect(screen.getByTestId('contextFieldsSelectable-index1')).toBeInTheDocument();
     const listButton = screen
