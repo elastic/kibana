@@ -11,8 +11,6 @@ import { CanvasRenderedPage } from '../../types';
 import { useCanvasShareableState } from '../../context';
 import { setPageAction } from '../../context/actions';
 
-import css from './page_preview.module.scss';
-
 type OnClickFn = (index: number) => void;
 
 export interface Props {
@@ -68,7 +66,6 @@ export const PagePreviewComponent: FC<Props> = ({
 
   return (
     <div
-      className={css.root}
       onClick={() => onClick(index)}
       onKeyPress={() => onClick(index)}
       style={{
@@ -76,7 +73,7 @@ export const PagePreviewComponent: FC<Props> = ({
         width: workpadWidth * scale,
       }}
     >
-      <div className={css.preview} style={transform}>
+      <div style={transform}>
         <PageComponent {...{ page }} height={workpadHeight} width={workpadWidth} />
       </div>
     </div>

@@ -13,8 +13,6 @@ import { Title } from './title';
 import { PageControls } from './page_controls';
 import { Settings } from './settings';
 
-import css from './footer.module.scss';
-
 export const FOOTER_HEIGHT = 48;
 
 export interface Props {
@@ -33,14 +31,12 @@ export interface Props {
  * The Footer of the Shareable Canvas Workpad.
  */
 export const FooterComponent: FC<Props> = ({ isAutohide = false, isHidden = false }) => {
-  const { root, title } = css;
-
   return (
-    <div className={root} style={{ height: FOOTER_HEIGHT }}>
+    <div style={{ height: FOOTER_HEIGHT }}>
       <Scrubber />
       <EuiBottomBar style={{ bottom: isAutohide && isHidden ? -FOOTER_HEIGHT : 0 }}>
         <EuiFlexGroup gutterSize="none" responsive={false} wrap={true}>
-          <EuiFlexItem className={title}>
+          <EuiFlexItem>
             <Title />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

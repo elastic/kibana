@@ -6,11 +6,9 @@
  */
 
 import React, { FC } from 'react';
-import classnames from 'classnames';
 import { PagePreview } from './page_preview';
 import { useCanvasShareableState } from '../../context';
 
-import css from './scrubber.module.scss';
 import { CanvasRenderedPage } from '../../types';
 
 interface Props {
@@ -33,15 +31,13 @@ const THUMBNAIL_HEIGHT = 100;
  * navigate to a specific page.
  */
 export const ScrubberComponent: FC<Props> = ({ isScrubberVisible, pages }) => {
-  const className = isScrubberVisible ? classnames(css.root, css.visible) : css.root;
-
   const slides = pages.map((page, index) => (
     <PagePreview key={page.id} height={THUMBNAIL_HEIGHT} {...{ index }} />
   ));
 
   return (
-    <div className={className}>
-      <div className={css.slideContainer}>{slides}</div>
+    <div>
+      <div>{slides}</div>
     </div>
   );
 };

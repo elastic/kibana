@@ -11,7 +11,6 @@ import { Page } from './page';
 import { Footer, FOOTER_HEIGHT } from './footer';
 import { getTimeInterval } from '../../public/lib/time_interval';
 
-import css from './canvas.module.scss';
 import { CanvasRenderedWorkpad, Stage, Settings, Refs } from '../types';
 
 let timeout: number = 0;
@@ -108,14 +107,13 @@ export const CanvasComponent = ({
 
   return (
     <div
-      className={css.root}
       style={{ height: rootHeight, width: stageWidth }}
       onMouseEnter={() => hideToolbar(false)}
       onMouseLeave={() => hideToolbar(true)}
       ref={refs.stage}
     >
-      <div className={css.container} style={{ height: stageHeight, width: stageWidth }}>
-        <div className={css.page} style={pageStyle}>
+      <div style={{ height: stageHeight, width: stageWidth }}>
+        <div style={pageStyle}>
           <Page index={page} />
         </div>
       </div>

@@ -10,8 +10,6 @@ import { RenderedElement } from './rendered_element';
 import { CanvasRenderedPage, CanvasRenderedElement } from '../types';
 import { useCanvasShareableState } from '../context';
 
-import css from './page.module.scss';
-
 interface ComponentProps {
   /**
    * The height of the page, in pixels.
@@ -38,7 +36,7 @@ export const PageComponent: FC<ComponentProps> = ({ page, height, width }) => {
   ));
 
   return (
-    <div {...{ id }} className={css.root} style={{ height, width, ...style }}>
+    <div {...{ id }} style={{ height, width, ...style }}>
       {output}
     </div>
   );

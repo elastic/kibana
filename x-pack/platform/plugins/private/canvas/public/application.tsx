@@ -41,8 +41,6 @@ import { size } from '../canvas_plugin_src/renderers/plot/plugins/size';
 // @ts-expect-error Not going to convert
 import { text } from '../canvas_plugin_src/renderers/plot/plugins/text';
 
-import './style/index.scss';
-
 const { ReadOnlyBadge: strings } = CapabilitiesStrings;
 
 export const renderApp = ({

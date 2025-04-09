@@ -8,8 +8,6 @@
 import React, { FC, PropsWithChildren } from 'react';
 import Dropzone from 'react-dropzone';
 
-import './upload_dropzone.scss';
-
 export interface Props {
   disabled?: boolean;
   onDrop?: (files: FileList) => void;

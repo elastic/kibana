@@ -7,7 +7,4 @@
 
 import { addDecorators } from './decorators';
 
-// Import Canvas CSS
-import '../public/style/index.scss';
-
 export const decorators = addDecorators();

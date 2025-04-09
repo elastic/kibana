@@ -15,8 +15,6 @@ import { CanvasShareableContext, useCanvasShareableState } from '../context';
 import { AnyRendererSpec } from '../../types';
 import { createHandlers } from '../../public/lib/create_handlers';
 
-import css from './rendered_element.module.scss';
-
 export interface Props {
   /**
    * An object describing the transient, independently renderable Element.
@@ -79,11 +77,11 @@ export class RenderedElementComponent extends PureComponent<Props> {
 
     return (
       <Positionable height={height} width={width} transformMatrix={shape.transformMatrix}>
-        <div className={css.root}>
-          <div css={emotionCss(elementCSS)} className={css.container} style={{ ...containerStyle }}>
-            <div className={css.content}>
-              <div className={css.renderContainer}>
-                <div key={id} ref={this.ref} data-renderer={as} className={css.render} />
+        <div>
+          <div css={emotionCss(elementCSS)} style={{ ...containerStyle }}>
+            <div>
+              <div>
+                <div key={id} ref={this.ref} data-renderer={as} />
               </div>
             </div>
           </div>
