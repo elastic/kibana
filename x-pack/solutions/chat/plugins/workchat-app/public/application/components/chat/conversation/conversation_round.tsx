@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { css } from '@emotion/css';
 import {
   EuiPanel,
@@ -80,12 +80,22 @@ export const ChatConversationRound: React.FC<ConversationRoundProps> = ({ round 
     return tabList;
   }, [isRoundLoading, assistantMessage]);
 
+  const onSourceClick = useCallback(() => {
+    setSelectedTabId('sources');
+  }, [setSelectedTabId]);
+
   const tabContents = useMemo(() => {
     return {
-      answer: <RoundTabAnswer key={`round-${round.userMessage.id}-answer-tab`} round={round} />,
+      answer: (
+        <RoundTabAnswer
+          key={`round-${round.userMessage.id}-answer-tab`}
+          round={round}
+          onSourceClick={onSourceClick}
+        />
+      ),
       sources: <RoundTabSources key={`round-${round.userMessage.id}-sources-tab`} round={round} />,
     } as Record<string, React.ReactNode>;
-  }, [round]);
+  }, [round, onSourceClick]);
 
   const selectedTabContent = useMemo(() => {
     return tabContents[selectedTabId];

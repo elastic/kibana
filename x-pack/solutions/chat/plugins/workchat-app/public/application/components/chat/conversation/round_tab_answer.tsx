@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import type { ConversationRound } from '../../../utils/conversation_rounds';
 import { ChatMessageText } from './chat_message_text';
+import { ChatConversationProgression } from './chat_conversation_progression';
 
 interface RoundTabAnswerProps {
   round: ConversationRound;
@@ -33,7 +34,7 @@ export const RoundTabAnswer: React.FC<RoundTabAnswerProps> = ({ round }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
-  const { assistantMessage, loading } = round;
+  const { assistantMessage, progressionEvents, loading } = round;
   const showSources = !loading && (assistantMessage?.citations.length ?? 0) > 0;
 
   const subTitlesClass = css`
@@ -43,7 +44,11 @@ export const RoundTabAnswer: React.FC<RoundTabAnswerProps> = ({ round }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="none">
       <EuiFlexItem>
-        <ChatMessageText content={assistantMessage?.content ?? ''} loading={loading} />
+        <ChatConversationProgression progressionEvents={progressionEvents} />
+        <ChatMessageText
+          content={assistantMessage?.content ?? ''}
+          loading={loading && progressionEvents.length === 0}
+        />
       </EuiFlexItem>
       {showSources && (
         <EuiFlexItem>
