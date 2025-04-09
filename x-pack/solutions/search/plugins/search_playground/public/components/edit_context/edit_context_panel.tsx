@@ -75,7 +75,7 @@ export const EditContextPanel: React.FC = () => {
                   <strong>
                     <FormattedMessage
                       id="xpack.searchPlayground.editContext.docsRetrievedCount"
-                      defaultMessage="Number of documents sent to LLM"
+                      defaultMessage="Number of documents sent"
                     />
                   </strong>
                 </EuiText>
