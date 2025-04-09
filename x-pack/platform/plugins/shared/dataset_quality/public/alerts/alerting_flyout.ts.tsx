@@ -7,6 +7,7 @@
 
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import React, { useCallback, useEffect, useState } from 'react';
+import { DATASET_QUALITY_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 interface Props {
@@ -20,7 +21,7 @@ export function AlertingFlyout(props: Props) {
 
   const {
     services: {
-      triggersActionsUi: { ruleTypeRegistry, actionTypeRegistry },
+      triggersActionsUi: { actionTypeRegistry, ruleTypeRegistry },
       ...services
     },
   } = useKibanaContextForPlugin();
@@ -42,11 +43,15 @@ export function AlertingFlyout(props: Props) {
     <>
       {addFlyoutVisible && (
         <RuleFormFlyout
-          plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
+          plugins={{
+            ...services,
+            ruleTypeRegistry,
+            actionTypeRegistry,
+          }}
           consumer={'datasetQuality'}
           onCancel={onCloseAddFlyout}
           onSubmit={onCloseAddFlyout}
-          ruleTypeId="datasetQuality"
+          ruleTypeId={DATASET_QUALITY_RULE_TYPE_ID}
           initialValues={{
             params: initialValues,
           }}

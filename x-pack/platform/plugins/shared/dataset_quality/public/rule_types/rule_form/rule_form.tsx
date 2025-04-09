@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { isArray } from 'lodash';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
+import { INDEX } from '../../../common/es_fields';
 import { useKibanaContextForPlugin } from '../../utils';
 import { RuleConditionChart } from './rule_condition_chart';
 
@@ -29,7 +30,7 @@ export const defaultRuleParams: Partial<DatasetQualityRuleParams> = {
   threshold: [3],
   timeSize: 5,
   timeUnit: 'm',
-  groupBy: ['_index'],
+  groupBy: [INDEX],
   type: 'degraded_docs',
 };
 

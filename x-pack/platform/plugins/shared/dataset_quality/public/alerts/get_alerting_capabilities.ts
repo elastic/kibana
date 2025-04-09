@@ -12,8 +12,7 @@ export const getAlertingCapabilities = (
   alerting: AlertingPublicStart | undefined,
   capabilities: Capabilities
 ) => {
-  // TODO: check after RBAC is figured out
-  const canSaveAlerts = !!capabilities.dataQuality.show;
+  const canSaveAlerts = !!capabilities.dataQuality['alerting:save'];
   const isAlertingPluginEnabled = !!alerting;
   const isAlertingAvailable = isAlertingPluginEnabled && canSaveAlerts;
 

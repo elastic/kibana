@@ -18,8 +18,8 @@
     "requiredPlugins": [
       "controls",
       "data",
-      "dataViewEditor",
       "dataViews",
+      "dataViewEditor",
       "embeddable",
       "fieldFormats",
       "fieldsMetadata",
@@ -28,19 +28,18 @@
       "kibanaUtils",
       "lens",
       "share",
-      "stackAlerts",
       "taskManager",
       "triggersActionsUi",
     ],
     "optionalPlugins": [
       "alerting",
       "telemetry",
-      "triggersActionsUi",
       "usageCollection",
     ],
     "requiredBundles": [
       "charts",
       "discover",
+      "stackAlerts",
       "unifiedHistogram",
     ],
     "extraPublicDirs": [

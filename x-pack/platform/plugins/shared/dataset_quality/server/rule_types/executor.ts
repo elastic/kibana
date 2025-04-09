@@ -14,21 +14,22 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
-import { DATASET_QUALITY_DATASTREAM_NAME } from '../../common/constants';
-import { THRESHOLD_MET_GROUP } from '../../common/alerting/constants';
 import { INDEX, _IGNORED } from '../../common/es_fields';
 import { generateContext } from './context';
+import { getDocsStats } from './get_docs_stats';
 import {
   ALERT_EVALUATION_CONDITIONS,
   ALERT_TITLE,
+  DATASET_QUALITY_DATASTREAM_NAME,
+  THRESHOLD_MET_GROUP,
   type DatasetQualityAlert,
   type DatasetQualityAlertContext,
   type DatasetQualityAlertState,
   type DatasetQualityAllowedActionGroups,
   type DatasetQualityRuleParams,
   type DatasetQualityRuleTypeState,
+  AdditionalContext,
 } from './types';
-import { getDocsStats } from './get_docs_stats';
 
 export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
   const sForPlural = time !== 0 && time > 1 ? 's' : '';
@@ -110,14 +111,6 @@ export const getRuleExecutor = () =>
       let generatedAlerts = 0;
       for (const groupResult of datasetQualityDegradedResults) {
         const { bucketKey, percentage } = groupResult;
-        const groupByFields: Record<string, string> = bucketKey.reduce((acc, field, i) => {
-          const fieldName = (params.groupBy ?? [])[i];
-          return {
-            ...acc,
-            [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: `${field}`, // _index is reserved for the actual alerts index
-          };
-        }, {});
-
         const alertId = bucketKey.join('_');
         const met = compareFn(percentage, params.threshold);
 
@@ -125,6 +118,14 @@ export const getRuleExecutor = () =>
           unmetGroupValues[alertId] = percentage.toFixed(2);
           continue;
         }
+
+        const groupByFields: AdditionalContext = bucketKey.reduce((acc, field, i) => {
+          const fieldName = (params.groupBy ?? [])[i];
+          return {
+            ...acc,
+            [fieldName === INDEX ? DATASET_QUALITY_DATASTREAM_NAME : fieldName]: field, // _index is reserved for the actual alerts index
+          };
+        }, {});
 
         if (generatedAlerts < alertLimit) {
           const context = generateContext(name, alertId, dateEnd, percentage.toFixed(2), params);

@@ -52,5 +52,3 @@ export const DEGRADED_DOCS_QUERY = `${_IGNORED}: *`;
 export const ALL_PATTERNS_SELECTOR = '::*';
 export const FAILURE_STORE_SELECTOR = '::failures';
 export const DATA_SELECTOR = '::data';
-
-export const DATASET_QUALITY_DATASTREAM_NAME = '_dataStreamName';

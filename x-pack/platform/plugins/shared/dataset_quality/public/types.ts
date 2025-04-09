@@ -51,7 +51,7 @@ export interface DatasetQualityStartDeps {
 }
 
 export interface DatasetQualitySetupDeps {
-  alerting: AlertingPublicSetup;
+  alerting?: AlertingPublicSetup;
   share: SharePluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }

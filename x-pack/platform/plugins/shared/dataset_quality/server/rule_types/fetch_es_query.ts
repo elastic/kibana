@@ -9,7 +9,6 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { estypes } from '@elastic/elasticsearch';
 import { extractKey } from './extract_key';
 
-// TODO: Check this limit
 const DEFAULT_GROUPS = 1000;
 
 export interface FetchEsQueryOpts {

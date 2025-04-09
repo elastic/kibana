@@ -10,10 +10,40 @@ import {
   KibanaFeatureConfig,
   KibanaFeatureScope,
   ElasticsearchFeatureConfig,
+  SubFeaturePrivilegeGroupConfig,
+  SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
-import { DATASET_QUALITY_RULE_TYPE_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { AlertConsumers, DATASET_QUALITY_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
+
+const datasetQualityAlertingFeatures = {
+  ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
+  consumers: [AlertConsumers.STACK_ALERTS, AlertConsumers.ALERTS],
+};
+
+const canManageRules: SubFeaturePrivilegeGroupConfig = {
+  groupType: 'independent' as SubFeaturePrivilegeGroupType,
+  privileges: [
+    {
+      id: 'manage_rules',
+      name: i18n.translate('xpack.dataQuality.features.canManageRules', {
+        defaultMessage: 'Manage rules',
+      }),
+      includeIn: 'all',
+      alerting: {
+        alert: {
+          all: [datasetQualityAlertingFeatures],
+        },
+      },
+      savedObject: {
+        all: [],
+        read: [],
+      },
+      ui: ['alerting:save'],
+    },
+  ],
+};
 
 export const KIBANA_FEATURE: KibanaFeatureConfig = {
   id: PLUGIN_FEATURE_ID,
@@ -21,12 +51,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   category: DEFAULT_APP_CATEGORIES.management,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
-  alerting: [
-    {
-      ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
-      consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
-    },
-  ],
+  alerting: [datasetQualityAlertingFeatures],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -38,23 +63,12 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
         read: [],
       },
       ui: ['show'],
-      // TODO: Review RBAC for the rule type
       alerting: {
         rule: {
-          read: [
-            {
-              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
-              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
-            },
-          ],
+          read: [datasetQualityAlertingFeatures],
         },
         alert: {
-          read: [
-            {
-              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
-              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
-            },
-          ],
+          all: [datasetQualityAlertingFeatures],
         },
       },
       management: {
@@ -70,24 +84,25 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
       ui: ['show'],
       alerting: {
         rule: {
-          read: [
-            {
-              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
-              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
-            },
-          ],
+          read: [datasetQualityAlertingFeatures],
         },
         alert: {
-          read: [
-            {
-              ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
-              consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
-            },
-          ],
+          read: [datasetQualityAlertingFeatures],
         },
       },
     },
   },
+  subFeatures: [
+    {
+      name: i18n.translate('xpack.dataQuality.features.app.manageRules', {
+        defaultMessage: 'Manage rules',
+      }),
+      description: i18n.translate('xpack.dataQuality.features.app.manageRulesDescription', {
+        defaultMessage: 'This feature enables users to manage dataset quality rules.',
+      }),
+      privilegeGroups: [canManageRules],
+    },
+  ],
 };
 
 export const ELASTICSEARCH_FEATURE: ElasticsearchFeatureConfig = {

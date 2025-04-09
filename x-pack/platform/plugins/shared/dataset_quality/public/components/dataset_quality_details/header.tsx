@@ -18,19 +18,20 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { openInDiscoverText } from '../../../common/translations';
+import React, { useState } from 'react';
+import { DATASET_QUALITY_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { createAlertText, openInDiscoverText } from '../../../common/translations';
+import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
+import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetDetailsTelemetry,
   useDatasetQualityDetailsState,
   useRedirectLink,
 } from '../../hooks';
-import { IntegrationIcon } from '../common';
-import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
-import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import { useKibanaContextForPlugin } from '../../utils';
+import { IntegrationIcon } from '../common';
 
 export function Header() {
   const { datasetDetails, timeRange, integrationDetails, loadingState } =
@@ -58,20 +59,18 @@ export function Header() {
   const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
 
   const [showPopover, setShowPopover] = useState<boolean>(false);
-  const [ruleType, setRuleType] = useState<'datasetQuality' | null>(null);
+  const [ruleType, setRuleType] = useState<typeof DATASET_QUALITY_RULE_TYPE_ID | null>(null);
 
   const pageTitle =
     integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ?? title;
 
   const createMenuItems = [
     {
-      name: i18n.translate('xpack.datasetQuality.header.actions.createAlert', {
-        defaultMessage: 'Create alert',
-      }),
+      name: createAlertText,
       icon: 'bell',
       onClick: () => {
         setShowPopover(false);
-        setRuleType('datasetQuality');
+        setRuleType(DATASET_QUALITY_RULE_TYPE_ID);
       },
       'data-test-subj': `createAlert`,
     },
@@ -95,7 +94,7 @@ export function Header() {
           key="actionsDropdown"
           onClick={() => setShowPopover((prev) => !prev)}
         >
-          {i18n.translate('xpack.ingestPipelines.list.table.createPipelineDropdownLabel', {
+          {i18n.translate('xpack.datasetQuality.ActionsLabel', {
             defaultMessage: 'Actions',
           })}
         </EuiButton>

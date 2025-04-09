@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
   DATASET_QUALITY_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
@@ -18,17 +19,17 @@ import {
   DatasetQualityRuleParams,
   datasetQualityParamsSchema,
 } from '@kbn/response-ops-rule-params/dataset_quality/v1';
-import { DATASET_QUALITY_AAD_FIELDS, THRESHOLD_MET_GROUP } from '../../common/alerting/constants';
 import { getRuleExecutor } from './executor';
 import {
   ALERT_EVALUATION_CONDITIONS,
   ALERT_TITLE,
+  DATASET_QUALITY_AAD_FIELDS,
+  DATASET_QUALITY_REGISTRATION_CONTEXT,
   DatasetQualityAlert,
   DatasetQualityAlertContext,
   DatasetQualityAllowedActionGroups,
+  THRESHOLD_MET_GROUP,
 } from './types';
-
-export const DATASET_QUALITY_REGISTRATION_CONTEXT = 'datasetQuality';
 
 export function DatasetQualityRuleType(): RuleType<
   DatasetQualityRuleParams,
@@ -64,21 +65,24 @@ export function DatasetQualityRuleType(): RuleType<
     isExportable: true,
     executor: getRuleExecutor(),
     doesSetRecoveryContext: true,
-    // Variables that will be available in the actions context. TODO: Update this
     actionVariables: {
       context: [
-        { name: 'reason', description: reasonActionDegradedDocsDescription },
-        { name: 'message', description: 'message' },
-        { name: 'title', description: 'title' },
-        { name: 'group', description: 'group' },
-        { name: 'date', description: 'date' },
-        { name: 'value', description: 'value' },
+        { name: 'reason', description: actionVariableContextReasonLabel },
+        { name: 'title', description: actionVariableContextTitleLabel },
+        { name: 'value', description: actionVariableContextValueLabel },
+        { name: 'conditions', description: actionVariableContextConditionsLabel },
+        {
+          name: 'threshold',
+          description: actionVariableContextThresholdLabel,
+          usesPublicBaseUrl: true,
+        },
       ],
     },
     alerts: {
       context: DATASET_QUALITY_REGISTRATION_CONTEXT,
       mappings: {
         fieldMap: {
+          [ALERT_REASON]: { type: 'keyword', array: false, required: false },
           [ALERT_TITLE]: { type: 'keyword', array: false, required: false },
           [ALERT_EVALUATION_VALUE]: { type: 'keyword', array: false, required: false },
           [ALERT_EVALUATION_CONDITIONS]: { type: 'keyword', array: false, required: false },
@@ -95,9 +99,38 @@ export function DatasetQualityRuleType(): RuleType<
   };
 }
 
-export const reasonActionDegradedDocsDescription = i18n.translate(
+export const actionVariableContextReasonLabel = i18n.translate(
   'xpack.datasetQuality.alerting.degradedDocs.reasonDescription',
   {
-    defaultMessage: 'Number of degraded documents has exceeded the threshold',
+    defaultMessage: 'A reason for the alert.',
+  }
+);
+
+const actionVariableContextValueLabel = i18n.translate(
+  'xpack.datasetQuality.alerting.actionVariableContextValueLabel',
+  {
+    defaultMessage: 'The value that met the threshold condition.',
+  }
+);
+
+const actionVariableContextTitleLabel = i18n.translate(
+  'xpack.datasetQuality.alerting.actionVariableContextTitleLabel',
+  {
+    defaultMessage: 'A title for the alert.',
+  }
+);
+
+const actionVariableContextThresholdLabel = i18n.translate(
+  'xpack.datasetQuality.alerting.actionVariableContextThresholdLabel',
+  {
+    defaultMessage:
+      'An array of rule threshold values. For between and notBetween thresholds, there are two values.',
+  }
+);
+
+const actionVariableContextConditionsLabel = i18n.translate(
+  'xpack.datasetQuality.alerting.actionVariableContextConditionsLabel',
+  {
+    defaultMessage: 'A string that describes the threshold condition.',
   }
 );

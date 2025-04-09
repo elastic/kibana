@@ -14,7 +14,7 @@ import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
 import type { DatasetQualityRuleParamsV1 } from '@kbn/response-ops-rule-params/dataset_quality';
 import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
-import { THRESHOLD_MET_GROUP } from '../../common/alerting/constants';
+import { i18n } from '@kbn/i18n';
 
 export type DatasetQualityRuleParams = DatasetQualityRuleParamsV1;
 export type DatasetQualityRuleTypeState = RuleTypeState;
@@ -36,3 +36,15 @@ export const ALERT_EVALUATION_CONDITIONS = `${ALERT_NAMESPACE}.evaluation.condit
 export interface AdditionalContext {
   [x: string]: any;
 }
+
+export const DATASET_QUALITY_REGISTRATION_CONTEXT = 'dataset_quality';
+export const DATASET_QUALITY_DATASTREAM_NAME = '_dataStreamName';
+export const DATASET_QUALITY_AAD_FIELDS = [DATASET_QUALITY_DATASTREAM_NAME];
+
+const THRESHOLD_MET_GROUP_ID = 'threshold_met';
+export const THRESHOLD_MET_GROUP = {
+  id: THRESHOLD_MET_GROUP_ID,
+  name: i18n.translate('xpack.datasetQuality.alerting.action.thresholdMet', {
+    defaultMessage: 'Threshold met',
+  }),
+};

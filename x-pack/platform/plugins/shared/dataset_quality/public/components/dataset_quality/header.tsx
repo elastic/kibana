@@ -9,9 +9,9 @@ import React, { useState } from 'react';
 import { EuiBetaBadge, EuiLink, EuiPageHeader, EuiCode, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { DATASET_QUALITY_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { KNOWN_TYPES } from '../../../common/constants';
-import { datasetQualityAppTitle } from '../../../common/translations';
+import { createAlertText, datasetQualityAppTitle } from '../../../common/translations';
 import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
 import { useKibanaContextForPlugin } from '../../utils';
@@ -24,7 +24,7 @@ export default function Header() {
   } = useKibanaContextForPlugin();
   const { capabilities } = application;
 
-  const [ruleType, setRuleType] = useState<'datasetQuality' | null>(null);
+  const [ruleType, setRuleType] = useState<typeof DATASET_QUALITY_RULE_TYPE_ID | null>(null);
 
   const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
 
@@ -78,14 +78,11 @@ export default function Header() {
                 <EuiButton
                   data-test-subj="datasetQualityDetailsHeaderButton"
                   onClick={() => {
-                    setRuleType('datasetQuality');
+                    setRuleType(DATASET_QUALITY_RULE_TYPE_ID);
                   }}
                   iconType="bell"
                 >
-                  <FormattedMessage
-                    id="xpack.datasetQuality.header.createAlertLabel"
-                    defaultMessage="Create alert"
-                  />
+                  {createAlertText}
                 </EuiButton>
                 <AlertingFlyout
                   addFlyoutVisible={!!ruleType}
