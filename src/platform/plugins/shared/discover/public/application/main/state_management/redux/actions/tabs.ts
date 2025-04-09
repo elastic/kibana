@@ -18,6 +18,11 @@ import {
   type InternalStateThunkActionCreator,
 } from '../internal_state';
 import { createTabRuntimeState, selectTabRuntimeState } from '../runtime_state';
+import {
+  APP_STATE_URL_KEY,
+  GLOBAL_STATE_URL_KEY,
+  TABS_STATE_URL_KEY,
+} from '../../../../../../common/constants';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -59,8 +64,8 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
         tab.id === currentTab.id
           ? {
               ...tab,
-              globalState: urlStateStorage.get('_g') ?? undefined,
-              appState: urlStateStorage.get('_a') ?? undefined,
+              globalState: urlStateStorage.get(GLOBAL_STATE_URL_KEY) ?? undefined,
+              appState: urlStateStorage.get(APP_STATE_URL_KEY) ?? undefined,
             }
           : tab
       );
@@ -68,11 +73,11 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
       const nextTab = selectedItem ? selectTab(currentState, selectedItem.id) : undefined;
 
       if (nextTab) {
-        await urlStateStorage.set('_g', nextTab.globalState);
-        await urlStateStorage.set('_a', nextTab.appState);
+        await urlStateStorage.set(GLOBAL_STATE_URL_KEY, nextTab.globalState);
+        await urlStateStorage.set(APP_STATE_URL_KEY, nextTab.appState);
       } else {
-        await urlStateStorage.set('_g', null);
-        await urlStateStorage.set('_a', null);
+        await urlStateStorage.set(GLOBAL_STATE_URL_KEY, null);
+        await urlStateStorage.set(APP_STATE_URL_KEY, null);
       }
 
       const nextTabRuntimeState = selectedItem
@@ -100,6 +105,14 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
 
         nextTabStateContainer.actions.initializeAndSync();
       }
+    }
+
+    if (
+      selectedItem?.id &&
+      urlStateStorage.get<{ selectedTabId?: string }>(TABS_STATE_URL_KEY)?.selectedTabId !==
+        selectedItem.id
+    ) {
+      await urlStateStorage.set(TABS_STATE_URL_KEY, { selectedTabId: selectedItem.id });
     }
 
     dispatch(
