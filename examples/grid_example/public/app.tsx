@@ -89,10 +89,7 @@ export const GridExample = ({
             if (!panelsAreEqual) break;
             const currentPanel = panels[panelId];
             const savedPanel = savedState.current.panels[panelId];
-            panelsAreEqual = deepEqual(
-              { row: 'first', ...currentPanel?.gridData },
-              { row: 'first', ...savedPanel?.gridData }
-            );
+            panelsAreEqual = deepEqual(currentPanel?.gridData, savedPanel?.gridData);
           }
           const hasChanges = !(panelsAreEqual && deepEqual(rows, savedState.current.rows));
           return { hasChanges, updatedLayout: dashboardInputToGridLayout({ panels, rows }) };

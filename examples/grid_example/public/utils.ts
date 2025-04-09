@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData } from '@kbn/grid-layout';
+import { GridLayoutData, GridRowData } from '@kbn/grid-layout';
 import { MockedDashboardPanelMap, MockedDashboardRowMap } from './types';
 
 export const gridLayoutToDashboardPanelMap = (
@@ -16,10 +16,9 @@ export const gridLayoutToDashboardPanelMap = (
 ): { panels: MockedDashboardPanelMap; rows: MockedDashboardRowMap } => {
   const panels: MockedDashboardPanelMap = {};
   const rows: MockedDashboardRowMap = {};
-  Object.entries(layout).forEach(([rowId, row]) => {
-    const { panels: rowPanels, isCollapsed, ...rest } = row; // drop panels
-    rows[rowId] = { ...rest, collapsed: isCollapsed };
-    Object.values(rowPanels).forEach((panelGridData) => {
+  Object.entries(layout).forEach(([widgetId, widget]) => {
+    if (widget.type === 'panel') {
+      const panelGridData = widget;
       panels[panelGridData.id] = {
         ...panelState[panelGridData.id],
         gridData: {
@@ -28,11 +27,27 @@ export const gridLayoutToDashboardPanelMap = (
           x: panelGridData.column,
           w: panelGridData.width,
           h: panelGridData.height,
-          row: rowId,
         },
       };
-    });
+    } else {
+      const { panels: rowPanels, isCollapsed, row, ...rest } = widget; // drop panels
+      rows[widgetId] = { ...rest, y: row, collapsed: isCollapsed };
+      Object.values(rowPanels).forEach((panelGridData) => {
+        panels[panelGridData.id] = {
+          ...panelState[panelGridData.id],
+          gridData: {
+            i: panelGridData.id,
+            y: panelGridData.row,
+            x: panelGridData.column,
+            w: panelGridData.width,
+            h: panelGridData.height,
+            row: widgetId,
+          },
+        };
+      });
+    }
   });
+
   return { panels, rows };
 };
 
@@ -45,9 +60,11 @@ export const dashboardInputToGridLayout = ({
 }): GridLayoutData => {
   const layout: GridLayoutData = {};
   Object.values(rows).forEach((row) => {
-    const { collapsed, ...rest } = row;
+    const { collapsed, y, ...rest } = row;
     layout[row.id] = {
       ...rest,
+      type: 'section',
+      row: y,
       panels: {},
       isCollapsed: collapsed,
     };
@@ -55,14 +72,26 @@ export const dashboardInputToGridLayout = ({
 
   Object.keys(panels).forEach((panelId) => {
     const gridData = panels[panelId].gridData;
-    layout[gridData.row ?? 'first'].panels[panelId] = {
-      id: panelId,
-      row: gridData.y,
-      column: gridData.x,
-      width: gridData.w,
-      height: gridData.h,
-    };
+    if (gridData.row) {
+      (layout[gridData.row] as GridRowData).panels[panelId] = {
+        id: panelId,
+        row: gridData.y,
+        column: gridData.x,
+        width: gridData.w,
+        height: gridData.h,
+      };
+    } else {
+      layout[panelId] = {
+        id: panelId,
+        type: 'panel',
+        row: gridData.y,
+        column: gridData.x,
+        width: gridData.w,
+        height: gridData.h,
+      };
+    }
   });
 
+  console.log('layout', layout);
   return layout;
 };

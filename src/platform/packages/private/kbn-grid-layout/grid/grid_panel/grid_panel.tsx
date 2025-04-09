@@ -17,13 +17,14 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
+import { GridPanelData, GridRowData } from '../types';
 
 export interface GridPanelProps {
   panelId: string;
-  rowId: string;
+  rowId?: string;
 }
 
-export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
+export const GridPanel = React.memo(({ panelId, rowId = 'main' }: GridPanelProps) => {
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
     useGridLayoutContext();
 
@@ -32,8 +33,15 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
   const initialStyles = useMemo(() => {
-    const initialPanel = (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-      gridLayoutStateManager.gridLayout$.getValue())[rowId].panels[panelId];
+    const layout =
+      gridLayoutStateManager.proposedGridLayout$.getValue() ??
+      gridLayoutStateManager.gridLayout$.getValue();
+    let initialPanel: GridPanelData;
+    if (rowId === 'main') {
+      initialPanel = layout[panelId] as GridPanelData;
+    } else {
+      initialPanel = (layout[rowId] as GridRowData)?.panels[panelId];
+    }
     return css`
       position: relative;
       height: calc(
@@ -74,7 +82,13 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
-          const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
+
+          let panel: GridPanelData;
+          if (rowId === 'main') {
+            panel = (proposedGridLayout ?? gridLayout)[panelId] as GridPanelData;
+          } else {
+            panel = ((proposedGridLayout ?? gridLayout)[rowId] as GridRowData)?.panels[panelId];
+          }
           if (!ref || !panel) return;
 
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
@@ -143,7 +157,12 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
         (expandedPanelId) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-          const panel = gridLayout[rowId].panels[panelId];
+          let panel: GridPanelData;
+          if (rowId === 'main') {
+            panel = gridLayout[panelId] as GridPanelData;
+          } else {
+            panel = (gridLayout[rowId] as GridRowData)?.panels[panelId];
+          }
           if (!ref || !panel) return;
 
           if (expandedPanelId && expandedPanelId === panelId) {

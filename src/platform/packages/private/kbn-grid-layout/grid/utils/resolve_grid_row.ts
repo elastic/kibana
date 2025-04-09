@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GridLayoutData, GridPanelData, GridRowData } from '../types';
+import { GridLayoutData, GridLayoutWidget, GridPanelData, GridRowData } from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
   if (panelA.id === panelB.id) return false; // same panel
@@ -46,10 +46,22 @@ const getFirstCollision = (gridLayout: GridRowData, keysInOrder: string[]): stri
   return undefined;
 };
 
-export const getRowKeysInOrder = (rows: GridLayoutData): string[] => {
-  return Object.values(rows)
-    .sort(({ order: orderA }, { order: orderB }) => orderA - orderB)
-    .map(({ id }) => id);
+export const getMainLayoutInOrder = (
+  layout: GridLayoutData,
+  draggedId?: string
+): Array<{ type: 'panel' | 'section'; id: string }> => {
+  const widgetIds = Object.keys(layout);
+  const idsInorder = widgetIds.sort((widgetKeyA, widgetKeyB) => {
+    const widgetA = layout[widgetKeyA];
+    const widgetB = layout[widgetKeyB];
+
+    if (widgetA.type === 'panel' && widgetB.type === 'panel') {
+      return comparePanel(widgetA, widgetB, draggedId);
+    } else {
+      return compareRow(widgetA, widgetB);
+    }
+  });
+  return idsInorder.map((id) => ({ id, type: layout[id].type }));
 };
 
 export const getPanelKeysInOrder = (
@@ -61,21 +73,33 @@ export const getPanelKeysInOrder = (
     const panelA = panels[panelKeyA];
     const panelB = panels[panelKeyB];
 
-    // sort by row first
-    if (panelA.row > panelB.row) return 1;
-    if (panelA.row < panelB.row) return -1;
-
-    // if rows are the same. Is either panel being dragged?
-    if (panelA.id === draggedId) return -1;
-    if (panelB.id === draggedId) return 1;
-
-    // if rows are the same and neither panel is being dragged, sort by column
-    if (panelA.column > panelB.column) return 1;
-    if (panelA.column < panelB.column) return -1;
-
-    // fall back
-    return 1;
+    return comparePanel(panelA, panelB, draggedId);
   });
+};
+
+const compareRow = (widgetA: GridLayoutWidget, widgetB: GridLayoutWidget) => {
+  if (widgetA.row > widgetB.row) return 1;
+  if (widgetA.row < widgetB.row) return -1;
+
+  // fall back
+  return 1;
+};
+
+const comparePanel = (panelA: GridPanelData, panelB: GridPanelData, draggedId?: string) => {
+  // sort by row first
+  if (panelA.row > panelB.row) return 1;
+  if (panelA.row < panelB.row) return -1;
+
+  // if rows are the same. Is either panel being dragged?
+  if (panelA.id === draggedId) return -1;
+  if (panelB.id === draggedId) return 1;
+
+  // if rows are the same and neither panel is being dragged, sort by column
+  if (panelA.column > panelB.column) return 1;
+  if (panelA.column < panelB.column) return -1;
+
+  // fall back
+  return 1;
 };
 
 const compactGridRow = (originalLayout: GridRowData) => {

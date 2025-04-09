@@ -9,9 +9,8 @@
 
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
+import { combineLatest, map, distinctUntilChanged } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -20,8 +19,8 @@ import { GridRow } from './grid_row';
 import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
-import { isLayoutEqual } from './utils/equality_checks';
-import { getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
+import { getMainLayoutInOrder } from './utils/resolve_grid_row';
+import { GridPanel } from './grid_panel';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -51,67 +50,67 @@ export const GridLayout = ({
     accessMode,
   });
 
-  const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
+  const [widgetsInOrder, setWidgetsInOrder] = useState<
+    Array<{ type: 'panel' | 'section'; id: string }>
+  >(getMainLayoutInOrder(layout));
+
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
-  useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
-      const newLayout = cloneDeep(layout);
-      /**
-       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
-       * so, we need to loop through each row and ensure it is compacted
-       */
-      Object.entries(newLayout).forEach(([rowId, row]) => {
-        newLayout[rowId] = resolveGridRow(row);
-      });
-      gridLayoutStateManager.gridLayout$.next(newLayout);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [layout]);
+  // useEffect(() => {
+  //   if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
+  //     const newLayout = cloneDeep(layout);
+  //     /**
+  //      * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
+  //      * so, we need to loop through each row and ensure it is compacted
+  //      */
+  //     Object.entries(newLayout).forEach(([rowId, row]) => {
+  //       newLayout[rowId] = resolveGridRow(row);
+  //     });
+  //     gridLayoutStateManager.gridLayout$.next(newLayout);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [layout]);
 
   /**
    * Set up subscriptions
    */
+  // useEffect(() => {
+  //   /**
+  //    * This subscription calls the passed `onLayoutChange` callback when the layout changes;
+  //    * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
+  //    */
+  //   const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
+  //     .pipe(pairwise())
+  //     .subscribe(([layoutBefore, layoutAfter]) => {
+  //       if (!isLayoutEqual(layoutBefore, layoutAfter)) {
+  //         onLayoutChange(layoutAfter);
+
+  //         if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
+  //           setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
+  //         }
+  //       }
+  //     });
+
+  //   return () => {
+  //     onLayoutChangeSubscription.unsubscribe();
+  //   };
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [onLayoutChange]);
+
   useEffect(() => {
-    /**
-     * This subscription calls the passed `onLayoutChange` callback when the layout changes;
-     * if the row IDs have changed, it also sets `rowIdsInOrder` to trigger a re-render
-     */
-    const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
-      .pipe(pairwise())
-      .subscribe(([layoutBefore, layoutAfter]) => {
-        if (!isLayoutEqual(layoutBefore, layoutAfter)) {
-          onLayoutChange(layoutAfter);
-
-          if (!deepEqual(Object.keys(layoutBefore), Object.keys(layoutAfter))) {
-            setRowIdsInOrder(getRowKeysInOrder(layoutAfter));
-          }
-        }
-      });
-
-    return () => {
-      onLayoutChangeSubscription.unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onLayoutChange]);
-
-  useEffect(() => {
-    /**
-     * This subscription ensures that rows get re-rendered when their orders change
-     */
-    const rowOrderSubscription = combineLatest([
+    const mainSectionWidgetsSubscription = combineLatest([
       gridLayoutStateManager.proposedGridLayout$,
       gridLayoutStateManager.gridLayout$,
     ])
       .pipe(
         map(([proposedGridLayout, gridLayout]) =>
-          getRowKeysInOrder(proposedGridLayout ?? gridLayout)
+          getMainLayoutInOrder(proposedGridLayout ?? gridLayout)
         ),
         distinctUntilChanged(deepEqual)
       )
-      .subscribe((rowKeys) => {
-        setRowIdsInOrder(rowKeys);
+      .subscribe((widgets) => {
+        setWidgetsInOrder(widgets);
       });
 
     /**
@@ -138,7 +137,7 @@ export const GridLayout = ({
     });
 
     return () => {
-      rowOrderSubscription.unsubscribe();
+      mainSectionWidgetsSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -164,15 +163,16 @@ export const GridLayout = ({
           }}
           className={classNames('kbnGrid', className)}
           css={[
+            styles.grid,
             styles.layoutPadding,
             styles.hasActivePanel,
             styles.singleColumn,
             styles.hasExpandedPanel,
           ]}
         >
-          {rowIdsInOrder.map((rowId) => (
-            <GridRow key={rowId} rowId={rowId} />
-          ))}
+          {widgetsInOrder.map(({ id, type }) =>
+            type === 'section' ? <GridRow key={id} rowId={id} /> : <GridPanel panelId={id} />
+          )}
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>
@@ -180,6 +180,18 @@ export const GridLayout = ({
 };
 
 const styles = {
+  grid: css({
+    display: 'grid',
+    gap: 'calc(var(--kbnGridGutterSize) * 1px)',
+    gridTemplateRows: 'calc(var(--kbnGridRowHeight) * 1px)',
+    gridTemplateColumns: `repeat(
+          var(--kbnGridColumnCount),
+          calc(
+            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
+              var(--kbnGridColumnCount)
+          )
+        )`,
+  }),
   layoutPadding: css({
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
   }),

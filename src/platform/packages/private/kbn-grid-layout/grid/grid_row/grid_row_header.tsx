@@ -246,7 +246,6 @@ const styles = {
   headerStyles: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
-      padding: `${euiTheme.size.s} 0px`,
       border: '1px solid transparent', // prevents layout shift
       '.kbnGridRowContainer--collapsed &:not(.kbnGridRowHeader--active)': {
         borderBottom: euiTheme.border.thin,

@@ -36,7 +36,7 @@ export interface MockedDashboardPanelMap {
 }
 
 export interface MockedDashboardRowMap {
-  [id: string]: { id: string; order: number; title: string; collapsed: boolean };
+  [id: string]: { id: string; y: number; title: string; collapsed: boolean };
 }
 
 export interface MockSerializedDashboardState {

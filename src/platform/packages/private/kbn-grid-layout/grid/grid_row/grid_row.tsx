@@ -19,6 +19,7 @@ import { GridPanel } from '../grid_panel';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { GridRowHeader } from './grid_row_header';
 import { getPanelKeysInOrder } from '../utils/resolve_grid_row';
+import { GridRowData } from '../types';
 
 export interface GridRowProps {
   rowId: string;
@@ -27,7 +28,7 @@ export interface GridRowProps {
 export const GridRow = React.memo(({ rowId }: GridRowProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
-  const currentRow = gridLayoutStateManager.gridLayout$.value[rowId];
+  const currentRow = gridLayoutStateManager.gridLayout$.value[rowId] as GridRowData;
 
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getPanelKeysInOrder(currentRow.panels)
@@ -62,9 +63,10 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
         .pipe(
           map(([proposedGridLayout, gridLayout]) => {
             const displayedGridLayout = proposedGridLayout ?? gridLayout;
+            const displayedRow = displayedGridLayout[rowId] as GridRowData;
             return {
-              isCollapsed: displayedGridLayout[rowId]?.isCollapsed ?? false,
-              panelIds: Object.keys(displayedGridLayout[rowId]?.panels ?? {}),
+              isCollapsed: displayedRow?.isCollapsed ?? false,
+              panelIds: Object.keys(displayedRow?.panels ?? {}),
             };
           }),
           pairwise()
@@ -82,8 +84,10 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
           ) {
             setPanelIdsInOrder(
               getPanelKeysInOrder(
-                (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-                  gridLayoutStateManager.gridLayout$.getValue())[rowId]?.panels ?? {}
+                (
+                  (gridLayoutStateManager.proposedGridLayout$.getValue() ??
+                    gridLayoutStateManager.gridLayout$.getValue())[rowId] as GridRowData
+                )?.panels ?? {}
               )
             );
           }
@@ -96,7 +100,7 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
        */
       const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe((gridLayout) => {
         if (!gridLayout[rowId]) return;
-        const newPanelIdsInOrder = getPanelKeysInOrder(gridLayout[rowId].panels);
+        const newPanelIdsInOrder = getPanelKeysInOrder((gridLayout[rowId] as GridRowData).panels);
         if (panelIdsInOrder.join() !== newPanelIdsInOrder.join()) {
           setPanelIdsInOrder(newPanelIdsInOrder);
         }
@@ -114,7 +118,7 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 
   const toggleIsCollapsed = useCallback(() => {
     const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    newLayout[rowId].isCollapsed = !newLayout[rowId].isCollapsed;
+    (newLayout[rowId] as GridRowData).isCollapsed = !(newLayout[rowId] as GridRowData).isCollapsed;
     gridLayoutStateManager.gridLayout$.next(newLayout);
   }, [rowId, gridLayoutStateManager.gridLayout$]);
 
@@ -129,18 +133,16 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 
   return (
     <div
-      css={styles.fullHeight}
+      css={[styles.fullHeight, styles.gridWrapper]}
       className={classNames('kbnGridRowContainer', {
         'kbnGridRowContainer--collapsed': isCollapsed,
       })}
     >
-      {currentRow.order !== 0 && (
-        <GridRowHeader
-          rowId={rowId}
-          toggleIsCollapsed={toggleIsCollapsed}
-          collapseButtonRef={collapseButtonRef}
-        />
-      )}
+      <GridRowHeader
+        rowId={rowId}
+        toggleIsCollapsed={toggleIsCollapsed}
+        collapseButtonRef={collapseButtonRef}
+      />
       {!isCollapsed && (
         <div
           id={`kbnGridRow-${rowId}`}
@@ -148,7 +150,7 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
           ref={(element: HTMLDivElement | null) =>
             (gridLayoutStateManager.rowRefs.current[rowId] = element)
           }
-          css={[styles.fullHeight, styles.grid]}
+          css={styles.grid}
           role="region"
           aria-labelledby={`kbnGridRowTitle-${rowId}`}
         >
@@ -166,6 +168,10 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 const styles = {
   fullHeight: css({
     height: '100%',
+  }),
+  gridWrapper: css({
+    gridColumnStart: 1,
+    gridColumnEnd: 'calc(var(--kbnGridColumnCount) + 1)', // full width
   }),
   grid: css({
     position: 'relative',
