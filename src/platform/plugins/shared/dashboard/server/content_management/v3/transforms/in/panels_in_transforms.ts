@@ -18,8 +18,7 @@ import { prefixReferencesFromPanel } from '../../../../../common';
 
 export function transformPanelsIn(
   panels: DashboardAttributes['panels'],
-  embeddable: EmbeddableStart,
-  references?: SavedObjectReference[]
+  embeddable: EmbeddableStart
 ): {
   panelsJSON: DashboardSavedObjectAttributes['panelsJSON'];
   references: SavedObjectReference[];
@@ -27,8 +26,7 @@ export function transformPanelsIn(
   const panelsWithIndex = transformSetPanelIndex(panels);
   const { panels: extractedPanels, references: panelReferences } = extractPanelReferences(
     panelsWithIndex,
-    embeddable,
-    references
+    embeddable
   );
   const panelsJSON = flow(transformPanelsProperties, JSON.stringify)(extractedPanels);
   return { panelsJSON, references: panelReferences };
@@ -49,11 +47,7 @@ function transformSetPanelIndex(panels: DashboardAttributes['panels']) {
   return updatedPanels;
 }
 
-function extractPanelReferences(
-  panels: DashboardPanel[],
-  embeddable: EmbeddableStart,
-  references: SavedObjectReference[] = []
-) {
+function extractPanelReferences(panels: DashboardPanel[], embeddable: EmbeddableStart) {
   const extractedPanels: DashboardPanel[] = [];
   const panelReferences: SavedObjectReference[] = [];
   panels.forEach((panel) => {

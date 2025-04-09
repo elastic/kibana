@@ -103,12 +103,7 @@ export const getResultV3ToV2 = (
     version,
   } = attributes;
 
-  // TODO Find a way for the transform to handle the references
-  const { panelsJSON, references: panelReferences } = transformPanelsIn(
-    panels,
-    embeddable,
-    references
-  );
+  const { panelsJSON, references: panelReferences } = transformPanelsIn(panels, embeddable);
 
   const v2Attributes = {
     ...(controlGroupInput && {
@@ -144,9 +139,9 @@ export const itemToSavedObject = ({
 }: ItemToSavedObjectParams): ItemToSavedObjectReturn => {
   try {
     const { controlGroupInput, kibanaSavedObjectMeta, options, panels, tags, ...rest } = attributes;
-    const { panelsJSON, references: extractedReferences } = panels
-      ? transformPanelsIn(panels, embeddable, references)
-      : { panelsJSON: '[]', references };
+    const { panelsJSON, references: panelReferences } = panels
+      ? transformPanelsIn(panels, embeddable)
+      : { panelsJSON: '[]', references: [] };
     const soAttributes = {
       ...rest,
       ...(controlGroupInput && {
@@ -162,7 +157,7 @@ export const itemToSavedObject = ({
     };
     return {
       attributes: soAttributes,
-      references: extractedReferences,
+      references: [...references, ...panelReferences],
       error: null,
     };
   } catch (e) {
