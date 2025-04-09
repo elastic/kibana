@@ -169,7 +169,6 @@ export function ExportContentPackFlyout({
               <ContentPackMetadata
                 manifest={manifest}
                 onChange={(updatedManifest) => {
-                  console.log('ONCHANGE', updatedManifest);
                   setManifest(updatedManifest);
                 }}
               />
