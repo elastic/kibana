@@ -55,8 +55,7 @@ export const HomeAgentSection: React.FC<{}> = () => {
             </EuiLink>
             <EuiSpacer size="s" />
             <EuiText size="xs" color="subdued">
-              {agent.description ||
-                'Donec ullamcorper nulla non metus auctor fringilla. Nulla vitae elit libero, a pharetra augue.'}
+              {agent.description}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
