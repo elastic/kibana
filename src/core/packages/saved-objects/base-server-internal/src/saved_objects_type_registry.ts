@@ -30,7 +30,9 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
       throw new Error(`Type '${type.name}' is already registered`);
     }
     if (REMOVED_TYPES.includes(type.name)) {
-      throw new Error(`Type '${type.name}' can't be used because it's been added to the removed types`);
+      throw new Error(
+        `Type '${type.name}' can't be used because it's been added to the removed types`
+      );
     }
     validateType(type);
     this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
