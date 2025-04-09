@@ -95,8 +95,6 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const isExpanded = selectedNode?.path === path;
   const isActive = isActiveFromUrl(item.path, activeNodes) || isExpanded;
 
-  const lastOpenByHoverTS = React.useRef<number | null>(null);
-
   const itemClassNames = classNames(
     'sideNavItem',
     { 'sideNavItem--isActive': isActive },
@@ -122,12 +120,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   const togglePanel = useCallback(
     (target: EventTarget) => {
       if (selectedNode?.id === item.id) {
-        // we want to avoid closing the panel if the user just opened it by hovering
-        const recentlyOpenedByHover =
-          lastOpenByHoverTS.current && Date.now() - lastOpenByHoverTS.current < 500;
-        if (!recentlyOpenedByHover) {
-          closePanel();
-        }
+        // don't close the panel if the user clicks on the active item
+        // closePanel();
       } else {
         openPanel(item, target as Element);
       }
@@ -159,7 +153,6 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     onOpen: useCallback(
       (e: React.MouseEvent) => {
         if (selectedNode?.id === item.id) return;
-        lastOpenByHoverTS.current = Date.now();
         openPanel(item, e.target as Element);
       },
       [item, openPanel, selectedNode?.id]
