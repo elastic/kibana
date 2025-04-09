@@ -99,10 +99,6 @@ export function initializeInternalApi(
     isRuleFormVisible$,
     alertRuleInitialValues$,
     alertingTypeRegistries$,
-    createAlertRule: (initialValues: Partial<RuleFormData>) => {
-      alertRuleInitialValues$.next(initialValues);
-      isRuleFormVisible$.next(true);
-    },
     dispatchError: () => {
       hasRenderCompleted$.next(true);
       renderCount$.next(renderCount$.getValue() + 1);

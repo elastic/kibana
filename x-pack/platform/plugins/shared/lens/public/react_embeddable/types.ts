@@ -66,10 +66,10 @@ import type { AllowedXYOverrides } from '@kbn/expression-xy-plugin/common';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import type { RuleFormData, RuleTypeModel } from '@kbn/response-ops-rule-form';
+import type { RuleFormData } from '@kbn/response-ops-rule-form';
 import type { BehaviorSubject } from 'rxjs';
-import { ActionTypeModel } from '@kbn/alerts-ui-shared';
-import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
+import type { ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
+import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';
 import type { LegacyMetricState } from '../../common';
 import type { LensDocument } from '../persistence';
 import type { LensInspector } from '../lens_inspector_service';
@@ -383,8 +383,8 @@ export interface LensInspectorAdapters {
 export interface LensAlertRulesApi {
   createAlertRule: (
     initialValues: Partial<RuleFormData>,
-    ruleTypeRegistry: TypeRegistry<RuleTypeModel>,
-    actionTypeRegistry: TypeRegistry<ActionTypeModel>
+    ruleTypeRegistry: RuleTypeRegistry,
+    actionTypeRegistry: ActionTypeRegistryContract
   ) => void;
 }
 
@@ -442,8 +442,8 @@ export type LensInternalApi = Simplify<
       isRuleFormVisible$: BehaviorSubject<boolean>;
       alertRuleInitialValues$: BehaviorSubject<Partial<RuleFormData>>;
       alertingTypeRegistries$: BehaviorSubject<{
-        ruleTypeRegistry?: TypeRegistry<RuleTypeModel>;
-        actionTypeRegistry?: TypeRegistry<ActionTypeModel>;
+        ruleTypeRegistry?: RuleTypeRegistry;
+        actionTypeRegistry?: ActionTypeRegistryContract;
       }>;
       setAsCreated: () => void;
       dispatchRenderStart: () => void;

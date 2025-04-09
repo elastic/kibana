@@ -192,7 +192,7 @@ export const getTooltipActions = (
   const alertRulesTooltipActions: Array<TooltipAction<Datum, XYChartSeriesIdentifier>> = isEsqlMode
     ? [
         {
-          disabled: () => false,
+          disabled: () => !isEsqlMode,
           label: (_, [firstSeries]: XYTooltipValue[]) =>
             i18n.translate('expressionXY.tooltipActions.addAlertRule', {
               defaultMessage: 'Add alert rule',
