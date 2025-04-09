@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+import { getAllConnectorsRoute } from './get_all';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 import { licenseStateMock } from '../../../lib/license_state.mock';
 import { mockHandlerArguments } from '../../_mock_handler_arguments';
 import { verifyAccessAndContext } from '../../verify_access_and_context';
-import { getAllConnectorsRoute } from './get_all';
+import { actionsClientMock } from '../../../actions_client/actions_client.mock';
 
 jest.mock('../../verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
-describe('getAllConnectorsRoute', () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-    (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
-  });
+beforeEach(() => {
+  jest.resetAllMocks();
+  (verifyAccessAndContext as jest.Mock).mockImplementation((license, handler) => handler);
+});
 
+describe('getAllConnectorsRoute', () => {
   it('get all connectors with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
