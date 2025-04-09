@@ -22,16 +22,22 @@ import type { ChromeProjectNavigationNode, PanelSelectedNode } from '@kbn/core-c
 
 import { DefaultContent } from './default_content';
 import { ContentProvider } from './types';
+import { useHoverOpener2 } from './use_hover_opener';
 
 export interface PanelContext {
   isOpen: boolean;
-  toggle: () => void;
   open: (navNode: PanelSelectedNode, openerEl: Element | null) => void;
   close: () => void;
   /** The selected node is the node in the main panel that opens the Panel */
   selectedNode: PanelSelectedNode | null;
   /** Reference to the selected nav node element in the DOM */
   selectedNodeEl: React.MutableRefObject<Element | null>;
+
+  hoverIn: (navNode: PanelSelectedNode) => void;
+  hoverOut: (navNode: PanelSelectedNode) => void;
+  /** The node that is hovered over in the navigation */
+  hoveredNode: PanelSelectedNode | null;
+
   /** Handler to retrieve the component to render in the panel */
   getContent: () => React.ReactNode;
 }
@@ -52,13 +58,8 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
   selectedNode: selectedNodeProp = null,
   setSelectedNode,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const [selectedNode, setActiveNode] = useState<PanelSelectedNode | null>(selectedNodeProp);
   const selectedNodeEl = useRef<Element | null>(null);
-
-  const toggle = useCallback(() => {
-    setIsOpen((prev) => !prev);
-  }, []);
 
   const open = useCallback(
     (navNode: PanelSelectedNode, openerEl: Element | null) => {
@@ -69,16 +70,16 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
         selectedNodeEl.current = navNodeEl;
       }
 
-      setIsOpen(true);
       setSelectedNode?.(navNode);
     },
     [setSelectedNode]
   );
 
+  const { onMouseLeave, hoveredNode, onMouseEnter } = useHoverOpener2();
+
   const close = useCallback(() => {
     setActiveNode(null);
     selectedNodeEl.current = null;
-    setIsOpen(false);
     setSelectedNode?.(null);
   }, [setSelectedNode]);
 
@@ -86,45 +87,42 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
     if (selectedNodeProp === undefined) return;
 
     setActiveNode(selectedNodeProp);
-
-    if (selectedNodeProp) {
-      setIsOpen(true);
-    } else {
-      setIsOpen(false);
-    }
   }, [selectedNodeProp]);
 
   const getContent = useCallback(() => {
-    if (!selectedNode) {
+    const contentNode = hoveredNode || selectedNode;
+    if (!contentNode) {
       return null;
     }
 
-    const provided = contentProvider?.(selectedNode.path);
+    const provided = contentProvider?.(contentNode.path);
 
     if (!provided) {
-      return <DefaultContent selectedNode={selectedNode} />;
+      return <DefaultContent selectedNode={contentNode} />;
     }
 
     if (provided.content) {
       const Component = provided.content;
-      return <Component closePanel={close} selectedNode={selectedNode} activeNodes={activeNodes} />;
+      return <Component closePanel={close} selectedNode={contentNode} activeNodes={activeNodes} />;
     }
 
-    const title: string | ReactNode = provided.title ?? selectedNode.title;
-    return <DefaultContent selectedNode={{ ...selectedNode, title }} />;
-  }, [selectedNode, contentProvider, close, activeNodes]);
+    const title: string | ReactNode = provided.title ?? contentNode.title;
+    return <DefaultContent selectedNode={{ ...contentNode, title }} />;
+  }, [hoveredNode, selectedNode, contentProvider, close, activeNodes]);
 
   const ctx: PanelContext = useMemo(
     () => ({
-      isOpen,
-      toggle,
+      isOpen: Boolean(selectedNode || hoveredNode),
       open,
       close,
       selectedNode,
       selectedNodeEl,
       getContent,
+      hoveredNode,
+      hoverIn: onMouseEnter,
+      hoverOut: onMouseLeave,
     }),
-    [isOpen, toggle, open, close, selectedNode, selectedNodeEl, getContent]
+    [hoveredNode, open, close, selectedNode, getContent, onMouseEnter, onMouseLeave]
   );
 
   return <Context.Provider value={ctx}>{children}</Context.Provider>;

@@ -17,8 +17,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
-
 import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
+
 import { usePanel } from './context';
 import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
 
@@ -34,7 +34,16 @@ const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined
 
 export const NavigationPanel: FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { isOpen, close, getContent, selectedNode, selectedNodeEl } = usePanel();
+  const {
+    isOpen,
+    close,
+    getContent,
+    selectedNode,
+    selectedNodeEl,
+    hoveredNode,
+    hoverIn,
+    hoverOut,
+  } = usePanel();
 
   // ESC key closes PanelNav
   const onKeyDown = useCallback(
@@ -68,18 +77,38 @@ export const NavigationPanel: FC = () => {
     [close, selectedNodeEl]
   );
 
+  const currentNode = hoveredNode || selectedNode;
+
+  const onMouseEnter = useCallback(
+    (event: React.MouseEvent) => {
+      if (currentNode) {
+        hoverIn(currentNode);
+      }
+    },
+    [hoverIn, currentNode]
+  );
+
+  const onMouseLeave = useCallback(
+    (event: React.MouseEvent) => {
+      if (currentNode) {
+        hoverOut(currentNode);
+      }
+    },
+    [hoverOut, currentNode]
+  );
+
   const panelWrapperClasses = getPanelWrapperStyles();
   const sideNavPanelStyles = getNavPanelStyles(euiTheme);
   const panelClasses = classNames('sideNavPanel', 'eui-yScroll', sideNavPanelStyles);
 
-  if (!isOpen) {
+  if (!isOpen && !hoveredNode) {
     return null;
   }
 
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <div className={panelWrapperClasses}>
+      <div className={panelWrapperClasses} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         <EuiFocusTrap autoFocus css={{ height: '100%' }}>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanel
@@ -87,7 +116,7 @@ export const NavigationPanel: FC = () => {
               hasShadow
               borderRadius="none"
               paddingSize="m"
-              data-test-subj={getTestSubj(selectedNode)}
+              data-test-subj={getTestSubj(currentNode)}
             >
               {getContent()}
             </EuiPanel>
