@@ -20,14 +20,14 @@ interface Props {
 }
 
 export function EnvironmentBadge({ environments = [], isMetricsSignalType = true }: Props) {
-  environments = environments.length
+  const _environments = environments.length
     ? environments
     : [getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE)];
-  return isMetricsSignalType || (environments && environments.length > 0) ? (
+  return isMetricsSignalType || (_environments && _environments.length > 0) ? (
     <ItemsBadge
-      items={environments ?? []}
+      items={_environments ?? []}
       multipleItemsMessage={i18n.translate('xpack.apm.servicesTable.environmentCount', {
-        values: { environmentCount: environments.length },
+        values: { environmentCount: _environments.length },
         defaultMessage: '{environmentCount, plural, one {1 environment} other {# environments}}',
       })}
     />
