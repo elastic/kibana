@@ -48,14 +48,12 @@ export function AlertingFlyout(props: Props) {
             ruleTypeRegistry,
             actionTypeRegistry,
           }}
-          consumer={'datasetQuality'}
           onCancel={onCloseAddFlyout}
           onSubmit={onCloseAddFlyout}
           ruleTypeId={DATASET_QUALITY_RULE_TYPE_ID}
           initialValues={{
             params: initialValues,
           }}
-          shouldUseRuleProducer
         />
       )}
     </>
