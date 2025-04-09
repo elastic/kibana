@@ -30,8 +30,6 @@ export function getNextRunAt(
     // adding 1ms to ensure the next run is always in the future
     // if scheduleFromDate is equal to now (very low possibility), the next run will be now again, which causes loops
     nextRunAt = _rrule.after(new Date(Date.now() + 1));
-    const nextCalculatedRunAt = Math.max(nextRunAt?.getTime() || 0, Date.now());
-    return new Date(nextCalculatedRunAt);
   }
 
   // Ensure we also don't schedule in the past by performing the Math.max with Date.now()
