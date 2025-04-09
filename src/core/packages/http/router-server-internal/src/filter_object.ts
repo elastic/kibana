@@ -10,6 +10,13 @@
 import { set } from '@kbn/safer-lodash-set';
 import { isPlainObject } from 'lodash';
 
+function isEmpty(value: object | unknown[]) {
+  return (
+    (isPlainObject(value) && Object.keys(value).length === 0) ||
+    (Array.isArray(value) && value.length === 0)
+  );
+}
+
 /**
  * Based on the ES `filter_path` query selector that can reduce
  * the amount of data sent over the wire by specifying paths to include.
@@ -27,31 +34,29 @@ export function filterObject(obj: object, paths: readonly string[] | string[][])
     const keys = Array.isArray(path) ? path : path.split('.');
     let current = obj;
 
-    for (let x = 0; x < keys.length; x++) {
-      const key = keys[x];
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
       if (isPlainObject(current) && Object.hasOwn(current, key)) {
         current = (current as { [k: string]: object })[key];
-        if (x === keys.length - 1) {
+        if (i === keys.length - 1) {
           set(result, keys.join('.'), current);
         }
         continue;
       } else if (Array.isArray(current)) {
         const arrResult: unknown[] = [];
-        const subKeys = keys.slice(x);
+        const subKeys = keys.slice(i);
         for (const item of current) {
           const itemResult = filterObject(item, [subKeys]);
-          if (
-            (isPlainObject(itemResult) && Object.keys(itemResult).length) ||
-            (Array.isArray(itemResult) && itemResult.length)
-          ) {
+          // This mimics the ES API behaviour by excluding "empty" items from arrays
+          if (!isEmpty(itemResult)) {
             arrResult.push(itemResult);
           }
         }
         if (arrResult.length) {
-          if (x === 0) {
+          if (i === 0) {
             result = arrResult;
           } else {
-            set(result, keys.slice(0, x).join('.'), arrResult);
+            set(result, keys.slice(0, i).join('.'), arrResult);
           }
         }
         break;
