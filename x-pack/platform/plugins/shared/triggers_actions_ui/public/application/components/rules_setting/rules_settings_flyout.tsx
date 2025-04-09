@@ -252,7 +252,10 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
           </>
         )}
         <EuiSpacer />
-        <AlertDeleteDescriptiveFormGroup services={{ http }} categoryIds={['securitySolution']} />
+        <AlertDeleteDescriptiveFormGroup
+          services={{ http }}
+          categoryIds={['observability', 'management']}
+        />
       </>
     );
   };
