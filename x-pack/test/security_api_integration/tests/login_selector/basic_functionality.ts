@@ -22,6 +22,7 @@ import {
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import type { AuthenticationProvider } from '@kbn/security-plugin/common';
+import type { Response } from 'supertest';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -574,11 +575,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should be able to have many pending SP initiated logins all successfully succeed', async () => {
-        const samlResponseMapByRequestId = {};
+        const samlResponseMapByRequestId: Record<string, { samlResponse: string; cookie: any }> =
+          {};
 
         let sharedCookie;
         for (let i = 0; i < 10; i++) {
-          const samlHandshakeResponse = await supertest
+          const samlHandshakeResponse: Response = await supertest
             .post('/internal/security/login')
             .ca(CA_CERT)
             .set('kbn-xsrf', 'xxx')
@@ -628,7 +630,7 @@ export default function ({ getService }: FtrProviderContext) {
           })
         );
         expect(
-          responses.map((response) => {
+          responses.map((response: Response) => {
             return response.headers.location;
           })
         ).to.eql([
