@@ -35,17 +35,19 @@ export const groupStatsAggregations = (field: string): NamedAggregation[] => {
 
   switch (field) {
     case 'signal.rule.id':
-      aggMetrics.push(...[SEVERITY_SUB_AGGREGATION, RULE_COUNT_AGGREGATION]);
+      aggMetrics.push(SEVERITY_SUB_AGGREGATION, RULE_COUNT_AGGREGATION);
       break;
     case 'kibana.alert.severity':
-      aggMetrics.push(...[RULE_SIGNAL_ID_SUB_AGGREGATION, RULE_COUNT_AGGREGATION]);
+      aggMetrics.push(RULE_SIGNAL_ID_SUB_AGGREGATION, RULE_COUNT_AGGREGATION);
       break;
     case 'kibana.alert.rule.name':
-      aggMetrics.push(...[RULE_SIGNAL_ID_SUB_AGGREGATION, SEVERITY_SUB_AGGREGATION]);
+      aggMetrics.push(RULE_SIGNAL_ID_SUB_AGGREGATION, SEVERITY_SUB_AGGREGATION);
       break;
     default:
       aggMetrics.push(
-        ...[RULE_SIGNAL_ID_SUB_AGGREGATION, SEVERITY_SUB_AGGREGATION, RULE_COUNT_AGGREGATION]
+        RULE_SIGNAL_ID_SUB_AGGREGATION,
+        SEVERITY_SUB_AGGREGATION,
+        RULE_COUNT_AGGREGATION
       );
   }
   return aggMetrics;

@@ -10,6 +10,8 @@ import type { Alert } from '@kbn/alerting-types';
 import type { JsonValue } from '@kbn/utility-types';
 import { getOrEmptyTagFromValue } from '../../../../common/components/empty_value';
 
+const styles = { display: 'flex', alignItems: 'center', height: '100%' };
+
 export interface CellValueProps {
   /**
    * Alert data passed from the renderCellValue callback via the AlertWithLegacyFormats interface
@@ -54,11 +56,7 @@ export const CellValue = memo(({ alert, columnId }: CellValueProps) => {
     }
   }, [alert, columnId]);
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-      {getOrEmptyTagFromValue(displayValue)}
-    </div>
-  );
+  return <div style={styles}>{getOrEmptyTagFromValue(displayValue)}</div>;
 });
 
 CellValue.displayName = 'CellValue';

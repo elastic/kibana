@@ -25,7 +25,7 @@ const STATS_GROUP_SIGNAL_RULE_ID = i18n.translate(
 const STATS_GROUP_SIGNAL_RULE_ID_MULTI = i18n.translate(
   'xpack.securitySolution.alertSummary.groups.integrations.multi',
   {
-    defaultMessage: 'Multi',
+    defaultMessage: ' Multi',
   }
 );
 
@@ -110,20 +110,16 @@ export const groupStatsRenderer = (
   const defaultBadges: GroupStatsItem[] = DEFAULT_GROUP_STATS_RENDERER(selectedGroup, bucket);
   const severityComponent: GroupStatsItem[] = getSeverityComponent(bucket);
   const integrationComponent: GroupStatsItem[] = getIntegrationComponent(bucket);
+  const rulesBadge: GroupStatsItem = getRulesBadge(bucket);
 
   switch (selectedGroup) {
     case 'signal.rule.id':
-      return [...severityComponent, getRulesBadge(bucket), ...defaultBadges];
+      return [...severityComponent, rulesBadge, ...defaultBadges];
     case 'kibana.alert.severity':
-      return [...integrationComponent, getRulesBadge(bucket), ...defaultBadges];
+      return [...integrationComponent, rulesBadge, ...defaultBadges];
     case 'kibana.alert.rule.name':
       return [...integrationComponent, ...severityComponent, ...defaultBadges];
     default:
-      return [
-        ...integrationComponent,
-        ...severityComponent,
-        getRulesBadge(bucket),
-        ...defaultBadges,
-      ];
+      return [...integrationComponent, ...severityComponent, rulesBadge, ...defaultBadges];
   }
 };

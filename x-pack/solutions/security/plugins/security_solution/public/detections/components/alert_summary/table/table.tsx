@@ -161,7 +161,13 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
     if (combinedQuery?.kqlError || !combinedQuery?.filterQuery) {
       return { bool: {} };
     }
-    return { bool: { filter: JSON.parse(combinedQuery?.filterQuery) } };
+
+    try {
+      const filter = JSON.parse(combinedQuery?.filterQuery);
+      return { bool: { filter } };
+    } catch {
+      return { bool: {} };
+    }
   }, [browserFields, dataViewSpec, filters, globalQuery, uiSettings]);
 
   const renderAdditionalToolbarControls = useCallback(

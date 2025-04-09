@@ -109,7 +109,7 @@ describe('getIntegrationComponent', () => {
     expect(groupStatsItems.length).toBe(1);
     expect(groupStatsItems[0].component).toMatchInlineSnapshot(`
       <React.Fragment>
-        Multi
+         Multi
       </React.Fragment>
 `);
   });
