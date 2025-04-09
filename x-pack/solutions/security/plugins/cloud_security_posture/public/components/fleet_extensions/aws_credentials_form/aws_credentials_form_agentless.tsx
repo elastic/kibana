@@ -14,8 +14,6 @@ import semverCompare from 'semver/functions/compare';
 import semverValid from 'semver/functions/valid';
 import { i18n } from '@kbn/i18n';
 
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common/types';
 import {
   getTemplateUrlFromPackageInfo,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
@@ -36,7 +34,7 @@ import {
   getAwsCredentialsFormAgentlessOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
-import { getAwsCredentialsType, getPosturePolicy } from '../utils';
+import { getAwsCredentialsType, getCloudCredentialVarsConfig, getPosturePolicy } from '../utils';
 import { AwsInputVarFields } from './aws_input_var_fields';
 import {
   AwsFormProps,
@@ -48,6 +46,7 @@ import {
 
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from '../../test_subjects';
+
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
@@ -56,7 +55,7 @@ export const CloudFormationCloudCredentialsGuide = ({
   credentialType,
 }: {
   isOrganization?: boolean;
-  credentialType: 'assume_role' | 'direct_access_keys';
+  credentialType: 'cloud_connectors' | 'direct_access_keys';
 }) => {
   const credentialsTypeSteps: Record<
     string,
@@ -96,7 +95,7 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
         />
       ),
     },
-    [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
+    [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
       intro: (
         <FormattedMessage
           id="xpack.csp.agentlessForm.cloudFormation.guide.description.cloudConnectors"
@@ -271,8 +270,8 @@ export const AwsCredentialsFormAgentless = ({
           type: 'text',
         },
         'aws.supports_cloud_connectors': {
-          value: awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE,
-          type: 'boolean',
+          value: awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS,
+          type: 'bool',
         },
       }),
     });
@@ -294,8 +293,8 @@ export const AwsCredentialsFormAgentless = ({
       accordianTitleLink: <EuiLink>Steps to Generate AWS Account Credentials</EuiLink>,
       templateUrl: automationCredentialTemplate,
     },
-    [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
-      accordianTitleLink: <EuiLink>Steps to Generate ARN Role</EuiLink>,
+    [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
+      accordianTitleLink: <EuiLink>Steps to Generate Cloud Connector Credentials</EuiLink>,
       templateUrl: cloudConnectorRemoteRoleTemplate,
     },
   };
@@ -304,7 +303,7 @@ export const AwsCredentialsFormAgentless = ({
 
   const isCloudFormationSupported =
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
-    awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
+    awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
   const agentlessOptions = showCloudConnectors
     ? getAwsCloudConnectorsCredentialsFormOptions()
     : getAwsAgentlessFormOptions();
@@ -342,23 +341,20 @@ export const AwsCredentialsFormAgentless = ({
             ? getAwsCloudConnectorsFormAgentlessOptions()
             : getAwsCredentialsFormAgentlessOptions()
         }
-        disabled={!!isEditPage && awsCredentialsType === AWS_CREDENTIALS_TYPE.ASSUME_ROLE}
+        disabled={!!isEditPage && awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS}
         onChange={(optionId) => {
-          const supportsCloudConnector =
-            setupTechnology === SetupTechnology.AGENTLESS &&
-            optionId === AWS_CREDENTIALS_TYPE.ASSUME_ROLE &&
-            showCloudConnectors;
-          const credentialType: Record<string, PackagePolicyConfigRecordEntry> = showCloudConnectors
-            ? {
-                'aws.credentials.type': { value: optionId },
-                'aws.supports_cloud_connectors': {
-                  value: supportsCloudConnector,
-                },
-              }
-            : {
-                'aws.credentials.type': { value: optionId },
-              };
-          updatePolicy(getPosturePolicy(newPolicy, input.type, credentialType));
+          updatePolicy(
+            getPosturePolicy(
+              newPolicy,
+              input.type,
+              getCloudCredentialVarsConfig({
+                setupTechnology,
+                optionId,
+                showCloudConnectors,
+                inputType: input.type,
+              })
+            )
+          );
         }}
       />
       <EuiSpacer size="m" />
@@ -384,7 +380,7 @@ export const AwsCredentialsFormAgentless = ({
           >
             <CloudFormationCloudCredentialsGuide
               isOrganization={isOrganization}
-              credentialType={awsCredentialsType as 'assume_role' | 'direct_access_keys'}
+              credentialType={awsCredentialsType as 'cloud_connectors' | 'direct_access_keys'}
             />
           </EuiAccordion>
           <EuiSpacer size="l" />

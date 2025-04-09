@@ -47,6 +47,7 @@ export const AWS_SETUP_FORMAT = {
 } as const;
 
 export const AWS_CREDENTIALS_TYPE = {
+  CLOUD_CONNECTORS: 'cloud_connectors',
   ASSUME_ROLE: 'assume_role',
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   TEMPORARY_KEYS: 'temporary_keys',

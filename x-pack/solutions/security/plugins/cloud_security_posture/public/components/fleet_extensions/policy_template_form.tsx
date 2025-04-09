@@ -40,10 +40,7 @@ import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_VULN_MGMT_AWS,
-  SINGLE_ACCOUNT,
   SUPPORTED_POLICY_TEMPLATES,
-  TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
-  TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
 } from '../../../common/constants';
 import {
   getMaxPackageName,
@@ -56,7 +53,8 @@ import {
   POSTURE_NAMESPACE,
   POLICY_TEMPLATE_FORM_DTS,
   hasErrors,
-  getAgentFeatures,
+  getCloudDefaultAwsCredentialConfig,
+  getCloudConnectorRemoteRoleTemplate,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -73,13 +71,8 @@ import {
 import { SetupTechnologySelector } from './setup_technology_selector/setup_technology_selector';
 import { useSetupTechnology } from './setup_technology_selector/use_setup_technology';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
-import { AWS_CREDENTIALS_TYPE } from './aws_credentials_form/aws_credentials_form';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
-import {
-  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-  getTemplateUrlFromPackageInfo,
-} from '../../common/utils/get_template_url_package_info';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -681,7 +674,6 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     isEditPage,
     packageInfo,
     handleSetupTechnologyChange,
-    handleAgentFeaturesChange,
     isAgentlessEnabled,
     defaultSetupTechnology,
     integrationToEnable,
@@ -701,15 +693,13 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const input = getSelectedOption(newPolicy.inputs, integration);
     const getIsSubscriptionValid = useIsSubscriptionStatusValid();
     const isSubscriptionValid = !!getIsSubscriptionValid.data;
-    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology, updateAgentFeatures } =
-      useSetupTechnology({
-        input,
-        isAgentlessEnabled,
-        handleSetupTechnologyChange,
-        handleAgentFeaturesChange,
-        isEditPage,
-        defaultSetupTechnology,
-      });
+    const { isAgentlessAvailable, setupTechnology, updateSetupTechnology } = useSetupTechnology({
+      input,
+      isAgentlessEnabled,
+      handleSetupTechnologyChange,
+      isEditPage,
+      defaultSetupTechnology,
+    });
 
     const shouldRenderAgentlessSelector =
       (!isEditPage && isAgentlessAvailable) || (isEditPage && isAgentlessEnabled);
@@ -726,22 +716,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         {
           [key: string]: {
             value: string | boolean;
-            type: 'text' | 'boolean';
+            type: 'text' | 'bool';
           };
         }
       > = {
-        'cloudbeat/cis_aws': {
-          'aws.credentials.type': {
-            value: isAgentless
-              ? AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS
-              : AWS_CREDENTIALS_TYPE.CLOUD_FORMATION,
-            type: 'text',
-          },
-          'aws.supports_cloud_connectors': {
-            value: isAgentless ? true : false,
-            type: 'boolean',
-          },
-        },
+        'cloudbeat/cis_aws': getCloudDefaultAwsCredentialConfig({
+          isAgentless,
+          showCloudConnectors,
+          packageInfo,
+        }),
         'cloudbeat/cis_gcp': {
           'gcp.credentials.type': {
             value: isAgentless
@@ -765,38 +748,18 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
-        const currentInput = updatedPolicy.inputs.find(
-          (i) => i.enabled === true && i.type === 'cloudbeat/cis_aws'
-        );
-        if (currentInput) {
-          const agentFeatures = getAgentFeatures(
-            currentInput?.streams?.[0].vars?.['aws.credentials.type']?.value,
-            setupTechnology === SetupTechnology.AGENTLESS
-          );
-          updateAgentFeatures(setupTechnology, agentFeatures);
-        }
         onChange({ isValid, updatedPolicy, isExtensionLoaded });
       },
-      [onChange, isValid, setupTechnology, updateAgentFeatures]
+      [onChange, isValid]
     );
 
     const { cloudConnectorsEnabled } = ExperimentalFeaturesService.get();
-    const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
-    // Elastic Service ID refers to the deployment ID or project ID
-    const elasticResourceId = cloud?.isCloudEnabled
-      ? cloud?.deploymentId
-      : cloud?.serverless.projectId;
-
-    const cloudConnectorRemoteRoleTemplate = elasticResourceId
-      ? getTemplateUrlFromPackageInfo(
-          packageInfo,
-          input.policy_template,
-          SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
-        )
-          ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-          ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId)
-      : undefined;
+    const cloudConnectorRemoteRoleTemplate = getCloudConnectorRemoteRoleTemplate({
+      input,
+      cloud,
+      packageInfo,
+    });
 
     const showCloudConnectors =
       cloud.csp === 'aws' && cloudConnectorsEnabled && !!cloudConnectorRemoteRoleTemplate;

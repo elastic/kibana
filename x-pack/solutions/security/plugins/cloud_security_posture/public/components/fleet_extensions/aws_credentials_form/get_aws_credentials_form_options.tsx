@@ -110,7 +110,7 @@ export const getAgentlessCredentialsType = (
   const credentialsType = getAwsCredentialsType(postureInput);
 
   if (!credentialsType && showCloudConnectors) {
-    return AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
+    return AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
   }
 
   return credentialsType || AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
@@ -118,7 +118,7 @@ export const getAgentlessCredentialsType = (
 
 const getAwsCredentialsTypeSelectorOptions = (
   filterFn: ({ value }: { value: AwsCredentialsType }) => boolean,
-  getFormOptions: () => AwsOptions | Omit<AwsOptions, 'assume_role'> = getAwsCredentialsFormOptions
+  getFormOptions: () => AwsOptions | Partial<AwsOptions> = getAwsCredentialsFormOptions
 ): AwsCredentialsTypeOptions => {
   return Object.entries(getFormOptions())
     .map(([key, value]) => ({
@@ -143,7 +143,7 @@ export const getAwsCredentialsFormAgentlessOptions = (): AwsCredentialsTypeOptio
 export const getAwsCloudConnectorsFormAgentlessOptions = (): AwsCredentialsTypeOptions =>
   getAwsCredentialsTypeSelectorOptions(
     ({ value }) =>
-      value === AWS_CREDENTIALS_TYPE.ASSUME_ROLE ||
+      value === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS ||
       value === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
       value === AWS_CREDENTIALS_TYPE.TEMPORARY_KEYS,
     getAwsCloudConnectorsCredentialsFormOptions
@@ -152,9 +152,11 @@ export const getAwsCloudConnectorsFormAgentlessOptions = (): AwsCredentialsTypeO
 export const DEFAULT_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.CLOUD_FORMATION;
 export const DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE: typeof AWS_CREDENTIALS_TYPE.ASSUME_ROLE =
   AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
-export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.ASSUME_ROLE;
+export const DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE = AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS;
+export const DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE =
+  AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
 
-export const getAwsCredentialsFormOptions = (): AwsOptions => ({
+export const getAwsCredentialsFormOptions = (): Omit<AwsOptions, 'cloud_connectors'> => ({
   [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
     label: i18n.translate('xpack.csp.awsIntegration.assumeRoleLabel', {
       defaultMessage: 'Assume role',
@@ -166,13 +168,6 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
           defaultMessage: 'Role ARN',
         }),
         dataTestSubj: 'awsRoleArnInput',
-      },
-      'aws.credentials.external_id': {
-        label: i18n.translate('xpack.csp.awsIntegration.externalId', {
-          defaultMessage: 'External ID',
-        }),
-        dataTestSubj: 'awsExternalId',
-        isSecret: true,
       },
     },
   },
@@ -242,8 +237,12 @@ export const getAwsCredentialsFormOptions = (): AwsOptions => ({
   },
 });
 
-export const getAwsCloudConnectorsCredentialsFormOptions = (): AwsOptions => ({
-  [AWS_CREDENTIALS_TYPE.ASSUME_ROLE]: {
+// TODO: create cloud setup access config
+export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
+  AwsOptions,
+  'assume_role' | 'cloud_formation' | 'shared_credentials'
+> => ({
+  [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
     label: i18n.translate('xpack.csp.awsIntegration.cloudConnectorsRoleLabel', {
       defaultMessage: 'Cloud Connectors (recommended)',
     }),
@@ -303,34 +302,12 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): AwsOptions => ({
       },
     },
   },
-  [AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
-      defaultMessage: 'Shared credentials',
-    }),
-    info: SharedCredentialsDescription,
-    fields: {
-      shared_credential_file: {
-        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
-          defaultMessage: 'Shared Credential File',
-        }),
-        dataTestSubj: 'awsSharedCredentialFile',
-      },
-      credential_profile_name: {
-        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
-          defaultMessage: 'Credential Profile Name',
-        }),
-        dataTestSubj: 'awsCredentialProfileName',
-      },
-    },
-  },
-  [AWS_CREDENTIALS_TYPE.CLOUD_FORMATION]: {
-    label: 'CloudFormation',
-    info: [],
-    fields: {},
-  },
 });
 
-export const getAwsAgentlessFormOptions = (): Omit<AwsOptions, 'assume_role'> => ({
+export const getAwsAgentlessFormOptions = (): Omit<
+  AwsOptions,
+  'assume_role' | 'cloud_formation' | 'cloud_connectors' | 'shared_credentials'
+> => ({
   [AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS]: {
     label: i18n.translate('xpack.csp.awsIntegration.directAccessKeyLabel', {
       defaultMessage: 'Direct access keys',
@@ -369,30 +346,5 @@ export const getAwsAgentlessFormOptions = (): Omit<AwsOptions, 'assume_role'> =>
         dataTestSubj: 'awsTemporaryKeysSessionToken',
       },
     },
-  },
-  [AWS_CREDENTIALS_TYPE.SHARED_CREDENTIALS]: {
-    label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialLabel', {
-      defaultMessage: 'Shared credentials',
-    }),
-    info: SharedCredentialsDescription,
-    fields: {
-      shared_credential_file: {
-        label: i18n.translate('xpack.csp.awsIntegration.sharedCredentialFileLabel', {
-          defaultMessage: 'Shared Credential File',
-        }),
-        dataTestSubj: 'awsSharedCredentialFile',
-      },
-      credential_profile_name: {
-        label: i18n.translate('xpack.csp.awsIntegration.credentialProfileNameLabel', {
-          defaultMessage: 'Credential Profile Name',
-        }),
-        dataTestSubj: 'awsCredentialProfileName',
-      },
-    },
-  },
-  [AWS_CREDENTIALS_TYPE.CLOUD_FORMATION]: {
-    label: 'CloudFormation',
-    info: [],
-    fields: {},
   },
 });

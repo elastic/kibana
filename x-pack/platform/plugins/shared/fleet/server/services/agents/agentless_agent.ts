@@ -90,16 +90,6 @@ class AgentlessAgentService {
     }
 
     const policyId = agentlessAgentPolicy.id;
-    const agentFeatures = agentlessAgentPolicy?.agent_features?.reduce(
-      (acc: Record<string, boolean>, item) => {
-        const key: string = item.name; // Choose a property dynamically
-        if (key) {
-          acc[key] = item.enabled; // Store the whole object or specific values
-        }
-        return acc;
-      },
-      {}
-    );
     const { fleetUrl, fleetToken } = await this.getFleetUrlAndTokenForAgentlessAgent(
       esClient,
       policyId,
@@ -128,7 +118,6 @@ class AgentlessAgentService {
         fleet_token: fleetToken,
         resources: agentlessAgentPolicy.agentless?.resources,
         labels,
-        ...agentFeatures,
       },
       method: 'POST',
       ...this.getHeaders(tlsConfig, traceId),

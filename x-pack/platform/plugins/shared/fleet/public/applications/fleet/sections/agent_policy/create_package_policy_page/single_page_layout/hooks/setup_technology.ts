@@ -24,7 +24,6 @@ import {
   AGENTLESS_GLOBAL_TAG_NAME_TEAM,
   AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
   AGENTLESS_AGENT_POLICY_MONITORING,
-  CLOUD_CONNECTOR_AGENT_FEATURE,
 } from '../../../../../../../../common/constants';
 import {
   isAgentlessIntegration as isAgentlessIntegrationFn,
@@ -122,51 +121,6 @@ export function useSetupTechnology({
     },
     [isAgentlessEnabled, selectedSetupTechnology, setSelectedPolicyTab, setSelectedSetupTechnology]
   );
-
-  const handleAgentFeaturesChange = useCallback(
-    (
-      setupTechnology: SetupTechnology,
-      agentFeatures: Array<{ name: string; enabled: boolean }>
-    ) => {
-      const defaultAgentFeatures = [{ name: CLOUD_CONNECTOR_AGENT_FEATURE, enabled: false }];
-      if (!isAgentlessEnabled || setupTechnology === SetupTechnology.AGENT_BASED) {
-        return;
-      }
-      if (setupTechnology === SetupTechnology.AGENTLESS) {
-        const newAgentlessPolicy = {
-          ...generateNewAgentPolicyWithDefaults({
-            inactivity_timeout: AGENTLESS_AGENT_POLICY_INACTIVITY_TIMEOUT,
-            supports_agentless: true,
-            monitoring_enabled: AGENTLESS_AGENT_POLICY_MONITORING,
-          }),
-          name: agentlessPolicyName,
-          global_data_tags: getGlobaDataTags(packageInfo),
-        };
-        const agentlessPolicy = {
-          ...newAgentlessPolicy,
-          agent_features: agentFeatures,
-        } as NewAgentPolicy;
-        setCurrentAgentPolicy(agentlessPolicy);
-        setNewAgentPolicy(agentlessPolicy);
-      } else {
-        const agentBasedPolicy = {
-          ...orginalAgentPolicyRef.current,
-          supports_agentless: false,
-        };
-        setCurrentAgentPolicy(agentBasedPolicy);
-        setNewAgentPolicy({
-          ...orginalAgentPolicyRef.current,
-          supports_agentless: false,
-          agent_features: [
-            ...(orginalAgentPolicyRef.current.agent_features || []),
-            ...defaultAgentFeatures,
-          ],
-        });
-      }
-    },
-    [isAgentlessEnabled, setNewAgentPolicy, setCurrentAgentPolicy, packageInfo, agentlessPolicyName]
-  );
-
   if (
     isEditPage &&
     agentPolicies &&
@@ -223,7 +177,6 @@ export function useSetupTechnology({
 
   return {
     handleSetupTechnologyChange,
-    handleAgentFeaturesChange,
     allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,

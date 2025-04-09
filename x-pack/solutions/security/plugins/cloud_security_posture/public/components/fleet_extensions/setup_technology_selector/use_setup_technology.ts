@@ -14,17 +14,12 @@ export const useSetupTechnology = ({
   input,
   isAgentlessEnabled,
   handleSetupTechnologyChange,
-  handleAgentFeaturesChange,
   defaultSetupTechnology,
   isEditPage,
 }: {
   input: NewPackagePolicyInput;
   isAgentlessEnabled?: boolean;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
-  handleAgentFeaturesChange?: (
-    deploymentMode: SetupTechnology,
-    agentFeatures: Array<{ name: string; enabled: boolean }>
-  ) => void;
   defaultSetupTechnology?: SetupTechnology;
   isEditPage?: boolean;
 }) => {
@@ -53,20 +48,10 @@ export const useSetupTechnology = ({
     }
   };
 
-  const updateAgentFeatures = (
-    deploymentMode: SetupTechnology,
-    agentFeaturesList: Array<{ name: string; enabled: boolean }>
-  ) => {
-    if (handleAgentFeaturesChange) {
-      handleAgentFeaturesChange(deploymentMode, agentFeaturesList);
-    }
-  };
-
   return {
     isAgentlessAvailable,
     setupTechnology,
     setSetupTechnology,
     updateSetupTechnology,
-    updateAgentFeatures,
   };
 };
