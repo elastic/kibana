@@ -7870,6 +7870,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/user-settings-example-plugin@link:examples/user_settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/utility-types-jest@link:src/platform/packages/shared/kbn-utility-types-jest":
   version "0.0.0"
   uid ""

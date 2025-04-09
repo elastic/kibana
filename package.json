@@ -1018,6 +1018,7 @@
     "@kbn/user-profile-components": "link:src/platform/packages/shared/kbn-user-profile-components",
     "@kbn/user-profile-examples-plugin": "link:examples/user_profile_examples",
     "@kbn/user-profiles-consumer-plugin": "link:x-pack/test/security_api_integration/plugins/user_profiles_consumer",
+    "@kbn/user-settings-example-plugin": "link:examples/user_settings",
     "@kbn/utility-types": "link:src/platform/packages/shared/kbn-utility-types",
     "@kbn/utility-types-jest": "link:src/platform/packages/shared/kbn-utility-types-jest",
     "@kbn/utils": "link:src/platform/packages/shared/kbn-utils",

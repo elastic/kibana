@@ -111,12 +111,11 @@ export class UserSettingsService implements IUserSettingsService {
 
   get$<T>(key: string): Observable<T> {
     this.assertRegistered(key);
-    const fullSettingName = this.getFullSettingName(key);
     return concat(
-      defer(() => of(this.get<T>(fullSettingName))),
+      defer(() => of(this.get<T>(key))),
       this.update$.pipe(
         filter(({ key: updatedKey }) => updatedKey === key),
-        map(() => this.get<T>(fullSettingName))
+        map(() => this.get<T>(key))
       )
     );
   }
