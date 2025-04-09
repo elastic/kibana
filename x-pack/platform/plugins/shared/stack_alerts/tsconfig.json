@@ -35,7 +35,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/esql",
     "@kbn/esql-editor",
-    "@kbn/expressions-plugin",
     "@kbn/core-http-browser",
     "@kbn/core-doc-links-browser",
     "@kbn/core-ui-settings-server",
@@ -52,8 +51,6 @@
     "@kbn/core-saved-objects-server",
     "@kbn/alerting-rule-utils",
     "@kbn/response-ops-rule-params",
-    "@kbn/esql-ast",
-    "@kbn/esql-validation-autocomplete"
   ],
   "exclude": ["target/**/*"]
 }
