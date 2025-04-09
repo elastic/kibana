@@ -51814,7 +51814,7 @@ paths:
       summary: Delete monitors
       tags:
         - synthetics
-  /api/synthetics/monitors/{config_id}:
+  /api/synthetics/monitors/{id}:
     delete:
       description: |
         Delete a monitor from the Synthetics app.
@@ -51823,7 +51823,7 @@ paths:
       parameters:
         - description: The identifier for the monitor that you want to delete.
           in: path
-          name: config_id
+          name: id
           required: true
           schema:
             type: string
