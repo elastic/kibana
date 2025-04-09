@@ -9,6 +9,7 @@ import React, { lazy } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { IntegrationCardItem } from '@kbn/fleet-plugin/public';
+import { noop } from 'lodash';
 import { FACETS_MAX_WIDTH_PX, INTEGRATIONS_GRID_MAX_WIDTH_PX } from './constants';
 import { IntegrationViewFacets } from './view_facets';
 import { IntegrationsFacets } from '../../../constants';
@@ -64,10 +65,10 @@ export const IntegrationsGrid = React.memo<IntegrationsGridProps>(
               searchTerm={searchTerm}
               selectedCategory={'security'}
               selectedSubCategory={''}
-              setCategory={() => {}}
               setSearchTerm={setSearchTerm}
-              setUrlandPushHistory={() => {}}
-              setUrlandReplaceHistory={() => {}}
+              setCategory={noop}
+              setUrlandPushHistory={noop}
+              setUrlandReplaceHistory={noop}
               showCardLabels={true}
               showControls={false}
               showSearchTools={true}
