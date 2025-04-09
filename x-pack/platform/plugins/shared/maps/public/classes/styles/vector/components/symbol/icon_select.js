@@ -15,9 +15,7 @@ import {
   EuiFocusTrap,
   keys,
   EuiSelectable,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -28,6 +26,7 @@ import { SymbolIcon } from '../legend/symbol_icon';
 import { SYMBOL_OPTIONS } from '../../symbol_utils';
 import { getIsDarkMode } from '../../../../../kibana_services';
 import { CustomIconModal } from './custom_icon_modal';
+import { PrependButton } from './prepend_button';
 
 function isKeyboardEvent(event) {
   return typeof event === 'object' && 'keyCode' in event;
@@ -221,19 +220,3 @@ export class IconSelect extends Component {
     );
   }
 }
-
-const PrependButton = ({ value, svg }) => {
-  const { euiTheme } = useEuiTheme();
-
-  return (
-    <SymbolIcon
-      key={value}
-      css={css({
-        margin: `0 ${euiTheme.size.xs}`,
-      })}
-      symbolId={value}
-      svg={svg}
-      fill={getIsDarkMode() ? 'rgb(223, 229, 239)' : 'rgb(52, 55, 65)'}
-    />
-  );
-};
