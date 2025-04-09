@@ -306,6 +306,9 @@ const defaultAlertRules = {
     throttle: null,
     apiKeyOwner: 'elastic_admin',
     apiKeyCreatedByUser: true,
+    artifacts: {
+      dashboards: [],
+    },
     createdBy: 'elastic_admin',
     updatedBy: 'elastic_admin',
     muteAll: false,
