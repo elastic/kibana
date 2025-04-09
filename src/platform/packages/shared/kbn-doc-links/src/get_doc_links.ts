@@ -25,11 +25,14 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
   const ELASTIC_GITHUB = meta.elasticGithubUrl;
   const SEARCH_LABS_URL = meta.searchLabsUrl;
   const API_DOCS = meta.apiDocsUrl;
+  const ELASTIC_DOCS = meta.docsWebsiteUrl;
 
   const ELASTICSEARCH_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`;
   const ELASTICSEARCH_APIS = `${API_DOCS}doc/elasticsearch/`;
   const ELASTICSEARCH_SERVERLESS_APIS = `${API_DOCS}doc/elasticsearch-serverless/`;
   const KIBANA_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/`;
+  const KIBANA_APIS = `${API_DOCS}doc/kibana/`;
+  const KIBANA_SERVERLESS_APIS = `{$API_DOCS}doc/serverless/`;
   const FLEET_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/fleet/${DOC_LINK_VERSION}/`;
   const INTEGRATIONS_DEV_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/integrations-developer/current/`;
   const PLUGIN_DOCS = `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/plugins/${DOC_LINK_VERSION}/`;
@@ -131,7 +134,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       behavioralAnalyticsCORS: `${ELASTICSEARCH_DOCS}behavioral-analytics-cors.html`,
       behavioralAnalyticsEvents: `${ELASTICSEARCH_DOCS}behavioral-analytics-event.html`,
       buildConnector: `${ELASTICSEARCH_DOCS}es-build-connector.html`,
-      bulkApi: `${ELASTICSEARCH_DOCS}docs-bulk.html`,
+      bulkApi: isServerless
+        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-bulk`
+        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ELASTICSEARCH_DOCS}es-connectors.html`,
       connectorsClientDeploy: `${ELASTICSEARCH_DOCS}es-build-connector.html#es-connectors-deploy-connector-service`,
@@ -174,11 +179,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       e5Model: `${MACHINE_LEARNING_DOCS}ml-nlp-e5.html`,
       elser: `${ELASTICSEARCH_DOCS}semantic-search-semantic-text.html`,
       engines: `${ENTERPRISE_SEARCH_DOCS}engines.html`,
-      indexApi: `${ELASTICSEARCH_DOCS}docs-index_.html`,
+      indexApi: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-create`
+        : `${ELASTICSEARCH_APIS}operation/operation-create`,
       inferenceApiCreate: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-inference-put`
         : `${ELASTICSEARCH_APIS}operation/operation-inference-put`,
-      inferenceApisConfigureChunking: `${ELASTICSEARCH_DOCS}inference-apis.html#infer-chunking-config`,
+      inferenceApisConfigureChunking: `${ELASTIC_DOCS}explore-analyze/elastic-inference/inference-api#infer-chunking-config`,
       ingestionApis: `${ELASTICSEARCH_DOCS}search-with-elasticsearch.html`,
       ingestPipelines: `${ELASTICSEARCH_DOCS}ingest-pipeline-search.html`,
       knnSearch: `${ELASTICSEARCH_DOCS}knn-search.html`,
@@ -300,7 +307,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       autocompleteSuggestions: `${KIBANA_DOCS}kibana-concepts-analysts.html#autocomplete-suggestions`,
       secureSavedObject: `${KIBANA_DOCS}xpack-security-secure-saved-objects.html`,
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
-      restApis: `${KIBANA_DOCS}api.html`,
+      restApis: isServerless ? `${KIBANA_SERVERLESS_APIS}` : `${KIBANA_APIS}`,
       dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
       upgradeNotes: `${KIBANA_DOCS}breaking-changes-summary.html`,
     },
@@ -504,7 +511,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       visualizationSettings: `${KIBANA_DOCS}advanced-options.html#kibana-visualization-settings`,
       timelionSettings: `${KIBANA_DOCS}advanced-options.html#kibana-timelion-settings`,
       generalSettings: `${KIBANA_DOCS}advanced-options.html#kibana-general-settings`,
-      savedObjectsApiList: `${KIBANA_DOCS}saved-objects-api.html#saved-objects-api`,
+      savedObjectsApiList: isServerless
+        ? `${KIBANA_SERVERLESS_APIS}group/endpoint-saved-objects`
+        : `${KIBANA_APIS}group/endpoint-saved-objects`,
       apiKeys: `${KIBANA_DOCS}api-keys.html`,
     },
     ml: {
@@ -719,7 +728,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexStats: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
         : `${ELASTICSEARCH_APIS}operation/operation-indices-stats`,
-      byteSizeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#byte-units`,
+      byteSizeUnits: `https://www.elastic.co/docs/reference/elasticsearch/rest-apis/api-conventions#byte-units`,
       createAutoFollowPattern: `${ELASTICSEARCH_APIS}operation/operation-ccr-put-auto-follow-pattern`,
       createFollower: `${ELASTICSEARCH_APIS}operation/operation-ccr-follow`,
       createIndex: isServerless
@@ -736,9 +745,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-ingest-put-pipeline`
         : `${ELASTICSEARCH_APIS}operation/operation-ingest-put-pipeline`,
       createTransformRequest: isServerless
-        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-put-transform#operation-transform-put-transform-body-application-json`
-        : `${ELASTICSEARCH_APIS}operation/operation-transform-put-transform#operation-transform-put-transform-body-application-json`,
-      cronExpressions: `${ELASTICSEARCH_DOCS}cron-expressions.html`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-put-transform`
+        : `${ELASTICSEARCH_APIS}operation/operation-transform-put-transform`,
+      cronExpressions: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#api-cron-expressions`,
       executeWatchActionModes: `${ELASTICSEARCH_APIS}operation/operation-watcher-execute-watch#operation-watcher-execute-watch-body-application-json`,
       indexExists: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-exists`
@@ -781,7 +790,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       tasks: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}group/endpoint-tasks`
         : `${ELASTICSEARCH_APIS}group/endpoint-tasks`,
-      timeUnits: `${ELASTICSEARCH_DOCS}api-conventions.html#time-units`,
+      timeUnits: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#time-units`,
       updateTransform: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-transform-update-transform`
         : `${ELASTICSEARCH_APIS}operation/operation-transform-update-transform`,
