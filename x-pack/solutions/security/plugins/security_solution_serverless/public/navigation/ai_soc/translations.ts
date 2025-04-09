@@ -36,3 +36,10 @@ export const CALLOUT_DESCRIPTION = i18n.translate(
     defaultMessage: 'Empowering SOCs for faster threat detection, investigation, and response',
   }
 );
+
+export const CALLOUT_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolutionServerless.navigation.aiSoc.callout.ariaLabel',
+  {
+    defaultMessage: 'Information about Elastic AI for SOC',
+  }
+);

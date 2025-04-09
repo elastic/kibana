@@ -103,6 +103,11 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
+/**
+ * Defines the type of navigation section
+ */
+export type NavigationSection = 'body' | 'footer' | 'callout';
+
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
 export type EuiThemeSize = Exclude<
@@ -388,7 +393,7 @@ export type RootNavigationItemDefinition<
 /**
  * @public
  *
- * Definition for the complete navigation tree, including body and footer
+ * Definition for the complete navigation tree, including body, callout, and footer
  */
 export interface NavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -405,6 +410,10 @@ export interface NavigationTreeDefinition<
    * or "group" items.
    * */
   footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  /**
+   * Special callout section displayed between the body and footer.
+   * Typically used for promotional or informational content.
+   * */
   callout?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
 }
 
