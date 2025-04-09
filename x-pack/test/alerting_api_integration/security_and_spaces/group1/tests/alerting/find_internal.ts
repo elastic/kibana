@@ -78,7 +78,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               const match = response.body.data.find((obj: any) => obj.id === createdAlert.id);
               const activeSnoozes = match.active_snoozes;
               const hasActiveSnoozes = !!(activeSnoozes || []).filter((obj: any) => obj).length;
-              expect(match).to.eql({
+              const expected = {
                 id: createdAlert.id,
                 name: 'abc',
                 tags: ['foo'],
@@ -111,7 +111,11 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 snooze_schedule: match.snooze_schedule,
                 ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
                 is_snoozed_until: null,
-              });
+              };
+
+              console.log('debug logging match', JSON.stringify(match));
+              console.log('debug logging expected', JSON.stringify(expected));
+              expect(match).to.eql(expected);
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
               break;
