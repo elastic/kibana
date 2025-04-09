@@ -17,7 +17,7 @@ export const useConversationList = ({ agentId }: { agentId?: string }) => {
     isLoading,
     refetch: refresh,
   } = useQuery({
-    queryKey: queryKeys.conversations.all,
+    queryKey: agentId ? queryKeys.conversations.byAgent(agentId) : queryKeys.conversations.all,
     queryFn: async () => {
       return conversationService.list({ agentId });
     },
