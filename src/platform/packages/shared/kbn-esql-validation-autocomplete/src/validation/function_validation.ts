@@ -545,7 +545,8 @@ function validateFunctionColumnArg(
     !checkFunctionArgMatchesDefinition(actualArg, parameterDefinition, references, parentCommand)
   ) {
     const columnHit = getColumnForASTNode(actualArg, references);
-    if (columnHit && 'hasConflict' in columnHit && !columnHit.hasConflict) {
+    const isConflictType = columnHit && 'hasConflict' in columnHit && columnHit.hasConflict;
+    if (!isConflictType) {
       messages.push(
         getMessageFromId({
           messageId: 'wrongArgumentType',
