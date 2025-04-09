@@ -12,7 +12,6 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { isEqual } from 'lodash';
 import { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKibana } from '../hooks/use_kibana';
 import { ConversationList, ChatBody, ChatInlineEditingContent } from '../chat';
 import { useConversationKey } from '../hooks/use_conversation_key';
@@ -25,7 +24,6 @@ import { useConversationList } from '../hooks/use_conversation_list';
 
 const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
-const queryClient = new QueryClient();
 interface ConversationViewProps {
   conversationId?: string;
   navigateToConversation: (nextConversationId?: string) => void;
@@ -143,64 +141,62 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
   `;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <EuiFlexGroup
-        direction="row"
-        className={containerClassName}
-        gutterSize="none"
-        data-test-subj="observabilityAiAssistantConversationsPage"
-      >
-        <EuiFlexItem grow={false} className={conversationListContainerName}>
-          <ConversationList
-            selectedConversationId={conversationId}
-            conversations={conversations}
-            isLoading={isLoadingConversationList}
-            newConversationHref={newConversationHref}
-            currentUser={currentUser as AuthenticatedUser}
-            onConversationSelect={navigateToConversation}
-            getConversationHref={getConversationHref}
+    <EuiFlexGroup
+      direction="row"
+      className={containerClassName}
+      gutterSize="none"
+      data-test-subj="observabilityAiAssistantConversationsPage"
+    >
+      <EuiFlexItem grow={false} className={conversationListContainerName}>
+        <ConversationList
+          selectedConversationId={conversationId}
+          conversations={conversations}
+          isLoading={isLoadingConversationList}
+          newConversationHref={newConversationHref}
+          currentUser={currentUser as AuthenticatedUser}
+          onConversationSelect={navigateToConversation}
+          getConversationHref={getConversationHref}
+          setIsUpdatingConversationList={setIsUpdatingConversationList}
+          refreshConversations={refreshConversations}
+          updateDisplayedConversation={updateDisplayedConversation}
+        />
+      </EuiFlexItem>
+
+      {!chatService.value ? (
+        <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="xl" />
+            <EuiLoadingSpinner size="l" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ) : null}
+
+      {chatService.value && (
+        <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
+          <ChatBody
+            key={bodyKey}
+            currentUser={currentUser}
+            connectors={connectors}
+            initialConversationId={conversationId}
+            knowledgeBase={knowledgeBase}
+            showLinkToConversationsApp={false}
+            onConversationUpdate={handleConversationUpdate}
+            navigateToConversation={navigateToConversation}
             setIsUpdatingConversationList={setIsUpdatingConversationList}
             refreshConversations={refreshConversations}
             updateDisplayedConversation={updateDisplayedConversation}
+            onConversationDuplicate={handleConversationDuplicate}
           />
-        </EuiFlexItem>
 
-        {!chatService.value ? (
-          <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
-            <EuiFlexItem grow={false}>
-              <EuiSpacer size="xl" />
-              <EuiLoadingSpinner size="l" />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : null}
-
-        {chatService.value && (
-          <ObservabilityAIAssistantChatServiceContext.Provider value={chatService.value}>
-            <ChatBody
-              key={bodyKey}
-              currentUser={currentUser}
-              connectors={connectors}
-              initialConversationId={conversationId}
-              knowledgeBase={knowledgeBase}
-              showLinkToConversationsApp={false}
-              onConversationUpdate={handleConversationUpdate}
-              navigateToConversation={navigateToConversation}
-              setIsUpdatingConversationList={setIsUpdatingConversationList}
-              refreshConversations={refreshConversations}
-              updateDisplayedConversation={updateDisplayedConversation}
-              onConversationDuplicate={handleConversationDuplicate}
+          <div className={sidebarContainerClass}>
+            <ChatInlineEditingContent
+              setContainer={setSecondSlotContainer}
+              visible={isSecondSlotVisible}
+              style={{ width: '100%' }}
             />
-
-            <div className={sidebarContainerClass}>
-              <ChatInlineEditingContent
-                setContainer={setSecondSlotContainer}
-                visible={isSecondSlotVisible}
-                style={{ width: '100%' }}
-              />
-            </div>
-          </ObservabilityAIAssistantChatServiceContext.Provider>
-        )}
-      </EuiFlexGroup>
-    </QueryClientProvider>
+          </div>
+        </ObservabilityAIAssistantChatServiceContext.Provider>
+      )}
+    </EuiFlexGroup>
   );
 };
