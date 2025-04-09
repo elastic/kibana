@@ -7,10 +7,9 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, type FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,6 +37,8 @@ import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useNavigateToServiceDetails } from '../entity_details/service_right/hooks/use_navigate_to_service_details';
 import { useNavigateToHostDetails } from '../entity_details/host_right/hooks/use_navigate_to_host_details';
 import { useNavigateToUserDetails } from '../entity_details/user_right/hooks/use_navigate_to_user_details';
+import { InvestigateRiskScoreSpikePanelKey } from './ai_investigate_left';
+import { RiskScoreSpikeBadges } from './badges';
 
 export interface RiskScoreSpikeDetailsExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'risk-score-spike-details';
@@ -126,6 +127,8 @@ const SpikeSummaryPanel: React.FC<{ spike: SpikeEntity }> = ({ spike }) => {
     queryId = SERVICE_PANEL_RISK_SCORE_QUERY_ID;
   }
 
+  const { openLeftPanel } = useExpandableFlyoutApi();
+
   const filterQuery = useMemo(() => {
     return {
       terms: {
@@ -175,7 +178,19 @@ const SpikeSummaryPanel: React.FC<{ spike: SpikeEntity }> = ({ spike }) => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty size="s" iconType="magnifyWithPlus" iconSide="right">
+                    <EuiButtonEmpty
+                      size="s"
+                      iconType="magnifyWithPlus"
+                      iconSide="right"
+                      onClick={() => {
+                        openLeftPanel({
+                          id: InvestigateRiskScoreSpikePanelKey,
+                          params: {
+                            spike,
+                          },
+                        });
+                      }}
+                    >
                       <FormattedMessage
                         id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.viewDetails"
                         defaultMessage="Investigate with AI"
@@ -185,39 +200,7 @@ const SpikeSummaryPanel: React.FC<{ spike: SpikeEntity }> = ({ spike }) => {
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-                  {!!spike.baseline && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge color="warning" iconType="warning">
-                        <FormattedMessage
-                          id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.spikeAboveBaseline"
-                          defaultMessage="Score +{spike} above baseline"
-                          values={{ spike: Math.round(spike.spike) }}
-                        />
-                      </EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                  {!spike.baseline && (
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="success" iconType="asterisk">
-                          <FormattedMessage
-                            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.newScore"
-                            defaultMessage="New score"
-                          />
-                        </EuiBadge>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="danger" iconType="warning">
-                          <FormattedMessage
-                            id="xpack.securitySolution.entityAnalytics.scoreSpikesCallout.highFirstScore"
-                            defaultMessage="High first score"
-                          />
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    </>
-                  )}
-                </EuiFlexGroup>
+                <RiskScoreSpikeBadges spike={spike} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
@@ -267,8 +250,8 @@ export const RiskScoreSpikeDetailsPanel: FC<RiskScoreSpikeDetailsPanelProps> = m
         </FlyoutHeader>
         <FlyoutBody>
           <EuiFlexGroup direction="column" gutterSize="m">
-            {combinedSpikes.map((spike: SpikeEntity) => (
-              <SpikeSummaryPanel spike={spike} />
+            {combinedSpikes.map((spike: SpikeEntity, i) => (
+              <SpikeSummaryPanel spike={spike} key={i} />
             ))}
           </EuiFlexGroup>
         </FlyoutBody>

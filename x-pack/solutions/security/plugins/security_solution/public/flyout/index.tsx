@@ -66,6 +66,11 @@ import {
   RiskScoreSpikeDetailsPanelKey,
   type RiskScoreSpikeDetailsExpandableFlyoutProps,
 } from './risk_score_spike_details';
+import type { InvestigateRiskScoreSpikeExpandableFlyoutProps } from './risk_score_spike_details/ai_investigate_left';
+import {
+  InvestigateRiskScoreSpikeLeftPanel,
+  InvestigateRiskScoreSpikePanelKey,
+} from './risk_score_spike_details/ai_investigate_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -208,6 +213,14 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <RiskScoreSpikeDetailsPanel
         {...(props as RiskScoreSpikeDetailsExpandableFlyoutProps).params}
+      />
+    ),
+  },
+  {
+    key: InvestigateRiskScoreSpikePanelKey,
+    component: (props) => (
+      <InvestigateRiskScoreSpikeLeftPanel
+        {...(props as InvestigateRiskScoreSpikeExpandableFlyoutProps).params}
       />
     ),
   },
