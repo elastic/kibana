@@ -11,9 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
 
 import {
-  EuiButton,
-  EuiCallOut,
-  EuiCheckbox,
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,7 +18,6 @@ import {
   EuiSpacer,
   EuiLink,
   EuiPortal,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -55,6 +51,7 @@ import { ReinstallButton } from './reinstall_button';
 import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
+import { UpdateAvailableCallout } from './update_available_callout';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -69,63 +66,6 @@ const NoteLabel = () => (
     />
   </strong>
 );
-const UpdatesAvailableMsg = ({
-  latestVersion,
-  toggleChangelogModal,
-  hasBreakingChanges,
-  isBreakingChangesUnderstood,
-  toggleBreakingChangesUnderstood,
-}: {
-  latestVersion: string;
-  hasBreakingChanges: boolean;
-  isBreakingChangesUnderstood: boolean;
-  toggleBreakingChangesUnderstood: () => void;
-  toggleChangelogModal: () => void;
-}) => {
-  const checkboxId = useGeneratedHtmlId({ prefix: 'understoodBreakingChangeCheckbox' });
-  const defaultTitle = 'New version available';
-  const breakingChangesTitleClause = ': Action required due to breaking changes';
-
-  const defaultBody = 'Upgrade to version {latestVersion} to get the latest features.';
-  const breakingChangeBody =
-    'Version {latestVersion} includes new features and breaking changes that may affect your current setup. Please review the changes carefully before upgrading.';
-
-  return (
-    <EuiCallOut
-      color="warning"
-      iconType="warning"
-      title={i18n.translate('xpack.fleet.integrations.settings.versionInfo.updatesAvailable', {
-        defaultMessage: `${defaultTitle}${hasBreakingChanges ? breakingChangesTitleClause : ''}`,
-      })}
-    >
-      <FormattedMessage
-        id="xpack.fleet.integration.settings.versionInfo.updatesAvailableBody"
-        defaultMessage={hasBreakingChanges ? breakingChangeBody : defaultBody}
-        values={{
-          latestVersion,
-        }}
-      />
-      <EuiSpacer size="s" />
-      <EuiButton color="warning" onClick={toggleChangelogModal}>
-        <FormattedMessage
-          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
-          defaultMessage="View changelog"
-        />
-      </EuiButton>
-      {hasBreakingChanges && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiCheckbox
-            id={checkboxId}
-            label="I've reviewed the breaking changes and understand the impact"
-            onChange={toggleBreakingChangesUnderstood}
-            checked={isBreakingChangesUnderstood}
-          />
-        </>
-      )}
-    </EuiCallOut>
-  );
-};
 
 const LatestVersionLink = ({ name, version }: { name: string; version: string }) => {
   const { getHref } = useLink();
@@ -359,14 +299,14 @@ export const SettingsPage: React.FC<Props> = memo(
 
                   {(updateAvailable || isUpgradingPackagePolicies) && (
                     <>
-                      <UpdatesAvailableMsg
-                        latestVersion={latestVersion}
+                      <UpdateAvailableCallout
+                        version={latestVersion}
                         toggleChangelogModal={toggleChangelogModal}
-                        hasBreakingChanges={hasBreakingChanges}
-                        isBreakingChangesUnderstood={isBreakingChangesUnderstood}
-                        toggleBreakingChangesUnderstood={() =>
-                          setIsBreakingChangesUnderstood((prev) => !prev)
-                        }
+                        breakingChanges={{
+                          changes: breakingChanges,
+                          isUnderstood: isBreakingChangesUnderstood,
+                          toggleIsUnderstood: () => setIsBreakingChangesUnderstood((prev) => !prev),
+                        }}
                       />
                       <EuiSpacer size="l" />
                       <p>
