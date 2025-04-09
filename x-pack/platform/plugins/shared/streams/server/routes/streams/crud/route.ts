@@ -85,11 +85,15 @@ export const listStreamsRoute = createServerRoute({
 
     await (
       await context.core
-    ).workerThreads.client.run(import('./read_stream.worker'), {
-      input: {
-        name: 'logs.child',
-      },
-    });
+    ).workerThreads.client
+      .run(import('./read_stream.worker'), {
+        input: {
+          name: 'logs.child',
+        },
+      })
+      .catch((error) => {
+        logger.error(error);
+      });
 
     return {
       streams: await streamsClient.listStreams(),

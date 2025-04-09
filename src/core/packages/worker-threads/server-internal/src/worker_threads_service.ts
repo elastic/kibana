@@ -23,8 +23,13 @@ import {
 import { Logger } from '@kbn/logging';
 import Path from 'path';
 import Piscina from 'piscina';
+import { promises as Fs, createWriteStream } from 'fs';
+import Os from 'os';
 import { firstValueFrom } from 'rxjs';
 import { bytes } from '@kbn/config-schema/src/byte_size_value';
+import { finished } from 'stream/promises';
+import moment from 'moment';
+import { performance, monitorEventLoopDelay } from 'perf_hooks';
 import { InternalWorkerThreadsClient } from './client';
 import { InternalRouteWorkerData } from './types';
 import { serialize } from './utils';
@@ -103,51 +108,80 @@ export class WorkerThreadsService
           idleTimeout: config.idleTimeout,
           concurrentTasksPerWorker: config.concurrentTasksPerWorker,
         })
+          .on('error', (err) => {
+            this.log.error(new Error(`Error in worker thread`, { cause: err }));
+          })
+          .on('close', () => {
+            this.log.info(`Worker pool closed`);
+          })
       : undefined;
 
     this.routeWorkerPool = routeWorkerPool;
 
+    let lastElu = performance.eventLoopUtilization();
+
+    const histogram = monitorEventLoopDelay({ resolution: 10 });
+
+    histogram.enable();
+
     setInterval(() => {
       const { rss, heapTotal, heapUsed } = process.memoryUsage();
 
-      this.log.info(
-        `Main thread stats: ${JSON.stringify({
-          rss: bytes(rss).toString(),
-          heapTotal: bytes(heapTotal).toString(),
-          heapUsed: bytes(heapUsed).toString(),
-          workers: routeWorkerPool?.threads.length ?? 0,
-        })}`
+      const nextElu = performance.eventLoopUtilization();
+
+      const diffElu = performance.eventLoopUtilization(nextElu, lastElu);
+
+      lastElu = nextElu;
+
+      this.log.debug(
+        () =>
+          `Main thread stats: ${JSON.stringify({
+            rss: bytes(rss).toString(),
+            heapTotal: bytes(heapTotal).toString(),
+            heapUsed: bytes(heapUsed).toString(),
+            workers: routeWorkerPool?.threads.length ?? 0,
+            eli: moment.duration(Math.round(diffElu.idle), 'ms').asMilliseconds(),
+            ela: moment.duration(Math.round(diffElu.active), 'ms').asMilliseconds(),
+            elu: `${(diffElu.utilization * 100).toPrecision(3)}%`,
+            eldMean: moment.duration(Math.round(histogram.mean / 1e6), 'ms').asMilliseconds(),
+            eldP95: moment
+              .duration(Math.round(histogram.percentile(95) / 1e6), 'ms')
+              .asMilliseconds(),
+          })}`
       );
+
+      histogram.reset();
     }, 5000).unref();
 
-    // const tmpDir = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'worker-heapsnapshots'));
+    const log = this.log;
 
-    // const log = this.log;
+    async function takeHeapsnapshotsFromWorkers() {
+      const tmpDir = await Fs.mkdtemp(Path.join(Os.tmpdir(), 'worker-heapsnapshots'));
+      Promise.allSettled(
+        routeWorkerPool?.threads.map(async (thread) => {
+          log.debug(`Getting heap snapshot for ${thread.threadId}`);
+          const readable = await thread.getHeapSnapshot();
+          const fileName = Path.join(tmpDir, `worker-${thread.threadId}.heapsnapshot`);
+          const fileStream = createWriteStream(fileName, { encoding: 'utf-8' });
+          log.debug(`Writing heap snapshot to ${fileName}`);
+          readable.pipe(fileStream);
+          await finished(fileStream);
+          log.info(`Wrote heap snapshot to ${fileName}`);
+        }) ?? []
+      ).then((results) => {
+        results.forEach((result) => {
+          if (result.status === 'rejected') {
+            log.error(result.reason);
+          }
+        });
+      });
+    }
 
-    // setTimeout(function generateSnapshots() {
-    //   Promise.allSettled(
-    //     routeWorkerPool?.threads.map(async (thread) => {
-    //       log.info(`Getting heap snapshot for ${thread.threadId}`);
-    //       const readable = await thread.getHeapSnapshot();
-    //       const fileName = Path.join(tmpDir, `worker-${thread.threadId}.heapsnapshot`);
-    //       const fileStream = createWriteStream(fileName, { encoding: 'utf-8' });
-
-    //       log.info(`Writing heap snapshot to ${fileName}`);
-
-    //       readable.pipe(fileStream);
-    //       await finished(fileStream);
-
-    //       log.info(`Wrote heap snapshot to ${fileName}`);
-    //     }) ?? []
-    //   ).then((results) => {
-    //     results.forEach((result) => {
-    //       if (result.status === 'rejected') {
-    //         log.error(result.reason);
-    //       }
-    //     });
-    //     setTimeout(generateSnapshots, 5000);
-    //   });
-    // }, 5000);
+    process.on('SIGUSR2', () => {
+      takeHeapsnapshotsFromWorkers().catch((error) => {
+        this.log.error(new Error(`Error generating heap snapshot`, { cause: error.cause }));
+      });
+    });
 
     return {
       getClientWithRequest: (request: KibanaRequest) => {
