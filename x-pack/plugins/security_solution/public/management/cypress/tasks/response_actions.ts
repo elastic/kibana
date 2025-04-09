@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inputConsoleCommand, submitCommand } from './response_console';
 import type { UserAuthzAccessLevel } from '../screens';
 import { loadPage, request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
@@ -64,6 +65,28 @@ export const visitRuleActions = (ruleId: string) => {
   cy.getByTestSubj('edit-rule-actions-tab').should('exist');
   cy.getByTestSubj('globalLoadingIndicator').should('not.exist');
   cy.getByTestSubj('stepPanelProgress').should('not.exist');
+};
+
+export const getRunningProcesses = (command: string): Cypress.Chainable<number> => {
+  inputConsoleCommand('processes');
+  submitCommand();
+  cy.contains('Action pending.').should('exist');
+
+  // on success
+  // find pid of process
+  // traverse back from last column to the second column that has pid
+  return cy
+    .getByTestSubj('getProcessListTable', { timeout: 120000 })
+    .findByTestSubj('process_list_command')
+    .contains(command)
+    .parents('td')
+    .siblings('td')
+    .eq(1)
+    .find('span')
+    .then((span) => {
+      // get pid
+      return Number(span.text());
+    });
 };
 
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
