@@ -1202,7 +1202,7 @@ describe('ServiceNow service', () => {
         );
       });
 
-      test('it should throw an error when the correlationId is empty', async () => {
+      test('it should throw an error when correlationId is empty', async () => {
         await expect(
           service.closeIncident({ incidentId: null, correlationId: ' ' })
         ).rejects.toThrow(
@@ -1419,7 +1419,7 @@ describe('ServiceNow service', () => {
         );
       });
 
-      test('it should throw an error correlationId is empty', async () => {
+      test('it should throw an error when correlationId is empty', async () => {
         await expect(
           service.closeIncident({ incidentId: null, correlationId: ' ' })
         ).rejects.toThrow(
@@ -1427,7 +1427,7 @@ describe('ServiceNow service', () => {
         );
       });
 
-      test('it should throw an error correlationId is empty', async () => {
+      test('it should throw an error when incidentId is empty', async () => {
         await expect(
           service.closeIncident({ incidentId: ' ', correlationId: null })
         ).rejects.toThrow(
