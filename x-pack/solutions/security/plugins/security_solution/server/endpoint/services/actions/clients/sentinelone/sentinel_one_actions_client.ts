@@ -135,8 +135,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     const soClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
     const policyInfo: LogsEndpointAction['agent']['policy'] = [];
 
-    // TODO: PT need to think about data namespacing and if we need to use it here.
-
     // Get the latest ingested document for each agent ID
     const s1AgentsEsResults = await esClient
       .search<SentinelOneAgentEsDoc, { most_recent: SentinelOneAgentEsDoc }>({
