@@ -101,7 +101,7 @@ class AgentlessAgentService {
     );
 
     if (agentlessAgentPolicy.agentless?.cloud_connectors?.enabled) {
-      logger.info(
+      logger.debug(
         `[Agentless API] Creating agentless agent with ${agentlessAgentPolicy.agentless?.cloud_connectors?.target_csp} cloud connector enabled for agentless policy ${policyId}`
       );
     }
