@@ -8,13 +8,14 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common/constants';
 
 import { APP_ID, ATTACK_DISCOVERY_FEATURE_ID, SERVER_APP_ID } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 
 const alertingFeatures = [
   {
-    ruleTypeId: 'attack-discovery',
+    ruleTypeId: ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID,
     consumers: [SERVER_APP_ID],
   },
 ];
