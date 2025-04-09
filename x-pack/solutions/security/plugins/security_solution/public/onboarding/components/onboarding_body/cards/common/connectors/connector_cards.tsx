@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
@@ -14,7 +14,6 @@ import { ConnectorsMissingPrivilegesCallOut } from './missing_privileges';
 import type { AIConnector } from './types';
 import { ConnectorSetup } from './connector_setup';
 import { ConnectorSelectorPanel } from './connector_selector_panel';
-import { AIActionTypeIds } from './constants';
 
 interface ConnectorCardsProps {
   onNewConnectorSaved: (connectorId: string) => void;
@@ -33,11 +32,7 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
     onConnectorSelected,
   }) => {
     const { http, notifications } = useKibana().services;
-    const { data } = useLoadActionTypes({ http, toasts: notifications.toasts });
-    const actionTypes = useMemo(
-      () => data?.filter(({ id }) => AIActionTypeIds.includes(id)),
-      [data]
-    );
+    const { data: actionTypes } = useLoadActionTypes({ http, toasts: notifications.toasts });
 
     const onNewConnectorStoredSave = useCallback(
       (newConnector: AIConnector) => {

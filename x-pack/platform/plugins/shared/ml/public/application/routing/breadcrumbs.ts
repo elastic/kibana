@@ -7,55 +7,109 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ChromeBreadcrumb } from '@kbn/core/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 
 import type { NavigateToPath } from '../contexts/kibana';
+import { ML_PAGES } from '../../../common/constants/locator';
+
+export type NavigateToApp = CoreStart['application']['navigateToApp'];
+
+type ManagementBreadcrumbType = ChromeBreadcrumb & {
+  appId?: string;
+  path?: string;
+};
+const stackManagementBreadcrumbText = i18n.translate(
+  'xpack.ml.settings.breadcrumbs.stackManagementLabel',
+  {
+    defaultMessage: 'Stack Management',
+  }
+);
+
+export const ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.anomalyDetectionManagementBreadcrumbLabel', {
+    defaultMessage: 'Anomaly Detection Jobs',
+  }),
+  appId: 'anomaly_detection',
+  path: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+  deepLinkId: 'ml:anomalyDetection',
+};
+
+export const CREATE_JOB_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.createJobManagementBreadcrumbLabel', {
+    defaultMessage: 'Create job',
+  }),
+  path: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB,
+  appId: `anomaly_detection`,
+};
+
+export const DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.dataFrameAnalyticsManagementLabel', {
+    defaultMessage: 'Data Frame Analytics Jobs',
+  }),
+  appId: 'analytics',
+  path: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+  deepLinkId: 'ml:dataFrameAnalytics',
+};
+
+export const TRAINED_MODELS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.trainedModelManagementLabel', {
+    defaultMessage: 'Trained Models',
+  }),
+  appId: 'trained_models',
+  path: '',
+  deepLinkId: 'management:trained_models',
+};
+
+export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.suppliedConfigurationsManagementLabel', {
+    defaultMessage: 'Supplied configurations',
+  }),
+  appId: `anomaly_detection`,
+  path: 'ad_supplied_configurations',
+  deepLinkId: 'ml:suppliedConfigurations',
+};
+
+export const SETTINGS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.settingsBreadcrumbLabel', {
+    defaultMessage: 'Anomaly Detection Settings',
+  }),
+  appId: 'ad_settings',
+  path: '',
+  deepLinkId: 'ml:settings',
+};
+
+export const FILTER_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsManagementLabel', {
+    defaultMessage: 'Filter lists',
+  }),
+  appId: 'ad_settings',
+  path: ML_PAGES.FILTER_LISTS_MANAGE,
+  deepLinkId: 'ml:filterListsSettings',
+};
+
+export const CALENDAR_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarListManagementLabel', {
+    defaultMessage: 'Calendar management',
+  }),
+  appId: 'ad_settings',
+  path: ML_PAGES.CALENDARS_MANAGE,
+  deepLinkId: 'ml:calendarSettings',
+};
+
+export const CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarListManagementLabel', {
+    defaultMessage: 'Calendar DST management',
+  }),
+  appId: 'ad_settings',
+  path: ML_PAGES.CALENDARS_DST_MANAGE,
+  deepLinkId: 'ml:calendarSettings',
+};
 
 export const ML_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.machineLearningBreadcrumbLabel', {
     defaultMessage: 'Machine Learning',
   }),
   href: '/',
-});
-
-export const SETTINGS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.settingsBreadcrumbLabel', {
-    defaultMessage: 'Settings',
-  }),
-  href: '/settings',
-  deepLinkId: 'ml:settings',
-});
-
-export const ANOMALY_DETECTION_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.anomalyDetectionBreadcrumbLabel', {
-    defaultMessage: 'Anomaly Detection',
-  }),
-  href: '/jobs',
-  deepLinkId: 'ml:anomalyDetection',
-});
-
-export const DATA_FRAME_ANALYTICS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.dataFrameAnalyticsLabel', {
-    defaultMessage: 'Data Frame Analytics',
-  }),
-  href: '/data_frame_analytics',
-  deepLinkId: 'ml:dataFrameAnalytics',
-});
-
-export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.modelManagementLabel', {
-    defaultMessage: 'Model Management',
-  }),
-  href: '/trained_models',
-  deepLinkId: 'ml:modelManagement',
-});
-
-export const SUPPLIED_CONFIGURATIONS: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.suppliedConfigurationsLabel', {
-    defaultMessage: 'Supplied configurations',
-  }),
-  href: '/supplied_configurations',
-  deepLinkId: 'ml:suppliedConfigurations',
 });
 
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
@@ -113,52 +167,38 @@ export const CHANGE_POINT_DETECTION: ChromeBreadcrumb = Object.freeze({
   deepLinkId: 'ml:changePointDetections',
 });
 
-export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.createJobsBreadcrumbLabel', {
-    defaultMessage: 'Create job',
-  }),
-  href: '/jobs/new_job',
-});
-
-export const CALENDAR_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
-    defaultMessage: 'Calendar management',
-  }),
-  href: '/settings/calendars_list',
-  deepLinkId: 'ml:calendarSettings',
-});
-
-export const CALENDAR_DST_MANAGEMENT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarManagementLabel', {
-    defaultMessage: 'Calendar DST management',
-  }),
-  href: '/settings/calendars_dst_list',
-  deepLinkId: 'ml:calendarSettings',
-});
-
-export const FILTER_LISTS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
-  text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsLabel', {
-    defaultMessage: 'Filter lists',
-  }),
-  href: '/settings/filter_lists',
-  deepLinkId: 'ml:filterListsSettings',
-});
-
 export const DATA_DRIFT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
-    defaultMessage: 'Data drift',
+    defaultMessage: 'Data Drift',
   }),
   href: '/data_drift_index_select',
   deepLinkId: 'ml:dataDrift',
 });
 
+export const DATA_DRIFT_INDEX_SELECT_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.settings.breadcrumbs.dataComparisonLabel', {
+    defaultMessage: 'Select Data View',
+  }),
+  href: '/data_drift_index_select',
+  deepLinkId: 'ml:dataDrift',
+});
+
+const managementBreadcrumbs = {
+  ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB,
+  CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB,
+  CALENDAR_LISTS_MANAGEMENT_BREADCRUMB,
+  CREATE_JOB_MANAGEMENT_BREADCRUMB,
+  DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB,
+  FILTER_LISTS_MANAGEMENT_BREADCRUMB,
+  SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB,
+  SETTINGS_MANAGEMENT_BREADCRUMB,
+  TRAINED_MODELS_MANAGEMENT_BREADCRUMB,
+};
+type ManagementBreadcrumb = keyof typeof managementBreadcrumbs;
+
 const breadcrumbs = {
   ML_BREADCRUMB,
-  SETTINGS_BREADCRUMB,
-  ANOMALY_DETECTION_BREADCRUMB,
-  DATA_FRAME_ANALYTICS_BREADCRUMB,
-  TRAINED_MODELS,
-  DATA_DRIFT_BREADCRUMB,
+  DATA_DRIFT_INDEX_SELECT_BREADCRUMB,
   DATA_VISUALIZER_BREADCRUMB,
   AIOPS_BREADCRUMB_LOG_RATE_ANALYSIS,
   AIOPS_BREADCRUMB_LOG_PATTERN_ANALYSIS,
@@ -166,11 +206,6 @@ const breadcrumbs = {
   LOG_RATE_ANALYSIS,
   LOG_PATTERN_ANALYSIS,
   CHANGE_POINT_DETECTION,
-  CREATE_JOB_BREADCRUMB,
-  CALENDAR_MANAGEMENT_BREADCRUMB,
-  CALENDAR_DST_MANAGEMENT_BREADCRUMB,
-  FILTER_LISTS_BREADCRUMB,
-  SUPPLIED_CONFIGURATIONS,
 };
 type Breadcrumb = keyof typeof breadcrumbs;
 
@@ -199,4 +234,37 @@ export const getBreadcrumbWithUrlForApp = (
         }
       : {}),
   };
+};
+
+export const getStackManagementBreadcrumb = (navigateToApp: NavigateToApp): ChromeBreadcrumb => {
+  return {
+    text: stackManagementBreadcrumbText,
+    onClick: (e) => {
+      e.preventDefault();
+      navigateToApp('management');
+    },
+  };
+};
+
+export const getMlManagementBreadcrumb = (
+  breadcrumbName: ManagementBreadcrumb,
+  navigateToApp: NavigateToApp
+): ChromeBreadcrumb => {
+  const { appId, deepLinkId, path, text } = managementBreadcrumbs[breadcrumbName];
+  return {
+    text,
+    onClick: (e) => {
+      e.preventDefault();
+      navigateToApp('management', { path: `/ml/${appId}/${path}` });
+    },
+    ...(deepLinkId ? { deepLinkId } : {}),
+  };
+};
+
+export const getADSettingsBreadcrumbs = (navigateToApp: NavigateToApp) => {
+  return [
+    getStackManagementBreadcrumb(navigateToApp),
+    getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),
+    getMlManagementBreadcrumb('SETTINGS_MANAGEMENT_BREADCRUMB', navigateToApp),
+  ];
 };

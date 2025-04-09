@@ -43,7 +43,7 @@ export const Chat: React.FC<ChatProps> = ({
   onConversationUpdate,
   connectorId,
 }) => {
-  const { sendMessage, conversationEvents, chatStatus } = useConversation({
+  const { sendMessage, conversationEvents, progressionEvents, chatStatus } = useConversation({
     conversationId,
     connectorId,
     agentId,
@@ -79,6 +79,7 @@ export const Chat: React.FC<ChatProps> = ({
           <EuiPanel hasBorder={false} hasShadow={false} className={panelClassName}>
             <ChatConversation
               conversationEvents={conversationEvents}
+              progressionEvents={progressionEvents}
               chatStatus={chatStatus}
               currentUser={currentUser}
             />
