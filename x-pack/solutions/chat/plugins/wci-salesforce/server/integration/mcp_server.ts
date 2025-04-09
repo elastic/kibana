@@ -6,9 +6,10 @@
  */
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { z } from '@kbn/zod';
-import { retrieveCases } from './tools';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { createMcpServer as createServer, McpServerTool, toolResultFactory } from '@kbn/wci-server';
+import { getCases, getAccounts } from './tools';
 
 // Define enum field structure upfront
 interface Field {
@@ -23,19 +24,16 @@ interface FieldWithValues extends Field {
 }
 
 export async function createMcpServer({
+  integrationId,
   configuration,
   elasticsearchClient,
   logger,
 }: {
+  integrationId: string;
   configuration: Record<string, any>;
   elasticsearchClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<McpServer> {
-  const server = new McpServer({
-    name: 'wci-salesforce',
-    version: '1.0.0',
-  });
-
   const { index } = configuration;
 
   const enumFields: Field[] = [
@@ -62,10 +60,10 @@ export async function createMcpServer({
   );
   const statusEnum = z.enum(statusValues.length ? (statusValues as [string, ...string[]]) : ['']);
 
-  server.tool(
-    'retrieve_cases',
-    `Retrieves Salesforce support cases with flexible filtering options`,
-    {
+  const getCasesTool: McpServerTool = {
+    name: 'search_cases',
+    description: 'Retrieves Salesforce support cases with flexible filtering options',
+    schema: {
       caseNumber: z
         .array(z.string())
         .optional()
@@ -128,8 +126,20 @@ export async function createMcpServer({
         .string()
         .optional()
         .describe('Return cases updated before this date (format: YYYY-MM-DD)'),
+      commentAuthorEmail: z
+        .array(z.string())
+        .optional()
+        .describe('Filter cases by the email of the comment author'),
+      commentCreatedAfter: z
+        .string()
+        .optional()
+        .describe('Filter cases with comments created after this date (format: YYYY-MM-DD)'),
+      commentCreatedBefore: z
+        .string()
+        .optional()
+        .describe('Filter cases with comments created before this date (format: YYYY-MM-DD)'),
     },
-    async ({
+    execute: async ({
       id,
       size = 10,
       sortField,
@@ -143,32 +153,121 @@ export async function createMcpServer({
       status,
       updatedAfter,
       updatedBefore,
+      commentAuthorEmail,
+      commentCreatedAfter,
+      commentCreatedBefore,
+      ownerEmail,
     }) => {
-      const caseContent = await retrieveCases(elasticsearchClient, logger, index, {
-        id,
-        size,
-        sortField,
-        sortOrder,
-        priority,
-        closed,
-        caseNumber,
-        createdAfter,
-        createdBefore,
-        semanticQuery,
-        status,
-        updatedAfter,
-        updatedBefore,
+      try {
+        const caseContent = await getCases({
+          esClient: elasticsearchClient,
+          logger,
+          integrationId,
+          indexName: index,
+          params: {
+            id,
+            size,
+            sortField,
+            sortOrder,
+            priority,
+            closed,
+            caseNumber,
+            createdAfter,
+            createdBefore,
+            semanticQuery,
+            status,
+            updatedAfter,
+            updatedBefore,
+            commentAuthorEmail,
+            commentCreatedAfter,
+            commentCreatedBefore,
+            ownerEmail,
+          },
+        });
+
+        logger.info(`Retrieved ${caseContent.length} support cases`);
+
+        logger.info(() => `Case content: ${JSON.stringify(caseContent)}`);
+        return toolResultFactory.contentList(caseContent);
+      } catch (e) {
+        return toolResultFactory.error(`Error fetching cases: ${e.message}`);
+      }
+    },
+  };
+
+  const getAccountsTool: McpServerTool = {
+    name: 'search_accounts',
+    description: 'Retrieves Salesforce accounts with flexible filtering options',
+    schema: {
+      id: z.array(z.string()).optional().describe('Salesforce internal IDs of the accounts'),
+      size: z
+        .number()
+        .int()
+        .positive()
+        .default(10)
+        .describe('Maximum number of accounts to return'),
+      sortField: z
+        .string()
+        .optional()
+        .describe(`Field to sort results by. Can only be one of these ${sortableFields}`),
+      sortOrder: z
+        .string()
+        .optional()
+        .describe(
+          `Sorting order. Can only be 'desc' meaning sort in descending order or 'asc' meaning sort in ascending order`
+        ),
+      ownerEmail: z
+        .array(z.string())
+        .optional()
+        .describe('Emails of account owners/assignees to filter results'),
+      isPartner: z.boolean().optional().describe('Filter accounts by partner status (true/false)'),
+      createdAfter: z
+        .string()
+        .optional()
+        .describe('Return accounts created after this date (format: YYYY-MM-DD)'),
+      createdBefore: z
+        .string()
+        .optional()
+        .describe('Return accounts created before this date (format: YYYY-MM-DD)'),
+    },
+    execute: async ({
+      id,
+      size = 10,
+      sortField,
+      sortOrder,
+      isPartner,
+      createdAfter,
+      createdBefore,
+      ownerEmail,
+    }) => {
+      const accountContent = await getAccounts({
+        esClient: elasticsearchClient,
+        logger,
+        integrationId,
+        indexName: index,
+        params: {
+          id,
+          size,
+          sortField,
+          sortOrder,
+          isPartner,
+          createdAfter,
+          createdBefore,
+          ownerEmail,
+        },
       });
 
-      logger.info(`Retrieved ${caseContent.length} support cases`);
+      logger.info(`Retrieved ${accountContent.length} accounts`);
 
-      return {
-        content: caseContent,
-      };
-    }
-  );
+      return toolResultFactory.contentList(accountContent);
+    },
+  };
 
-  return server;
+  return createServer({
+    name: 'wci-salesforce',
+    version: '1.0.0',
+    tools: [getCasesTool, getAccountsTool],
+  });
 }
 
 /**

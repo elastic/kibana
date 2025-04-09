@@ -36,6 +36,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 import { EsqlControlType } from '../types';
+import { checkVariableExistence } from './helpers';
 
 const controlTypeOptions = [
   {
@@ -171,13 +172,21 @@ export function VariableName({
       }}
     />
   );
-
   const isDisabledTooltipText = i18n.translate('esql.flyout.variableName.disabledTooltip', {
     defaultMessage: 'You can’t edit a control name after it’s been created.',
   });
+  const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
   const variableExists =
-    esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
-    !isControlInEditMode;
+    checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
+  const errorMessage = !variableNameWithoutQuestionmark
+    ? i18n.translate('esql.flyout.variableName.error', {
+        defaultMessage: 'Variable name is required',
+      })
+    : variableExists
+    ? i18n.translate('esql.flyout.variableNameExists.error', {
+        defaultMessage: 'Variable name already exists',
+      })
+    : undefined;
   return (
     <EuiFormRow
       label={i18n.translate('esql.flyout.variableName.label', {
@@ -186,18 +195,8 @@ export function VariableName({
       helpText={helpText}
       fullWidth
       autoFocus
-      isInvalid={!variableName || variableExists}
-      error={
-        !variableName
-          ? i18n.translate('esql.flyout.variableName.error', {
-              defaultMessage: 'Variable name is required',
-            })
-          : variableExists
-          ? i18n.translate('esql.flyout.variableNameExists.error', {
-              defaultMessage: 'Variable name already exists',
-            })
-          : undefined
-      }
+      isInvalid={!variableNameWithoutQuestionmark || variableExists}
+      error={errorMessage}
     >
       <EuiToolTip
         content={isControlInEditMode ? isDisabledTooltipText : tooltipContent}
@@ -210,6 +209,7 @@ export function VariableName({
           placeholder={i18n.translate('esql.flyout.variableName.placeholder', {
             defaultMessage: 'Set a variable name',
           })}
+          disabled={isControlInEditMode}
           value={variableName}
           onChange={onVariableNameChange}
           aria-label={i18n.translate('esql.flyout.variableName.placeholder', {
@@ -217,7 +217,6 @@ export function VariableName({
           })}
           data-test-subj="esqlVariableName"
           fullWidth
-          disabled={isControlInEditMode}
           compressed
         />
       </EuiToolTip>
