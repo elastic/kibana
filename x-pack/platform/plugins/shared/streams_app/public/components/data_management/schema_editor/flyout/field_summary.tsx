@@ -102,11 +102,10 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                     size="s"
                     color="primary"
                     iconType="popout"
-                    href={router.link('/{key}/{tab}/{subtab}', {
+                    href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: field.parent,
-                        tab: 'management',
-                        subtab: 'schemaEditor',
+                        tab: 'schemaEditor',
                       },
                     })}
                   >

@@ -41,8 +41,8 @@ jest.mock('../common/hooks/use_load_connector_types', () => ({
   useLoadConnectorTypes: jest.fn(),
 }));
 
-jest.mock('../common/hooks/use_load_rule_type_aad_template_fields', () => ({
-  useLoadRuleTypeAadTemplateField: jest.fn(),
+jest.mock('../common/hooks/use_load_rule_type_alert_fields', () => ({
+  useLoadRuleTypeAlertFields: jest.fn(),
 }));
 
 jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings', () => ({
@@ -56,8 +56,8 @@ const { useHealthCheck } = jest.requireMock(
 const { useResolveRule } = jest.requireMock('../common/hooks/use_resolve_rule');
 const { useLoadConnectors } = jest.requireMock('../common/hooks/use_load_connectors');
 const { useLoadConnectorTypes } = jest.requireMock('../common/hooks/use_load_connector_types');
-const { useLoadRuleTypeAadTemplateField } = jest.requireMock(
-  '../common/hooks/use_load_rule_type_aad_template_fields'
+const { useLoadRuleTypeAlertFields } = jest.requireMock(
+  '../common/hooks/use_load_rule_type_alert_fields'
 );
 const { useGetRuleTypesPermissions } = jest.requireMock(
   '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
@@ -135,7 +135,6 @@ const indexThresholdRuleType = {
   ruleTaskTimeout: '5m',
   doesSetRecoveryContext: true,
   hasAlertsMappings: true,
-  hasFieldsForAAD: false,
   id: '.index-threshold',
   name: 'Index threshold',
   category: 'management',
@@ -190,7 +189,7 @@ const mockConnectorType = {
   is_system_action_type: false,
 };
 
-const mockAadTemplateField = {
+const mockAlertField = {
   name: '@timestamp',
   deprecated: false,
   useWithTripleBracesInTemplates: false,
@@ -209,8 +208,8 @@ useLoadConnectorTypes.mockReturnValue({
   isInitialLoading: false,
 });
 
-useLoadRuleTypeAadTemplateField.mockReturnValue({
-  data: [mockAadTemplateField],
+useLoadRuleTypeAlertFields.mockReturnValue({
+  data: [mockAlertField],
   isLoading: false,
   isInitialLoading: false,
 });
@@ -274,7 +273,7 @@ describe('useLoadDependencies', () => {
       },
       connectors: [mockConnector],
       connectorTypes: [mockConnectorType],
-      aadTemplateFields: [mockAadTemplateField],
+      alertFields: [mockAlertField],
     });
   });
 
