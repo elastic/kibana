@@ -252,12 +252,14 @@ export const getAwsCloudConnectorsCredentialsFormOptions = (): Omit<
         label: i18n.translate('xpack.csp.awsIntegration.roleArnLabel', {
           defaultMessage: 'Role ARN',
         }),
+        type: 'text',
         dataTestSubj: 'awsRoleArnInput',
       },
       'aws.credentials.external_id': {
         label: i18n.translate('xpack.csp.awsIntegration.externalId', {
           defaultMessage: 'External ID',
         }),
+        type: 'password',
         dataTestSubj: 'awsExternalId',
         isSecret: true,
       },

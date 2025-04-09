@@ -121,6 +121,7 @@ export const POSTURE_TYPES: { [x: string]: PostureTypes } = {
 };
 
 export const AWS_CREDENTIALS_TYPE_TO_FIELDS_MAP: AwsCredentialsTypeFieldMap = {
+  cloud_connectors: ['role_arn', 'aws.credentials.external_id'],
   assume_role: ['role_arn'],
   direct_access_keys: ['access_key_id', 'secret_access_key'],
   temporary_keys: ['access_key_id', 'secret_access_key', 'session_token'],

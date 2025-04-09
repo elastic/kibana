@@ -120,9 +120,10 @@ Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to 
       lastStep: (
         <FormattedMessage
           id="xpack.csp.agentlessForm.cloudFormation.steps.credentials"
-          defaultMessage="Copy {role} then paste the credentials below"
+          defaultMessage="Copy {role} and {external_id} then paste the role credentials below"
           values={{
             role: <strong>ARN role</strong>,
+            external_id: <strong> External Id</strong>,
           }}
         />
       ),
@@ -294,7 +295,7 @@ export const AwsCredentialsFormAgentless = ({
       templateUrl: automationCredentialTemplate,
     },
     [AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS]: {
-      accordianTitleLink: <EuiLink>Steps to Generate Cloud Connector Credentials</EuiLink>,
+      accordianTitleLink: <EuiLink>Steps to Generate Cloud Connection</EuiLink>,
       templateUrl: cloudConnectorRemoteRoleTemplate,
     },
   };

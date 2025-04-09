@@ -264,7 +264,7 @@ export const getCloudDefaultAwsCredentialConfig = ({
   packageInfo: PackageInfo;
   showCloudConnectors: boolean;
 }) => {
-  let credentialsType: string = DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
+  let credentialsType;
   const hasCloudFormationTemplate = !!getCspmCloudFormationDefaultValue(packageInfo);
   if (!showCloudConnectors && isAgentless) {
     credentialsType = DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
@@ -272,6 +272,8 @@ export const getCloudDefaultAwsCredentialConfig = ({
     credentialsType = DEFAULT_AGENTLESS_CLOUD_CONNECTORS_AWS_CREDENTIALS_TYPE;
   } else if (hasCloudFormationTemplate) {
     credentialsType = DEFAULT_AWS_CREDENTIALS_TYPE;
+  } else {
+    credentialsType = DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE;
   }
 
   const config: {
@@ -498,7 +500,7 @@ export const getCloudConnectorRemoteRoleTemplate = ({
     SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS.CLOUD_FORMATION_CLOUD_CONNECTORS
   )
     ?.replace(TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR, accountType)
-    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, elasticResourceId);
+    ?.replace(TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR, 'elasticResourceId');
 };
 
 export const getCloudProvider = (type: string): string | undefined => {
