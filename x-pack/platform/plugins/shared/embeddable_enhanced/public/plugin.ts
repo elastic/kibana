@@ -43,7 +43,7 @@ export interface SetupContract {}
 export interface EmbeddableDynamicActionsManager {
   api: HasDynamicActions;
   comparators: StateComparators<DynamicActionsSerializedState>;
-  latestState$: Observable<DynamicActionsSerializedState>;
+  anyStateChange$: Observable<void>;
   getLatestState: () => DynamicActionsSerializedState;
   reinitializeState: (lastState: DynamicActionsSerializedState) => void;
   startDynamicActions: () => { stopDynamicActions: () => void };
@@ -106,10 +106,6 @@ export class EmbeddableEnhancedPlugin
       uiActions: this.uiActions!,
     });
 
-    function getLatestState() {
-      return { enhancements: dynamicActionsState$.getValue() };
-    }
-
     return {
       api: { ...api, enhancements: { dynamicActions } },
       comparators: {
@@ -117,10 +113,12 @@ export class EmbeddableEnhancedPlugin
           return deepEqual(getDynamicActionsState(a), getDynamicActionsState(b));
         }
       } as StateComparators<DynamicActionsSerializedState>,
-      latestState$: dynamicActionsState$.pipe(
-        map(() => getLatestState())
+      anyStateChange$: dynamicActionsState$.pipe(
+        map(() => undefined)
       ),
-      getLatestState,
+      getLatestState: () => {
+        return { enhancements: dynamicActionsState$.getValue() };
+      },
       reinitializeState: (lastState: DynamicActionsSerializedState) => {
         api.setDynamicActions(lastState.enhancements);
       },

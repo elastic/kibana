@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Observable, combineLatest, map, startWith } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import { StateManager, WithAllKeys } from './types';
 
 type SubjectOf<StateType extends object> = BehaviorSubject<WithAllKeys<StateType>[keyof StateType]>;
@@ -78,17 +78,14 @@ export const initializeStateManager = <StateType extends object>(
     }
   };
 
-  const latestState$: Observable<StateType> = combineLatest(allSubjects).pipe(
-    startWith(allState),
-    map(() => getLatestState())
-  );
-
   // SERIALIZED STATE ONLY TODO: Remember that the state manager DOES NOT contain comparators, because it's meant for Runtime state, and comparators should be written against serialized state.
 
   return {
     api,
     getLatestState,
     reinitializeState,
-    latestState$,
+    anyStateChange$: merge(...allSubjects).pipe(
+      map(() => undefined)
+    ),
   };
 };

@@ -44,7 +44,6 @@ export type VisualizeRuntimeState = SerializedTitles &
     serializedVis: SerializedVis<VisParams>;
     savedObjectId?: string;
     savedObjectProperties?: ExtraSavedObjectProperties;
-    linkedToLibrary?: boolean;
   };
 
 export type VisualizeEditorInput = Omit<VisualizeRuntimeState, 'vis'> & {
@@ -80,7 +79,7 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   HasSupportedTriggers &
   PublishesTimeRange &
   HasLibraryTransforms &
-  DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
+  DefaultEmbeddableApi<VisualizeSerializedState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;
   };

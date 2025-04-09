@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import { getTitle, StateComparators } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import { SavedMap } from '../routes/map_page';
@@ -215,26 +215,24 @@ export function initializeCrossPanelActions({
     }
   });
 
-  function getLatestState() {
-    return {
-      isMovementSynchronized: isMovementSynchronized$.value,
-      filterByMapExtent: isFilterByMapExtent$.value,
-    };
-  }
-
   return {
     cleanup: () => {
       mapEmbeddablesSingleton.unregister(uuid);
       unsubscribeFromStore();
     },
     getIsFilterByMapExtent,
-    latestState$: combineLatest([isMovementSynchronized$, isFilterByMapExtent$]).pipe(
-      map(() => getLatestState())
+    anyStateChange$: merge(isMovementSynchronized$, isFilterByMapExtent$).pipe(
+      map(() => undefined)
     ),
     reinitializeState: (lastSaved: MapSerializedState) => {
       setIsMovementSynchronized(lastSaved.isMovementSynchronized);
       setIsFilterByMapExtent(lastSaved.filterByMapExtent);
     },
-    getLatestState,
+    getLatestState: () => {
+      return {
+        isMovementSynchronized: isMovementSynchronized$.value,
+        filterByMapExtent: isFilterByMapExtent$.value,
+      };
+    },
   };
 }

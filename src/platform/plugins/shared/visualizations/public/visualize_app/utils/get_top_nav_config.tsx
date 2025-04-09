@@ -45,6 +45,7 @@ import { getVizEditorOriginatingAppUrl } from './utils';
 
 import './visualize_navigation.scss';
 import { serializeReferences } from '../../utils/saved_visualization_references';
+import { serializeState } from '../../embeddable/state';
 
 interface VisualizeCapabilities {
   createShortUrl: boolean;
@@ -191,7 +192,6 @@ export const getTopNavConfig = (
                 type: VISUALIZE_EMBEDDABLE_TYPE,
                 serializedState: {
                   rawState: {
-                    serializedVis,
                     savedObjectId: id,
                   },
                   references,
@@ -252,17 +252,11 @@ export const getTopNavConfig = (
       return;
     }
 
-    const serializedVis = vis.serialize();
-    const { references } = serializeReferences(serializedVis);
-
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
       state: {
-        serializedState: {
-          rawState: {
-            serializedVis: vis.serialize(),
-          },
-          references,
-        },
+        serializedState: serializeState({
+          serializedVis: vis.serialize(),
+        }),
         embeddableId,
         type: VISUALIZE_EMBEDDABLE_TYPE,
         searchSessionId: data.search.session.getSessionId(),
@@ -532,20 +526,15 @@ export const getTopNavConfig = (
                   history.replace(appPath);
                   setActiveUrl(appPath);
 
-                  const serializedVis = vis.serialize();
-                  const { references } = serializeReferences(serializedVis);
                   stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
                     state: {
-                      serializedState: {
-                        rawState: {
-                          serializedVis: {
-                            ...serializedVis,
-                            title: newTitle,
-                            description: newDescription,
-                          },
+                      serializedState: serializeState({
+                        serializedVis: vis.serialize(),
+                        titles: {
+                          title: newTitle,
+                          description: newDescription,
                         },
-                        references,
-                      },
+                      }),
                       embeddableId,
                       type: VISUALIZE_EMBEDDABLE_TYPE,
                       searchSessionId: data.search.session.getSessionId(),

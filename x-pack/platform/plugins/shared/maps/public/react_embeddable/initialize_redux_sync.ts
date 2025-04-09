@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, Subscription } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge, Subscription } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { PaletteRegistry } from '@kbn/coloring';
 import { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { MapCenterAndZoom } from '../../common/descriptor_types';
+import type { LayerDescriptor, MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
 import { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
@@ -25,6 +25,7 @@ import {
   isMapLoading,
 } from '../selectors/map_selectors';
 import {
+  replaceLayerList,
   setEmbeddableSearchContext,
   setExecutionContext,
   setGotoWithCenter,
@@ -186,16 +187,6 @@ export function initializeReduxSync({
     });
   }
 
-  function getLatestState() {
-    return {
-      hiddenLayers: hiddenLayers$.value,
-      isLayerTOCOpen: isLayerTOCOpen$.value,
-      mapBuffer: getMapBuffer(store.getState()),
-      mapCenter: mapCenterAndZoom$.value,
-      openTOCDetails: openTOCDetails$.value,
-    };
-  }
-
   return {
     cleanup: () => {
       if (syncColorsSubscription) syncColorsSubscription.unsubscribe();
@@ -231,19 +222,35 @@ export function initializeReduxSync({
         store.dispatch(setEventHandlers(eventHandlers));
       },
     },
-    latestState$: combineLatest([
+    anyStateChange$: merge(
       hiddenLayers$,
       isLayerTOCOpen$,
       mapCenterAndZoom$,
       openTOCDetails$,
-    ]).pipe(map(() => getLatestState())),
+    ).pipe(map(() => undefined)),
     reinitializeState: (lastSaved?: MapSerializedState) => {
+      if (lastSaved?.savedObjectId === undefined && lastSaved?.attributes?.layerListJSON) {
+        try {
+          const layerList = JSON.parse(lastSaved?.attributes?.layerListJSON) as LayerDescriptor[];
+          store.dispatch<any>(replaceLayerList(layerList));
+        } catch (e) {
+          // TODO maybe show toast since map could not reset layers?
+        }
+      }
       store.dispatch<any>(setHiddenLayers(lastSaved?.hiddenLayers ?? []));
       store.dispatch(setIsLayerTOCOpen(lastSaved?.isLayerTOCOpen ?? true));
       if (lastSaved?.mapCenter) store.dispatch(setGotoWithCenter(lastSaved.mapCenter));
       store.dispatch(setOpenTOCDetails(lastSaved?.openTOCDetails));
     },
-    getLatestState,
+    getLatestState: () => {
+      return {
+        hiddenLayers: hiddenLayers$.value,
+        isLayerTOCOpen: isLayerTOCOpen$.value,
+        mapBuffer: getMapBuffer(store.getState()),
+        mapCenter: mapCenterAndZoom$.value,
+        openTOCDetails: openTOCDetails$.value,
+      };
+    },
   };
 }
 

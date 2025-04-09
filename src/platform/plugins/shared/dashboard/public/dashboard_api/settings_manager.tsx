@@ -119,7 +119,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
           timeRestore$,
           useMargins$,
 
-          titleManager.latestState$,
+          titleManager.anyStateChange$,
         ]).pipe(
           debounceTime(100),
           map(() => getSettings()),
