@@ -6,6 +6,7 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 function isPromise<T>(value: unknown): value is Promise<T> {
   return value instanceof Promise;
@@ -27,7 +28,10 @@ export function logWrapper<T extends Record<string, Function>>(
   return Object.keys(instance).reduce((acc, prop) => {
     const baseFn = acc[prop];
     (acc as Record<string, Function>)[prop] = (...args: unknown[]) => {
-      logger.start(prop, args);
+      logger.start(
+        prop,
+        args.map((arg) => (arg instanceof WebElementWrapper ? '[WebElement]' : arg))
+      );
       const result = baseFn.apply(instance, args);
       if (isPromise(result)) {
         result.then(logger.end, logger.end);
