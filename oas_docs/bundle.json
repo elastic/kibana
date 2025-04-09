@@ -29826,25 +29826,6 @@
                               "secrets": {
                                 "additionalProperties": true,
                                 "properties": {
-                                  "kibana_api_key": {
-                                    "anyOf": [
-                                      {
-                                        "additionalProperties": true,
-                                        "properties": {
-                                          "id": {
-                                            "type": "string"
-                                          }
-                                        },
-                                        "required": [
-                                          "id"
-                                        ],
-                                        "type": "object"
-                                      },
-                                      {
-                                        "type": "string"
-                                      }
-                                    ]
-                                  },
                                   "service_token": {
                                     "anyOf": [
                                       {
@@ -31007,25 +30988,6 @@
                       "secrets": {
                         "additionalProperties": false,
                         "properties": {
-                          "kibana_api_key": {
-                            "anyOf": [
-                              {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id"
-                                ],
-                                "type": "object"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
                           "service_token": {
                             "anyOf": [
                               {
@@ -32121,25 +32083,6 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
-                                "kibana_api_key": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": true,
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    {
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -33400,25 +33343,6 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
-                                "kibana_api_key": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": true,
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    {
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
                                 "service_token": {
                                   "anyOf": [
                                     {
@@ -34566,25 +34490,6 @@
                       "secrets": {
                         "additionalProperties": false,
                         "properties": {
-                          "kibana_api_key": {
-                            "anyOf": [
-                              {
-                                "additionalProperties": false,
-                                "properties": {
-                                  "id": {
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "id"
-                                ],
-                                "type": "object"
-                              },
-                              {
-                                "type": "string"
-                              }
-                            ]
-                          },
                           "service_token": {
                             "anyOf": [
                               {
@@ -35665,25 +35570,6 @@
                             "secrets": {
                               "additionalProperties": true,
                               "properties": {
-                                "kibana_api_key": {
-                                  "anyOf": [
-                                    {
-                                      "additionalProperties": true,
-                                      "properties": {
-                                        "id": {
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    {
-                                      "type": "string"
-                                    }
-                                  ]
-                                },
                                 "service_token": {
                                   "anyOf": [
                                     {

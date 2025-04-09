@@ -71,6 +71,9 @@ export function StreamDetailEnrichmentContentImpl() {
   const { resetChanges, saveChanges } = useStreamEnrichmentEvents();
 
   const hasChanges = useStreamsEnrichmentSelector((state) => state.can({ type: 'stream.update' }));
+  const canManage = useStreamsEnrichmentSelector(
+    (state) => state.context.definition.privileges.manage
+  );
   const isSavingChanges = useStreamsEnrichmentSelector((state) =>
     state.matches({ ready: { stream: 'updating' } })
   );
@@ -124,6 +127,7 @@ export function StreamDetailEnrichmentContentImpl() {
           onConfirm={saveChanges}
           isLoading={isSavingChanges}
           disabled={!hasChanges}
+          insufficientPrivileges={!canManage}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>
@@ -134,6 +138,7 @@ const ProcessorsEditor = React.memo(() => {
   const { euiTheme } = useEuiTheme();
 
   const { reorderProcessors } = useStreamEnrichmentEvents();
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
 
   const processorsRefs = useStreamsEnrichmentSelector((state) =>
     state.context.processorsRefs.filter((processorRef) =>
@@ -222,6 +227,7 @@ const ProcessorsEditor = React.memo(() => {
           <SortableList onDragItem={handlerItemDrag}>
             {processorsRefs.map((processorRef, idx) => (
               <DraggableProcessorListItem
+                disableDrag={!definition.privileges.manage}
                 key={processorRef.id}
                 idx={idx}
                 processorRef={processorRef}
@@ -230,7 +236,7 @@ const ProcessorsEditor = React.memo(() => {
             ))}
           </SortableList>
         )}
-        <AddProcessorPanel />
+        {definition.privileges.simulate && <AddProcessorPanel />}
       </EuiPanel>
       <EuiPanel paddingSize="m" hasShadow={false} grow={false}>
         {!isEmpty(errors.ignoredFields) && (

@@ -28614,16 +28614,6 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
-                                kibana_api_key:
-                                  anyOf:
-                                    - additionalProperties: true
-                                      type: object
-                                      properties:
-                                        id:
-                                          type: string
-                                      required:
-                                        - id
-                                    - type: string
                                 service_token:
                                   anyOf:
                                     - additionalProperties: true
@@ -29394,16 +29384,6 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
-                        kibana_api_key:
-                          anyOf:
-                            - additionalProperties: false
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                              required:
-                                - id
-                            - type: string
                         service_token:
                           anyOf:
                             - additionalProperties: false
@@ -30133,16 +30113,6 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
-                              kibana_api_key:
-                                anyOf:
-                                  - additionalProperties: true
-                                    type: object
-                                    properties:
-                                      id:
-                                        type: string
-                                    required:
-                                      - id
-                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -30978,16 +30948,6 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
-                              kibana_api_key:
-                                anyOf:
-                                  - additionalProperties: true
-                                    type: object
-                                    properties:
-                                      id:
-                                        type: string
-                                    required:
-                                      - id
-                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -31745,16 +31705,6 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
-                        kibana_api_key:
-                          anyOf:
-                            - additionalProperties: false
-                              type: object
-                              properties:
-                                id:
-                                  type: string
-                              required:
-                                - id
-                            - type: string
                         service_token:
                           anyOf:
                             - additionalProperties: false
@@ -32471,16 +32421,6 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
-                              kibana_api_key:
-                                anyOf:
-                                  - additionalProperties: true
-                                    type: object
-                                    properties:
-                                      id:
-                                        type: string
-                                    required:
-                                      - id
-                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
