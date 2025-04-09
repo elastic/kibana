@@ -36,6 +36,7 @@ import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-s
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
+import { RRule } from '@kbn/rrule';
 import type { RequestTimeoutsConfig } from './config';
 import type { Result } from './lib/result_type';
 import { asOk, asErr, unwrap } from './lib/result_type';
@@ -49,6 +50,7 @@ import type {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  RruleSchedule,
 } from './task';
 import { TaskStatus, TaskLifecycleResult } from './task';
 
@@ -149,6 +151,7 @@ export class TaskStore {
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
   private spaces?: SpacesPluginStart;
+  private logger: Logger;
 
   /**
    * Constructs a new TaskStore.
@@ -183,6 +186,7 @@ export class TaskStore {
     this.security = opts.security;
     this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
+    this.logger = opts.logger;
   }
 
   public registerEncryptedSavedObjectsClient(client: EncryptedSavedObjectsClient) {
@@ -313,16 +317,26 @@ export class TaskStore {
       const id = taskInstance.id || v4();
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+
+      const runAt = getRunAt({
+        taskInstance: validatedTaskInstance,
+        logger: this.logger,
+      });
+
       savedObject = await soClient.create<SerializedConcreteTaskInstance>(
         'task',
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(userScope ? { userScope } : {}),
           ...(apiKey ? { apiKey } : {}),
+          runAt,
         },
         { id, refresh: false }
       );
-      if (get(taskInstance, 'schedule.interval', null) == null) {
+      if (
+        get(taskInstance, 'schedule.interval', null) == null &&
+        get(taskInstance, 'schedule.rrule', null) == null
+      ) {
         this.adHocTaskCounter.increment();
       }
     } catch (e) {
@@ -354,12 +368,17 @@ export class TaskStore {
       this.definitions.ensureHas(taskInstance.taskType);
       const validatedTaskInstance =
         this.taskValidator.getValidatedTaskInstanceForUpdating(taskInstance);
+      const runAt = getRunAt({
+        taskInstance: validatedTaskInstance,
+        logger: this.logger,
+      });
       return {
         type: 'task',
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(apiKey ? { apiKey } : {}),
           ...(userScope ? { userScope } : {}),
+          runAt,
         },
         id,
       };
@@ -1059,4 +1078,40 @@ function ensureAggregationOnlyReturnsEnabledTaskObjects(opts: AggregationOpts): 
 
 function isMGetSuccess(doc: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
   return (doc as estypes.GetGetResult).found !== undefined;
+}
+
+function rruleHasFixedTime(schedule: RruleSchedule['rrule']): boolean {
+  const keys = Object.keys(schedule);
+  const baseFields = ['freq', 'interval', 'tzid'];
+
+  if ((keys.length === 2 || keys.length === 3) && keys.every((key) => baseFields.includes(key))) {
+    return false;
+  }
+
+  return true;
+}
+
+function getRunAt({
+  taskInstance,
+  logger,
+}: {
+  taskInstance: TaskInstance;
+  logger: Logger;
+}): string {
+  const now = new Date();
+  const nowString = now.toISOString();
+
+  if (taskInstance.schedule?.rrule && rruleHasFixedTime(taskInstance.schedule.rrule)) {
+    try {
+      const rrule = new RRule({
+        ...taskInstance.schedule.rrule,
+        dtstart: now,
+      });
+      return rrule.after(now)?.toISOString() || nowString;
+    } catch (e) {
+      logger.error(`runAt for the rrule with fixed time could not be calculated: ${e}`);
+    }
+  }
+
+  return taskInstance.runAt?.toISOString() || nowString;
 }
