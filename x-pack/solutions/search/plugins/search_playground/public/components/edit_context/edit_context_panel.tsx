@@ -23,6 +23,7 @@ import { AnalyticsEvents } from '../../analytics/constants';
 import { ContextFieldsSelect } from './context_fields_select';
 
 export const EditContextPanel: React.FC = () => {
+  const idPrefix = 'playground_context_doc_number';
   const usageTracker = useUsageTracker();
   const { fields } = useSourceIndicesFields();
 
@@ -49,9 +50,9 @@ export const EditContextPanel: React.FC = () => {
     [onChangeSourceFields, sourceFields, usageTracker]
   );
 
-  const handleDocSizeButtonGroupChange = (id: string) => {
+  const handleDocSizeButtonGroupChange = (docSize: number) => {
     usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
-    onChangeSize(Number(id));
+    onChangeSize(docSize);
   };
 
   return (
@@ -87,24 +88,28 @@ export const EditContextPanel: React.FC = () => {
                   buttonSize="compressed"
                   options={[
                     {
-                      id: '1',
+                      id: `${idPrefix} - 1`,
                       label: '1',
+                      value: 1,
                     },
                     {
-                      id: '3',
+                      id: `${idPrefix} - 3`,
                       label: '3',
+                      value: 3,
                     },
                     {
-                      id: '5',
+                      id: `${idPrefix} - 5`,
                       label: '5',
+                      value: 5,
                     },
                     {
-                      id: '10',
+                      id: `${idPrefix} - 10`,
                       label: '10',
+                      value: 10,
                     },
                   ]}
-                  idSelected={String(docSize)}
-                  onChange={(id) => handleDocSizeButtonGroupChange(id)}
+                  idSelected={`${idPrefix} - ${docSize}`}
+                  onChange={(_, value) => handleDocSizeButtonGroupChange(value)}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
