@@ -33,16 +33,7 @@ import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
 import {
-  byOption,
-  metadataOption,
-  asOption,
-  onOption,
-  withOption,
-  appendSeparatorOption,
-} from '../definitions/options';
-import {
   CommandDefinition,
-  CommandOptionsDefinition,
   FunctionParameter,
   FunctionDefinition,
   FunctionParameterType,
@@ -50,6 +41,7 @@ import {
   ArrayType,
   SupportedDataType,
   FunctionDefinitionTypes,
+  getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -131,7 +123,7 @@ export function isComma(char: string) {
 }
 
 export function isSourceCommand({ label }: { label: string }) {
-  return ['FROM', 'ROW', 'SHOW', 'METRICS'].includes(label);
+  return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
 }
 
 let fnLookups: Map<string, FunctionDefinition> | undefined;
@@ -173,9 +165,7 @@ export function isSupportedFunction(
   }
   const fn = buildFunctionLookup().get(name);
   const isSupported = Boolean(
-    option == null
-      ? fn?.supportedCommands.includes(parentCommand)
-      : fn?.supportedOptions?.includes(option)
+    fn?.locationsAvailable.includes(getLocationFromCommandOrOptionName(option ?? parentCommand))
   );
   return {
     supported: isSupported,
@@ -204,9 +194,6 @@ function buildCommandLookup(): Map<string, CommandDefinition<string>> {
   if (!commandLookups) {
     commandLookups = commandDefinitions.reduce((memo, def) => {
       memo.set(def.name, def);
-      if (def.alias) {
-        memo.set(def.alias, def);
-      }
       return memo;
     }, new Map<string, CommandDefinition<string>>());
   }
@@ -219,12 +206,6 @@ export function getCommandDefinition(name: string): CommandDefinition<string> {
 
 export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
-}
-
-export function getCommandOption(optionName: CommandOptionsDefinition<string>['name']) {
-  return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
-    ({ name }) => name === optionName
-  );
 }
 
 function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {

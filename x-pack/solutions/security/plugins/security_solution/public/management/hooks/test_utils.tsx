@@ -42,7 +42,7 @@ export const renderQuery = async (
   const { result: resultHook } = renderHook(() => hook(), {
     wrapper,
   });
-  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy());
+  await waitFor(() => expect(resultHook.current[waitForHook]).toBeTruthy(), { timeout: 5000 });
   return resultHook.current;
 };
 

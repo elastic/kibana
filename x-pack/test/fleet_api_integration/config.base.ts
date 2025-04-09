@@ -85,7 +85,10 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
           './apis/fixtures/package_verification/signatures/fleet_test_key_public.asc'
         )}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
-        `--xpack.fleet.enableExperimental=${JSON.stringify(['enableAutomaticAgentUpgrades'])}`,
+        `--xpack.fleet.enableExperimental=${JSON.stringify([
+          'enableAutomaticAgentUpgrades',
+          'installedIntegrationsTabularUI',
+        ])}`,
         `--xpack.cloud.id='123456789'`,
         `--xpack.fleet.agentless.enabled=true`,
         `--xpack.fleet.agentless.api.url=https://api.agentless.url/api/v1/ess`,
@@ -93,6 +96,7 @@ export default async function ({ readConfigFile, log }: FtrConfigProviderContext
         `--xpack.fleet.agentless.api.tls.key=./config/node.key`,
         `--xpack.fleet.agentless.api.tls.ca=./config/ca.crt`,
         `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
+        `--xpack.fleet.internal.registry.spec.min=1.0`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

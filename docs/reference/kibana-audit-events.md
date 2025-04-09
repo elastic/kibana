@@ -6,7 +6,7 @@ navigation_title: Kibana audit events
 
 Audit logging is a [subscription feature](https://www.elastic.co/subscriptions) that you can enable to keep track of security-related events, such as authorization success and failures. Logging these events enables you to monitor Kibana for suspicious activity and provides evidence in the event of an attack.
 
-Refer to [enabling](docs-content://deploy-manage/monitor/logging-configuration/enabling-audit-logs.md) and [configuring](docs-content://deploy-manage/monitor/logging-configuration/configuring-audit-logs.md) audit logs for details on activation and tunning.
+Refer to [enabling](docs-content://deploy-manage/security/logging-configuration/enabling-audit-logs.md) and [configuring](docs-content://deploy-manage/security/logging-configuration/configuring-audit-logs.md) audit logs for details on activation and tunning.
 
 ## Kibana audit events [xpack-security-ecs-audit-logging]
 

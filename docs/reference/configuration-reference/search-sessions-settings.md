@@ -16,7 +16,7 @@ If a setting is applicable to {{ecloud}} Hosted environments, its name is follow
 :::
 
 `data.search.sessions.enabled` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
-:   Deprecated in 8.15.0. Set to `true` (default) to enable search sessions.
+:   Deprecated in 8.15.0. `false` by default. Set to `true` to enable search sessions.
 
 `data.search.sessions.notTouchedTimeout` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ess}}")
 :   Deprecated in 8.15.0. How long {{kib}} stores search results from unsaved sessions, after the last search in the session completes. The default is `5m`.

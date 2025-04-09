@@ -147,14 +147,14 @@ setUnifiedDocViewerServices(
 
 const renderLogsOverview = (props: Partial<DocViewRenderProps> = {}) => {
   const { rerender: baseRerender, ...tools } = render(
-    <EuiProvider>
+    <EuiProvider highContrastMode={false}>
       <LogsOverview dataView={dataView} hit={fullHit} {...props} />
     </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<DocViewRenderProps>) =>
     baseRerender(
-      <EuiProvider>
+      <EuiProvider highContrastMode={false}>
         <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
       </EuiProvider>
     );

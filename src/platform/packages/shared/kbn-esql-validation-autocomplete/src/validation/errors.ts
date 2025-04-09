@@ -143,26 +143,27 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           'kbn-esql-validation-autocomplete.esql.validation.unsupportedColumnTypeForCommand',
           {
             defaultMessage:
-              '{command} only supports {type} {typeCount, plural, one {type} other {types}} values, found [{column}] of type [{givenType}]',
+              '{command} only supports values of type [{type}]. Found [{column}] of type [{givenType}]',
             values: {
               command: out.command,
               type: out.type,
-              typeCount: out.typeCount,
               column: out.column,
               givenType: out.givenType,
             },
           }
         ),
       };
-    case 'unknownOption':
+    case 'unknownDissectKeyword':
       return {
-        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.unknownOption', {
-          defaultMessage: 'Invalid option for {command}: [{option}]',
-          values: {
-            command: out.command,
-            option: out.option,
-          },
-        }),
+        message: i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.validation.unknownDissectKeyword',
+          {
+            defaultMessage: 'Expected [APPEND_SEPARATOR] in [DISSECT] but found [{keyword}]',
+            values: {
+              keyword: out.keyword,
+            },
+          }
+        ),
       };
     case 'unsupportedFunctionForCommand':
       return {
@@ -372,7 +373,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           'kbn-esql-validation-autocomplete.esql.validation.wrongDissectOptionArgumentType',
           {
             defaultMessage:
-              'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
+              'Invalid value for DISSECT APPEND_SEPARATOR: expected a string, but was [{value}]',
             values: {
               value: out.value,
             },
