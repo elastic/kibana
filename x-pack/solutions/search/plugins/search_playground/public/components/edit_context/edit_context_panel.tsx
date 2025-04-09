@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiPanel, EuiSelect, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+  EuiText,
+  EuiButtonGroup,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
@@ -43,46 +51,51 @@ export const EditContextPanel: React.FC = () => {
     [onChangeSourceFields, sourceFields, usageTracker]
   );
 
-  const handleDocSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleDocSizeButtonGroupChange = (id: string) => {
     usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
-    onChangeSize(Number(e.target.value));
+    onChangeSize(Number(id));
   };
 
   return (
     <EuiPanel data-test-subj="editContextPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate('xpack.searchPlayground.editContext.docsRetrievedCount', {
-              defaultMessage: 'Number of documents sent to LLM',
-            })}
-            fullWidth
-          >
-            <EuiSelect
-              data-test-subj="contextPanelDocumentNumberSelect"
-              options={[
-                {
-                  value: 1,
-                  text: '1',
-                },
-                {
-                  value: 3,
-                  text: '3',
-                },
-                {
-                  value: 5,
-                  text: '5',
-                },
-                {
-                  value: 10,
-                  text: '10',
-                },
-              ]}
-              value={docSize}
-              onChange={handleDocSizeChange}
-              fullWidth
-            />
-          </EuiFormRow>
+          <EuiFlexGroup direction="row" gutterSize="m">
+            <EuiFlexItem>
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.searchPlayground.editContext.docsRetrievedCount"
+                  defaultMessage="Number of documents sent to LLM"
+                />
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButtonGroup
+                legend="Default single select button group"
+                isFullWidth={true}
+                options={[
+                  {
+                    id: '1',
+                    label: '1',
+                  },
+                  {
+                    id: '3',
+                    label: '3',
+                  },
+                  {
+                    id: '5',
+                    label: '5',
+                  },
+                  {
+                    id: '10',
+                    label: '10',
+                  },
+                ]}
+                idSelected={String(docSize)}
+                onChange={(id) => handleDocSizeButtonGroupChange(id)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup direction="column" gutterSize="m">
