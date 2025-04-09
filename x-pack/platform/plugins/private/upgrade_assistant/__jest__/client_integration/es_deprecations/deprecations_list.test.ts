@@ -97,10 +97,10 @@ describe('ES deprecations table', () => {
   it('shows critical and warning deprecations count', () => {
     const { find } = testBed;
     const criticalDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
-      (deprecation) => deprecation.isCritical
+      (deprecation) => deprecation.level === 'critical'
     );
     const warningDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
-      (deprecation) => deprecation.isCritical === false
+      (deprecation) => deprecation.level !== 'critical'
     );
 
     expect(find('criticalDeprecationsCount').text()).toContain(String(criticalDeprecations.length));
@@ -135,7 +135,7 @@ describe('ES deprecations table', () => {
       await actions.searchBar.clickFilterByTitle('Critical');
 
       const criticalDeprecations = esDeprecationsMockResponse.migrationsDeprecations.filter(
-        (deprecation) => deprecation.isCritical
+        (deprecation) => deprecation.level === 'critical'
       );
 
       expect(find('deprecationTableRow').length).toEqual(criticalDeprecations.length);
@@ -258,7 +258,7 @@ describe('ES deprecations table', () => {
       const { actions, find } = testBed;
 
       const criticalDeprecations = migrationsDeprecations.filter(
-        (deprecation) => deprecation.isCritical
+        (deprecation) => deprecation.level === 'critical'
       );
 
       await actions.searchBar.clickStatusFilterDropdown();
