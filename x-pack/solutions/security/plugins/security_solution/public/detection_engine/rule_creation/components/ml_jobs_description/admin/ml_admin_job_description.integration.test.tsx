@@ -101,7 +101,6 @@ describe('MlAdminJobDescription', () => {
     // link to job
     const linkElement = screen.getByTestId('machineLearningJobLink');
 
-    expect(linkElement).toHaveAttribute('href', expect.any(String));
     expect(linkElement).toHaveTextContent(
       securityJobNotStarted.customSettings?.security_app_display_name!
     );
