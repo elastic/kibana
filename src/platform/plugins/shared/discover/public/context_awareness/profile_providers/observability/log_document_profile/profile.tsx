@@ -8,6 +8,7 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
+import { BehaviorSubject } from 'rxjs';
 import type { DocumentProfileProvider } from '../../../profiles';
 import { DocumentType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
