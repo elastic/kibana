@@ -109,6 +109,10 @@ const esqlLanguagePlugin = () => {
   };
 };
 
+/**
+ * Component handling markdown support to the assistant's responses.
+ * Also handles "loading" state by appending the blinking cursor.
+ */
 export function ChatMessageText({ loading, content }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;

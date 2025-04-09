@@ -14,7 +14,7 @@ import { useChat } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ChatInputForm } from './chat_input_form';
-import { ChatConversation } from './chat_conversation';
+import { ChatConversation } from './conversation/chat_conversation';
 
 interface ChatProps {
   agentId: string;

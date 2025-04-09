@@ -35,6 +35,20 @@ export type ProgressionConversationItem = ConversationItemBase & {
   progressionEvents: ProgressionEvent[];
 };
 
+export interface ConversationRoundToolCall {
+  toolCall: ToolCall;
+  toolResult?: string;
+}
+
+export interface ConversationRound {
+  userMessage: UserMessage;
+  assistantMessage?: AssistantMessage;
+  toolCalls: ConversationRoundToolCall[];
+  progressionEvents: ProgressionEvent[];
+  loading: boolean;
+  // TODO
+}
+
 /**
  * UI-specific representation of the conversation events.
  */

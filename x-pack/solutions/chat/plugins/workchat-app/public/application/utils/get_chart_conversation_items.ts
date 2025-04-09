@@ -16,6 +16,8 @@ import type { ProgressionEvent } from '../../../common/chat_events';
 import type { ChatStatus } from '../hooks/use_chat';
 import {
   type ConversationItem,
+  type ConversationRound,
+  type ConversationRoundToolCall,
   type ToolCallConversationItem,
   createUserMessageItem,
   createAssistantMessageItem,
@@ -25,6 +27,66 @@ import {
   isToolCallItem,
   isProgressionItem,
 } from './conversation_items';
+
+export const getConversationRounds = ({
+  conversationEvents,
+  progressionEvents,
+  chatStatus,
+}: {
+  conversationEvents: ConversationEvent[];
+  progressionEvents: ProgressionEvent[];
+  chatStatus: ChatStatus;
+}): ConversationRound[] => {
+  const toolCallMap = new Map<string, ConversationRoundToolCall>();
+  const rounds: ConversationRound[] = [];
+
+  let current: Partial<ConversationRound> | undefined;
+
+  conversationEvents.forEach((item) => {
+    if (isUserMessage(item)) {
+      if (current?.userMessage) {
+        throw new Error('chained user message');
+      }
+      if (!current) {
+        current = {
+          toolCalls: [],
+          progressionEvents: [],
+        };
+      }
+      current.userMessage = item;
+    }
+    if (isToolResult(item)) {
+      const toolCallItem = toolCallMap.get(item.toolCallId);
+      if (toolCallItem) {
+        toolCallItem.toolResult = item.toolResult;
+      }
+    }
+    if (isAssistantMessage(item)) {
+      if (item.toolCalls.length) {
+        item.toolCalls.forEach((toolCall) => {
+          const roundToolCall = {
+            toolCall,
+          };
+          current!.toolCalls!.push(roundToolCall);
+          toolCallMap.set(toolCall.toolCallId, roundToolCall);
+        });
+      } else {
+        current!.assistantMessage = item;
+        rounds.push(current as ConversationRound);
+        current = undefined;
+      }
+    }
+  });
+
+  if (current) {
+    rounds.push(current as ConversationRound);
+  }
+
+  // TODO: progressionEvents
+  // TODO: status
+
+  return rounds;
+};
 
 /**
  * Utility function preparing the data to display the chat conversation
