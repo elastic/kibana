@@ -248,10 +248,9 @@ export async function generateLink(
 
   // use `lzCompress` flag for making the link readable during debugging/testing
   // const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { lzCompress: false });
-  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams);
-  const [start, end] = redirectUrl.split('/app');
+  const redirectUrl = discoverLocator!.getRedirectUrl(redirectUrlParams, { spaceId: spacePrefix });
 
-  return start + spacePrefix + '/app' + end;
+  return redirectUrl;
 }
 
 export function getSmallerDataViewSpec(
