@@ -30,6 +30,7 @@ import type { TraceItems } from './get_trace_items';
 import { getTraceItems } from './get_trace_items';
 import type { TraceSamplesResponse } from './get_trace_samples_by_query';
 import { getTraceSamplesByQuery } from './get_trace_samples_by_query';
+import { getTraceSummaryCount } from './get_trace_summary_count';
 
 const tracesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces',
@@ -133,25 +134,32 @@ const tracesByIdSummaryRoute = createApmServerRoute({
     resources
   ): Promise<{
     traceItems?: FocusedTraceItems;
+    summary: { services: number; traceEvents: number; errors: number };
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params, config, logger } = resources;
     const { traceId } = params.path;
     const { start, end, focusedTraceItemId } = params.query;
 
-    const traceItems = await getTraceItems({
-      traceId,
-      config,
-      apmEventClient,
-      start,
-      end,
-      maxTraceItemsFromUrlParam: params.query.maxTraceItems,
-      logger,
-    });
+    const [traceItems, traceSummaryCount] = await Promise.all([
+      getTraceItems({
+        traceId,
+        config,
+        apmEventClient,
+        start,
+        end,
+        maxTraceItemsFromUrlParam: params.query.maxTraceItems,
+        logger,
+      }),
+      getTraceSummaryCount({ apmEventClient, start, end, traceId }),
+    ]);
 
     const focusedTraceItems = buildFocusedTraceItems({ traceItems, focusedTraceItemId });
 
-    return { traceItems: focusedTraceItems };
+    return {
+      traceItems: focusedTraceItems,
+      summary: { ...traceSummaryCount, errors: traceItems.errorDocs.length },
+    };
   },
 });
 

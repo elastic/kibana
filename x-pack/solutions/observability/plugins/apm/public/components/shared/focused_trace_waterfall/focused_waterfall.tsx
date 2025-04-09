@@ -15,7 +15,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { FocusedTraceWaterfall } from '.';
 
 export function FocusedWatefall() {
-  const [focusedId, setFocusedId] = useState<string>('86682e13644e14b9');
+  const [focusedId, setFocusedId] = useState<string>('13f3e680dff16fd4');
   const [clicked, setClicked] = useState<number>(0);
   console.log('### caue FocusedWatefall focusedId:', focusedId, clicked);
   const {

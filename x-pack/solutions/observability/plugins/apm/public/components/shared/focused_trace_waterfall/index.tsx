@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import type { WaterfallSpan, WaterfallTransaction } from '../../../../common/waterfall/typings';
@@ -20,11 +20,13 @@ import {
 } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallItem } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_item';
 import { TimelineAxisContainer, VerticalLinesContainer } from '../charts/timeline';
+import { TraceSummary } from './trace_summary';
 
-type TraceItems = APIReturnType<'GET /internal/apm/traces/{traceId}/focused'>;
+type FocusedTrace = APIReturnType<'GET /internal/apm/traces/{traceId}/focused'>;
 
 interface Props {
-  items: TraceItems;
+  items: FocusedTrace;
+  isEmbeddable?: boolean;
 }
 
 const margin = {
@@ -34,16 +36,13 @@ const margin = {
   bottom: 0,
 };
 
-interface Child {
-  traceDoc: WaterfallTransaction | WaterfallSpan;
-  children?: Child[];
-}
-
 function convertChildrenToWatefallItem(
-  children: Child[],
+  children: NonNullable<FocusedTrace['traceItems']>['focusedTraceDocChildren'],
   rootWaterfallTransaction: IWaterfallTransaction
 ) {
-  function convert(child: Child): Array<IWaterfallTransaction | IWaterfallSpan> {
+  function convert(
+    child: NonNullable<FocusedTrace['traceItems']>['focusedTraceDocChildren'][0]
+  ): Array<IWaterfallTransaction | IWaterfallSpan> {
     const waterfallItem =
       child.traceDoc.processor.event === 'transaction'
         ? getTransactionItem(child.traceDoc as WaterfallTransaction, 0)
@@ -67,7 +66,7 @@ const calculateOffset = ({
   rootWaterfallTransaction: IWaterfallTransaction;
 }) => item.doc.timestamp.us - rootWaterfallTransaction.doc.timestamp.us;
 
-export function FocusedTraceWaterfall({ items }: Props) {
+export function FocusedTraceWaterfall({ items, isEmbeddable = false }: Props) {
   const { euiTheme } = useEuiTheme();
 
   const traceItems = items.traceItems;
@@ -141,36 +140,45 @@ export function FocusedTraceWaterfall({ items }: Props) {
   }
 
   return (
-    <div
-      css={css`
-        position: relative;
-      `}
-    >
+    <>
       <div
         css={css`
-          display: flex;
-          position: sticky;
-          top: var(--euiFixedHeadersOffset, 0);
-          z-index: ${euiTheme.levels.menu};
-          background-color: ${euiTheme.colors.emptyShade};
-          border-bottom: 1px solid ${euiTheme.colors.mediumShade};
+          position: relative;
         `}
       >
-        <TimelineAxisContainer xMax={waterfall.totalDuration} margins={margin} numberOfTicks={3} />
+        <div
+          css={css`
+            display: flex;
+            position: sticky;
+            top: var(--euiFixedHeadersOffset, 0);
+            z-index: ${euiTheme.levels.menu};
+            background-color: ${euiTheme.colors.emptyShade};
+            border-bottom: 1px solid ${euiTheme.colors.mediumShade};
+          `}
+        >
+          <TimelineAxisContainer
+            xMax={waterfall.totalDuration}
+            margins={margin}
+            numberOfTicks={3}
+          />
+        </div>
+        <VerticalLinesContainer xMax={waterfall.totalDuration} margins={margin} />
+        {waterfall.items.map((item) => (
+          <WaterfallItem
+            timelineMargins={margin}
+            color={item.color}
+            hasToggle={false}
+            errorCount={0}
+            isSelected={item.id === waterfall.focusedItemId}
+            item={item}
+            marginLeftLevel={0}
+            totalDuration={waterfall.totalDuration}
+            isEmbeddable={isEmbeddable}
+          />
+        ))}
       </div>
-      <VerticalLinesContainer xMax={waterfall.totalDuration} margins={margin} />
-      {waterfall.items.map((item) => (
-        <WaterfallItem
-          timelineMargins={margin}
-          color={item.color}
-          hasToggle={false}
-          errorCount={0}
-          isSelected={item.id === waterfall.focusedItemId}
-          item={item}
-          marginLeftLevel={0}
-          totalDuration={waterfall.totalDuration}
-        />
-      ))}
-    </div>
+      <EuiSpacer />
+      <TraceSummary summary={items.summary} />
+    </>
   );
 }
