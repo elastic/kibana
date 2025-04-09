@@ -60,7 +60,7 @@ export async function runDockerGenerator(
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:22d75e23a4c0308bb5d75f30eef0a010c8e2cd839ddcd55bd59eb80545177e97';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:01350140fe702d4b41c85298c6ab94c788ccfd2f4b5ffe588301977ecb08f004';
   }
 
   // General docker var config

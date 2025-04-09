@@ -370,14 +370,18 @@ export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
     return messages;
   }
 
-  if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
+  if (source.sourceType === 'index') {
+    const index = source.index;
+    const indexName = source.cluster ? source.name : index?.valueUnquoted;
+    if (indexName && !sourceExists(indexName, sources)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unknownIndex',
+          values: { name: source.name },
+          locations: source.location,
+        })
+      );
+    }
   }
 
   return messages;
