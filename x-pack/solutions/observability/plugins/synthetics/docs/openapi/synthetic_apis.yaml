@@ -271,7 +271,7 @@ paths:
         - synthetics
       parameters:
         - in: path
-          name: config_id
+          name: id
           description: The ID of the monitor.
           required: true
           schema:
@@ -284,7 +284,7 @@ paths:
                 type: object
               examples:
                 getSyntheticMonitorResponseExample1:
-                  description: A successful response from `GET /api/synthetics/monitors/<config_id>`.
+                  description: A successful response from `GET /api/synthetics/monitors/<id>`.
                   value: |-
                     {
                         "type": "http",
@@ -362,7 +362,7 @@ paths:
       parameters:
         - description: The identifier for the monitor that you want to update.
           in: path
-          name: config_id
+          name: id
           required: true
           schema:
             type: string
