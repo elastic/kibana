@@ -523,7 +523,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should simulate an index template by name with a related data stream', async () => {
         const dataStreamName = `test-foo`;
         const templateName = `template-${getRandomString()}`;
-        const payload = getTemplatePayload(templateName, [getRandomString()]);
+        const payload = getTemplatePayload(templateName);
 
         await createTemplate(payload).expect(200);
 
