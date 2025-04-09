@@ -57,7 +57,7 @@ export const ConnectLLMButton: React.FC = () => {
         >
           <FormattedMessage
             id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
-            defaultMessage="Elastic LLM connected"
+            defaultMessage="LLM connected"
           />
         </EuiButtonEmpty>
       ) : (
