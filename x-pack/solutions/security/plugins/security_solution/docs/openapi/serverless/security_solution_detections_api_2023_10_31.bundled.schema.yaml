@@ -2189,7 +2189,7 @@ paths:
                             license: ''
                             max_signals: 100
                             meta:
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
                             name: Rule 1
                             output_index: ''
                             query: '*'
@@ -2257,7 +2257,7 @@ paths:
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
                             name: Rule 2
                             output_index: ''
                             query: '*'
@@ -2378,7 +2378,7 @@ paths:
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
                             name: Test rule
                             output_index: ''
                             query: '*'
@@ -2470,7 +2470,7 @@ paths:
                             max_signals: 100
                             meta:
                               from: 3m
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
                             name: Test rule
                             output_index: ''
                             query: '*'
@@ -2566,7 +2566,7 @@ paths:
                             license: ''
                             max_signals: 100
                             meta:
-                              kibana_siem_app_url: http://localhost:5601/kbn/app/security
+                              kibana_siem_app_url: 'http://localhost:5601/kbn/app/security'
                             name: Jacek test rule
                             output_index: ''
                             query: '*'
