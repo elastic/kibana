@@ -20,7 +20,7 @@ import {
   EuiTab,
   useEuiFontSize,
 } from '@elastic/eui';
-import { type ConversationRound } from '../../../utils/conversation_items';
+import type { ConversationRound } from '../../../utils/conversation_rounds';
 import { ChatMessageText } from './chat_message_text';
 
 interface RoundTabAnswerProps {

@@ -8,7 +8,7 @@
 import React, { useState, useMemo } from 'react';
 import { css } from '@emotion/css';
 import { EuiPanel, EuiText, useEuiTheme, EuiTabs, EuiTab, useEuiFontSize } from '@elastic/eui';
-import { type ConversationRound } from '../../../utils/conversation_items';
+import type { ConversationRound } from '../../../utils/conversation_rounds';
 import { RoundTabAnswer } from './round_tab_answer';
 
 interface ConversationRoundProps {

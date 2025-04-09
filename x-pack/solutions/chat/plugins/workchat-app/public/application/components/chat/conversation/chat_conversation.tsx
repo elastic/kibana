@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import type { AuthenticatedUser } from '@kbn/core/public';
 import type { ConversationEvent } from '../../../../../common/conversation_events';
 import type { ProgressionEvent } from '../../../../../common/chat_events';
-import { getConversationRounds } from '../../../utils/get_chart_conversation_items';
+import { getConversationRounds } from '../../../utils/conversation_rounds';
 import type { ChatStatus } from '../../../hooks/use_chat';
 import { ChatConversationRound } from './conversation_round';
 
