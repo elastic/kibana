@@ -361,7 +361,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:risk-engine-configuration/bulk_update",
                 "saved_object:risk-engine-configuration/delete",
                 "saved_object:risk-engine-configuration/bulk_delete",
-                "saved_object:risk-engine-configuration/share_to_space",   
+                "saved_object:risk-engine-configuration/share_to_space",
                 "saved_object:entity-engine-status/bulk_get",
                 "saved_object:entity-engine-status/get",
                 "saved_object:entity-engine-status/find",

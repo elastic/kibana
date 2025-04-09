@@ -152,7 +152,7 @@ export const startPrivilegeMonitoringTask = async ({
       params: { version: VERSION },
     });
 
-    logger.info(`Starting privilege monitoring task with id ${taskId}`);
+    logger.info(`Scheduling privilege monitoring task with id ${taskId}`);
   } catch (e) {
     logger.warn(
       `[Privilege Monitoring]  [task ${taskId}]: error scheduling task, received ${e.message}`
