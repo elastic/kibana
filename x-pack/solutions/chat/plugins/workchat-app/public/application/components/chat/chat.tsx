@@ -15,6 +15,7 @@ import { useConversation } from '../../hooks/use_conversation';
 import { useStickToBottom } from '../../hooks/use_stick_to_bottom';
 import { ChatInputForm } from './chat_input_form';
 import { ChatConversation } from './conversation/chat_conversation';
+import { ChatNewConversationPrompt } from './chat_new_conversation_prompt';
 
 interface ChatProps {
   agentId: string;
@@ -86,6 +87,10 @@ export const Chat: React.FC<ChatProps> = ({
     },
     [sendMessage, setStickToBottom]
   );
+
+  if (!conversationId && conversationEvents.length === 0) {
+    return <ChatNewConversationPrompt agentId={agentId} onSubmit={onSubmit} />;
+  }
 
   return (
     <>
