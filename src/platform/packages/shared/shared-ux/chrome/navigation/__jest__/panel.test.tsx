@@ -207,6 +207,16 @@ describe('Panel', () => {
 
       expect(queryByTestId(/sideNavPanel/)).toBeNull();
     });
+
+    test('should allow hover to open the panel', async () => {
+      const { findByTestId } = renderNavigation({
+        navTreeDef: of(navigationTree),
+      });
+
+      // open the panel
+      await userEvent.hover(await findByTestId(/nav-item-id-group1/));
+      expect(await findByTestId(/sideNavPanel/)).toBeVisible();
+    });
   });
 
   describe('custom content', () => {

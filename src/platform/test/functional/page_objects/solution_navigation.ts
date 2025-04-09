@@ -25,9 +25,12 @@ const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId
 
 const TIMEOUT_CHECK = 3000;
 
-export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getService'>) {
+export function SolutionNavigationProvider(
+  ctx: Pick<FtrProviderContext, 'getService' | 'getPageObject'>
+) {
   const testSubjects = ctx.getService('testSubjects');
   const browser = ctx.getService('browser');
+  const common = ctx.getPageObject('common');
   const retry = ctx.getService('retry');
   const log = ctx.getService('log');
 
@@ -213,7 +216,10 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
       },
       async openPanel(
         sectionId: NavigationId,
-        { button }: { button: 'icon' | 'link' } = { button: 'icon' }
+        { button, action }: { button: 'icon' | 'link'; action?: 'click' | 'hover' } = {
+          button: 'icon',
+          action: 'click',
+        }
       ) {
         log.debug('SolutionNavigation.sidenav.openPanel', sectionId);
 
@@ -225,7 +231,15 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           TIMEOUT_CHECK
         );
 
-        await panelOpenerBtn.click();
+        if (action === 'click') {
+          await panelOpenerBtn.click();
+        } else {
+          await panelOpenerBtn.moveMouseTo();
+        }
+
+        await retry.waitFor(`panel ${sectionId} to be open`, async () => {
+          return await this.isPanelOpen(sectionId);
+        });
       },
       async closePanel(
         sectionId: NavigationId,
@@ -234,6 +248,7 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
         log.debug('SolutionNavigation.sidenav.closePanel', sectionId);
 
         const isOpen = await this.isPanelOpen(sectionId);
+        log.debug('SolutionNavigation.sidenav.closePanel isOpen', isOpen);
         if (!isOpen) return;
 
         const panelOpenerBtn = await testSubjects.find(
@@ -241,6 +256,9 @@ export function SolutionNavigationProvider(ctx: Pick<FtrProviderContext, 'getSer
           TIMEOUT_CHECK
         );
 
+        // after panel is opened, it takes a bit of time for the button to be clickable to close it
+        // the delay is needed to differentiate between the click to close and the redundant click to open after it was opened by hover
+        await common.sleep(1000);
         await panelOpenerBtn.click();
       },
       async isCollapsed() {

@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
 
         // open Infrastructure panel and navigate to some link inside the panel
-        await solutionNavigation.sidenav.openPanel('metrics', { button: 'link' });
+        await solutionNavigation.sidenav.openPanel('metrics', { button: 'link', action: 'hover' });
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
           expect(isOpen).to.be(true);

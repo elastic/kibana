@@ -156,11 +156,14 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   );
 
   const { onMouseEnter, onMouseLeave } = useHoverOpener({
-    onOpen: (e: React.MouseEvent) => {
-      if (selectedNode?.id === item.id) return;
-      lastOpenByHoverTS.current = Date.now();
-      openPanel(item, e.target as Element);
-    },
+    onOpen: useCallback(
+      (e: React.MouseEvent) => {
+        if (selectedNode?.id === item.id) return;
+        lastOpenByHoverTS.current = Date.now();
+        openPanel(item, e.target as Element);
+      },
+      [item, openPanel, selectedNode?.id]
+    ),
   });
 
   if (!hasLandingPage) {
@@ -244,7 +247,8 @@ const useHoverOpener = ({ onOpen }: { onOpen: (e: React.MouseEvent) => void }) =
   const onMouseLeave = useCallback((event: React.MouseEvent) => {
     clearTimers();
     closeTimer.current = window.setTimeout(() => {
-      // TODO?
+      // for now we don't close the panel on mouse leave
+      // because currently we share the opened state with the panels opened by click
     }, HOVER_CLOSE_DELAY);
   }, []);
 
