@@ -521,6 +521,23 @@ export default function ({ getService }: FtrProviderContext) {
         // cleanup
         await deleteTemplates([{ name: templateName }]);
       });
+
+      it('should simulate an index template by name with a related data stream', async () => {
+        const dataStreamName = `test-foo`;
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName);
+
+        await createTemplate({ ...payload, dataStream: {} }).expect(200);
+
+        // Matches index template
+        await es.indices.createDataStream({ name: dataStreamName });
+
+        await simulateTemplateByName(templateName).expect(200);
+
+        // cleanup
+        await deleteTemplates([{ name: templateName }]);
+        await es.indices.deleteDataStream({ name: dataStreamName });
+      });
     });
   });
 }
