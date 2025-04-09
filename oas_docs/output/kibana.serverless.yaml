@@ -14249,6 +14249,24 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        required_versions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              percentage:
+                                description: Target percentage of agents to auto upgrade
+                                maximum: 100
+                                minimum: 0
+                                type: number
+                              version:
+                                description: Target version for automatic agent upgrade
+                                type: string
+                            required:
+                              - version
+                              - percentage
+                          nullable: true
+                          type: array
                         revision:
                           type: number
                         schema_version:
@@ -14517,6 +14535,24 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                required_versions:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      percentage:
+                        description: Target percentage of agents to auto upgrade
+                        maximum: 100
+                        minimum: 0
+                        type: number
+                      version:
+                        description: Target version for automatic agent upgrade
+                        type: string
+                    required:
+                      - version
+                      - percentage
+                  nullable: true
+                  type: array
                 space_ids:
                   items:
                     type: string
@@ -15097,6 +15133,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -15769,6 +15823,24 @@ paths:
                                   - created_at
                                   - created_by
                               type: array
+                        required_versions:
+                          items:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              percentage:
+                                description: Target percentage of agents to auto upgrade
+                                maximum: 100
+                                minimum: 0
+                                type: number
+                              version:
+                                description: Target version for automatic agent upgrade
+                                type: string
+                            required:
+                              - version
+                              - percentage
+                          nullable: true
+                          type: array
                         revision:
                           type: number
                         schema_version:
@@ -16421,6 +16493,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -16571,6 +16661,8 @@ paths:
                               type: string
                             memory:
                               type: string
+                bumpRevision:
+                  type: boolean
                 data_output_id:
                   nullable: true
                   type: string
@@ -16688,6 +16780,24 @@ paths:
                   description: Override settings that are defined in the agent policy. Input settings cannot be overridden. The override option should be used only in unusual circumstances and not as a routine procedure.
                   nullable: true
                   type: object
+                required_versions:
+                  items:
+                    additionalProperties: false
+                    type: object
+                    properties:
+                      percentage:
+                        description: Target percentage of agents to auto upgrade
+                        maximum: 100
+                        minimum: 0
+                        type: number
+                      version:
+                        description: Target version for automatic agent upgrade
+                        type: string
+                    required:
+                      - version
+                      - percentage
+                  nullable: true
+                  type: array
                 space_ids:
                   items:
                     type: string
@@ -17268,6 +17378,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -17940,6 +18068,24 @@ paths:
                                 - created_at
                                 - created_by
                             type: array
+                      required_versions:
+                        items:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            percentage:
+                              description: Target percentage of agents to auto upgrade
+                              maximum: 100
+                              minimum: 0
+                              type: number
+                            version:
+                              description: Target version for automatic agent upgrade
+                              type: string
+                          required:
+                            - version
+                            - percentage
+                        nullable: true
+                        type: array
                       revision:
                         type: number
                       schema_version:
@@ -19186,6 +19332,11 @@ paths:
                             type: string
                           nullable: true
                           type: array
+                        upgrade_attempts:
+                          items:
+                            type: string
+                          nullable: true
+                          type: array
                         upgrade_details:
                           additionalProperties: false
                           type: object
@@ -19650,6 +19801,11 @@ paths:
                           type: string
                         nullable: true
                         type: array
+                      upgrade_attempts:
+                        items:
+                          type: string
+                        nullable: true
+                        type: array
                       upgrade_details:
                         additionalProperties: false
                         type: object
@@ -19990,6 +20146,11 @@ paths:
                             - input
                             - output
                             - other
+                          type: string
+                        nullable: true
+                        type: array
+                      upgrade_attempts:
+                        items:
                           type: string
                         nullable: true
                         type: array
@@ -20610,6 +20771,8 @@ paths:
                         expiration:
                           type: string
                         hasRolloutPeriod:
+                          type: boolean
+                        is_automatic:
                           type: boolean
                         latestErrors:
                           items:
@@ -39363,8 +39526,37 @@ paths:
                                 minLength: 1
                                 type: string
                               type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - kql
+                              type: array
                           required:
                             - dashboards
+                            - queries
                         - type: object
                           properties:
                             stream:
@@ -40423,8 +40615,37 @@ paths:
                                 minLength: 1
                                 type: string
                               type: array
+                            queries:
+                              items:
+                                allOf:
+                                  - type: object
+                                    properties:
+                                      id:
+                                        minLength: 1
+                                        type: string
+                                      title:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - id
+                                      - title
+                                  - type: object
+                                    properties:
+                                      kql:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          query:
+                                            minLength: 1
+                                            type: string
+                                        required:
+                                          - query
+                                    required:
+                                      - kql
+                              type: array
                           required:
                             - dashboards
+                            - queries
                         - type: object
                           properties:
                             stream:
@@ -41336,8 +41557,37 @@ paths:
                             minLength: 1
                             type: string
                           type: array
+                        queries:
+                          items:
+                            allOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    minLength: 1
+                                    type: string
+                                  title:
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - id
+                                  - title
+                              - type: object
+                                properties:
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - query
+                                required:
+                                  - kql
+                          type: array
                       required:
                         - dashboards
+                        - queries
                     - type: object
                       properties:
                         stream:
@@ -43776,6 +44026,243 @@ paths:
                 - not: {}
       responses: {}
       summary: Link a dashboard to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/queries:
+    get:
+      description: Fetches all queries linked to a stream that are visible to the current user in the current space.
+      operationId: get-streams-name-queries
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Get stream queries
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/queries/_bulk:
+    post:
+      description: Bulk update queries of a stream. Can add new queries and delete existing ones.
+      operationId: post-streams-name-queries-bulk
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                operations:
+                  items:
+                    anyOf:
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          index:
+                            allOf:
+                              - type: object
+                                properties:
+                                  id:
+                                    minLength: 1
+                                    type: string
+                                  title:
+                                    minLength: 1
+                                    type: string
+                                required:
+                                  - id
+                                  - title
+                              - type: object
+                                properties:
+                                  kql:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      query:
+                                        minLength: 1
+                                        type: string
+                                    required:
+                                      - query
+                                required:
+                                  - kql
+                        required:
+                          - index
+                      - additionalProperties: false
+                        type: object
+                        properties:
+                          delete:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                            required:
+                              - id
+                        required:
+                          - delete
+                  type: array
+              required:
+                - operations
+      responses: {}
+      summary: Bulk update queries
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/queries/{queryId}:
+    delete:
+      description: Remove a query from a stream. Noop if the query is not found on the stream.
+      operationId: delete-streams-name-queries-queryid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: queryId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Remove a query from a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+    put:
+      description: Adds a query to a stream. Noop if the query is already present on the stream.
+      operationId: put-streams-name-queries-queryid
+      parameters:
+        - description: A required header to protect against CSRF attacks
+          in: header
+          name: kbn-xsrf
+          required: true
+          schema:
+            example: 'true'
+            type: string
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: queryId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: false
+              type: object
+              properties:
+                kql:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    query:
+                      minLength: 1
+                      type: string
+                  required:
+                    - query
+                title:
+                  minLength: 1
+                  type: string
+              required:
+                - title
+                - kql
+      responses: {}
+      summary: Upsert a query to a stream
+      tags:
+        - streams
+      x-state: Technical Preview
+  /api/streams/{name}/significant_events:
+    get:
+      description: Read the significant events
+      operationId: get-streams-name-significant-events
+      parameters:
+        - in: path
+          name: name
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: from
+          required: true
+          schema:
+            format: date-time
+            type: string
+        - in: query
+          name: to
+          required: true
+          schema:
+            format: date-time
+            type: string
+        - in: query
+          name: bucketSize
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              anyOf:
+                - additionalProperties: false
+                  type: object
+                  properties: {}
+                - enum:
+                    - 'null'
+                  nullable: true
+                - not: {}
+      responses: {}
+      summary: Read the significant events
       tags:
         - streams
       x-state: Technical Preview

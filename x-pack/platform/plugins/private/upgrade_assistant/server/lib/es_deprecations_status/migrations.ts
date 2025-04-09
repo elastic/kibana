@@ -31,6 +31,7 @@ interface EsDeprecations extends MigrationDeprecationsResponse {
   templates: Record<string, MigrationDeprecationsDeprecation[]>;
   ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
+type DeprecationLevel = 'none' | 'info' | 'warning' | 'critical';
 
 export interface BaseDeprecation {
   index?: string;
@@ -38,7 +39,7 @@ export interface BaseDeprecation {
   details?: string;
   message: string;
   url: string;
-  isCritical: boolean;
+  level: DeprecationLevel;
   metadata?: EsMetadata;
   resolveDuringUpgrade: boolean;
   // these properties apply to index_settings deprecations only
@@ -65,7 +66,7 @@ const createBaseDeprecation = (
     details,
     message,
     url,
-    isCritical: level === 'critical',
+    level,
     metadata: metadata as EsMetadata,
     resolveDuringUpgrade,
   };
@@ -209,7 +210,7 @@ const excludeDeprecation = (
   ) {
     return true;
   } else if (
-    deprecation.isCritical &&
+    deprecation.level === 'critical' &&
     deprecation.type === 'index_settings' &&
     deprecation.isFrozenIndex &&
     correctiveAction?.type === 'reindex'
