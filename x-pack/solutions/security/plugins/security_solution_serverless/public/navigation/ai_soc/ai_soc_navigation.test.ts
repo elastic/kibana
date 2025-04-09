@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAiSocNavigationTree$ } from '../ai_soc_navigation';
+import { createAiSocNavigationTree$ } from './ai_soc_navigation';
 
 describe('createAiSocNavigationTree$', () => {
   it('includes callout section', (done) => {

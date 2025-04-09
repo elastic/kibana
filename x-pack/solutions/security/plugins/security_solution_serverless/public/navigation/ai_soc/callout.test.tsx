@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { AiSocCallout } from '../callout';
-import { CALLOUT_TITLE, CALLOUT_DESCRIPTION, CALLOUT_ARIA_LABEL } from '../translations';
+import { AiSocCallout } from './callout';
+import { CALLOUT_TITLE, CALLOUT_DESCRIPTION, CALLOUT_ARIA_LABEL } from './translations';
 
 describe('AiSocCallout', () => {
   it('renders the callout with correct content', () => {

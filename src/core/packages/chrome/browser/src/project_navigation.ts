@@ -103,10 +103,7 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-/**
- * Defines the type of navigation section
- */
-export type NavigationSection = 'body' | 'footer' | 'callout';
+export type SideNavigationSection = 'body' | 'footer' | 'callout';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
