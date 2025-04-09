@@ -11,9 +11,9 @@ import classNames from 'classnames';
 import React, { useEffect } from 'react';
 import MarkdownIt from 'markdown-it';
 import { memoize } from 'lodash';
-import { getSecureRelForTarget } from '@elastic/eui';
+import { getSecureRelForTarget, useEuiTheme } from '@elastic/eui';
+import { markdownStyles } from './markdownStyles';
 
-import './index.scss';
 /**
  * Return a memoized markdown rendering function that use the specified
  * whiteListedRules and openLinksInNewTab configurations.
@@ -80,6 +80,7 @@ export interface MarkdownProps extends React.HTMLAttributes<HTMLDivElement> {
   openLinksInNewTab?: boolean;
   whiteListedRules?: string[];
   onRender?: () => void;
+  isReversed?: boolean;
 }
 
 export const Markdown = (props: MarkdownProps) => {
@@ -87,14 +88,27 @@ export const Markdown = (props: MarkdownProps) => {
     props.onRender?.();
   }, [props]);
 
-  const { className, markdown = '', openLinksInNewTab, whiteListedRules, ...rest } = props;
-  const classes = classNames('kbnMarkdown__body', className);
+  const {
+    className,
+    markdown = '',
+    openLinksInNewTab,
+    whiteListedRules,
+    isReversed = false,
+    ...rest
+  } = props;
+  const { euiTheme } = useEuiTheme();
+  const classes = classNames(
+    'kbnMarkdown__body',
+    { 'kbnMarkdown__body--reversed': isReversed },
+    className
+  );
   const markdownRenderer = markdownFactory(whiteListedRules, openLinksInNewTab);
   const renderedMarkdown = markdownRenderer(markdown);
   return (
     <div
       {...rest}
       className={classes}
+      css={markdownStyles(euiTheme, isReversed)}
       /*
        * Justification for dangerouslySetInnerHTML:
        * The Markdown Visualization is, believe it or not, responsible for rendering Markdown.
