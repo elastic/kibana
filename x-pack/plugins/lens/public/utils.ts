@@ -116,7 +116,7 @@ export function getActiveVisualizationIdFromDoc(doc?: Document) {
   return doc.visualizationType || null;
 }
 
-export function getInitialDatasourceId(datasourceMap: DatasourceMap, doc?: LensDocument) {
+export function getInitialDatasourceId(datasourceMap: DatasourceMap, doc?: Document) {
   return (doc && getActiveDatasourceIdFromDoc(doc)) || Object.keys(datasourceMap)[0] || null;
 }
 
