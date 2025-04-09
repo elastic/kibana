@@ -8,13 +8,9 @@
  */
 
 import { createHash } from 'crypto';
-import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
+import { IRouter, RequestHandler } from '@kbn/core/server';
 import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
-import type {
-  DataViewsServerPluginStart,
-  DataViewsServerPluginStartDependencies,
-} from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
 import { parseFields, IBody, IQuery, querySchema, validate } from './fields_for';
@@ -26,7 +22,9 @@ export function calculateHash(srcBuffer: Buffer) {
   return hash.digest('hex');
 }
 
-export const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
+export const createHandler: (
+  isRollupsEnabled: () => boolean
+) => RequestHandler<{}, IQuery, IBody> =
   (isRollupsEnabled) => async (context, request, response) => {
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
@@ -140,14 +138,7 @@ export const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQ
     }
   };
 
-export const registerFields = (
-  router: IRouter,
-  getStartServices: StartServicesAccessor<
-    DataViewsServerPluginStartDependencies,
-    DataViewsServerPluginStart
-  >,
-  isRollupsEnabled: () => boolean
-) => {
+export const registerFields = (router: IRouter, isRollupsEnabled: () => boolean) => {
   router.versioned
     .get({
       path,
@@ -165,6 +156,6 @@ export const registerFields = (
         version: '1',
         validate: { request: { query: querySchema }, response: validate.response },
       },
-      handler(isRollupsEnabled)
+      createHandler(isRollupsEnabled)
     );
 };

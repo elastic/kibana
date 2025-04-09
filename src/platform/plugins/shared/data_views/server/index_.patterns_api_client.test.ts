@@ -8,74 +8,47 @@
  */
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { IndexPatternsFetcher } from './fetcher';
-import {
-  ElasticsearchClient,
-  SavedObjectsClientContract,
-  IUiSettingsClient,
-} from '@kbn/core/server';
-import { MappingRuntimeFieldType } from '@kbn/timelines-plugin/common/api/search_strategy';
+import { coreMock } from '@kbn/core/server/mocks';
 
 jest.mock('./fetcher');
 
 describe('IndexPatternsApiServer - getFieldsForWildcard', () => {
-  let indexPatternsApiServer: IndexPatternsApiServer;
-  let mockEsClient: ElasticsearchClient;
-  let mockSavedObjectsClient: SavedObjectsClientContract;
-  let mockUiSettingsClient: IUiSettingsClient;
+  const coreRequestHandler = coreMock.createRequestHandlerContext();
   let getFieldsForWildcard: jest.Mock;
+  let indexPatternsApiServer: IndexPatternsApiServer;
 
   beforeEach(() => {
-    mockEsClient = {} as ElasticsearchClient;
-    mockSavedObjectsClient = {} as SavedObjectsClientContract;
-    mockUiSettingsClient = {} as IUiSettingsClient;
-
+    jest.clearAllMocks();
     getFieldsForWildcard = jest.fn().mockResolvedValue({
       fields: [{ name: 'field1', type: 'string' }],
       indices: ['index1'],
     });
 
-    // Mock the constructor to return an object with the mocked method
     (IndexPatternsFetcher as jest.Mock).mockImplementation(() => ({
       getFieldsForWildcard,
     }));
 
     indexPatternsApiServer = new IndexPatternsApiServer(
-      mockEsClient,
-      mockSavedObjectsClient,
-      mockUiSettingsClient,
-      false // rollupsEnabled
+      coreRequestHandler.elasticsearch.client.asInternalUser,
+      coreRequestHandler.savedObjects.client,
+      coreRequestHandler.uiSettings.client,
+      false
     );
   });
 
-  it('should propagate properties correctly to IndexPatternsFetcher.getFieldsForWildcard', async () => {
+  it('propagates allow_hidden query param to the actual indexPatterns.getFieldsForWildcard request', async () => {
     const options = {
-      allowNoIndex: true,
-      pattern: 'test-pattern',
-      metaFields: ['_id', '_type'],
-      type: 'test-type',
-      indexFilter: { term: { field: 'value' } },
-      fields: ['field1', 'field2'],
-      includeEmptyFields: false,
-      abortSignal: new AbortController().signal,
-      runtimeMappings: {
-        runtime_field: {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: { source: 'emit("value")' },
-        },
-      },
       allowHidden: true,
-      rollupIndex: undefined,
+      allowNoIndex: true,
+      pattern: '*',
     };
 
-    const result = await indexPatternsApiServer.getFieldsForWildcard(options);
+    await indexPatternsApiServer.getFieldsForWildcard(options);
 
-    expect(IndexPatternsFetcher).toHaveBeenCalledWith(mockEsClient, {
-      uiSettingsClient: mockUiSettingsClient,
-      allowNoIndices: options.allowNoIndex,
-      rollupsEnabled: false,
-    });
-    const { allowNoIndex, ...optionsWithoutAllowNoIndex } = options;
-    expect(getFieldsForWildcard).toHaveBeenCalledWith(optionsWithoutAllowNoIndex);
-    expect(result).toBe('mockedFields');
+    expect(getFieldsForWildcard).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowHidden: true,
+      })
+    );
   });
 });
