@@ -9,6 +9,15 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
+
+jest.mock('@kbn/core-saved-objects-migration-server-internal', () => {
+  const actual = jest.requireActual('@kbn/core-saved-objects-migration-server-internal');
+  return {
+    ...actual,
+    REMOVED_TYPES: ['removedType', 'csp_rule_copy', 'final-random-removed-type'],
+  };
+});
 
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
   name: 'unknown',
@@ -46,6 +55,14 @@ describe('SavedObjectTypeRegistry', () => {
       expect(() => {
         registry.registerType(createType({ name: 'typeA' }));
       }).toThrowErrorMatchingInlineSnapshot(`"Type 'typeA' is already registered"`);
+    });
+
+    it.each(REMOVED_TYPES)('throws when trying to register a removed type: %s', (removedType) => {
+      expect(() => {
+        registry.registerType(createType({ name: removedType }));
+      }).toThrowError(
+        `Type '${removedType}' can't be used because it's been added to the removed types`
+      );
     });
 
     it('throws when `management.visibleInManagement` is specified but `management.importableAndExportable` is undefined or false', () => {

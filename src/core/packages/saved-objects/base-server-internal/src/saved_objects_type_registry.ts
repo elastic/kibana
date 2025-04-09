@@ -9,6 +9,7 @@
 
 import { deepFreeze } from '@kbn/std';
 import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
 
 /**
  * Core internal implementation of {@link ISavedObjectTypeRegistry}.
@@ -27,6 +28,9 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   public registerType(type: SavedObjectsType) {
     if (this.types.has(type.name)) {
       throw new Error(`Type '${type.name}' is already registered`);
+    }
+    if (REMOVED_TYPES.includes(type.name)) {
+      throw new Error(`Type '${type.name}' can't be used because it's been added to the removed types`);
     }
     validateType(type);
     this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
