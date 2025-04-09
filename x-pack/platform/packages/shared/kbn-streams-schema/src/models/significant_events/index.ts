@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getSolutionNavigation } from './solution_navigation';
+export * from './api';
