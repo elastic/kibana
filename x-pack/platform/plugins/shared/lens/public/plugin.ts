@@ -70,6 +70,7 @@ import type { ChartType } from '@kbn/visualization-utils';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -143,7 +144,6 @@ import {
 } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   ACTION_CREATE_ESQL_CHART,
   ACTION_EDIT_LENS_EMBEDDABLE,

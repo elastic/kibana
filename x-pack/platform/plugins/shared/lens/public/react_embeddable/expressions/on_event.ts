@@ -55,7 +55,7 @@ export const prepareEventHandler =
     } else if (isLensAlertRule(event)) {
       // TODO: here is where we run the uiActions on the embeddable for the alert rule
       eventHandler = callbacks.onAlertRule;
-       if (shouldExecuteDefaultTriggers) {
+      if (shouldExecuteDefaultTriggers) {
         // this runs the function that we define in addTriggerAction in the plugin.ts file in alertRulesDefinition
         uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
           {
