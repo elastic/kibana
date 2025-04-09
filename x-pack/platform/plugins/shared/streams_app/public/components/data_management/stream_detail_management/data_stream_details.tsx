@@ -90,8 +90,8 @@ export function DataStreamDetails({
               href={
                 (dataStream &&
                   indexManagementLocator?.getRedirectUrl({
-                    page: 'index_list',
-                    filter: `data_stream="${dataStream.name}"`,
+                    page: 'data_stream_index_list',
+                    dataStreamName: dataStream.name,
                   })) ||
                 ''
               }

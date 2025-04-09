@@ -1277,6 +1277,7 @@ export const OUTPUT_INCLUDE_AAD_FIELDS = new Set([
 export const OUTPUT_ENCRYPTED_FIELDS = new Set([
   { key: 'ssl', dangerouslyExposeValue: true },
   { key: 'password', dangerouslyExposeValue: true },
+  { key: 'kibana_api_key', dangerouslyExposeValue: true },
 ]);
 
 export const FLEET_SERVER_HOST_ENCRYPTED_FIELDS = new Set([
