@@ -216,7 +216,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         expect.anything(),
         expect.anything(),
         {
-          agents: agents.slice(0, 2),
+          agents: agents.slice(0, 2), // As theres already one upgrading, and 30% of 11 is 3, we only want two items to be sent for upgrade
           version: '8.18.0',
         }
       );
@@ -258,6 +258,89 @@ describe('AutomaticAgentUpgradeTask', () => {
       await runTask();
 
       expect(mockedSendAutomaticUpgradeAgentsActions).not.toHaveBeenCalled();
+    });
+
+    it('should not take inactive agents into account when checking for upgrade eligibility', async () => {
+      const activeAgents = generateAgents(10, 'agent-policy-1', '8.15.0');
+      const uninstalledAgents = generateAgents(5, 'agent-policy-1', '8.17.3', 'uninstalled');
+
+      mockedGetAgentsByKuery
+        .mockResolvedValueOnce({ total: activeAgents.length } as any) // active agents
+        .mockResolvedValueOnce({ total: 0 } as any); // agents on or updating to target version
+      mockedFetchAllAgentsByKuery
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery([])) // agents marked for retry
+        .mockResolvedValueOnce(getMockFetchAllAgentsByKuery(activeAgents)); // active agents
+
+      await runTask();
+
+      expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        {
+          agents: activeAgents.slice(0, 3),
+          version: '8.18.0',
+        }
+      );
+      expect(mockedSendAutomaticUpgradeAgentsActions).not.toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        { agents: uninstalledAgents, version: '8.18.0' }
+      );
+    });
+
+    it('should correctly round agent counts and not over or undershoot the target', async () => {
+      // need to check that things are being rounded correctly. Each sub-array would be an automatic upgrade on a policy with a breakout of how many of each version should be upgraded
+      // the target percentage is what we want to hit, but the count is what we have with the first step of normal rounding
+      // this tests that the adjustment to ensure we dont go over or under the total amount of agents is working as intended
+      const MOCK_VERSIONS_AND_COUNTS = [
+        [
+          { version: '8.17.3', count: 1, targetPercentage: 33, alreadyUpgrading: 0 }, // 3 way split of 4 agents
+          { version: '8.17.2', count: 1, targetPercentage: 33, alreadyUpgrading: 0 },
+
+          { version: '8.17.1', count: 1, targetPercentage: 34, alreadyUpgrading: 0 },
+        ],
+        [
+          { version: '8.17.3', count: 33, targetPercentage: 33, alreadyUpgrading: 0 }, // 3 way split of 99 agents
+          { version: '8.17.2', count: 33, targetPercentage: 33, alreadyUpgrading: 0 },
+
+          { version: '8.17.1', count: 34, targetPercentage: 34, alreadyUpgrading: 0 },
+        ],
+        [{ version: '8.17.3', count: 60, targetPercentage: 60, alreadyUpgrading: 0 }], // 60% with 99 agents
+        [
+          { version: '8.17.3', count: 13, targetPercentage: 50, alreadyUpgrading: 0 },
+          { version: '8.17.2', count: 13, targetPercentage: 50, alreadyUpgrading: 0 }, // 50% each with 25 agents
+        ],
+      ];
+      const TOTAL_AGENTS_MOCKS = [4, 99, 99, 25]; // how many total agents each array should be using to recalculate the values
+
+      const MOCK_VERSIONS_AND_COUNTS_EXPECTED = [
+        [
+          { version: '8.17.3', count: 2, targetPercentage: 33, alreadyUpgrading: 0 }, // since we were missing one
+          { version: '8.17.2', count: 1, targetPercentage: 33, alreadyUpgrading: 0 }, // we should add one to the lowest
+
+          { version: '8.17.1', count: 1, targetPercentage: 34, alreadyUpgrading: 0 },
+        ],
+        [
+          { version: '8.17.3', count: 32, targetPercentage: 33, alreadyUpgrading: 0 },
+          { version: '8.17.2', count: 33, targetPercentage: 33, alreadyUpgrading: 0 },
+
+          { version: '8.17.1', count: 34, targetPercentage: 34, alreadyUpgrading: 0 },
+        ],
+        [{ version: '8.17.3', count: 59, targetPercentage: 60, alreadyUpgrading: 0 }], // since the 60 above was over, this should come out to 59
+        [
+          { version: '8.17.3', count: 12, targetPercentage: 50, alreadyUpgrading: 0 }, // as theres too many above, it should get reduced by 1
+          { version: '8.17.2', count: 13, targetPercentage: 50, alreadyUpgrading: 0 },
+        ],
+      ];
+      // now assert on each item using the above mocks
+      for (let i = 0; i < MOCK_VERSIONS_AND_COUNTS.length; i++) {
+        const result = await mockTask.adjustAgentCounts(
+          MOCK_VERSIONS_AND_COUNTS[i],
+          TOTAL_AGENTS_MOCKS[i]
+        );
+
+        expect(result).toEqual(MOCK_VERSIONS_AND_COUNTS_EXPECTED[i]);
+      }
     });
 
     it('Should set a rollout duration for upgrade batches bigger than 10 agents', async () => {
