@@ -6545,7 +6545,7 @@
     "@types/node" "*"
     "@types/ws" "*"
 
-"@types/semver@^7", "@types/semver@^7.3.12", "@types/semver@^7.3.4", "@types/semver@^7.5.1", "@types/semver@^7.7.0":
+"@types/semver@^7.3.12", "@types/semver@^7.7.0":
   version "7.7.0"
   resolved "https://registry.yarnpkg.com/@types/semver/-/semver-7.7.0.tgz#64c441bdae033b378b6eef7d0c3d77c329b9378e"
   integrity sha512-k107IF4+Xr7UHjwDc7Cfd6PRQfbdkiRabXGRjo07b4WyPahFBZCZ1sE+BNxYIJPPg73UkfOsVOLwqVc/6ETrIA==
