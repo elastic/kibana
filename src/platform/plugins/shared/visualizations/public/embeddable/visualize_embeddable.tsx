@@ -52,11 +52,10 @@ import { deserializeState, serializeState } from './state';
 import {
   VisualizeApi,
   VisualizeOutputState,
-  VisualizeSavedObjectInputState,
-  VisualizeSavedVisInputState,
   VisualizeSerializedState,
 } from './types';
 import { initializeEditApi } from './initialize_edit_api';
+import { VisParams } from '../types';
 
 export const getVisualizeEmbeddableFactory: (deps: {
   embeddableStart: EmbeddableStart;
@@ -189,39 +188,36 @@ export const getVisualizeEmbeddableFactory: (deps: {
           ...(dynamicActionsManager?.comparators ?? { enhancements: 'skip' }),
           ...titleComparators,
           ...timeRangeComparators,
-          savedObjectId: (a, b) => {
-            if (!a && !b) return true;
-            return a === b;
-          },
-          savedVis: (a, b) => {
-            const visA = a
-              ? {
-                  ...omitBy(a, isEmpty),
-                  data: omitBy(a.data, isNil),
-                  params: omitBy(a.params, isNil),
-                }
-              : {};
-            const visB = b
-              ? {
-                  ...omitBy(b, isEmpty),
-                  data: omitBy(b.data, isNil),
-                  params: omitBy(b.params, isNil),
-                }
-              : {};
-            return isEqual(visA, visB);
-          }
+          savedObjectId: 'skip',
+          savedVis: linkedToLibrary
+            ? 'skip'
+            : (a, b) => {
+              function cleanSavedVis(savedVis?: SerializedVis<VisParams>) {
+                return savedVis
+                  ? {
+                      ...omitBy(savedVis, isEmpty),
+                      data: {
+                        ...omitBy(savedVis.data, isNil),
+                        searchSource: {
+                          ...omitBy(savedVis.data.searchSource, isNil),
+                        }
+                      },
+                      params: omitBy(savedVis.params, isNil),
+                    }
+                  : {};
+              }
+              return isEqual(cleanSavedVis(a), cleanSavedVis(b));
+            }
         };
       },
-      onReset: (lastSaved) => {
-        if (lastSaved && (lastSaved.rawState as VisualizeSavedVisInputState)?.savedVis) {
-          serializedVis$.next((lastSaved.rawState as VisualizeSavedVisInputState)!.savedVis);
-        }
-        if (lastSaved && (lastSaved.rawState as VisualizeSavedObjectInputState)?.savedObjectId) {
-          savedObjectId$.next((lastSaved.rawState as VisualizeSavedObjectInputState)!.savedObjectId);
-        };
+      onReset: async (lastSaved) => {
         dynamicActionsManager?.reinitializeState(lastSaved?.rawState ?? {});
         timeRangeManager.reinitializeState(lastSaved?.rawState);
         titleManager.reinitializeState(lastSaved?.rawState);
+
+        if (!lastSaved) return;
+        const lastSavedRuntimeState = await deserializeState(lastSaved);
+        serializedVis$.next(lastSavedRuntimeState.serializedVis);
       },
     });
 

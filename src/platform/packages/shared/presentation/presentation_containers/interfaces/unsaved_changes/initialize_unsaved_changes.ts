@@ -14,7 +14,7 @@ import {
   areComparatorsEqual,
 } from '@kbn/presentation-publishing';
 import { MaybePromise } from '@kbn/utility-types';
-import { Observable, debounceTime, map, of } from 'rxjs';
+import { Observable, combineLatestWith, debounceTime, map, merge, of } from 'rxjs';
 import { apiHasLastSavedChildState } from '../last_saved_child_state';
 
 const UNSAVED_CHANGES_DEBOUNCE = 100;
@@ -41,11 +41,13 @@ export const initializeUnsavedChanges = <SerializedStateType extends object = ob
     };
   }
   const hasUnsavedChanges$ = anyStateChange$.pipe(
+    combineLatestWith(
+      parentApi.lastSavedStateForChild$(uuid).pipe(map((panelState) => panelState?.rawState))
+    ),
     debounceTime(UNSAVED_CHANGES_DEBOUNCE),
-    map(() => {
-      const latestState = serializeState().rawState;
-      const lastSavedState = parentApi.getLastSavedStateForChild(uuid)?.rawState;
-      return !areComparatorsEqual(getComparators(), lastSavedState, latestState);
+    map(([, lastSavedState]) => {
+      const currentState = serializeState().rawState;
+      return !areComparatorsEqual(getComparators(), lastSavedState, currentState);
     })
   );
 

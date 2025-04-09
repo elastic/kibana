@@ -175,7 +175,7 @@ export const deserializeSavedObjectState = async ({
 
 export const serializeState: (props: {
   serializedVis: SerializedVis;
-  titles: SerializedTitles;
+  titles?: SerializedTitles;
   id?: string;
   savedObjectProperties?: ExtraSavedObjectProperties;
   linkedToLibrary?: boolean;
@@ -190,11 +190,6 @@ export const serializeState: (props: {
   enhancements,
   timeRange,
 }) => {
-  const titlesWithDefaults = {
-    title: '',
-    description: '',
-    ...titles,
-  };
   const { references, serializedSearchSource } = serializeReferences(serializedVis);
 
   // Serialize ONLY the savedObjectId. This ensures that when this vis is loaded again, it will always fetch the
@@ -202,7 +197,7 @@ export const serializeState: (props: {
   if (linkedToLibrary) {
     return {
       rawState: {
-        ...titlesWithDefaults,
+        ...(titles ? titles : {}),
         savedObjectId: id,
         ...(enhancements ? { enhancements } : {}),
         ...(!isEmpty(serializedVis.uiState) ? { uiState: serializedVis.uiState } : {}),
@@ -218,7 +213,7 @@ export const serializeState: (props: {
 
   return {
     rawState: {
-      ...titlesWithDefaults,
+      ...(titles ? titles : {}),
       ...savedObjectProperties,
       ...(enhancements ? { enhancements } : {}),
       ...(timeRange ? { timeRange } : {}),
