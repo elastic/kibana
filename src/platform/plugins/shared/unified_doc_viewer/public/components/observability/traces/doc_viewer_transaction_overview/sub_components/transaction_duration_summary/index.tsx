@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { Duration, DurationDistributionChart } from '@kbn/apm-ui-shared';
 import { FETCH_STATUS, ProcessorEvent } from '@kbn/apm-ui-shared/src/enums';
 import { useRootTransactionContext } from '../../hooks/use_root_transaction';
-import { useTransactionLatencyChart } from '../../hooks/use_transaction_latency_chart';
+import { useTransactionLatencyChart } from '../../hooks/use_tranaction_latency_chart';
 
 export interface TransactionDurationSummaryProps {
   transaction: {

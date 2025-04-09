@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react';
 import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
 import { HistogramItem } from '@kbn/apm-ui-shared/src/typings';
 import { DurationDistributionChartData } from '@kbn/apm-ui-shared';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
 interface GetTransactionDistributionChartDataParams {
   euiTheme: EuiThemeComputed;
