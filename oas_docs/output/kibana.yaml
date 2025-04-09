@@ -8056,6 +8056,11 @@ paths:
                               default: ''
                               description: A short description.
                               type: string
+                            tags:
+                              items:
+                                description: An array of tags applied to this dashboard
+                                type: string
+                              type: array
                             timeRestore:
                               default: false
                               description: Whether to restore time upon viewing this dashboard
@@ -8516,6 +8521,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -8981,6 +8991,11 @@ paths:
                       required:
                         - pause
                         - value
+                    tags:
+                      items:
+                        description: An array of tags applied to this dashboard
+                        type: string
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -9369,6 +9384,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
@@ -9814,6 +9834,11 @@ paths:
                       required:
                         - pause
                         - value
+                    tags:
+                      items:
+                        description: An array of tags applied to this dashboard
+                        type: string
+                      type: array
                     timeFrom:
                       description: An ISO string indicating when to restore time from
                       type: string
@@ -10198,6 +10223,11 @@ paths:
                             required:
                               - pause
                               - value
+                          tags:
+                            items:
+                              description: An array of tags applied to this dashboard
+                              type: string
+                            type: array
                           timeFrom:
                             description: An ISO string indicating when to restore time from
                             type: string
