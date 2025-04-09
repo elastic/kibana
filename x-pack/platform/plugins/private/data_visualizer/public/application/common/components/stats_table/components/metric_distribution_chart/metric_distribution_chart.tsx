@@ -26,6 +26,7 @@ import {
 import { MetricDistributionChartTooltipHeader } from './metric_distribution_chart_tooltip_header';
 import { kibanaFieldFormat } from '../../../utils';
 import { useDataVizChartTheme } from '../../hooks';
+import { useColumnChartStyles } from '../field_data_row/column_chart_styles';
 
 export interface MetricDistributionChartData {
   x: number;
@@ -64,6 +65,8 @@ export const MetricDistributionChart: FC<Props> = ({
 
   const theme = useDataVizChartTheme();
 
+  const styles = useColumnChartStyles();
+
   const headerFormatter: TooltipHeaderFormatter = (tooltipData) => {
     const xValue = tooltipData.value;
     const chartPoint: MetricDistributionChartData | undefined = chartData.find(
@@ -80,10 +83,7 @@ export const MetricDistributionChart: FC<Props> = ({
   };
 
   return (
-    <div
-      data-test-subj="dataVisualizerFieldDataMetricDistributionChart"
-      className="dataGridChart__histogram"
-    >
+    <div data-test-subj="dataVisualizerFieldDataMetricDistributionChart" css={styles.histogram}>
       <Chart size={{ width, height }}>
         <Tooltip headerFormatter={headerFormatter} />
         <Settings

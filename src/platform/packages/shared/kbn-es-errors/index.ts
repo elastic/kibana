@@ -11,6 +11,7 @@ export type { ElasticsearchErrorDetails } from './src/types';
 export {
   isUnauthorizedError,
   isResponseError,
+  isNotFoundError,
   isRequestAbortedError,
   isMaximumResponseSizeExceededError,
 } from './src/errors';
