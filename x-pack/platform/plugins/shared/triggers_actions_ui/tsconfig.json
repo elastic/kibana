@@ -9,8 +9,7 @@
     "public/**/*",
     "common/**/*",
     "config.ts",
-    "../../../../../typings/**/*",
-    "../../../../../src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_rule_from_vis_ui_action"
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",

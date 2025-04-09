@@ -45,6 +45,7 @@ import { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import type { DraggingIdentifier, DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import type { DateRange, LayerType, SortingHint } from '../common/types';
 import type {
   LensSortActionData,
@@ -1405,7 +1406,7 @@ export interface LensTableRowContextMenuEvent {
 
 export interface LensAlertRulesEvent {
   name: 'alertRule';
-  data: unknown;
+  data: AlertRuleFromVisUIActionData;
 }
 
 export type TriggerEvent =
