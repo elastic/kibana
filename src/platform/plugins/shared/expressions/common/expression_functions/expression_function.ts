@@ -42,7 +42,9 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
   /**
    * Opt-in to caching this function. By default function outputs are cached and given the same inputs cached result is returned.
    */
-  allowCache: boolean;
+  allowCache:
+    | boolean
+    | { withSideEffects: (params: Record<string, unknown>, handlers: object) => () => void };
 
   /**
    * Function to run function (context, args)
@@ -52,8 +54,6 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     params: Record<string, unknown>,
     handlers: object
   ) => ExpressionValue;
-
-  sideEffects?: (params: Record<string, unknown>, handlers: object) => () => void;
 
   /**
    * A short help text.
@@ -109,7 +109,6 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
       migrations,
       namespace,
       allowCache,
-      sideEffects,
     } = functionDefinition;
 
     this.name = name;
@@ -117,10 +116,12 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     this.type = type;
     this.aliases = aliases || [];
     this.fn = fn as ExpressionFunction['fn'];
-    this.sideEffects = sideEffects as ExpressionFunction['sideEffects'];
     this.help = help || '';
     this.inputTypes = inputTypes || context?.types;
-    this.allowCache = !!allowCache;
+    this.allowCache =
+      allowCache && typeof allowCache !== 'boolean'
+        ? (allowCache as ExpressionFunction['allowCache'])
+        : Boolean(allowCache);
     this.disabled = disabled || false;
     this.deprecated = !!deprecated;
     this.telemetry = telemetry || ((s, c) => c);

@@ -523,7 +523,7 @@ export class Execution<
         }),
         finalize(() => {
           if (completionFlag && hash) {
-            const sideEffectResult = fn.sideEffects?.(args, this.context);
+            const sideEffectResult = this.#getSideEffectFn(fn, args);
             while (this.functionCache.size >= maxCacheSize) {
               this.functionCache.delete(this.functionCache.keys().next().value);
             }
@@ -744,5 +744,15 @@ export class Execution<
       value: undefined,
       valid: false,
     };
+  }
+
+  #getSideEffectFn<Fn extends ExpressionFunction>(
+    fn: Fn,
+    args: Record<string, unknown>
+  ): undefined | (() => void) {
+    if (!fn.allowCache || typeof fn.allowCache === 'boolean') {
+      return undefined;
+    }
+    return fn.allowCache.withSideEffects?.(args, this.context);
   }
 }
