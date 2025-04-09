@@ -12,12 +12,7 @@ import {
   createEsDocument,
 } from '../../../../../spaces_only/tests/alerting/create_test_data';
 import type { Space } from '../../../../../common/types';
-import {
-  GlobalReadAtSpace1,
-  Space1,
-  Space1AllAtSpace1,
-  SuperuserAtSpace1,
-} from '../../../../scenarios';
+import { Space1, SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../../scenarios';
 import { getUrlPrefix, getEventLog, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import {
@@ -141,203 +136,405 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
       await objectRemover.removeAll();
     });
 
-    // TODO - switch to all scenarios when real APIs available
-    for (const scenario of [
-      GlobalReadAtSpace1,
-      SuperuserAtSpace1,
-      Space1AllAtSpace1,
-    ] /* UserAtSpaceScenarios*/) {
+    for (const scenario of UserAtSpaceScenarios) {
       describe(scenario.id, () => {
         it('should return the correct number of alerts to delete when previewing', async () => {
-          const previewDeleteAllCategoryActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-            });
+          const url = '/internal/alerting/rules/settings/_alert_delete_preview';
 
-          const previewDeleteAllCategoryInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteAllCategoryActiveAlerts = await supertestWithoutAuth
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-            });
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'false',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+            })
+            .send();
 
-          const previewDeleteAllCategoryActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-            });
+          const previewDeleteAllCategoryInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'false',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+          }).toString();
 
-          const previewDeleteObservabilityActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteAllCategoryInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteAllCategoryInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability'],
-            });
+            .send();
 
-          const previewDeleteObservabilityInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability'],
-            });
+          const previewDeleteAllCategoryActiveAndInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+          }).toString();
 
-          const previewDeleteObservabilityActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteAllCategoryActiveAndInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteAllCategoryActiveAndInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability'],
-            });
+            .send();
 
-          const previewDeleteSecurityActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution'],
-            });
+          const previewDeleteObservabilityActiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'false',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'observability',
+          }).toString();
 
-          const previewDeleteSecurityInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteObservabilityActiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteObservabilityActiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution'],
-            });
+            .send();
 
-          const previewDeleteSecurityActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution'],
-            });
+          const previewDeleteObservabilityInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'false',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'observability',
+          }).toString();
 
-          const previewDeleteManagementActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteObservabilityInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteObservabilityInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['management'],
-            });
+            .send();
 
-          const previewDeleteManagementInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['management'],
-            });
+          const previewDeleteObservabilityActiveAndInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'observability',
+          }).toString();
 
-          const previewDeleteManagementActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteObservabilityActiveAndInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteObservabilityActiveAndInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['management'],
-            });
+            .send();
 
-          const previewDeleteMultiCategoryActiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: false,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability', 'management'],
-            });
+          const previewDeleteSecurityActiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'false',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'securitySolution',
+          }).toString();
 
-          const previewDeleteMultiCategoryInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteSecurityActiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(scenario.space.id)}${url}?${previewDeleteSecurityActiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: false,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['observability', 'securitySolution'],
-            });
+            .send();
 
-          const previewDeleteMultiCategoryActiveAndInactiveAlerts = await supertest
-            .post(`${getUrlPrefix(scenario.space.id)}/api/alerts_fixture/preview_alert_deletion`)
+          const previewDeleteSecurityInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'false',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'securitySolution',
+          }).toString();
+
+          const previewDeleteSecurityInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(scenario.space.id)}${url}?${previewDeleteSecurityInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
-            .send({
-              isActiveAlertDeleteEnabled: true,
-              isInactiveAlertDeleteEnabled: true,
-              activeAlertDeleteThreshold: 90,
-              inactiveAlertDeleteThreshold: 90,
-              categoryIds: ['securitySolution', 'management'],
-            });
+            .send();
+
+          const previewDeleteSecurityActiveAndInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'securitySolution',
+          }).toString();
+
+          const previewDeleteSecurityActiveAndInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteSecurityActiveAndInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'foo')
+            .send();
+
+          const previewDeleteManagementActiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'false',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'management',
+          }).toString();
+
+          const previewDeleteManagementActiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(scenario.space.id)}${url}?${previewDeleteManagementActiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'foo')
+            .send();
+
+          const previewDeleteManagementInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'false',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'management',
+          }).toString();
+
+          const previewDeleteManagementInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteManagementInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'foo')
+            .send();
+
+          const previewDeleteManagementActiveAndInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+            category_ids: 'management',
+          }).toString();
+
+          const previewDeleteManagementActiveAndInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteManagementActiveAndInactiveAlertsQuery}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'foo')
+            .send();
+
+          const previewDeleteMultiCategoryActiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'false',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+          });
+          ['observability', 'management'].forEach((category) =>
+            previewDeleteMultiCategoryActiveAlertsQuery.append('category_ids', category)
+          );
+
+          const previewDeleteMultiCategoryActiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteMultiCategoryActiveAlertsQuery.toString()}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'foo')
+            .send();
+
+          const previewDeleteMultiCategoryInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'false',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+          });
+          ['observability', 'securitySolution'].forEach((category) =>
+            previewDeleteMultiCategoryInactiveAlertsQuery.append('category_ids', category)
+          );
+
+          const previewDeleteMultiCategoryInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteMultiCategoryInactiveAlertsQuery.toString()}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'foo')
+            .send();
+
+          const previewDeleteMultiCategoryActiveAndInactiveAlertsQuery = new URLSearchParams({
+            is_active_alert_delete_enabled: 'true',
+            is_inactive_alert_delete_enabled: 'true',
+            active_alert_delete_threshold: '90',
+            inactive_alert_delete_threshold: '90',
+          });
+          ['securitySolution', 'management'].forEach((category) =>
+            previewDeleteMultiCategoryActiveAndInactiveAlertsQuery.append('category_ids', category)
+          );
+
+          const previewDeleteMultiCategoryActiveAndInactiveAlerts = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                scenario.space.id
+              )}${url}?${previewDeleteMultiCategoryActiveAndInactiveAlertsQuery.toString()}`
+            )
+            .auth(scenario.user.username, scenario.user.password)
+            .set('kbn-xsrf', 'foo')
+            .send();
 
           switch (scenario.id) {
-            // case 'no_kibana_privileges at space1':
-            // case 'space_1_all at space2':
-            // case 'space_1_all_with_restricted_fixture at space1':
-            // case 'space_1_all_alerts_none_actions at space1':
-            //   // when preview route is available, expect a forbidden error
-            //   // current test route does not gate on rules settings permissions
-            //   break;
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(previewDeleteAllCategoryActiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteAllCategoryActiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=false&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteAllCategoryInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteAllCategoryInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=false&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteAllCategoryActiveAndInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteAllCategoryActiveAndInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteObservabilityActiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteObservabilityActiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=false&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=observability] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteObservabilityInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteObservabilityInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=false&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=observability] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteObservabilityActiveAndInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteObservabilityActiveAndInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=observability] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteSecurityActiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteSecurityActiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=false&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=securitySolution] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteSecurityInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteSecurityInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=false&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=securitySolution] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteSecurityActiveAndInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteSecurityActiveAndInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=securitySolution] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteManagementActiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteManagementActiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=false&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=management] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteManagementInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteManagementInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=false&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=management] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteManagementActiveAndInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteManagementActiveAndInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=management] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteMultiCategoryActiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteMultiCategoryActiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=false&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=observability&category_ids=management] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteMultiCategoryInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteMultiCategoryInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=false&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=observability&category_ids=securitySolution] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              expect(previewDeleteMultiCategoryActiveAndInactiveAlerts.statusCode).to.eql(403);
+              expect(previewDeleteMultiCategoryActiveAndInactiveAlerts.body).to.eql({
+                error: 'Forbidden',
+                message: `API [GET /internal/alerting/rules/settings/_alert_delete_preview?is_active_alert_delete_enabled=true&is_inactive_alert_delete_enabled=true&active_alert_delete_threshold=90&inactive_alert_delete_threshold=90&category_ids=securitySolution&category_ids=management] is unauthorized for user, this action is granted by the Kibana privileges [read-alert-delete-settings]`,
+                statusCode: 403,
+              });
+
+              break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(previewDeleteAllCategoryActiveAlerts.status).to.eql(200);
-              expect(previewDeleteAllCategoryActiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteAllCategoryActiveAlerts.body.affected_alert_count).to.eql(
                 activeStackAlertsOlderThan90.length +
                   activeO11yAlertsOlderThan90.length +
                   activeSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteAllCategoryInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteAllCategoryInactiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteAllCategoryInactiveAlerts.body.affected_alert_count).to.eql(
                 inactiveStackAlertsOlderThan90.length +
                   inactiveO11yAlertsOlderThan90.length +
                   inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteAllCategoryActiveAndInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteAllCategoryActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(
+                previewDeleteAllCategoryActiveAndInactiveAlerts.body.affected_alert_count
+              ).to.eql(
                 activeStackAlertsOlderThan90.length +
                   activeO11yAlertsOlderThan90.length +
                   activeSecurityAlertsOlderThan90.length +
@@ -347,63 +544,63 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
               );
 
               expect(previewDeleteObservabilityActiveAlerts.status).to.eql(200);
-              expect(previewDeleteObservabilityActiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteObservabilityActiveAlerts.body.affected_alert_count).to.eql(
                 activeO11yAlertsOlderThan90.length
               );
 
               expect(previewDeleteObservabilityInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteObservabilityInactiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteObservabilityInactiveAlerts.body.affected_alert_count).to.eql(
                 inactiveO11yAlertsOlderThan90.length
               );
 
               expect(previewDeleteObservabilityActiveAndInactiveAlerts.status).to.eql(200);
               expect(
-                previewDeleteObservabilityActiveAndInactiveAlerts.body.numAlertsDeleted
+                previewDeleteObservabilityActiveAndInactiveAlerts.body.affected_alert_count
               ).to.eql(activeO11yAlertsOlderThan90.length + inactiveO11yAlertsOlderThan90.length);
 
               expect(previewDeleteSecurityActiveAlerts.status).to.eql(200);
-              expect(previewDeleteSecurityActiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteSecurityActiveAlerts.body.affected_alert_count).to.eql(
                 activeSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteSecurityInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteSecurityInactiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteSecurityInactiveAlerts.body.affected_alert_count).to.eql(
                 inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteSecurityActiveAndInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteSecurityActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteSecurityActiveAndInactiveAlerts.body.affected_alert_count).to.eql(
                 activeSecurityAlertsOlderThan90.length + inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteManagementActiveAlerts.status).to.eql(200);
-              expect(previewDeleteManagementActiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteManagementActiveAlerts.body.affected_alert_count).to.eql(
                 activeStackAlertsOlderThan90.length
               );
 
               expect(previewDeleteManagementInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteManagementInactiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteManagementInactiveAlerts.body.affected_alert_count).to.eql(
                 inactiveStackAlertsOlderThan90.length
               );
 
               expect(previewDeleteManagementActiveAndInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteManagementActiveAndInactiveAlerts.body.numAlertsDeleted).to.eql(
-                activeStackAlertsOlderThan90.length + inactiveStackAlertsOlderThan90.length
-              );
+              expect(
+                previewDeleteManagementActiveAndInactiveAlerts.body.affected_alert_count
+              ).to.eql(activeStackAlertsOlderThan90.length + inactiveStackAlertsOlderThan90.length);
 
               expect(previewDeleteMultiCategoryActiveAlerts.status).to.eql(200);
-              expect(previewDeleteMultiCategoryActiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteMultiCategoryActiveAlerts.body.affected_alert_count).to.eql(
                 activeStackAlertsOlderThan90.length + activeO11yAlertsOlderThan90.length
               );
 
               expect(previewDeleteMultiCategoryInactiveAlerts.status).to.eql(200);
-              expect(previewDeleteMultiCategoryInactiveAlerts.body.numAlertsDeleted).to.eql(
+              expect(previewDeleteMultiCategoryInactiveAlerts.body.affected_alert_count).to.eql(
                 inactiveO11yAlertsOlderThan90.length + inactiveSecurityAlertsOlderThan90.length
               );
 
               expect(previewDeleteMultiCategoryActiveAndInactiveAlerts.status).to.eql(200);
               expect(
-                previewDeleteMultiCategoryActiveAndInactiveAlerts.body.numAlertsDeleted
+                previewDeleteMultiCategoryActiveAndInactiveAlerts.body.affected_alert_count
               ).to.eql(
                 activeStackAlertsOlderThan90.length +
                   activeSecurityAlertsOlderThan90.length +
