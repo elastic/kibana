@@ -49,9 +49,11 @@ export class StreamsPlugin
   public config: StreamsConfig;
   public logger: Logger;
   public server?: StreamsServer;
+  private isDev: boolean;
   private telemtryService = new StreamsTelemetryService();
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
+    this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
