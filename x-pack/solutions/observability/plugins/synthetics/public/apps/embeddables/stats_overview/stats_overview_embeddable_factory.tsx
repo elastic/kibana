@@ -17,9 +17,16 @@ import {
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+  getUnchangingComparator,
+  HasSupportedTriggers,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
+import {
+  DynamicActionsSerializedState,
+  ReactEmbeddableDynamicActionsApi,
+} from '@kbn/embeddable-enhanced-plugin/public/plugin';
+import { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import { MonitorFilters } from '../monitors_overview/types';
 import { SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
@@ -31,14 +38,50 @@ export const getOverviewPanelTitle = () =>
     defaultMessage: 'Synthetics Stats Overview',
   });
 
-export type OverviewEmbeddableState = SerializedTitles & {
-  filters: MonitorFilters;
-};
+export type OverviewEmbeddableState = SerializedTitles &
+  DynamicActionsSerializedState & {
+    filters: MonitorFilters;
+  };
 
 export type StatsOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
   PublishesWritableTitle &
   PublishesTitle &
-  HasEditCapabilities;
+  HasEditCapabilities &
+  HasDynamicActions &
+  HasSupportedTriggers;
+
+type DynamicActionsData = {
+  serializedDynamicActions: DynamicActionsSerializedState;
+  stopDynamicActions?: () => void;
+} & Pick<ReactEmbeddableDynamicActionsApi, 'dynamicActionsApi' | 'dynamicActionsComparator'>;
+
+const getDynamicActionsData = (
+  extractor?: () => ReactEmbeddableDynamicActionsApi
+): DynamicActionsData => {
+  if (extractor) {
+    const {
+      serializeDynamicActions,
+      startDynamicActions,
+      dynamicActionsApi,
+      dynamicActionsComparator,
+    } = extractor();
+    return {
+      serializedDynamicActions: serializeDynamicActions(),
+      stopDynamicActions: startDynamicActions().stopDynamicActions,
+      dynamicActionsApi,
+      dynamicActionsComparator,
+    };
+  }
+
+  return {
+    serializedDynamicActions: {},
+    stopDynamicActions: undefined,
+    dynamicActionsApi: {},
+    dynamicActionsComparator: {
+      enhancements: getUnchangingComparator(),
+    },
+  };
+};
 
 export const getStatsOverviewEmbeddableFactory = (
   getStartServices: StartServicesAccessor<ClientPluginsStart>
@@ -52,7 +95,7 @@ export const getStatsOverviewEmbeddableFactory = (
     deserializeState: (state) => {
       return state.rawState as OverviewEmbeddableState;
     },
-    buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
+    buildEmbeddable: async (state, buildApi, uuid) => {
       const [coreStart, pluginStart] = await getStartServices();
 
       const titleManager = initializeTitleManager(state);
@@ -60,9 +103,28 @@ export const getStatsOverviewEmbeddableFactory = (
       const reload$ = new Subject<boolean>();
       const filters$ = new BehaviorSubject(state.filters);
 
+      const { embeddableEnhanced } = pluginStart;
+      const {
+        dynamicActionsApi,
+        dynamicActionsComparator,
+        serializedDynamicActions,
+        stopDynamicActions,
+      } = getDynamicActionsData(
+        embeddableEnhanced
+          ? () =>
+              embeddableEnhanced.initializeReactEmbeddableDynamicActions(
+                uuid,
+                () => titleManager.api.title$.getValue(),
+                state
+              )
+          : undefined
+      );
+
       const api = buildApi(
         {
           ...titleManager.api,
+          ...dynamicActionsApi,
+          supportedTriggers: () => [],
           defaultTitle$,
           getTypeDisplayName: () =>
             i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
@@ -92,6 +154,7 @@ export const getStatsOverviewEmbeddableFactory = (
               rawState: {
                 ...titleManager.serialize(),
                 filters: filters$.getValue(),
+                ...serializedDynamicActions,
               },
             };
           },
@@ -99,6 +162,7 @@ export const getStatsOverviewEmbeddableFactory = (
         {
           ...titleManager.comparators,
           filters: [filters$, (value) => filters$.next(value)],
+          ...dynamicActionsComparator,
         }
       );
 
@@ -116,6 +180,7 @@ export const getStatsOverviewEmbeddableFactory = (
           useEffect(() => {
             return () => {
               fetchSubscription.unsubscribe();
+              if (stopDynamicActions) stopDynamicActions();
             };
           }, []);
           return (
