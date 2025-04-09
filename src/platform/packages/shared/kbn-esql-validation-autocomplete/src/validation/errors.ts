@@ -443,6 +443,12 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           }
         ),
       };
+    case 'tooManyForks':
+      return {
+        message: i18n.translate('kbn-esql-validation-autocomplete.esql.validation.tooManyForks', {
+          defaultMessage: '[FORK] a query cannot have more than one FORK command.',
+        }),
+      };
   }
   return { message: '' };
 }
@@ -507,6 +513,9 @@ export const errors = {
     errors.byId('unknownColumn', column.location, {
       name: column.name,
     }),
+
+  tooManyForks: (command: ESQLCommand): ESQLMessage =>
+    errors.byId('tooManyForks', command.location, {}),
 
   noAggFunction: (cmd: ESQLCommand, fn: ESQLFunction): ESQLMessage =>
     errors.byId('noAggFunction', fn.location, {
