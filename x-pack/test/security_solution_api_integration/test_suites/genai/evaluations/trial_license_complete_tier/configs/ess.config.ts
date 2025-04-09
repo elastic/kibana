@@ -6,14 +6,17 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
-import { getPreconfiguredConnectorConfig } from '@kbn/gen-ai-functional-testing';
+import { loadConnectorsFromEnvVar } from '../../../../../scripts/genai/vault/manage_secrets';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
     require.resolve('../../../../../config/ess/config.base.trial')
   );
 
-  const preconfiguredConnectors = getPreconfiguredConnectorConfig();
+  const preconfiguredConnectors = loadConnectorsFromEnvVar();
+  const allowedHosts = Object.values(preconfiguredConnectors).map(
+    (connector: any) => connector.config.apiUrl
+  );
 
   return {
     ...functionalConfig.getAll(),
@@ -32,6 +35,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           ),
         '--elasticsearch.hosts=http://localhost:9220',
         `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
+        `--xpack.actions.allowedHosts=${JSON.stringify(allowedHosts)}`,
         `--xpack.securitySolution.enableExperimental=["assistantModelEvaluation"]`,
       ],
     },
