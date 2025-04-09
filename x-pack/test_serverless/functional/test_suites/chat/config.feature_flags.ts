@@ -12,21 +12,20 @@ import { createTestConfig } from '../../config.base';
  * These tests most likely will fail on default MKI project
  */
 export default createTestConfig({
-  serverlessProject: 'oblt',
+  serverlessProject: 'chat',
   junit: {
-    reportName: 'Serverless Observability Feature Flags Functional Tests',
+    reportName: 'Serverless Chat Feature Flags Functional Tests',
   },
-  suiteTags: { exclude: ['skipSvlOblt'] },
+  suiteTags: { exclude: ['skipSvlChat'] },
   // add feature flags
   kbnServerArgs: [
-    '--xpack.infra.enabled=true',
-    '--xpack.infra.featureFlags.customThresholdAlertsEnabled=true',
-    '--xpack.security.roleManagementEnabled=true',
+    // e.g. `--xpack.cloud.id=ES3_FTR_TESTS:ZmFrZS1kb21haW4uY2xkLmVsc3RjLmNvJGZha2Vwcm9qZWN0aWQuZXMkZmFrZXByb2plY3RpZC5rYg==`,
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
-  // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.security.authc.native_roles.enabled=true'],
+  esServerArgs: [],
+
+  apps: {},
 });
