@@ -35,7 +35,7 @@ import { uniq } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ContentPackObjectsList } from './content_pack_objects_list';
-import { contentPreview } from './content/content_preview';
+import { previewContent } from './content/requests';
 import { ContentPackMetadata } from './content_pack_manifest';
 
 export function ExportContentPackFlyout({
@@ -48,7 +48,7 @@ export function ExportContentPackFlyout({
   onExport: () => void;
 }) {
   const {
-    core: { http },
+    core: { http, notifications },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -81,7 +81,7 @@ export function ExportContentPackFlyout({
         }
       );
 
-      const contentPack = await contentPreview({
+      const contentPack = await previewContent({
         http,
         definition,
         file: new File([contentPackRaw], 'archive.zip', { type: 'application/zip' }),
@@ -205,28 +205,36 @@ export function ExportContentPackFlyout({
                   .filter(([, selected]) => selected)
                   .map(([pattern]) => pattern);
 
-                const contentPack = await streamsRepositoryClient.fetch(
-                  'POST /api/streams/{name}/content/export 2023-10-31',
-                  {
-                    params: {
-                      path: { name: definition.stream.name },
-                      body: {
-                        ...manifest,
-                        replaced_patterns: replacedPatterns,
-                        include: {
-                          objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
+                try {
+                  const contentPack = await streamsRepositoryClient.fetch(
+                    'POST /api/streams/{name}/content/export 2023-10-31',
+                    {
+                      params: {
+                        path: { name: definition.stream.name },
+                        body: {
+                          ...manifest,
+                          replaced_patterns: replacedPatterns,
+                          include: {
+                            objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
+                          },
                         },
                       },
-                    },
-                    signal: new AbortController().signal,
-                  }
-                );
+                      signal: new AbortController().signal,
+                    }
+                  );
 
-                saveAs(
-                  new Blob([contentPack], { type: 'application/zip' }),
-                  `${manifest.name}-${manifest.version}.zip`
-                );
-                onExport();
+                  saveAs(
+                    new Blob([contentPack], { type: 'application/zip' }),
+                    `${manifest.name}-${manifest.version}.zip`
+                  );
+                  onExport();
+                } catch (err) {
+                  notifications.toasts.addError(err, {
+                    title: i18n.translate('xpack.streams.failedToExportContentError', {
+                      defaultMessage: 'Failed to export content pack',
+                    }),
+                  });
+                }
               }}
             >
               {i18n.translate('xpack.streams.exportContentPackFlyout.exportContentPack', {

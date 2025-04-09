@@ -24,7 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 import { ContentPackObjectsList } from './content_pack_objects_list';
-import { contentPreview } from './content/content_preview';
+import { importContent, previewContent } from './content/requests';
 import { ContentPackMetadata } from './content_pack_manifest';
 
 export function ImportContentPackFlyout({
@@ -37,7 +37,7 @@ export function ImportContentPackFlyout({
   onImport: () => void;
 }) {
   const {
-    core: { http },
+    core: { http, notifications },
   } = useKibana();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -73,18 +73,28 @@ export function ImportContentPackFlyout({
 
               setFile(archiveFile);
 
-              const contentPackParsed = await contentPreview({
-                http,
-                definition,
-                file: archiveFile,
-              });
+              try {
+                const contentPackParsed = await previewContent({
+                  http,
+                  definition,
+                  file: archiveFile,
+                });
 
-              setManifest({
-                name: contentPackParsed.name,
-                version: contentPackParsed.version,
-                description: contentPackParsed.description,
-              });
-              setContentPackObjects(contentPackParsed.entries);
+                setManifest({
+                  name: contentPackParsed.name,
+                  version: contentPackParsed.version,
+                  description: contentPackParsed.description,
+                });
+                setContentPackObjects(contentPackParsed.entries);
+              } catch (err) {
+                setFile(null);
+
+                notifications.toasts.addError(err, {
+                  title: i18n.translate('xpack.streams.failedToPreviewContentError', {
+                    defaultMessage: 'Failed to preview content pack',
+                  }),
+                });
+              }
             } else {
               setFile(null);
             }
@@ -118,34 +128,34 @@ export function ImportContentPackFlyout({
               disabled={!file || selectedContentPackObjects.length === 0}
               isLoading={isLoading}
               fill
-              onClick={() => {
+              onClick={async () => {
                 if (!file) return;
 
                 setIsLoading(true);
 
-                const body = new FormData();
-                body.append('content', file);
-                body.append(
-                  'include',
-                  JSON.stringify({
-                    objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
-                  })
-                );
-
-                http
-                  .post(`/api/streams/${definition.stream.name}/content/import`, {
-                    body,
-                    headers: {
-                      // Important to be undefined, it forces proper headers to be set for FormData
-                      'Content-Type': undefined,
+                try {
+                  await importContent({
+                    http,
+                    file,
+                    definition,
+                    include: {
+                      objects: { dashboards: selectedContentPackObjects.map(({ id }) => id) },
                     },
-                  })
-                  .then(() => {
-                    setIsLoading(false);
-                    setContentPackObjects([]);
-                    setFile(null);
-                    onImport();
                   });
+
+                  setIsLoading(false);
+                  setContentPackObjects([]);
+                  setFile(null);
+                  onImport();
+                } catch (err) {
+                  setIsLoading(false);
+
+                  notifications.toasts.addError(err, {
+                    title: i18n.translate('xpack.streams.failedToImportContentError', {
+                      defaultMessage: 'Failed to import content pack',
+                    }),
+                  });
+                }
               }}
             >
               {i18n.translate('xpack.streams.importContentPackFlyout.importToStream', {

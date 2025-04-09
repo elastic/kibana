@@ -5,11 +5,37 @@
  * 2.0.
  */
 
-import { ContentPack } from '@kbn/content-packs-schema';
+import { ContentPack, ContentPackIncludedObjects } from '@kbn/content-packs-schema';
 import { HttpSetup } from '@kbn/core/public';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
 
-export async function contentPreview({
+export async function importContent({
+  file,
+  http,
+  definition,
+  include,
+}: {
+  file: File;
+  http: HttpSetup;
+  definition: IngestStreamGetResponse;
+  include: ContentPackIncludedObjects;
+}) {
+  const body = new FormData();
+  body.append('content', file);
+  body.append('include', JSON.stringify(include));
+
+  const response = await http.post(`/api/streams/${definition.stream.name}/content/import`, {
+    body,
+    headers: {
+      // Important to be undefined, it forces proper headers to be set for FormData
+      'Content-Type': undefined,
+    },
+  });
+
+  return response;
+}
+
+export async function previewContent({
   http,
   file,
   definition,
