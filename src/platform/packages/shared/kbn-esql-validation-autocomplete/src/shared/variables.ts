@@ -142,7 +142,7 @@ export function collectVariables(
     })
     .on('visitCommand', (ctx) => {
       const ret = [];
-      if (['row', 'eval', 'stats', 'inlinestats', 'metrics', 'rename'].includes(ctx.node.name)) {
+      if (['row', 'eval', 'stats', 'inlinestats', 'ts', 'rename'].includes(ctx.node.name)) {
         ret.push(...ctx.visitArgs());
       }
       if (['stats', 'inlinestats', 'enrich'].includes(ctx.node.name)) {
