@@ -58,42 +58,56 @@ export const EditContextPanel: React.FC = () => {
     <EuiPanel data-test-subj="editContextPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" gutterSize="m">
+          <EuiFlexGroup direction="column" gutterSize="m">
             <EuiFlexItem>
               <EuiText>
-                <FormattedMessage
-                  id="xpack.searchPlayground.editContext.docsRetrievedCount"
-                  defaultMessage="Number of documents sent to LLM"
-                />
+                <h5>
+                  <FormattedMessage
+                    id="xpack.searchPlayground.documentsSize.table.title"
+                    defaultMessage="Documents"
+                  />
+                </h5>
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiButtonGroup
-                legend="Number of documents sent"
-                isFullWidth={true}
-                buttonSize="compressed"
-                options={[
-                  {
-                    id: '1',
-                    label: '1',
-                  },
-                  {
-                    id: '3',
-                    label: '3',
-                  },
-                  {
-                    id: '5',
-                    label: '5',
-                  },
-                  {
-                    id: '10',
-                    label: '10',
-                  },
-                ]}
-                idSelected={String(docSize)}
-                onChange={(id) => handleDocSizeButtonGroupChange(id)}
-              />
-            </EuiFlexItem>
+            <EuiFlexGroup direction="row" gutterSize="m" alignItems="center">
+              <EuiFlexItem>
+                <EuiText size="xs">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.searchPlayground.editContext.docsRetrievedCount"
+                      defaultMessage="Number of documents sent to LLM"
+                    />
+                  </strong>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiButtonGroup
+                  legend="Number of documents sent"
+                  isFullWidth={true}
+                  buttonSize="compressed"
+                  options={[
+                    {
+                      id: '1',
+                      label: '1',
+                    },
+                    {
+                      id: '3',
+                      label: '3',
+                    },
+                    {
+                      id: '5',
+                      label: '5',
+                    },
+                    {
+                      id: '10',
+                      label: '10',
+                    },
+                  ]}
+                  idSelected={String(docSize)}
+                  onChange={(id) => handleDocSizeButtonGroupChange(id)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
