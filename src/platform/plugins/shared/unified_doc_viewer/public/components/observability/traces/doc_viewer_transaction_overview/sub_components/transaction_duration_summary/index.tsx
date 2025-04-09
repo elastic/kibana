@@ -125,6 +125,7 @@ export function TransactionDurationSummary({
                 status={latencyChartLoading ? FETCH_STATUS.LOADING : FETCH_STATUS.SUCCESS}
                 showAxisTitle={false}
                 eventType={ProcessorEvent.transaction} // TODO PUEDE SER SPAN?
+                dataTestSubPrefix="docViewerTransactionOverview"
               />
             )}
           </EuiFlexItem>
