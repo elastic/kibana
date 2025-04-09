@@ -13,6 +13,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useLoadConnectors } from '../../hooks/use_load_connectors';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { LLMs } from '../../../common/types';
 
 export const ConnectLLMButton: React.FC = () => {
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);
@@ -55,10 +56,17 @@ export const ConnectLLMButton: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText color="success">
-              <FormattedMessage
-                id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
-                defaultMessage="LLM connected"
-              />
+              {connectors.some((connector) => connector.type === LLMs.inference) ? (
+                <FormattedMessage
+                  id="xpack.searchPlayground.setupPage.elasticManagedLlmConnectedButtonLabel"
+                  defaultMessage="Elastic Managed LLM connected"
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.searchPlayground.setupPage.llmConnectedButtonLabel"
+                  defaultMessage="LLM connected"
+                />
+              )}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
