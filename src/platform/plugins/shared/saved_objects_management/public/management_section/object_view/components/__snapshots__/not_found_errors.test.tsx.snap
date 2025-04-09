@@ -29,7 +29,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern type 1`] =
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"
-        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -80,7 +80,7 @@ exports[`NotFoundErrors component renders correctly for index-pattern-field type
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"
-        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -131,7 +131,7 @@ exports[`NotFoundErrors component renders correctly for search type 1`] = `
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"
-        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
         rel="noopener noreferrer"
         target="_blank"
       >
@@ -180,7 +180,7 @@ exports[`NotFoundErrors component renders correctly for unknown type 1`] = `
       <a
         aria-label="Saved objects APIs"
         class="euiLink emotion-euiLink-primary"
-        href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/saved-objects-api.html#saved-objects-api"
+        href="https://www.elastic.co/docs/api/doc/kibana/group/endpoint-saved-objects"
         rel="noopener noreferrer"
         target="_blank"
       >
