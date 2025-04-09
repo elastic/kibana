@@ -23611,7 +23611,7 @@ components:
           does_set_recovery_context: true
           enabled_in_license: true
           has_alerts_mappings: true
-          has_fields_for_a_a_d: false
+          has_fields_for_a_a_d: true
           id: xpack.ml.anomaly_detection_alert
           is_exportable: true
           minimum_license_required: platinum

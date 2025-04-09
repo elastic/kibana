@@ -8,19 +8,16 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import {
-  fetchRuleTypeAadTemplateFields,
-  getDescription,
-} from './fetch_rule_type_aad_template_fields';
+import { fetchRuleTypeAlertFields, getDescription } from './fetch_rule_type_alert_fields';
 import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 
 const http = httpServiceMock.createStartContract();
 
-describe('fetchRuleTypeAadTemplateFields', () => {
+describe('fetchRuleTypeAlertFields', () => {
   test('should call aad fields endpoint with the correct params', async () => {
     http.get.mockResolvedValueOnce(['mockData']);
 
-    const result = await fetchRuleTypeAadTemplateFields({
+    const result = await fetchRuleTypeAlertFields({
       http,
       ruleTypeId: 'test-rule-type-id',
     });
@@ -28,10 +25,12 @@ describe('fetchRuleTypeAadTemplateFields', () => {
     expect(result).toEqual(['mockData']);
     expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
-        "/internal/rac/alerts/aad_fields",
+        "/internal/rac/alerts/browser_fields",
         Object {
           "query": Object {
-            "ruleTypeId": "test-rule-type-id",
+            "ruleTypeIds": Array [
+              "test-rule-type-id",
+            ],
           },
         },
       ]
