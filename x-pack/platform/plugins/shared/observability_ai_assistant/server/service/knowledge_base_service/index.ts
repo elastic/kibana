@@ -491,10 +491,18 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    return getElserModelStatus({
+    const { enabled, errorMessage, endpoint, modelStats, kbState } = await getElserModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
+
+    return {
+      enabled,
+      errorMessage,
+      endpoint,
+      modelStats,
+      kbState,
+    };
   };
 }

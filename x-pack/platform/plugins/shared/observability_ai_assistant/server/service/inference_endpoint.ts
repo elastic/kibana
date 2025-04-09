@@ -9,6 +9,11 @@ import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import moment from 'moment';
+import {
+  InferenceInferenceEndpointInfo,
+  MlTrainedModelStats,
+} from '@elastic/elasticsearch/lib/api/types';
+import { KnowledgeBaseState } from '../../common';
 import { ObservabilityAIAssistantConfig } from '../config';
 
 export const AI_ASSISTANT_KB_INFERENCE_ID = 'obs_ai_assistant_kb_inference';
@@ -98,7 +103,13 @@ export async function getElserModelStatus({
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
-}) {
+}): Promise<{
+  enabled: boolean;
+  endpoint?: InferenceInferenceEndpointInfo;
+  modelStats?: MlTrainedModelStats;
+  errorMessage?: string;
+  kbState: KnowledgeBaseState;
+}> {
   let errorMessage = '';
   const endpoint = await getInferenceEndpoint({
     esClient,
@@ -111,7 +122,7 @@ export async function getElserModelStatus({
 
   const enabled = config.enableKnowledgeBase;
   if (!endpoint) {
-    return { ready: false, enabled, errorMessage };
+    return { enabled, errorMessage, kbState: KnowledgeBaseState.NOT_INSTALLED };
   }
 
   const modelId = endpoint.service_settings?.model_id;
@@ -123,27 +134,39 @@ export async function getElserModelStatus({
     });
 
   if (!modelStats) {
-    return { ready: false, enabled, errorMessage };
+    return { enabled, errorMessage, kbState: KnowledgeBaseState.ERROR };
   }
 
   const elserModelStats = modelStats.trained_model_stats.find(
     (stats) => stats.deployment_stats?.deployment_id === AI_ASSISTANT_KB_INFERENCE_ID
   );
-  const deploymentState = elserModelStats?.deployment_stats?.state;
-  const allocationState = elserModelStats?.deployment_stats?.allocation_status?.state;
-  const allocationCount =
-    elserModelStats?.deployment_stats?.allocation_status?.allocation_count ?? 0;
-  const ready =
-    deploymentState === 'started' && allocationState === 'fully_allocated' && allocationCount > 0;
+
+  let kbState: KnowledgeBaseState;
+
+  if (!modelStats) {
+    kbState = KnowledgeBaseState.PENDING_MODEL_DEPLOYMENT;
+  } else if (elserModelStats.deployment_stats?.state === 'failed') {
+    kbState = KnowledgeBaseState.ERROR;
+  } else if (
+    elserModelStats?.deployment_stats?.state === 'starting' &&
+   
+    elserModelStats?.deployment_stats?.allocation_status?.allocation_count === 0
+  ) {
+    kbState = KnowledgeBaseState.DEPLOYING_MODEL;
+  } else if (
+    modelStats?.deployment_stats?.state === 'started' &&
+    modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
+    modelStats?.deployment_stats?.allocation_status?.allocation_count > 0
+  ) {
+    kbState = KnowledgeBaseState.READY;
+  } else {
+    kbState = KnowledgeBaseState.ERROR;
+  }
 
   return {
     endpoint,
-    ready,
     enabled,
-    model_stats: {
-      allocation_count: allocationCount,
-      deployment_state: deploymentState,
-      allocation_state: allocationState,
-    },
+    modelStats,
+    kbState,
   };
 }
