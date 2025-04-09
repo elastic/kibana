@@ -52,7 +52,11 @@ function InstructionTabs({
   };
 
   return (
-    <EuiTabs style={{ padding: `0 ${euiTheme.size.l}` }}>
+    <EuiTabs
+      css={css`
+        padding: 0 ${euiTheme.size.l};
+      `}
+    >
       {agentTabs.map((tab) => (
         <EuiTab
           key={tab.id}
