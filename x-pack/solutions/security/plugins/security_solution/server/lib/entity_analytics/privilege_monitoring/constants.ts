@@ -9,7 +9,7 @@ export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_analytics:monitoring:privileges:engine';
 export const VERSION = '1.0.0';
 export const TIMEOUT = '10m';
-export const INTERVAL = '1m';
+export const INTERVAL = '10m';
 
 export const PRIVILEGE_MONITORING_ENGINE_STATUS = {
   INSTALLING: 'installing',
