@@ -11,7 +11,7 @@ import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { RuleTypeWithDescription } from '../common/types';
 
-export const hasFieldsForAad = ({
+export const hasAlertsFields = ({
   ruleType,
   consumer,
   validConsumers,
@@ -21,9 +21,7 @@ export const hasFieldsForAad = ({
   validConsumers: RuleCreationValidConsumer[];
 }) => {
   const hasAlertHasData = ruleType
-    ? ruleType.hasFieldsForAAD ||
-      ruleType.producer === AlertConsumers.SIEM ||
-      ruleType.hasAlertsMappings
+    ? ruleType.producer === AlertConsumers.SIEM || ruleType.hasAlertsMappings
     : false;
 
   return !!hasAlertHasData;

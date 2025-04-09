@@ -13,7 +13,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { EcsFlat } from '@elastic/ecs';
 
-import { useLoadRuleTypeAadTemplateField } from './use_load_rule_type_aad_template_fields';
+import { useLoadRuleTypeAlertFields } from './use_load_rule_type_alert_fields';
 
 const queryClient = new QueryClient();
 
@@ -31,7 +31,7 @@ const fieldsMetadataMock = {
   ),
 };
 
-describe('useLoadRuleTypeAadTemplateFields', () => {
+describe('useLoadRuleTypeAlertFields', () => {
   beforeEach(() => {
     http.get.mockResolvedValue([
       {
@@ -50,7 +50,7 @@ describe('useLoadRuleTypeAadTemplateFields', () => {
   test('should call API endpoint with the correct parameters', async () => {
     const { result } = renderHook(
       () =>
-        useLoadRuleTypeAadTemplateField({
+        useLoadRuleTypeAlertFields({
           http,
           fieldsMetadata: fieldsMetadataMock,
           ruleTypeId: 'ruleTypeId',
@@ -63,8 +63,8 @@ describe('useLoadRuleTypeAadTemplateFields', () => {
       return expect(result.current.isInitialLoading).toEqual(false);
     });
 
-    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/aad_fields', {
-      query: { ruleTypeId: 'ruleTypeId' },
+    expect(http.get).toHaveBeenLastCalledWith('/internal/rac/alerts/browser_fields', {
+      query: { ruleTypeIds: ['ruleTypeId'] },
     });
 
     expect(result.current.data).toMatchInlineSnapshot(`
