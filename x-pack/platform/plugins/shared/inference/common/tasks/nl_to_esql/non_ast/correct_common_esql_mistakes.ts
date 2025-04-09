@@ -94,6 +94,42 @@ function removeColumnQuotesAndEscape(column: string) {
   return '`' + plainColumnIdentifier + '`';
 }
 
+/**
+ * Replaces quotes in function argument if present, e.g.
+ * @example
+ * // Example 1: Without quotes
+ * escapeColumnsInFunctions('MIN(total_bytes)'); // 'MIN(total_bytes)'
+ *
+ * @example
+ * // Example 2: With quotes
+ * escapeColumnsInFunctions('MIN("Total Bytes")'); // 'MIN(`Total Bytes`)'
+ */
+function escapeColumnsInFunctions(string: string): string {
+  const regex = /([A-Za-z_]+)\s*\(([^()]*?)\)/g;
+
+  return string.replace(regex, (match: string, functionName: string, args: string) => {
+    const escapedArgs = args.length
+      ? args
+          .split(',')
+          .map((arg, index) => {
+            const trimmedArg = arg.trim();
+            if (index > 0) {
+              // FIXME
+              return trimmedArg;
+            }
+            // If the string is not wrapped in quotes, return it as is
+            if (!trimmedArg.match(/^["'].*["']$/)) {
+              return trimmedArg;
+            }
+            return removeColumnQuotesAndEscape(trimmedArg);
+          })
+          .join(', ')
+      : args;
+
+    return `${functionName}(${escapedArgs})`;
+  });
+}
+
 function replaceAsKeywordWithAssignments(command: string) {
   return command.replaceAll(/^STATS\s*(.*)/g, (__, statsOperations: string) => {
     return `STATS ${statsOperations.replaceAll(
@@ -113,10 +149,12 @@ function escapeColumns(line: string) {
   const escapedBody = split(body.trim(), ',')
     .map((statement) => {
       const [lhs, rhs] = split(statement, '=');
+
       if (!rhs) {
         return lhs;
       }
-      return `${removeColumnQuotesAndEscape(lhs)} = ${rhs}`;
+      const escapedRhs = escapeColumnsInFunctions(rhs);
+      return `${removeColumnQuotesAndEscape(lhs)} = ${escapedRhs}`;
     })
     .join(', ');
 

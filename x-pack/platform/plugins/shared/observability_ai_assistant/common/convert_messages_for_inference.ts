@@ -16,7 +16,7 @@ import { Message, MessageRole } from '.';
 
 function safeJsonParse(jsonString: string | undefined, logger: Pick<Logger, 'error'>) {
   try {
-    return JSON.parse(jsonString ?? '{}');
+    return JSON.parse(jsonString || '{}');
   } catch (error) {
     logger.error(
       `Failed to parse function call arguments when converting messages for inference: ${error}`
