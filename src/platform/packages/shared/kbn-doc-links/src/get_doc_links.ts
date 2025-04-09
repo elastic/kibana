@@ -605,48 +605,34 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${OBSERVABILITY_DOCS}obs-ai-assistant.html`,
     },
     alerting: {
-      guide: isServerless
-        ? `${SERVERLESS_DOCS}rules.html`
-        : `${KIBANA_DOCS}create-and-manage-rules.html`,
-      actionTypes: isServerless
-        ? `${SERVERLESS_DOCS}action-connectors.html`
-        : `${KIBANA_DOCS}action-types.html`,
-      apmRulesErrorCount: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-error-count-threshold-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      apmRulesTransactionDuration: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-latency-threshold-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      apmRulesTransactionError: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-failed-transaction-rate-threshold-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      apmRulesAnomaly: isServerless
-        ? `${SERVERLESS_DOCS}observability-create-anomaly-alert-rule.html`
-        : `${KIBANA_DOCS}apm-alerts.html`,
-      emailAction: `${KIBANA_DOCS}email-action-type.html`,
-      emailActionConfig: `${KIBANA_DOCS}email-action-type.html`,
-      emailExchangeClientSecretConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-secret`,
-      emailExchangeClientIdConfig: `${KIBANA_DOCS}email-action-type.html#exchange-client-tenant-id`,
-      generalSettings: `${KIBANA_DOCS}alert-action-settings-kb.html#general-alert-action-settings`,
-      indexAction: `${KIBANA_DOCS}index-action-type.html`,
-      esQuery: `${KIBANA_DOCS}rule-type-es-query.html`,
-      indexThreshold: `${KIBANA_DOCS}rule-type-index-threshold.html`,
-      maintenanceWindows: isServerless
-        ? `${SERVERLESS_DOCS}maintenance-windows.html`
-        : `${KIBANA_DOCS}maintenance-windows.html`,
-      pagerDutyAction: `${KIBANA_DOCS}pagerduty-action-type.html`,
-      preconfiguredConnectors: `${KIBANA_DOCS}pre-configured-connectors.html`,
-      preconfiguredAlertHistoryConnector: `${KIBANA_DOCS}pre-configured-connectors.html#preconfigured-connector-alert-history`,
-      serviceNowAction: `${KIBANA_DOCS}servicenow-action-type.html#configuring-servicenow`,
-      serviceNowSIRAction: `${KIBANA_DOCS}servicenow-sir-action-type.html`,
-      setupPrerequisites: `${KIBANA_DOCS}alerting-setup.html#alerting-prerequisites`,
-      slackAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-webhook`,
-      slackApiAction: `${KIBANA_DOCS}slack-action-type.html#configuring-slack-web-api`,
-      teamsAction: `${KIBANA_DOCS}teams-action-type.html#configuring-teams`,
-      connectors: `${KIBANA_DOCS}action-types.html`,
+      guide: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/create-manage-rules`,
+      actionTypes: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
+      apmRulesErrorCount: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-error-count-threshold-rule`,
+      apmRulesTransactionDuration: `${ELASTIC_DOCS}solutions/observability/incident-management/create-latency-threshold-rule`,
+      apmRulesTransactionError: `${ELASTIC_DOCS}solutions/observability/incident-management/create-failed-transaction-rate-threshold-rule`,
+      apmRulesAnomaly: `${ELASTIC_DOCS}solutions/observability/incident-management/create-an-apm-anomaly-rule`,
+      emailAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
+      emailActionConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type`,
+      emailExchangeClientSecretConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type#exchange-client-secret`,
+      emailExchangeClientIdConfig: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/email-action-type#exchange-client-tenant-id`,
+      generalSettings: `${ELASTIC_DOCS}reference/kibana/configuration-reference/alerting-settings#general-alert-action-settings`,
+      indexAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/index-action-type`,
+      esQuery: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/rule-type-es-query`,
+      indexThreshold: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/rule-type-index-threshold`,
+      maintenanceWindows: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/maintenance-windows`,
+      pagerDutyAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/pagerduty-action-type`,
+      preconfiguredConnectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/pre-configured-connectors`,
+      preconfiguredAlertHistoryConnector: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/pre-configured-connectors#preconfigured-connector-alert-history`,
+      serviceNowAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/servicenow-action-type#configuring-servicenow`,
+      serviceNowSIRAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/servicenow-sir-action-type`,
+      setupPrerequisites: `${ELASTIC_DOCS}explore-analyze/alerts-cases/alerts/alerting-setup#alerting-prerequisites`,
+      slackAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-webhook`,
+      slackApiAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/slack-action-type#configuring-slack-web-api`,
+      teamsAction: `${ELASTIC_DOCS}reference/kibana/connectors-kibana/teams-action-type#configuring-teams`,
+      connectors: `${ELASTIC_DOCS}reference/kibana/connectors-kibana`,
     },
     taskManager: {
-      healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
+      healthMonitoring: `${ELASTIC_DOCS}deploy-manage/monitor/kibana-task-manager-health-monitoring`,
     },
     maps: {
       connectToEms: `${KIBANA_DOCS}maps-connect-to-ems.html`,
@@ -672,10 +658,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       troubleshootKibana: `${KIBANA_DOCS}monitor-troubleshooting.html`,
     },
     reporting: {
-      cloudMinimumRequirements: `${KIBANA_DOCS}reporting-getting-started.html#reporting-on-cloud-resource-requirements`,
-      grantUserAccess: `${KIBANA_DOCS}secure-reporting.html#grant-user-access`,
-      browserSystemDependencies: `${KIBANA_DOCS}secure-reporting.html#install-reporting-packages`,
-      browserSandboxDependencies: `${KIBANA_DOCS}reporting-troubleshooting-pdf.html#reporting-troubleshooting-sandbox-dependency`,
+      cloudMinimumRequirements: `${ELASTIC_DOCS}explore-analyze/report-and-share#_embed_outside_of_kib`,
+      browserSystemDependencies: `${ELASTIC_DOCS}deploy-manage/kibana-reporting-configuration#install-reporting-packages`,
+      browserSandboxDependencies: `${ELASTIC_DOCS}explore-analyze/report-and-share/reporting-troubleshooting-pdf#reporting-troubleshooting-sandbox-dependency`,
     },
     security: {
       apiKeyServiceSettings: `${ELASTICSEARCH_DOCS}security-settings.html#api-key-service-settings`,
