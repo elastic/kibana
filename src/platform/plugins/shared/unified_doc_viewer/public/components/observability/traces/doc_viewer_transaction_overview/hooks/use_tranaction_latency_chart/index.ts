@@ -62,7 +62,7 @@ const getTransactionLatencyChart = ({
   percentileThresholdValue?: number;
 }> => {
   const { data } = getUnifiedDocViewerServices();
-  const timeFilter = data.query.timefilter.timefilter.getTime();
+  const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
   const params = {
     transactionName,
     transactionType,
