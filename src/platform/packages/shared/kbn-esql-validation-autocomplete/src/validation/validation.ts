@@ -10,7 +10,7 @@
 import {
   AstProviderFn,
   ESQLAst,
-  ESQLAstMetricsCommand,
+  ESQLAstTimeseriesCommand,
   ESQLColumn,
   ESQLCommand,
   ESQLCommandOption,
@@ -53,7 +53,7 @@ import type {
 } from './types';
 
 import { validate as validateJoinCommand } from './commands/join';
-import { validate as validateMetricsCommand } from './commands/metrics';
+import { validate as validateTimeseriesCommand } from './commands/metrics';
 
 /**
  * ES|QL validation public API
@@ -213,9 +213,9 @@ function validateCommand(
   }
 
   switch (commandDef.name) {
-    case 'metrics': {
-      const metrics = command as ESQLAstMetricsCommand;
-      const metricsCommandErrors = validateMetricsCommand(metrics, references);
+    case 'ts': {
+      const metrics = command as ESQLAstTimeseriesCommand;
+      const metricsCommandErrors = validateTimeseriesCommand(metrics, references);
       messages.push(...metricsCommandErrors);
       break;
     }
@@ -370,14 +370,18 @@ export function validateSource(source: ESQLSource, { sources }: ReferenceMaps) {
     return messages;
   }
 
-  if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
+  if (source.sourceType === 'index') {
+    const index = source.index;
+    const indexName = source.cluster ? source.name : index?.valueUnquoted;
+    if (indexName && !sourceExists(indexName, sources)) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'unknownIndex',
+          values: { name: source.name },
+          locations: source.location,
+        })
+      );
+    }
   }
 
   return messages;
