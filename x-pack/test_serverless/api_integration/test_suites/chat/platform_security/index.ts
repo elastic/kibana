@@ -4,13 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiTitle } from '@elastic/eui';
-import React from 'react';
 
-export function StreamsAppPageHeaderTitle({ title }: { title: React.ReactNode }) {
-  return (
-    <EuiTitle size="l">
-      <h1>{title}</h1>
-    </EuiTitle>
-  );
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('Platform security APIs', function () {
+    loadTestFile(require.resolve('./authorization'));
+  });
 }
