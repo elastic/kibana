@@ -55,7 +55,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
     ],
   },
   validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
-    return { errors: [], warnings: [] };
+    // return { errors: [], warnings: [] };
     const astAdapter = new ESQLAstAdapter(
       (...uris) => workerProxyService.getWorker(uris),
       callbacks
@@ -104,7 +104,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         position: monaco.Position,
         context: monaco.languages.CompletionContext
       ): Promise<monaco.languages.CompletionList> {
-        // return { suggestions: [] };
+        return { suggestions: [] };
         const astAdapter = new ESQLAstAdapter(
           (...uris) => workerProxyService.getWorker(uris),
           callbacks
