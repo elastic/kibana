@@ -135,8 +135,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       behavioralAnalyticsEvents: `${ELASTICSEARCH_DOCS}behavioral-analytics-event.html`,
       buildConnector: `${ELASTICSEARCH_DOCS}es-build-connector.html`,
       bulkApi: isServerless
-        ? `https://www.elastic.co/docs/api/doc/elasticsearch-serverless/operation/operation-bulk`
-        : `https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-bulk`,
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-bulk`
+        : `${ELASTICSEARCH_APIS}operation/operation-bulk`,
       configuration: `${ENTERPRISE_SEARCH_DOCS}configuration.html`,
       connectors: `${ELASTICSEARCH_DOCS}es-connectors.html`,
       connectorsClientDeploy: `${ELASTICSEARCH_DOCS}es-build-connector.html#es-connectors-deploy-connector-service`,
@@ -728,7 +728,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       indexStats: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
         : `${ELASTICSEARCH_APIS}operation/operation-indices-stats`,
-      byteSizeUnits: `https://www.elastic.co/docs/reference/elasticsearch/rest-apis/api-conventions#byte-units`,
+      byteSizeUnits: `${ELASTIC_DOCS}reference/elasticsearch/rest-apis/api-conventions#byte-units`,
       createAutoFollowPattern: `${ELASTICSEARCH_APIS}operation/operation-ccr-put-auto-follow-pattern`,
       createFollower: `${ELASTICSEARCH_APIS}operation/operation-ccr-follow`,
       createIndex: isServerless
