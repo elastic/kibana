@@ -9,7 +9,7 @@
 
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { buildContextMenuForActions } from './build_eui_context_menu_panels';
-import { Action, createAction } from '../actions';
+import { Action, ActionExecutionContext, createAction } from '../actions';
 import { PresentableGrouping } from '@kbn/ui-actions-browser';
 
 const createTestAction = ({
@@ -18,19 +18,21 @@ const createTestAction = ({
   order,
   grouping = undefined,
   disabled,
+  execute = async () => {},
 }: {
   type?: string;
   displayName: string;
   order?: number;
   grouping?: PresentableGrouping;
   disabled?: boolean;
+  execute?: (context: ActionExecutionContext<object>) => Promise<void>;
 }) =>
   createAction({
     id: type as string,
     type,
     getDisplayName: () => displayName,
     order,
-    execute: async () => {},
+    execute,
     grouping,
     disabled,
   });
@@ -495,4 +497,36 @@ test('it creates disabled actions', async () => {
       },
     ]
   `);
+});
+
+test('it calls execute with the provided event', async () => {
+  const mockExecute = jest.fn();
+  const mockEvent = { nativeEvent: new MouseEvent('click') } as unknown as React.MouseEvent<
+    Element,
+    MouseEvent
+  >;
+
+  const actions = [
+    createTestAction({
+      order: 1,
+      displayName: 'Foo',
+      execute: mockExecute,
+    }),
+  ];
+
+  const menu = await buildContextMenuForActions({
+    actions: actions.map((action) => ({ action, context: {}, trigger: { id: 'TEST' } })),
+  });
+
+  // Simulate clicking the first menu item
+  const firstMenuItem = menu[0].items![0];
+  if (firstMenuItem.onClick) {
+    firstMenuItem.onClick(mockEvent as any);
+  }
+
+  expect(mockExecute).toHaveBeenCalledWith(
+    expect.objectContaining({
+      event: mockEvent.nativeEvent,
+    })
+  );
 });
