@@ -13,7 +13,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const svlMl = getService('svlMl');
   const PageObjects = getPageObjects(['svlCommonPage']);
 
-  const expectedObservabilityTypeFilters = ['Anomaly Detection', 'Inference', 'System'];
+  const expectedObservabilityTypeFilters = [
+    'Anomaly Detection',
+    'Data Frame Analytics',
+    'Inference',
+    'System',
+  ];
 
   describe('Notifications page', function () {
     before(async () => {
