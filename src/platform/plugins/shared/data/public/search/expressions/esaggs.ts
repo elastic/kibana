@@ -15,6 +15,7 @@ import {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
   getEsaggsMeta,
+  getSideEffectFunction,
 } from '../../../common/search/expressions';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
@@ -37,19 +38,10 @@ export function getFunctionDefinition({
 }) {
   return (): EsaggsExpressionFunctionDefinition => ({
     ...getEsaggsMeta(),
-    sideEffects: (
-      args,
-      { inspectorAdapters, abortSignal, getSearchSessionId, getExecutionContext, getSearchContext }
-    ) => {
-      const requests = inspectorAdapters.requests?.getRequestEntries();
-      return () => {
-        if (!requests || requests.length === 0) {
-          return;
-        }
-        const requestsMap = new Map(requests.map(([request]) => [request.id, request]));
-        const responsesMap = new WeakMap(requests);
-        inspectorAdapters.requests?.loadFromEntries(requestsMap, responsesMap);
-      };
+    allowCache: {
+      withSideEffects: (_, { inspectorAdapters }) => {
+        return getSideEffectFunction(inspectorAdapters);
+      },
     },
     fn(
       input,
