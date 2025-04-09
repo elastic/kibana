@@ -54,8 +54,6 @@ export const SearchAILakeConfigurationsSettingsManagement: React.FC<Props> = Rea
       if (selectedSettingsTab) {
         // selectedSettingsTab can be selected from Conversations > System Prompts > Add System Prompt
         onTabChange?.(selectedSettingsTab);
-        // set to null after nav change as to not persist the tab
-        setSelectedSettingsTab(null);
       }
     }, [onTabChange, selectedSettingsTab, setSelectedSettingsTab]);
 
