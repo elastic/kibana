@@ -411,7 +411,7 @@ export class FileUploadManager {
       }
     } else {
       config$.next({
-        json: config,
+        json: config as IndicesIndexSettings | MappingTypeMapping,
         string: '',
         valid: true,
         count: currentConfig.count + 1,
