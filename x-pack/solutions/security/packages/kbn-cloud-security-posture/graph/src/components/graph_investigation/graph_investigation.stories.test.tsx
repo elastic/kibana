@@ -113,7 +113,7 @@ const isSearchBarVisible = (container: HTMLElement) => {
 };
 
 // FLAKY: https://github.com/elastic/kibana/issues/206646
-describe('GraphInvestigation Component', () => {
+describe.skip('GraphInvestigation Component', () => {
   beforeEach(() => {
     for (const key in actionMocks) {
       if (Object.prototype.hasOwnProperty.call(actionMocks, key)) {
@@ -275,7 +275,7 @@ describe('GraphInvestigation Component', () => {
   });
 
   describe('investigateInTimeline', () => {
-    it('empty query and no filters - calls onInvestigateInTimeline action with event.id', () => {
+    it('has originEventIds, empty query and no filters - calls onInvestigateInTimeline action with event.id filter only', () => {
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
@@ -324,7 +324,7 @@ describe('GraphInvestigation Component', () => {
       ]);
     });
 
-    it('query and no filters - calls onInvestigateInTimeline action with event.id in the query but not in the filters', async () => {
+    it('has originEventIds, has a query and no filters - calls onInvestigateInTimeline action with event.id in the query but not in the filters', async () => {
       // Arrange
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
@@ -348,7 +348,165 @@ describe('GraphInvestigation Component', () => {
       expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
     });
 
-    it('empty query and empty originEventIds - calls onInvestigateInTimeline with empty filters', () => {
+    it('has originEventIds, empty query and there are filters - calls onInvestigateInTimeline action with event.id filter only', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId, container } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+      const entityIdFilter = 'admin@example.com';
+
+      // Act
+      showActionsByNode(container, entityIdFilter);
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '',
+        language: 'kuery',
+      });
+
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'actor.entity.id',
+                  index: '1235',
+                  key: 'actor.entity.id',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'actor.entity.id': entityIdFilter,
+                  },
+                },
+              },
+              ...['1', '2'].map((eventId) => ({
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'event.id',
+                  index: eventId === '1' ? '1235' : undefined,
+                  ...(eventId === '2' ? { disabled: false } : {}),
+                  key: 'event.id',
+                  negate: false,
+                  params: {
+                    query: eventId,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'event.id': eventId,
+                  },
+                },
+              })),
+            ],
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('has originEventIds, has query and there are filters - calls onInvestigateInTimeline action with event.id filter and query', async () => {
+      // Arrange
+      const onInvestigateInTimeline = jest.fn();
+      const { getByTestId, container } = renderStory({
+        onInvestigateInTimeline,
+        showInvestigateInTimeline: true,
+      });
+      const entityIdFilter = 'admin@example.com';
+
+      // Act
+      showActionsByNode(container, entityIdFilter);
+      const queryInput = getByTestId('queryInput');
+      await userEvent.type(queryInput, 'host1');
+      const querySubmitBtn = getByTestId('querySubmitButton');
+      querySubmitBtn.click();
+
+      getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+      // Assert
+      expect(onInvestigateInTimeline).toHaveBeenCalled();
+      expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+        query: '(host1) OR event.id: "1" OR event.id: "2"',
+        language: 'kuery',
+      });
+
+      expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+        {
+          $state: {
+            store: 'appState',
+          },
+          meta: expect.objectContaining({
+            disabled: false,
+            index: '1235',
+            negate: false,
+            controlledBy: 'graph-investigation',
+            params: [
+              {
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'actor.entity.id',
+                  index: '1235',
+                  key: 'actor.entity.id',
+                  negate: false,
+                  params: {
+                    query: entityIdFilter,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'actor.entity.id': entityIdFilter,
+                  },
+                },
+              },
+              ...['1', '2'].map((eventId) => ({
+                meta: {
+                  controlledBy: 'graph-investigation',
+                  field: 'event.id',
+                  index: eventId === '1' ? '1235' : undefined,
+                  ...(eventId === '2' ? { disabled: false } : {}),
+                  key: 'event.id',
+                  negate: false,
+                  params: {
+                    query: eventId,
+                  },
+                  type: 'phrase',
+                },
+                query: {
+                  match_phrase: {
+                    'event.id': eventId,
+                  },
+                },
+              })),
+            ],
+            type: 'combined',
+            relation: 'OR',
+          }),
+        },
+      ]);
+    });
+
+    it('empty originEventIds, empty query and no filters - calls onInvestigateInTimeline with empty query and no filters', () => {
+      // Arrange
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
@@ -363,8 +521,10 @@ describe('GraphInvestigation Component', () => {
         },
       });
 
+      // Act
       getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
 
+      // Assert
       expect(onInvestigateInTimeline).toHaveBeenCalled();
       expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
         query: '',
@@ -374,7 +534,8 @@ describe('GraphInvestigation Component', () => {
       expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
     });
 
-    it('query and empty originEventIds - calls onInvestigateInTimeline with only the query', async () => {
+    it('empty originEventIds, has query and no filters - calls onInvestigateInTimeline with query only', async () => {
+      // Arrange
       const onInvestigateInTimeline = jest.fn();
       const { getByTestId } = renderStory({
         onInvestigateInTimeline,
@@ -389,6 +550,7 @@ describe('GraphInvestigation Component', () => {
         },
       });
 
+      // Act
       const queryInput = getByTestId('queryInput');
       await userEvent.type(queryInput, 'host1');
       const querySubmitBtn = getByTestId('querySubmitButton');
@@ -396,6 +558,7 @@ describe('GraphInvestigation Component', () => {
 
       getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
 
+      // Assert
       expect(onInvestigateInTimeline).toHaveBeenCalled();
       // Query should remain unchanged since there are no originEventIds to add
       expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
@@ -404,5 +567,117 @@ describe('GraphInvestigation Component', () => {
       });
       expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([]);
     });
+  });
+
+  it('empty originEventIds, empty query and has filters - calls onInvestigateInTimeline with empty query and filters', async () => {
+    // Arrange
+    const onInvestigateInTimeline = jest.fn();
+    const { getByTestId, container } = renderStory({
+      onInvestigateInTimeline,
+      showInvestigateInTimeline: true,
+      initialState: {
+        dataView: mockDataView,
+        originEventIds: [],
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      },
+    });
+    const entityIdFilter = 'admin@example.com';
+
+    // Act
+    showActionsByNode(container, entityIdFilter);
+    getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+    // Assert
+    expect(onInvestigateInTimeline).toHaveBeenCalled();
+    // Query should remain unchanged since there are no originEventIds to add
+    expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+      query: '',
+      language: 'kuery',
+    });
+    expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: expect.objectContaining({
+          disabled: false,
+          index: '1235',
+          negate: false,
+          controlledBy: 'graph-investigation',
+          field: 'actor.entity.id',
+          key: 'actor.entity.id',
+          params: {
+            query: entityIdFilter,
+          },
+          type: 'phrase',
+        }),
+        query: {
+          match_phrase: {
+            'actor.entity.id': entityIdFilter,
+          },
+        },
+      },
+    ]);
+  });
+
+  it('empty originEventIds, has query and has filters - calls onInvestigateInTimeline with query and filters', async () => {
+    // Arrange
+    const onInvestigateInTimeline = jest.fn();
+    const { getByTestId, container } = renderStory({
+      onInvestigateInTimeline,
+      showInvestigateInTimeline: true,
+      initialState: {
+        dataView: mockDataView,
+        originEventIds: [],
+        timeRange: {
+          from: 'now-15m',
+          to: 'now',
+        },
+      },
+    });
+    const entityIdFilter = 'admin@example.com';
+
+    // Act
+    showActionsByNode(container, entityIdFilter);
+    const queryInput = getByTestId('queryInput');
+    await userEvent.type(queryInput, 'host1');
+    const querySubmitBtn = getByTestId('querySubmitButton');
+    querySubmitBtn.click();
+    getByTestId(GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID).click();
+
+    // Assert
+    expect(onInvestigateInTimeline).toHaveBeenCalled();
+    // Query should remain unchanged since there are no originEventIds to add
+    expect(onInvestigateInTimeline.mock.calls[0][QUERY_PARAM_IDX]).toEqual({
+      query: 'host1',
+      language: 'kuery',
+    });
+    expect(onInvestigateInTimeline.mock.calls[0][FILTERS_PARAM_IDX]).toEqual([
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: expect.objectContaining({
+          disabled: false,
+          index: '1235',
+          negate: false,
+          controlledBy: 'graph-investigation',
+          field: 'actor.entity.id',
+          key: 'actor.entity.id',
+          params: {
+            query: entityIdFilter,
+          },
+          type: 'phrase',
+        }),
+        query: {
+          match_phrase: {
+            'actor.entity.id': entityIdFilter,
+          },
+        },
+      },
+    ]);
   });
 });

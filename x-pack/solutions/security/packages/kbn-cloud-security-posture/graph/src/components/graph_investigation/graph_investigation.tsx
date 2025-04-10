@@ -140,34 +140,22 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
       const query = { ...kquery };
 
       let filters = [...searchFilters];
-      // Case 1: Empty query with origin event IDs
-      if (query.query.trim() === '' && originEventIds.length > 0) {
-        filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
-          return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
-        }, searchFilters);
-      }
-      // Case 2: Has query, no search filters, but has origin event IDs
-      else if (
-        query.query.trim() !== '' &&
-        searchFilters.length === 0 &&
-        originEventIds.length > 0
-      ) {
-        query.query = `(${query.query})${originEventIds
-          .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
-          .join('')}`;
-      }
-      // Case 3: Has query, has search filters, and has origin event IDs
-      else if (query.query.trim() !== '' && searchFilters.length > 0 && originEventIds.length > 0) {
-        // Apply both modifications from Case 1 and Case 2
-        filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
-          return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
-        }, searchFilters);
 
-        query.query = `(${query.query})${originEventIds
-          .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
-          .join('')}`;
-      }
+      const hasKqlQuery = query.query.trim() !== '';
 
+      if (originEventIds.length > 0) {
+        if (!hasKqlQuery || searchFilters.length > 0) {
+          filters = originEventIds.reduce<Filter[]>((acc, { id }) => {
+            return addFilter(dataView?.id ?? '', acc, EVENT_ID, id);
+          }, searchFilters);
+        }
+
+        if (hasKqlQuery) {
+          query.query = `(${query.query})${originEventIds
+            .map(({ id }) => ` OR ${EVENT_ID}: "${id}"`)
+            .join('')}`;
+        }
+      }
       onInvestigateInTimeline?.(query, filters, timeRange);
     }, [dataView?.id, onInvestigateInTimeline, originEventIds, kquery, searchFilters, timeRange]);
 

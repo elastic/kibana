@@ -81,17 +81,6 @@ export class TimelinePageObject extends FtrService {
   }
 
   /**
-   * Check to see if the timeline is empty
-   */
-  async isTimelineEmpty(): Promise<boolean> {
-    const eventRows = await this.testSubjects.findService.allByCssSelector(
-      `${testSubjSelector(TIMELINE_MODAL_PAGE_TEST_SUBJ)} [role="row"]`
-    );
-
-    return eventRows.length === 0;
-  }
-
-  /**
    * Waits for events to be displayed in the timeline. It will click on the "Refresh" button to trigger a data fetch
    * @param timeoutMs
    */
