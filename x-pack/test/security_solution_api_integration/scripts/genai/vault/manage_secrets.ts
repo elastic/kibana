@@ -14,7 +14,11 @@ import { schema } from '@kbn/config-schema';
 const SECURITY_GEN_AI_CONNECTORS_ENV_VAR = 'KIBANA_SECURITY_TESTING_AI_CONNECTORS';
 const SECURITY_GEN_AI_LANGSMITH_KEY_ENV_VAR = 'KIBANA_SECURITY_TESTING_LANGSMITH_KEY';
 
-const SECURITY_GEN_AI_VAULT = 'secret/siem-team/security-gen-ai';
+// Main Secrets // TODO: Discuss w/ operations to see if we can use this vault so we can self-manage
+// const SECURITY_GEN_AI_VAULT = 'secret/siem-team/security-gen-ai';
+
+// CI Vault
+const SECURITY_GEN_AI_VAULT = 'secret/ci/elastic-kibana/security-gen-ai';
 const SECURITY_GEN_AI_VAULT_CONNECTORS = `${SECURITY_GEN_AI_VAULT}/connectors`;
 const SECURITY_GEN_AI_VAULT_LANGSMITH = `${SECURITY_GEN_AI_VAULT}/langsmith`;
 const SECURITY_GEN_AI_CONNECTORS_FIELD = 'config';

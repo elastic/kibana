@@ -14,9 +14,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const preconfiguredConnectors = loadConnectorsFromEnvVar();
-  const allowedHosts = Object.values(preconfiguredConnectors).map(
-    (connector: any) => connector.config.apiUrl
-  );
 
   return {
     ...functionalConfig.getAll(),
@@ -35,7 +32,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           ),
         '--elasticsearch.hosts=http://localhost:9220',
         `--xpack.actions.preconfigured=${JSON.stringify(preconfiguredConnectors)}`,
-        `--xpack.actions.allowedHosts=${JSON.stringify(allowedHosts)}`,
+        `--xpack.actions.allowedHosts=["*"]`,
         `--xpack.securitySolution.enableExperimental=["assistantModelEvaluation"]`,
       ],
     },
