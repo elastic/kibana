@@ -114,6 +114,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
         ),
         {
           'data-test-subj': 'inspectorPanel',
+          'aria-labelledby': 'inspector-panel-title',
           closeButtonProps: { 'aria-label': closeButtonLabel },
           type: options.flyoutType,
         }

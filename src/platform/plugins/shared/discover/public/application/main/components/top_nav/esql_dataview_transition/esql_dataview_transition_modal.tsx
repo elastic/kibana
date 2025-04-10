@@ -24,6 +24,7 @@ import {
   EuiFlexGroup,
   EuiLink,
   EuiHorizontalRule,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 export interface ESQLToDataViewTransitionModalProps {
@@ -39,14 +40,19 @@ export default function ESQLToDataViewTransitionModal({
     setDismissModalChecked(e.target.checked);
   }, []);
 
+  const modalTitleId = useGeneratedHtmlId({
+    prefix: 'discover-esql-to-dataview-modal-title',
+  });
+
   return (
     <EuiModal
       onClose={() => onClose()}
       css={{ width: 700 }}
       data-test-subj="discover-esql-to-dataview-modal"
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
+        <EuiModalHeaderTitle id={modalTitleId}>
           {i18n.translate('discover.esqlToDataViewTransitionModal.title', {
             defaultMessage: 'Unsaved changes',
           })}
