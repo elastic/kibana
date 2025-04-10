@@ -118,31 +118,40 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     await cancelReadonly();
   }, [cancelReadonly]);
 
-  const { docsSizeFormatted, indicesRequiringUpgradeDocsCount, lastIndexCreationDateFormatted } =
-    useMemo(() => {
-      if (!meta) {
-        return {
-          indicesRequiringUpgradeDocsCount: containerMessages.unknownMessage,
-          docsSizeFormatted: containerMessages.unknownMessage,
-          lastIndexCreationDateFormatted: containerMessages.unknownMessage,
-        };
-      }
-
+  const {
+    docsSizeFormatted,
+    indicesRequiringUpgradeDocsCount,
+    lastIndexCreationDateFormatted,
+    oldestIncompatibleDocFormatted,
+  } = useMemo(() => {
+    if (!meta) {
       return {
-        indicesRequiringUpgradeDocsCount:
-          typeof meta.indicesRequiringUpgradeDocsCount === 'number'
-            ? `${meta.indicesRequiringUpgradeDocsCount}`
-            : 'Unknown',
-        docsSizeFormatted:
-          typeof meta.indicesRequiringUpgradeDocsSize === 'number'
-            ? numeral(meta.indicesRequiringUpgradeDocsSize).format(FILE_SIZE_DISPLAY_FORMAT)
-            : 'Unknown',
-        lastIndexCreationDateFormatted:
-          typeof meta.lastIndexRequiringUpgradeCreationDate === 'number'
-            ? `${moment(meta.lastIndexRequiringUpgradeCreationDate).format(DATE_FORMAT)}`
-            : 'Unknown',
+        indicesRequiringUpgradeDocsCount: containerMessages.unknownMessage,
+        docsSizeFormatted: containerMessages.unknownMessage,
+        lastIndexCreationDateFormatted: containerMessages.unknownMessage,
+        oldestIncompatibleDocFormatted: undefined,
       };
-    }, [meta]);
+    }
+
+    return {
+      indicesRequiringUpgradeDocsCount:
+        typeof meta.indicesRequiringUpgradeDocsCount === 'number'
+          ? `${meta.indicesRequiringUpgradeDocsCount}`
+          : 'Unknown',
+      docsSizeFormatted:
+        typeof meta.indicesRequiringUpgradeDocsSize === 'number'
+          ? numeral(meta.indicesRequiringUpgradeDocsSize).format(FILE_SIZE_DISPLAY_FORMAT)
+          : 'Unknown',
+      lastIndexCreationDateFormatted:
+        typeof meta.lastIndexRequiringUpgradeCreationDate === 'number'
+          ? `${moment(meta.lastIndexRequiringUpgradeCreationDate).format(DATE_FORMAT)}`
+          : 'Unknown',
+      oldestIncompatibleDocFormatted:
+        typeof meta.oldestIncompatibleDocTimestamp === 'number'
+          ? `${moment(meta.oldestIncompatibleDocTimestamp).format(DATE_FORMAT)}`
+          : undefined,
+    };
+  }, [meta]);
 
   const flyoutContents = useMemo(() => {
     switch (flyoutStep) {
@@ -273,17 +282,33 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
                 <EuiFlexItem>
                   <EuiDescriptionList
                     textStyle="reverse"
-                    listItems={[
-                      {
-                        title: i18n.translate(
-                          'xpack.upgradeAssistant.dataStream.flyout.container.affectedIndicesCreatedOnOrBefore',
-                          {
-                            defaultMessage: 'Migration required for indices created on or before',
-                          }
-                        ),
-                        description: lastIndexCreationDateFormatted,
-                      },
-                    ]}
+                    listItems={
+                      oldestIncompatibleDocFormatted
+                        ? [
+                            {
+                              title: i18n.translate(
+                                'xpack.upgradeAssistant.dataStream.flyout.container.oldestIncompatibleDoc',
+                                {
+                                  defaultMessage:
+                                    'Migration required for data indexed on or before',
+                                }
+                              ),
+                              description: oldestIncompatibleDocFormatted,
+                            },
+                          ]
+                        : [
+                            {
+                              title: i18n.translate(
+                                'xpack.upgradeAssistant.dataStream.flyout.container.affectedIndicesCreatedOnOrBefore',
+                                {
+                                  defaultMessage:
+                                    'Migration required for indices created on or before',
+                                }
+                              ),
+                              description: lastIndexCreationDateFormatted,
+                            },
+                          ]
+                    }
                   />
                 </EuiFlexItem>
                 <EuiFlexGroup>
