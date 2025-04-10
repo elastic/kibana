@@ -18,6 +18,15 @@ describe('extractKey', () => {
   });
 
   describe('when "_index" is part of the groupBy', () => {
+    it('and is not a backing index name', async () => {
+      const result = extractKey({
+        groupBy: ['_index'],
+        bucketKey: ['logs-custom-default'],
+      });
+
+      expect(result).toEqual(['logs-custom-default']);
+    });
+
     it('and is the only element in groupBy', async () => {
       const result = extractKey({
         groupBy: ['_index'],

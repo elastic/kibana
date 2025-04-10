@@ -6,12 +6,12 @@
  */
 
 import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
-import { getRuleType as getDatasetQualityRuleType } from './dataset_quality';
+import { getRuleType as getDegradedDocsRuleType } from './degraded_docs';
 
 export function registerRuleTypes({
   ruleTypeRegistry,
 }: {
   ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
 }) {
-  ruleTypeRegistry.register(getDatasetQualityRuleType());
+  ruleTypeRegistry.register(getDegradedDocsRuleType());
 }

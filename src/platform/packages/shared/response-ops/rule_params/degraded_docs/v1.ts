@@ -14,20 +14,13 @@ import { oneOfLiterals } from '../common/utils';
 
 const comparators = Object.values(COMPARATORS);
 
-export const datasetQualityParamsSchema = schema.object({
+export const degradedDocsParamsSchema = schema.object({
   name: schema.string(),
   timeUnit: schema.string(),
   timeSize: schema.number(),
   threshold: schema.arrayOf(schema.number()),
   comparator: oneOfLiterals(comparators),
   groupBy: schema.maybe(schema.arrayOf(schema.string())),
-  type: schema.oneOf([schema.literal('degraded_docs')]),
 });
 
-export type DatasetQualityRuleParams = TypeOf<typeof datasetQualityParamsSchema>;
-
-export const isDegradedDocsRule = (
-  params: DatasetQualityRuleParams
-): params is TypeOf<typeof datasetQualityParamsSchema> => {
-  return params.type === 'degraded_docs';
-};
+export type DegradedDocsRuleParams = TypeOf<typeof degradedDocsParamsSchema>;

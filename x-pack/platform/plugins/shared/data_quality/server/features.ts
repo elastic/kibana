@@ -13,12 +13,12 @@ import {
   SubFeaturePrivilegeGroupConfig,
   SubFeaturePrivilegeGroupType,
 } from '@kbn/features-plugin/common';
-import { AlertConsumers, DATASET_QUALITY_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { AlertConsumers, DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_FEATURE_ID, PLUGIN_ID, PLUGIN_NAME } from '../common';
 
-const datasetQualityAlertingFeatures = {
-  ruleTypeId: DATASET_QUALITY_RULE_TYPE_ID,
+const degradedDocsAlertingFeatures = {
+  ruleTypeId: DEGRADED_DOCS_RULE_TYPE_ID,
   consumers: [AlertConsumers.STACK_ALERTS, AlertConsumers.ALERTS],
 };
 
@@ -33,7 +33,7 @@ const canManageRules: SubFeaturePrivilegeGroupConfig = {
       includeIn: 'all',
       alerting: {
         alert: {
-          all: [datasetQualityAlertingFeatures],
+          all: [degradedDocsAlertingFeatures],
         },
       },
       savedObject: {
@@ -51,7 +51,7 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
   category: DEFAULT_APP_CATEGORIES.management,
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [PLUGIN_ID],
-  alerting: [datasetQualityAlertingFeatures],
+  alerting: [degradedDocsAlertingFeatures],
   management: {
     insightsAndAlerting: ['triggersActions'],
   },
@@ -65,10 +65,10 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
       ui: ['show'],
       alerting: {
         rule: {
-          read: [datasetQualityAlertingFeatures],
+          read: [degradedDocsAlertingFeatures],
         },
         alert: {
-          all: [datasetQualityAlertingFeatures],
+          all: [degradedDocsAlertingFeatures],
         },
       },
       management: {
@@ -84,10 +84,10 @@ export const KIBANA_FEATURE: KibanaFeatureConfig = {
       ui: ['show'],
       alerting: {
         rule: {
-          read: [datasetQualityAlertingFeatures],
+          read: [degradedDocsAlertingFeatures],
         },
         alert: {
-          read: [datasetQualityAlertingFeatures],
+          read: [degradedDocsAlertingFeatures],
         },
       },
     },

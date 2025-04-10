@@ -20,7 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { DATASET_QUALITY_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createAlertText, openInDiscoverText } from '../../../common/translations';
 import { AlertingFlyout } from '../../alerts/alerting_flyout.ts';
 import { getAlertingCapabilities } from '../../alerts/get_alerting_capabilities';
@@ -59,7 +59,7 @@ export function Header() {
   const { isAlertingAvailable } = getAlertingCapabilities(alerting, capabilities);
 
   const [showPopover, setShowPopover] = useState<boolean>(false);
-  const [ruleType, setRuleType] = useState<typeof DATASET_QUALITY_RULE_TYPE_ID | null>(null);
+  const [ruleType, setRuleType] = useState<typeof DEGRADED_DOCS_RULE_TYPE_ID | null>(null);
 
   const pageTitle =
     integrationDetails?.integration?.integration?.datasets?.[datasetDetails.name] ?? title;
@@ -70,7 +70,7 @@ export function Header() {
       icon: 'bell',
       onClick: () => {
         setShowPopover(false);
-        setRuleType(DATASET_QUALITY_RULE_TYPE_ID);
+        setRuleType(DEGRADED_DOCS_RULE_TYPE_ID);
       },
       'data-test-subj': `createAlert`,
     },

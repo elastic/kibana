@@ -7,9 +7,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { Coordinate } from '../../common/types';
-import { PreviewChartResponse } from '../../common/api_types';
-import { extractKey } from './extract_key';
+import { Coordinate } from '../../../common/types';
+import { PreviewChartResponse } from '../../../common/api_types';
+import { extractKey } from '../extract_key';
 
 interface DataStreamTotals {
   x: Coordinate['x'];

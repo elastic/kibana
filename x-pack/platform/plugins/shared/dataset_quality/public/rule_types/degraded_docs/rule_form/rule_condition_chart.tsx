@@ -9,10 +9,10 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { TimeRange } from '@kbn/es-query';
 import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
-import React from 'react';
 import rison from '@kbn/rison';
-import { PreviewChartResponse } from '../../../common/api_types';
-import { useKibanaContextForPlugin } from '../../utils';
+import React from 'react';
+import { PreviewChartResponse } from '../../../../common/api_types';
+import { useKibanaContextForPlugin } from '../../../utils';
 import { ChartPreview } from './chart_preview';
 import {
   ErrorState,

@@ -12,11 +12,11 @@ import {
 } from '@kbn/alerting-plugin/common';
 import { RuleTypeState } from '@kbn/alerting-plugin/server';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
-import type { DatasetQualityRuleParamsV1 } from '@kbn/response-ops-rule-params/dataset_quality';
-import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
+import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
+import { ALERT_NAMESPACE } from '@kbn/rule-data-utils';
 
-export type DatasetQualityRuleParams = DatasetQualityRuleParamsV1;
+export type DatasetQualityRuleParams = DegradedDocsRuleParams;
 export type DatasetQualityRuleTypeState = RuleTypeState;
 export type DatasetQualityAlertState = AlertState;
 export type DatasetQualityAlertContext = AlertContext;

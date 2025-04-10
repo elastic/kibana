@@ -8,14 +8,15 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
-import { DatasetQualityRuleParams } from './types';
+import { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
+import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { validate } from './rule_form/validate';
 
-export function getRuleType(): RuleTypeModel<DatasetQualityRuleParams> {
+export function getRuleType(): RuleTypeModel<DegradedDocsRuleParams> {
   return {
-    id: 'datasetQuality',
-    description: i18n.translate('xpack.datasetQuality.alert.descriptionText', {
-      defaultMessage: 'Alert when dataset quality indicator exceeds a threshold.',
+    id: DEGRADED_DOCS_RULE_TYPE_ID,
+    description: i18n.translate('xpack.datasetQuality.alert.degradedDocs.descriptionText', {
+      defaultMessage: 'Alert when degraded docs percentage exceeds a threshold.',
     }),
     iconClass: 'bell',
     documentationUrl: null,

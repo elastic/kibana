@@ -11,14 +11,14 @@ import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
-  DATASET_QUALITY_RULE_TYPE_ID,
+  DEGRADED_DOCS_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { RuleType } from '@kbn/alerting-plugin/server';
 import {
-  DatasetQualityRuleParams,
-  datasetQualityParamsSchema,
-} from '@kbn/response-ops-rule-params/dataset_quality/v1';
+  DegradedDocsRuleParams,
+  degradedDocsParamsSchema,
+} from '@kbn/response-ops-rule-params/degraded_docs';
 import { getRuleExecutor } from './executor';
 import {
   ALERT_EVALUATION_CONDITIONS,
@@ -29,10 +29,10 @@ import {
   DatasetQualityAlertContext,
   DatasetQualityAllowedActionGroups,
   THRESHOLD_MET_GROUP,
-} from './types';
+} from '../types';
 
-export function DatasetQualityRuleType(): RuleType<
-  DatasetQualityRuleParams,
+export function DegradedDocsRuleType(): RuleType<
+  DegradedDocsRuleParams,
   never,
   {},
   {},
@@ -42,19 +42,19 @@ export function DatasetQualityRuleType(): RuleType<
   DatasetQualityAlert
 > {
   return {
-    id: DATASET_QUALITY_RULE_TYPE_ID,
-    name: i18n.translate('xpack.datasetQuality.rule.name', {
-      defaultMessage: 'Dataset quality',
+    id: DEGRADED_DOCS_RULE_TYPE_ID,
+    name: i18n.translate('xpack.datasetQuality.rule.degradedDocs.name', {
+      defaultMessage: 'Degraded docs',
     }),
     solution: 'stack',
     fieldsForAAD: DATASET_QUALITY_AAD_FIELDS,
     validate: {
-      params: datasetQualityParamsSchema,
+      params: degradedDocsParamsSchema,
     },
     schemas: {
       params: {
         type: 'config-schema',
-        schema: datasetQualityParamsSchema,
+        schema: degradedDocsParamsSchema,
       },
     },
     defaultActionGroupId: THRESHOLD_MET_GROUP.id,
@@ -100,7 +100,7 @@ export function DatasetQualityRuleType(): RuleType<
 }
 
 export const actionVariableContextReasonLabel = i18n.translate(
-  'xpack.datasetQuality.alerting.degradedDocs.reasonDescription',
+  'xpack.datasetQuality.alerting.actionVariableContextReasonLabel',
   {
     defaultMessage: 'A reason for the alert.',
   }

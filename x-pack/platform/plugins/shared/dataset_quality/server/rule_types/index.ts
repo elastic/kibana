@@ -6,8 +6,8 @@
  */
 
 import { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { DatasetQualityRuleType } from './register';
+import { DegradedDocsRuleType } from './degraded_docs/register';
 
 export function registerBuiltInRuleTypes(alertingPlugin: AlertingServerSetup) {
-  alertingPlugin.registerType(DatasetQualityRuleType());
+  alertingPlugin.registerType(DegradedDocsRuleType());
 }

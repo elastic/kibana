@@ -22,33 +22,32 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
-import { DatasetQualityRuleParams } from '@kbn/response-ops-rule-params/dataset_quality/latest';
+import { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 import { isArray } from 'lodash';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { TimeUnitChar } from '@kbn/response-ops-rule-params/common/utils';
-import { INDEX } from '../../../common/es_fields';
-import { useKibanaContextForPlugin } from '../../utils';
+import { INDEX } from '../../../../common/es_fields';
+import { useKibanaContextForPlugin } from '../../../utils';
 import { RuleConditionChart } from './rule_condition_chart';
 
 const degradedDocsLabel = i18n.translate('xpack.datasetQuality.rule.degradedDocsLabel', {
   defaultMessage: 'degraded docs',
 });
 
-export const defaultRuleParams: Partial<DatasetQualityRuleParams> = {
+export const defaultRuleParams: Partial<DegradedDocsRuleParams> = {
   comparator: COMPARATORS.GREATER_THAN,
   threshold: [3],
   timeSize: 5,
   timeUnit: 'm',
   groupBy: [INDEX],
-  type: 'degraded_docs',
 };
 
 export type DataStreamGroupByFields = Array<DataViewFieldBase & { aggregatable: boolean }>;
 
 export const RuleForm: React.FunctionComponent<
-  RuleTypeParamsExpressionProps<DatasetQualityRuleParams, { adHocDataViewList: DataView[] }>
+  RuleTypeParamsExpressionProps<DegradedDocsRuleParams, { adHocDataViewList: DataView[] }>
 > = (props) => {
   const {
     services: { dataViews, dataViewEditor },
@@ -65,14 +64,14 @@ export const RuleForm: React.FunctionComponent<
   );
 
   const preFillProperty = useCallback(
-    (property: keyof DatasetQualityRuleParams) => {
+    (property: keyof DegradedDocsRuleParams) => {
       setRuleParams(property, defaultRuleParams[property]);
     },
     [setRuleParams]
   );
 
   const updateProperty = useCallback(
-    (property: keyof DatasetQualityRuleParams, value?: any) => {
+    (property: keyof DegradedDocsRuleParams, value?: any) => {
       setRuleParams(property, value);
     },
     [setRuleParams]
@@ -138,10 +137,6 @@ export const RuleForm: React.FunctionComponent<
     if (!ruleParams.groupBy) {
       preFillProperty('groupBy');
     }
-
-    if (!ruleParams.type) {
-      preFillProperty('type');
-    }
   }, [
     preFillProperty,
     ruleParams.comparator,
@@ -150,7 +145,6 @@ export const RuleForm: React.FunctionComponent<
     ruleParams.threshold,
     ruleParams.timeSize,
     ruleParams.timeUnit,
-    ruleParams.type,
   ]);
 
   const onGroupByChange = useCallback(

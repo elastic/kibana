@@ -6,7 +6,7 @@
  */
 
 import {
-  DATASET_QUALITY_RULE_TYPE_ID,
+  DEGRADED_DOCS_RULE_TYPE_ID,
   ES_QUERY_ID,
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -19,7 +19,7 @@ export function useGetFilteredRuleTypes() {
   return useMemo(() => {
     return [
       ES_QUERY_ID,
-      DATASET_QUALITY_RULE_TYPE_ID,
+      DEGRADED_DOCS_RULE_TYPE_ID,
       ML_ANOMALY_DETECTION_RULE_TYPE_ID,
       ...observabilityRuleTypeRegistry.list(),
     ];

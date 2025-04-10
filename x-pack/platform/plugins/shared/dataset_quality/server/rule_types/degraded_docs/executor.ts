@@ -14,9 +14,9 @@ import {
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
-import { INDEX, _IGNORED } from '../../common/es_fields';
-import { generateContext } from './context';
-import { getDocsStats } from './get_docs_stats';
+import { INDEX, _IGNORED } from '../../../common/es_fields';
+import { generateContext } from '../context';
+import { getDocsStats } from '../get_docs_stats';
 import {
   ALERT_EVALUATION_CONDITIONS,
   ALERT_TITLE,
@@ -29,7 +29,7 @@ import {
   type DatasetQualityRuleParams,
   type DatasetQualityRuleTypeState,
   AdditionalContext,
-} from './types';
+} from '../types';
 
 export const formatDurationFromTimeUnitChar = (time: number, unit: TimeUnitChar): string => {
   const sForPlural = time !== 0 && time > 1 ? 's' : '';

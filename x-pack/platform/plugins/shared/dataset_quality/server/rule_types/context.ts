@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { getHumanReadableComparator } from '@kbn/stack-alerts-plugin/common';
 import type { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
-import { isDegradedDocsRule } from '@kbn/response-ops-rule-params/dataset_quality/latest';
 import { DatasetQualityRuleParams } from './types';
 
 const generateTitle = (ruleName: string, group: string, isRecovered = false) =>
@@ -23,17 +22,15 @@ const generateTitle = (ruleName: string, group: string, isRecovered = false) =>
 const generateMessage = (
   value: string,
   group: string,
-  isDegradedDocs: boolean,
   timeSize: number,
   timeUnit: string,
   comparator: Comparator,
   threshold: number[]
 ) =>
   i18n.translate('xpack.datasetQuality.rule.alertTypeContextReasonDescription', {
-    defaultMessage: `{type} documents percentage is {value} in the last {window} for {group}. Alert when {comparator} {threshold}.`,
+    defaultMessage: `Degraded documents percentage is {value} in the last {window} for {group}. Alert when {comparator} {threshold}.`,
     values: {
       value,
-      type: isDegradedDocs ? 'Degraded' : '',
       window: `${timeSize}${timeUnit}`,
       group,
       comparator: getHumanReadableComparator(comparator),
@@ -43,16 +40,14 @@ const generateMessage = (
 
 const generateConditions = (
   group: string,
-  isDegradedDocs: boolean,
   comparator: Comparator,
   threshold: number[],
   isRecovered = false
 ) =>
   i18n.translate('xpack.datasetQuality.rule.alertTypeContextConditionsDescription', {
     defaultMessage:
-      '{type} documents percentage for {group} is {negation}{thresholdComparator} {threshold}',
+      'Degraded documents percentage for {group} is {negation}{thresholdComparator} {threshold}',
     values: {
-      type: isDegradedDocs ? 'Degraded' : '',
       group,
       thresholdComparator: getHumanReadableComparator(comparator),
       threshold: threshold.join(' and '),
@@ -75,7 +70,6 @@ export const generateContext = (
   message: generateMessage(
     value,
     group,
-    isDegradedDocsRule(params),
     params.timeSize,
     params.timeUnit,
     params.comparator as Comparator,
@@ -83,7 +77,6 @@ export const generateContext = (
   ),
   conditions: generateConditions(
     group,
-    isDegradedDocsRule(params),
     params.comparator as Comparator,
     params.threshold,
     isRecovered

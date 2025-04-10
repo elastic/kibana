@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { datasetQualityParamsSchema } from './latest';
-export { datasetQualityParamsSchema as datasetQualityParamsSchemaV1 } from './v1';
+export { degradedDocsParamsSchema } from './latest';
 
-export type { DatasetQualityRuleParams } from './latest';
-export type { DatasetQualityRuleParams as DatasetQualityRuleParamsV1 } from './v1';
+export type { DegradedDocsRuleParams } from './latest';

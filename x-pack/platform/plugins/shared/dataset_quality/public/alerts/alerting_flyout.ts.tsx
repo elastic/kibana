@@ -7,7 +7,7 @@
 
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import React, { useCallback, useEffect, useState } from 'react';
-import { DATASET_QUALITY_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { DEGRADED_DOCS_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 interface Props {
@@ -50,7 +50,7 @@ export function AlertingFlyout(props: Props) {
           }}
           onCancel={onCloseAddFlyout}
           onSubmit={onCloseAddFlyout}
-          ruleTypeId={DATASET_QUALITY_RULE_TYPE_ID}
+          ruleTypeId={DEGRADED_DOCS_RULE_TYPE_ID}
           initialValues={{
             params: initialValues,
           }}
