@@ -32,7 +32,8 @@ export class KibanaClient {
   }
 
   fetch<T>(pathname: string, options: KibanaClientFetchOptions): Promise<T> {
-    const url = new URL(`${this.target}${pathname}`);
+    const pathnameWithLeadingSlash = pathname.startsWith('/') ? pathname : `/${pathname}`;
+    const url = new URL(`${this.target}${pathnameWithLeadingSlash}`);
     const normalizedUrl = normalizeUrl(url.toString());
     return fetch(normalizedUrl, {
       ...options,
