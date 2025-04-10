@@ -663,13 +663,18 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   public async scheduleTask(request: KibanaRequest, params: ReportTaskParams) {
+    const reportingHealth = await this.reporting.getHealthInfo();
+    const shouldScheduleWithApiKey =
+      reportingHealth.hasPermanentEncryptionKey && reportingHealth.isSufficientlySecure;
     const taskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params,
     };
 
-    return await this.getTaskManagerStart().schedule(taskInstance, { request });
+    return shouldScheduleWithApiKey
+      ? await this.getTaskManagerStart().schedule(taskInstance, { request })
+      : await this.getTaskManagerStart().schedule(taskInstance);
   }
 
   public getStatus() {

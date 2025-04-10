@@ -16,10 +16,10 @@ import { cryptoFactory, type ExportType, type ReportingConfigType } from '@kbn/r
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { ExecuteReportTask } from '.';
-import type { ReportingCore } from '../..';
+import { ExecuteReportTask, REPORTING_EXECUTE_TYPE } from '.';
+import { ReportingCore } from '../..';
 import { createMockReportingCore } from '../../test_helpers';
-import { FakeRawRequest } from '@kbn/core/server';
+import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 interface StreamMock {
   getSeqNo: () => number;
@@ -167,6 +167,93 @@ describe('Execute Report Task', () => {
         "type": "report:execute",
       }
     `);
+  });
+
+  it('schedules task with request if health indicates security and api keys are enabled', async () => {
+    jest
+      .spyOn(mockReporting, 'getHealthInfo')
+      .mockResolvedValueOnce({ isSufficientlySecure: true, hasPermanentEncryptionKey: true });
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    await task.scheduleTask(
+      fakeRawRequest as unknown as KibanaRequest,
+      {
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'pending',
+      } as never
+    );
+
+    expect(mockTaskManager.schedule).toHaveBeenCalledWith(
+      {
+        taskType: REPORTING_EXECUTE_TYPE,
+        state: {},
+        params: {
+          _id: 'test',
+          jobtype: 'test1',
+          status: 'pending',
+        },
+      },
+      { request: fakeRawRequest }
+    );
+  });
+
+  it('schedules task without request if health indicates security is disabled', async () => {
+    jest
+      .spyOn(mockReporting, 'getHealthInfo')
+      .mockResolvedValueOnce({ isSufficientlySecure: false, hasPermanentEncryptionKey: true });
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    await task.scheduleTask(
+      fakeRawRequest as unknown as KibanaRequest,
+      {
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'pending',
+      } as never
+    );
+
+    expect(mockTaskManager.schedule).toHaveBeenCalledWith({
+      taskType: REPORTING_EXECUTE_TYPE,
+      state: {},
+      params: {
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'pending',
+      },
+    });
+  });
+
+  it('schedules task without request if health indicates no permanent encryption key', async () => {
+    jest
+      .spyOn(mockReporting, 'getHealthInfo')
+      .mockResolvedValueOnce({ isSufficientlySecure: true, hasPermanentEncryptionKey: false });
+    const task = new ExecuteReportTask(mockReporting, configType, logger);
+    const mockTaskManager = taskManagerMock.createStart();
+    await task.init(mockTaskManager);
+
+    await task.scheduleTask(
+      fakeRawRequest as unknown as KibanaRequest,
+      {
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'pending',
+      } as never
+    );
+
+    expect(mockTaskManager.schedule).toHaveBeenCalledWith({
+      taskType: REPORTING_EXECUTE_TYPE,
+      state: {},
+      params: {
+        _id: 'test',
+        jobtype: 'test1',
+        status: 'pending',
+      },
+    });
   });
 
   it('uses authorization headers from task manager fake request if defined', async () => {
