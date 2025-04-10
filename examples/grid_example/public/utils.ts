@@ -92,6 +92,5 @@ export const dashboardInputToGridLayout = ({
     }
   });
 
-  console.log('layout', layout);
   return layout;
 };

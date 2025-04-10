@@ -8,14 +8,13 @@
  */
 
 import { cloneDeep } from 'lodash';
-import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
-import { GridLayoutStateManager, GridPanelData } from '../../types';
-import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './utils';
-import { resolveGridRow } from '../../utils/resolve_grid_row';
-import { isGridDataEqual } from '../../utils/equality_checks';
-import { PointerPosition, UserInteractionEvent } from '../types';
+import { GridLayoutStateManager, GridPanelData, GridRowData } from '../../types';
+import { isGridDataEqual, isLayoutEqual } from '../../utils/equality_checks';
+import { resolveGridRow, resolveMainGrid } from '../../utils/resolve_grid_row';
 import { getSensorType, isKeyboardEvent } from '../sensors';
+import { PointerPosition, UserInteractionEvent } from '../types';
+import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -52,17 +51,20 @@ export const moveAction = (
     interactionEvent$,
     proposedGridLayout$,
     activePanel$,
+    layoutRef: { current: gridLayoutElement },
     rowRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
-  if (!interactionEvent || !runtimeSettings || !gridRowElements) {
+  const currentLayout = proposedGridLayout$.value;
+  if (!interactionEvent || !runtimeSettings || !gridRowElements || !currentLayout) {
     // if no interaction event return early
     return;
   }
 
-  const currentLayout = proposedGridLayout$.value;
-
-  const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
+  const currentPanelData: GridPanelData =
+    interactionEvent.targetRow === 'main'
+      ? (currentLayout[interactionEvent.id] as GridPanelData)
+      : (currentLayout[interactionEvent.targetRow] as GridRowData).panels[interactionEvent.id];
 
   if (!currentPanelData) {
     return;
@@ -95,7 +97,7 @@ export const moveAction = (
 
     let highestOverlap = -Infinity;
     let highestOverlapRowId = '';
-    Object.entries(gridRowElements).forEach(([id, row]) => {
+    Object.entries({ ...gridRowElements, main: gridLayoutElement }).forEach(([id, row]) => {
       if (!row) return;
       const rowRect = row.getBoundingClientRect();
       const overlap =
@@ -103,10 +105,12 @@ export const moveAction = (
       if (overlap > highestOverlap) {
         highestOverlap = overlap;
         highestOverlapRowId = id;
+        // console.log({ highestOverlap, highestOverlapRowId });
       }
     });
-    return highestOverlapRowId;
+    return highestOverlap > 0 ? highestOverlapRowId : lastRowId;
   })();
+  // console.log({ targetRowId, lastRowId });
   const hasChangedGridRow = targetRowId !== lastRowId;
 
   // re-render when the target row changes
@@ -118,7 +122,7 @@ export const moveAction = (
   }
 
   // calculate the requested grid position
-  const targetedGridRow = gridRowElements[targetRowId];
+  const targetedGridRow = targetRowId === 'main' ? gridLayoutElement : gridRowElements[targetRowId];
   const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0;
   const targetedGridTop = targetedGridRow?.getBoundingClientRect().top ?? 0;
 
@@ -145,7 +149,7 @@ export const moveAction = (
     requestedPanelData.column = targetColumn;
     requestedPanelData.row = targetRow;
   }
-
+  // console.log({ targetRow });
   // resolve the new grid layout
   if (
     hasChangedGridRow ||
@@ -153,24 +157,40 @@ export const moveAction = (
   ) {
     lastRequestedPanelPosition.current = { ...requestedPanelData };
 
-    const nextLayout = cloneDeep(currentLayout);
-    Object.entries(nextLayout).forEach(([rowId, row]) => {
+    let nextLayout = cloneDeep(currentLayout) ?? {};
+    if (interactionEvent.targetRow === 'main') {
+      const { [interactionEvent.id]: interactingPanel, ...otherWidgets } = nextLayout;
+      nextLayout = { ...otherWidgets };
+    } else {
+      const row = nextLayout[interactionEvent.targetRow] as GridRowData;
       const { [interactionEvent.id]: interactingPanel, ...otherPanels } = row.panels;
-      nextLayout[rowId] = { ...row, panels: { ...otherPanels } };
-    });
+      nextLayout[interactionEvent.targetRow] = {
+        ...row,
+        type: 'section',
+        panels: { ...otherPanels },
+      };
+    }
 
     // resolve destination grid
-    const destinationGrid = nextLayout[targetRowId];
-    const resolvedDestinationGrid = resolveGridRow(destinationGrid, requestedPanelData);
-    nextLayout[targetRowId] = resolvedDestinationGrid;
+    if (targetRowId === 'main') {
+      nextLayout = resolveMainGrid(nextLayout, requestedPanelData);
+    } else {
+      const destinationGrid = nextLayout[targetRowId] as GridRowData;
+      const resolvedDestinationGrid = resolveGridRow(destinationGrid.panels, requestedPanelData);
+      (nextLayout[targetRowId] as GridRowData).panels = resolvedDestinationGrid;
+    }
 
     // resolve origin grid
     if (hasChangedGridRow) {
-      const originGrid = nextLayout[lastRowId];
-      const resolvedOriginGrid = resolveGridRow(originGrid);
-      nextLayout[lastRowId] = resolvedOriginGrid;
+      if (lastRowId === 'main') {
+        nextLayout = resolveMainGrid(nextLayout);
+      } else {
+        const originGrid = nextLayout[lastRowId] as GridRowData;
+        const resolvedOriginGrid = resolveGridRow(originGrid.panels);
+        (nextLayout[lastRowId] as GridRowData).panels = resolvedOriginGrid;
+      }
     }
-    if (!deepEqual(currentLayout, nextLayout)) {
+    if (currentLayout && !isLayoutEqual(currentLayout, nextLayout)) {
       proposedGridLayout$.next(nextLayout);
     }
   }
@@ -184,7 +204,10 @@ export const commitAction = ({
 }: GridLayoutStateManager) => {
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
-  if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {
+  if (
+    proposedGridLayout$.value &&
+    !isLayoutEqual(proposedGridLayout$.value, gridLayout$.getValue())
+  ) {
     gridLayout$.next(cloneDeep(proposedGridLayout$.value));
   }
   proposedGridLayout$.next(undefined);

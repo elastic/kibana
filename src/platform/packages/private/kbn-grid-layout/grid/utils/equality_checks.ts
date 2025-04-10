@@ -26,19 +26,25 @@ export const isLayoutEqual = (a: GridLayoutData, b: GridLayoutData) => {
   let isEqual = true;
   const keys = Object.keys(a); // keys of A are equal to keys of b
   for (const key of keys) {
-    const rowA = a[key];
-    const rowB = b[key];
+    const widgetA = a[key];
+    const widgetB = b[key];
 
-    isEqual =
-      rowA.order === rowB.order &&
-      rowA.title === rowB.title &&
-      rowA.isCollapsed === rowB.isCollapsed &&
-      Object.keys(rowA.panels).length === Object.keys(rowB.panels).length;
+    if (widgetA.type === 'panel' && widgetB.type === 'panel') {
+      isEqual = isGridDataEqual(widgetA, widgetB);
+    } else {
+      isEqual =
+        widgetA.row === widgetB.row &&
+        (widgetA.type === 'section' && widgetB.type === 'section'
+          ? widgetA.title === widgetB.title &&
+            widgetA.isCollapsed === widgetB.isCollapsed &&
+            Object.keys(widgetA.panels).length === Object.keys(widgetB.panels).length
+          : true);
 
-    if (isEqual) {
-      for (const panelKey of Object.keys(rowA.panels)) {
-        isEqual = isGridDataEqual(rowA.panels[panelKey], rowB.panels[panelKey]);
-        if (!isEqual) break;
+      if (isEqual && widgetA.type === 'section' && widgetB.type === 'section') {
+        for (const panelKey of Object.keys(widgetA.panels)) {
+          isEqual = isGridDataEqual(widgetA.panels[panelKey], widgetB.panels[panelKey]);
+          if (!isEqual) break;
+        }
       }
     }
     if (!isEqual) break;

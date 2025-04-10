@@ -29,6 +29,7 @@ import { useGridLayoutState } from './use_grid_layout_state';
 import { getMainLayoutInOrder } from './utils/resolve_grid_row';
 import { GridPanel } from './grid_panel';
 import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
+import { isLayoutEqual } from './utils/equality_checks';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -107,13 +108,17 @@ export const GridLayout = ({
   // }, [onLayoutChange]);
 
   useEffect(() => {
-    const mainSectionWidgetsSubscription = gridLayoutStateManager.gridLayout$
+    const mainSectionWidgetsSubscription = combineLatest([
+      gridLayoutStateManager.proposedGridLayout$,
+      gridLayoutStateManager.gridLayout$,
+    ])
       .pipe(
-        map((gridLayout) => getMainLayoutInOrder(gridLayout)),
+        map(([proposedGridLayout, gridLayout]) =>
+          getMainLayoutInOrder(proposedGridLayout ?? gridLayout)
+        ),
         distinctUntilChanged(deepEqual)
       )
       .subscribe((widgets) => {
-        console.log('SET WIDGETS IN ORDER', widgets);
         setWidgetsInOrder(widgets);
       });
 
@@ -122,22 +127,25 @@ export const GridLayout = ({
       gridLayoutStateManager.gridLayout$,
     ])
       .pipe(
-        map(([proposedGridLayout, gridLayout]) =>
-          getMainLayoutInOrder(proposedGridLayout ?? gridLayout)
-        )
+        map(([proposedGridLayout, gridLayout]) => proposedGridLayout ?? gridLayout),
+        distinctUntilChanged(isLayoutEqual)
       )
-      .subscribe((widgets) => {
+
+      .subscribe((currentLayout) => {
         if (!layoutRef.current) return;
 
-        const currentLayout =
-          gridLayoutStateManager.proposedGridLayout$.getValue() ??
-          gridLayoutStateManager.gridLayout$.getValue();
+        const widgets = getMainLayoutInOrder(currentLayout);
+        // console.log('widgets', widgets);
         let gridTemplateRows = '';
         let maxRow = -Infinity;
+        let startingRow = 0;
         widgets.forEach(({ id, type }) => {
           if (type === 'panel') {
             const panelData = currentLayout[id] as GridPanelData;
-            maxRow = Math.max(maxRow, panelData.row + panelData.height);
+            if (maxRow < 0) {
+              startingRow = panelData.row;
+            }
+            maxRow = Math.max(maxRow, panelData.row + panelData.height - startingRow);
           } else {
             const sectionData = currentLayout[id] as GridRowData;
             gridTemplateRows += `${
@@ -146,6 +154,7 @@ export const GridLayout = ({
             maxRow = -Infinity;
           }
         });
+        // console.log({ currentLayout, gridTemplateRows });
         layoutRef.current.style.gridTemplateRows = gridTemplateRows;
       });
 
