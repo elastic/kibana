@@ -160,7 +160,7 @@ export function QuerySearchBar({
                 disableQueryLanguageSwitcher={true}
                 onClearSavedQuery={() => {}}
                 filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
-                allowSavingQueries={true}
+                saveQueryMenuVisibility="globally_managed"
                 showSavedQueryControls={true}
               />
             </div>
