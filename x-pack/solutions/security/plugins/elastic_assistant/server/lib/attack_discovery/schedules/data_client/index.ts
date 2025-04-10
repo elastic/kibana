@@ -52,31 +52,6 @@ export class AttackDiscoveryScheduleDataClient {
     return rule;
   };
 
-  public getScheduleEventLogs = async (id: string) => {
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    const rule = await this.options.rulesClient.getExecutionLogForRule({
-      id,
-      dateStart: oneWeekAgo.toISOString(),
-      page: 1,
-      perPage: 20,
-      // sort: estypes.Sort;
-      sort: [
-        {
-          timestamp: {
-            order: 'desc',
-          },
-        },
-      ],
-    });
-    return rule;
-  };
-
-  public getScheduleSummary = async (id: string) => {
-    const rule = await this.options.rulesClient.getAlertSummary({ id });
-    return rule;
-  };
-
   public createSchedule = async (ruleToCreate: CreateRuleData<AttackDiscoveryScheduleParams>) => {
     const rule = await this.options.rulesClient.create<AttackDiscoveryScheduleParams>({
       data: ruleToCreate,

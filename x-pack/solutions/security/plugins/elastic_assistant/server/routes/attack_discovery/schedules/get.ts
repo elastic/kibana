@@ -89,12 +89,6 @@ export const getAttackDiscoverySchedulesRoute = (
 
           const alertingRule = await dataClient.getSchedule(id);
 
-          const eventLogs = await dataClient.getScheduleEventLogs(id);
-          console.log(`[TEST] eventLogs: ${JSON.stringify(eventLogs, null, 2)}`);
-
-          const summary = await dataClient.getScheduleSummary(id);
-          console.log(`[TEST] summary: ${JSON.stringify(summary, null, 2)}`);
-
           const schedule = convertAlertingRuleToSchedule(alertingRule);
 
           return response.ok({ body: schedule });

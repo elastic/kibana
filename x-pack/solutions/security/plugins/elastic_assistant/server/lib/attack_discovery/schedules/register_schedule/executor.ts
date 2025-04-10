@@ -32,9 +32,5 @@ export const attackDiscoveryScheduleExecutor = async ({
     `Attack discovery schedule "[${ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID}]" executing...`
   );
 
-  if (true) {
-    throw new Error('Test AD failure');
-  }
-
   return { state: {} };
 };
