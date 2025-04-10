@@ -74,6 +74,7 @@ export const ChatSetupPage: React.FC = () => {
                 <EuiFlexItem style={{ minWidth: 360 }}>
                   <EuiCard
                     textAlign="left"
+                    titleSize="xs"
                     title={
                       <FormattedMessage
                         id="xpack.searchPlayground.setupPage.connectToLLM"
@@ -92,6 +93,7 @@ export const ChatSetupPage: React.FC = () => {
                 <EuiFlexItem style={{ minWidth: 360 }}>
                   <EuiCard
                     textAlign="left"
+                    titleSize="xs"
                     title={
                       <FormattedMessage
                         id="xpack.searchPlayground.setupPage.elasticsearchData"
