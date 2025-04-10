@@ -30,16 +30,20 @@ export const GridPanelDragPreview = React.memo(() => {
         .subscribe(([activePanel, proposedGridLayout]) => {
           if (!dragPreviewRef.current) return;
           const interactionEvent = gridLayoutStateManager.interactionEvent$.getValue();
-          const rowId = interactionEvent?.targetRow
+          const rowId = interactionEvent?.targetRow;
           if (!rowId || !proposedGridLayout) return;
 
-          const offset = getTopOffsetForRow(rowId, proposedGridLayout);
+          const row = proposedGridLayout?.[rowId]
+          const headerOffset = row.order === 0 ? 0 : 2;
+
+          const offset = getTopOffsetForRow(rowId, proposedGridLayout) + headerOffset; 
           console.log('offset', offset);
 
-          if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
+
+          if (!activePanel || !row.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = proposedGridLayout[rowId].panels[activePanel.id];
+            const panel = row.panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;

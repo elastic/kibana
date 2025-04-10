@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import classNames from 'classnames';
-import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
-import { combineLatest, map, pairwise, skip } from 'rxjs';
-
+import React, { useEffect, useState } from 'react';
+import { combineLatest, map, pairwise } from 'rxjs';
 
 import { GridPanelDragPreview } from '../grid_panel/grid_panel_drag_preview';
 import { GridPanel } from '../grid_panel';
@@ -21,7 +18,7 @@ import { getPanelKeysInOrder } from '../utils/resolve_grid_row';
 
 export interface GridRowProps {
   rowId: string;
-  toggleIsCollapsed
+  toggleIsCollapsed;
 }
 
 export const GridRow = React.memo(({ rowId, toggleIsCollapsed }: GridRowProps) => {
@@ -35,8 +32,6 @@ export const GridRow = React.memo(({ rowId, toggleIsCollapsed }: GridRowProps) =
 
   useEffect(
     () => {
-    
-
       /**
        * This subscription ensures that the row will re-render when one of the following changes:
        * - Collapsed state
@@ -98,23 +93,21 @@ export const GridRow = React.memo(({ rowId, toggleIsCollapsed }: GridRowProps) =
     [rowId]
   );
   return (
-    < >
-      
-        {currentRow.order !== 0 && (
-          <GridRowHeader rowId={rowId} toggleIsCollapsed={toggleIsCollapsed} />
-        )}
-        {!isCollapsed && (
-          <>
-            {/* render the panels **in order** for accessibility, using the memoized panel components */}
-            {panelIdsInOrder.map((panelId) => (
-              <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
-            ))}
-            <GridPanelDragPreview rowId={rowId} />
-          </>
-        )}
-      </>
+    <>
+      {currentRow.order !== 0 && (
+        <GridRowHeader rowId={rowId} toggleIsCollapsed={toggleIsCollapsed} />
+      )}
+      {!isCollapsed && (
+        <>
+          {/* render the panels **in order** for accessibility, using the memoized panel components */}
+          {panelIdsInOrder.map((panelId) => (
+            <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
+          ))}
+          <GridPanelDragPreview rowId={rowId} />
+        </>
+      )}
+    </>
   );
 });
-
 
 GridRow.displayName = 'KbnGridLayoutRow';

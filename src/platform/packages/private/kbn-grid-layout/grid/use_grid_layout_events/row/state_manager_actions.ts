@@ -71,10 +71,10 @@ export const moveAction = (
       // if expanded, get dimensions of row; otherwise, use the header
       const rowRefA = currentLayout[idA].isCollapsed
         ? gridLayoutStateManager.headerRefs.current[idA]
-        : gridLayoutStateManager.headerRefs.current[idA] // TODO: this should be calculated from the expanded row height (getRowHeight?)
+        : gridLayoutStateManager.headerRefs.current[idA]; // TODO: this should be calculated from the expanded row height (getRowHeight?)
       const rowRefB = currentLayout[idB].isCollapsed
         ? gridLayoutStateManager.headerRefs.current[idB]
-        : gridLayoutStateManager.headerRefs.current[idB] // TODO: this should be calculated from the expanded row height ()
+        : gridLayoutStateManager.headerRefs.current[idB]; // TODO: this should be calculated from the expanded row height ()
 
       if (!rowRefA || !rowRefB) return 0;
       // switch the order when the dragged row goes beyond the mid point of the row it's compared against

@@ -38,7 +38,6 @@ describe('row state manager actions', () => {
       const currentRowOrder = getRowKeysInOrder(gridLayoutStateManager.gridLayout$.getValue());
       expect(currentRowOrder).toEqual(['first', 'second', 'third']);
 
-
       moveAction(gridLayoutStateManager, { clientX: 0, clientY: 0 }, { clientX: 0, clientY: 0 });
 
       const newRowOrder = getRowKeysInOrder(gridLayoutStateManager.proposedGridLayout$.getValue()!);

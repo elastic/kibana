@@ -16,15 +16,19 @@ import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
-import { GridRow } from './grid_row';
-import { GridAccessMode, GridLayoutData, GridPanelData, GridSettings, UseCustomDragHandle } from './types';
-import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
+import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import {
+  GridLayoutContext,
+  GridLayoutContextType,
+  useGridLayoutContext,
+} from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { getPanelKeysInOrder, getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
 import { GridRowHeader } from './grid_row/grid_row_header';
 import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
 import { GridPanel } from './grid_panel';
+import { getTopOffsetForRow } from './utils/calculations';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -61,27 +65,28 @@ export const GridLayout = ({
 
   const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
 
-  //TODO: move this to state so the updates are not so frequent
+  // TODO: move this to state so the updates are not so frequent
   const headersAndPanelsIds = rowIdsInOrder.flatMap((rowId) => {
-    let headerAndPanels = []
+    const headerAndPanels = [];
     const row = rows[rowId];
     const panels = row.panels;
     const panelIdsInOrder = getPanelKeysInOrder(panels);
-    if (row.order!==0){
-      headerAndPanels.push(['header', rowId, row.isCollapsed])
+    if (row.order === 0) {
+      headerAndPanels.push(['header-ghost', rowId, row.isCollapsed]);
+    } else {
+      headerAndPanels.push(['header', rowId, row.isCollapsed]);
     }
-    return [...headerAndPanels ,...panelIdsInOrder.map((panelId) => [panelId, rowId, row.isCollapsed])];
-  })
-  console.log(headersAndPanelsIds)
-
-
+    return [
+      ...headerAndPanels,
+      ...panelIdsInOrder.map((panelId) => [panelId, rowId, row.isCollapsed]),
+    ];
+  });
+  console.log(headersAndPanelsIds);
 
   //  const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
   //   getPanelKeysInOrder(rows[rowIdsInOrder[0]].panels)
   // );
   // const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
-
-
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -185,37 +190,37 @@ export const GridLayout = ({
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 
-      useEffect(() => {
-      /**
-       * When the user is interacting with an element, the page can grow, but it cannot
-       * shrink. This is to stop a behaviour where the page would scroll up automatically
-       * making the panel shrink or grow unpredictably.
-       */
-      const interactionStyleSubscription = combineLatest([
-        gridLayoutStateManager.interactionEvent$,
-      ]).subscribe(([ interactionEvent]) => {
-        if (!layoutRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
-        if (!interactionEvent) {
-          layoutRef.current.classList.remove('kbnGridLayout--active'); // todo: fix how these styles display for header - should they be visible for the whole page till the bottom?
-          return;
-        }
-        layoutRef.current.classList.add('kbnGridLayout--active');
-      });
+  useEffect(() => {
+    /**
+     * When the user is interacting with an element, the page can grow, but it cannot
+     * shrink. This is to stop a behaviour where the page would scroll up automatically
+     * making the panel shrink or grow unpredictably.
+     */
+    const interactionStyleSubscription = combineLatest([
+      gridLayoutStateManager.interactionEvent$,
+    ]).subscribe(([interactionEvent]) => {
+      if (!layoutRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
+      if (!interactionEvent) {
+        layoutRef.current.classList.remove('kbnGridLayout--active'); // todo: fix how these styles display for header - should they be visible for the whole page till the bottom?
+        return;
+      }
+      layoutRef.current.classList.add('kbnGridLayout--active');
+    });
 
-      return () => {
-        interactionStyleSubscription.unsubscribe();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    return () => {
+      interactionStyleSubscription.unsubscribe();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-
-  const toggleIsCollapsed = useCallback((rowwId: string) => {
-    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    newLayout[rowwId].isCollapsed = !newLayout[rowwId].isCollapsed;
-    gridLayoutStateManager.gridLayout$.next(newLayout);
-  }, [gridLayoutStateManager.gridLayout$]);
-
-
+  const toggleIsCollapsed = useCallback(
+    (rowwId: string) => {
+      const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+      newLayout[rowwId].isCollapsed = !newLayout[rowwId].isCollapsed;
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+    },
+    [gridLayoutStateManager.gridLayout$]
+  );
 
   return (
     <GridLayoutContext.Provider value={memoizedContext}>
@@ -236,14 +241,40 @@ export const GridLayout = ({
           ]}
         >
           {headersAndPanelsIds.map(([typeId, rowId, isCollapsed]) => {
+            // todo: fix types
             if (typeId === 'header') {
-              return <GridRowHeader rowId={rowId} toggleIsCollapsed={toggleIsCollapsed} key={rowId} />
+              return (
+                <GridRowHeaderWrapper
+                  rowId={rowId}
+                  toggleIsCollapsed={toggleIsCollapsed}
+                  key={rowId}
+                  isCollapsed={!!isCollapsed}
+                />
+              );
+            } else if (typeId === 'header-ghost') {
+              return (
+                <div
+                  key={typeId}
+                  className="kbnGridRowHeader--ghost"
+                  style={{
+                    gridColumnStart: 1,
+                    gridColumnEnd: -1,
+                    gridRowStart: 1,
+                    gridRowEnd: 1,
+                    pointerEvents: 'none',
+                    height: '0px',
+                  }}
+                  ref={(element: HTMLDivElement | null) => {
+                    gridLayoutStateManager.headerRefs.current[rowId] = element;
+                  }}
+                />
+              );
             }
             if (!isCollapsed) {
-              return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />
+              return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
             }
             return null;
-            })}
+          })}
           <GridPanelDragPreview />
         </div>
       </GridHeightSmoother>
@@ -251,7 +282,60 @@ export const GridLayout = ({
   );
 };
 
- // <GridRow key={rowId} rowId={rowId} toggleIsCollapsed={toggleIsCollapsed}/>
+const GridRowHeaderWrapper = ({
+  rowId,
+  toggleIsCollapsed,
+  isCollapsed,
+}: {
+  rowId: string;
+  toggleIsCollapsed: (rowId: string) => void;
+  isCollapsed: boolean;
+}) => {
+  const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
+  const { gridLayoutStateManager } = useGridLayoutContext();
+
+  useEffect(() => {
+    /**
+     * Set `aria-expanded` without passing the expanded state as a prop to `GridRowHeader` in order
+     * to prevent `GridRowHeader` from rerendering when this state changes
+     */
+    if (!collapseButtonRef.current) return;
+    collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
+  }, [isCollapsed]);
+
+  // memoization here causes that the layout doesn't refresh when another row is collapsed, but we have to find a performant way of memoizing it
+
+  // const styles = useMemo(() => {
+  const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+  const topOffset = getTopOffsetForRow(rowId, gridLayout);
+  const styles = {
+    gridColumnStart: 1,
+    gridColumnEnd: -1,
+    gridRowStart: topOffset + 1,
+    gridRowEnd: topOffset + 3,
+  };
+
+  // }, [gridLayoutStateManager]);
+
+  return (
+    <div
+      className={classNames({ 'kbnGridRowHeader--collapsed': isCollapsed })}
+      style={styles}
+      id={`kbnGridRow-${rowId}`}
+      role="region"
+      aria-labelledby={`kbnGridRowTitle-${rowId}`}
+      ref={(element: HTMLDivElement | null) =>
+        (gridLayoutStateManager.headerRefs.current[rowId] = element)
+      }
+    >
+      <GridRowHeader
+        rowId={rowId}
+        toggleIsCollapsed={toggleIsCollapsed}
+        collapseButtonRef={collapseButtonRef}
+      />
+    </div>
+  );
+};
 
 const stylesRow = {
   fullHeight: css({
@@ -300,36 +384,24 @@ const styles = {
   hasExpandedPanel: css({
     '&:has(.kbnGridPanel--expanded)': {
       height: '100%',
-      // targets the grid row container that contains the expanded panel
-      '& .kbnGridRowContainer:has(.kbnGridPanel--expanded)': {
-        '.kbnGridRowHeader': {
-          height: '0px', // used instead of 'display: none' due to a11y concerns
-          padding: '0px',
-          display: 'block',
-          overflow: 'hidden',
-        },
-        '.kbnGridRow': {
-          display: 'block !important', // overwrite grid display
-          height: '100%',
-          '.kbnGridPanel': {
-            '&.kbnGridPanel--expanded': {
-              height: '100% !important',
-            },
-            // hide the non-expanded panels
-            '&:not(.kbnGridPanel--expanded)': {
-              position: 'absolute',
-              top: '-9999px',
-              left: '-9999px',
-              visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
-            },
-          },
-        },
+      display: 'block',
+      '.kbnGridRowHeader': {
+        height: '0px', // used instead of 'display: none' due to a11y concerns
+        padding: '0px',
+        display: 'block',
+        overflow: 'hidden',
       },
-      // targets the grid row containers that **do not** contain the expanded panel
-      '& .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded))': {
-        position: 'absolute',
-        top: '-9999px',
-        left: '-9999px',
+      '.kbnGridPanel': {
+        '&.kbnGridPanel--expanded': {
+          height: '100% !important',
+        },
+        // hide the non-expanded panels
+        '&:not(.kbnGridPanel--expanded)': {
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
+        },
       },
     },
   }),

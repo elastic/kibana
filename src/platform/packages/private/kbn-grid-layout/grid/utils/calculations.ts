@@ -1,18 +1,27 @@
-import { GridLayoutData, GridRowData } from "../types";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { GridLayoutData, GridRowData } from '../types';
 
 export const getRowHeight = (row: GridRowData) => {
-  // for the elements build like: 
+  // for the elements build like:
   // {id: '10', row: 58, column: 0, width: 24, height: 11}
   // we need to find the element that has the highest row + height value
   if (row.isCollapsed) return 2;
-  const panelsHeight =  Object.values(row.panels).reduce((acc, panel) => {
+  const panelsHeight = Object.values(row.panels).reduce((acc, panel) => {
     const panelEnd = panel.row + panel.height;
     if (!acc) return panelEnd;
     return Math.max(acc, panelEnd);
   }, 0);
   const headerHeight = row.order === 0 ? 0 : 2;
   return panelsHeight + headerHeight;
-}
+};
 
 export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
   // get all the rows before the current row using the order property
@@ -22,4 +31,4 @@ export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
     return acc + getRowHeight(row);
   }, 0);
   return rowsBeforeHeight;
-}
+};

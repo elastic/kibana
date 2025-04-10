@@ -52,9 +52,10 @@ export const moveAction = (
     interactionEvent$,
     proposedGridLayout$,
     activePanel$,
+    headerRefs: { current: gridRowElements },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
-  if (!interactionEvent || !runtimeSettings ) {
+  if (!interactionEvent || !runtimeSettings) {
     // if no interaction event return early
     return;
   }
@@ -118,9 +119,9 @@ export const moveAction = (
   }
 
   // calculate the requested grid position
-  // const targetedGridRow = gridRowElements[targetRowId];
-  const targetedGridLeft = 0 //targetedGridRow?.getBoundingClientRect().left ?? 0; // TODO: use the grid row header, AND ALSO ADD THE GRID ROW FOOTER!!!
-  const targetedGridTop = 0 // targetedGridRow?.getBoundingClientRect().top ?? 0;
+  const targetedGridRow = gridRowElements[targetRowId];
+  const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0; // TODO: use the grid row header, AND ALSO ADD THE GRID ROW FOOTER!!!
+  const targetedGridTop = targetedGridRow?.getBoundingClientRect().bottom ?? 0;
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
 
