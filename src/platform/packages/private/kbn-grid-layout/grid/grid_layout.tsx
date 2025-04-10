@@ -226,20 +226,14 @@ export const GridLayout = ({
   return (
     <GridLayoutContext.Provider value={memoizedContext}>
       <GridHeightSmoother>
-        <div css={[styles.layoutPadding, styles.fullHeight]}>
+        <div css={[styles.layoutPadding, styles.hasExpandedPanel]}>
           <div
             ref={(divElement) => {
               layoutRef.current = divElement;
               setDimensionsRef(divElement);
             }}
             className={classNames('kbnGrid', className)}
-            css={[
-              styles.hasActivePanel,
-              styles.singleColumn,
-              styles.hasExpandedPanel,
-              styles.fullHeight,
-              styles.grid,
-            ]}
+            css={[styles.hasActivePanel, styles.singleColumn, styles.fullHeight, styles.grid]}
           >
             {headersAndPanelsIds.map(([typeId, rowId, isCollapsed]) => {
               // todo: fix types
@@ -438,9 +432,12 @@ const styles = {
     },
   }),
   hasExpandedPanel: css({
-    '&:has(.kbnGridPanel--expanded)': {
+    ':has(.kbnGridPanel--expanded)': {
       height: '100%',
-      display: 'block',
+      '.kbnGrid': {
+        display: 'block',
+        height: '100%',
+      },
       '.kbnGridRowHeader': {
         height: '0px', // used instead of 'display: none' due to a11y concerns
         padding: '0px',
