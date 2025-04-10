@@ -129,7 +129,7 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     async getM2MApiCookieCredentialsWitCustomRoleScope(
       options?: GetCookieOptions
     ): Promise<CookieCredentials> {
-      return sessionManager.getM2MApiCookieCredentialsWithRoleScope(role, options);
+      return this.getM2MApiCookieCredentialsWithRoleScope(CUSTOM_ROLE, options);
     },
 
     async getEmail(role: string) {
@@ -146,20 +146,27 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
     },
 
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
+      if (!supportedRoles.includes(role)) {
+        throw new Error(
+          `Cannot create API key for non-existent role "${role}", supported roles are: ${supportedRoles.join(
+            ', '
+          )}`
+        );
+      }
+      if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
+        throw new Error(`Custom roles are not supported for the current deployment`);
+      }
       // Get admin credentials in order to create the API key
       const adminCookieHeader = await getAdminCredentials();
       let roleDescriptors = {};
 
       if (role !== 'admin') {
-        if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
-          throw new Error(`Custom roles are not supported for the current deployment`);
-        }
         const roleDescriptor = supportedRoleDescriptors.get(role);
         if (!roleDescriptor) {
           throw new Error(
             role === CUSTOM_ROLE
               ? `Before creating API key for '${CUSTOM_ROLE}', use 'samlAuth.setCustomRole' to set the role privileges`
-              : `Cannot create API key for non-existent role "${role}"`
+              : `Cannot create API key for role "${role}", role descriptor not found`
           );
         }
         log.debug(
