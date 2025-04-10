@@ -94,7 +94,7 @@ export interface FindingsMisconfigurationFlyoutHeaderProps {
 }
 
 export interface FindingsMisconfigurationFlyoutContentProps {
-  data: CspFinding;
+  finding: CspFinding;
 }
 
 export interface FindingMisconfigurationFlyoutFooterProps {

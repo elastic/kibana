@@ -13,10 +13,10 @@ import type {
   FindingMisconfigurationFlyoutProps,
 } from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
+import { i18n } from '@kbn/i18n';
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { useKibana } from '../../../../common/lib/kibana';
-import { FlyoutBody } from '../../../shared/components/flyout_body';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
@@ -46,7 +46,11 @@ export const FindingsMisconfigurationPanel = ({
                   {finding['@timestamp'] && (
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs">
-                        <b>{'Evaluated at '}</b>
+                        <b>
+                          {i18n.translate('xpack.securitySolution.csp.findingsFlyout.evaluatedAt', {
+                            defaultMessage: 'Evaluated at ',
+                          })}
+                        </b>
                         <PreferenceFormattedDate value={new Date(finding['@timestamp'])} />
                         <EuiSpacer size="xs" />
                       </EuiText>
@@ -58,9 +62,7 @@ export const FindingsMisconfigurationPanel = ({
                 </EuiFlexGroup>
                 <CspFlyout.Header finding={finding} />
               </FlyoutHeader>
-              <FlyoutBody>
-                <CspFlyout.Body data={finding} />
-              </FlyoutBody>
+              <CspFlyout.Body finding={finding} />
               <EuiFlyoutFooter>
                 <CspFlyout.Footer createRuleFn={createRuleFn} />
               </EuiFlyoutFooter>

@@ -118,7 +118,7 @@ const FindingsTab = ({ tab, finding }: { finding: CspFinding; tab: FindingsTab }
   }
 };
 
-export const FindingsMisconfigurationFlyoutContent = ({ data }: { data: CspFinding }) => {
+export const FindingsMisconfigurationFlyoutContent = ({ finding }: { finding: CspFinding }) => {
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
   const { euiTheme } = useEuiTheme();
 
@@ -137,7 +137,7 @@ export const FindingsMisconfigurationFlyoutContent = ({ data }: { data: CspFindi
             </EuiTab>
           ))}
         </EuiTabs>
-        {data && (
+        {finding && (
           <EuiPanel
             hasShadow={false}
             css={css`
@@ -145,12 +145,12 @@ export const FindingsMisconfigurationFlyoutContent = ({ data }: { data: CspFindi
             `}
           >
             <EuiFlyoutBody key={tab.id}>
-              {!isNativeCspFinding(data) && ['overview', 'rule'].includes(tab.id) && (
+              {!isNativeCspFinding(finding) && ['overview', 'rule'].includes(tab.id) && (
                 <div style={{ marginBottom: euiTheme.size.base }}>
-                  <MissingFieldsCallout finding={data} />
+                  <MissingFieldsCallout finding={finding} />
                 </div>
               )}
-              <FindingsTab tab={tab} finding={data} />
+              <FindingsTab tab={tab} finding={finding} />
             </EuiFlyoutBody>
           </EuiPanel>
         )}
