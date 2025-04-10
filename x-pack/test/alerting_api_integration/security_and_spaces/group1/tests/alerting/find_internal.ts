@@ -116,10 +116,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 is_snoozed_until: null,
               };
 
-              // eslint-disable-next-line no-console
-              console.log('debug logging match', JSON.stringify(match));
-              // eslint-disable-next-line no-console
-              console.log('debug logging expected', JSON.stringify(expected));
               expect(match).to.eql(expected);
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
