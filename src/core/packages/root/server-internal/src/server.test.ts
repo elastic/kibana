@@ -289,6 +289,47 @@ test(`doesn't preboot core services if config validation fails`, async () => {
   expect(mockPrebootService.preboot).not.toHaveBeenCalled();
 });
 
+describe('stripUnknownsWorkaround', () => {
+  beforeEach(async () => {
+    mockEnsureValidConfiguration.mockImplementation(() => {
+      throw new Error('Unknown configuration keys');
+    });
+  });
+
+  test(`aborts on the first validation attempt if allowStripUnknownsWorkaround is not true`, async () => {
+    mockConfigService.atPath.mockReturnValue(
+      new BehaviorSubject({ lifecycle: { disablePreboot: true } })
+    );
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unknown configuration keys"`
+    );
+    expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(1);
+  });
+
+  test(`tries again with stripUnknownKeys: true when allowStripUnknownsWorkaround is true`, async () => {
+    mockConfigService.atPath.mockReturnValue(
+      new BehaviorSubject({
+        lifecycle: { disablePreboot: true },
+        allowStripUnknownsWorkaround: true,
+      })
+    );
+
+    const server = new Server(rawConfigService, env, logger);
+    await server.preboot();
+    await expect(server.setup()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Unknown configuration keys"`
+    );
+    expect(mockEnsureValidConfiguration).toHaveBeenCalledTimes(2);
+    expect(mockEnsureValidConfiguration).toHaveBeenNthCalledWith(
+      2,
+      expect.anything(),
+      expect.objectContaining({ stripUnknownKeys: true })
+    );
+  });
+});
+
 test('migrator-only node throws exception during start', async () => {
   rawConfigService.getConfig$.mockReturnValue(
     new BehaviorSubject({ node: { roles: ['migrator'] } })

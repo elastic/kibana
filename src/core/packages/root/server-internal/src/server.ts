@@ -521,11 +521,10 @@ export class Server {
     try {
       await ensureValidConfiguration(this.configService);
     } catch (validationError) {
-      if (this.env.packageInfo.buildFlavor !== 'serverless') {
-        throw validationError;
-      }
-      // Even for serverless mode, we want to throw in CI because that means that the build will include invalid configuration.
-      if (process.env.CI) {
+      const config = await firstValueFrom(
+        this.configService.atPath<CoreConfigType>(coreConfig.path)
+      );
+      if (!config.allowStripUnknownsWorkaround) {
         throw validationError;
       }
       // When running on serverless, we may allow unknown keys, but stripping them from the final config object.
