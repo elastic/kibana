@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export {
-  ENT_SEARCH_DATASTREAM_PATTERN,
-  ENT_SEARCH_DATASTREAM_PREFIXES,
-  ENT_SEARCH_INDEX_PREFIX,
-} from './pre_eight_index_deprecator';
+/**
+ * Workflow Insights
+ */
+
+export const WORKFLOW_INSIGHTS_SURVEY_URL = 'https://ela.st/automatic-troubleshooting-feedback';
