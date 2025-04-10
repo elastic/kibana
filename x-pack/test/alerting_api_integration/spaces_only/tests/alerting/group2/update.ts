@@ -457,13 +457,19 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .expect(400);
       });
     });
+
     describe('artifacts', () => {
-      it('should not return investigation guide in the response', async () => {
+      it('should not return dashboards in the response', async () => {
         const expectedArtifacts = {
           artifacts: {
-            investigation_guide: { blob: 'Sample investigation guide' },
+            dashboards: [
+              {
+                id: 'dashboard-1',
+              },
+            ],
           },
         };
+
         const createResponse = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
@@ -478,9 +484,11 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           { meta: true }
         );
 
-        expect((esResponse.body._source as any)?.alert.artifacts.investigation_guide ?? {}).to.eql({
-          blob: 'Sample investigation guide',
-        });
+        expect((esResponse.body._source as any)?.alert.artifacts.dashboards ?? []).to.eql([
+          {
+            refId: 'dashboard_0',
+          },
+        ]);
 
         const updateResponse = await supertest
           .put(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${createResponse.body.id}`)
@@ -496,7 +504,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             throttle: '1m',
             notify_when: 'onThrottleInterval',
             artifacts: {
-              investigation_guide: { blob: 'Updated investigation guide' },
+              dashboards: [{ id: 'dashboard-1' }, { id: 'dashboard-2' }],
             },
           })
           .expect(200);
@@ -510,11 +518,14 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           },
           { meta: true }
         );
-        expect(
-          (esUpdateResponse.body._source as any)?.alert.artifacts.investigation_guide ?? {}
-        ).to.eql({
-          blob: 'Updated investigation guide',
-        });
+        expect((esUpdateResponse.body._source as any)?.alert.artifacts.dashboards ?? {}).to.eql([
+          {
+            refId: 'dashboard_0',
+          },
+          {
+            refId: 'dashboard_1',
+          },
+        ]);
       });
     });
   });
