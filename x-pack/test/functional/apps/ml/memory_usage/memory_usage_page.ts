@@ -25,8 +25,10 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.createAnomalyDetectionJob(jobConfig);
       await ml.api.openAnomalyDetectionJob(jobId);
 
-      await ml.navigation.navigateToMl();
-      await ml.navigation.navigateToMemoryUsage();
+      await ml.navigation.navigateToStackManagementMlSection(
+        'overview',
+        'mlStackManagementOverviewPage'
+      );
     });
 
     after(async () => {
@@ -34,8 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.api.cleanMlIndices();
     });
 
-    it('opens page with nodes tab selected', async () => {
-      await ml.memoryUsage.assertMemoryUsageTabIsSelected('nodes');
+    it('opens page with memory usage and nodes panel expanded', async () => {
+      await ml.memoryUsage.assertMemoryUsageExpandedDetailsPanelExists(true);
+      await ml.memoryUsage.assertNodeExpandedDetailsPanelExists();
     });
 
     it('allows sorting', async () => {
@@ -61,8 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.memoryUsage.assertEmptyTreeChartExists();
     });
 
-    it('selects memory usage tab and displays chart', async () => {
-      await ml.memoryUsage.selectTab('memory-usage');
+    it('displays chart in memory usage', async () => {
       await ml.memoryUsage.assertTreeChartExists();
 
       await ml.memoryUsage.clearSelectedChartItems();
