@@ -7,8 +7,6 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
-import { catchAndWrapError } from '../../../../utils/wrap_errors';
 import { CustomHttpRequestError } from '../../../../../utils/custom_http_request_error';
 import { getActionRequestExpiration } from '../../utils';
 import { ResponseActionsClientError } from '../errors';
@@ -69,60 +67,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
-    const spaceId = this.options.spaceId;
-    const fleetServices = this.options.endpointService.getInternalFleetServices(spaceId);
-    const soClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
-    const agentPolicyIds = new Set<string>();
-    const policyInfo: LogsEndpointAction['agent']['policy'] = [];
-
-    // Get a list of Agent records so we can identify the Agent Policy ID
-    const agents = await fleetServices.agent
-      .getByIds(agentIds, { ignoreMissing: true })
-      .catch(catchAndWrapError);
-
-    this.log.debug(() => `Agent records for ids [${agentIds.join(' | ')}]:\n${stringify(agents)}`);
-
-    for (const agent of agents) {
-      if (agent.policy_id) {
-        agentPolicyIds.add(agent.policy_id);
-      }
-    }
-
-    // Get a list of endpoint policies that are associated with the agent policies found from above
-    const kuery = `${
-      fleetServices.endpointPolicyKuery
-    } AND ingest-package-policies.policy_ids: (${Array.from(agentPolicyIds.values())
-      .map((id) => `"${id}"`)
-      .join(' OR ')})`;
-
-    const integrationPolicies = await fleetServices.packagePolicy
-      .list(soClient, { kuery })
-      .catch(catchAndWrapError);
-
-    this.log.debug(
-      () => `Endpoint integration policies for agents:\n${stringify(integrationPolicies)}`
-    );
-
-    const agentPolicyToIntegrationPolicyMap: Record<string, PackagePolicy> = {};
-
-    for (const integrationPolicy of integrationPolicies.items) {
-      for (const agentPolicyId of integrationPolicy.policy_ids) {
-        agentPolicyToIntegrationPolicyMap[agentPolicyId] = integrationPolicy;
-      }
-    }
-
-    for (const agent of agents) {
-      if (agent.policy_id) {
-        policyInfo.push({
-          agentId: agent.id,
-          elasticAgentId: agent.id,
-          agentPolicyId: agent.policy_id,
-          integrationPolicyId: agentPolicyToIntegrationPolicyMap[agent.policy_id].id,
-        });
-      }
-    }
-
-    return policyInfo;
+    return this.fetchFleetInfoForAgents(agentIds, ['endpoint']);
   }
 
   private async checkAgentIds(ids: string[]): Promise<{

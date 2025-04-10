@@ -130,46 +130,51 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
     const esClient = this.options.esClient;
-    const spaceId = this.options.spaceId;
-    const fleetServices = this.options.endpointService.getInternalFleetServices(spaceId);
-    const soClient = fleetServices.savedObjects.createInternalScopedSoClient({ spaceId });
-    const policyInfo: LogsEndpointAction['agent']['policy'] = [];
+    const esSearchRequest: SearchRequest = {
+      index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
+      query: {
+        bool: {
+          filter: [{ terms: { 'sentinel_one.agent.agent.id': agentIds } }],
+        },
+      },
+      collapse: {
+        field: 'sentinel_one.agent.agent.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          _source: ['agent', 'sentinel_one.agent.agent.id'],
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      _source: false,
+    };
+
+    this.log.debug(
+      () =>
+        `Looking for agents in [${SENTINEL_ONE_AGENT_INDEX_PATTERN}] with:\n${stringify(
+          esSearchRequest
+        )}`
+    );
 
     // Get the latest ingested document for each agent ID
     const s1AgentsEsResults = await esClient
-      .search<SentinelOneAgentEsDoc, { most_recent: SentinelOneAgentEsDoc }>({
-        index: SENTINEL_ONE_AGENT_INDEX_PATTERN,
-        query: {
-          bool: {
-            filter: [{ terms: { 'sentinel_one.agent.agent.id': agentIds } }],
-          },
-        },
-        collapse: {
-          field: 'sentinel_one.agent.agent.id',
-          inner_hits: {
-            name: 'most_recent',
-            size: 1,
-            _source: ['agent', 'sentinel_one.agent.agent.id'],
-            sort: [{ 'event.created': 'desc' }],
-          },
-        },
-        _source: false,
-      })
+      .search<SentinelOneAgentEsDoc, { most_recent: SentinelOneAgentEsDoc }>(esSearchRequest)
       .catch(catchAndWrapError);
 
     this.log.debug(
       () =>
         `SentinelOne Agent records found in [${SENTINEL_ONE_AGENT_INDEX_PATTERN}]:\n${stringify(
-          s1AgentsEsResults
+          s1AgentsEsResults,
+          20
         )}`
     );
 
-    const s1AgentIdToElasticAgentIdMap: Record<string, string> = s1AgentsEsResults.hits.hits.reduce(
+    const fleetAgentIdToS1AgentIdMap: Record<string, string> = s1AgentsEsResults.hits.hits.reduce(
       (acc, s1AgentEsDoc) => {
         const doc = s1AgentEsDoc.inner_hits?.most_recent.hits.hits[0]._source;
 
         if (doc) {
-          acc[doc.sentinel_one.agent.agent.id] = doc.agent.id;
+          acc[doc.agent.id] = doc.sentinel_one.agent.agent.id;
         }
 
         return acc;
@@ -177,53 +182,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       {} as Record<string, string>
     );
 
-    // Get the Agent records from fleet in order to determine the agent policy id
-    const fleetAgents = await fleetServices.agent
-      .getByIds(Object.values(s1AgentIdToElasticAgentIdMap), { ignoreMissing: true })
-      .catch(catchAndWrapError);
-    const fleetAgentIdToAgentPolicyIdMap: Record<string, string> = {};
-    const agentPolicyIds = new Set<string>([]);
-
-    for (const fleetAgent of fleetAgents) {
-      if (fleetAgent.policy_id) {
-        fleetAgentIdToAgentPolicyIdMap[fleetAgent.id] = fleetAgent.policy_id;
-        agentPolicyIds.add(fleetAgent.policy_id);
+    return this.fetchFleetInfoForAgents(Object.keys(fleetAgentIdToS1AgentIdMap), [
+      'sentinel_one',
+    ]).then((agentInfoList) => {
+      for (const agentInfo of agentInfoList) {
+        agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
       }
-    }
 
-    // Get list of SentinelOne Integration policies
-    const integrationPolicies = await fleetServices.packagePolicy
-      .list(soClient, {
-        kuery: `ingest-package-policies.package.name: "sentinel_one" AND ingest-package-policies.policy_ids: (${Array.from(
-          agentPolicyIds.values()
-        )
-          .map((id) => `"${id}"`)
-          .join(' OR ')})`,
-      })
-      .catch(catchAndWrapError);
-
-    const agentPolicyIdToIntegrationPolicyIdMap: Record<string, string> = {};
-
-    for (const integrationPolicy of integrationPolicies.items) {
-      for (const agentPolicyId of integrationPolicy.policy_ids) {
-        agentPolicyIdToIntegrationPolicyIdMap[agentPolicyId] = integrationPolicy.id;
-      }
-    }
-
-    for (const s1AgentId of agentIds) {
-      const elasticAgentId = s1AgentIdToElasticAgentIdMap[s1AgentId];
-      const agentPolicyId = fleetAgentIdToAgentPolicyIdMap[elasticAgentId];
-      const integrationPolicyId = agentPolicyIdToIntegrationPolicyIdMap[agentPolicyId];
-
-      policyInfo.push({
-        agentId: s1AgentId,
-        elasticAgentId,
-        agentPolicyId,
-        integrationPolicyId,
-      });
-    }
-
-    return policyInfo;
+      return agentInfoList;
+    });
   }
 
   private async handleResponseActionCreation<
