@@ -52,7 +52,6 @@ export function NewRoutingStreamEntry({
             />
           </EuiFormRow>
           <ConditionEditor
-            isNew
             condition={child.if}
             onConditionChange={(condition) => {
               onChildChange({

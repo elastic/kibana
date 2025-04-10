@@ -9,10 +9,11 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiSelect,
   EuiSwitch,
-  EuiText,
-  EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import {
   BinaryFilterCondition,
@@ -20,138 +21,101 @@ import {
   FilterCondition,
   isNeverCondition,
 } from '@kbn/streams-schema';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
+import { useBoolean } from '@kbn/react-hooks';
 import {
   EMPTY_EQUALS_CONDITION,
+  NEVER_CONDITION,
   alwaysToEmptyEquals,
   emptyEqualsToAlways,
 } from '../../../util/condition';
 
 export function ConditionEditor(props: {
   condition: Condition;
-  onConditionChange?: (condition: Condition) => void;
-  isNew?: boolean;
+  onConditionChange: (condition: Condition) => void;
 }) {
-  const normalizedCondition = alwaysToEmptyEquals(props.condition);
+  const condition = alwaysToEmptyEquals(props.condition);
+  const isEnabled = !isNeverCondition(condition);
 
-  const handleConditionChange = (condition: Condition) => {
-    props.onConditionChange?.(emptyEqualsToAlways(condition));
+  const [usingSyntaxEditor, { toggle: toggleSyntaxEditor, off: closeSyntaxEditor }] = useBoolean(
+    !('operator' in condition)
+  );
+
+  const handleConditionChange = (updatedCondition: Condition) => {
+    props.onConditionChange(emptyEqualsToAlways(updatedCondition));
   };
 
   return (
-    <ConditionForm
-      condition={normalizedCondition}
-      onConditionChange={handleConditionChange}
-      isNew={props.isNew}
-    />
-  );
-}
-
-export function ConditionForm(props: {
-  condition: Condition;
-  onConditionChange: (condition: Condition) => void;
-  isNew?: boolean;
-}) {
-  const [syntaxEditor, setSyntaxEditor] = React.useState(() =>
-    Boolean(props.condition && !('operator' in props.condition))
-  );
-  const [jsonCondition, setJsonCondition] = React.useState<string | null>(() =>
-    JSON.stringify(props.condition, null, 2)
-  );
-  useEffect(() => {
-    if (!syntaxEditor && props.condition) {
-      setJsonCondition(JSON.stringify(props.condition, null, 2));
-    }
-  }, [syntaxEditor, props.condition]);
-  return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      {!props.isNew && (
-        <>
-          <EuiFlexItem grow>
-            <EuiText
-              className={css`
-                font-weight: bold;
-              `}
-              size="xs"
-            >
-              {i18n.translate('xpack.streams.conditionEditor.title', { defaultMessage: 'Status' })}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiToolTip
-            content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
-              defaultMessage: 'Route no documents to this stream without deleting existing data',
+    <EuiForm fullWidth>
+      <EuiFormRow
+        label={
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {i18n.translate('xpack.streams.conditionEditor.title', {
+              defaultMessage: 'Status',
             })}
-          >
-            <EuiSwitch
-              label={i18n.translate('xpack.streams.conditionEditor.switch', {
-                defaultMessage: 'Enabled',
+            <EuiIconTip
+              content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
+                defaultMessage:
+                  'When the stream is not enabled, it does not route documents to this stream. Disabling the stream does not delete existing data.',
               })}
-              compressed
-              checked={!isNeverCondition(props.condition)}
-              onChange={() => {
-                props.onConditionChange(
-                  isNeverCondition(props.condition) ? EMPTY_EQUALS_CONDITION : { never: {} }
-                );
-                setSyntaxEditor(false);
-              }}
             />
-          </EuiToolTip>
-        </>
-      )}
-      {(props.isNew || !isNeverCondition(props.condition)) && (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="xs">
-            <EuiFlexItem grow>
-              <EuiText
-                className={css`
-                  font-weight: bold;
-                `}
-                size="xs"
-              >
-                {i18n.translate('xpack.streams.conditionEditor.title', {
-                  defaultMessage: 'Condition',
-                })}
-              </EuiText>
-            </EuiFlexItem>
-
+          </EuiFlexGroup>
+        }
+      >
+        <EuiSwitch
+          label={i18n.translate('xpack.streams.conditionEditor.switch', {
+            defaultMessage: 'Enabled',
+          })}
+          compressed
+          checked={isEnabled}
+          onChange={(event) => {
+            handleConditionChange(event.target.checked ? EMPTY_EQUALS_CONDITION : NEVER_CONDITION);
+            closeSyntaxEditor();
+          }}
+        />
+      </EuiFormRow>
+      {isEnabled && (
+        <EuiFormRow
+          label={i18n.translate('xpack.streams.conditionEditor.title', {
+            defaultMessage: 'Condition',
+          })}
+          labelAppend={
             <EuiSwitch
               label={i18n.translate('xpack.streams.conditionEditor.switch', {
                 defaultMessage: 'Syntax editor',
               })}
               compressed
-              checked={syntaxEditor}
-              onChange={() => setSyntaxEditor(!syntaxEditor)}
+              checked={usingSyntaxEditor}
+              onChange={toggleSyntaxEditor}
             />
-          </EuiFlexGroup>
-          {syntaxEditor ? (
+          }
+        >
+          {usingSyntaxEditor ? (
             <CodeEditor
               height={200}
               languageId="json"
-              value={jsonCondition || ''}
-              onChange={(e) => {
-                setJsonCondition(e);
+              value={JSON.stringify(condition, null, 2)}
+              onChange={(value) => {
                 try {
-                  const condition = JSON.parse(e);
-                  props.onConditionChange(condition);
+                  handleConditionChange(JSON.parse(value));
                 } catch (error: unknown) {
                   // do nothing
                 }
               }}
             />
-          ) : !props.condition || 'operator' in props.condition ? (
+          ) : 'operator' in condition ? (
             <FilterForm
-              condition={(props.condition as FilterCondition) || EMPTY_EQUALS_CONDITION}
-              onConditionChange={props.onConditionChange}
+              condition={condition || EMPTY_EQUALS_CONDITION}
+              onConditionChange={handleConditionChange}
             />
           ) : (
-            <pre>{JSON.stringify(props.condition, null, 2)}</pre>
+            <pre>{JSON.stringify(condition, null, 2)}</pre>
           )}
-        </>
+        </EuiFormRow>
       )}
-    </EuiFlexGroup>
+    </EuiForm>
   );
 }
 
