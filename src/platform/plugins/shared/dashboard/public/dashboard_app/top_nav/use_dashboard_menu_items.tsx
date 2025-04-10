@@ -15,6 +15,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { useOpenContentSource } from '@kbn/content-management-content-source';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
+import { CONTENT_ID } from '../../../common/content_management';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_renderer/settings/open_settings_flyout';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
@@ -76,6 +77,7 @@ export const useDashboardMenuItems = ({
     const close = openContentSource({
       getContent: async () => dashboardApi.getSerializedState(),
       onClose: () => close(),
+      contentName: CONTENT_ID,
     });
   }, [dashboardApi, openContentSource]);
 
