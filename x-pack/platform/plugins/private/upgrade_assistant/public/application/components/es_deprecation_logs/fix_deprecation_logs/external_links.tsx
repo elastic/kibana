@@ -11,7 +11,7 @@ import { buildPhrasesFilter, PhrasesFilter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,
