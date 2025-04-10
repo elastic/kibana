@@ -41,8 +41,7 @@ import { SOLUTION_NAME, ASSISTANT_MANAGEMENT_TITLE } from './common/translations
 
 import { APP_ID, APP_UI_ID, APP_PATH, APP_ICON_SOLUTION } from '../common/constants';
 
-import type { AppLinkItems } from './common/links';
-import { updateAppLinks, type LinksPermissions } from './common/links';
+import type { AppLinkItems, LinksPermissions } from './common/links';
 import { registerDeepLinksUpdater } from './common/links/deep_links';
 import type { FleetUiExtensionGetterOptions, SecuritySolutionUiConfigType } from './common/types';
 
@@ -62,6 +61,7 @@ import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 import { hasAccessToSecuritySolution } from './helpers_access';
+import { applicationLinks } from './common/links/application_links';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -321,9 +321,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
         entityAnalytics: new subPluginClasses.EntityAnalytics(),
-        assets: new subPluginClasses.Assets(),
-        investigations: new subPluginClasses.Investigations(),
-        machineLearning: new subPluginClasses.MachineLearning(),
         siemMigrations: new subPluginClasses.SiemMigrations(),
         configurations: new subPluginClasses.Configurations(),
       };
@@ -356,9 +353,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       entityAnalytics: subPlugins.entityAnalytics.start(
         this.experimentalFeatures.riskScoringRoutesEnabled
       ),
-      assets: subPlugins.assets.start(),
-      investigations: subPlugins.investigations.start(),
-      machineLearning: subPlugins.machineLearning.start(),
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
@@ -435,7 +429,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   private async registerPluginUpdates(core: CoreStart, plugins: StartPlugins) {
     const { license$ } = plugins.licensing;
     const { capabilities } = core.application;
-    const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
+    const { upsellingService, solutionNavigationTree$ } = this.contract;
 
     // When the user does not have any of the capabilities required to access security solution, the plugin should be inaccessible
     // This is necessary to hide security solution from the selectable solutions in the spaces UI
@@ -446,30 +440,23 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     }
 
     // Configuration of AppLinks updater registration based on license and capabilities
-    const {
-      appLinks: initialAppLinks,
-      getFilteredLinks,
-      solutionAppLinksSwitcher,
-    } = await this.lazyApplicationLinks();
+    const { appLinks: initialAppLinks, getFilteredLinks } = await this.lazyApplicationLinks();
 
-    registerDeepLinksUpdater(this.appUpdater$, isSolutionNavigationEnabled$);
+    registerDeepLinksUpdater(this.appUpdater$, solutionNavigationTree$);
 
     const appLinksToUpdate$ = new Subject<AppLinkItems>();
     appLinksToUpdate$.next(initialAppLinks);
 
-    appLinksToUpdate$
-      .pipe(combineLatestWith(license$, isSolutionNavigationEnabled$))
-      .subscribe(([appLinks, license, isSolutionNavigationEnabled]) => {
-        const links = isSolutionNavigationEnabled ? solutionAppLinksSwitcher(appLinks) : appLinks;
-        const linksPermissions: LinksPermissions = {
-          experimentalFeatures: this.experimentalFeatures,
-          upselling: upsellingService,
-          capabilities,
-          uiSettingsClient: core.uiSettings,
-          ...(license.type != null && { license }),
-        };
-        updateAppLinks(links, linksPermissions);
-      });
+    appLinksToUpdate$.pipe(combineLatestWith(license$)).subscribe(([appLinks, license]) => {
+      const linksPermissions: LinksPermissions = {
+        experimentalFeatures: this.experimentalFeatures,
+        upselling: upsellingService,
+        capabilities,
+        uiSettingsClient: core.uiSettings,
+        ...(license.type != null && { license }),
+      };
+      applicationLinks.update(appLinks, linksPermissions);
+    });
 
     const filteredLinks = await getFilteredLinks(core, plugins);
     appLinksToUpdate$.next(filteredLinks);

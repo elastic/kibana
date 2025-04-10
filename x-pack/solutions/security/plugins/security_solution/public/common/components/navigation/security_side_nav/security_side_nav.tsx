@@ -14,16 +14,16 @@ import {
 } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
 import { SecurityPageName } from '../../../../app/types';
-import type { SecurityNavLink } from '../../../links';
-import { getAncestorLinksInfo } from '../../../links';
+import type { NavigationLink } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
 import { useGetSecuritySolutionLinkProps, type GetSecuritySolutionLinkProps } from '../../links';
-import { useSecurityInternalNavLinks } from '../../../links/nav_links';
+import { useNavLinks } from '../../../links/nav_links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
 import { CATEGORIES } from './categories';
+import { useParentLinks } from '../../../links/links_hooks';
 
 export const EUI_HEADER_HEIGHT = '93px';
 export const BOTTOM_BAR_HEIGHT = '50px';
@@ -39,7 +39,7 @@ const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.la
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
  */
 const formatLink = (
-  navLink: SecurityNavLink,
+  navLink: NavigationLink,
   getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
 ): SolutionSideNavItem => ({
   id: navLink.id,
@@ -69,7 +69,7 @@ const formatLink = (
  * Formats the get started navigation links into the shape expected by the `SolutionSideNav`
  */
 const formatGetStartedLink = (
-  navLink: SecurityNavLink,
+  navLink: NavigationLink,
   getSecuritySolutionLinkProps: GetSecuritySolutionLinkProps
 ): SolutionSideNavItem => ({
   id: navLink.id,
@@ -84,7 +84,7 @@ const formatGetStartedLink = (
  * Returns the formatted `items` and `footerItems` to be rendered in the navigation
  */
 const useSolutionSideNavItems = () => {
-  const navLinks = useSecurityInternalNavLinks();
+  const navLinks = useNavLinks();
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
   const sideNavItems = useMemo(() => {
@@ -110,12 +110,8 @@ const useSolutionSideNavItems = () => {
 
 const useSelectedId = (): SecurityPageName => {
   const [{ pageName }] = useRouteSpy();
-  const selectedId = useMemo(() => {
-    const [rootLinkInfo] = getAncestorLinksInfo(pageName);
-    return rootLinkInfo?.id ?? '';
-  }, [pageName]);
-
-  return selectedId;
+  const [rootLinkInfo] = useParentLinks(pageName);
+  return rootLinkInfo?.id ?? '';
 };
 
 const usePanelTopOffset = (): string | undefined => {

@@ -6,14 +6,19 @@
  */
 
 import { useEffect } from 'react';
-import { useNavLinks } from '../links/nav_links';
-import { useFindAppLinksByPath } from '../links/use_find_app_links_by_path';
+import { i18n } from '@kbn/i18n';
+import { useRouteSpy } from '../utils/route/use_route_spy';
+import { useLinkInfo } from '../links/links_hooks';
+
+const SECURITY = i18n.translate('xpack.securitySolution.browserTitle.security', {
+  defaultMessage: 'Security',
+});
 
 export const useUpdateBrowserTitle = () => {
-  const navLinks = useNavLinks();
-  const linkInfo = useFindAppLinksByPath(navLinks);
+  const [{ pageName }] = useRouteSpy();
+  const linkInfo = useLinkInfo(pageName);
 
   useEffect(() => {
-    document.title = `${linkInfo?.title ?? ''} - Kibana`;
+    document.title = `${linkInfo?.title ?? SECURITY} - Kibana`;
   }, [linkInfo]);
 };

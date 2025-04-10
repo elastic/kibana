@@ -13,7 +13,7 @@ import {
   isSecurityId,
   getAppIdsFromId,
   formatPath,
-  isModified,
+  isModifiedEvent,
   concatPaths,
 } from './links';
 import { mockGetAppUrl, mockNavigateTo } from '../mocks/navigation';
@@ -223,7 +223,7 @@ describe('links', () => {
         ctrlKey: false,
         shiftKey: true,
       } as unknown as React.MouseEvent;
-      const result = isModified(event);
+      const result = isModifiedEvent(event);
       expect(result).toBe(true);
     });
 
@@ -234,7 +234,7 @@ describe('links', () => {
         ctrlKey: false,
         shiftKey: false,
       } as unknown as React.MouseEvent;
-      const result = isModified(event);
+      const result = isModifiedEvent(event);
       expect(result).toBe(false);
     });
   });

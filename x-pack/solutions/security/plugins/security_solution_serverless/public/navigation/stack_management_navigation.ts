@@ -95,10 +95,12 @@ export const createStackManagementNavigationTree = (): GroupDefinition => ({
               breadcrumbStatus: 'hidden',
             },
             {
+              id: SecurityPageName.entityAnalyticsManagement,
               link: securityLink(SecurityPageName.entityAnalyticsManagement),
               breadcrumbStatus: 'hidden',
             },
             {
+              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
               link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
               breadcrumbStatus: 'hidden',
             },

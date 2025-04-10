@@ -20,11 +20,23 @@ import {
   useLinkExists,
   isLinkUiSettingsAllowed,
 } from './links';
-import { createCapabilities } from './test_utils';
 import { hasCapabilities } from '../lib/capabilities';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import React from 'react';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+
+interface FeatureCap {
+  [key: string]: Record<string, boolean | Record<string, boolean>>;
+}
+
+const createCapabilities = (capabilities?: FeatureCap): Capabilities => {
+  return {
+    navLinks: {},
+    management: {},
+    catalogue: {},
+    ...capabilities,
+  };
+};
 
 const defaultAppLinks: AppLinkItems = [
   {

@@ -10,7 +10,6 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LinkAnchor } from '@kbn/security-solution-navigation/links';
 import { css } from '@emotion/react';
-import { ExternalPageName } from '@kbn/security-solution-navigation';
 
 const linkAnchorCss = css`
   text-decoration: underline;
@@ -28,7 +27,7 @@ export const DashboardsLandingCalloutComponent: React.FC = () => {
             defaultMessage="Building a dashboard or visualization? Create and add {maps} or choose from the {visualizationLibrary}"
             values={{
               maps: (
-                <LinkAnchor id={ExternalPageName.maps} css={linkAnchorCss}>
+                <LinkAnchor app="maps" css={linkAnchorCss}>
                   <FormattedMessage
                     id="xpack.securitySolutionServerless.dashboardsLandingCallout.maps"
                     defaultMessage="Maps"
@@ -36,7 +35,7 @@ export const DashboardsLandingCalloutComponent: React.FC = () => {
                 </LinkAnchor>
               ),
               visualizationLibrary: (
-                <LinkAnchor id={ExternalPageName.visualize} css={linkAnchorCss}>
+                <LinkAnchor app="visualize" css={linkAnchorCss}>
                   <FormattedMessage
                     id="xpack.securitySolutionServerless.dashboardsLandingCallout.visualizeLibrary"
                     defaultMessage="Visualize library"

@@ -16,10 +16,6 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.rules.management', {
         defaultMessage: 'Management',
       }),
-      siemMigrationsRules: i18n.translate(
-        'securitySolutionPackages.navLinks.rules.management.siemRuleMigrations',
-        { defaultMessage: 'SIEM rule migrations' }
-      ),
       discover: i18n.translate('securitySolutionPackages.navLinks.rules.discover', {
         defaultMessage: 'Discover',
       }),

@@ -6,15 +6,17 @@
  */
 
 import type { Subject, Subscription } from 'rxjs';
-import { combineLatestWith } from 'rxjs';
+import { combineLatestWith, debounceTime } from 'rxjs';
 import type { AppDeepLink, AppUpdater, AppDeepLinkLocations } from '@kbn/core/public';
-import { appLinks$ } from './links';
-import type { AppLinkItems } from './types';
-
-type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
+import type { SecurityPageName } from '@kbn/deeplinks-security';
+import type { NavigationTreeDefinition, NodeDefinition } from '@kbn/core-chrome-browser';
+import { SecurityLinkGroup } from '@kbn/security-solution-navigation/links';
+import type { SecurityGroupName } from '@kbn/security-solution-navigation';
+import type { AppLinkItems, LinkItem, NormalizedLinks } from './types';
+import { applicationLinks } from './application_links';
 
 // TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
-const classicFormatter: DeepLinksFormatter = (appLinks) =>
+const classicFormatter: (appLinks: AppLinkItems) => AppDeepLink[] = (appLinks) =>
   appLinks.map((appLink) => {
     const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
     if (!appLink.globalSearchDisabled) {
@@ -39,44 +41,110 @@ const classicFormatter: DeepLinksFormatter = (appLinks) =>
     return deepLink;
   });
 
-const solutionFormatter: DeepLinksFormatter = (appLinks) =>
-  appLinks.map((appLink) => {
-    const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
-    if (!appLink.globalSearchDisabled) {
-      visibleIn.add('globalSearch');
+/**
+ * Converts the navigation tree to a deepLinks hierarchy format using the application normalized links.
+ * @param navigationTree - The navigation tree to convert
+ * @param normalizedLinks - The normalized links to use for formatting
+ * @returns The formatted deep links
+ */
+const solutionFormatter = (
+  navigationTree: NavigationTreeDefinition,
+  normalizedLinks: NormalizedLinks
+): AppDeepLink[] => {
+  const { body, footer = [] } = navigationTree;
+  const nodes: NodeDefinition[] = [];
+  [...body, ...footer].forEach((rootNode) => {
+    if (rootNode.type === 'navGroup') {
+      nodes.push(...rootNode.children);
     }
-    if (!appLink.sideNavDisabled) {
-      visibleIn.add('sideNav');
+    if (!rootNode.type || rootNode.type === 'navItem') {
+      nodes.push(rootNode);
     }
-    const deepLink: AppDeepLink = {
-      id: appLink.id,
-      path: appLink.path,
-      title: appLink.title,
-      visibleIn: Array.from(visibleIn),
-      ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
-      ...(appLink.links && appLink.links?.length
-        ? {
-            deepLinks: solutionFormatter(appLink.links),
-          }
-        : {}),
-    };
-    return deepLink;
   });
+
+  return solutionNodesFormatter(nodes, normalizedLinks);
+};
+
+const solutionNodesFormatter = (
+  navigationNodes: NodeDefinition[],
+  normalizedLinks: NormalizedLinks
+): AppDeepLink[] => {
+  const deepLinks: AppDeepLink[] = [];
+
+  navigationNodes.forEach((node) => {
+    // Process links without an id: external links or second level groups
+    if (!node.id && node.children) {
+      deepLinks.push(...solutionNodesFormatter(node.children, normalizedLinks));
+      return;
+    }
+
+    // Process top level groups
+    const linkGroup = SecurityLinkGroup[node.id as SecurityGroupName];
+    if (linkGroup) {
+      const childrenLinks = solutionNodesFormatter(node.children ?? [], normalizedLinks);
+      if (childrenLinks.length > 0) {
+        deepLinks.push({
+          id: node.id as string,
+          title: linkGroup.title,
+          deepLinks: childrenLinks,
+        });
+      }
+      return;
+    }
+
+    // Process security links
+    const appLink = normalizedLinks[node.id as SecurityPageName];
+    if (appLink) {
+      const deepLink = formatDeepLink(appLink);
+      if (node.children) {
+        const childrenLinks = solutionNodesFormatter(node.children, normalizedLinks);
+        if (childrenLinks.length > 0) {
+          deepLink.deepLinks = childrenLinks;
+        }
+      }
+      deepLinks.push(deepLink);
+    }
+  });
+
+  return deepLinks;
+};
+
+const formatDeepLink = (appLink: LinkItem): AppDeepLink => {
+  const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
+  if (!appLink.globalSearchDisabled) {
+    visibleIn.add('globalSearch');
+  }
+  if (!appLink.sideNavDisabled) {
+    visibleIn.add('sideNav');
+  }
+  const deepLink: AppDeepLink = {
+    id: appLink.id,
+    path: appLink.path,
+    title: appLink.title,
+    visibleIn: Array.from(visibleIn),
+    ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+  };
+  return deepLink;
+};
 
 /**
  * Registers any change in appLinks to be updated in app deepLinks
  */
 export const registerDeepLinksUpdater = (
   appUpdater$: Subject<AppUpdater>,
-  isSolutionNavigationEnabled$: Subject<boolean>
+  navigationTree$: Subject<NavigationTreeDefinition | null>
 ): Subscription => {
-  return appLinks$
-    .pipe(combineLatestWith(isSolutionNavigationEnabled$))
-    .subscribe(([appLinks, isSolutionNavigationEnabled]) => {
-      appUpdater$.next(() => ({
-        deepLinks: isSolutionNavigationEnabled
-          ? solutionFormatter(appLinks)
-          : classicFormatter(appLinks),
-      }));
+  return navigationTree$
+    .pipe(
+      combineLatestWith(applicationLinks.links$, applicationLinks.normalizedLinks$),
+      debounceTime(100) // avoid multiple calls in a short period of time
+    )
+    .subscribe(([navigationTree, appLinks, normalizedLinks]) => {
+      const deepLinks =
+        navigationTree == null
+          ? classicFormatter(appLinks)
+          : solutionFormatter(navigationTree, normalizedLinks);
+
+      appUpdater$.next(() => ({ deepLinks }));
     });
 };

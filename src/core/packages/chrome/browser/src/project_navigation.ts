@@ -195,6 +195,11 @@ interface NodeDefinitionBase {
    * ----------------------------------------------------------------------------------------------
    */
   /**
+   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
+   * the Navigation.Item component when React components are used to declare the navigation tree.
+   */
+  renderItem?: () => React.ReactNode;
+  /**
    * ["item" nodes only] Optional flag to indicate if the target page should be opened in a new Browser tab.
    * Note: this property is currently only used in the navigation panel opening on the right of the side nav.
    */

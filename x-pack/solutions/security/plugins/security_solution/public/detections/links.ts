@@ -29,7 +29,7 @@ export const alertsLink: LinkItem = {
 };
 
 export const alertSummaryLink: LinkItem = {
-  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.alerts_summary`]],
+  // capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.alerts_summary`]],
   globalNavPosition: 3,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.alertSummary', {

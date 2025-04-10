@@ -22,9 +22,6 @@ import { findingsLinks } from './cloud_security_posture/links';
 import type { StartPlugins } from './types';
 import { dashboardsLinks } from './dashboards/links';
 
-// TODO: remove after rollout https://github.com/elastic/kibana/issues/179572
-export { solutionAppLinksSwitcher } from './app/solution_navigation/links/app_links';
-
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
   alertsLink,
