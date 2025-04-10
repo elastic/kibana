@@ -8,8 +8,11 @@ import expect from '@kbn/expect';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
 } from '@kbn/core-http-common';
+import type { EcsHost } from "@elastic/ecs"
 import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
-import type { GetEntityStoreStatusResponse } from '../../../../solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/status.gen'
+import { dataViewRouteHelpersFactory } from '../../utils/data_view';
+import { EntityStoreUtils } from '../../utils';
+import type { GetEntityStoreStatusResponse } from '../../../../../../solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/status.gen.ts'
 
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
@@ -20,10 +23,11 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = providerContext.getService('supertest');
   const retry = providerContext.getService('retry');
   const es = providerContext.getService('es');
+  const dataView = dataViewRouteHelpersFactory(supertest);
 
-  describe('GET /api/entity_store/status', () => {
+  describe('Host transform logic', () => {
 
-    describe('not_installed', () => {
+    describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
         const { body } = await supertest
           .get('/api/entity_store/status')
@@ -34,35 +38,12 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('running', () => {
+    describe('Install Entity Store and test Host transform', () => {
       before(async () => {
+        await utils.cleanEngines();
         // Initialize security solution by creating a prerequisite index pattern.
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
-        let response = await supertest
-          .post('/api/content_management/rpc/create')
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            contentTypeId: 'index-pattern',
-            data: {
-              fieldAttrs: '{}',
-              title: '.alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
-              timeFieldName: '@timestamp',
-              sourceFilters: '[]',
-              fields: '[]',
-              fieldFormatMap: '{}',
-              allowNoIndex: true,
-              runtimeFieldMap: '{}',
-              name: '.alerts-security.alerts-default,apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*,-*elastic-cloud-logs-*',
-              allowHidden: false
-            },
-            options: {
-              id: 'security-solution-default',
-              overwrite: true
-            },
-            version: 1
-          });
-        expect(response.statusCode).to.eql(200);
-
+        await dataView.create('security-solution');
         // Create a test index matching transform's pattern to store test documents
         await es.indices.createDataStream({name: DATASTREAM_NAME});
 
@@ -87,7 +68,12 @@ export default function (providerContext: FtrProviderContext) {
 
       after(async () => {
         await es.indices.deleteDataStream({name: DATASTREAM_NAME});
-      })
+        await dataView.delete('security-solution');
+      });
+
+      afterEach(async () => {
+        await utils.cleanEngines();
+      });
 
       it("Should return 200 and status 'running' for all engines", async () => {
         const { body } = await supertest
@@ -162,21 +148,7 @@ export default function (providerContext: FtrProviderContext) {
   });
 }
 
-type hostObject = {
-  domain: string
-  hostname: string
-  id: string
-  os: {
-    name: string
-    type: string
-  },
-  ip: string
-  mac: string
-  type: string
-  architecture: string
-}
-
-function buildHostTransformDocument(name: string, host: hostObject): Object {
+function buildHostTransformDocument(name: string, host: EcsHost): Object {
   // Get timestamp without the millisecond part
   const isoTimestamp: string = (new Date).toISOString().split('.')[0];
   let document: Object = {
