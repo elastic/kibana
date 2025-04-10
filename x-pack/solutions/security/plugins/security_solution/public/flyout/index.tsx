@@ -198,14 +198,6 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       />
     ),
   },
-  // {
-  //   key: MisconfigurationFindingsPanelKey,
-  //   component: (props) => (
-  //     <FindingsMisconfigurationPanel
-  //       {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
-  //     />
-  //   ),
-  // },
 ];
 
 export const SECURITY_SOLUTION_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.securitySolution}`;
