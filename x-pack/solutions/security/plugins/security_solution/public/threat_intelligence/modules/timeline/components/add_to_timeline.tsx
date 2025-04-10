@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { useRef } from 'react';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
@@ -52,7 +52,7 @@ export interface AddToTimelineCellActionProps extends AddToTimelineProps {
  *
  * @returns add to timeline button or an empty component
  */
-export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
+export const AddToTimelineButtonIcon: FC<AddToTimelineProps> = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
@@ -83,7 +83,7 @@ export const AddToTimelineButtonIcon: VFC<AddToTimelineProps> = ({
  *
  * @returns add to timeline button or an empty component
  */
-export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
+export const AddToTimelineButtonEmpty: FC<AddToTimelineProps> = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
@@ -144,7 +144,7 @@ export const AddToTimelineButtonEmpty: VFC<AddToTimelineProps> = ({
  *
  * @returns add to timeline {@link EuiContextMenuItem} for a context menu
  */
-export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
+export const AddToTimelineContextMenu: FC<AddToTimelineProps> = ({
   data,
   field,
   'data-test-subj': dataTestSubj,
@@ -203,7 +203,7 @@ export const AddToTimelineContextMenu: VFC<AddToTimelineProps> = ({
  *
  * @returns add to timeline button or an empty component
  */
-export const AddToTimelineCellAction: VFC<AddToTimelineCellActionProps> = ({
+export const AddToTimelineCellAction: FC<AddToTimelineCellActionProps> = ({
   data,
   field,
   Component,

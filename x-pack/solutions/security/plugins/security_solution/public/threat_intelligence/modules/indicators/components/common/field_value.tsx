@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React from 'react';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
 import { EMPTY_VALUE } from '../../../../constants/common';
@@ -30,7 +30,7 @@ export interface IndicatorFieldValueProps {
  * Takes an indicator object, a field and a field => type object to returns the correct value to display.
  * @returns If the type is a 'date', returns the {@link DateFormatter} component, else returns the value or {@link EMPTY_VALUE}.
  */
-export const IndicatorFieldValue: VFC<IndicatorFieldValueProps> = ({ indicator, field }) => {
+export const IndicatorFieldValue: FC<IndicatorFieldValueProps> = ({ indicator, field }) => {
   const fieldType = useFieldTypes()[field];
   const value = unwrapValue(indicator, field as RawIndicatorFieldId);
 

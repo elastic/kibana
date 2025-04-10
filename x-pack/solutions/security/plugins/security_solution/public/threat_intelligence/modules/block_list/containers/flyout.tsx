@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
-import {
+import type { FC } from 'react';
+import React from 'react';
+import type {
   CreateExceptionListItemSchema,
   EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -28,7 +29,7 @@ export interface BlockListFlyoutProps {
  * - the flyout component: x-pack/solutions/security/plugins/security_solution/public/management/components/artifact_list_page/components/artifact_flyout.tsx
  * - the form component: x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/view/components/blocklist_form.tsx
  */
-export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }) => {
+export const BlockListFlyout: FC<BlockListFlyoutProps> = ({ indicatorFileHash }) => {
   const { setBlockListIndicatorValue } = useBlockListContext();
   const { blockList } = useSecurityContext();
   const Component = blockList.getFlyoutComponent();

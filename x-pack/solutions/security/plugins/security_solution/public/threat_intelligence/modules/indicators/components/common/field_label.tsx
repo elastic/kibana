@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type VFC } from 'react';
+import React, { type FC } from 'react';
 import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
 import {
   CONFIDENCE,
@@ -25,7 +25,7 @@ interface IndicatorFieldLabelProps {
 /**
  * Renders field label using i18n, or the field key if the translation is not available
  */
-export const IndicatorFieldLabel: VFC<IndicatorFieldLabelProps> = ({ field }) => (
+export const IndicatorFieldLabel: FC<IndicatorFieldLabelProps> = ({ field }) => (
   <>{translateFieldLabel(field)}</>
 );
 

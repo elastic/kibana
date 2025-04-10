@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, type VFC } from 'react';
+import React, { useMemo, type FC } from 'react';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
 import { unwrapValue } from '../../utils/unwrap_value';
@@ -33,7 +33,7 @@ interface HighlightedValuesTableProps {
 /**
  * Displays highlighted indicator values based on indicator type
  */
-export const HighlightedValuesTable: VFC<HighlightedValuesTableProps> = ({
+export const HighlightedValuesTable: FC<HighlightedValuesTableProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
 }) => {

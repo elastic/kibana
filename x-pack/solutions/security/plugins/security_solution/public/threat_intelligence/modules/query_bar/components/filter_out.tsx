@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import React, { type FC } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useFilterInOut } from '../hooks/use_filter_in_out';
 import { FilterOut } from '../utils/filter';
-import { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import { type Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { FILTER_OUT_TITLE } from './translations';
 
 const ICON_TYPE = 'minusInCircle';
@@ -49,7 +49,7 @@ export interface FilterOutCellActionProps extends FilterOutProps {
  *
  * @returns filter out button icon
  */
-export const FilterOutButtonIcon: VFC<FilterOutProps> = ({
+export const FilterOutButtonIcon: FC<FilterOutProps> = ({
   data,
   field,
   'data-test-subj': dataTestSub,
@@ -81,7 +81,7 @@ export const FilterOutButtonIcon: VFC<FilterOutProps> = ({
  *
  * @returns filter out button empty
  */
-export const FilterOutButtonEmpty: VFC<FilterOutProps> = ({
+export const FilterOutButtonEmpty: FC<FilterOutProps> = ({
   data,
   field,
   'data-test-subj': dataTestSub,
@@ -114,7 +114,7 @@ export const FilterOutButtonEmpty: VFC<FilterOutProps> = ({
  *
  * @returns filter in {@link EuiContextMenuItem} for a context menu
  */
-export const FilterOutContextMenu: VFC<FilterOutProps> = ({
+export const FilterOutContextMenu: FC<FilterOutProps> = ({
   data,
   field,
   'data-test-subj': dataTestSub,
@@ -144,7 +144,7 @@ export const FilterOutContextMenu: VFC<FilterOutProps> = ({
  *
  * @returns filter in button for data grid
  */
-export const FilterOutCellAction: VFC<FilterOutCellActionProps> = ({
+export const FilterOutCellAction: FC<FilterOutCellActionProps> = ({
   data,
   field,
   Component,

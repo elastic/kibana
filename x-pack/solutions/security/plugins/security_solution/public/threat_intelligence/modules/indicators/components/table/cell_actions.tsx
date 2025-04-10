@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
-import { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import type { FC } from 'react';
+import React from 'react';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { AddToTimelineCellAction } from '../../../timeline/components/add_to_timeline';
 import { FilterInCellAction } from '../../../query_bar/components/filter_in';
 import { FilterOutCellAction } from '../../../query_bar/components/filter_out';
@@ -37,7 +38,7 @@ export interface CellActionsProps
  * It displays the FilterIn, FilterOut and AddToTimeline icons in the popover
  * when the user hovers above a cell.
  */
-export const CellActions: VFC<CellActionsProps> = ({
+export const CellActions: FC<CellActionsProps> = ({
   rowIndex,
   columnId,
   Component,

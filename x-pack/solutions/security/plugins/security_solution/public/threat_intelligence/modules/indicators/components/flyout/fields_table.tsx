@@ -7,7 +7,7 @@
 
 import { EuiBasicTableColumn, EuiInMemoryTable, EuiInMemoryTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, VFC } from 'react';
+import React, { useMemo, FC } from 'react';
 import { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorValueActions } from './indicator_value_actions';
@@ -19,7 +19,7 @@ export interface IndicatorFieldsTableProps {
   ['data-test-subj']?: string;
 }
 
-export const IndicatorFieldsTable: VFC<IndicatorFieldsTableProps> = ({
+export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
   fields,
   indicator,
   'data-test-subj': dataTestSubj,

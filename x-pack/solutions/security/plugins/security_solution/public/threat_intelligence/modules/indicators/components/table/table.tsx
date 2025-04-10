@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import {
@@ -65,7 +65,7 @@ const gridStyle = {
   fontSize: 's',
 } as const;
 
-export const IndicatorsTable: VFC<IndicatorsTableProps> = ({
+export const IndicatorsTable: FC<IndicatorsTableProps> = ({
   indicators,
   indicatorCount,
   onChangePage,

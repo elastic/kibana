@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
-import { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorEmptyPrompt } from './empty_prompt';
 import { CODE_BLOCK_TEST_ID } from './test_ids';
 
@@ -22,7 +23,7 @@ export interface IndicatorsFlyoutJsonProps {
  * Displays all the properties and values of an {@link Indicator} in json view,
  * using the {@link EuiCodeBlock} from the @elastic/eui library.
  */
-export const IndicatorsFlyoutJson: VFC<IndicatorsFlyoutJsonProps> = ({ indicator }) => {
+export const IndicatorsFlyoutJson: FC<IndicatorsFlyoutJsonProps> = ({ indicator }) => {
   return Object.keys(indicator).length === 0 ? (
     <IndicatorEmptyPrompt />
   ) : (

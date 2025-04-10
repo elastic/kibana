@@ -6,9 +6,10 @@
  */
 
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import React, { VFC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
-import { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorFieldLabel } from '../common/field_label';
 import { IndicatorValueActions } from './indicator_value_actions';
@@ -50,7 +51,7 @@ export interface IndicatorBlockProps {
 /**
  * Renders indicator field value in a rectangle, to highlight it even more
  */
-export const IndicatorBlock: VFC<IndicatorBlockProps> = ({
+export const IndicatorBlock: FC<IndicatorBlockProps> = ({
   field,
   indicator,
   'data-test-subj': dataTestSubj,

@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useIndicatorsTableContext } from '../../hooks/use_table_context';
 import { MoreActions } from './more_actions';
 import { InvestigateInTimelineButtonIcon } from '../../../timeline/components/investigate_in_timeline';
-import { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { OpenIndicatorFlyoutButton } from './open_flyout_button';
 import { INVESTIGATE_IN_TIMELINE_TEST_ID } from './test_ids';
 
-export const ActionsRowCell: VFC<{ indicator: Indicator }> = ({ indicator }) => {
+export const ActionsRowCell: FC<{ indicator: Indicator }> = ({ indicator }) => {
   const indicatorTableContext = useIndicatorsTableContext();
 
   const { setExpanded, expanded } = indicatorTableContext;

@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import React, { VFC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useCaseDisabled } from '../hooks/use_case_permission';
-import {
-  AttachmentMetadata,
-  generateAttachmentsMetadata,
-  generateAttachmentsWithoutOwner,
-} from '../utils/attachments';
+import type { AttachmentMetadata } from '../utils/attachments';
+import { generateAttachmentsMetadata, generateAttachmentsWithoutOwner } from '../utils/attachments';
 import { useKibana } from '../../../hooks/use_kibana';
-import { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 
 export interface AddToExistingCaseProps {
   /**
@@ -42,7 +40,7 @@ export interface AddToExistingCaseProps {
  *
  * @returns add to existing case for a context menu
  */
-export const AddToExistingCase: VFC<AddToExistingCaseProps> = ({
+export const AddToExistingCase: FC<AddToExistingCaseProps> = ({
   indicator,
   onClick,
   'data-test-subj': dataTestSubj,

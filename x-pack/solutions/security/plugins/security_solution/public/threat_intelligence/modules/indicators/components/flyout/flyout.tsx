@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
@@ -68,7 +68,7 @@ export interface IndicatorsFlyoutProps {
 /**
  * Leverages the {@link EuiFlyout} from the @elastic/eui library to dhow the details of a specific {@link Indicator}.
  */
-export const IndicatorsFlyout: VFC<IndicatorsFlyoutProps> = ({
+export const IndicatorsFlyout: FC<IndicatorsFlyoutProps> = ({
   indicator,
   closeFlyout,
   kqlBarIntegration = false,

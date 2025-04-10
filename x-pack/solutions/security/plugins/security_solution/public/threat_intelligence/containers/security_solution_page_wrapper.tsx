@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import React, { type FC, type PropsWithChildren } from 'react';
 import { useSecurityContext } from '../hooks/use_security_context';
 
 /**

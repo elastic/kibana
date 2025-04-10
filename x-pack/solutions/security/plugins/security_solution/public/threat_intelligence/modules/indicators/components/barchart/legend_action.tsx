@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React, { useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
@@ -34,7 +34,7 @@ export interface IndicatorBarchartLegendActionProps {
   field: EuiComboBoxOptionOption<string>;
 }
 
-export const IndicatorBarchartLegendAction: VFC<IndicatorBarchartLegendActionProps> = ({
+export const IndicatorBarchartLegendAction: FC<IndicatorBarchartLegendActionProps> = ({
   data,
   field,
 }) => {

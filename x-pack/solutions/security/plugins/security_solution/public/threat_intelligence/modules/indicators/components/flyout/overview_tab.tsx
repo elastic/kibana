@@ -15,7 +15,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, type VFC } from 'react';
+import React, { useMemo, type FC } from 'react';
 import { useIndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 import { EMPTY_VALUE } from '../../../../constants/common';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
@@ -42,7 +42,7 @@ export interface IndicatorsFlyoutOverviewProps {
   onViewAllFieldsInTable: VoidFunction;
 }
 
-export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
+export const IndicatorsFlyoutOverview: FC<IndicatorsFlyoutOverviewProps> = ({
   indicator,
   onViewAllFieldsInTable,
 }) => {

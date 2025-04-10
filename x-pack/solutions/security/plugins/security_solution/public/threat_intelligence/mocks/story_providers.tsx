@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC, ReactNode, VFC } from 'react';
+import type { ReactNode, FC } from 'react';
+import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CoreStart, IUiSettingsClient } from '@kbn/core/public';
-import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { CoreStart, IUiSettingsClient } from '@kbn/core/public';
+import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -92,7 +93,7 @@ const defaultServices = {
  * Helper functional component used in Storybook stories.
  * Wraps the story with our {@link SecuritySolutionContext} and KibanaReactContext.
  */
-export const StoryProvidersComponent: VFC<StoryProvidersComponentProps> = ({
+export const StoryProvidersComponent: FC<StoryProvidersComponentProps> = ({
   children,
   kibana = {},
 }) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { VFC } from 'react';
+import type { FC } from 'react';
 import React from 'react';
 
 import { EuiButton, EuiEmptyPrompt, EuiImage, EuiLink } from '@elastic/eui';
@@ -20,7 +20,7 @@ export const DOCS_LINK_TEST_ID = 'tiEmptyPageDocsLink';
 export const EMPTY_PROMPT_TEST_ID = 'tiEmptyPage';
 export const INTEGRATION_LINK_ID = 'tiEmptyPageIntegrationsPageLink';
 
-export const EmptyPage: VFC = () => {
+export const EmptyPage: FC = () => {
   const integrationsPageLink = useIntegrationsPageLink();
   const documentationLink = useTIDocumentationLink();
 
