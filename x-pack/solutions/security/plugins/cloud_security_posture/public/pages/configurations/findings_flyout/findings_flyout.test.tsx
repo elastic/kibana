@@ -24,7 +24,7 @@ const TestComponent = () => (
         return (
           <>
             <FindingsMisconfigurationFlyoutHeader finding={finding} />
-            <FindingsMisconfigurationFlyoutContent data={finding} />
+            <FindingsMisconfigurationFlyoutContent finding={finding} />
             <FindingsMisconfigurationFlyoutFooter createRuleFn={createRuleFn} />
           </>
         );
