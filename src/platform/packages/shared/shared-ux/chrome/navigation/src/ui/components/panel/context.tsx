@@ -60,6 +60,7 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
 }) => {
   const [selectedNode, setActiveNode] = useState<PanelSelectedNode | null>(selectedNodeProp);
   const selectedNodeEl = useRef<Element | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<PanelSelectedNode | null>(null);
 
   const open = useCallback(
     (navNode: PanelSelectedNode, openerEl: Element | null) => {
@@ -75,12 +76,11 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
     [setSelectedNode]
   );
 
-  const { onMouseLeave, hoveredNode, onMouseEnter } = useHoverOpener2();
-
   const close = useCallback(() => {
     setActiveNode(null);
     selectedNodeEl.current = null;
     setSelectedNode?.(null);
+    setHoveredNode(null);
   }, [setSelectedNode]);
 
   useEffect(() => {
@@ -88,6 +88,21 @@ export const PanelProvider: FC<PropsWithChildren<Props>> = ({
 
     setActiveNode(selectedNodeProp);
   }, [selectedNodeProp]);
+
+  const { onMouseLeave, onMouseEnter } = useHoverOpener2({
+    onHover: useCallback(
+      (node: PanelSelectedNode) => {
+        if (selectedNode && node !== selectedNode) {
+          close();
+        }
+        setHoveredNode(node);
+      },
+      [selectedNode, close]
+    ),
+    onLeave: useCallback(() => {
+      setHoveredNode(null);
+    }, []),
+  });
 
   const getContent = useCallback(() => {
     const contentNode = hoveredNode || selectedNode;

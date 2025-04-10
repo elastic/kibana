@@ -54,33 +54,43 @@ export const useHoverOpener = ({
   };
 };
 
-export const useHoverOpener2 = () => {
+export const useHoverOpener2 = ({
+  onHover,
+  onLeave,
+}: {
+  onHover: (node: PanelSelectedNode) => void;
+  onLeave: () => void;
+}) => {
   const HOVER_OPEN_DELAY = 200;
   const HOVER_CLOSE_DELAY = 300;
 
-  const [hoveredNode, setHoveredNode] = useState<PanelSelectedNode | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const onMouseEnter = useCallback((node: PanelSelectedNode) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setHoveredNode(node);
-    }, HOVER_OPEN_DELAY);
-  }, []);
-  const onMouseLeave = useCallback((node: PanelSelectedNode) => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-    }
-    timeoutRef.current = setTimeout(() => {
-      setHoveredNode(null);
-    }, HOVER_CLOSE_DELAY);
-  }, []);
+  const onMouseEnter = useCallback(
+    (node: PanelSelectedNode) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        onHover(node);
+      }, HOVER_OPEN_DELAY);
+    },
+    [onHover]
+  );
+  const onMouseLeave = useCallback(
+    (node: PanelSelectedNode) => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      timeoutRef.current = setTimeout(() => {
+        onLeave();
+      }, HOVER_CLOSE_DELAY);
+    },
+    [onLeave]
+  );
 
   return {
     onMouseEnter,
     onMouseLeave,
-    hoveredNode,
   };
 };
