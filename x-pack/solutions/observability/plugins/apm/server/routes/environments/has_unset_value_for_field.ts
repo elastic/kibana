@@ -40,6 +40,7 @@ export async function hasUnsetValueForField({
       ],
     },
     track_total_hits: true,
+    terminated_after: 1,
     size: 0,
     query: {
       bool: {
