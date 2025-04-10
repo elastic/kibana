@@ -49,7 +49,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
   }
 
   public getDisplayName = () =>
-    i18n.translate('alertsUIShared.alertRuleFromVis.actionName', {
+    i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.actionName', {
       defaultMessage: 'Add alert rule',
     });
 
@@ -95,11 +95,11 @@ export class AlertRuleFromVisAction implements Action<Context> {
       .map(([sourceField, value]) => `${escapeFieldName(sourceField)} >= ${value}`)
       .join(' AND ');
     const thresholdQueryComment = usesPlaceholderValues
-      ? i18n.translate('alertsUIShared.alertRuleFromVis.thresholdPlaceholderComment', {
+      ? i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.thresholdPlaceholderComment', {
           defaultMessage:
             'Modify the following conditions to set an alert threshold for this rule:',
         })
-      : i18n.translate('alertsUIShared.alertRuleFromVis.thresholdComment', {
+      : i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.thresholdComment', {
           defaultMessage:
             'Threshold automatically generated from the selected {thresholdValues, plural, one {value} other {values} } on the chart. This rule will generate an alert based on the following conditions:',
           values: { thresholdValues: Object.keys(thresholdValues).length },
@@ -118,7 +118,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
 
     // Generate ES|QL to escape function columns
     if (evalQuery.length)
-      evalQuery = `// ${i18n.translate('alertsUIShared.alertRuleFromVis.evalComment', {
+      evalQuery = `// ${i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.evalComment', {
         defaultMessage:
           'Evaluate the following columns so they can be used as part of the alerting threshold:',
       })}\n${evalQuery}\n`;
@@ -129,9 +129,12 @@ export class AlertRuleFromVisAction implements Action<Context> {
     // Generate the full ES|QL code
     let initialValues;
     if (query) {
-      const queryHeader = i18n.translate('alertsUIShared.alertRuleFromVis.queryHeaderComment', {
-        defaultMessage: 'Original ES|QL query derived from the visualization:',
-      });
+      const queryHeader = i18n.translate(
+        'xpack.triggersActionsUI.alertRuleFromVis.queryHeaderComment',
+        {
+          defaultMessage: 'Original ES|QL query derived from the visualization:',
+        }
+      );
 
       initialValues = {
         params: {
@@ -144,7 +147,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
       };
     } else {
       const missingQueryComment = `// ${i18n.translate(
-        'alertsUIShared.alertRuleFromVis.missingQueryComment',
+        'xpack.triggersActionsUI.alertRuleFromVis.missingQueryComment',
         {
           defaultMessage: 'Unable to generate an ES|QL query from the visualization.',
         }
@@ -154,7 +157,7 @@ export class AlertRuleFromVisAction implements Action<Context> {
       if (dataView) {
         const [index] = dataView.matchedIndices;
         const esqlFromDataviewComment = `// ${i18n.translate(
-          'alertsUIShared.alertRuleFromVis.esqlFromDataviewComment',
+          'xpack.triggersActionsUI.alertRuleFromVis.esqlFromDataviewComment',
           {
             defaultMessage:
               'Unable to automatically generate an ES|QL query that produces the same data as this visualization. You may be able to reproduce it manually using this data source:',
@@ -204,7 +207,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
           return {
             ...result,
             [String(sourceField)]: i18n.translate(
-              'alertsUIShared.alertRuleFromVis.thresholdPlaceholder',
+              'xpack.triggersActionsUI.alertRuleFromVis.thresholdPlaceholder',
               {
                 defaultMessage: '[THRESHOLD]',
               }
@@ -223,7 +226,7 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
           return {
             ...result,
             [String(sourceField)]: [
-              i18n.translate('alertsUIShared.alertRuleFromVis.splitValuePlaceholder', {
+              i18n.translate('xpack.triggersActionsUI.alertRuleFromVis.splitValuePlaceholder', {
                 defaultMessage: '[VALUE]',
               }),
             ],
@@ -241,21 +244,21 @@ const getDataFromEmbeddable = (embeddable: Context['embeddable']): AlertRuleFrom
 };
 
 const missingSourceFieldPlaceholder = i18n.translate(
-  'alertsUIShared.alertRuleFromVis.fieldNamePlaceholder',
+  'xpack.triggersActionsUI.alertRuleFromVis.fieldNamePlaceholder',
   {
     defaultMessage: '[FIELD NAME]',
   }
 );
 
 const missingYFieldPlaceholder = i18n.translate(
-  'alertsUIShared.alertRuleFromVis.yAxisPlaceholder',
+  'xpack.triggersActionsUI.alertRuleFromVis.yAxisPlaceholder',
   {
     defaultMessage: '[Y AXIS]',
   }
 );
 
 const missingXFieldPlaceholder = i18n.translate(
-  'alertsUIShared.alertRuleFromVis.xAxisPlaceholder',
+  'xpack.triggersActionsUI.alertRuleFromVis.xAxisPlaceholder',
   {
     defaultMessage: '[X AXIS]',
   }
