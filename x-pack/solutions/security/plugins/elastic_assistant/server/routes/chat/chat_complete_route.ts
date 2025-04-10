@@ -192,16 +192,19 @@ export const chatCompleteRoute = (router: ElasticAssistantPluginRouter): void =>
             isError = false
           ): Promise<void> => {
             if (conversationId && conversationsDataClient) {
-              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+              const { prunedContent, prunedContentReferencesStore } = pruneContentReferences(
+                content,
+                contentReferencesStore
+              );
 
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
-                messageContent: content,
+                messageContent: prunedContent,
                 replacements: latestReplacements,
                 isError,
                 traceData,
-                contentReferences,
+                contentReferences: prunedContentReferencesStore,
               });
             }
           };
