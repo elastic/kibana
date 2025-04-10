@@ -17,6 +17,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "alerting",
       "data",
       "ml",
       "taskManager",

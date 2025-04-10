@@ -129,7 +129,8 @@ export function ESQLControlsFlyout({
 
   useEffect(() => {
     const variableNameWithoutQuestionmark = variableName.replace(/^\?+/, '');
-    const variableExists = checkVariableExistence(esqlVariables, variableName);
+    const variableExists =
+      checkVariableExistence(esqlVariables, variableName) && !isControlInEditMode;
     setFormIsInvalid(
       !variableNameWithoutQuestionmark ||
         variableExists ||
@@ -137,6 +138,7 @@ export function ESQLControlsFlyout({
         !controlState?.availableOptions.length
     );
   }, [
+    isControlInEditMode,
     areValuesValid,
     controlState?.availableOptions.length,
     esqlVariables,
