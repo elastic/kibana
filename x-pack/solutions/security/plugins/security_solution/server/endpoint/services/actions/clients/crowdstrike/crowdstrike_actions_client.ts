@@ -10,7 +10,7 @@ import {
   SUB_ACTION,
   CROWDSTRIKE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
   CrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
@@ -49,6 +49,7 @@ import type {
   NormalizedExternalConnectorClient,
   NormalizedExternalConnectorClientExecuteOptions,
 } from '../lib/normalized_external_connector_client';
+import { catchAndWrapError } from '../../../../utils';
 
 export type CrowdstrikeActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -67,8 +68,59 @@ export class CrowdstrikeActionsClient extends ResponseActionsClientImpl {
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
-    // TODO: implement crowdstrike agent policy info.
-    return [];
+    const esClient = this.options.esClient;
+    const indexPattern = 'logs-crowdstrike*';
+    const esSearchRequest: SearchRequest = {
+      index: indexPattern,
+      query: { bool: { filter: [{ terms: { 'device.id': agentIds } }] } },
+      collapse: {
+        field: 'device.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          _source: ['agent', 'device.id'],
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      _source: false,
+    };
+
+    this.log.debug(
+      () => `Looking for agents in [${indexPattern}] with:\n${stringify(esSearchRequest)}`
+    );
+
+    // Get the latest ingested document for each agent ID
+    const crowdstrikeEsResults = await esClient.search(esSearchRequest).catch(catchAndWrapError);
+
+    this.log.debug(
+      () => `Records found in [${indexPattern}]:\n${stringify(crowdstrikeEsResults, 20)}`
+    );
+
+    const fleetAgentIdToCrowdstrikeAgentIdMap: Record<string, string> =
+      crowdstrikeEsResults.hits.hits.reduce((acc, esDoc) => {
+        const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+
+        if (doc) {
+          acc[doc.agent.id] = doc.device.id;
+        }
+
+        return acc;
+      }, {} as Record<string, string>);
+    const elasticAgentIds = Object.keys(fleetAgentIdToCrowdstrikeAgentIdMap);
+
+    if (elasticAgentIds.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to find elastic agent IDs for Crowdstrike agent ids: [${agentIds.join(', ')}]`
+      );
+    }
+
+    return this.fetchFleetInfoForAgents(elasticAgentIds, ['crowdstrike']).then((agentInfoList) => {
+      for (const agentInfo of agentInfoList) {
+        agentInfo.agentId = fleetAgentIdToCrowdstrikeAgentIdMap[agentInfo.elasticAgentId];
+      }
+
+      return agentInfoList;
+    });
   }
 
   protected async writeActionRequestToEndpointIndex<

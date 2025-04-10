@@ -181,10 +181,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       },
       {} as Record<string, string>
     );
+    const elasticAgentIds = Object.keys(fleetAgentIdToS1AgentIdMap);
 
-    return this.fetchFleetInfoForAgents(Object.keys(fleetAgentIdToS1AgentIdMap), [
-      'sentinel_one',
-    ]).then((agentInfoList) => {
+    if (elasticAgentIds.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to find elastic agent IDs for SentinelOne agent ids: [${agentIds.join(', ')}]`
+      );
+    }
+
+    return this.fetchFleetInfoForAgents(elasticAgentIds, ['sentinel_one']).then((agentInfoList) => {
       for (const agentInfo of agentInfoList) {
         agentInfo.agentId = fleetAgentIdToS1AgentIdMap[agentInfo.elasticAgentId];
       }
