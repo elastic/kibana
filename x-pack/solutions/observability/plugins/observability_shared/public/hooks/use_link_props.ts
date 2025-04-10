@@ -14,10 +14,6 @@ import { useNavigationWarningPrompt } from '../components/navigation_warning_pro
 
 type Search = Record<string, string | string[]>;
 
-type InteractionMouseEvent =
-  | React.MouseEvent
-  | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>;
-
 export interface LinkDescriptor {
   app: string;
   pathname?: string;
@@ -28,7 +24,7 @@ export interface LinkDescriptor {
 
 export interface LinkProps {
   href?: string;
-  onClick?: (e: InteractionMouseEvent) => void;
+  onClick?: (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
 }
 
 export interface Options {
@@ -72,7 +68,7 @@ export const useLinkProps = (
   }, [mergedHash, hash, encodedSearch, pathname, prefixer, app]);
 
   const onClick = useMemo(() => {
-    return (e: InteractionMouseEvent) => {
+    return (e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
       if (!shouldHandleLinkEvent(e)) {
         return;
       }
@@ -122,8 +118,9 @@ const validateParams = ({ app, pathname, hash, search }: LinkDescriptor) => {
   }
 };
 
-const isModifiedEvent = (event: InteractionMouseEvent) =>
+const isModifiedEvent = (event: any) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-export const shouldHandleLinkEvent = (e: InteractionMouseEvent) =>
-  !e.defaultPrevented && !isModifiedEvent(e);
+export const shouldHandleLinkEvent = (
+  e: React.MouseEvent | React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
+) => !e.defaultPrevented && !isModifiedEvent(e);
