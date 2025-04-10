@@ -172,7 +172,7 @@ LABEL name="Kibana" \
   release="1" \
   summary="Kibana" \
   description="Your window into the Elastic Stack."
-{{dockerHub}}
+{{/dockerHub}}
 
 {{#ubi}}
 RUN mkdir /licenses && ln LICENSE.txt /licenses/LICENSE
