@@ -5,6 +5,9 @@
  * 2.0.
  */
 import { isEqual } from 'lodash';
+import fetch from 'node-fetch';
+import type { RequestInit } from 'node-fetch';
+
 import type {
   ElasticsearchClient,
   Logger,
@@ -20,8 +23,9 @@ import type {
 
 import { appContextService } from '../../services';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
+import { outputService } from '../../services';
 
-import { IndexNotFoundError } from '../../errors';
+import { FleetError, FleetNotFoundError, IndexNotFoundError } from '../../errors';
 
 import type { Installation } from '../../types';
 
@@ -330,5 +334,61 @@ export const getRemoteSyncedIntegrationsStatus = async (
     return res;
   } catch (error) {
     return { error, integrations: [] };
+  }
+};
+
+export const getRemoteSyncedIntegrationsInfoByOutput = async (
+  soClient: SavedObjectsClientContract,
+  outputId: string
+): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
+  const { enableSyncIntegrationsOnRemote } = appContextService.getExperimentalFeatures();
+  const logger = appContextService.getLogger();
+
+  if (!enableSyncIntegrationsOnRemote) {
+    return { integrations: [] };
+  }
+  try {
+    const output = await outputService.get(soClient, outputId);
+    if (output.type !== 'remote_elasticsearch') {
+      throw new FleetNotFoundError(`No output found with id ${outputId}`);
+    }
+
+    const {
+      kibana_api_key: kibanaApiKey,
+      kibana_url: kibanaUrl,
+      sync_integrations: syncIntegrations,
+    } = output;
+
+    if (!syncIntegrations) {
+      throw new FleetError(`Synced integrations not enabled`);
+    }
+    if (!kibanaUrl) {
+      throw new FleetError(`Remote url not available`);
+    }
+    if (!kibanaApiKey) {
+      throw new FleetError(`Kibana api key for ${kibanaUrl} not found`);
+    }
+    const options: RequestInit = {
+      headers: {
+        'kbn-xsrf': 'true',
+        'User-Agent': `Kibana/${appContextService.getKibanaVersion()} node-fetch`,
+        'Content-Type': 'application/json',
+        Authorization: `ApiKey ${kibanaApiKey}`,
+      },
+      method: 'GET',
+    };
+    const url = `${kibanaUrl}/api/fleet/remote_synced_integrations/status`;
+    logger.info(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
+
+    const res = await fetch(url, options);
+    const body = await res.json();
+
+    if (body.error) {
+      throw new FleetError(`${body.error}, status: ${body?.status}`);
+    }
+    return body as GetRemoteSyncedIntegrationsStatusResponse;
+  } catch (error) {
+    logger.error(`${error}`);
+    throw error;
   }
 };
