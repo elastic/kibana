@@ -62,31 +62,8 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     setSelected(onChangeSelectedOptions);
   };
 
-<<<<<<< HEAD
-  useDebounce(
-    () => {
-      const result: string[] = [];
-      setOptions(result);
-
-      if (autocompleteQuery) {
-        autocompleteQuery({ indexName: query }).then((indexNames: string[]) => {
-          if (indexNames) {
-            setOptions(indexNames);
-          }
-        });
-      }
-    },
-    250,
-    [query]
-  );
-
   const onSearchChange = (searchValue: string) => {
     setQuery(searchValue);
-    console.log(`onSearchChange with ${searchValue}`);
-=======
-  const onSearchChange = (searchValue: string) => {
-    setQuery(searchValue);
->>>>>>> 136806faabc (One step forward)
   };
 
   const onSchemaGenerated = useCallback(
