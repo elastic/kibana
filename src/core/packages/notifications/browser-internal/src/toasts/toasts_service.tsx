@@ -12,7 +12,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import { RenderContextService } from '@kbn/core-render-context-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { GlobalToastList } from './global_toast_list';
 import { ToastsApi } from './toasts_api';
 import { EventReporter } from './telemetry';
@@ -23,7 +23,7 @@ interface SetupDeps {
 
 interface StartDeps {
   overlays: OverlayStart;
-  rendering: RenderContextService;
+  rendering: RenderingService;
   eventReporter: EventReporter;
   targetDomElement: HTMLElement;
 }

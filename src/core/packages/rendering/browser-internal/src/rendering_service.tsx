@@ -9,32 +9,37 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { pairwise, startWith } from 'rxjs';
+import useObservable from 'react-use/lib/useObservable';
+import { BehaviorSubject, pairwise, startWith } from 'rxjs';
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
+import { GlobalAppStyle } from '@kbn/core-application-common';
 import type { InternalChromeStart } from '@kbn/core-chrome-browser-internal';
+import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
+import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
-import { GlobalAppStyle } from '@kbn/core-application-common';
+import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
 import { AppWrapper } from './app_containers';
 
-interface StartServices {
+interface ContextDeps {
   analytics: AnalyticsServiceStart;
+  executionContext: ExecutionContextStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
   userProfile: UserProfileService;
 }
 
-export interface StartDeps extends StartServices {
+interface RenderCoreDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
-  targetDomElement: HTMLDivElement;
 }
 
 /**
@@ -45,8 +50,17 @@ export interface StartDeps extends StartServices {
  *
  * @internal
  */
-export class RenderingService {
-  start({ application, chrome, overlays, targetDomElement, ...startServices }: StartDeps) {
+export class RenderingService implements IRenderingService {
+  private contextDeps = new BehaviorSubject<ContextDeps | null>(null);
+
+  start(deps: ContextDeps) {
+    this.contextDeps.next(deps);
+    return this;
+  }
+
+  renderCore(renderCoreDeps: RenderCoreDeps, targetDomElement: HTMLDivElement) {
+    const { chrome, application, overlays } = renderCoreDeps;
+    const startServices = this.contextDeps.getValue()!;
     const chromeHeader = chrome.getHeaderComponent();
     const appComponent = application.getComponent();
     const bannerComponent = overlays.banners.getComponent();
@@ -84,5 +98,35 @@ export class RenderingService {
       </KibanaRootContextProvider>,
       targetDomElement
     );
+  }
+
+  public addContext(element: React.ReactNode): React.ReactElement<string> {
+    const Component: React.FC = () => {
+      /**
+       * The dependencies are captured using BehaviorSubject, because we assume that Kibana plugins' start
+       * methods could be called before the CoreStart services are completely settled internally. If this
+       * assumption is wrong, the available dependencies are given as the initial value to `useObservable`, and
+       * there is no unnecessary re-render.
+       */
+      const deps = useObservable(this.contextDeps, this.contextDeps.getValue());
+
+      if (!deps) {
+        return <EuiLoadingSpinner size="s" />;
+      }
+
+      return (
+        <KibanaRenderContextProvider
+          analytics={deps.analytics}
+          executionContext={deps.executionContext}
+          i18n={deps.i18n}
+          theme={deps.theme}
+          userProfile={deps.userProfile}
+        >
+          {element}
+        </KibanaRenderContextProvider>
+      );
+    };
+
+    return <Component />;
   }
 }

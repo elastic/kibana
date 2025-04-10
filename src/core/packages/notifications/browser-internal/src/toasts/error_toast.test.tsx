@@ -12,7 +12,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { ErrorToast } from './error_toast';
-import { renderContextServiceMock } from '@kbn/core-render-context-browser-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
 interface ErrorToastProps {
   error?: Error;
@@ -21,7 +21,7 @@ interface ErrorToastProps {
 }
 
 let openModal: jest.Mock;
-const mockRendering = renderContextServiceMock.createStart();
+const mockRendering = renderingServiceMock.create();
 
 beforeEach(() => (openModal = jest.fn()));
 

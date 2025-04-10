@@ -8,17 +8,29 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RenderingService } from '@kbn/core-rendering-browser-internal';
+import type { RenderingService as RenderingServiceInternal } from '@kbn/core-rendering-browser-internal';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 
+type RenderingServiceContractInternal = PublicMethodsOf<RenderingServiceInternal>;
 type RenderingServiceContract = PublicMethodsOf<RenderingService>;
+
+const createMockInternal = () => {
+  const mocked: jest.Mocked<RenderingServiceContractInternal> = {
+    start: jest.fn(),
+    renderCore: jest.fn(),
+    addContext: jest.fn(),
+  };
+  return mocked;
+};
 
 const createMock = () => {
   const mocked: jest.Mocked<RenderingServiceContract> = {
-    start: jest.fn(),
+    addContext: jest.fn().mockImplementation((element) => element),
   };
   return mocked;
 };
 
 export const renderingServiceMock = {
+  createInternal: createMockInternal,
   create: createMock,
 };

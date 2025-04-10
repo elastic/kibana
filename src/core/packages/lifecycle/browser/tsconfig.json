@@ -30,8 +30,7 @@
     "@kbn/core-plugins-contracts-browser",
     "@kbn/core-security-browser",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-feature-flags-browser",
-    "@kbn/core-render-context-browser"
+    "@kbn/core-feature-flags-browser"
   ],
   "exclude": [
     "target/**/*",

@@ -24,7 +24,6 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
-import { renderContextServiceMock } from '@kbn/core-render-context-browser-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 
 export function createCoreStartMock({ basePath = '' } = {}) {
@@ -48,7 +47,6 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     fatalErrors: fatalErrorsServiceMock.createStartContract(),
     security: securityServiceMock.createStart(),
     userProfile: userProfileServiceMock.createStart(),
-    rendering: renderContextServiceMock.createStart(),
     plugins: {
       onStart: jest.fn(),
     },

@@ -35,7 +35,6 @@ import { NotificationsService } from '@kbn/core-notifications-browser-internal';
 import { ChromeService } from '@kbn/core-chrome-browser-internal';
 import { ApplicationService } from '@kbn/core-application-browser-internal';
 import { RenderingService } from '@kbn/core-rendering-browser-internal';
-import { RenderContextService } from '@kbn/core-render-context-browser-internal';
 import { CoreAppsService } from '@kbn/core-apps-browser-internal';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-browser-internal';
 import { PluginsService } from '@kbn/core-plugins-browser-internal';
@@ -102,7 +101,6 @@ export class CoreSystem {
   private readonly application: ApplicationService;
   private readonly docLinks: DocLinksService;
   private readonly rendering: RenderingService;
-  private readonly renderContextService: RenderContextService;
   private readonly integrations: IntegrationsService;
   private readonly coreApp: CoreAppsService;
   private readonly deprecations: DeprecationsService;
@@ -163,7 +161,6 @@ export class CoreSystem {
     });
     this.docLinks = new DocLinksService(this.coreContext);
     this.rendering = new RenderingService();
-    this.renderContextService = new RenderContextService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
     this.deprecations = new DeprecationsService();
@@ -348,7 +345,7 @@ export class CoreSystem {
         curApp$: application.currentAppId$,
       });
 
-      const rendering = this.renderContextService.start({
+      const rendering = this.rendering.start({
         analytics,
         executionContext,
         i18n,
@@ -359,8 +356,8 @@ export class CoreSystem {
       const notifications = this.notifications.start({
         analytics,
         overlays,
-        rendering,
         targetDomElement: notificationsTargetDomElement,
+        rendering,
       });
 
       const chrome = await this.chrome.start({
@@ -375,6 +372,7 @@ export class CoreSystem {
         userProfile,
         uiSettings,
       });
+
       const deprecations = this.deprecations.start({ http });
 
       this.coreApp.start({
@@ -430,16 +428,7 @@ export class CoreSystem {
       `;
       this.rootDomElement.classList.add(coreSystemRootDomElement);
 
-      this.rendering.start({
-        application,
-        chrome,
-        analytics,
-        i18n,
-        overlays,
-        theme,
-        targetDomElement: coreUiTargetDomElement,
-        userProfile,
-      });
+      this.rendering.renderCore({ chrome, application, overlays }, coreUiTargetDomElement);
 
       performance.mark(KBN_LOAD_MARKS, {
         detail: LOAD_START_DONE,

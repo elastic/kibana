@@ -485,8 +485,8 @@ describe('#start()', () => {
 
   it('calls rendering#start()', async () => {
     await startCore();
-    expect(MockRenderingService.start).toHaveBeenCalledTimes(1);
-    expect(MockRenderingService.start).toHaveBeenCalledWith({
+    expect(MockRenderingService.renderCore).toHaveBeenCalledTimes(1);
+    expect(MockRenderingService.renderCore).toHaveBeenCalledWith({
       analytics: expect.any(Object),
       application: expect.any(Object),
       chrome: expect.any(Object),
@@ -609,15 +609,15 @@ describe('RenderingService targetDomElement', () => {
       rootDomElement,
     });
 
-    let targetDomElementParentInStart: HTMLElement | null;
-    MockRenderingService.start.mockImplementation(({ targetDomElement }) => {
-      targetDomElementParentInStart = targetDomElement.parentElement;
+    let targetDomElementParentInRenderCore: HTMLElement | null;
+    MockRenderingService.renderCore.mockImplementation((_deps, targetDomElement) => {
+      targetDomElementParentInRenderCore = targetDomElement.parentElement;
     });
 
     // Starting the core system should pass the targetDomElement as a child of the rootDomElement
     await core.setup();
     await core.start();
-    expect(targetDomElementParentInStart!).toBe(rootDomElement);
+    expect(targetDomElementParentInRenderCore!).toBe(rootDomElement);
   });
 });
 

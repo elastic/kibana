@@ -20,16 +20,16 @@ import {
   EuiModalHeaderTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { RenderContextService } from '@kbn/core-render-context-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 interface ErrorToastProps {
   title: string;
   error: Error;
   toastMessage: string;
   openModal: OverlayStart['openModal'];
-  rendering: RenderContextService;
+  rendering: RenderingService;
 }
 
 interface RequestError extends Error {

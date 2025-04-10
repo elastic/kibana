@@ -1,7 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/core-render-context-browser-internal",
-  "owner": "@elastic/appex-sharedux",
-  "group": "platform",
-  "visibility": "private"
-}

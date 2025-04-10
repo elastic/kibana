@@ -15,7 +15,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RenderContextService } from '@kbn/core-render-context-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser-internal';
 import { showErrorDialog, ToastsService } from './toasts';
 import { EventReporter, eventTypes } from './toasts/telemetry';
 
@@ -26,7 +26,7 @@ export interface SetupDeps {
 
 export interface StartDeps {
   overlays: OverlayStart;
-  rendering: RenderContextService;
+  rendering: RenderingService;
   analytics: AnalyticsServiceStart;
   targetDomElement: HTMLElement;
 }

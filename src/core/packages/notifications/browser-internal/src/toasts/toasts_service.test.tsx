@@ -15,11 +15,11 @@ import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { EventReporter } from './telemetry';
-import { renderContextServiceMock } from '@kbn/core-render-context-browser-mocks';
+import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockAnalytics = analyticsServiceMock.createAnalyticsServiceStart();
-const mockRendering = renderContextServiceMock.createStart();
+const mockRendering = renderingServiceMock.create();
 
 const eventReporter = new EventReporter({ analytics: mockAnalytics });
 

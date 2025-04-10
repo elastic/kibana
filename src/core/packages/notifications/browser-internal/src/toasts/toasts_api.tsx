@@ -22,7 +22,7 @@ import type {
   ToastInputFields,
   ToastOptions,
 } from '@kbn/core-notifications-browser';
-import type { RenderContextService } from '@kbn/core-render-context-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import { ErrorToast } from './error_toast';
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
@@ -36,7 +36,7 @@ const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
 
 interface StartDeps {
   overlays: OverlayStart;
-  rendering: RenderContextService;
+  rendering: RenderingService;
 }
 
 /**

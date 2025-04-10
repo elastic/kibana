@@ -7,29 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
-import type { RenderContextService } from '@kbn/core-render-context-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser-internal';
 import {
   KibanaRenderContextProvider,
   KibanaRenderContextProviderProps,
 } from '@kbn/react-kibana-context-render';
+import React from 'react';
+import ReactDOM from 'react-dom';
 
 /**
- * @deprecated Pass RenderContextService as the second parameter to toMountPoint instead
+ * @deprecated Pass RenderingService as the second parameter to toMountPoint instead
  */
 type ToMountPointParamsDeprecated = Pick<
   KibanaRenderContextProviderProps,
   'analytics' | 'i18n' | 'theme' | 'userProfile'
 >;
 
-export type ToMountPointParams = ToMountPointParamsDeprecated | RenderContextService;
+export type ToMountPointParams = ToMountPointParamsDeprecated | RenderingService;
 
-function isParamsUsingPreferred(params?: ToMountPointParams): params is RenderContextService {
+function isParamsUsingPreferred(params?: ToMountPointParams): params is RenderingService {
   return (
-    typeof params !== 'undefined' &&
-    typeof (params as RenderContextService).addContext !== 'undefined'
+    typeof params !== 'undefined' && typeof (params as RenderingService).addContext !== 'undefined'
   );
 }
 

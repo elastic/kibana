@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/src/core/packages/context-browser'],
-};
+import React from 'react';
+
+export interface RenderingService {
+  addContext: (element: React.ReactNode) => React.ReactElement;
+}
