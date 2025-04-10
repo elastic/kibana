@@ -52,7 +52,7 @@ export async function getSuggestionsWithTermsAggregation({
       },
       aggs: {
         items: {
-          terms: { 
+          terms: {
             field: fieldName,
             size,
             order: { _key: 'asc' as const },
