@@ -187,7 +187,7 @@ function isEsqlQueryRule(searchType: EsQueryRuleParams['searchType']) {
 }
 
 // using direct type not allowed, circular reference, so body is typed to any
-function validateParams(anyParams: unknown): string | undefined {
+export function validateParams(anyParams: unknown): string | undefined {
   const {
     esQuery,
     thresholdComparator,
@@ -199,6 +199,30 @@ function validateParams(anyParams: unknown): string | undefined {
     termField,
     termSize,
   } = anyParams as EsQueryRuleParams;
+
+  if (isEsqlQueryRule(searchType)) {
+    const { timeField } = anyParams as EsQueryRuleParams;
+
+    if (!timeField) {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlTimeFieldErrorMessage', {
+        defaultMessage: '[timeField]: is required',
+      });
+    }
+    if (thresholdComparator !== Comparator.GT) {
+      return i18n.translate(
+        'xpack.responseOps.ruleParams.esQuery.esqlThresholdComparatorErrorMessage',
+        {
+          defaultMessage: '[thresholdComparator]: is required to be greater than',
+        }
+      );
+    }
+    if (threshold && threshold[0] !== 0) {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlThresholdErrorMessage', {
+        defaultMessage: '[threshold]: is required to be 0',
+      });
+    }
+    return;
+  }
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('responseOps.ruleParams.esQuery.invalidThreshold2ErrorMessage', {
@@ -243,32 +267,13 @@ function validateParams(anyParams: unknown): string | undefined {
       );
     }
   }
-
-  if (isSearchSourceRule(searchType)) {
-    return;
+  if (groupBy === 'row') {
+    return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidRowGroupByErrorMessage', {
+      defaultMessage: '[groupBy]: groupBy should be all or top when [searchType] is not esqlQuery',
+    });
   }
 
-  if (isEsqlQueryRule(searchType)) {
-    const { timeField } = anyParams as EsQueryRuleParams;
-
-    if (!timeField) {
-      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlTimeFieldErrorMessage', {
-        defaultMessage: '[timeField]: is required',
-      });
-    }
-    if (thresholdComparator !== Comparator.GT) {
-      return i18n.translate(
-        'xpack.responseOps.ruleParams.esQuery.esqlThresholdComparatorErrorMessage',
-        {
-          defaultMessage: '[thresholdComparator]: is required to be greater than',
-        }
-      );
-    }
-    if (threshold && threshold[0] !== 0) {
-      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlThresholdErrorMessage', {
-        defaultMessage: '[threshold]: is required to be 0',
-      });
-    }
+  if (isSearchSourceRule(searchType)) {
     return;
   }
 
