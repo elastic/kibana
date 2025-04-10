@@ -11,7 +11,6 @@
 
 import fetch from 'node-fetch';
 import { RequestInit } from 'node-fetch';
-import Path from 'path';
 import { kibanaHeaders } from './client_headers';
 import { getFetchAgent } from '../../cli/utils/ssl';
 
@@ -33,28 +32,19 @@ export class KibanaClient {
   }
 
   fetch<T>(pathname: string, options: KibanaClientFetchOptions): Promise<T> {
-    const url = new URL(this.target);
-    const pathSplitted = pathname.split('?');
-    const pathnamePart = pathSplitted[0];
-    const searchPart = pathSplitted[1];
-    if (searchPart) {
-      const searchPartObj = new URLSearchParams(searchPart);
-      for (const [key, value] of searchPartObj.entries()) {
-        url.searchParams.append(key, value);
-      }
-    }
-    url.pathname = Path.join(url.pathname, pathnamePart);
-    return fetch(url, {
+    const url = new URL(`${this.target}${pathname}`);
+    const normalizedUrl = normalizeUrl(url.toString());
+    return fetch(normalizedUrl, {
       ...options,
       headers: {
         ...this.headers,
         ...options.headers,
       },
-      agent: getFetchAgent(url.toString()),
+      agent: getFetchAgent(normalizedUrl),
     }).then(async (response) => {
       if (response.status >= 400) {
         throw new KibanaClientHttpError(
-          `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${url}`,
+          `Response error for ${options.method?.toUpperCase() ?? 'GET'} ${normalizedUrl}`,
           response.status,
           await response.json().catch((error) => {
             return undefined;
