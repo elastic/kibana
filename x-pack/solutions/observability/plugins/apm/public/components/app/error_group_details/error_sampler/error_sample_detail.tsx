@@ -56,6 +56,7 @@ import { ErrorTabKey, getTabs } from './error_tabs';
 import { ErrorUiActionsContextMenu } from './error_ui_actions_context_menu';
 import { SampleSummary } from './sample_summary';
 import { ErrorSampleContextualInsight } from './error_sample_contextual_insight';
+import { buildUrl } from '../../../../utils/build_url';
 
 const TransactionLinkName = styled.div`
   margin-left: ${({ theme }) => theme.euiTheme.size.s};
@@ -155,10 +156,11 @@ export function ErrorSampleDetails({
   const tabs = getTabs(error);
   const currentTab = getCurrentTab(tabs, detailTab) as ErrorTab;
 
-  const errorUrl = error.error.page?.url || error.url?.full;
-  const method = error.http?.request?.method;
-  const status = error.http?.response?.status_code;
-  const userAgent = error?.user_agent;
+  const errorUrl =
+    (error.error.page?.url || error.url?.full) ?? buildUrl(error?.url ? error : transaction);
+  const method = error.http?.request?.method ?? transaction?.http?.request?.method;
+  const status = error.http?.response?.status_code ?? transaction?.http?.response?.status_code;
+  const userAgent = error?.user_agent ?? transaction?.user_agent;
   const environment = error.service.environment;
   const serviceVersion = error.service.version;
   const isUnhandled = error.error.exception?.[0]?.handled === false;
@@ -205,7 +207,7 @@ export function ErrorSampleDetails({
                 <EuiFlexItem>
                   <EuiIcon type="apmTrace" />
                 </EuiFlexItem>
-                <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+                <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                   {i18n.translate('xpack.apm.errorSampleDetails.viewOccurrencesInTraceExplorer', {
                     defaultMessage: 'Explore traces with this error',
                   })}
@@ -223,7 +225,7 @@ export function ErrorSampleDetails({
               <EuiFlexItem>
                 <EuiIcon type="discoverApp" />
               </EuiFlexItem>
-              <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
+              <EuiFlexItem css={{ whiteSpace: 'nowrap' }}>
                 {i18n.translate(
                   'xpack.apm.errorSampleDetails.viewOccurrencesInDiscoverButtonLabel',
                   {
@@ -247,7 +249,7 @@ export function ErrorSampleDetails({
         <Summary
           items={[
             <TimestampTooltip time={errorData ? error.timestamp.us / 1000 : 0} />,
-            errorUrl && method ? (
+            errorUrl ? (
               <HttpInfoSummaryItem url={errorUrl} method={method} status={status} />
             ) : null,
             userAgent?.name ? <UserAgentSummaryItem {...userAgent} /> : null,

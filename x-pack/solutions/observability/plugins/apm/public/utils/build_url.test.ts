@@ -6,7 +6,6 @@
  */
 
 import { buildUrl } from './build_url';
-import type { Transaction } from '../../typings/es_schemas/ui/transaction';
 
 describe('buildUrl', () => {
   it('should return a full URL when all fields are provided', () => {
@@ -17,10 +16,10 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.com',
-        port: 443,
+        port: '443',
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBe('ftp://example.com:443/some/path');
   });
 
@@ -34,7 +33,7 @@ describe('buildUrl', () => {
         address: 'example.org',
       },
     };
-    const result = buildUrl(item as Transaction);
+    const result = buildUrl(item);
     expect(result).toBe('http://example.org/another/path');
   });
 
@@ -45,10 +44,10 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.net',
-        port: 8443,
+        port: '8443',
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBe('https://example.net:8443/');
   });
 
@@ -59,10 +58,10 @@ describe('buildUrl', () => {
       },
       server: {
         address: 'example.com',
-        port: 8080,
+        port: '8080',
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBeUndefined();
   });
 
@@ -73,10 +72,10 @@ describe('buildUrl', () => {
         path: '/missing/address',
       },
       server: {
-        port: 8080,
+        port: '8080',
       },
     };
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
     expect(result).toBeUndefined();
   });
 
@@ -94,7 +93,7 @@ describe('buildUrl', () => {
       },
     };
 
-    const result = buildUrl(item as unknown as Transaction);
+    const result = buildUrl(item);
 
     expect(result).toBeUndefined();
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -109,7 +108,7 @@ describe('buildUrl', () => {
 
   it('should handle an empty object gracefully', () => {
     const item = {};
-    const result = buildUrl(item as Transaction);
+    const result = buildUrl(item);
     expect(result).toBeUndefined();
   });
 });
