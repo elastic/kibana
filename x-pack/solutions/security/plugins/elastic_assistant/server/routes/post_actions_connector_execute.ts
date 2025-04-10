@@ -40,7 +40,7 @@ export const postActionsConnectorExecuteRoute = (
 ) => {
   // add 30 seconds to the response timeout
   // to allow for the request to be aborted
-  const RESPONSE_TIMEOUT = (config?.responseTimeout ?? 180000) + 30 * 1000; // 3 minutes
+  const RESPONSE_TIMEOUT = (config?.responseTimeout as number) + 30 * 1000; // 3 minutes
   router.versioned
     .post({
       access: 'internal',
@@ -164,7 +164,7 @@ export const postActionsConnectorExecuteRoute = (
               reject(
                 new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
               );
-            }, RESPONSE_TIMEOUT);
+            }, config?.responseTimeout as number);
           }) as unknown as IKibanaResponse;
 
           return await Promise.race([

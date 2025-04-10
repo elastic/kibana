@@ -22,7 +22,7 @@ const toolDetails = {
   // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
   // local definitions can be overwritten by security-ai-prompt integration definitions
   description:
-    'Use this tool to retrieve documentation about Elastic products. You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch, or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search.',
+    'Use this tool to retrieve documentation about Elastic products. You can retrieve documentation about the Elastic stack, such as Kibana and Elasticsearch, or for Elastic solutions, such as Elastic Security, Elastic Observability or Elastic Enterprise Search. Call it only once with the same input within the same conversation.',
   id: 'product-documentation-tool',
   name: 'ProductDocumentationTool',
 };
@@ -64,12 +64,15 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
         name: toolDetails.name,
         description: params.description || toolDetails.description,
         schema: z.object({
-          query: z.string().describe(
-            `The query to use to retrieve documentation
+          query: z
+            .string()
+            .min(10, { message: "'Must be 10 or more characters long" })
+            .describe(
+              `The query to use to retrieve documentation
             Examples:
             - "How to enable TLS for Elasticsearch?"
             - "What is Kibana Security?"`
-          ),
+            ),
           product: z
             .enum(['kibana', 'elasticsearch', 'observability', 'security'])
             .describe(

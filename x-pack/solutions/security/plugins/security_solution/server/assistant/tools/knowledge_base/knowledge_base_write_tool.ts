@@ -24,7 +24,7 @@ const toolDetails = {
   // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
   // local definitions can be overwritten by security-ai-prompt integration definitions
   description:
-    "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, a short UI friendly name for the entry, and whether or not the entry is required.",
+    "ONLY call this tool when the user EXPLICITLY asks to save or store information to their knowledge base. Before calling this tool, ALWAYS first call KnowledgeBaseRetrievalTool to check if similar information already exists. DO NOT call this tool for general information sharing, answering questions, or any task that doesn't involve explicitly saving user-specific information. The knowledge base is for storing user preferences, configurations, and personal information that needs to be remembered between conversations. Input must include: 1) a concise summarized knowledge base entry to store (keep it brief and relevant), 2) a short UI-friendly name for the entry, and 3) whether the entry is required (must be a boolean value: true or false, NOT a string). If you're uncertain whether information should be saved, DO NOT call this tool and instead ask the user for clarification.",
   id: 'knowledge-base-write-tool',
   name: 'KnowledgeBaseWriteTool',
 };
@@ -70,8 +70,12 @@ export const KNOWLEDGE_BASE_WRITE_TOOL: AssistantTool = {
         schema: z.object({
           name: z
             .string()
+            .min(10, { message: "'Must be 10 or more characters long" })
             .describe(`This is what the user will use to refer to the entry in the future.`),
-          query: z.string().describe(`Summary of items/things to save in the knowledge base`),
+          query: z
+            .string()
+            .min(10, { message: "'Must be 10 or more characters long" })
+            .describe(`Summary of items/things to save in the knowledge base`),
           required: z
             .boolean()
             .describe(

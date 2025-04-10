@@ -29,7 +29,7 @@ export function stepRouter(state: AgentState): string {
       }
       return NodeType.GENERATE_CHAT_TITLE;
 
-    case NodeType.MODEL_INPUT:
+    case 'start':
       return state.conversationId ? NodeType.GET_PERSISTED_CONVERSATION : NodeType.AGENT;
 
     default:

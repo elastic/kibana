@@ -53,7 +53,7 @@ export const localToolPrompts: Prompt[] = [
     promptGroupId,
     prompt: {
       default:
-        "Call this for writing details to the user's knowledge base. The knowledge base contains useful information the user wants to store between conversation contexts. Input will be the summarized knowledge base entry to store, a short UI friendly name for the entry, and whether or not the entry is required.",
+        "ONLY call this tool when the user EXPLICITLY asks to save or store information to their knowledge base. Before calling this tool, ALWAYS first call KnowledgeBaseRetrievalTool to check if similar information already exists. DO NOT call this tool for general information sharing, answering questions, or any task that doesn't involve explicitly saving user-specific information. The knowledge base is for storing user preferences, configurations, and personal information that needs to be remembered between conversations. Input must include: 1) a concise summarized knowledge base entry to store (keep it brief and relevant), 2) a short UI-friendly name for the entry, and 3) whether the entry is required (must be a boolean value: true or false, NOT a string). If you're uncertain whether information should be saved, DO NOT call this tool and instead ask the user for clarification.",
     },
   },
   {

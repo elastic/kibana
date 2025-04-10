@@ -6,6 +6,7 @@
  */
 
 import { ChatCompletionChunkEvent, UnvalidatedToolCall } from '@kbn/inference-common';
+import deepmerge from 'deepmerge';
 
 interface UnvalidatedMessage {
   content: string;
@@ -25,18 +26,27 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
         if (!prevToolCall) {
           prev.tool_calls[toolCall.index] = {
             function: {
-              name: '',
-              arguments: '',
+              name: toolCall.function.name,
+              arguments: toolCall.function.arguments,
             },
-            toolCallId: '',
+            toolCallId: toolCall.toolCallId,
           };
 
           prevToolCall = prev.tool_calls[toolCall.index];
+        } else if (prevToolCall.function.name === toolCall.function.name) {
+          try {
+            prevToolCall.function.arguments = JSON.stringify(
+              deepmerge(
+                JSON.parse(prevToolCall.function.arguments),
+                JSON.parse(toolCall.function.arguments)
+              )
+            );
+          } catch (e) {}
+        } else {
+          prevToolCall.function.name += toolCall.function.name;
+          prevToolCall.function.arguments += toolCall.function.arguments;
+          prevToolCall.toolCallId += toolCall.toolCallId;
         }
-
-        prevToolCall.function.name += toolCall.function.name;
-        prevToolCall.function.arguments += toolCall.function.arguments;
-        prevToolCall.toolCallId += toolCall.toolCallId;
       });
 
       return prev;

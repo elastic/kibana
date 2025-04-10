@@ -233,7 +233,7 @@ export const invokeGraph = async ({
       ],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
-      recursionLimit: 100,
+      recursionLimit: inputs?.isOssModel ? 100 : 25,
     });
     const output = (result.agentOutcome as AgentFinish).returnValues.output;
     const conversationId = result.conversation?.id;
