@@ -123,29 +123,30 @@ export function ControlBar() {
         title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
           defaultMessage: 'Stream saved',
         }),
-        text: toMountPoint(
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
-                size="s"
-                target="_blank"
-                href={router.link('/{key}/{tab}/{subtab}', {
-                  path: {
-                    key: routingAppState.childUnderEdit?.child.destination!,
-                    tab: 'management',
-                    subtab: 'route',
-                  },
-                })}
-              >
-                {i18n.translate('xpack.streams.streamDetailRouting.view', {
-                  defaultMessage: 'Open stream in new tab',
-                })}
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-          core
-        ),
+        text: routingAppState.childUnderEdit?.child.destination
+          ? toMountPoint(
+              <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
+                    size="s"
+                    target="_blank"
+                    href={router.link('/{key}/management/{tab}', {
+                      path: {
+                        key: routingAppState.childUnderEdit.child.destination,
+                        tab: 'route',
+                      },
+                    })}
+                  >
+                    {i18n.translate('xpack.streams.streamDetailRouting.view', {
+                      defaultMessage: 'Open stream in new tab',
+                    })}
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>,
+              core
+            )
+          : undefined,
       });
       routingAppState.setLastDisplayedToast(toast);
       routingAppState.selectChildUnderEdit(undefined);
