@@ -27,6 +27,7 @@ import {
   useSetupAutosave,
   useResizeCheckerUtils,
   useKeyboardCommandsUtils,
+  useContextMenuUtils,
 } from './hooks';
 import type { EditorRequest } from './types';
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
@@ -58,6 +59,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const { registerKeyboardCommands, unregisterKeyboardCommands } = useKeyboardCommandsUtils();
+  const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
   const dispatch = useRequestActionContext();
   const editorDispatch = useEditorActionContext();
@@ -94,8 +96,12 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
+      registerContextMenuActions({
+        editor,
+        enableWriteActions: true,
+      });
     },
-    [setupResizeChecker, setInputEditor, setEditorInstace, isDevMode]
+    [setupResizeChecker, setInputEditor, isDevMode, registerContextMenuActions]
   );
 
   useEffect(() => {
@@ -125,7 +131,8 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
     unregisterKeyboardCommands();
-  }, [destroyResizeChecker, unregisterKeyboardCommands]);
+    unregisterContextMenuActions();
+  }, [destroyResizeChecker, unregisterContextMenuActions, unregisterKeyboardCommands]);
 
   const suggestionProvider = useMemo(() => {
     return getSuggestionProvider(actionsProvider);
@@ -222,6 +229,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
           hover: {
             above: false,
           },
+          contextmenu: true,
         }}
         suggestionProvider={suggestionProvider}
         enableFindAction={true}

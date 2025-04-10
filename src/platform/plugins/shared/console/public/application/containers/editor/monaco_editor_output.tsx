@@ -38,7 +38,7 @@ import {
 } from './utils';
 import { useEditorReadContext, useRequestReadContext, useServicesContext } from '../../contexts';
 import { MonacoEditorOutputActionsProvider } from './monaco_editor_output_actions_provider';
-import { useResizeCheckerUtils } from './hooks';
+import { useContextMenuUtils, useResizeCheckerUtils } from './hooks';
 
 export const MonacoEditorOutput: FunctionComponent = () => {
   const context = useServicesContext();
@@ -54,6 +54,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
   const lineDecorations = useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
   const actionsProvider = useRef<MonacoEditorOutputActionsProvider | null>(null);
   const [editorActionsCss, setEditorActionsCss] = useState<CSSProperties>({});
@@ -65,13 +66,18 @@ export const MonacoEditorOutput: FunctionComponent = () => {
 
       setupResizeChecker(divRef.current!, editor);
       lineDecorations.current = editor.createDecorationsCollection();
+      registerContextMenuActions({
+        editor,
+        enableWriteActions: false,
+      });
     },
-    [setupResizeChecker]
+    [registerContextMenuActions, setupResizeChecker]
   );
 
   const editorWillUnmountCallback = useCallback(() => {
     destroyResizeChecker();
-  }, [destroyResizeChecker]);
+    unregisterContextMenuActions();
+  }, [destroyResizeChecker, unregisterContextMenuActions]);
 
   useEffect(() => {
     // Clean up any existing line decorations
@@ -193,6 +199,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
           theme: CONSOLE_OUTPUT_THEME_ID,
           automaticLayout: true,
+          contextmenu: true,
         }}
       />
     </div>
