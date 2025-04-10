@@ -21,6 +21,8 @@ import {
   type MicrosoftDefenderEndpointMachineAction,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import type {
   IsolationRouteRequestBody,
   UnisolationRouteRequestBody,
@@ -32,6 +34,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   MicrosoftDefenderEndpointActionRequestCommonMeta,
+  MicrosoftDefenderEndpointLogEsDoc,
 } from '../../../../../../../../common/endpoint/types';
 import type {
   ResponseActionAgentType,
@@ -53,6 +56,7 @@ import type {
   CommonResponseActionMethodOptions,
   ProcessPendingActionsMethodOptions,
 } from '../../../lib/types';
+import { catchAndWrapError } from '../../../../../../utils';
 
 export type MicrosoftDefenderActionsClientOptions = ResponseActionsClientOptions & {
   connectorActions: NormalizedExternalConnectorClient;
@@ -71,8 +75,68 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   protected async fetchAgentPolicyInfo(
     agentIds: string[]
   ): Promise<LogsEndpointAction['agent']['policy']> {
-    // TODO: implement microsoft agent policy info.
-    return [];
+    const esClient = this.options.esClient;
+    const esSearchRequest: SearchRequest = {
+      index: MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN,
+      query: { bool: { filter: [{ terms: { 'cloud.instance.id': agentIds } }] } },
+      collapse: {
+        field: 'cloud.instance.id',
+        inner_hits: {
+          name: 'most_recent',
+          size: 1,
+          _source: ['agent', 'cloud.instance.id'],
+          sort: [{ 'event.created': 'desc' }],
+        },
+      },
+      _source: false,
+    };
+
+    this.log.debug(
+      () =>
+        `Looking for agents in [${MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN}] with:\n${stringify(
+          esSearchRequest
+        )}`
+    );
+
+    const msDefenderLogEsResults = await esClient
+      .search<
+        MicrosoftDefenderEndpointLogEsDoc,
+        { most_recent: MicrosoftDefenderEndpointLogEsDoc }
+      >(esSearchRequest)
+      .catch(catchAndWrapError);
+
+    this.log.debug(
+      () => `MS Defender Log records found:\n${stringify(msDefenderLogEsResults, 20)}`
+    );
+
+    const fleetAgentIdToMsDefenderAgentIdMap: Record<string, string> = (
+      msDefenderLogEsResults.hits.hits ?? []
+    ).reduce((acc, esDoc) => {
+      const doc = esDoc.inner_hits?.most_recent.hits.hits[0]._source;
+
+      if (doc) {
+        acc[doc.agent.id] = doc.cloud.instance.id;
+      }
+
+      return acc;
+    }, {} as Record<string, string>);
+    const elasticAgentIds = Object.keys(fleetAgentIdToMsDefenderAgentIdMap);
+
+    if (elasticAgentIds.length === 0) {
+      throw new ResponseActionsClientError(
+        `Unable to find elastic agent IDs for Microsoft agent ids: [${agentIds.join(', ')}]`
+      );
+    }
+
+    return this.fetchFleetInfoForAgents(elasticAgentIds, ['microsoft_defender_endpoint']).then(
+      (agentInfoList) => {
+        for (const agentInfo of agentInfoList) {
+          agentInfo.agentId = fleetAgentIdToMsDefenderAgentIdMap[agentInfo.elasticAgentId];
+        }
+
+        return agentInfoList;
+      }
+    );
   }
 
   protected async handleResponseActionCreation<

@@ -9,3 +9,26 @@ export interface MicrosoftDefenderEndpointActionRequestCommonMeta {
   /** The ID of the action in Microsoft Defender's system */
   machineActionId: string;
 }
+
+/**
+ * The log record that is ingested into Elasticsearch by the Microsoft Defender for Endpoint integration
+ *
+ * NOTE:  not all properties are currently mapped below. Check the index definition if wanting to
+ *        see what else is available and add it bellow if needed
+ */
+export interface MicrosoftDefenderEndpointLogEsDoc {
+  agent: {
+    id: string;
+    type: string;
+    version: string;
+  };
+  cloud: {
+    instance: {
+      id: string;
+    };
+  };
+  microsoft: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    defender_endpoint: Record<string, any>;
+  };
+}
