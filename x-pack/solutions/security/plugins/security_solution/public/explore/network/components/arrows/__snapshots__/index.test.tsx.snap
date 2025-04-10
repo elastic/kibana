@@ -62,20 +62,6 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               .css-8kffb{margin-right:8px;overflow:hidden;text-overflow:ellipsis;}
             </style>
             <style
-              data-emotion="css"
-              data-s=""
-            >
-              
-              .css-1kcx8qm{}
-            </style>
-            <style
-              data-emotion="css"
-              data-s=""
-            >
-              
-              .css-1kcx8qm .euiAccordion__childWrapper{-webkit-transition:none;transition:none;}
-            </style>
-            <style
               data-emotion="css-global"
               data-s=""
             >
