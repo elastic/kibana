@@ -83,7 +83,7 @@ export const ChatSetupPage: React.FC = () => {
                     description={
                       <FormattedMessage
                         id="xpack.searchPlayground.setupPage.connectToLLMDescription"
-                        defaultMessage="Select a model to integrate with your chat experience.  You can also set up your own connection."
+                        defaultMessage="Select a model to integrate with your chat experience. You can also set up your own connection."
                       />
                     }
                     footer={<ConnectLLMButton />}
