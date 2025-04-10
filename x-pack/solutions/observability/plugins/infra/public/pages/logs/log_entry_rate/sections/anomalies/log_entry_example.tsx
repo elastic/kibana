@@ -11,6 +11,7 @@ import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
 import { useLinkProps, shouldHandleLinkEvent } from '@kbn/observability-shared-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiTable,
   EuiTableHeader,
@@ -23,6 +24,7 @@ import {
   EuiContextMenuItem,
   EuiButtonIcon,
   EuiScreenReaderOnly,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { getFriendlyNameForPartitionId } from '../../../../../../common/log_analysis';
@@ -56,6 +58,7 @@ const MENU_LABEL = i18n.translate('xpack.infra.logAnomalies.logEntryExamplesMenu
 interface Props extends LogEntryExample {
   timeRange: TimeRange;
   anomaly: LogEntryAnomaly;
+  euiTheme: EuiThemeComputed;
 }
 
 export const LogEntryExampleMessageRow: React.FC<Props> = ({
@@ -66,6 +69,7 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
   tiebreaker,
   timeRange,
   anomaly,
+  euiTheme,
 }) => {
   const {
     services: { ml, http, application },
@@ -161,7 +165,9 @@ export const LogEntryExampleMessageRow: React.FC<Props> = ({
 
   return (
     <EuiTableRow>
-      <EuiTableRowCell width="150px"> {moment(timestamp).format('HH:mm:ss.SSS')}</EuiTableRowCell>
+      <EuiTableRowCell width="150px" css={{ color: euiTheme.colors.textSubdued }}>
+        {moment(timestamp).format('HH:mm:ss.SSS')}
+      </EuiTableRowCell>
       <EuiTableRowCell>{message}</EuiTableRowCell>
 
       <EuiTableRowCell width="250px">{humanFriendlyDataset}</EuiTableRowCell>
@@ -207,6 +213,8 @@ export const LogEntryExampleMessageTable: React.FC<{
   timeRange: TimeRange;
   anomaly: LogEntryAnomaly;
 }> = ({ examples, timeRange, anomaly }) => {
+  const { euiTheme } = useEuiTheme();
+
   const dateTime = examples.length > 0 ? examples[0].timestamp : Date.now();
 
   const columns = [
@@ -224,7 +232,7 @@ export const LogEntryExampleMessageTable: React.FC<{
     {
       id: 'dataset',
       header: i18n.translate('xpack.infra.logEntryExampleMessageHeaders.datasetHeader', {
-        defaultMessage: 'Dataset',
+        defaultMessage: 'event.dataset',
       }),
       width: '250px',
     },
@@ -244,7 +252,20 @@ export const LogEntryExampleMessageTable: React.FC<{
   ];
 
   return (
-    <EuiTable>
+    <EuiTable
+      css={{
+        backgroundColor: euiTheme.colors.borderBaseFloating,
+        '& .euiTableHeaderCell': {
+          paddingBottom: 5,
+        },
+        '& .euiTableRowCell': {
+          borderColor: euiTheme.colors.borderBaseFloating,
+        },
+        '& .euiTableCellContent': {
+          padding: 0,
+        },
+      }}
+    >
       <EuiTableHeader>
         {columns.map((column) => (
           <EuiTableHeaderCell key={column.id} width={column.width}>
@@ -260,6 +281,7 @@ export const LogEntryExampleMessageTable: React.FC<{
             {...example}
             timeRange={timeRange}
             anomaly={anomaly}
+            euiTheme={euiTheme}
           />
         ))}
       </EuiTableBody>
