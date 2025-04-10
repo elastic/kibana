@@ -25,13 +25,13 @@ import { FlyoutBody } from '../shared/components/flyout_body';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
 import type { AIForSOCDetailsProps } from './types';
 import { PanelFooter } from './footer';
-import { FLYOUT_BODY_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../shared/components/flyout_header';
+import { HeaderTitle } from './components/header_title';
 import { DEFAULT_AI_CONNECTOR } from '../../../common/constants';
 import { UserAssetTableType } from '../../explore/users/store/model';
-import { AlertHeaderTitle } from '../document_details/right/components/alert_header_title_ai_for_soc';
 import { useAlertsContext } from '../../detections/components/alerts_table/alerts_context';
 
+export const FLYOUT_BODY_TEST_ID = 'ai-for-soc-alert-flyout-body';
 /**
  * Panel to be displayed in the document details expandable flyout right section
  */
@@ -58,7 +58,6 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
     [getFieldsData]
   );
   const { uiSettings } = useKibana().services;
-  // TODO will this be in non-serverless? because this value will not work if so
   const defaultConnectorId = uiSettings.get<string>(DEFAULT_AI_CONNECTOR);
   const timestamp = useMemo(() => getField(getFieldsData('@timestamp')) || '', [getFieldsData]);
 
@@ -71,7 +70,7 @@ export const AIForSOCPanel: React.FC<Partial<AIForSOCDetailsProps>> = memo(() =>
       >
         <FlyoutNavigation flyoutIsExpandable={false} />
         <FlyoutHeader>
-          <AlertHeaderTitle />
+          <HeaderTitle />
         </FlyoutHeader>
         <FlyoutBody data-test-subj={FLYOUT_BODY_TEST_ID}>
           <EuiFlexGroup direction="column">
