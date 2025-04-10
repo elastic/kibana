@@ -24,7 +24,11 @@ const TABS_LOCAL_STORAGE_KEY = 'discover.tabs';
 interface TabStateInLocalStorage {
   tabState: Pick<TabState, 'id' | 'label' | 'dataViewId' | 'appState' | 'globalState'>;
   version: string;
-  closedAt?: number; // for future use
+}
+
+interface TabsStateInLocalStorage {
+  openTabs: TabStateInLocalStorage[];
+  closedTabs: Array<TabStateInLocalStorage & { closedAt: number }>;
 }
 
 interface TabsInternalStatePayload {
@@ -97,6 +101,23 @@ export const getTabsStorageManager = ({
     await urlStateStorage.set(TABS_STATE_URL_KEY, { selectedTabId }); // can be called even before sync with URL started
   };
 
+  const readFromLocalStorage = (): TabsStateInLocalStorage => {
+    const storedTabsState = storage.get(TABS_LOCAL_STORAGE_KEY);
+    let parsedTabsState: TabsStateInLocalStorage | null = null;
+    if (storedTabsState) {
+      try {
+        parsedTabsState = JSON.parse(storedTabsState);
+      } catch {
+        // suppress error
+      }
+    }
+
+    return {
+      openTabs: parsedTabsState?.openTabs || [],
+      closedTabs: parsedTabsState?.closedTabs || [],
+    };
+  };
+
   const persistLocally = async ({ allTabs, selectedTabId }: TabsInternalStatePayload) => {
     await pushSelectedTabIdToUrl(selectedTabId);
     const tabsToPersist: TabStateInLocalStorage[] = allTabs.map((tabState) => {
@@ -111,9 +132,27 @@ export const getTabsStorageManager = ({
         version: '1',
       };
     });
-    // console.log('stored', tabsToPersist);
-    const tabsToPersistString = JSON.stringify(tabsToPersist);
-    storage.set(TABS_LOCAL_STORAGE_KEY, tabsToPersistString);
+    const storedTabs = readFromLocalStorage();
+    const storedOpenTabs = storedTabs.openTabs;
+    const storedClosedTabs = storedTabs.closedTabs;
+
+    const newClosedTabs = storedOpenTabs
+      .filter(
+        (tab: TabStateInLocalStorage) =>
+          !tabsToPersist.find((t) => t.tabState.id === tab.tabState.id)
+      )
+      .map((tab: TabStateInLocalStorage) => ({
+        ...tab,
+        closedAt: Date.now(),
+      }));
+
+    const nextTabsInStorage: TabsStateInLocalStorage = {
+      openTabs: tabsToPersist,
+      // TODO: add logic to keep only the last 10 closed tabs
+      closedTabs: [...storedClosedTabs, ...newClosedTabs], // wil be used for "Recently closed tabs" feature
+    };
+
+    storage.set(TABS_LOCAL_STORAGE_KEY, JSON.stringify(nextTabsInStorage));
   };
 
   const loadLocally = ({
@@ -125,24 +164,22 @@ export const getTabsStorageManager = ({
     let allTabs: TabState[] = [];
 
     // read from storage only if we have selectedTabId in URL
-    const tabsFromLocalStorage = selectedTabId ? storage.get(TABS_LOCAL_STORAGE_KEY) : null;
+    const storedTabsState = selectedTabId ? readFromLocalStorage() : null;
 
-    if (tabsFromLocalStorage) {
+    if (storedTabsState) {
       try {
-        allTabs = JSON.parse(tabsFromLocalStorage).map(
-          (tabStateInStorage: TabStateInLocalStorage) => ({
-            ...defaultTabState,
-            ...tabStateInStorage.tabState,
-            appState: {
-              ...defaultTabState.appState,
-              ...tabStateInStorage.tabState.appState,
-            },
-            globalState: {
-              ...defaultTabState.globalState,
-              ...tabStateInStorage.tabState.globalState,
-            },
-          })
-        );
+        allTabs = storedTabsState.openTabs?.map((tabStateInStorage: TabStateInLocalStorage) => ({
+          ...defaultTabState,
+          ...tabStateInStorage.tabState,
+          appState: {
+            ...defaultTabState.appState,
+            ...tabStateInStorage.tabState.appState,
+          },
+          globalState: {
+            ...defaultTabState.globalState,
+            ...tabStateInStorage.tabState.globalState,
+          },
+        }));
       } catch {
         // suppress error
       }
