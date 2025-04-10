@@ -12,6 +12,7 @@ import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_valu
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import type { Environment } from '../../../common/environment_rt';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import { hasUnsetValueForField } from './has_unset_value_for_field';
 
 /**
  * This is used for getting the list of environments for the environment selector,
@@ -53,13 +54,21 @@ export async function getEnvironments({
       environments: {
         terms: {
           field: SERVICE_ENVIRONMENT,
-          missing: ENVIRONMENT_NOT_DEFINED.value,
           order: { _key: 'asc' as const },
           size,
         },
       },
     },
   };
+
+  const hasUnsetEnvironments = hasUnsetValueForField({
+    apmEventClient,
+    searchAggregatedTransactions,
+    serviceName,
+    fieldName: SERVICE_ENVIRONMENT,
+    start,
+    end,
+  });
 
   const resp = await apmEventClient.search(operationName, params);
   const aggs = resp.aggregations;
@@ -68,6 +77,10 @@ export async function getEnvironments({
   const environments = environmentsBuckets.map(
     (environmentBucket) => environmentBucket.key as string
   );
+
+  if (await hasUnsetEnvironments) {
+    environments.push(ENVIRONMENT_NOT_DEFINED.value);
+  }
 
   return environments as Environment[];
 }

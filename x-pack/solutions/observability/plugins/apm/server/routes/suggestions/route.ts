@@ -13,7 +13,6 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { hasUnsetValueForField } from './has_unset_value_for_field';
 
 const suggestionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/suggestions',
@@ -28,7 +27,7 @@ const suggestionsRoute = createApmServerRoute({
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ terms: string[]; hasUnset: boolean }> => {
+  handler: async (resources): Promise<{ terms: string[] }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { context, params, config } = resources;
     const { fieldName, fieldValue, serviceName, start, end } = params.query;
@@ -39,15 +38,6 @@ const suggestionsRoute = createApmServerRoute({
     });
     const coreContext = await context.core;
     const size = await coreContext.uiSettings.client.get<number>(maxSuggestions);
-
-    const hasUnset = hasUnsetValueForField({
-      apmEventClient,
-      searchAggregatedTransactions,
-      serviceName,
-      fieldName,
-      start,
-      end,
-    });
 
     if (!serviceName) {
       const suggestions = await getSuggestionsWithTermsEnum({
@@ -64,26 +54,21 @@ const suggestionsRoute = createApmServerRoute({
       // This is useful because terms enum can only find terms that start with the search query
       // whereas terms agg approach can find terms that contain the search query
       if (suggestions.terms.length > 0) {
-        return { ...suggestions, hasUnset: await hasUnset };
+        return suggestions;
       }
     }
 
-    return {
-      ...(await getSuggestionsWithTermsAggregation({
-        fieldName,
-        fieldValue,
-        searchAggregatedTransactions,
-        serviceName,
-        apmEventClient,
-        size,
-        start,
-        end,
-      })),
-      hasUnset: await hasUnset,
-    };
+    return await getSuggestionsWithTermsAggregation({
+      fieldName,
+      fieldValue,
+      searchAggregatedTransactions,
+      serviceName,
+      apmEventClient,
+      size,
+      start,
+      end,
+    });
   },
 });
 
-export const suggestionsRouteRepository = {
-  ...suggestionsRoute,
-};
+export const suggestionsRouteRepository = suggestionsRoute;
