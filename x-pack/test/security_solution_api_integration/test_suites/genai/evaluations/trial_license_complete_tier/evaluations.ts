@@ -26,6 +26,7 @@ import {
 
 import { MachineLearningProvider } from '../../../../../functional/services/ml';
 import { routeWithNamespace } from '../../../../../common/utils/security_solution';
+import { loadEvalKnowledgeBaseEntries } from '../data/kb_entries';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -56,8 +57,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('Run Evaluations', () => {
+      const buildNumber = process.env.BUILDKITE_BUILD_NUMBER;
       const defaultEvalPayload: PostEvaluateBody = {
-        runName: 'Eval Automation', // TODO: Dynamically generate from buildkite build id?
+        runName: `Eval Automation${buildNumber ? ' - ' + buildNumber : ''}`,
         graphs: ['DefaultAssistantGraph'],
         datasetName: 'Sample Dataset',
         connectorIds: Object.keys(loadConnectorsFromEnvVar()),
@@ -88,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should successfully run the "Alerts RAG Regression (Episodes 1-8)" dataset', async () => {
+          // TODO: Load alerts from episodes 1-8
           const evalPayload: PostEvaluateBody = {
             ...defaultEvalPayload,
             graphs: ['DefaultAssistantGraph'],
@@ -103,6 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should successfully run the "Assistant Eval: Custom Knowledge" dataset', async () => {
+          await loadEvalKnowledgeBaseEntries(supertest, log);
           const evalPayload: PostEvaluateBody = {
             ...defaultEvalPayload,
             graphs: ['DefaultAssistantGraph'],
