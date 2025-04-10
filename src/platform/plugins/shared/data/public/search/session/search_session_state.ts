@@ -168,7 +168,7 @@ export interface SessionPureTransitions<
   SearchMeta extends {} = {},
   S = SessionStateInternal<SearchDescriptor, SearchMeta>
 > {
-  start: (state: S) => ({ appName, sessionId }: { appName: string; sessionId?: string }) => S;
+  start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
   store: (state: S) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
@@ -187,9 +187,9 @@ export interface SessionPureTransitions<
 export const sessionPureTransitions: SessionPureTransitions = {
   start:
     (state) =>
-    ({ appName, sessionId }) => ({
+    ({ appName }) => ({
       ...createSessionDefaultState(),
-      sessionId: sessionId ?? uuidv4(),
+      sessionId: uuidv4(),
       startTime: new Date(),
       appName,
     }),
