@@ -70,5 +70,13 @@ export interface DiscoverInternalState {
   tabs: {
     byId: Record<string, TabState>;
     allIds: string[];
+    /**
+     * WARNING: You probably don't want to use this property.
+     * This is used high in the component tree for managing tabs,
+     * but is unsafe to use in actions and selectors since it can
+     * change between renders and leak state between tabs.
+     * Actions and selectors should use a tab ID parameter instead.
+     */
+    unsafeCurrentId: string;
   };
 }
