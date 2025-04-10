@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 
 import {
   EuiFlyout,
@@ -31,9 +30,6 @@ const BreakingChangesList = ({ changelog }: { changelog: ChangelogEntry[] }) => 
       label: link,
       href: link,
       target: '_blank',
-      css: css`
-        padding-inline: 0px;
-      `,
     }));
 
     return (
