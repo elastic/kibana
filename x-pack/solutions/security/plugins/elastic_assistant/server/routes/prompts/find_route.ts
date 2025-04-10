@@ -56,7 +56,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             return checkResponse.response;
           }
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
-
+          console.log('--------findPromptDataClient---------');
           const result = await dataClient?.findDocuments<EsPromptsSchema>({
             perPage: query.per_page,
             page: query.page,

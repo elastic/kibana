@@ -170,7 +170,7 @@ export const bulkPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           const authenticatedUser = checkResponse.currentUser;
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantPromptsDataClient();
-
+          console.log('--------bulkPrompts---------');
           if (body.create && body.create.length > 0) {
             const result = await dataClient?.findDocuments<EsPromptsSchema>({
               perPage: 100,

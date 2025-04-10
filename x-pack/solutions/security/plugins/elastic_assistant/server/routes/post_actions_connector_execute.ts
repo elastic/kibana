@@ -115,7 +115,7 @@ export const postActionsConnectorExecuteRoute = (
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
-
+          console.log('--------conversationsDataClient---------');
           const contentReferencesStore = newContentReferencesStore({
             disabled: request.query.content_references_disabled,
           });

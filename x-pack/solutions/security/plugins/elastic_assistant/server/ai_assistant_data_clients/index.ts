@@ -37,6 +37,11 @@ export class AIAssistantDataClient {
   public indexTemplateAndPattern: IIndexPatternString;
 
   constructor(public readonly options: AIAssistantDataClientParams) {
+    console.log('-------------------AIAssistantDataClient--------------------');
+    console.log(this.options.indexPatternsResourceName);
+    console.log(this.options.spaceId ?? DEFAULT_NAMESPACE_STRING);
+    console.log('-------------------/AIAssistantDataClient--------------------');
+
     this.indexTemplateAndPattern = getIndexTemplateAndPattern(
       this.options.indexPatternsResourceName,
       this.options.spaceId ?? DEFAULT_NAMESPACE_STRING
