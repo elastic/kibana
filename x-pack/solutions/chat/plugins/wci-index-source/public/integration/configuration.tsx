@@ -57,7 +57,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
   const { isLoading, data } = useIndexNameAutocomplete({ query });
   const [selectedOptions, setSelected] = useState<EuiComboBoxOptionOption[]>([]);
 
-  const onChange = (onChangeSelectedOptions: EuiComboBoxOptionOption[]) => {
+  const onIndexNameChange = (onChangeSelectedOptions: EuiComboBoxOptionOption[]) => {
     setSelected(onChangeSelectedOptions);
   };
 
@@ -137,7 +137,7 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
                 selectedOptions={selectedOptions}
                 singleSelection={{ asPlainText: true }}
                 options={data.map((option) => ({ label: option, key: option }))}
-                onChange={onChange}
+                onChange={onIndexNameChange}
                 fullWidth={true}
                 onSearchChange={onSearchChange}
                 append={
