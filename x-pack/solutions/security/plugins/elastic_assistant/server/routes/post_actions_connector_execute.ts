@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
+import { IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 
@@ -32,10 +32,12 @@ import {
   performChecks,
 } from './helpers';
 import { isOpenSourceModel } from './utils';
+import { ConfigSchema } from '../config_schema';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser
+  getElser: GetElser,
+  config: ConfigSchema
 ) => {
   router.versioned
     .post({
@@ -44,6 +46,13 @@ export const postActionsConnectorExecuteRoute = (
       security: {
         authz: {
           requiredPrivileges: ['elasticAssistant'],
+        },
+      },
+      options: {
+        timeout: {
+          // add 30 seconds to the response timeout
+          // to allow for the request to be aborted
+          idleSocket: config?.responseTimeout + 30 * 1000,
         },
       },
     })
@@ -147,31 +156,42 @@ export const postActionsConnectorExecuteRoute = (
               promptsDataClient,
             });
           }
-          return await langChainExecute({
-            abortSignal,
-            isStream: request.body.subAction !== 'invokeAI',
-            actionsClient,
-            actionTypeId,
-            connectorId,
-            contentReferencesStore,
-            isOssModel,
-            conversationId,
-            context: ctx,
-            getElser,
-            logger,
-            inference,
-            messages: (newMessage ? [newMessage] : messages) ?? [],
-            onLlmResponse,
-            onNewReplacements,
-            replacements: latestReplacements,
-            request,
-            response,
-            telemetry,
-            savedObjectsClient,
-            screenContext,
-            systemPrompt,
-            ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
-          });
+          const timeout = new Promise((_, reject) => {
+            setTimeout(() => {
+              reject(
+                new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
+              );
+            }, config.responseTimeout);
+          }) as unknown as IKibanaResponse;
+
+          return await Promise.race([
+            langChainExecute({
+              abortSignal,
+              isStream: request.body.subAction !== 'invokeAI',
+              actionsClient,
+              actionTypeId,
+              connectorId,
+              contentReferencesStore,
+              isOssModel,
+              conversationId,
+              context: ctx,
+              logger,
+              inference,
+              messages: (newMessage ? [newMessage] : messages) ?? [],
+              onLlmResponse,
+              onNewReplacements,
+              replacements: latestReplacements,
+              request,
+              response,
+              telemetry,
+              savedObjectsClient,
+              screenContext,
+              systemPrompt,
+              timeout: config?.responseTimeout + 30 * 1000,
+              ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+            }),
+            timeout,
+          ]);
         } catch (err) {
           logger.error(err);
           const error = transformError(err);

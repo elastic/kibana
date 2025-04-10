@@ -88,23 +88,17 @@ export const streamGraph = async ({
 
   // Stream is from tool calling agent or structured chat agent
   if (inputs.isOssModel || inputs?.llmType === 'bedrock' || inputs?.llmType === 'gemini') {
-    const stream = await assistantGraph.streamEvents(
-      inputs,
-      {
-        callbacks: [
-          apmTracer,
-          ...(traceOptions?.tracers ?? []),
-          ...(telemetryTracer ? [telemetryTracer] : []),
-        ],
-        runName: DEFAULT_ASSISTANT_GRAPH_ID,
-        tags: traceOptions?.tags ?? [],
-        version: 'v2',
-        streamMode: 'values',
-      },
-      inputs.isOssModel || inputs?.llmType === 'bedrock'
-        ? { includeNames: ['Summarizer'] }
-        : undefined
-    );
+    const stream = await assistantGraph.streamEvents(inputs, {
+      callbacks: [
+        apmTracer,
+        ...(traceOptions?.tracers ?? []),
+        ...(telemetryTracer ? [telemetryTracer] : []),
+      ],
+      runName: DEFAULT_ASSISTANT_GRAPH_ID,
+      tags: traceOptions?.tags ?? [],
+      version: 'v2',
+      streamMode: 'values',
+    });
 
     const pushStreamUpdate = async () => {
       for await (const { event, data, tags } of stream) {
@@ -137,21 +131,17 @@ export const streamGraph = async ({
 
   // Stream is from openai functions agent
   let finalMessage = '';
-  const stream = assistantGraph.streamEvents(
-    inputs,
-    {
-      callbacks: [
-        apmTracer,
-        ...(traceOptions?.tracers ?? []),
-        ...(telemetryTracer ? [telemetryTracer] : []),
-      ],
-      runName: DEFAULT_ASSISTANT_GRAPH_ID,
-      streamMode: 'values',
-      tags: traceOptions?.tags ?? [],
-      version: 'v1',
-    },
-    inputs?.provider === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
-  );
+  const stream = assistantGraph.streamEvents(inputs, {
+    callbacks: [
+      apmTracer,
+      ...(traceOptions?.tracers ?? []),
+      ...(telemetryTracer ? [telemetryTracer] : []),
+    ],
+    runName: DEFAULT_ASSISTANT_GRAPH_ID,
+    streamMode: 'values',
+    tags: traceOptions?.tags ?? [],
+    version: 'v1',
+  });
 
   const pushStreamUpdate = async () => {
     for await (const { event, data, tags } of stream) {
@@ -243,6 +233,7 @@ export const invokeGraph = async ({
       ],
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
+      recursionLimit: 100,
     });
     const output = (result.agentOutcome as AgentFinish).returnValues.output;
     const conversationId = result.conversation?.id;

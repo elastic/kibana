@@ -24,10 +24,6 @@ export const getStateAnnotation = ({ getFormattedTime }: { getFormattedTime?: ()
       reducer: (x: AgentStep[], y: AgentStep[]) => x.concat(y),
       default: () => [],
     }),
-    hasRespondStep: Annotation<boolean>({
-      reducer: (x: boolean, y?: boolean) => y ?? x,
-      default: () => false,
-    }),
     agentOutcome: Annotation<AgentAction | AgentFinish | undefined>({
       reducer: (
         x: AgentAction | AgentFinish | undefined,

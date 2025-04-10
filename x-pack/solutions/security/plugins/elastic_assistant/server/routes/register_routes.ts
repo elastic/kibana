@@ -41,11 +41,13 @@ import {
 import { deleteKnowledgeBaseEntryRoute } from './knowledge_base/entries/delete_route';
 import { updateKnowledgeBaseEntryRoute } from './knowledge_base/entries/update_route';
 import { getKnowledgeBaseEntryRoute } from './knowledge_base/entries/get_route';
+import { ConfigSchema } from '../config_schema';
 
 export const registerRoutes = (
   router: ElasticAssistantPluginRouter,
   logger: Logger,
-  getElserId: GetElser
+  getElserId: GetElser,
+  config: ConfigSchema
 ) => {
   /** PUBLIC */
   // Chat
@@ -82,7 +84,7 @@ export const registerRoutes = (
   bulkActionKnowledgeBaseEntriesRoute(router);
 
   // Actions Connector Execute (LLM Wrapper)
-  postActionsConnectorExecuteRoute(router, getElserId);
+  postActionsConnectorExecuteRoute(router, getElserId, config);
 
   // Evaluate
   getEvaluateRoute(router);

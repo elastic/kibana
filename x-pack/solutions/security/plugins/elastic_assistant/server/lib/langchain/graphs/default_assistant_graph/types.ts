@@ -34,7 +34,6 @@ export interface AgentState extends AgentStateBase {
   messages: BaseMessage[];
   chatTitle: string;
   lastNode: string;
-  hasRespondStep: boolean;
   isStream: boolean;
   isOssModel: boolean;
   llmType: string;

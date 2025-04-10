@@ -19,7 +19,7 @@ export function stepRouter(state: AgentState): string {
   switch (state.lastNode) {
     case NodeType.AGENT:
       if (state.agentOutcome && 'returnValues' in state.agentOutcome) {
-        return state.hasRespondStep ? NodeType.RESPOND : NodeType.END;
+        return NodeType.END;
       }
       return NodeType.TOOLS;
 

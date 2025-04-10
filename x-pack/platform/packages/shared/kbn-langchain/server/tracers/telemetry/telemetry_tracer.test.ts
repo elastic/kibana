@@ -81,7 +81,6 @@ const mockRun = {
         observation: '"Wow this is totally cool."',
       },
     ],
-    hasRespondStep: false,
     agentOutcome: {
       returnValues: {
         output:

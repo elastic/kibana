@@ -25,7 +25,6 @@ import { executeTools } from './nodes/execute_tools';
 import { generateChatTitle } from './nodes/generate_chat_title';
 import { getPersistedConversation } from './nodes/get_persisted_conversation';
 import { persistConversationChanges } from './nodes/persist_conversation_changes';
-import { respond } from './nodes/respond';
 import { NodeType } from './constants';
 import { getStateAnnotation } from './state';
 
@@ -101,12 +100,8 @@ export const getDefaultAssistantGraph = ({
       .addNode(NodeType.TOOLS, (state: AgentState) =>
         executeTools({ ...nodeParams, config: { signal }, state, tools })
       )
-      .addNode(NodeType.RESPOND, (state: AgentState) =>
-        respond({ ...nodeParams, config: { signal }, state, model: createLlmInstance() })
-      )
       .addNode(NodeType.MODEL_INPUT, (state: AgentState) => modelInput({ ...nodeParams, state }))
       .addEdge(START, NodeType.MODEL_INPUT)
-      .addEdge(NodeType.RESPOND, END)
       .addEdge(NodeType.GENERATE_CHAT_TITLE, NodeType.PERSIST_CONVERSATION_CHANGES)
       .addEdge(NodeType.PERSIST_CONVERSATION_CHANGES, NodeType.AGENT)
       .addEdge(NodeType.TOOLS, NodeType.AGENT)
@@ -119,7 +114,6 @@ export const getDefaultAssistantGraph = ({
         [NodeType.GENERATE_CHAT_TITLE]: NodeType.GENERATE_CHAT_TITLE,
       })
       .addConditionalEdges(NodeType.AGENT, stepRouter, {
-        [NodeType.RESPOND]: NodeType.RESPOND,
         [NodeType.TOOLS]: NodeType.TOOLS,
         [NodeType.END]: END,
       });

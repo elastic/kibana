@@ -26,6 +26,7 @@ import { PLUGIN_ID } from '../common/constants';
 import { registerRoutes } from './routes/register_routes';
 import { CallbackIds, appContextService } from './services/app_context';
 import { createGetElserId, removeLegacyQuickPrompt } from './ai_assistant_service/helpers';
+import { ConfigSchema } from './config_schema';
 
 export class ElasticAssistantPlugin
   implements
@@ -42,11 +43,13 @@ export class ElasticAssistantPlugin
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private mlTrainedModelsProvider?: MlPluginSetup['trainedModelsProvider'];
   private getElserId?: () => Promise<string>;
+  private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.pluginStop$ = new ReplaySubject(1);
     this.logger = initializerContext.logger.get();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.config = initializerContext.config.get<ConfigSchema>();
   }
 
   public setup(
@@ -87,7 +90,7 @@ export class ElasticAssistantPlugin
     this.mlTrainedModelsProvider = plugins.ml.trainedModelsProvider;
     this.getElserId = createGetElserId(this.mlTrainedModelsProvider);
 
-    registerRoutes(router, this.logger, this.getElserId);
+    registerRoutes(router, this.logger, this.getElserId, this.config);
 
     return {
       actions: plugins.actions,
