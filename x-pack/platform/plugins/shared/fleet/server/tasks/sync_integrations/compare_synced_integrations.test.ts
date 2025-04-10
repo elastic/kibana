@@ -1328,6 +1328,19 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
     jest
       .spyOn(mockedAppContextService, 'getExperimentalFeatures')
       .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    mockedOutputService.get.mockImplementation(() => {
+      throw new Error('Saved object [ingest-outputs/remote-es-not-existent] not found');
+    });
+
+    await expect(
+      getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote-es-not-existent')
+    ).rejects.toThrowError();
+  });
+
+  it('should throw error if the output returns undefined', async () => {
+    jest
+      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
+      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
     mockedOutputService.get.mockResolvedValue(undefined as any);
     await expect(
       getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote2')
