@@ -24,7 +24,7 @@ import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
-import { Trace } from '../components/trace_waterfall';
+import { Trace } from '../components/trace';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;

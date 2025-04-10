@@ -24,7 +24,7 @@ import { getTransactionFieldConfiguration } from './resources/get_transaction_fi
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 import { RootTransactionProvider } from './hooks/use_root_transaction';
-import { Trace } from '../components/trace_waterfall';
+import { Trace } from '../components/trace';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
