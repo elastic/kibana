@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { Condition, SampleDocument } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
-import { errors as esErrors } from '@elastic/elasticsearch';
+import type { errors as esErrors } from '@elastic/elasticsearch';
 import { DateRangeContext } from '../../../../../state_management/date_range_state_machine';
 import { SimulationMachineDeps } from './types';
 

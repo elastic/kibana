@@ -26,7 +26,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import { useTimeFilter } from '../../hooks/use_timefilter';
+import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function DocumentsColumn({
   indexPattern,
@@ -43,24 +43,28 @@ export function DocumentsColumn({
     },
   } = useKibana();
 
-  const { absoluteTimeRange } = useTimeFilter();
-  const minInterval = Math.floor((absoluteTimeRange.end - absoluteTimeRange.start) / numDataPoints);
+  const { timeState } = useTimefilter();
+
+  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
 
   const histogramQueryFetch = useStreamsAppFetch(
-    async ({ signal }) => {
+    async ({ signal, timeState: { start, end } }) => {
       return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
             query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
-            start: absoluteTimeRange.start,
-            end: absoluteTimeRange.end,
+            start,
+            end,
           },
         },
         signal,
       });
     },
-    [streamsRepositoryClient, indexPattern, absoluteTimeRange, minInterval]
+    [streamsRepositoryClient, indexPattern, , minInterval],
+    {
+      withTimeRange: true,
+    }
   );
 
   const allTimeseries = React.useMemo(
@@ -77,7 +81,7 @@ export function DocumentsColumn({
     0
   );
 
-  const xFormatter = niceTimeFormatter([absoluteTimeRange.start, absoluteTimeRange.end]);
+  const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
 
   return (
     <EuiFlexGroup
@@ -113,7 +117,11 @@ export function DocumentsColumn({
           >
             <Chart size={{ width: '100%', height: euiThemeVars.euiSizeL }}>
               <SettingsWithTheme
-                xDomain={{ min: absoluteTimeRange.start, max: absoluteTimeRange.end, minInterval }}
+                xDomain={{
+                  min: timeState.start,
+                  max: timeState.end,
+                  minInterval,
+                }}
                 noResults={<div />}
               />
               <Tooltip
