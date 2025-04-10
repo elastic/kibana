@@ -60,7 +60,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
     [item, onLabelEdited, onExit, setSubmitState]
   );
 
-  const onKeyUp = useCallback(
+  const onKeyDown = useCallback(
     async (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === keys.ESCAPE) {
         onExit();
@@ -94,7 +94,7 @@ export const EditTabLabel: React.FC<EditTabLabelProps> = ({ item, onLabelEdited,
       isLoading={submitState === SubmitState.submitting}
       isInvalid={submitState === SubmitState.error || !value.trim()}
       onChange={onChange}
-      onKeyUp={onKeyUp}
+      onKeyDown={onKeyDown}
       onBlur={submitState !== SubmitState.submitting ? onExit : undefined}
     />
   );

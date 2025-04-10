@@ -120,7 +120,7 @@ export class UnifiedTabsPageObject extends FtrService {
       '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
     );
     await labelElement.clearValue();
-    await labelElement.type(newLabel);
+    await labelElement.type(newLabel, { charByChar: true });
     await this.browser.pressKeys(this.browser.keys.ENTER);
     await this.retry.waitFor('the tab label to change', async () => {
       return (await this.getSelectedTab())?.label === newLabel;
