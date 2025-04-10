@@ -184,7 +184,7 @@ export interface PluginSelector {
   /**
    * When defined, only select plugins that belong to the specified groups
    */
-  allowlistPluginGroups?: readonly string[];
+  allowlistPluginGroups?: readonly KibanaGroup[];
 }
 
 export interface KbnImportReq {

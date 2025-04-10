@@ -21,10 +21,11 @@ import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
+import type { KibanaGroup } from '@kbn/projects-solutions-groups';
+import { PluginType } from '@kbn/core-base-common';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { PluginType } from '@kbn/core-base-common';
 
 jest.mock('@kbn/repo-packages', () => ({
   ...jest.requireActual('@kbn/repo-packages'),
@@ -37,6 +38,8 @@ jest.mock('./plugin_manifest_from_plugin_package', () => ({
     ...pkgManifest,
   })),
 }));
+
+const getPluginPackagesFilter = jest.requireActual('@kbn/repo-packages').getPluginPackagesFilter;
 
 const getPluginPackagesFilterMock: jest.Mock =
   jest.requireMock('@kbn/repo-packages').getPluginPackagesFilter;
@@ -53,6 +56,10 @@ function getMockPackage(id: string, group: string = 'platform') {
       type: 'plugin',
     },
     group,
+    isPlugin: () => true,
+    getPluginCategories: () => ({
+      oss: false,
+    }),
     getGroup: () => group,
     directory: resolve(REPO_ROOT, relativePath),
     normalizedRepoRelativeDir: relativePath,
@@ -689,7 +696,7 @@ describe('plugins discovery system', () => {
       expect(plugins[3].name).toEqual('sec');
     });
 
-    it('filters out plugins that do not belong to included groups filter out plugins from included groups', async () => {
+    it('filters out plugins that do not belong to included groups', async () => {
       const foo = getMockPackage('foo');
       const bar = getMockPackage('bar');
       const obs = getMockPackage('obs', 'observability');
@@ -700,12 +707,13 @@ describe('plugins discovery system', () => {
         repoPackages: [foo, bar, obs, sec],
       };
 
-      getPluginPackagesFilterMock.mockReturnValue(Boolean);
-
+      const allowlistPluginGroups: KibanaGroup[] = ['platform', 'observability'];
       const filteredPluginsConfig: PluginsConfigType = {
         ...pluginConfig,
-        allowlistPluginGroups: ['platform', 'observability'],
+        allowlistPluginGroups,
       };
+
+      getPluginPackagesFilterMock.mockImplementation(getPluginPackagesFilter);
 
       const { plugin$ } = discover({
         config: new PluginsConfig(filteredPluginsConfig, coreContext.env),

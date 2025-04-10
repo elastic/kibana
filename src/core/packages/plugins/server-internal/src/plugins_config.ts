@@ -80,13 +80,13 @@ export class PluginsConfig {
    * Allows reducing the amount of plugins that are taken into account.
    * The list will default to "all plugin groups" if the config is not present.
    */
-  public readonly allowlistPluginGroups: readonly string[];
+  public readonly allowlistPluginGroups?: readonly KibanaGroup[];
 
   constructor(rawConfig: PluginsConfigType, env: Env) {
     this.initialize = rawConfig.initialize;
     this.pluginSearchPaths = env.pluginSearchPaths;
     this.additionalPluginPaths = rawConfig.paths;
-    this.allowlistPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS, KIBANA_GROUPS);
+    this.allowlistPluginGroups = get(rawConfig, INCLUDED_PLUGIN_GROUPS);
     this.shouldEnableAllPlugins = get(rawConfig, ENABLE_ALL_PLUGINS_CONFIG_PATH, false);
   }
 }
