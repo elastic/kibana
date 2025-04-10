@@ -153,254 +153,184 @@ export default function previewAlertDeletionTests({ getService }: FtrProviderCon
             })
             .send();
 
-          const previewDeleteAllCategoryInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'false',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-          }).toString();
-
           const previewDeleteAllCategoryInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteAllCategoryInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'false',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+            })
             .send();
-
-          const previewDeleteAllCategoryActiveAndInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-          }).toString();
 
           const previewDeleteAllCategoryActiveAndInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteAllCategoryActiveAndInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+            })
             .send();
-
-          const previewDeleteObservabilityActiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'false',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'observability',
-          }).toString();
 
           const previewDeleteObservabilityActiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteObservabilityActiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'false',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'observability',
+            })
             .send();
-
-          const previewDeleteObservabilityInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'false',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'observability',
-          }).toString();
 
           const previewDeleteObservabilityInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteObservabilityInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'false',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'observability',
+            })
             .send();
-
-          const previewDeleteObservabilityActiveAndInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'observability',
-          }).toString();
 
           const previewDeleteObservabilityActiveAndInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteObservabilityActiveAndInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'observability',
+            })
             .send();
-
-          const previewDeleteSecurityActiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'false',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'securitySolution',
-          }).toString();
 
           const previewDeleteSecurityActiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(scenario.space.id)}${url}?${previewDeleteSecurityActiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'false',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'securitySolution',
+            })
             .send();
-
-          const previewDeleteSecurityInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'false',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'securitySolution',
-          }).toString();
 
           const previewDeleteSecurityInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(scenario.space.id)}${url}?${previewDeleteSecurityInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'false',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'securitySolution',
+            })
             .send();
-
-          const previewDeleteSecurityActiveAndInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'securitySolution',
-          }).toString();
 
           const previewDeleteSecurityActiveAndInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteSecurityActiveAndInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'securitySolution',
+            })
             .send();
-
-          const previewDeleteManagementActiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'false',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'management',
-          }).toString();
 
           const previewDeleteManagementActiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(scenario.space.id)}${url}?${previewDeleteManagementActiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'false',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'management',
+            })
             .send();
-
-          const previewDeleteManagementInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'false',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'management',
-          }).toString();
 
           const previewDeleteManagementInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteManagementInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'false',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'management',
+            })
             .send();
-
-          const previewDeleteManagementActiveAndInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-            category_ids: 'management',
-          }).toString();
 
           const previewDeleteManagementActiveAndInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteManagementActiveAndInactiveAlertsQuery}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: 'management',
+            })
             .send();
-
-          const previewDeleteMultiCategoryActiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'false',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-          });
-          ['observability', 'management'].forEach((category) =>
-            previewDeleteMultiCategoryActiveAlertsQuery.append('category_ids', category)
-          );
 
           const previewDeleteMultiCategoryActiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteMultiCategoryActiveAlertsQuery.toString()}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'false',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: ['observability', 'management'],
+            })
             .send();
-
-          const previewDeleteMultiCategoryInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'false',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-          });
-          ['observability', 'securitySolution'].forEach((category) =>
-            previewDeleteMultiCategoryInactiveAlertsQuery.append('category_ids', category)
-          );
 
           const previewDeleteMultiCategoryInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteMultiCategoryInactiveAlertsQuery.toString()}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'false',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: ['observability', 'securitySolution'],
+            })
             .send();
 
-          const previewDeleteMultiCategoryActiveAndInactiveAlertsQuery = new URLSearchParams({
-            is_active_alert_delete_enabled: 'true',
-            is_inactive_alert_delete_enabled: 'true',
-            active_alert_delete_threshold: '90',
-            inactive_alert_delete_threshold: '90',
-          });
-          ['securitySolution', 'management'].forEach((category) =>
-            previewDeleteMultiCategoryActiveAndInactiveAlertsQuery.append('category_ids', category)
-          );
-
           const previewDeleteMultiCategoryActiveAndInactiveAlerts = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(
-                scenario.space.id
-              )}${url}?${previewDeleteMultiCategoryActiveAndInactiveAlertsQuery.toString()}`
-            )
+            .get(`${getUrlPrefix(scenario.space.id)}${url}`)
             .auth(scenario.user.username, scenario.user.password)
             .set('kbn-xsrf', 'foo')
+            .query({
+              is_active_alert_delete_enabled: 'true',
+              is_inactive_alert_delete_enabled: 'true',
+              active_alert_delete_threshold: '90',
+              inactive_alert_delete_threshold: '90',
+              category_ids: ['securitySolution', 'management'],
+            })
             .send();
 
           switch (scenario.id) {
