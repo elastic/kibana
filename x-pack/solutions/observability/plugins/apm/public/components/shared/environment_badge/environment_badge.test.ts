@@ -24,9 +24,14 @@ describe('EnvironmentBadge', () => {
     expectTextsInDocument(component, ['2 environments']);
     expectTextsNotInDocument(component, ['DEMO', 'DEV']);
   });
-  it('handles undefined environment', () => {
+  it('handles empty object', () => {
     // @ts-ignore-next-line
     const component = render(EnvironmentBadge({}));
+    expectTextsInDocument(component, ['Unset']);
+  });
+  it('handled undefined environments', () => {
+    // @ts-ignore-next-line
+    const component = render(EnvironmentBadge({ environments: undefined }));
     expectTextsInDocument(component, ['Unset']);
   });
 });
