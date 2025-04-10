@@ -12,6 +12,7 @@ import { resolve } from 'path';
 import Mustache from 'mustache';
 
 import { TemplateContext } from '../template_context';
+
 function generator(options: TemplateContext) {
   const dir = options.ironbank ? 'ironbank' : 'base';
   const template = readFileSync(resolve(__dirname, dir, './Dockerfile'));
