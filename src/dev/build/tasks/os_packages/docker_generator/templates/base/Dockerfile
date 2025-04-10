@@ -44,14 +44,16 @@ RUN chmod -R g=u /usr/share/kibana
 # Add an init process, check the checksum to make sure it's a match
 RUN set -e ; \
     TINI_BIN="" ; \
-    case "$(arch)" in \
+    {{#wolfi}}arch="$(apk --print-arch)" ; \ {{/wolfi}}
+    {{#ubi}}arch="$(rpm --query --queryformat='%{ARCH}' rpm)"; \ {{/ubi}}
+    case "$arch" in \
         aarch64) \
             TINI_BIN='tini-arm64' ; \
             ;; \
         x86_64) \
             TINI_BIN='tini-amd64' ; \
             ;; \
-        *) echo >&2 "Unsupported architecture $(arch)" ; exit 1 ;; \
+        *) echo >&2 "Unsupported architecture $arch" ; exit 1 ;; \
     esac ; \
   TINI_VERSION='v0.19.0' ; \
   curl -f --retry 8 -S -L -O "https://github.com/krallin/tini/releases/download/${TINI_VERSION}/${TINI_BIN}" ; \
