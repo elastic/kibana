@@ -46,23 +46,6 @@ export const Trace = ({
     [absoluteTimeRange]
   );
 
-  const fieldMapper = useCallback(
-    (fieldId: string) => {
-      const props = {
-        key: fieldId,
-        fieldId,
-        fieldConfiguration: fields[fieldId],
-      };
-
-      return displayType === 'span' ? (
-        <SpanSummaryField {...props} />
-      ) : (
-        <TransactionSummaryField {...props} />
-      );
-    },
-    [fields, displayType]
-  );
-
   const getParentApi = useCallback(
     () => ({
       getSerializedStateForChild: () => ({
@@ -90,7 +73,21 @@ export const Trace = ({
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>{traceFields.map(fieldMapper)}</EuiFlexItem>
+        <EuiFlexItem>
+          {traceFields.map((fieldId: string) => {
+            const props = {
+              key: fieldId,
+              fieldId,
+              fieldConfiguration: fields[fieldId],
+            };
+
+            return displayType === 'span' ? (
+              <SpanSummaryField {...props} />
+            ) : (
+              <TransactionSummaryField {...props} />
+            );
+          })}
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <ReactEmbeddableRenderer
