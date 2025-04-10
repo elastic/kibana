@@ -90,9 +90,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 },
                 schedule: { interval: '1m' },
                 enabled: true,
-                artifacts: {
-                  dashboards: [],
-                },
                 actions: [],
                 params: {},
                 created_by: 'elastic',
