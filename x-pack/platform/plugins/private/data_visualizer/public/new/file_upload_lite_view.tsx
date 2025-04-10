@@ -33,7 +33,7 @@ import { FileStatus } from './file_status';
 
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
-import { useFileUpload } from './use_file_upload';
+import { useFileUploadContext } from './use_file_upload';
 import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
 
@@ -46,11 +46,8 @@ interface Props {
 }
 
 export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClose }) => {
-  const { flyoutContent, initialIndexName, onUploadComplete } = props;
+  const { flyoutContent } = props;
   const {
-    setIndexName,
-    setIndexValidationStatus,
-    deleteFile,
     filesStatus,
     uploadStatus,
     fileClashes,
@@ -58,8 +55,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
     uploadInProgress,
     onImportClick,
     canImport,
-    indices,
-  } = useFileUpload(fileUploadManager, onUploadComplete);
+  } = useFileUploadContext();
 
   const existingIndexName = fileUploadManager.getExistingIndexName();
 
@@ -138,25 +134,17 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
             <>
               {filesStatus.map((status, i) => (
                 <FileStatus
-                  uploadStatus={uploadStatus}
                   fileStatus={status}
                   key={i}
-                  deleteFile={() => deleteFile(i)}
                   index={i}
                   lite={true}
                   showFileContentPreview={flyoutContent?.showFileContentPreview}
                   showFileSummary={flyoutContent?.showFileSummary}
-                  autoExpand={filesStatus.length === 1}
+                  showOverrideButton={false}
                 />
               ))}
 
-              {fileClashes ? (
-                <FileClashWarning
-                  uploadStatus={uploadStatus}
-                  filesStatus={filesStatus}
-                  removeClashingFiles={() => fileUploadManager.removeClashingFiles()}
-                />
-              ) : null}
+              {fileClashes ? <FileClashWarning /> : null}
               <EuiSpacer />
             </>
           ) : null}
@@ -164,16 +152,7 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
           {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
           filesStatus.length > 0 &&
           uploadStatus.analysisStatus !== STATUS.NOT_STARTED ? (
-            <>
-              {fileUploadManager.isExistingIndexUpload() === false ? (
-                <IndexSelection
-                  setIndexName={setIndexName}
-                  setIndexValidationStatus={setIndexValidationStatus}
-                  initialIndexName={initialIndexName}
-                  indices={indices}
-                />
-              ) : null}
-            </>
+            <>{fileUploadManager.isExistingIndexUpload() === false ? <IndexSelection /> : null}</>
           ) : null}
           {uploadInProgress ? (
             <>
@@ -181,11 +160,9 @@ export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClos
 
               <EuiSpacer size="xl" />
 
-              <OverallUploadStatus uploadStatus={uploadStatus} filesStatus={filesStatus} />
+              <OverallUploadStatus />
 
-              {uploadStatus.overallImportStatus === STATUS.FAILED ? (
-                <ImportErrors uploadStatus={uploadStatus} />
-              ) : null}
+              {uploadStatus.overallImportStatus === STATUS.FAILED ? <ImportErrors /> : null}
             </>
           ) : null}
         </>

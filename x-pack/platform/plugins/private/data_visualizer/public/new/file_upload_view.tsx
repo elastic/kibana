@@ -23,7 +23,7 @@ import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
-import { useFileUpload } from './use_file_upload';
+import { useFileUploadContext } from './use_file_upload';
 import { AdvancedSection } from './advanced_section';
 import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
@@ -38,31 +38,17 @@ interface Props {
   onClose?: () => void;
 }
 
-export const FileUploadView: FC<Props> = ({ http, fileUploadManager, onClose, reset }) => {
+export const FileUploadView: FC<Props> = ({ reset }) => {
   const {
-    indexName,
-    setIndexName,
-    setIndexValidationStatus,
-    deleteFile,
+    fileUploadManager,
     filesStatus,
     uploadStatus,
     fileClashes,
     uploadInProgress,
     onImportClick,
     canImport,
-    mappings,
-    settings,
-    pipelines,
     importResults,
-    dataViewName,
-    setDataViewName,
-    dataViewNameError,
-    indexCreateMode,
-    setIndexCreateMode,
-    indices,
-    existingIndexName,
-    setExistingIndexName,
-  } = useFileUpload(fileUploadManager, undefined, http);
+  } = useFileUploadContext();
 
   const showImportControls =
     uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
@@ -100,60 +86,26 @@ export const FileUploadView: FC<Props> = ({ http, fileUploadManager, onClose, re
           <>
             {filesStatus.map((status, i) => (
               <FileStatus
-                uploadStatus={uploadStatus}
                 fileStatus={status}
-                pipeline={pipelines[i]!}
                 key={i}
-                deleteFile={() => deleteFile(i)}
                 index={i}
                 lite={false}
-                setPipeline={fileUploadManager.updatePipeline(i)}
-                analyzeFileWithOverrides={fileUploadManager.analyzeFileWithOverrides(i)}
-                autoExpand={filesStatus.length === 1}
+                showOverrideButton={true}
               />
             ))}
 
-            {fileClashes ? (
-              <FileClashWarning
-                uploadStatus={uploadStatus}
-                filesStatus={filesStatus}
-                removeClashingFiles={() => fileUploadManager.removeClashingFiles()}
-              />
-            ) : null}
+            {fileClashes ? <FileClashWarning /> : null}
             <EuiSpacer />
           </>
         ) : null}
 
         {showImportControls ? (
           <>
-            <AdvancedSection
-              mappings={mappings.json}
-              setMappings={(m) => fileUploadManager.updateMappings(m)}
-              settings={settings.json}
-              pipelines={pipelines}
-              setPipelines={(p) => fileUploadManager.updatePipelines(p)}
-              setSettings={(s) => fileUploadManager.updateSettings(s)}
-              indexName={indexName}
-              dataViewName={dataViewName}
-              setDataViewName={setDataViewName}
-              dataViewNameError={dataViewNameError}
-              results={2}
-              filesStatus={filesStatus}
-              indexCreateMode={indexCreateMode}
-            />
+            <AdvancedSection />
 
             <EuiSpacer />
 
-            <IndexSelection
-              setIndexName={setIndexName}
-              setIndexValidationStatus={setIndexValidationStatus}
-              initialIndexName={indexName}
-              indexCreateMode={indexCreateMode}
-              setIndexCreateMode={setIndexCreateMode}
-              indices={indices}
-              existingIndexName={existingIndexName}
-              setExistingIndexName={setExistingIndexName}
-            />
+            <IndexSelection />
           </>
         ) : null}
         {uploadInProgress ? (
@@ -162,11 +114,9 @@ export const FileUploadView: FC<Props> = ({ http, fileUploadManager, onClose, re
 
             <EuiSpacer size="xl" />
 
-            <OverallUploadStatus uploadStatus={uploadStatus} filesStatus={filesStatus} />
+            <OverallUploadStatus />
 
-            {uploadStatus.overallImportStatus === STATUS.FAILED ? (
-              <ImportErrors uploadStatus={uploadStatus} />
-            ) : null}
+            {uploadStatus.overallImportStatus === STATUS.FAILED ? <ImportErrors /> : null}
           </>
         ) : null}
       </>

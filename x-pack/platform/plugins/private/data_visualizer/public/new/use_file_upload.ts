@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { Index } from '@kbn/index-management-shared-types/src/types';
-import type { HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileUploadManager } from './file_manager/file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { CLASH_ERROR_TYPE } from './file_manager/merge_tools';
-import { useDataVisualizerKibana } from '../application/kibana_context';
 
 export enum UPLOAD_TYPE {
   NEW = 'new',
@@ -23,15 +23,13 @@ export enum UPLOAD_TYPE {
 
 export function useFileUpload(
   fileUploadManager: FileUploadManager,
+  data: DataPublicPluginStart,
+  application: ApplicationStart,
   onUploadComplete?: (results: FileUploadResults | null) => void,
   http?: HttpSetup
 ) {
-  const {
-    services: {
-      application: { navigateToApp },
-      data: { dataViews },
-    },
-  } = useDataVisualizerKibana();
+  const { dataViews } = data;
+  const { navigateToApp } = application;
 
   const [importResults, setImportResults] = useState<FileUploadResults | null>(null);
   const [indexCreateMode, setIndexCreateMode] = useState<UPLOAD_TYPE>(UPLOAD_TYPE.NEW);
@@ -170,6 +168,7 @@ export function useFileUpload(
   const pipelines = useObservable(fileUploadManager.filePipelines$, []);
 
   return {
+    fileUploadManager,
     indexName,
     setIndexName,
     indexValidationStatus,
@@ -230,3 +229,18 @@ function isDataViewNameValid(name: string, dataViewNames: string[], index: strin
 
   return '';
 }
+
+type FileUploadContextValue = ReturnType<typeof useFileUpload>;
+
+export const FileUploadContext = createContext<FileUploadContextValue | undefined>(undefined);
+
+export const useFileUploadContext = (): FileUploadContextValue => {
+  const fileUploadContext = useContext(FileUploadContext);
+
+  // if `undefined`, throw an error
+  if (fileUploadContext === undefined) {
+    throw new Error('useFileUploadContext was used outside of its Provider');
+  }
+
+  return fileUploadContext;
+};

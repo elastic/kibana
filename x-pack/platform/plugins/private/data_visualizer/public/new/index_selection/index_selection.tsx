@@ -9,32 +9,19 @@ import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { EuiRadioGroup, EuiSpacer, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Index } from '@kbn/index-management-shared-types/src/types';
-import type { STATUS } from '../file_manager/file_manager';
 import { IndexInput } from './index_input';
-import { UPLOAD_TYPE } from '../use_file_upload';
+import { UPLOAD_TYPE, useFileUploadContext } from '../use_file_upload';
 
-interface Props {
-  setIndexName: (name: string) => void;
-  setIndexValidationStatus: (status: STATUS) => void;
-  initialIndexName?: string;
-  indexCreateMode?: string;
-  setIndexCreateMode?: (mode: UPLOAD_TYPE) => void;
-  indices: Index[];
-  existingIndexName?: string | null;
-  setExistingIndexName?: (name: string | null) => void;
-}
-
-export const IndexSelection: FC<Props> = ({
-  setIndexName,
-  setIndexValidationStatus,
-  initialIndexName, // / is this needed?!!!!!!!!!!!
-  indexCreateMode,
-  setIndexCreateMode,
-  indices,
-  existingIndexName,
-  setExistingIndexName,
-}) => {
+export const IndexSelection: FC = () => {
+  const {
+    setIndexName,
+    setIndexValidationStatus,
+    indexCreateMode,
+    setIndexCreateMode,
+    indices,
+    existingIndexName,
+    setExistingIndexName,
+  } = useFileUploadContext();
   const setSelectedOptions = useCallback(
     (selected: any[]) => {
       if (setExistingIndexName === undefined) {

@@ -21,9 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline as IngestPipelineType } from '@kbn/file-upload-plugin/common';
-import type { InputOverrides } from '@kbn/file-upload-plugin/common';
 import type { FileAnalysis } from '../file_manager/file_wrapper';
-import { STATUS, type UploadStatus } from '../file_manager/file_manager';
+import { STATUS } from '../file_manager/file_manager';
 import { FieldsStatsGrid } from '../../application/common/components/fields_stats_grid';
 
 import { FileContents } from '../../application/file_data_visualizer/components/file_contents';
@@ -36,6 +35,7 @@ import { AnalysisExplanation } from './analysis_explanation';
 
 import { AnalysisOverrides } from './analysis_overrides';
 import { AnalysisSummary } from '../../application/file_data_visualizer/components/analysis_summary';
+import { useFileUploadContext } from '../use_file_upload';
 
 enum TAB {
   SUMMARY,
@@ -47,32 +47,27 @@ enum TAB {
 }
 
 interface Props {
-  uploadStatus: UploadStatus;
   fileStatus: FileAnalysis;
-  pipeline?: IngestPipelineType;
-  deleteFile: () => void;
   index: number;
-  setPipeline?: (pipeline: string) => void;
   showFileContentPreview?: boolean;
   showFileSummary?: boolean;
   lite: boolean;
-  analyzeFileWithOverrides?: (overrides: InputOverrides) => void;
-  autoExpand?: boolean;
+  showOverrideButton?: boolean;
 }
 
 export const FileStatus: FC<Props> = ({
   lite,
-  uploadStatus,
   fileStatus,
-  pipeline,
-  deleteFile,
   index,
   showFileContentPreview,
   showFileSummary,
-  setPipeline,
-  analyzeFileWithOverrides,
-  autoExpand = false,
+  showOverrideButton = false,
 }) => {
+  const { deleteFile, uploadStatus, filesStatus, fileUploadManager, pipelines } =
+    useFileUploadContext();
+
+  const autoExpand = filesStatus.length === 1;
+
   const fileClash = uploadStatus.fileClashes[index] ?? {
     clash: false,
   };
@@ -122,7 +117,7 @@ export const FileStatus: FC<Props> = ({
               }
               extraAction={
                 <EuiButtonIcon
-                  onClick={deleteFile}
+                  onClick={() => deleteFile(index)}
                   iconType="trash"
                   size="xs"
                   color="danger"
@@ -219,10 +214,12 @@ export const FileStatus: FC<Props> = ({
                     <>
                       <AnalysisSummary results={fileStatus.results!} showTitle={false} />
 
-                      {analyzeFileWithOverrides ? (
+                      {showOverrideButton ? (
                         <AnalysisOverrides
                           fileStatus={fileStatus}
-                          analyzeFileWithOverrides={analyzeFileWithOverrides}
+                          analyzeFileWithOverrides={() =>
+                            fileUploadManager.analyzeFileWithOverrides(index)
+                          }
                         />
                       ) : null}
                     </>
@@ -252,11 +249,11 @@ export const FileStatus: FC<Props> = ({
                     />
                   ) : null}
 
-                  {selectedTab === TAB.PIPELINE && pipeline !== undefined ? (
+                  {selectedTab === TAB.PIPELINE && pipelines[index] !== undefined ? (
                     <IngestPipeline
-                      pipeline={pipeline}
+                      pipeline={pipelines[index] as IngestPipelineType}
                       showTitle={false}
-                      setPipeline={setPipeline}
+                      setPipeline={() => fileUploadManager.updatePipeline(index)}
                     />
                   ) : null}
                 </>
@@ -269,10 +266,12 @@ export const FileStatus: FC<Props> = ({
                     loaded={false}
                     showEditFlyout={() => {}}
                   />
-                  {analyzeFileWithOverrides ? (
+                  {showOverrideButton ? (
                     <AnalysisOverrides
                       fileStatus={fileStatus}
-                      analyzeFileWithOverrides={analyzeFileWithOverrides}
+                      analyzeFileWithOverrides={() =>
+                        fileUploadManager.analyzeFileWithOverrides(index)
+                      }
                     />
                   ) : null}
                 </>

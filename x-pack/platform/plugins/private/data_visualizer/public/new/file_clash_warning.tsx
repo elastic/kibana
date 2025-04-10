@@ -9,17 +9,11 @@ import React from 'react';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileAnalysis } from './file_manager/file_wrapper';
-import type { UploadStatus } from './file_manager/file_manager';
 import { CLASH_TYPE } from './file_manager/merge_tools';
+import { useFileUploadContext } from './use_file_upload';
 
-interface Props {
-  uploadStatus: UploadStatus;
-  filesStatus: FileAnalysis[];
-  removeClashingFiles: () => void;
-}
-
-export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeClashingFiles }) => {
+export const FileClashWarning: FC = () => {
+  const { uploadStatus, fileUploadManager } = useFileUploadContext();
   const fileClashes = uploadStatus.fileClashes;
 
   const clashType = fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.FORMAT)
@@ -90,7 +84,12 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
   return (
     <EuiCallOut title={title} color="danger">
       <p>{description}</p>
-      <EuiButton onClick={() => removeClashingFiles()} color="danger" size="s" fill>
+      <EuiButton
+        onClick={() => fileUploadManager.removeClashingFiles()}
+        color="danger"
+        size="s"
+        fill
+      >
         <FormattedMessage
           id="xpack.dataVisualizer.file.fileClashWarning.deleteAllButtonLabel"
           defaultMessage="Delete all"

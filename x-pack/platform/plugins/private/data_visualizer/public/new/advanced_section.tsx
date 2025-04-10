@@ -16,10 +16,7 @@ import {
 } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import type {
-  IndicesIndexSettings,
-  MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IngestPipeline } from '@kbn/file-upload-plugin/common';
@@ -28,51 +25,40 @@ import { Settings } from './file_status/settings';
 import { CreateDataViewToolTip } from '../application/file_data_visualizer/components/import_settings/create_data_view_tooltip';
 import type { CombinedField } from '../application/common/components/combined_fields';
 import { CombinedFieldsForm } from '../application/common/components/combined_fields';
-import type { FileAnalysis } from './file_manager/file_wrapper';
-import { UPLOAD_TYPE } from './use_file_upload';
+import { UPLOAD_TYPE, useFileUploadContext } from './use_file_upload';
 
 interface Props {
-  mappings: MappingTypeMapping | null;
-  setMappings: (mappings: string) => void;
-  settings: IndicesIndexSettings;
-  setSettings: (settings: string) => void;
-  pipelines: Array<IngestPipeline | undefined>;
-  setPipelines: (pipelines: IngestPipeline[]) => void;
   canCreateDataView?: boolean;
-  indexName: string;
-  dataViewName: string | null;
-  setDataViewName: (dataViewName: string | null) => void;
-  dataViewNameError: string;
-  results: any;
-  filesStatus: FileAnalysis[];
-  indexCreateMode: UPLOAD_TYPE;
 }
 
-export const AdvancedSection: FC<Props> = ({
-  mappings,
-  setMappings,
-  pipelines,
-  setPipelines,
-  setSettings,
-  settings,
-  canCreateDataView = true,
-  indexName,
-  dataViewName,
-  setDataViewName,
-  dataViewNameError,
-  results,
-  filesStatus,
-  indexCreateMode,
-}) => {
+export const AdvancedSection: FC<Props> = ({ canCreateDataView = true }) => {
+  const {
+    filesStatus,
+    fileUploadManager,
+    pipelines,
+    setDataViewName,
+    indexName,
+    mappings,
+    settings,
+    dataViewName,
+    dataViewNameError,
+    indexCreateMode,
+  } = useFileUploadContext();
   const [combinedFields, setCombinedFields] = useState<CombinedField[]>([]);
   return (
     <EuiAccordion id={'advancedSection'} buttonContent="Advanced" paddingSize="m">
       <EuiFlexGroup>
         <EuiFlexItem>
-          <Mappings mappings={mappings ?? {}} setMappings={(m) => setMappings(m)} />
+          <Mappings
+            mappings={mappings?.json ?? {}}
+            setMappings={(m) => fileUploadManager.updateMappings(m)}
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <Settings settings={settings ?? {}} setSettings={(s) => setSettings(s)} />
+          <Settings
+            settings={settings?.json ?? {}}
+            setSettings={(s) => fileUploadManager.updateSettings(s)}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -121,10 +107,10 @@ export const AdvancedSection: FC<Props> = ({
       ) : null}
 
       <CombinedFieldsForm
-        mappings={mappings!}
-        onMappingsChange={(m) => setMappings(m)}
+        mappings={mappings!.json as MappingTypeMapping}
+        onMappingsChange={(m) => fileUploadManager.updateMappings(m)}
         pipelines={pipelines as IngestPipeline[]}
-        onPipelinesChange={(p) => setPipelines(p)}
+        onPipelinesChange={(p) => fileUploadManager.updatePipelines(p)}
         combinedFields={combinedFields}
         onCombinedFieldsChange={(f) => setCombinedFields(f)}
         isDisabled={false}

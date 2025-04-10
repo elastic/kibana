@@ -11,17 +11,12 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import type { FileAnalysis } from './file_manager/file_wrapper';
 import { STATUS } from './file_manager/file_manager';
-import { type UploadStatus } from './file_manager/file_manager';
 import { FileStatus } from './file_status';
+import { useFileUploadContext } from './use_file_upload';
 
-interface Props {
-  uploadStatus: UploadStatus;
-  filesStatus: FileAnalysis[];
-}
-
-export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) => {
+export const OverallUploadStatus: FC = () => {
+  const { filesStatus, uploadStatus } = useFileUploadContext();
   const generateStatus = (statuses: STATUS[]): EuiStepStatus => {
     if (statuses.includes(STATUS.STARTED)) {
       return 'current';
@@ -67,14 +62,7 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       children: (
         <>
           {filesStatus.map((status, i) => (
-            <FileStatus
-              uploadStatus={uploadStatus}
-              fileStatus={status}
-              key={i}
-              deleteFile={() => {}}
-              index={i}
-              lite={false}
-            />
+            <FileStatus fileStatus={status} key={i} index={i} lite={false} />
           ))}
           <EuiSpacer />
         </>
