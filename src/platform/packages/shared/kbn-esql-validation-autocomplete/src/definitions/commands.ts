@@ -45,6 +45,7 @@ import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForEnrich } from '../autocomplete/commands/enrich';
 import { suggest as suggestForEval } from '../autocomplete/commands/eval';
+import { suggest as suggestForFork } from '../autocomplete/commands/fork';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
@@ -673,5 +674,35 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       return messages;
     },
     suggest: suggestForChangePoint,
+  },
+  {
+    hidden: true,
+    name: 'fork',
+    preview: true,
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.forkDoc', {
+      defaultMessage: 'Forks the stream.',
+    }),
+    declaration: `TODO`,
+    examples: [],
+    suggest: suggestForFork,
+    validate: (command) => {
+      const messages: ESQLMessage[] = [];
+
+      if (command.args.length < 2) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate(
+            'kbn-esql-validation-autocomplete.esql.validation.forkTooFewBranches',
+            {
+              defaultMessage: '[FORK] Must include at least two branches.',
+            }
+          ),
+          type: 'error',
+          code: 'forkTooFewBranches',
+        });
+      }
+
+      return messages;
+    },
   },
 ];

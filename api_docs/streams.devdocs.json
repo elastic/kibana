@@ -373,9 +373,9 @@
             },
             ", undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
             "StreamsRouteHandlerResources",
-            ", undefined, { enabled: boolean; }>; security?: ",
+            ", undefined, { enabled: boolean; }>; security: ",
             "RouteSecurity",
-            " | undefined; }; \"POST /api/streams/_resync 2023-10-31\": ",
+            "; }; \"POST /api/streams/_resync 2023-10-31\": ",
             {
               "pluginId": "@kbn/server-route-repository-utils",
               "scope": "common",
@@ -1320,9 +1320,9 @@
           },
           ", undefined>; \"GET /api/streams/_status\": { endpoint: \"GET /api/streams/_status\"; handler: ServerRouteHandler<",
           "StreamsRouteHandlerResources",
-          ", undefined, { enabled: boolean; }>; security?: ",
+          ", undefined, { enabled: boolean; }>; security: ",
           "RouteSecurity",
-          " | undefined; }; \"POST /api/streams/_resync 2023-10-31\": ",
+          "; }; \"POST /api/streams/_resync 2023-10-31\": ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",

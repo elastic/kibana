@@ -55,11 +55,10 @@ export function ChildStreamList({ definition }: { definition?: IngestStreamGetRe
                   <EuiButton
                     data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
                     iconType="plusInCircle"
-                    href={router.link('/{key}/{tab}/{subtab}', {
+                    href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: definition.stream.name,
-                        tab: 'management',
-                        subtab: 'route',
+                        tab: 'route',
                       },
                     })}
                   >
