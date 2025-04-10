@@ -30,7 +30,7 @@ export interface CellValueProps {
  */
 export const CellValue = memo(({ alert, columnId }: CellValueProps) => {
   const displayValue: string | null = useMemo(() => {
-    const cellValues: string | JsonValue[] = alert[columnId];
+    const cellValues: string | number | JsonValue[] = alert[columnId];
 
     // Displays string as is.
     // Joins values of array with more than one element.
