@@ -137,7 +137,7 @@ describe('CasesConnectorRunParamsSchema', () => {
       ).not.toThrow();
     });
 
-    it.each(['s', 'y'])('does not allow time unit %s', (unit) => {
+    it.each(['s', 'y', 'M', 'H'])('does not allow time unit %s', (unit) => {
       expect(() =>
         CasesConnectorRunParamsSchema.validate(getParams({ timeWindow: `5${unit}` }))
       ).toThrow();

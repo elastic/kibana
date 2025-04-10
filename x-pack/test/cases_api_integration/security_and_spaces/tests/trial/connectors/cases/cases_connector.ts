@@ -134,17 +134,18 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns 400 for unsupported time units', async () => {
-        const unit = 's';
-        const res = await executeSystemConnector({
-          supertest,
-          connectorId,
-          req: getRequest({ timeWindow: `5${unit}` }),
-        });
+        for (const unit of ['s', 'H']) {
+          const res = await executeSystemConnector({
+            supertest,
+            connectorId,
+            req: getRequest({ timeWindow: `5${unit}` }),
+          });
 
-        expect(res.status).to.be('error');
-        expect(res.serviceMessage).to.be(
-          'Request validation failed (Error: [timeWindow]: Not a valid time window)'
-        );
+          expect(res.status).to.be('error');
+          expect(res.serviceMessage).to.be(
+            'Request validation failed (Error: [timeWindow]: Not a valid time window)'
+          );
+        }
       });
 
       it('returns 400 when maximumCasesToOpen > 10', async () => {
