@@ -18,6 +18,13 @@ export const PERFORMANCE_TRACKER_MARKS = {
 export type PerformanceTrackerMarks =
   (typeof PERFORMANCE_TRACKER_MARKS)[keyof typeof PERFORMANCE_TRACKER_MARKS];
 
+export const PERFORMANCE_TRACKER_MEASURES = {
+  PRE_RENDER_DURATION: 'preRenderDuration',
+  RENDER_DURATION: 'renderDuration',
+} as const;
+export type PerformanceTrackerMeasures =
+  (typeof PERFORMANCE_TRACKER_MEASURES)[keyof typeof PERFORMANCE_TRACKER_MEASURES];
+
 interface PerformanceTrackerOptions {
   type: string;
   instance: string;

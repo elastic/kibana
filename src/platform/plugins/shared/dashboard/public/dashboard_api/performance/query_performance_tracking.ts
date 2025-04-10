@@ -13,7 +13,12 @@ import { combineLatest, map, pairwise, startWith, switchMap, skipWhile, of } fro
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { PublishesPhaseEvents, apiPublishesPhaseEvents } from '@kbn/presentation-publishing';
-import { clearPerformanceTrackersByType, getPerformanceTrackersGroupedById } from '@kbn/analytics';
+import {
+  clearPerformanceTrackersByType,
+  getPerformanceTrackersGroupedById,
+  PERFORMANCE_TRACKER_MARKS,
+  PERFORMANCE_TRACKER_MEASURES,
+} from '@kbn/analytics';
 
 import { coreServices } from '../../services/kibana_services';
 import { DASHBOARD_LOADED_EVENT } from '../../utils/telemetry_constants';
@@ -131,28 +136,32 @@ function reportPerformanceMetrics({
   const measurements = Object.entries(groupedPerformanceMarkers).map(([id, group]) => {
     const markerName = group[0].name.split(':').slice(0, -1).join(':');
 
-    const preFlightStart = group.find((marker) => marker.name.endsWith(':preFlight'))?.startTime;
-    const renderStart = group.find((marker) => marker.name.endsWith(':renderStart'))?.startTime;
+    const preRenderStart = group.find((marker) =>
+      marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.PRE_RENDER}`)
+    )?.startTime;
+    const renderStart = group.find((marker) =>
+      marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_START}`)
+    )?.startTime;
     const renderComplete = group.find((marker) =>
-      marker.name.endsWith(':renderComplete')
+      marker.name.endsWith(`:${PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE}`)
     )?.startTime;
 
-    if (preFlightStart && renderStart) {
-      performance.measure(`${markerName}:preFlightDuration`, {
-        start: preFlightStart,
+    if (preRenderStart && renderStart) {
+      performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION}`, {
+        start: preRenderStart,
         end: renderStart,
       });
     }
 
     if (renderComplete && renderStart) {
-      performance.measure(`${markerName}:renderDuration`, {
+      performance.measure(`${markerName}:${PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION}`, {
         start: renderStart,
         end: renderComplete,
       });
     }
 
     return {
-      preFlightDuration: preFlightStart && renderStart ? renderStart - preFlightStart : 0,
+      preRenderDuration: preRenderStart && renderStart ? renderStart - preRenderStart : 0,
       renderDuration: renderComplete && renderStart ? renderComplete - renderStart : 0,
     };
   });
@@ -166,12 +175,12 @@ function reportPerformanceMetrics({
     value2: panelCount,
     key4: 'load_type',
     value4: loadTypesMapping[loadType],
-    key7: 'mean_lens_preflight',
-    value7: round(meanBy(measurements, 'preFlightDuration'), 2),
+    key7: 'mean_lens_prerender',
+    value7: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.PRE_RENDER_DURATION), 2),
     key8: 'mean_lens_data_request',
     value8: 0,
     key9: 'mean_lens_rendering',
-    value9: round(meanBy(measurements, 'renderDuration'), 2),
+    value9: round(meanBy(measurements, PERFORMANCE_TRACKER_MEASURES.RENDER_DURATION), 2),
   };
 
   reportPerformanceMetricEvent(coreServices.analytics, e);
