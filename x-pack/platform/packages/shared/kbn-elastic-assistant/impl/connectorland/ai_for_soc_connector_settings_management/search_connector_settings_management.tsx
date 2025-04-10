@@ -26,7 +26,7 @@ const SearchConnectorSettingsManagementComponent: React.FC = () => {
   const onClick = useCallback(
     () =>
       navigateToApp('management', {
-        path: 'data/search_connectors/connectors',
+        path: 'data/content_connectors/connectors',
       }),
     [navigateToApp]
   );
@@ -34,7 +34,7 @@ const SearchConnectorSettingsManagementComponent: React.FC = () => {
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="l">
       <EuiTitle size="xs">
-        <h2>{i18n.SEARCH_CONNECTORS_TITLE}</h2>
+        <h2>{i18n.CONTENT_CONNECTORS_TITLE}</h2>
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup>
@@ -43,7 +43,7 @@ const SearchConnectorSettingsManagementComponent: React.FC = () => {
             align-self: center;
           `}
         >
-          <EuiText size="m">{i18n.SEARCH_CONNECTORS_DESCRIPTION}</EuiText>
+          <EuiText size="m">{i18n.CONTENT_CONNECTORS_DESCRIPTION}</EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

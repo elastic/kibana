@@ -8,15 +8,15 @@
 // Search Connectors
 import { i18n } from '@kbn/i18n';
 
-export const SEARCH_CONNECTORS_TITLE = i18n.translate(
-  'xpack.elasticAssistant.aiSettings.searchConnectors.title',
-  { defaultMessage: 'Search connectors' }
+export const CONTENT_CONNECTORS_TITLE = i18n.translate(
+  'xpack.elasticAssistant.aiSettings.contentConnectors.title',
+  { defaultMessage: 'Content connectors' }
 );
 
-export const SEARCH_CONNECTORS_DESCRIPTION = i18n.translate(
-  'xpack.elasticAssistant.aiSettings.searchConnectors.description',
+export const CONTENT_CONNECTORS_DESCRIPTION = i18n.translate(
+  'xpack.elasticAssistant.aiSettings.contentConnectors.description',
   {
-    defaultMessage: 'Use search connectors to add knowledge to the Knowledge Base.',
+    defaultMessage: 'Use content connectors to add knowledge to the Knowledge Base.',
   }
 );
 
