@@ -9,10 +9,10 @@
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
-import { REMOVED_TYPES } from '@kbn/core-saved-objects-migration-server-internal';
+import { REMOVED_TYPES } from './constants';
 
-jest.mock('@kbn/core-saved-objects-migration-server-internal', () => {
-  const actual = jest.requireActual('@kbn/core-saved-objects-migration-server-internal');
+jest.mock('./constants', () => {
+  const actual = jest.requireActual('./constants');
   return {
     ...actual,
     REMOVED_TYPES: ['removedType', 'csp_rule_copy', 'final-random-removed-type'],

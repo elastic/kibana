@@ -19,7 +19,6 @@
     "@kbn/std",
     "@kbn/logging-mocks",
     "@kbn/safer-lodash-set",
-    "@kbn/core-saved-objects-migration-server-internal",
   ],
   "exclude": [
     "target/**/*",
