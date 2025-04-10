@@ -226,56 +226,62 @@ export const GridLayout = ({
     <GridLayoutContext.Provider value={memoizedContext}>
       <GridHeightSmoother>
         <div
-          ref={(divElement) => {
-            layoutRef.current = divElement;
-            setDimensionsRef(divElement);
-          }}
-          className={classNames('kbnGrid', className)}
           css={[
-            styles.layoutPadding,
-            styles.hasActivePanel,
-            styles.singleColumn,
-            styles.hasExpandedPanel,
+            styles.layoutPadding, // todo: this should be moved to the wrapper because it messes up how the grid background is displayed
             stylesRow.fullHeight,
-            stylesRow.grid,
           ]}
         >
-          {headersAndPanelsIds.map(([typeId, rowId, isCollapsed]) => {
-            // todo: fix types
-            if (typeId === 'header') {
-              return (
-                <GridRowHeaderWrapper
-                  rowId={rowId}
-                  toggleIsCollapsed={toggleIsCollapsed}
-                  key={rowId}
-                  isCollapsed={!!isCollapsed}
-                />
-              );
-            } else if (typeId === 'header-ghost') {
-              return (
-                <div
-                  key={typeId}
-                  className="kbnGridRowHeader--ghost"
-                  style={{
-                    gridColumnStart: 1,
-                    gridColumnEnd: -1,
-                    gridRowStart: 1,
-                    gridRowEnd: 1,
-                    pointerEvents: 'none',
-                    height: '0px',
-                  }}
-                  ref={(element: HTMLDivElement | null) => {
-                    gridLayoutStateManager.headerRefs.current[rowId] = element;
-                  }}
-                />
-              );
-            }
-            if (!isCollapsed) {
-              return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
-            }
-            return null;
-          })}
-          <GridPanelDragPreview />
+          <div
+            ref={(divElement) => {
+              layoutRef.current = divElement;
+              setDimensionsRef(divElement);
+            }}
+            className={classNames('kbnGrid', className)}
+            css={[
+              styles.hasActivePanel,
+              styles.singleColumn,
+              styles.hasExpandedPanel,
+              stylesRow.fullHeight,
+              stylesRow.grid,
+            ]}
+          >
+            {headersAndPanelsIds.map(([typeId, rowId, isCollapsed]) => {
+              // todo: fix types
+              if (typeId === 'header') {
+                return (
+                  <GridRowHeaderWrapper
+                    rowId={rowId}
+                    toggleIsCollapsed={toggleIsCollapsed}
+                    key={rowId}
+                    isCollapsed={!!isCollapsed}
+                  />
+                );
+              } else if (typeId === 'header-ghost') {
+                return (
+                  <div
+                    key={typeId}
+                    className="kbnGridRowHeader--ghost"
+                    style={{
+                      gridColumnStart: 1,
+                      gridColumnEnd: -1,
+                      gridRowStart: 1,
+                      gridRowEnd: 1,
+                      pointerEvents: 'none',
+                      height: '0px',
+                    }}
+                    ref={(element: HTMLDivElement | null) => {
+                      gridLayoutStateManager.headerRefs.current[rowId] = element;
+                    }}
+                  />
+                );
+              }
+              if (!isCollapsed) {
+                return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
+              }
+              return null;
+            })}
+            <GridPanelDragPreview />
+          </div>
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>
@@ -319,7 +325,7 @@ const GridRowHeaderWrapper = ({
 
   return (
     <div
-      className={classNames({ 'kbnGridRowHeader--collapsed': isCollapsed })}
+      className={classNames({'kbnGridRowHeader--collapsed': isCollapsed })}
       style={styles}
       id={`kbnGridRow-${rowId}`}
       role="region"

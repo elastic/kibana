@@ -33,12 +33,11 @@ export const GridPanelDragPreview = React.memo(() => {
           const rowId = interactionEvent?.targetRow;
           if (!rowId || !proposedGridLayout) return;
 
-          const row = proposedGridLayout?.[rowId]
+          const row = proposedGridLayout?.[rowId];
           const headerOffset = row.order === 0 ? 0 : 2;
 
-          const offset = getTopOffsetForRow(rowId, proposedGridLayout) + headerOffset; 
+          const offset = getTopOffsetForRow(rowId, proposedGridLayout) + headerOffset;
           console.log('offset', offset);
-
 
           if (!activePanel || !row.panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';

@@ -73,9 +73,7 @@ export const moveAction = (
   const previewRect = (() => {
     if (isResize) {
       const layoutRef = gridLayoutStateManager.layoutRef.current;
-      const maxRight = layoutRef
-        ? layoutRef.getBoundingClientRect().right - runtimeSettings.gutterSize
-        : window.innerWidth;
+      const maxRight = layoutRef ? layoutRef.getBoundingClientRect().right : window.innerWidth;
       return getResizePreviewRect({ interactionEvent, pointerPixel, maxRight });
     } else {
       return getDragPreviewRect({ interactionEvent, pointerPixel });
