@@ -40,7 +40,10 @@ export const ConfirmBulkUninstallModal: React.FunctionComponent<{
       }
       confirmButtonText={i18n.translate(
         'xpack.fleet.installedIntegrations.bulkUninstallModal.confirmButton',
-        { defaultMessage: 'Uninstall integrations' }
+        {
+          defaultMessage: 'Uninstall {itemsCount, plural, one {integration} other {integrations}} ',
+          values: { itemsCount: selectedItems.length },
+        }
       )}
       buttonColor="danger"
       cancelButtonText={
@@ -72,10 +75,17 @@ export const ConfirmBulkUninstallModal: React.FunctionComponent<{
           defaultMessage: 'This action cannot be undone.',
         })}
       >
-        <FormattedMessage
-          id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContent"
-          defaultMessage="All Kibana and Elasticsearch assets created by these integrations will be also removed. Review and edit your selection if needed."
-        />
+        {isSingleItem ? (
+          <FormattedMessage
+            id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContentSingleItem"
+            defaultMessage="All Kibana and Elasticsearch assets created by this integration will be also removed."
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.fleet.installedIntegrations.bulkUninstallModal.calloutContent"
+            defaultMessage="All Kibana and Elasticsearch assets created by these integrations will be also removed. Review and edit your selection if needed."
+          />
+        )}
       </EuiCallOut>
     </EuiConfirmModal>
   );
