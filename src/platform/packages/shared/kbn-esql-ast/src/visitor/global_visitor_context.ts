@@ -19,6 +19,8 @@ import type {
   ESQLInlineCast,
   ESQLList,
   ESQLLiteral,
+  ESQLMap,
+  ESQLMapEntry,
   ESQLOrderExpression,
   ESQLSource,
   ESQLTimeInterval,
@@ -442,6 +444,14 @@ export class GlobalVisitorContext<
         if (!this.methods.visitIdentifierExpression) break;
         return this.visitIdentifierExpression(parent, expressionNode, input as any);
       }
+      case 'map': {
+        if (!this.methods.visitMapExpression) break;
+        return this.visitMapExpression(parent, expressionNode, input as any);
+      }
+      case 'map-entry': {
+        if (!this.methods.visitMapEntryExpression) break;
+        return this.visitMapEntryExpression(parent, expressionNode, input as any);
+      }
       case 'option': {
         switch (expressionNode.name) {
           case 'as': {
@@ -546,5 +556,23 @@ export class GlobalVisitorContext<
   ): types.VisitorOutput<Methods, 'visitIdentifierExpression'> {
     const context = new contexts.IdentifierExpressionVisitorContext(this, node, parent);
     return this.visitWithSpecificContext('visitIdentifierExpression', context, input);
+  }
+
+  public visitMapExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLMap,
+    input: types.VisitorInput<Methods, 'visitMapExpression'>
+  ): types.VisitorOutput<Methods, 'visitMapExpression'> {
+    const context = new contexts.MapExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitMapExpression', context, input);
+  }
+
+  public visitMapEntryExpression(
+    parent: contexts.VisitorContext | null,
+    node: ESQLMapEntry,
+    input: types.VisitorInput<Methods, 'visitMapEntryExpression'>
+  ): types.VisitorOutput<Methods, 'visitMapEntryExpression'> {
+    const context = new contexts.MapEntryExpressionVisitorContext(this, node, parent);
+    return this.visitWithSpecificContext('visitMapEntryExpression', context, input);
   }
 }

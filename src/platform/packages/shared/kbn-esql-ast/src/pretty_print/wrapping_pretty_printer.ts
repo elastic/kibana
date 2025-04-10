@@ -16,6 +16,7 @@ import {
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
   ListLiteralExpressionVisitorContext,
+  MapExpressionVisitorContext,
   Visitor,
 } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
@@ -143,10 +144,11 @@ export class WrappingPrettyPrinter {
       : word.toUpperCase();
   }
 
-  private visitBinaryExpression(
+  private printBinaryOperatorExpression(
     ctx: ExpressionVisitorContext,
     operator: string,
-    inp: Input
+    inp: Input,
+    operatorTrailingWhitespace = ' '
   ): Output {
     const node = ctx.node;
     const group = binaryExpressionGroup(node);
@@ -177,7 +179,7 @@ export class WrappingPrettyPrinter {
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
 
-      let txt = `${leftOut.txt} ${operator}\n`;
+      let txt = `${leftOut.txt}${operatorTrailingWhitespace}${operator}\n`;
 
       if (!rightOut.indented) {
         txt += rightIndent;
@@ -200,13 +202,18 @@ export class WrappingPrettyPrinter {
       rightFormatted = `(${rightFormatted})`;
     }
 
-    const length = leftFormatted.length + rightFormatted.length + operator.length + 2;
+    const length =
+      leftFormatted.length +
+      rightFormatted.length +
+      operatorTrailingWhitespace.length +
+      operator.length +
+      2;
     const fitsOnOneLine = length <= inp.remaining;
 
     let indented = false;
 
     if (fitsOnOneLine) {
-      txt = `${leftFormatted} ${operator} ${rightFormatted}${suffix}`;
+      txt = `${leftFormatted}${operatorTrailingWhitespace}${operator} ${rightFormatted}${suffix}`;
     } else {
       const flattenVertically = group === groupLeft || group === groupRight;
       const flattenBinExpOfType = flattenVertically ? group : undefined;
@@ -223,7 +230,7 @@ export class WrappingPrettyPrinter {
       const leftOut = ctx.visitArgument(0, leftInput);
       const rightOut = ctx.visitArgument(1, rightInput);
 
-      txt = `${leftOut.txt} ${operator}\n`;
+      txt = `${leftOut.txt}${operatorTrailingWhitespace}${operator}\n`;
 
       if (!rightOut.indented) {
         txt += `${inp.indent}${this.opts.tab}`;
@@ -236,12 +243,39 @@ export class WrappingPrettyPrinter {
     return { txt, indented };
   }
 
-  private printArguments(
+  /**
+   * Prints node children as a list, separated by commas. If the list is too
+   * long, it will be broken into multiple lines, otherwise it will be all
+   * printed on a single line.
+   *
+   * The breaking into two lines happens in two stages, first the list is simply
+   * wrapped into multiple lines, where the wrapping happens just before the
+   * list element that is too long to fit into the remaining space.
+   *
+   * Alternatively, if the first ("wrapping") approach results in some line
+   * still exceeding the maximum line length, or if some line in the middle of
+   * the list (not the last line) contains only a single element, then the list
+   * is "broken" into multiple lines, where each line contains a single
+   * element.
+   *
+   * To summarize:
+   *
+   * 1. First try to print the list in a single line, if it fits.
+   * 2. If it doesn't fit, try to WRAP the list into multiple lines.
+   * 3. If the WRAP doesn't succeed, then BREAK the list into element-per-line
+   *    format.
+   *
+   * @param ctx The node which contains the children to be printed.
+   * @param inp Expression visitor input arguments.
+   * @returns Expression visitor output.
+   */
+  private printChildrenList(
     ctx:
       | CommandVisitorContext
       | CommandOptionVisitorContext
       | FunctionCallExpressionVisitorContext
-      | ListLiteralExpressionVisitorContext,
+      | ListLiteralExpressionVisitorContext
+      | MapExpressionVisitorContext,
     inp: Input
   ) {
     let txt = '';
@@ -501,7 +535,7 @@ export class WrappingPrettyPrinter {
 
     .on('visitRenameExpression', (ctx, inp: Input): Output => {
       const operator = this.keyword('AS');
-      const expression = this.visitBinaryExpression(ctx, operator, inp);
+      const expression = this.printBinaryOperatorExpression(ctx, operator, inp);
       const { txt, indented } = this.decorateWithComments(
         inp.indent,
         ctx.node,
@@ -513,7 +547,7 @@ export class WrappingPrettyPrinter {
     })
 
     .on('visitListLiteralExpression', (ctx, inp: Input): Output => {
-      const args = this.printArguments(ctx, {
+      const args = this.printChildrenList(ctx, {
         indent: inp.indent,
         remaining: inp.remaining - 1,
       });
@@ -521,6 +555,20 @@ export class WrappingPrettyPrinter {
       const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
 
       return { txt, indented };
+    })
+
+    .on('visitMapEntryExpression', (ctx, inp: Input) => {
+      const operator = this.keyword(':');
+      const expression = this.printBinaryOperatorExpression(ctx, operator, inp, '');
+
+      return this.decorateWithComments(inp.indent, ctx.node, expression.txt, expression.indented);
+    })
+
+    .on('visitMapExpression', (ctx, inp: Input) => {
+      const entriesFormatted = this.printChildrenList(ctx, inp);
+      const formatted = '{' + entriesFormatted.txt + '}';
+
+      return this.decorateWithComments(inp.indent, ctx.node, formatted);
     })
 
     .on('visitFunctionCallExpression', (ctx, inp: Input): Output => {
@@ -544,10 +592,10 @@ export class WrappingPrettyPrinter {
           break;
         }
         case 'binary-expression': {
-          return this.visitBinaryExpression(ctx, operator, inp);
+          return this.printBinaryOperatorExpression(ctx, operator, inp);
         }
         default: {
-          const args = this.printArguments(ctx, {
+          const args = this.printChildrenList(ctx, {
             indent: inp.indent,
             remaining: inp.remaining - operator.length - 1,
           });
@@ -573,7 +621,7 @@ export class WrappingPrettyPrinter {
 
     .on('visitCommandOption', (ctx, inp: Input): Output => {
       const option = this.opts.lowercaseOptions ? ctx.node.name : ctx.node.name.toUpperCase();
-      const args = this.printArguments(ctx, {
+      const args = this.printChildrenList(ctx, {
         indent: inp.indent,
         remaining: inp.remaining - option.length - 1,
       });
@@ -594,7 +642,7 @@ export class WrappingPrettyPrinter {
         cmd = `${type} ${cmd}`;
       }
 
-      const args = this.printArguments(ctx, {
+      const args = this.printChildrenList(ctx, {
         indent: inp.indent,
         remaining: inp.remaining - cmd.length - 1,
       });
