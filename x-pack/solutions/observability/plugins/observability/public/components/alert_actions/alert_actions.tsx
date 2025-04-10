@@ -214,7 +214,7 @@ export const AlertActions: GetObservabilityAlertsTableProp<'renderActionsCell'> 
         css={{
           textAlign: 'center',
         }}
-        grow={false}
+        grow={parentAlert ? false : undefined}
       >
         <EuiPopover
           anchorPosition="downLeft"
