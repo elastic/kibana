@@ -7,8 +7,8 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SyntheticsRuleHelper, SYNTHETICS_ALERT_ACTION_INDEX } from './synthetics_rule_helper';
 import { waitForDocumentInIndex } from '../helpers/alerting_wait_for_helpers';
 
@@ -22,15 +22,16 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/202337
-  // Failing: See https://github.com/elastic/kibana/issues/196257
-  describe.skip('SyntheticsCustomStatusRule', () => {
+  describe('SyntheticsCustomStatusRule', () => {
     const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
 
     before(async () => {
       await server.savedObjects.cleanStandardList();
-      await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
       await ruleHelper.createIndexAction();
+      await esClient.deleteByQuery({
+        index: SYNTHETICS_RULE_ALERT_INDEX,
+        query: { match_all: {} },
+      });
       await supertest
         .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
         .set('kbn-xsrf', 'true')
@@ -40,10 +41,6 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await server.savedObjects.cleanStandardList();
       await esDeleteAllIndices([SYNTHETICS_ALERT_ACTION_INDEX]);
-      await esClient.deleteByQuery({
-        index: SYNTHETICS_RULE_ALERT_INDEX,
-        query: { match_all: {} },
-      });
     });
 
     /* 1. create a monitor
@@ -71,14 +68,13 @@ export default function ({ getService }: FtrProviderContext) {
       let monitor: any;
       let docs: any[] = [];
 
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+      });
+
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor('Monitor check based at ' + moment().format('LLL'));
         expect(monitor).to.have.property('id');
-
-        docs = await ruleHelper.makeSummaries({
-          monitor,
-          downChecks: 5,
-        });
       });
 
       it('creates a custom rule', async () => {
@@ -102,6 +98,10 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should trigger down alert', async function () {
+        docs = await ruleHelper.makeSummaries({
+          monitor,
+          downChecks: 5,
+        });
         const response = await ruleHelper.waitForStatusAlert({
           ruleId,
         });
@@ -190,6 +190,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('NumberOfChecks - Location threshold = 1 - grouped by location - 2 down locations', () => {
       let ruleId = '';
       let monitor: any;
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor('Monitor location based at ' + moment().format('LT'));
@@ -282,6 +286,10 @@ export default function ({ getService }: FtrProviderContext) {
       let ruleId = '';
       let monitor: any;
       let docs: any[] = [];
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor(
@@ -410,6 +418,10 @@ export default function ({ getService }: FtrProviderContext) {
       let ruleId = '';
       let monitor: any;
 
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+      });
+
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor(
           `Monitor location based at ${moment().format('LT')} ungrouped 2 locations`
@@ -525,6 +537,9 @@ export default function ({ getService }: FtrProviderContext) {
             {
               term: { 'monitor.id': monitor.id },
             },
+            {
+              term: { status: 'active' },
+            },
           ],
         });
         expect(downResponse.hits.hits[0]._source).property(
@@ -576,26 +591,29 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 2,
+          docCountTarget: 1,
           filters: [
             {
               term: { 'monitor.id': monitor.id },
             },
+            {
+              term: { status: 'recovered' },
+            },
           ],
         });
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'reason',
           `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
         );
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'locationNames',
           'Dev Service and Dev Service 2'
         );
-        expect(recoveryResponse.hits.hits[1]._source).property(
+        expect(recoveryResponse.hits.hits[0]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryResponse.hits.hits[1]._source).property('locationId', 'dev and dev2');
+        expect(recoveryResponse.hits.hits[0]._source).property('locationId', 'dev and dev2');
       });
 
       let downDocs: any[] = [];
@@ -629,22 +647,23 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 3,
-          filters: [{ term: { 'monitor.id': monitor.id } }],
+          docCountTarget: 2,
+          filters: [{ term: { 'monitor.id': monitor.id } }, { term: { status: 'active' } }],
         });
-        expect(downResponse.hits.hits[2]._source).property(
+
+        expect(downResponse.hits.hits[1]._source).property(
           'reason',
           `Monitor "${monitor.name}" is down 1 time from Dev Service and 1 time from Dev Service 2. Alert when down 1 time out of the last 1 checks from at least 2 locations.`
         );
-        expect(downResponse.hits.hits[2]._source).property(
+        expect(downResponse.hits.hits[1]._source).property(
           'locationNames',
           'Dev Service and Dev Service 2'
         );
-        expect(downResponse.hits.hits[2]._source).property(
+        expect(downResponse.hits.hits[1]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(downResponse.hits.hits[2]._source).property('locationId', 'dev and dev2');
+        expect(downResponse.hits.hits[1]._source).property('locationId', 'dev and dev2');
       });
 
       it('should trigger recovered alert when the location threshold is no longer met', async () => {
@@ -673,33 +692,37 @@ export default function ({ getService }: FtrProviderContext) {
           indexName: SYNTHETICS_ALERT_ACTION_INDEX,
           retryService,
           logger,
-          docCountTarget: 4,
-          filters: [{ term: { 'monitor.id': monitor.id } }],
+          docCountTarget: 2,
+          filters: [{ term: { 'monitor.id': monitor.id } }, { term: { status: 'recovered' } }],
         });
-        expect(recoveryResponse.hits.hits[3]._source).property(
+        expect(recoveryResponse.hits.hits[1]._source).property(
           'reason',
           `Monitor "${monitor.name}" from Dev Service and Dev Service 2 is recovered. Alert when 1 out of the last 1 checks are down from at least 2 locations.`
         );
-        expect(recoveryResponse.hits.hits[3]._source).property(
+        expect(recoveryResponse.hits.hits[1]._source).property(
           'locationNames',
           'Dev Service and Dev Service 2'
         );
-        expect(recoveryResponse.hits.hits[3]._source).property(
+        expect(recoveryResponse.hits.hits[1]._source).property(
           'linkMessage',
           `- Link: https://localhost:5601/app/synthetics/monitor/${monitor.id}/errors/Test%20private%20location-18524a3d9a7-0?locationId=dev`
         );
-        expect(recoveryResponse.hits.hits[3]._source).property('locationId', 'dev and dev2');
-        expect(recoveryResponse.hits.hits[3]._source).property(
+        expect(recoveryResponse.hits.hits[1]._source).property('locationId', 'dev and dev2');
+        expect(recoveryResponse.hits.hits[1]._source).property(
           'recoveryReason',
           'the alert condition is no longer met'
         );
-        expect(recoveryResponse.hits.hits[3]._source).property('recoveryStatus', 'has recovered');
+        expect(recoveryResponse.hits.hits[1]._source).property('recoveryStatus', 'has recovered');
       });
     });
 
     describe('TimeWindow - Location threshold = 1 - grouped by location - 1 down location', () => {
       let ruleId = '';
       let monitor: any;
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor('Monitor time based at ' + moment().format('LT'));
@@ -824,6 +847,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('TimeWindow - Location threshold = 1 - grouped by location - 2 down location', () => {
       let ruleId = '';
       let monitor: any;
+
+      before(async () => {
+        await server.savedObjects.clean({ types: ['synthetics-monitor', 'rule'] });
+      });
 
       it('creates a monitor', async () => {
         monitor = await ruleHelper.addMonitor(

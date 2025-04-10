@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import {
   IngestStreamGetResponse,
   isDisabledLifecycle,
@@ -31,17 +29,19 @@ import {
   EuiPanel,
   EuiPopover,
   EuiText,
+  EuiToolTip,
+  formatNumber,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
 import { IlmLink } from './ilm_link';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
-import { formatBytes } from './helpers/format_bytes';
+import { formatIngestionRate } from './helpers/format_bytes';
+import { PrivilegesWarningIconWrapper } from '../../insufficient_privileges/insufficient_privileges';
 
 export function RetentionMetadata({
   definition,
-  ilmLocator,
   lifecycleActions,
   openEditModal,
   stats,
@@ -49,7 +49,6 @@ export function RetentionMetadata({
   statsError,
 }: {
   definition: IngestStreamGetResponse;
-  ilmLocator?: LocatorPublic<IlmLocatorParams>;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
@@ -64,16 +63,30 @@ export function RetentionMetadata({
     lifecycleActions.length === 0 ? null : (
       <EuiPopover
         button={
-          <EuiButton
-            data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
-            size="s"
-            fullWidth
-            onClick={toggleMenu}
+          <EuiToolTip
+            content={
+              !definition.privileges.lifecycle
+                ? i18n.translate(
+                    'xpack.streams.entityDetailViewWithoutParams.editDataRetention.insufficientPrivileges',
+                    {
+                      defaultMessage: "You don't have sufficient privileges to change retention.",
+                    }
+                  )
+                : undefined
+            }
           >
-            {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
-              defaultMessage: 'Edit data retention',
-            })}
-          </EuiButton>
+            <EuiButton
+              data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
+              size="s"
+              fullWidth
+              onClick={toggleMenu}
+              disabled={!definition.privileges.lifecycle}
+            >
+              {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
+                defaultMessage: 'Edit data retention',
+              })}
+            </EuiButton>
+          </EuiToolTip>
         }
         isOpen={isMenuOpen}
         closePopover={closeMenu}
@@ -98,7 +111,7 @@ export function RetentionMetadata({
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
-      <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
+      <IlmLink lifecycle={lifecycle} />
     </EuiBadge>
   ) : null;
 
@@ -178,18 +191,23 @@ export function RetentionMetadata({
         })}
         tip={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateDetails', {
           defaultMessage:
-            'Estimated average (stream total size divided by the number of days since creation).',
+            'Approximate average (stream total size divided by the number of days since creation).',
         })}
         value={
-          statsError ? (
-            '-'
-          ) : isLoadingStats || !stats ? (
-            <EuiLoadingSpinner size="s" />
-          ) : stats.bytesPerDay ? (
-            formatIngestionRate(stats.bytesPerDay)
-          ) : (
-            '-'
-          )
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="ingestionRate"
+          >
+            {statsError ? (
+              '-'
+            ) : isLoadingStats || !stats ? (
+              <EuiLoadingSpinner size="s" />
+            ) : stats.bytesPerDay ? (
+              formatIngestionRate(stats.bytesPerDay)
+            ) : (
+              '-'
+            )}
+          </PrivilegesWarningIconWrapper>
         }
       />
       <EuiHorizontalRule margin="s" />
@@ -198,13 +216,18 @@ export function RetentionMetadata({
           defaultMessage: 'Total doc count',
         })}
         value={
-          statsError ? (
-            '-'
-          ) : isLoadingStats || !stats ? (
-            <EuiLoadingSpinner size="s" />
-          ) : (
-            stats.totalDocs
-          )
+          <PrivilegesWarningIconWrapper
+            hasPrivileges={definition.privileges.monitor}
+            title="totalDocCount"
+          >
+            {statsError ? (
+              '-'
+            ) : isLoadingStats || !stats ? (
+              <EuiLoadingSpinner size="s" />
+            ) : (
+              formatNumber(stats.totalDocs, '0,0')
+            )}
+          </PrivilegesWarningIconWrapper>
         }
       />
     </EuiPanel>
@@ -242,9 +265,3 @@ function MetadataRow({
     </EuiFlexGroup>
   );
 }
-
-const formatIngestionRate = (bytesPerDay: number) => {
-  const perDay = formatBytes(bytesPerDay);
-  const perMonth = formatBytes(bytesPerDay * 30);
-  return `${perDay} / Day - ${perMonth} / Month`;
-};

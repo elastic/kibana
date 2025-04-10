@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'indexManagement',
     'searchNavigation',
+    'solutionNavigation',
   ]);
   const es = getService('es');
   const browser = getService('browser');
@@ -28,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/206396
   describe.skip('Search index details page', function () {
     describe('Solution Nav - Search', function () {
-      let cleanUp: () => Promise<unknown>;
+      let cleanUpSpace: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
 
       before(async () => {
@@ -38,28 +39,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         // Create a space with the search solution and navigate to its home page
-        ({ cleanUp, space: spaceCreated } = await spaces.create({
-          name: 'search-ftr',
+        ({ cleanUp: cleanUpSpace, space: spaceCreated } = await spaces.create({
+          name: 'solution-nav-search-index-details-ftr',
           solution: 'es',
         }));
+
         await pageObjects.searchApiKeys.deleteAPIKeys();
+        await es.indices.create({ index: indexName });
       });
 
       after(async () => {
         // Clean up space created
-        await cleanUp();
+        await cleanUpSpace();
         await esDeleteAllIndices(indexName);
       });
       describe('search index details page', () => {
         before(async () => {
           // Navigate to the spaces management page which will log us in Kibana
-          await pageObjects.searchApiKeys.deleteAPIKeys();
           await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-          await es.indices.create({ index: indexName });
           await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
-        });
-        after(async () => {
-          await esDeleteAllIndices(indexName);
         });
         it('can load index detail page', async () => {
           await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
@@ -70,6 +68,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should have embedded dev console', async () => {
           await testHasEmbeddedConsole(pageObjects);
         });
+        it('should have breadcrumbs', async () => {
+          await pageObjects.searchIndexDetailsPage.expectIndexNametoBeInBreadcrumbs(indexName);
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Content');
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable(
+            'Index Management'
+          );
+          await pageObjects.searchIndexDetailsPage.expectBreadcrumbsToBeAvailable('Indices');
+
+          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Indices');
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
+
+          await pageObjects.searchIndexDetailsPage.clickOnBreadcrumb('Index Management');
+          await pageObjects.indexManagement.expectToBeOnIndexManagement();
+
+          await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
+        });
+
         it('should have connection details', async () => {
           await pageObjects.searchIndexDetailsPage.expectConnectionDetails();
         });
@@ -259,134 +274,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             await pageObjects.searchIndexDetailsPage.expectDeleteIndexButtonExistsInMoreOptions();
             await pageObjects.searchIndexDetailsPage.clickDeleteIndexButton();
             await pageObjects.searchIndexDetailsPage.clickConfirmingDeleteIndex();
-          });
-        });
-      });
-
-      describe('index management index list page', () => {
-        before(async () => {
-          await esDeleteAllIndices(indexName);
-          await es.indices.create({ index: indexName });
-        });
-        beforeEach(async () => {
-          // Navigate to search solution space
-          await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-          // Navigate to index management app
-          await pageObjects.common.navigateToApp('indexManagement', {
-            basePath: `s/${spaceCreated.id}`,
-          });
-          // Navigate to the indices tab
-          await pageObjects.indexManagement.changeTabs('indicesTab');
-          await pageObjects.header.waitUntilLoadingHasFinished();
-        });
-        after(async () => {
-          await esDeleteAllIndices(indexName);
-        });
-        describe('manage index action', () => {
-          beforeEach(async () => {
-            await pageObjects.indexManagement.manageIndex(indexName);
-            await pageObjects.indexManagement.manageIndexContextMenuExists();
-          });
-          it('navigates to overview tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('data');
-          });
-
-          it('navigates to settings tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('settings');
-          });
-          it('navigates to mappings tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectUrlShouldChangeTo('mappings');
-          });
-        });
-        describe('can view search index details', function () {
-          it('renders search index details with no documents', async () => {
-            await pageObjects.searchIndexDetailsPage.openIndicesDetailFromIndexManagementIndicesListTable(
-              0
-            );
-            await pageObjects.searchIndexDetailsPage.expectIndexDetailPageHeader();
-            await pageObjects.searchIndexDetailsPage.expectSearchIndexDetailsTabsExists();
-            await pageObjects.searchIndexDetailsPage.expectAPIReferenceDocLinkExists();
-          });
-        });
-      });
-    });
-    describe('Classic Nav', function () {
-      let cleanUp: () => Promise<unknown>;
-      let spaceCreated: { id: string } = { id: '' };
-
-      before(async () => {
-        // Navigate to the spaces management page which will log us in Kibana
-        await pageObjects.common.navigateToUrl('management', 'kibana/spaces', {
-          shouldUseHashForSubUrl: false,
-        });
-
-        // Create a space with the search solution and navigate to its home page
-        ({ cleanUp, space: spaceCreated } = await spaces.create({
-          name: 'classic-nav',
-          solution: 'classic',
-        }));
-        await pageObjects.searchApiKeys.deleteAPIKeys();
-      });
-
-      after(async () => {
-        // Clean up space created
-        await cleanUp();
-        await esDeleteAllIndices(indexName);
-      });
-      describe('index management index list page', () => {
-        before(async () => {
-          await esDeleteAllIndices(indexName);
-          await es.indices.create({ index: indexName });
-        });
-        beforeEach(async () => {
-          // Navigate to search solution space
-          await browser.navigateTo(spaces.getRootUrl(spaceCreated.id));
-          // Navigate to index management app
-          await pageObjects.common.navigateToApp('indexManagement', {
-            basePath: `s/${spaceCreated.id}`,
-          });
-          // Navigate to the indices tab
-          await pageObjects.indexManagement.changeTabs('indicesTab');
-          await pageObjects.header.waitUntilLoadingHasFinished();
-        });
-        after(async () => {
-          await esDeleteAllIndices(indexName);
-        });
-        describe('manage index action', () => {
-          beforeEach(async () => {
-            await pageObjects.indexManagement.manageIndex(indexName);
-            await pageObjects.indexManagement.manageIndexContextMenuExists();
-          });
-          it('navigates to overview tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showOverviewIndexMenuButton');
-            await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-            await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('overview');
-          });
-
-          it('navigates to settings tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showSettingsIndexMenuButton');
-            await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-            await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('settings');
-          });
-          it('navigates to mappings tab', async () => {
-            await pageObjects.indexManagement.changeManageIndexTab('showMappingsIndexMenuButton');
-            await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
-            await pageObjects.indexManagement.indexDetailsPage.expectUrlShouldChangeTo('mappings');
-          });
-        });
-        describe('can view index management index details page', function () {
-          it('navigates to the index management index details page from the home page', async () => {
-            // display hidden indices to have some rows in the indices table
-            await pageObjects.indexManagement.toggleHiddenIndices();
-            // click the first index in the table and wait for the index details page
-            await pageObjects.indexManagement.indexDetailsPage.openIndexDetailsPage(0);
-            await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
           });
         });
       });

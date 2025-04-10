@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import { getApmIndexPatterns } from './get_indices';
 
 export async function getNonDataStreamIndices({

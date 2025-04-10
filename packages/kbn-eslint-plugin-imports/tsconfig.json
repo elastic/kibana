@@ -15,6 +15,7 @@
     "@kbn/repo-source-classifier",
     "@kbn/repo-info",
     "@kbn/repo-packages",
+    "@kbn/projects-solutions-groups",
   ],
   "exclude": [
     "target/**/*",

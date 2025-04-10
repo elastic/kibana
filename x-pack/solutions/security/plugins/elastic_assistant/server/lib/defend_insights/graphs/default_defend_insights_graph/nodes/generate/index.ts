@@ -9,6 +9,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 
+import { DefendInsightsGenerationPrompts } from '../helpers/prompts/incompatible_antivirus';
 import type { GraphState } from '../../types';
 import { discardPreviousGenerations } from './helpers/discard_previous_generations';
 import { extractJson } from '../helpers/extract_json';
@@ -25,10 +26,12 @@ export const getGenerateNode = ({
   insightType,
   llm,
   logger,
+  prompts,
 }: {
   insightType: DefendInsightType;
   llm: ActionsClientLlm;
   logger?: Logger;
+  prompts: DefendInsightsGenerationPrompts;
 }): ((state: GraphState) => Promise<GraphState>) => {
   const generate = async (state: GraphState): Promise<GraphState> => {
     logger?.debug(() => `---GENERATE---`);
@@ -37,6 +40,7 @@ export const getGenerateNode = ({
 
     const {
       prompt,
+      continuePrompt,
       combinedGenerations,
       generationAttempts,
       generations,
@@ -51,14 +55,16 @@ export const getGenerateNode = ({
     try {
       const query = getCombinedDefendInsightsPrompt({
         anonymizedEvents,
-        prompt,
+        defendInsightsPrompt: prompt,
         combinedMaybePartialResults: combinedGenerations,
+        continuePrompt,
       });
 
-      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions(
+      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions({
         insightType,
-        llm
-      );
+        llm,
+        prompts,
+      });
 
       logger?.debug(
         () => `generate node is invoking the chain (${llmType}), attempt ${generationAttempts}`
@@ -119,6 +125,7 @@ export const getGenerateNode = ({
         llmType,
         logger,
         nodeName: 'generate',
+        prompts,
       });
 
       // use the unrefined results if we already reached the max number of retries:

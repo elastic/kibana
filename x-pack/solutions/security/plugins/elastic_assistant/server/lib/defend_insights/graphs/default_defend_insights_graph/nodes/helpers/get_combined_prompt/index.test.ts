@@ -6,12 +6,14 @@
  */
 
 import { getCombinedDefendInsightsPrompt } from '.';
+import { DEFEND_INSIGHTS } from '../../../../../../prompt/prompts';
 
 describe('getCombinedDefendInsightsPrompt', () => {
   it('returns the initial query when there are no partial results', () => {
     const result = getCombinedDefendInsightsPrompt({
       anonymizedEvents: ['event1', 'event2'],
-      prompt: 'defendInsightsPrompt',
+      defendInsightsPrompt: 'defendInsightsPrompt',
+      continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
       combinedMaybePartialResults: '',
     });
 
@@ -30,8 +32,9 @@ event2
   it('returns the initial query combined with a continuation prompt and partial results', () => {
     const result = getCombinedDefendInsightsPrompt({
       anonymizedEvents: ['event1', 'event2'],
-      prompt: 'defendInsightsPrompt',
+      defendInsightsPrompt: 'defendInsightsPrompt',
       combinedMaybePartialResults: 'partialResults',
+      continuePrompt: DEFEND_INSIGHTS.INCOMPATIBLE_ANTIVIRUS.CONTINUE,
     });
 
     expect(result).toBe(`defendInsightsPrompt

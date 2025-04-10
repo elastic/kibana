@@ -22,12 +22,15 @@ import {
   INTERNAL_API_ACCESS,
   PostEvaluateBody,
   PostEvaluateResponse,
+  DefendInsightType,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getDefaultArguments } from '@kbn/langchain/server';
 import { StructuredTool } from '@langchain/core/tools';
 import { AgentFinish } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
+import { evaluateDefendInsights } from '../../lib/defend_insights/evaluation';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../lib/prompt/tool_prompts';
 import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getFormattedTime, getModelOrOss } from '../../lib/prompt/helpers';
@@ -50,6 +53,7 @@ import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 import { DEFAULT_DATE_FORMAT_TZ } from '../../../common/constants';
 import { agentRunableFactory } from '../../lib/langchain/graphs/default_assistant_graph/agentRunnable';
+import { PrepareIndicesForAssistantGraphEvaluations } from './prepare_indices_for_evaluations/graph_type/assistant';
 
 const DEFAULT_SIZE = 20;
 const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
@@ -177,27 +181,80 @@ export const postEvaluateRoute = (
             ids: connectorIds,
             throwIfSystemAction: false,
           });
-          const connectorsWithPrompts = await Promise.all(
-            connectors.map(async (connector) => {
-              const prompts = await getAttackDiscoveryPrompts({
-                actionsClient,
-                connectorId: connector.id,
-                connector,
-                savedObjectsClient,
-              });
-              return {
-                ...connector,
-                prompts,
-              };
-            })
-          );
 
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
 
-          const { attackDiscoveryGraphs } = getGraphsFromNames(graphNames);
+          const { attackDiscoveryGraphs, defendInsightsGraphs, assistantGraphs } =
+            getGraphsFromNames(graphNames);
+
+          const prepareIndicesForAssistantGraph = new PrepareIndicesForAssistantGraphEvaluations({
+            esClient,
+            logger,
+          });
+
+          if (assistantGraphs?.length) {
+            await prepareIndicesForAssistantGraph.cleanup();
+            await prepareIndicesForAssistantGraph.setup();
+          }
+
+          if (defendInsightsGraphs.length > 0) {
+            const connectorsWithPrompts = await Promise.all(
+              connectors.map(async (connector) => {
+                const prompts = await getDefendInsightsPrompt({
+                  type: DefendInsightType.Enum.incompatible_antivirus,
+                  actionsClient,
+                  connectorId: connector.id,
+                  connector,
+                  savedObjectsClient,
+                });
+                return {
+                  ...connector,
+                  prompts,
+                };
+              })
+            );
+            try {
+              void evaluateDefendInsights({
+                actionsClient,
+                defendInsightsGraphs,
+                connectors: connectorsWithPrompts,
+                connectorTimeout: CONNECTOR_TIMEOUT,
+                datasetName,
+                esClient,
+                evaluationId,
+                evaluatorConnectorId,
+                langSmithApiKey,
+                langSmithProject,
+                logger,
+                runName,
+                size,
+              });
+            } catch (err) {
+              logger.error(() => `Error evaluating defend insights: ${err}`);
+            }
+
+            return response.ok({
+              body: { evaluationId, success: true },
+            });
+          }
 
           if (attackDiscoveryGraphs.length > 0) {
+            const connectorsWithPrompts = await Promise.all(
+              connectors.map(async (connector) => {
+                const prompts = await getAttackDiscoveryPrompts({
+                  actionsClient,
+                  connectorId: connector.id,
+                  connector,
+                  savedObjectsClient,
+                });
+                return {
+                  ...connector,
+                  prompts,
+                };
+              })
+            );
+
             try {
               // NOTE: we don't wait for the evaluation to finish here, because
               // the client will retry / timeout when evaluations take too long
@@ -254,6 +311,7 @@ export const postEvaluateRoute = (
                     pluginId: 'security_ai_assistant',
                   },
                 });
+
               const llm = createLlmInstance();
               const anonymizationFieldsRes =
                 await dataClients?.anonymizationFieldsDataClient?.findDocuments<EsAnonymizationFieldsSchema>(

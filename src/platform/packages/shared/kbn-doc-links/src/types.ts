@@ -169,6 +169,7 @@ export interface DocLinks {
     readonly textEmbedding: string;
     readonly troubleshootSetup: string;
     readonly usersAccess: string;
+    readonly upgrade9x: string;
   };
   readonly heartbeat: {
     readonly base: string;
@@ -261,6 +262,7 @@ export interface DocLinks {
   readonly upgradeAssistant: {
     readonly overview: string;
     readonly batchReindex: string;
+    readonly indexBlocks: string;
     readonly remoteReindex: string;
     readonly unfreezeApi: string;
     readonly reindexWithPipeline: string;
@@ -525,6 +527,7 @@ export interface DocLinks {
     proxiesSettings: string;
     unprivilegedMode: string;
     httpMonitoring: string;
+    agentLevelLogging: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -643,6 +646,10 @@ export interface DocLinks {
   };
   readonly synonyms: {
     readonly synonymsAPIDocumentation: string;
+  };
+
+  readonly queryRules: {
+    readonly queryRulesAPIDocumentation: string;
   };
 }
 

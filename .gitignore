@@ -30,11 +30,11 @@ __tmp__
 /x-pack/examples/*/build
 
 # Ignore certain functional test runner artifacts
-/test/*/failure_debug
-/test/*/screenshots/diff
-/test/*/screenshots/failure
-/test/*/screenshots/session
-/test/*/screenshots/visual_regression_gallery.html
+/src/platform/test/*/failure_debug
+/src/platform/test/*/screenshots/diff
+/src/platform/test/*/screenshots/failure
+/src/platform/test/*/screenshots/session
+/src/platform/test/*/screenshots/visual_regression_gallery.html
 
 # Ignore the same artifacts in x-pack
 /x-pack/test/*/failure_debug
@@ -63,6 +63,7 @@ webpackstats.json
 !/config/README.md
 !/config/serverless.yml
 !/config/serverless.es.yml
+!/config/serverless.chat.yml
 !/config/serverless.oblt.yml
 !/config/serverless.security.yml
 !/config/serverless.security.essentials.yml
@@ -70,12 +71,13 @@ webpackstats.json
 !/config/serverless.security.search_ai_lake.yml
 !/config/node.options
 coverage
-!/test/common/fixtures/plugins/coverage
+!/src/platform/test/common/fixtures/plugins/coverage
 selenium
 .babel_register_cache.json
 .webpack.babelcache
 *.swp
 *.swo
+*.swn
 *.out
 package-lock.json
 !/.buildkite/package-lock.json

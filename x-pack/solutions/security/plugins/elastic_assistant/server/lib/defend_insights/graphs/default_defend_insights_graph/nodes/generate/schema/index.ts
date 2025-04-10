@@ -7,12 +7,19 @@
 
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
+import { DefendInsightsGenerationPrompts } from '../../helpers/prompts/incompatible_antivirus';
 import { InvalidDefendInsightTypeError } from '../../../../../errors';
-import { getIncompatibleVirusSchema } from './incompatible_antivirus';
+import { getDefendInsightsIncompatibleVirusGenerationSchema } from './incompatible_antivirus';
 
-export function getSchema({ type }: { type: DefendInsightType }) {
+export function getDefendInsightsSchema({
+  type,
+  prompts,
+}: {
+  type: DefendInsightType;
+  prompts: DefendInsightsGenerationPrompts;
+}) {
   if (type === DefendInsightType.Enum.incompatible_antivirus) {
-    return getIncompatibleVirusSchema();
+    return getDefendInsightsIncompatibleVirusGenerationSchema(prompts);
   }
 
   throw new InvalidDefendInsightTypeError();

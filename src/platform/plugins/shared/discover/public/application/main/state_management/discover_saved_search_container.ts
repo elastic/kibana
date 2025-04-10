@@ -12,7 +12,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
 import type { FilterCompareOptions } from '@kbn/es-query';
-import { COMPARE_ALL_OPTIONS, updateFilterReferences } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, isOfAggregateQueryType, updateFilterReferences } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
@@ -21,14 +21,11 @@ import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { VIEW_MODE } from '../../../../common/constants';
-import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
-import { handleSourceColumnState } from '../../../utils/state_helpers';
 import type { DiscoverAppState } from './discover_app_state_container';
 import { isEqualFilters } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
-import { getStateDefaults } from './utils/get_state_defaults';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 import type { InternalStateStore } from './redux';
 
@@ -62,6 +59,10 @@ export interface UpdateParams {
  */
 export interface DiscoverSavedSearchContainer {
   /**
+   * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
+   */
+  initUrlTracking: () => () => void;
+  /**
    * Get an BehaviorSubject which contains the current state of the current saved search
    * All modifications are applied to this state
    */
@@ -89,19 +90,6 @@ export interface DiscoverSavedSearchContainer {
    */
   getState: () => SavedSearch;
   /**
-   * Load a saved search by the given id
-   * Resets the initial and current state of the saved search
-   * @param id
-   * @param dataView
-   */
-  load: (id: string) => Promise<SavedSearch>;
-  /**
-   * Initialize a new saved search
-   * Resets the initial and current state of the saved search
-   * @param dataView
-   */
-  new: (dataView?: DataView) => Promise<SavedSearch>;
-  /**
    * Persist the given saved search
    * Resets the initial and current state of the saved search
    */
@@ -116,6 +104,12 @@ export interface DiscoverSavedSearchContainer {
    */
   set: (savedSearch: SavedSearch) => SavedSearch;
   /**
+   * Similar to set, but does not reset the initial state,
+   * ensuring unsaved changes are tracked
+   * @param nextSavedSearch
+   */
+  assignNextSavedSearch: (nextSavedSearch: SavedSearch) => void;
+  /**
    * Updates the current state of the saved search
    * @param params
    */
@@ -124,11 +118,6 @@ export interface DiscoverSavedSearchContainer {
    * Updates the current state of the saved search with new time range and refresh interval
    */
   updateTimeRange: () => void;
-  /**
-   * Passes filter manager filters to saved search filters
-   * @param params
-   */
-  updateWithFilterManagerFilters: () => SavedSearch;
   /**
    * Updates the current value of visContext in saved search
    * @param params
@@ -163,20 +152,30 @@ export function getSavedSearchContainer({
   const getTitle = () => savedSearchCurrent$.getValue().title;
   const getId = () => savedSearchCurrent$.getValue().id;
 
-  const newSavedSearch = async (nextDataView: DataView | undefined) => {
-    addLog('[savedSearch] new', { nextDataView });
-    const dataView = nextDataView ?? getState().searchSource.getField('index');
-    const nextSavedSearch = services.savedSearch.getNew();
-    nextSavedSearch.searchSource.setField('index', dataView);
-    const newAppState = getDefaultAppState(nextSavedSearch, services);
-    const nextSavedSearchToSet = updateSavedSearch({
-      savedSearch: { ...nextSavedSearch },
-      dataView,
-      state: newAppState,
-      globalStateContainer,
-      services,
+  const initUrlTracking = () => {
+    const subscription = savedSearchCurrent$.subscribe((savedSearch) => {
+      const dataView = savedSearch.searchSource.getField('index');
+
+      if (!dataView?.id) {
+        return;
+      }
+
+      const dataViewSupportsTracking =
+        // Disable for ad hoc data views, since they can't be restored after a page refresh
+        dataView.isPersisted() ||
+        // Unless it's a default profile data view, which can be restored on refresh
+        internalState.getState().defaultProfileAdHocDataViewIds.includes(dataView.id) ||
+        // Or we're in ES|QL mode, in which case we don't care about the data view
+        isOfAggregateQueryType(savedSearch.searchSource.getField('query'));
+
+      const trackingEnabled = dataViewSupportsTracking || Boolean(savedSearch.id);
+
+      services.urlTracker.setTrackingEnabled(trackingEnabled);
     });
-    return set(nextSavedSearchToSet);
+
+    return () => {
+      subscription.unsubscribe();
+    };
   };
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
@@ -238,19 +237,6 @@ export function getSavedSearchContainer({
     savedSearchCurrent$.next(nextSavedSearch);
   };
 
-  const updateWithFilterManagerFilters = () => {
-    const nextSavedSearch: SavedSearch = {
-      ...getState(),
-    };
-
-    nextSavedSearch.searchSource.setField('filter', cloneDeep(services.filterManager.getFilters()));
-
-    assignNextSavedSearch({ nextSavedSearch });
-
-    addLog('[savedSearch] updateWithFilterManagerFilters done', nextSavedSearch);
-    return nextSavedSearch;
-  };
-
   const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
     addLog('[savedSearch] update', { nextDataView, nextState });
 
@@ -307,33 +293,19 @@ export function getSavedSearchContainer({
     addLog('[savedSearch] updateVisContext done', nextSavedSearch);
   };
 
-  const load = async (id: string): Promise<SavedSearch> => {
-    addLog('[savedSearch] load', { id });
-
-    const loadedSavedSearch = await services.savedSearch.get(id);
-
-    restoreStateFromSavedSearch({
-      savedSearch: loadedSavedSearch,
-      timefilter: services.timefilter,
-    });
-
-    return set(loadedSavedSearch);
-  };
-
   return {
+    initUrlTracking,
     getCurrent$,
     getHasChanged$,
     getId,
     getInitial$,
     getState,
     getTitle,
-    load,
-    new: newSavedSearch,
     persist,
     set,
+    assignNextSavedSearch: (nextSavedSearch) => assignNextSavedSearch({ nextSavedSearch }),
     update,
     updateTimeRange,
-    updateWithFilterManagerFilters,
     updateVisContext,
   };
 }
@@ -347,16 +319,6 @@ export function copySavedSearch(savedSearch: SavedSearch): SavedSearch {
     ...savedSearch,
     ...{ searchSource: savedSearch.searchSource.createCopy() },
   };
-}
-
-export function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverServices) {
-  return handleSourceColumnState(
-    getStateDefaults({
-      savedSearch,
-      services,
-    }),
-    services.uiSettings
-  );
 }
 
 export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext: SavedSearch) {
