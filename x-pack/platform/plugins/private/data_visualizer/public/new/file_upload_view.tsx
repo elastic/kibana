@@ -10,14 +10,12 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
 import type { FileUploadResults } from '@kbn/file-upload-common';
-import type { HttpSetup } from '@kbn/core/public';
 import type { ResultLinks } from '../../common/app';
 import {
   ResultsLinks,
   type GetAdditionalLinks,
 } from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';
-import type { FileUploadManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
@@ -29,8 +27,6 @@ import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
 
 interface Props {
-  http: HttpSetup;
-  fileUploadManager: FileUploadManager;
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;

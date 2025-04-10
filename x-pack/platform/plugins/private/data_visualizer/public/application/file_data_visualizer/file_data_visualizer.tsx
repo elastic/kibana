@@ -102,8 +102,6 @@ export const FileDataVisualizer: FC<Props> = ({
           <FileUploadContext.Provider value={fileUploadContextValue}>
             {mode === TEST_MODE.NEW ? (
               <FileUploadView
-                http={coreStart.http}
-                fileUploadManager={fileUploadManager}
                 getAdditionalLinks={getAdditionalLinks}
                 resultLinks={resultLinks}
                 setUploadResults={setUploadResults}

@@ -15,6 +15,7 @@ import type { GetAdditionalLinks } from '../application/common/components/result
 import { FileUploadLiteView } from './file_upload_lite_view';
 import { FileUploadManager } from './file_manager/file_manager';
 import type { DataVisualizerStartDependencies } from '../application/common/types/data_visualizer_plugin';
+import { FileUploadContext, useFileUpload } from './use_file_upload';
 
 export interface Props {
   coreStart: CoreStart;
@@ -39,7 +40,8 @@ export const FileDataVisualizerLite: FC<Props> = ({
   };
   const { data, fileUpload, cloud } = services;
 
-  const { existingIndex, autoAddInference, autoCreateDataView, indexSettings } = props;
+  const { existingIndex, autoAddInference, autoCreateDataView, indexSettings, onUploadComplete } =
+    props;
   const fileUploadManager = useMemo(
     () =>
       new FileUploadManager(
@@ -63,6 +65,14 @@ export const FileDataVisualizerLite: FC<Props> = ({
     ]
   );
 
+  const fileUploadContextValue = useFileUpload(
+    fileUploadManager,
+    data,
+    coreStart.application,
+    onUploadComplete,
+    coreStart.http
+  );
+
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
   const CloudContext = cloud?.CloudContextProvider ?? EmptyContext;
 
@@ -70,13 +80,14 @@ export const FileDataVisualizerLite: FC<Props> = ({
     <KibanaRenderContextProvider {...coreStart}>
       <KibanaContextProvider services={{ ...services }}>
         <CloudContext>
-          <FileUploadLiteView
-            fileUploadManager={fileUploadManager}
-            getAdditionalLinks={getAdditionalLinks}
-            resultLinks={resultLinks}
-            props={props}
-            onClose={onClose}
-          />
+          <FileUploadContext.Provider value={fileUploadContextValue}>
+            <FileUploadLiteView
+              getAdditionalLinks={getAdditionalLinks}
+              resultLinks={resultLinks}
+              props={props}
+              onClose={onClose}
+            />
+          </FileUploadContext.Provider>
         </CloudContext>
       </KibanaContextProvider>
     </KibanaRenderContextProvider>

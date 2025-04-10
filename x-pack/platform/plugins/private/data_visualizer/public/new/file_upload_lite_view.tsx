@@ -26,7 +26,6 @@ import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';
-import type { FileUploadManager } from './file_manager';
 import { STATUS } from './file_manager/file_manager';
 import { FilePicker } from './file_picker';
 import { FileStatus } from './file_status';
@@ -38,16 +37,16 @@ import { UploadImage } from './upload_image';
 import { IndexSelection } from './index_selection';
 
 interface Props {
-  fileUploadManager: FileUploadManager;
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   props: OpenFileUploadLiteContext;
   onClose?: () => void;
 }
 
-export const FileUploadLiteView: FC<Props> = ({ fileUploadManager, props, onClose }) => {
+export const FileUploadLiteView: FC<Props> = ({ props, onClose }) => {
   const { flyoutContent } = props;
   const {
+    fileUploadManager,
     filesStatus,
     uploadStatus,
     fileClashes,
