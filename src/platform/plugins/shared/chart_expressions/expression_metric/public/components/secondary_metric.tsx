@@ -156,7 +156,7 @@ function SecondaryMetricValue({
       </EuiBadge>
     );
   }
-  return safeFormattedValue;
+  return formattedValue;
 }
 
 export interface SecondaryMetricProps {
