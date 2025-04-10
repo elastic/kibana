@@ -46,7 +46,7 @@ export const useLensAttributes = ({
 
   if (newDataViewPickerEnabled) {
     dataViewId = dataView?.id ?? '';
-    indicesExist = !!dataView?.matchedIndices.length;
+    indicesExist = !!dataView?.matchedIndices?.length;
     selectedPatterns = experimentalSelectedPatterns;
   }
 

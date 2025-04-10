@@ -59,7 +59,7 @@ const DataQualityComponent: React.FC = () => {
   const experimentalSelectedPatterns = useSelectedPatterns();
 
   if (newDataViewPickerEnabled) {
-    indicesExist = !!dataView?.matchedIndices.length;
+    indicesExist = !!dataView?.matchedIndices?.length;
     selectedPatterns = experimentalSelectedPatterns;
     isSourcererLoading = status !== 'ready';
   }

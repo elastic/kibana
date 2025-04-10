@@ -120,7 +120,7 @@ const NetworkDetailsComponent: React.FC = () => {
 
   if (newDataViewPickerEnabled) {
     sourcererDataView = dataViewSpec;
-    indicesExist = !!dataView?.matchedIndices.length;
+    indicesExist = !!dataView?.matchedIndices?.length;
     selectedPatterns = experimentalSelectedPatterns;
   }
 

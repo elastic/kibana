@@ -38,7 +38,7 @@ const EntityAnalyticsComponent = () => {
 
   if (newDataViewPickerEnabled) {
     sourcererDataView = dataViewSpec;
-    indicesExist = !!dataView?.matchedIndices.length;
+    indicesExist = !!dataView?.matchedIndices?.length;
     isSourcererLoading = status !== 'ready';
   }
 
