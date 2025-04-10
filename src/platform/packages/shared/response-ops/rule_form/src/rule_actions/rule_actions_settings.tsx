@@ -24,7 +24,7 @@ import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
   getSelectedActionGroup,
-  hasFieldsForAad,
+  hasAlertsFields,
   parseDuration,
 } from '../utils';
 import { DEFAULT_VALID_CONSUMERS } from '../constants';
@@ -191,7 +191,7 @@ export const RuleActionsSettings = (props: RuleActionsSettingsProps) => {
   const ruleTypeId = selectedRuleType.id;
 
   const showActionAlertsFilter =
-    hasFieldsForAad({
+    hasAlertsFields({
       ruleType: selectedRuleType,
       consumer,
       validConsumers,
