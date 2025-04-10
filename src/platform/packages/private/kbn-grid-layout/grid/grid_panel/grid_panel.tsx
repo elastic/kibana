@@ -43,7 +43,6 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
     const initialPanel = activeLayout[rowId].panels[panelId];
 
     // offset of the element including the header and the previous rows
-    console.log(gridLayoutStateManager);
     const gridRowOffset = headerOffset + getTopOffsetForRow(rowId, activeLayout);
     return css`
       position: relative;
@@ -87,18 +86,24 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
           const activeLayout = proposedGridLayout ?? gridLayout;
           const panel = activeLayout[rowId]?.panels[panelId];
+          if (panelId === activePanel?.id){
+            console.log(ref, panel)
+          }
           if (!ref || !panel) return;
 
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+          // console.log('subscription', currentInteractionEvent, activePanel);
 
           const headerOffset = activeLayout[rowId].order === 0 ? 0 : 2;
           const gridRowOffset = headerOffset + getTopOffsetForRow(rowId, activeLayout);
 
           if (panelId === activePanel?.id) {
+            
             ref.classList.add('kbnGridPanel--active');
 
             // if the current panel is active, give it fixed positioning depending on the interaction event
             const { position: draggingPosition } = activePanel;
+            console.log('draggingPosition', draggingPosition);
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
             ref.style.zIndex = `${euiTheme.levels.modal}`;

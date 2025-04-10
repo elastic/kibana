@@ -28,7 +28,7 @@ import { getPanelKeysInOrder, getRowKeysInOrder, resolveGridRow } from './utils/
 import { GridRowHeader } from './grid_row/grid_row_header';
 import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
 import { GridPanel } from './grid_panel';
-import { getTopOffsetForRow } from './utils/calculations';
+import { getTopOffsetForRow, getTopOffsetForRowFooter } from './utils/calculations';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -79,9 +79,10 @@ export const GridLayout = ({
     return [
       ...headerAndPanels,
       ...panelIdsInOrder.map((panelId) => [panelId, rowId, row.isCollapsed]),
+      ['footer-ghost', rowId, row.isCollapsed]
     ];
   });
-  console.log(headersAndPanelsIds);
+
 
   //  const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
   //   getPanelKeysInOrder(rows[rowIdsInOrder[0]].panels)
@@ -227,8 +228,8 @@ export const GridLayout = ({
       <GridHeightSmoother>
         <div
           css={[
-            styles.layoutPadding, // todo: this should be moved to the wrapper because it messes up how the grid background is displayed
-            stylesRow.fullHeight,
+            styles.layoutPadding,
+            styles.fullHeight,
           ]}
         >
           <div
@@ -241,8 +242,8 @@ export const GridLayout = ({
               styles.hasActivePanel,
               styles.singleColumn,
               styles.hasExpandedPanel,
-              stylesRow.fullHeight,
-              stylesRow.grid,
+              styles.fullHeight,
+              styles.grid,
             ]}
           >
             {headersAndPanelsIds.map(([typeId, rowId, isCollapsed]) => {
@@ -260,7 +261,7 @@ export const GridLayout = ({
                 return (
                   <div
                     key={typeId}
-                    className="kbnGridRowHeader--ghost"
+                    className="kbnGridRowHeader--ghost" // this used only for calculating the position of the row 
                     style={{
                       gridColumnStart: 1,
                       gridColumnEnd: -1,
@@ -273,6 +274,10 @@ export const GridLayout = ({
                       gridLayoutStateManager.headerRefs.current[rowId] = element;
                     }}
                   />
+                );
+              } else if (typeId === 'footer-ghost') {
+                return (
+                  <GhostFooter rowId={rowId} key={`${rowId}-footer`} />
                 );
               }
               if (!isCollapsed) {
@@ -287,6 +292,28 @@ export const GridLayout = ({
     </GridLayoutContext.Provider>
   );
 };
+
+const GhostFooter = ({rowId}: {rowId: string}) => {
+  const { gridLayoutStateManager } = useGridLayoutContext();
+  const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
+  const topOffset = getTopOffsetForRowFooter(rowId, gridLayout);
+  const styles = {
+    gridColumnStart: 1,
+    gridColumnEnd: -1,
+    gridRowStart: topOffset + 1,
+    gridRowEnd: topOffset + 3,
+    pointerEvents: 'none' as const,
+    height: '0px',
+  };
+  return (
+    <div 
+      style={styles} 
+      className="kbnGridRowFooter--ghost"   
+      ref={(element: HTMLDivElement | null) =>
+        (gridLayoutStateManager.footerRefs.current[rowId] = element)
+      }/> // this used only for calculating the position of the row 
+  );
+}
 
 const GridRowHeaderWrapper = ({
   rowId,
@@ -343,7 +370,8 @@ const GridRowHeaderWrapper = ({
   );
 };
 
-const stylesRow = {
+
+const styles = {
   fullHeight: css({
     height: '100%',
   }),
@@ -361,9 +389,6 @@ const stylesRow = {
           )
         )`,
   }),
-};
-
-const styles = {
   layoutPadding: css({
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
   }),

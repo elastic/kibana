@@ -40,11 +40,11 @@ export const commitAction = ({
   proposedGridLayout$,
   gridLayout$,
 }: GridLayoutStateManager) => {
-  activeRowEvent$.next(undefined);
   const proposedGridLayoutValue = proposedGridLayout$.getValue();
   if (proposedGridLayoutValue && !deepEqual(proposedGridLayoutValue, gridLayout$.getValue())) {
     gridLayout$.next(cloneDeep(proposedGridLayoutValue));
   }
+  activeRowEvent$.next(undefined);
   proposedGridLayout$.next(undefined);
 };
 

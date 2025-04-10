@@ -52,17 +52,20 @@ export const moveAction = (
     interactionEvent$,
     proposedGridLayout$,
     activePanel$,
-    headerRefs: { current: gridRowElements },
+    headerRefs: { current: gridRowHeaders },
+    footerRefs: { current: gridRowFooters },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
+    // console.log('interactionEvent!', interactionEvent);
   if (!interactionEvent || !runtimeSettings) {
     // if no interaction event return early
-    return;
+    return; 
   }
 
   const currentLayout = proposedGridLayout$.value;
 
   const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
+  // console.log('currentPanelData', currentPanelData);
 
   if (!currentPanelData) {
     return;
@@ -88,28 +91,29 @@ export const moveAction = (
   const lastRowId = interactionEvent.targetRow;
   const targetRowId = (() => {
     // TODO: temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
-    if (isResize || isKeyboardEvent(e)) return lastRowId;
+    if (isResize) return lastRowId;
     const previewBottom = previewRect.top + rowHeight;
-    return lastRowId; // TODO: implement the logic to find the row that the preview rect is over
 
-    // let highestOverlap = -Infinity;
-    // let highestOverlapRowId = '';
-    // Object.entries(gridRowElements).forEach(([id, row]) => {
-    //   if (!row) return;
-    //   const rowRect = row.getBoundingClientRect();
-    //   const overlap =
-    //     Math.min(previewBottom, rowRect.bottom) - Math.max(previewRect.top, rowRect.top);
-    //   if (overlap > highestOverlap) {
-    //     highestOverlap = overlap;
-    //     highestOverlapRowId = id;
-    //   }
-    // });
-    // return highestOverlapRowId;
+    let highestOverlap = -Infinity;
+    let highestOverlapRowId = '';
+    Object.entries(gridRowHeaders).forEach(([id, row]) => {
+      if (!row) return;
+      const rowTop = row.getBoundingClientRect().top;
+      const rowBottom = gridRowFooters[id].getBoundingClientRect().bottom;
+      const overlap =
+        Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
+      if (overlap > highestOverlap) {
+        highestOverlap = overlap;
+        highestOverlapRowId = id;
+      }
+    });
+    return highestOverlapRowId;
   })();
   const hasChangedGridRow = targetRowId !== lastRowId;
 
   // re-render when the target row changes
   if (hasChangedGridRow) {
+    console.log(interactionEvent, targetRowId);
     interactionEvent$.next({
       ...interactionEvent,
       targetRow: targetRowId,
@@ -117,9 +121,9 @@ export const moveAction = (
   }
 
   // calculate the requested grid position
-  const targetedGridRow = gridRowElements[targetRowId];
-  const targetedGridLeft = targetedGridRow?.getBoundingClientRect().left ?? 0; // TODO: use the grid row header, AND ALSO ADD THE GRID ROW FOOTER!!!
-  const targetedGridTop = targetedGridRow?.getBoundingClientRect().bottom ?? 0;
+  const targetedGridRowHeader = gridRowHeaders[targetRowId];
+  const targetedGridLeft = targetedGridRowHeader?.getBoundingClientRect().left ?? 0; 
+  const targetedGridTop = targetedGridRowHeader?.getBoundingClientRect().bottom ?? 0;
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
 

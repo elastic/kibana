@@ -32,6 +32,10 @@ describe('row state manager actions', () => {
         second: {} as any as HTMLDivElement,
         third: {} as any as HTMLDivElement,
       };
+       gridLayoutStateManager.footerRefs.current = {
+        second: {} as any as HTMLDivElement,
+        third: {} as any as HTMLDivElement,
+      };
     });
 
     it('adjusts row order based on positioning of row refs', () => {
