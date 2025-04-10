@@ -259,7 +259,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       {flyoutStep !== 'initializing' && (
         <EuiFlyoutHeader hasBorder>
           <DeprecationBadge
-            isCritical={deprecation.isCritical}
+            level={deprecation.level}
             isResolved={status === DataStreamMigrationStatus.completed}
           />
           <EuiSpacer size="s" />
