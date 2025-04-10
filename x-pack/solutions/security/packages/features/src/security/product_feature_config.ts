@@ -90,6 +90,11 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
     },
   },
 
+  // Endpoint Essentials/Complete tiers
+  [ProductFeatureSecurityKey.endpointHostIsolation]: {
+    subFeatureIds: [SecuritySubFeatureId.hostIsolation],
+  },
+
   [ProductFeatureSecurityKey.endpointHostManagement]: {
     subFeatureIds: [SecuritySubFeatureId.endpointList],
   },

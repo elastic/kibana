@@ -26,6 +26,11 @@ export enum ProductFeatureSecurityKey {
    * running endpoint security
    */
   endpointHostManagement = 'endpoint_host_management',
+
+  /**
+   * Enables access to Endpoint host isolation and release actions
+   */
+  endpointHostIsolation = 'endpoint_host_isolation',
   /**
    * Enables endpoint policy views that enables user to manage endpoint security policies
    */
