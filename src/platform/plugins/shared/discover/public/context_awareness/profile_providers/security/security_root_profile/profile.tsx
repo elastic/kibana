@@ -39,7 +39,6 @@ export const createSecurityRootProfileProvider: SecurityProfileProviderFactory<
 
   return {
     profileId: 'security-root-profile',
-    isExperimental: true,
     profile: {
       getRowAdditionalLeadingControls: (prev) => (params) => {
         const additionalControls = prev(params) || [];
