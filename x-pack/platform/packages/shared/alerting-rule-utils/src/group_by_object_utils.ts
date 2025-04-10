@@ -38,22 +38,22 @@ export const flattenObject = (obj: FieldsObject, prefix: string = ''): FieldsObj
 
 export const getGroupByObject = (
   groupBy: string | string[] | undefined,
-  resultGroupSet: Set<string>
+  groupValueSet: Set<string>
 ): Record<string, object> => {
-  const groupByKeysObjectMapping: Record<string, object> = {};
+  const groupKeyValueMappingsObject: Record<string, object> = {};
   if (groupBy) {
-    resultGroupSet.forEach((groupSet) => {
-      const groupSetKeys = groupSet.split(',');
-      groupByKeysObjectMapping[groupSet] = unflattenObject(
+    groupValueSet.forEach((groupValueStr) => {
+      const groupValuesArray = groupValueStr.split(',');
+      groupKeyValueMappingsObject[groupValueStr] = unflattenObject(
         Array.isArray(groupBy)
-          ? groupBy.reduce((result, group, index) => {
-              return { ...result, [group]: groupSetKeys[index]?.trim() };
+          ? groupBy.reduce((result, groupKey, index) => {
+              return { ...result, [groupKey]: groupValuesArray[index]?.trim() };
             }, {})
-          : { [groupBy]: groupSet }
+          : { [groupBy]: groupValueStr }
       );
     });
   }
-  return groupByKeysObjectMapping;
+  return groupKeyValueMappingsObject;
 };
 
 export const getFormattedGroupBy = (
