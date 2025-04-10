@@ -130,6 +130,7 @@ export const useAlertSummary = ({
       const rawResponse = await sendMessage({
         ...content,
         promptIds: { promptGroupId: 'aiForSoc', promptId: 'alertSummarySystemPrompt' },
+        query: 'content_references_disabled=true',
       });
       let responseSummary;
       let responseRecommendedActions;

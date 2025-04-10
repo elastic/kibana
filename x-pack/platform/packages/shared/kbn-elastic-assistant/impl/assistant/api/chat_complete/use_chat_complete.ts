@@ -15,6 +15,7 @@ interface SendMessageProps {
   message: string;
   promptIds?: PromptIds;
   replacements: Replacements;
+  query?: string;
 }
 interface UseChatComplete {
   abortStream: () => void;
@@ -34,7 +35,7 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
     [connectors, connectorId]
   );
   const sendMessage = useCallback(
-    async ({ message, promptIds, replacements }: SendMessageProps) => {
+    async ({ message, promptIds, replacements, query }: SendMessageProps) => {
       setIsLoading(true);
 
       const timeoutId = setTimeout(() => {
@@ -51,6 +52,7 @@ export const useChatComplete = ({ connectorId }: { connectorId: string }): UseCh
           message,
           promptIds,
           replacements,
+          query,
           signal: abortController.current.signal,
           traceOptions,
         });

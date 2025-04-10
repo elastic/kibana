@@ -23,6 +23,7 @@ export interface PostChatCompleteParams {
   message: string;
   promptIds?: PromptIds;
   replacements: Replacements;
+  query?: string;
   signal?: AbortSignal | undefined;
   traceOptions?: TraceOptions;
 }
@@ -44,12 +45,14 @@ export const postChatComplete = async ({
   message,
   promptIds,
   replacements,
-  // TODO add query arg content_references_disabled=true once main is merged in
+  query,
   signal,
   traceOptions,
 }: PostChatCompleteParams): Promise<ChatCompleteResponse> => {
   try {
-    const path = `/internal/elastic_assistant/actions/connector/${connectorId}/_execute`;
+    const path = `/internal/elastic_assistant/actions/connector/${connectorId}/_execute${
+      query ? `?${query}` : ''
+    }`;
 
     const requestBody = {
       actionTypeId,
