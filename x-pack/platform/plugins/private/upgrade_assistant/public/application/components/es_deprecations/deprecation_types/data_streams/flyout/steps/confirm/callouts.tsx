@@ -20,6 +20,7 @@ export const ReindexWarningCallout: React.FunctionComponent<{}> = () => {
       }
       color="warning"
       iconType="warning"
+      data-test-subj="reindexDsWarningCallout"
     >
       <p>
         <FormattedMessage
@@ -42,6 +43,7 @@ export const ReadonlyWarningCallout: React.FunctionComponent<{}> = () => {
       }
       color="warning"
       iconType="warning"
+      data-test-subj="readOnlyDsWarningCallout"
     >
       <p>
         <FormattedMessage

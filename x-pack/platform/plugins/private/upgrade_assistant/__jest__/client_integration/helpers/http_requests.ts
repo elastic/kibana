@@ -150,6 +150,25 @@ const registerHttpRequestMockHelpers = (
     mockResponse('POST', `${API_BASE_PATH}/cluster_settings`, response, error);
   };
 
+  const setDataStreamMigrationStatusResponse = (
+    dataStreamName: string,
+    response?: object,
+    error?: ResponseError
+  ) =>
+    mockResponse('GET', `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}`, response, error);
+
+  const setDataStreamMetadataResponse = (
+    dataStreamName: string,
+    response?: object,
+    error?: ResponseError
+  ) =>
+    mockResponse(
+      'GET',
+      `${API_BASE_PATH}/migrate_data_stream/${dataStreamName}/metadata`,
+      response,
+      error
+    );
+
   return {
     setLoadCloudBackupStatusResponse,
     setLoadEsDeprecationsResponse,
@@ -170,6 +189,8 @@ const registerHttpRequestMockHelpers = (
     setLoadRemoteClustersResponse,
     setLoadNodeDiskSpaceResponse,
     setClusterSettingsResponse,
+    setDataStreamMigrationStatusResponse,
+    setDataStreamMetadataResponse,
   };
 };
 

@@ -80,6 +80,72 @@ const MOCK_DEFAULT_DEPRECATION: EnrichedDeprecationInfo = {
   index: 'nested_multi-fields',
 };
 
+export const MOCK_DS_DEPRECATION: EnrichedDeprecationInfo = {
+  index: 'reindex_or_readonly_ds',
+  type: 'data_streams',
+  details: 'Data stream deprecation details',
+  message: 'Outdated data stream',
+  url: 'doc_url',
+  level: 'critical',
+  resolveDuringUpgrade: false,
+  correctiveAction: {
+    type: 'dataStream',
+    metadata: {
+      excludedActions: [],
+      reindexRequired: true,
+      totalBackingIndices: 1,
+      indicesRequiringUpgradeCount: 1,
+      indicesRequiringUpgrade: ['ds_index'],
+      ignoredIndicesRequiringUpgrade: [],
+      ignoredIndicesRequiringUpgradeCount: 0,
+    },
+  },
+};
+
+export const MOCK_DS_DEPRECATION_REINDEX: EnrichedDeprecationInfo = {
+  index: 'reindex_ds',
+  type: 'data_streams',
+  details: 'Data stream deprecation details',
+  message: 'Outdated data stream',
+  url: 'doc_url',
+  level: 'critical',
+  resolveDuringUpgrade: false,
+  correctiveAction: {
+    type: 'dataStream',
+    metadata: {
+      excludedActions: ['readOnly'],
+      reindexRequired: true,
+      totalBackingIndices: 1,
+      indicesRequiringUpgradeCount: 1,
+      indicesRequiringUpgrade: ['ds_index'],
+      ignoredIndicesRequiringUpgrade: [],
+      ignoredIndicesRequiringUpgradeCount: 0,
+    },
+  },
+};
+
+export const MOCK_DS_DEPRECATION_READ_ONLY: EnrichedDeprecationInfo = {
+  index: 'readonly_ds',
+  type: 'data_streams',
+  details: 'Data stream deprecation details',
+  message: 'Outdated data stream',
+  url: 'doc_url',
+  level: 'critical',
+  resolveDuringUpgrade: false,
+  correctiveAction: {
+    type: 'dataStream',
+    metadata: {
+      excludedActions: ['reindex'],
+      reindexRequired: true,
+      totalBackingIndices: 1,
+      indicesRequiringUpgradeCount: 1,
+      indicesRequiringUpgrade: ['ds_index'],
+      ignoredIndicesRequiringUpgrade: [],
+      ignoredIndicesRequiringUpgradeCount: 0,
+    },
+  },
+};
+
 export const esDeprecationsMockResponse: ESUpgradeStatus = {
   totalCriticalDeprecations: 2,
   migrationsDeprecations: [
@@ -88,6 +154,9 @@ export const esDeprecationsMockResponse: ESUpgradeStatus = {
     MOCK_DEFAULT_DEPRECATION,
     MOCK_REINDEX_DEPRECATION,
     MOCK_CLUSTER_SETTING_DEPRECATION,
+    MOCK_DS_DEPRECATION,
+    MOCK_DS_DEPRECATION_REINDEX,
+    MOCK_DS_DEPRECATION_READ_ONLY,
   ],
   totalCriticalHealthIssues: 0,
   enrichedHealthIndicators: [],
