@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EmptySchedule } from './empty_schedule';
+const ONE_MINUTE = 60000;
 
-export const Schedule: React.FC = React.memo(() => {
-  return <EmptySchedule />;
-});
-Schedule.displayName = 'Schedule';
+export const DEFAULT_QUERY_OPTIONS = {
+  refetchIntervalInBackground: false,
+  staleTime: ONE_MINUTE * 5,
+  retry: false,
+};

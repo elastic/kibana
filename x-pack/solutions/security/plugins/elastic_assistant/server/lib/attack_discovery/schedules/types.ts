@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { RuleExecutorOptions, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
 import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
@@ -28,3 +29,14 @@ export type AttackDiscoveryScheduleType = RuleType<
   never,
   SecurityAttackDiscoveryAlert
 >;
+
+export interface AttackDiscoveryScheduleSort {
+  sortDirection?: estypes.SortOrder;
+  sortField?: string;
+}
+
+export interface AttackDiscoveryScheduleFindOptions {
+  page?: number;
+  perPage?: number;
+  sort?: AttackDiscoveryScheduleSort;
+}

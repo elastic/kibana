@@ -10,11 +10,11 @@ import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
   API_VERSIONS,
+  ATTACK_DISCOVERY,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { ATTACK_DISCOVERY } from '../../../../common/constants';
 import { updateAttackDiscoveryStatusToRunning } from '../helpers/helpers';
 import { buildResponse } from '../../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';

@@ -11,11 +11,11 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import {
   API_VERSIONS,
+  ATTACK_DISCOVERY_SCHEDULES_BY_ID,
   GetAttackDiscoverySchedulesRequestParams,
   GetAttackDiscoverySchedulesResponse,
 } from '@kbn/elastic-assistant-common';
 import { buildResponse } from '../../../lib/build_response';
-import { ATTACK_DISCOVERY_SCHEDULES_BY_ID } from '../../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { convertAlertingRuleToSchedule } from './utils/convert_alerting_rule_to_schedule';
 import { performChecks } from '../../helpers';
@@ -88,6 +88,12 @@ export const getAttackDiscoverySchedulesRoute = (
           }
 
           const alertingRule = await dataClient.getSchedule(id);
+
+          const eventLogs = await dataClient.getScheduleEventLogs(id);
+          console.log(`[TEST] eventLogs: ${JSON.stringify(eventLogs, null, 2)}`);
+
+          const summary = await dataClient.getScheduleSummary(id);
+          console.log(`[TEST] summary: ${JSON.stringify(summary, null, 2)}`);
 
           const schedule = convertAlertingRuleToSchedule(alertingRule);
 
