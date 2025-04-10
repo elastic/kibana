@@ -29,7 +29,7 @@ const AlertsContext = createContext<{
    * anonymization switch state in local storage
    */
   showAnonymizedValues: boolean;
-  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
+  setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean | undefined>>;
 } | null>(null);
 
 const AlertsContextProviderComponent = ({ children }: PropsWithChildren) => {
