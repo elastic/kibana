@@ -30,7 +30,6 @@ import {
   BaseExportTypeStartDeps,
   ExportType,
   RunTaskOpts,
-  decryptJobHeaders,
   getFieldFormats,
 } from '@kbn/reporting-server';
 
@@ -74,34 +73,24 @@ export class CsvSearchSourceExportType extends ExportType<
     jobId,
     payload: job,
     taskInstanceFields,
-    fakeRequest: requestFromTask,
+    request,
     cancellationToken,
     stream,
   }: RunTaskOpts<TaskPayloadCSV>) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
 
-    const { encryptionKey, csv: csvConfig } = this.config;
+    const { csv: csvConfig } = this.config;
 
-    let requestToUse = requestFromTask;
-    if (!requestToUse) {
-      const headers = await decryptJobHeaders(encryptionKey, job.headers, logger);
-      requestToUse = this.getFakeRequest(headers, job.spaceId, logger);
-      logger.info(`Using fakeRequest from headers for job ${jobId}`);
-    } else {
-      logger.info(`Using fakeRequest from taskInstance for job ${jobId}`);
-    }
-    logger.info(`request headers ${JSON.stringify(requestToUse.headers)}`);
-
-    const uiSettings = await this.getUiSettingsClient(requestToUse, logger);
+    const uiSettings = await this.getUiSettingsClient(request, logger);
     const dataPluginStart = this.startDeps.data;
     const fieldFormatsRegistry = await getFieldFormats().fieldFormatServiceFactory(uiSettings);
 
-    const es = this.startDeps.esClient.asScoped(requestToUse);
-    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(requestToUse);
+    const es = this.startDeps.esClient.asScoped(request);
+    const searchSourceStart = await dataPluginStart.search.searchSource.asScoped(request);
 
     const clients = {
       uiSettings,
-      data: dataPluginStart.search.asScoped(requestToUse),
+      data: dataPluginStart.search.asScoped(request),
       es,
     };
     const dependencies = {

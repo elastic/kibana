@@ -18,6 +18,7 @@ import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 
 import { PdfV1ExportType } from '.';
+import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 let content: string;
 let mockPdfExportType: PdfV1ExportType;
@@ -31,6 +32,13 @@ const mockEncryptionKey = 'testencryptionkey';
 const encryptHeaders = async (headers: Record<string, string>) => {
   const crypto = cryptoFactory(mockEncryptionKey);
   return await crypto.encrypt(headers);
+};
+
+const fakeRawRequest: FakeRawRequest = {
+  headers: {
+    authorization: `ApiKey skdjtq4u543yt3rhewrh`,
+  },
+  path: '/',
 };
 
 const screenshottingMock = createMockScreenshottingStart();
@@ -76,6 +84,7 @@ test(`passes browserTimezone to getScreenshots`, async () => {
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({
       browserTimezone,
       headers: encryptedHeaders,
@@ -96,6 +105,7 @@ test(`returns content_type of application/pdf`, async () => {
 
   const { content_type: contentType } = await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
@@ -108,6 +118,7 @@ test(`returns buffer content base64 encoded`, async () => {
   const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,
@@ -123,6 +134,7 @@ test(`screenshotting plugin uses the logger provided by the PDF export-type`, as
   const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask({
     jobId: 'pdfJobId',
+    request: fakeRawRequest as unknown as KibanaRequest,
     payload: getBasePayload({ objects: [], headers: encryptedHeaders }),
     taskInstanceFields,
     cancellationToken,

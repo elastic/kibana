@@ -27,7 +27,7 @@ import {
   PDF_JOB_TYPE_V2,
   PDF_REPORT_TYPE_V2,
 } from '@kbn/reporting-export-types-pdf-common';
-import { ExportType, decryptJobHeaders, getFullRedirectAppUrl } from '@kbn/reporting-server';
+import { ExportType, getFullRedirectAppUrl } from '@kbn/reporting-server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 
 import { getCustomLogo } from './get_custom_logo';
@@ -76,7 +76,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
   public runTask = ({
     jobId,
     payload,
-    fakeRequest: requestFromTask,
+    request,
     taskInstanceFields,
     cancellationToken,
     stream,
@@ -85,24 +85,13 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
-    const { encryptionKey } = this.config;
 
     const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
       mergeMap(async () => {
-        let requestToUse = requestFromTask;
-        if (!requestToUse) {
-          const headers = await decryptJobHeaders(encryptionKey, payload.headers, logger);
-          requestToUse = this.getFakeRequest(headers, payload.spaceId, logger);
-          logger.info(`Using fakeRequest from headers for job ${jobId}`);
-        } else {
-          logger.info(`Using fakeRequest from taskInstance for job ${jobId}`);
-        }
-        logger.info(`request headers ${JSON.stringify(requestToUse.headers)}`);
-        const uiSettingsClient = await this.getUiSettingsClient(requestToUse);
-        const logo = await getCustomLogo(uiSettingsClient);
-        return { logo, requestToUse };
+        const uiSettingsClient = await this.getUiSettingsClient(request);
+        return getCustomLogo(uiSettingsClient);
       }),
-      mergeMap(({ logo, requestToUse }) => {
+      mergeMap((logo) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
 
         apmGetAssets?.end();
@@ -130,7 +119,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
             format: 'pdf',
             title,
             logo,
-            request: requestToUse,
+            request,
             browserTimezone,
             layout,
             urls: urls.map((url) =>

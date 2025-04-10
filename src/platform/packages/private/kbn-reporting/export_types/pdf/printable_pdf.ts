@@ -25,12 +25,7 @@ import {
   PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import {
-  ExportType,
-  REPORTING_TRANSACTION_TYPE,
-  RunTaskOpts,
-  decryptJobHeaders,
-} from '@kbn/reporting-server';
+import { ExportType, REPORTING_TRANSACTION_TYPE, RunTaskOpts } from '@kbn/reporting-server';
 
 import { getCustomLogo } from './get_custom_logo';
 import { getFullUrls } from './get_full_urls';
@@ -76,7 +71,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
   public runTask = async ({
     jobId,
     payload: job,
-    fakeRequest: requestFromTask,
+    request,
     taskInstanceFields,
     cancellationToken,
     stream,
@@ -88,20 +83,10 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
     const process$: Observable<TaskRunResult> = of(1).pipe(
       mergeMap(async () => {
-        let requestToUse = requestFromTask;
-        if (!requestToUse) {
-          const headers = await decryptJobHeaders(this.config.encryptionKey, job.headers, logger);
-          requestToUse = this.getFakeRequest(headers, job.spaceId, logger);
-          logger.info(`Using fakeRequest from headers for job ${jobId}`);
-        } else {
-          logger.info(`Using fakeRequest from taskInstance for job ${jobId}`);
-        }
-        logger.info(`request headers ${JSON.stringify(requestToUse.headers)}`);
-        const uiSettingsClient = await this.getUiSettingsClient(requestToUse);
-        const logo = await getCustomLogo(uiSettingsClient);
-        return { logo, requestToUse };
+        const uiSettingsClient = await this.getUiSettingsClient(request);
+        return getCustomLogo(uiSettingsClient);
       }),
-      mergeMap(({ requestToUse, logo }) => {
+      mergeMap((logo) => {
         const urls = getFullUrls(this.getServerInfo(), this.config, job);
 
         const { browserTimezone, layout, title } = job;
@@ -118,7 +103,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             title,
             logo,
             urls,
-            request: requestToUse,
+            request,
             browserTimezone,
             layout,
             taskInstanceFields,

@@ -8,7 +8,6 @@
  */
 
 import { Writable } from 'stream';
-
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -39,7 +38,7 @@ export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload
 export interface RunTaskOpts<TaskPayloadType = BasePayload> {
   jobId: string;
   payload: TaskPayloadType;
-  fakeRequest?: KibanaRequest;
+  request: KibanaRequest;
   taskInstanceFields: TaskInstanceFields;
   cancellationToken: CancellationToken;
   stream: Writable;
