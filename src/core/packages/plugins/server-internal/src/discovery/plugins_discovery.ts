@@ -65,18 +65,12 @@ export function discover({
   const pluginPkgDiscovery$ = from(coreContext.env.repoPackages ?? EMPTY).pipe(
     filter(
       getPluginPackagesFilter({
+        allowlistPluginGroups: config.allowlistPluginGroups,
         oss: coreContext.env.cliArgs.oss,
         examples: coreContext.env.cliArgs.runExamples,
         paths: config.additionalPluginPaths,
         parentDirs: config.pluginSearchPaths,
       })
-    ),
-    filter(
-      (pkg) =>
-        // if allowlistPluginGroups is defined
-        !config.allowlistPluginGroups ||
-        // admit those packages that are part of the included groups
-        config.allowlistPluginGroups.includes(pkg.getGroup())
     ),
     map((pkg) => {
       log.debug(`Successfully discovered plugin package "${pkg.id}"`);
