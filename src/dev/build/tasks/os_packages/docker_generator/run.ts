@@ -36,6 +36,7 @@ export async function runDockerGenerator(
     ironbank?: boolean;
     cloud?: boolean;
     serverless?: boolean;
+    dockerHub?: boolean;
     dockerBuildDate?: string;
     fips?: boolean;
   }
@@ -121,6 +122,7 @@ export async function runDockerGenerator(
     dockerTag,
     dockerTagQualifier,
     dockerCrossCompile,
+    dockerHub: flags.dockerHub,
     baseImageName,
     dockerBuildDate,
     baseImage: flags.baseImage,
