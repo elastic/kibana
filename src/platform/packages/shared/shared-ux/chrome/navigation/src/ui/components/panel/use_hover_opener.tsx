@@ -61,8 +61,8 @@ export const useHoverOpener2 = ({
   onHover: (node: PanelSelectedNode) => void;
   onLeave: () => void;
 }) => {
-  const HOVER_OPEN_DELAY = 200;
-  const HOVER_CLOSE_DELAY = 300;
+  const HOVER_OPEN_DELAY = 50;
+  const HOVER_CLOSE_DELAY = 200;
 
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
