@@ -342,6 +342,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         const expectedArtifacts = {
           artifacts: {
             investigation_guide: { blob: 'Sample investigation guide' },
+            dashboards: [{ id: 'dashboard-1' }],
           },
         };
         const { body: createdAlert } = await supertest

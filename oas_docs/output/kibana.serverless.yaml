@@ -29541,6 +29541,8 @@ paths:
                                   type: string
                             sync_integrations:
                               type: boolean
+                            sync_uninstalled_integrations:
+                              type: boolean
                             type:
                               enum:
                                 - remote_elasticsearch
@@ -30311,6 +30313,8 @@ paths:
                           type: string
                     sync_integrations:
                       type: boolean
+                    sync_uninstalled_integrations:
+                      type: boolean
                     type:
                       enum:
                         - remote_elasticsearch
@@ -31039,6 +31043,8 @@ paths:
                                   - strict
                                 type: string
                           sync_integrations:
+                            type: boolean
+                          sync_uninstalled_integrations:
                             type: boolean
                           type:
                             enum:
@@ -31875,6 +31881,8 @@ paths:
                                 type: string
                           sync_integrations:
                             type: boolean
+                          sync_uninstalled_integrations:
+                            type: boolean
                           type:
                             enum:
                               - remote_elasticsearch
@@ -32632,6 +32640,8 @@ paths:
                           type: string
                     sync_integrations:
                       type: boolean
+                    sync_uninstalled_integrations:
+                      type: boolean
                     type:
                       enum:
                         - remote_elasticsearch
@@ -33347,6 +33357,8 @@ paths:
                                   - strict
                                 type: string
                           sync_integrations:
+                            type: boolean
+                          sync_uninstalled_integrations:
                             type: boolean
                           type:
                             enum:
