@@ -84,8 +84,9 @@ export class ServerlessAuthProvider implements AuthProvider {
     );
   }
 
+  // For compatibility with the Scout test framework we use the same name for the custom role
   getCustomRole() {
-    return 'customRole';
+    return 'custom_role_worker_1';
   }
 
   getRolesDefinitionPath(): string {

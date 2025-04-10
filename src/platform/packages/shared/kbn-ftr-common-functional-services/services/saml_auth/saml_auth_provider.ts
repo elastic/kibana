@@ -126,6 +126,12 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       return sessionManager.getApiCredentialsForRole(role, options);
     },
 
+    async getM2MApiCookieCredentialsWitCustomRoleScope(
+      options?: GetCookieOptions
+    ): Promise<CookieCredentials> {
+      return sessionManager.getM2MApiCookieCredentialsWithRoleScope(role, options);
+    },
+
     async getEmail(role: string) {
       return sessionManager.getEmail(role);
     },
@@ -180,6 +186,10 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
 
       log.debug(`Created API key for role: [${role}]`);
       return { apiKey, apiKeyHeader };
+    },
+
+    async createM2mApiKeyWithCustomRoleScope() {
+      return this.createM2mApiKeyWithRoleScope(CUSTOM_ROLE);
     },
 
     async invalidateM2mApiKeyWithRoleScope(roleCredentials: RoleCredentials) {
