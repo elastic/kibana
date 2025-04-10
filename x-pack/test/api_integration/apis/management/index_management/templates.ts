@@ -15,6 +15,7 @@ import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
+  const es = getService('es');
   const { catTemplate, getTemplatePayload, getSerializedTemplate } = templatesHelpers(getService);
   const {
     getAllTemplates,
