@@ -63,7 +63,7 @@ describe('Global HTTP API options', () => {
     server = innerServer;
   });
   afterEach(async () => {
-    httpService?.stop();
+    await httpService?.stop();
   });
 
   it('filters plain objects', async () => {
