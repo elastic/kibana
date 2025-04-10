@@ -64,7 +64,13 @@ export const createRackAgentInstructions = (commonOptions: AgentInstructions): E
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.rack.install.copyAriaLabel', {
+              defaultMessage: 'Copy the code to install the APM agent for Rack',
+            })}
+          >
             gem &apos;elastic-apm&apos;
           </EuiCodeBlock>
         </>
@@ -83,7 +89,13 @@ export const createRackAgentInstructions = (commonOptions: AgentInstructions): E
             })}
           </EuiMarkdownFormat>
           <EuiSpacer />
-          <EuiCodeBlock language="bash" isCopyable={true}>
+          <EuiCodeBlock
+            language="bash"
+            isCopyable={true}
+            copyAriaLabel={i18n.translate('xpack.apm.onboarding.rack.configure.copyAriaLabel', {
+              defaultMessage: 'Copy the code to configure the APM agent for Rack',
+            })}
+          >
             {codeBlock}
           </EuiCodeBlock>
         </>
