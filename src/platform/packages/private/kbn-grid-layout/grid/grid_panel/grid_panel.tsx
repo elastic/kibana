@@ -95,19 +95,14 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           let panel = activeLayout[row]?.panels[panelId];
           if (!panel) {
             // search for panel in each of the `activeLayout[row]` - save panel to panel variable and row to row variable
-            Object.entries(activeLayout).forEach(([rowId, rowData]) => {
+            Object.entries(activeLayout).forEach(([rId, rowData]) => {
               if (rowData.panels[panelId]) {
                 panel = rowData.panels[panelId];
-                row = rowId;
+                row = rId;
               }
             });
           }
-          if (panelId === activePanel?.id) {
-            console.log(ref, panel);
-          }
           if (!ref || !panel) return;
-
-          // console.log('subscription', currentInteractionEvent, activePanel);
 
           const headerOffset = activeLayout[row].order === 0 ? 0 : 2;
           const gridRowOffset = headerOffset + getTopOffsetForRow(row, activeLayout);
@@ -117,7 +112,6 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
             // if the current panel is active, give it fixed positioning depending on the interaction event
             const { position: draggingPosition } = activePanel;
-            console.log('draggingPosition', draggingPosition);
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
             ref.style.zIndex = `${euiTheme.levels.modal}`;

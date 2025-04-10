@@ -25,7 +25,6 @@ export const startAction = (
   panelId: string
 ) => {
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
-  console.log(panelRef);
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
@@ -57,7 +56,6 @@ export const moveAction = (
     footerRefs: { current: gridRowFooters },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
-  // console.log('interactionEvent!', interactionEvent);
   if (!interactionEvent || !runtimeSettings) {
     // if no interaction event return early
     return;
@@ -66,7 +64,6 @@ export const moveAction = (
   const currentLayout = proposedGridLayout$.value;
 
   const currentPanelData = currentLayout?.[interactionEvent.targetRow].panels[interactionEvent.id];
-  // console.log('currentPanelData', currentPanelData);
 
   if (!currentPanelData) {
     return;
@@ -113,7 +110,6 @@ export const moveAction = (
 
   // re-render when the target row changes
   if (hasChangedGridRow) {
-    console.log(interactionEvent, targetRowId);
     interactionEvent$.next({
       ...interactionEvent,
       targetRow: targetRowId,

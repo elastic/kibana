@@ -108,6 +108,7 @@ export const GridRowHeader = React.memo(
             headerRef.style.width = `${width}px`;
             headerRef.style.top = `${activeRowEvent.startingPosition.top}px`;
             headerRef.style.left = `${activeRowEvent.startingPosition.left}px`;
+            headerRef.style.zIndex = `10000`; // todo
           } else if (type === 'update') {
             headerRef.style.transform = `translate(${activeRowEvent.translate.left}px, ${activeRowEvent.translate.top}px)`;
           } else {
@@ -117,6 +118,7 @@ export const GridRowHeader = React.memo(
             headerRef.style.top = ``;
             headerRef.style.left = ``;
             headerRef.style.transform = ``;
+            headerRef.style.zIndex = ``;
           }
         });
 
@@ -211,7 +213,7 @@ export const GridRowHeader = React.memo(
                         onMouseDown={startDrag}
                         onTouchStart={startDrag}
                         onKeyDown={startDrag}
-                        onBlur={onBlur}
+                        // onBlur={onBlur}
                         data-test-subj={`kbnGridRowHeader-${rowId}--dragHandle`}
                       />
                     </EuiFlexItem>

@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { combineLatest, pairwise, map, distinctUntilChanged, skip } from 'rxjs';
+import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -291,26 +291,24 @@ const GhostFooter = ({ rowId }: { rowId: string }) => {
     pointerEvents: 'none' as const,
     height: '0px',
   };
-    
-   useEffect(
+
+  useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
-      ])
-        .subscribe(([gridLayout, proposedGridLayout]) => {
-          const footerRef = gridLayoutStateManager.footerRefs.current[rowId]
-          if (!footerRef) return;
-          const currentGridLayout = proposedGridLayout || gridLayout
-          const topOffset = getTopOffsetForRowFooter(rowId, currentGridLayout);
-            footerRef.style.display = 'block';
-            footerRef.style.gridColumnStart = `1`;
-            footerRef.style.gridColumnEnd = `-1`;
-            footerRef.style.gridRowStart = `${topOffset + 1}`;
-            footerRef.style.gridRowEnd = `${topOffset + 3}`;
-
-        });
+      ]).subscribe(([gridLayout, proposedGridLayout]) => {
+        const footerRef = gridLayoutStateManager.footerRefs.current[rowId];
+        if (!footerRef) return;
+        const currentGridLayout = proposedGridLayout || gridLayout;
+        const topOffset = getTopOffsetForRowFooter(rowId, currentGridLayout);
+        footerRef.style.display = 'block';
+        footerRef.style.gridColumnStart = `1`;
+        footerRef.style.gridColumnEnd = `-1`;
+        footerRef.style.gridRowStart = `${topOffset + 1}`;
+        footerRef.style.gridRowEnd = `${topOffset + 3}`;
+      });
 
       return () => {
         styleSubscription.unsubscribe();
@@ -351,27 +349,23 @@ const GridRowHeaderWrapper = ({
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
   }, [isCollapsed]);
 
-  
-   useEffect(
+  useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
       const styleSubscription = combineLatest([
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
-      ])
-        .subscribe(([gridLayout, proposedGridLayout]) => {
-          const headerRef = gridLayoutStateManager.headerRefs.current[rowId]
-          console.log(headerRef)
-          if (!headerRef) return;
-          const currentGridLayout = proposedGridLayout || gridLayout
-            const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
-            headerRef.style.display = 'block';
-            headerRef.style.gridColumnStart = `1`;
-            headerRef.style.gridColumnEnd = `-1`;
-            headerRef.style.gridRowStart = `${topOffset + 1}`;
-            headerRef.style.gridRowEnd = `${topOffset + 3}`;
-
-        });
+      ]).subscribe(([gridLayout, proposedGridLayout]) => {
+        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
+        if (!headerRef) return;
+        const currentGridLayout = proposedGridLayout || gridLayout;
+        const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
+        headerRef.style.display = 'block';
+        headerRef.style.gridColumnStart = `1`;
+        headerRef.style.gridColumnEnd = `-1`;
+        headerRef.style.gridRowStart = `${topOffset + 1}`;
+        headerRef.style.gridRowEnd = `${topOffset + 3}`;
+      });
 
       return () => {
         styleSubscription.unsubscribe();
