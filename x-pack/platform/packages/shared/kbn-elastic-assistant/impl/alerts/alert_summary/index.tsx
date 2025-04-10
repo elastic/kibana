@@ -74,7 +74,7 @@ export const AlertSummary: FunctionComponent<Props> = ({
           </>
         ) : (
           <>
-            <MessageText content={alertSummary} contentReferences={null} />
+            <MessageText content={alertSummary} />
 
             <EuiSpacer size="m" />
             {recommendedActions && (
@@ -84,7 +84,7 @@ export const AlertSummary: FunctionComponent<Props> = ({
                     {i18n.RECOMMENDED_ACTIONS}
                   </EuiText>
                   <EuiSpacer size="s" />
-                  <MessageText content={recommendedActions} contentReferences={null} />
+                  <MessageText content={recommendedActions} />
                 </EuiPanel>
                 <EuiSpacer size="m" />
               </>

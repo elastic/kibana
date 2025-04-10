@@ -15,25 +15,17 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
-import type { ContentReferences } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
-import { contentReferenceParser } from './content_reference_parser';
 import { customCodeBlockLanguagePlugin } from './custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from './custom_code_block';
 
-export type StreamingOrFinalContentReferences = ContentReferences | undefined | null;
 interface Props {
-  contentReferences: StreamingOrFinalContentReferences;
   content: string;
   ['data-test-subj']?: string;
 }
 
-interface GetPluginDependencies {
-  contentReferences: StreamingOrFinalContentReferences;
-}
-
-const getPluginDependencies = ({ contentReferences }: GetPluginDependencies) => {
+const getPluginDependencies = () => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -75,24 +67,17 @@ const getPluginDependencies = ({ contentReferences }: GetPluginDependencies) => 
   };
 
   return {
-    parsingPluginList: [
-      customCodeBlockLanguagePlugin,
-      ...parsingPlugins,
-      contentReferenceParser({ contentReferences }),
-    ],
+    parsingPluginList: [customCodeBlockLanguagePlugin, ...parsingPlugins],
     processingPluginList: processingPlugins,
   };
 };
 
-export function MessageText({ contentReferences, content, 'data-test-subj': dataTestSubj }: Props) {
+export function MessageText({ content, 'data-test-subj': dataTestSubj }: Props) {
   const containerCss = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = useMemo(
-    () => getPluginDependencies({ contentReferences }),
-    [contentReferences]
-  );
+  const { parsingPluginList, processingPluginList } = useMemo(() => getPluginDependencies(), []);
 
   return (
     <EuiText css={containerCss} data-test-subj={dataTestSubj}>

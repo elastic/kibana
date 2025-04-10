@@ -11,13 +11,12 @@ import type {
   CoreSetup,
   CoreStart,
   Logger,
-  KibanaRequest,
 } from '@kbn/core/server';
 
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { isSupportedConnector } from '@kbn/inference-common';
 import { getDefaultAIConnectorSetting } from '@kbn/security-solution-plugin/server/ui_settings';
-import type { RawConnector } from '@kbn/inference-common/src/connectors/connectors';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -97,10 +96,10 @@ export class SecuritySolutionServerlessPlugin
       .then(async ([_, depsStart]) => {
         await new Promise<void>(async (resolve) => {
           try {
-            const fakeRequest = { headers: {} } as KibanaRequest;
-            const actionsClient = await depsStart.actions.getActionsClientWithRequest(fakeRequest);
-            const aiConnectors = actionsClient.context.inMemoryConnectors.filter(
-              (connector: RawConnector) => isSupportedConnector(connector)
+            const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
+            // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
+            const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
+              (connector: Connector) => isSupportedConnector(connector)
             );
             const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
             if (defaultAIConnectorSetting !== null) {

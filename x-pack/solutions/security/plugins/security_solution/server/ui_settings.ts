@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
-import type { InMemoryConnector } from '@kbn/actions-plugin/server';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import {
   APP_ID,
   DEFAULT_ANOMALY_SCORE,
@@ -514,9 +514,7 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
-export const getDefaultAIConnectorSetting = (
-  connectors: InMemoryConnector[]
-): SettingsConfig | null =>
+export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
   connectors.length > 0
     ? {
         [DEFAULT_AI_CONNECTOR]: {
