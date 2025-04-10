@@ -19,7 +19,6 @@ import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 
 import { stepRouter } from './nodes/step_router';
-import { modelInput } from './nodes/model_input';
 import { runAgent } from './nodes/run_agent';
 import { executeTools } from './nodes/execute_tools';
 import { generateChatTitle } from './nodes/generate_chat_title';
@@ -100,12 +99,10 @@ export const getDefaultAssistantGraph = ({
       .addNode(NodeType.TOOLS, (state: AgentState) =>
         executeTools({ ...nodeParams, config: { signal }, state, tools })
       )
-      .addNode(NodeType.MODEL_INPUT, (state: AgentState) => modelInput({ ...nodeParams, state }))
-      .addEdge(START, NodeType.MODEL_INPUT)
       .addEdge(NodeType.GENERATE_CHAT_TITLE, NodeType.PERSIST_CONVERSATION_CHANGES)
       .addEdge(NodeType.PERSIST_CONVERSATION_CHANGES, NodeType.AGENT)
       .addEdge(NodeType.TOOLS, NodeType.AGENT)
-      .addConditionalEdges(NodeType.MODEL_INPUT, stepRouter, {
+      .addConditionalEdges(START, stepRouter, {
         [NodeType.GET_PERSISTED_CONVERSATION]: NodeType.GET_PERSISTED_CONVERSATION,
         [NodeType.AGENT]: NodeType.AGENT,
       })

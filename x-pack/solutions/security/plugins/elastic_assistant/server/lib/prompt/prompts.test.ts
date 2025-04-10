@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import {
-  BEDROCK_SYSTEM_PROMPT,
-  DEFAULT_SYSTEM_PROMPT,
-  GEMINI_SYSTEM_PROMPT,
-  STRUCTURED_SYSTEM_PROMPT,
-} from './prompts';
+import { BEDROCK_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT, GEMINI_SYSTEM_PROMPT } from './prompts';
 
 describe('prompts', () => {
   it.each([
     [DEFAULT_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
     [GEMINI_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
     [BEDROCK_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
-    [STRUCTURED_SYSTEM_PROMPT, 'Annotate your answer with the provided citations', 1],
     [DEFAULT_SYSTEM_PROMPT, '{formattedTime}', 1],
     [GEMINI_SYSTEM_PROMPT, '{formattedTime}', 1],
     [BEDROCK_SYSTEM_PROMPT, '{formattedTime}', 1],
-    [STRUCTURED_SYSTEM_PROMPT, '{formattedTime}', 1],
     [DEFAULT_SYSTEM_PROMPT, 'You are a security analyst', 1],
     [GEMINI_SYSTEM_PROMPT, 'You are an assistant', 1],
     [BEDROCK_SYSTEM_PROMPT, 'You are a security analyst', 1],

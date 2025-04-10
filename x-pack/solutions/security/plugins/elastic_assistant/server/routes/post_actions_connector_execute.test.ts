@@ -126,8 +126,6 @@ const mockResponse = {
 };
 
 describe('postActionsConnectorExecuteRoute', () => {
-  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
-
   beforeEach(() => {
     jest.clearAllMocks();
     license.hasAtLeast.mockReturnValue(true);
@@ -206,8 +204,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -235,8 +232,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -274,8 +270,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -308,8 +303,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -349,8 +343,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -389,8 +382,7 @@ describe('postActionsConnectorExecuteRoute', () => {
       },
     };
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -426,8 +418,7 @@ describe('postActionsConnectorExecuteRoute', () => {
     };
 
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 
@@ -462,8 +453,7 @@ describe('postActionsConnectorExecuteRoute', () => {
       },
     };
     await postActionsConnectorExecuteRoute(
-      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
-      mockGetElser
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>
     );
   });
 });

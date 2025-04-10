@@ -254,7 +254,7 @@ export interface LangChainExecuteParams {
   savedObjectsClient: SavedObjectsClientContract;
   screenContext?: ScreenContext;
   systemPrompt?: string;
-  timeout: number;
+  timeout?: number;
 }
 export const langChainExecute = async ({
   messages,

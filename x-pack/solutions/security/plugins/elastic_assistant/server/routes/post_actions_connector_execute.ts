@@ -23,7 +23,7 @@ import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
 import { POST_ACTIONS_CONNECTOR_EXECUTE } from '../../common/constants';
 import { buildResponse } from '../lib/build_response';
-import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
+import { ElasticAssistantRequestHandlerContext } from '../types';
 import {
   appendAssistantMessageToConversation,
   getIsKnowledgeBaseInstalled,
@@ -36,9 +36,11 @@ import { ConfigSchema } from '../config_schema';
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
-  getElser: GetElser,
-  config: ConfigSchema
+  config?: ConfigSchema
 ) => {
+  // add 30 seconds to the response timeout
+  // to allow for the request to be aborted
+  const RESPONSE_TIMEOUT = (config?.responseTimeout ?? 180000) + 30 * 1000; // 3 minutes
   router.versioned
     .post({
       access: 'internal',
@@ -50,9 +52,7 @@ export const postActionsConnectorExecuteRoute = (
       },
       options: {
         timeout: {
-          // add 30 seconds to the response timeout
-          // to allow for the request to be aborted
-          idleSocket: config?.responseTimeout + 30 * 1000,
+          idleSocket: RESPONSE_TIMEOUT,
         },
       },
     })
@@ -161,7 +161,7 @@ export const postActionsConnectorExecuteRoute = (
               reject(
                 new Error('Request timed out, increase xpack.elasticAssistant.responseTimeout')
               );
-            }, config.responseTimeout);
+            }, RESPONSE_TIMEOUT);
           }) as unknown as IKibanaResponse;
 
           return await Promise.race([
@@ -187,7 +187,7 @@ export const postActionsConnectorExecuteRoute = (
               savedObjectsClient,
               screenContext,
               systemPrompt,
-              timeout: config?.responseTimeout + 30 * 1000,
+              timeout: RESPONSE_TIMEOUT,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
             }),
             timeout,
