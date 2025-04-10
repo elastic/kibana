@@ -351,6 +351,8 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           .send(getTestRuleData(expectedArtifacts))
           .expect(200);
 
+        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
+
         const { id } = createdAlert;
 
         const response = await supertest.get(
