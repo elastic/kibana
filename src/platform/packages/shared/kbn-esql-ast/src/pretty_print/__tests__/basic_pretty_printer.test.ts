@@ -434,7 +434,7 @@ describe('single line query', () => {
       test('empty map', () => {
         const src = 'ROW fn(1, {"foo": "bar"})';
         const { root } = parse(src);
-        const node = Walker.match(root, {type: 'map'})! as ESQLMap;
+        const node = Walker.match(root, { type: 'map' })! as ESQLMap;
 
         node.entries = [];
 
