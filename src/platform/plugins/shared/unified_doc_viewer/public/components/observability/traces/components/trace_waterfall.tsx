@@ -7,50 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { TimefilterSetup } from '@kbn/data-plugin/public';
+import React, { useCallback, useMemo } from 'react';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import {
-  SERVICE_NAME_FIELD,
-  TRACE_ID_FIELD,
-  TRANSACTION_ID_FIELD,
-  type TraceDocumentOverview,
-} from '@kbn/discover-utils';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { traceFields } from '../doc_viewer_span_overview/resources/fields';
-import { getSpanFieldConfiguration } from '../doc_viewer_span_overview/resources/get_span_field_configuration';
 import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
-import { getTransactionFieldConfiguration } from '../doc_viewer_transaction_overview/resources/get_transaction_field_configuration';
 import { TransactionSummaryField } from '../doc_viewer_transaction_overview/sub_components/transaction_summary_field';
+import { getUnifiedDocViewerServices } from '../../../../plugin';
+import { FieldConfiguration } from '../resources/get_field_configuration';
 
-export interface TraceWaterfallProps {
-  document: TraceDocumentOverview;
+export interface TraceProps {
+  fields: Record<string, FieldConfiguration>;
+  serviceName: string;
+  traceId: string;
+  transactionId?: string;
   displayType: 'span' | 'transaction';
   displayLimit?: number;
 }
 
-export const TraceWaterfall = ({
-  document,
+export const Trace = ({
+  serviceName,
+  traceId,
+  transactionId,
+  fields,
   displayType,
   displayLimit = 5,
-}: TraceWaterfallProps) => {
-  const { services } = useKibana<TimefilterSetup>();
+}: TraceProps) => {
+  const { data } = getUnifiedDocViewerServices();
 
-  const { absoluteTimeRange } = services.timefilter.useTimefilter();
+  const { absoluteTimeRange } = data.query.timefilter.timefilter.useTimefilter();
+
+  const { rangeFrom, rangeTo } = useMemo(
+    () => ({
+      rangeFrom: new Date(absoluteTimeRange.start).toISOString(),
+      rangeTo: new Date(absoluteTimeRange.end).toISOString(),
+    }),
+    [absoluteTimeRange]
+  );
 
   const fieldMapper = useCallback(
     (fieldId: string) => {
-      const fieldConfiguration =
-        displayType === 'span'
-          ? getSpanFieldConfiguration(document)[fieldId]
-          : getTransactionFieldConfiguration(document)[fieldId];
-
       const props = {
         key: fieldId,
         fieldId,
-        fieldConfiguration,
+        fieldConfiguration: fields[fieldId],
       };
 
       return displayType === 'span' ? (
@@ -59,35 +60,32 @@ export const TraceWaterfall = ({
         <TransactionSummaryField {...props} />
       );
     },
-    [document, displayType]
+    [fields, displayType]
   );
 
   const getParentApi = useCallback(
     () => ({
       getSerializedStateForChild: () => ({
         rawState: {
-          serviceName: document[SERVICE_NAME_FIELD],
-          traceId: document[TRACE_ID_FIELD],
-          entryTransactionId: document[TRANSACTION_ID_FIELD],
-          rangeFrom: new Date(absoluteTimeRange.start).toISOString(),
-          rangeTo: new Date(absoluteTimeRange.end).toISOString(),
+          serviceName,
+          traceId,
+          entryTransactionId: transactionId,
+          rangeFrom,
+          rangeTo,
           displayLimit,
         },
       }),
     }),
-    [absoluteTimeRange, document, displayLimit]
+    [rangeFrom, rangeTo, displayLimit, serviceName, traceId, transactionId]
   );
 
   return (
     <>
       <EuiTitle size="s">
         <h2>
-          {i18n.translate(
-            'unifiedDocViewer.observability.traces.docViewerTraceWaterfall.traceWaterfall.title',
-            {
-              defaultMessage: 'Trace',
-            }
-          )}
+          {i18n.translate('unifiedDocViewer.observability.traces.trace.title', {
+            defaultMessage: 'Trace',
+          })}
         </h2>
       </EuiTitle>
       <EuiSpacer size="m" />

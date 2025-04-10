@@ -12,7 +12,9 @@ import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
+  TRACE_ID_FIELD,
   TRANSACTION_ID_FIELD,
   getTraceDocumentOverview,
 } from '@kbn/discover-utils';
@@ -22,7 +24,7 @@ import { spanFields } from './resources/fields';
 import { getSpanFieldConfiguration } from './resources/get_span_field_configuration';
 import { SpanSummaryField } from './sub_components/span_summary_field';
 import { SpanDurationSummary } from './sub_components/span_duration_summary';
-import { TraceWaterfall } from '../components/trace_waterfall';
+import { Trace } from '../components/trace_waterfall';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   transactionIndexPattern: string;
@@ -38,10 +40,11 @@ export function SpanOverview({
 }: SpanOverviewProps) {
   const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
   const spanDuration = parsedDoc[SPAN_DURATION_FIELD];
-  const transaction = parsedDoc[TRANSACTION_ID_FIELD];
+  const transactionId = parsedDoc[TRANSACTION_ID_FIELD];
+  const fieldConfigurations = getSpanFieldConfiguration(parsedDoc);
 
   return (
-    <TransactionProvider transactionId={transaction} indexPattern={transactionIndexPattern}>
+    <TransactionProvider transactionId={transactionId} indexPattern={transactionIndexPattern}>
       <FieldActionsProvider
         columns={columns}
         filter={filter}
@@ -59,7 +62,7 @@ export function SpanOverview({
           </EuiTitle>
           <EuiSpacer size="m" />
           {spanFields.map((fieldId) => {
-            const fieldConfiguration = getSpanFieldConfiguration(parsedDoc)[fieldId];
+            const fieldConfiguration = fieldConfigurations[fieldId];
 
             return (
               <SpanSummaryField
@@ -76,10 +79,16 @@ export function SpanOverview({
               <SpanDurationSummary duration={spanDuration} />
             </>
           )}
-          {transaction && (
+          {transactionId && (
             <>
               <EuiSpacer size="m" />
-              <TraceWaterfall document={parsedDoc} displayType="span" />
+              <Trace
+                fields={fieldConfigurations}
+                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                traceId={parsedDoc[TRACE_ID_FIELD]}
+                transactionId={transactionId}
+                displayType="span"
+              />
             </>
           )}
         </EuiPanel>

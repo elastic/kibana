@@ -15,8 +15,7 @@
       "data",
       "fieldFormats",
       "share",
-      "embeddable",
-      "kibanaReact"
+      "embeddable"
     ],
     "optionalPlugins": [
       "fieldsMetadata"

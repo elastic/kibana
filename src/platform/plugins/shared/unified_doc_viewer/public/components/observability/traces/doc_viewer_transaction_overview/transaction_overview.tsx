@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
   TRANSACTION_DURATION_FIELD,
+  TRANSACTION_ID_FIELD,
   getTraceDocumentOverview,
 } from '@kbn/discover-utils';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
@@ -22,7 +24,7 @@ import { getTransactionFieldConfiguration } from './resources/get_transaction_fi
 import { TransactionSummaryField } from './sub_components/transaction_summary_field';
 import { TransactionDurationSummary } from './sub_components/transaction_duration_summary';
 import { RootTransactionProvider } from './hooks/use_root_transaction';
-import { TraceWaterfall } from '../components/trace_waterfall';
+import { Trace } from '../components/trace_waterfall';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   tracesIndexPattern: string;
@@ -36,9 +38,13 @@ export function TransactionOverview({
   onRemoveColumn,
   tracesIndexPattern,
 }: TransactionOverviewProps) {
-  const parsedDoc = getTraceDocumentOverview(hit);
+  const parsedDoc = useMemo(() => getTraceDocumentOverview(hit), [hit]);
   const transactionDuration = parsedDoc[TRANSACTION_DURATION_FIELD];
   const traceId = parsedDoc[TRACE_ID_FIELD];
+  const fieldConfigurations = useMemo(
+    () => getTransactionFieldConfiguration(parsedDoc),
+    [parsedDoc]
+  );
 
   const detailTitle = i18n.translate(
     'unifiedDocViewer.observability.traces.transactionOverview.title',
@@ -62,7 +68,7 @@ export function TransactionOverview({
           </EuiTitle>
           <EuiSpacer size="m" />
           {transactionFields.map((fieldId) => {
-            const fieldConfiguration = getTransactionFieldConfiguration(parsedDoc)[fieldId];
+            const fieldConfiguration = fieldConfigurations[fieldId];
 
             return (
               <TransactionSummaryField
@@ -82,7 +88,13 @@ export function TransactionOverview({
           {traceId && (
             <>
               <EuiSpacer size="m" />
-              <TraceWaterfall document={parsedDoc} displayType="transaction" />
+              <Trace
+                fields={fieldConfigurations}
+                serviceName={parsedDoc[SERVICE_NAME_FIELD]}
+                traceId={traceId}
+                transactionId={parsedDoc[TRANSACTION_ID_FIELD]}
+                displayType="transaction"
+              />
             </>
           )}
         </EuiPanel>
