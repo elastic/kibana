@@ -19,11 +19,15 @@ import { TSESTree } from '@typescript-eslint/typescript-estree';
     * Translated text via {i18n.translate} call -> uses passed options object key `defaultMessage` 
 */
 export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): string {
-  const parent = originalNode.parent as TSESTree.JSXElement;
+  if (!originalNode.parent) return '';
 
-  const node = Array.isArray(parent.children) ? parent.children : [];
+  if (originalNode.parent.type !== 'JSXElement') return '';
 
-  if (node.length === 0) {
+  const { parent } = originalNode;
+
+  const nodes = Array.isArray(parent.children) ? parent.children : [];
+
+  if (nodes.length === 0) {
     return '';
   }
 
@@ -33,7 +37,7 @@ export function getIntentFromNode(originalNode: TSESTree.JSXOpeningElement): str
     keeping the code readable. In the cases where types are explicitly set to
     variables, it was done to help the compiler when it couldn't infer the type.
     */
-  const intent = node.reduce((acc: string, currentNode) => {
+  const intent = nodes.reduce((acc: string, currentNode) => {
     switch (currentNode.type) {
       case 'JSXText':
         // When node is a string primitive
