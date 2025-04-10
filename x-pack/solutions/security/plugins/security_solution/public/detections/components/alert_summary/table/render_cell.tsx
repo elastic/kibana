@@ -38,6 +38,8 @@ export const CellValue = memo(({ alert, columnId }: CellValueProps) => {
     // Return the string of the value otherwise.
     if (typeof cellValues === 'string') {
       return cellValues;
+    } else if (typeof cellValues === 'number') {
+      return cellValues.toString();
     } else if (Array.isArray(cellValues)) {
       if (cellValues.length > 1) {
         return cellValues.join(', ');
