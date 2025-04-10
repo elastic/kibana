@@ -34,7 +34,7 @@ import {
 } from './components/session_view';
 import { useAsyncFunction } from './hooks/use_async_function';
 import { TabsView } from './components/tabs_view';
-import { getDiscoverTabsUrlStateContainer } from './state_management/discover_tabs_url_state_container';
+import { getTabsStorageManager } from './state_management/tabs_storage_manager';
 
 // TEMPORARY: This is a temporary flag to enable/disable tabs in Discover until the feature is fully implemented.
 export const TABS_ENABLED = false;
@@ -71,18 +71,14 @@ export const DiscoverMainRoute = ({
   );
 
   // syncing with the _t part URL
-  const [tabsUrlStateContainer] = useState(() =>
-    getDiscoverTabsUrlStateContainer({
-      stateStorage: urlStateStorage,
-    })
-  );
+  const [tabsStorageManager] = useState(() => getTabsStorageManager({ urlStateStorage }));
 
   useEffect(() => {
-    const stopSync = tabsUrlStateContainer.startUrlSync();
+    const stopUrlSync = tabsStorageManager.startUrlSync();
     return () => {
-      stopSync();
+      stopUrlSync();
     };
-  }, [tabsUrlStateContainer]);
+  }, [tabsStorageManager]);
 
   const [runtimeStateManager] = useState(() => createRuntimeStateManager());
   const [internalState] = useState(() =>
@@ -91,7 +87,7 @@ export const DiscoverMainRoute = ({
       customizationContext,
       runtimeStateManager,
       urlStateStorage,
-      tabsUrlStateContainer,
+      tabsStorageManager,
     })
   );
   const { initializeProfileDataViews } = useDefaultAdHocDataViews({ internalState });

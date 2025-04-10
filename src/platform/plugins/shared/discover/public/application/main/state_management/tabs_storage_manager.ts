@@ -15,38 +15,38 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
 
-export interface DiscoverTabsUrlState {
+export interface TabsStorageState {
   selectedTabId?: string; // syncing the selected tab id with the URL
 }
 
-export interface DiscoverTabsUrlContainer extends ReduxLikeStateContainer<DiscoverTabsUrlState> {
+export interface TabsStorageManager {
+  /**
+   * Supports two-way sync of the selected tab id with the URL.
+   * Currently, we use it only one way - from internal state to URL.
+   */
+  urlStateContainer: ReduxLikeStateContainer<TabsStorageState>;
   startUrlSync: () => () => void;
+  pushSelectedTabIdToUrl: (selectedTabId: string) => Promise<void>;
 }
 
-/**
- * Supports two-way sync of the selected tab id with the URL.
- * Currently, we use it only one way - from internal state to URL.
- * @param stateStorage
- * @param onChanged
- */
-export const getDiscoverTabsUrlStateContainer = ({
-  stateStorage,
+export const getTabsStorageManager = ({
+  urlStateStorage,
   onChanged,
 }: {
-  stateStorage: IKbnUrlStateStorage;
-  onChanged?: (nextState: DiscoverTabsUrlState) => void; // can be called when selectedTabId changes in URL to trigger app state change if needed
-}): DiscoverTabsUrlContainer => {
-  const stateContainer = createStateContainer<DiscoverTabsUrlState>({});
+  urlStateStorage: IKbnUrlStateStorage;
+  onChanged?: (nextState: TabsStorageState) => void; // can be called when selectedTabId changes in URL to trigger app state change if needed
+}): TabsStorageManager => {
+  const urlStateContainer = createStateContainer<TabsStorageState>({});
 
   const startUrlSync = () => {
     const { start, stop } = syncState({
-      stateStorage,
+      stateStorage: urlStateStorage,
       stateContainer: {
-        ...stateContainer,
+        ...urlStateContainer,
         set: (state) => {
           if (state) {
             // syncState utils requires to handle incoming "null" value
-            stateContainer.set(state);
+            urlStateContainer.set(state);
           }
         },
       },
@@ -54,7 +54,7 @@ export const getDiscoverTabsUrlStateContainer = ({
     });
 
     const listener = onChanged
-      ? stateContainer.state$.subscribe((state) => {
+      ? urlStateContainer.state$.subscribe((state) => {
           onChanged(state);
         })
       : null;
@@ -67,8 +67,13 @@ export const getDiscoverTabsUrlStateContainer = ({
     };
   };
 
+  const pushSelectedTabIdToUrl = async (selectedTabId: string) => {
+    await urlStateStorage.set(TABS_STATE_URL_KEY, { selectedTabId }); // can be called even before sync with URL started
+  };
+
   return {
-    ...stateContainer,
+    urlStateContainer,
     startUrlSync,
+    pushSelectedTabIdToUrl,
   };
 };

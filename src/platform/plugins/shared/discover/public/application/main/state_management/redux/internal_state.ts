@@ -31,7 +31,7 @@ import {
 import { loadDataViewList, setTabs } from './actions';
 import { selectAllTabs, selectTab } from './selectors';
 import { createTabItem } from './utils';
-import type { DiscoverTabsUrlContainer } from '../discover_tabs_url_state_container';
+import type { TabsStorageManager } from '../tabs_storage_manager';
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
   dataViewId: undefined,
@@ -187,21 +187,14 @@ export const internalStateSlice = createSlice({
   },
 });
 
-const createMiddleware = ({
-  tabsUrlStateContainer,
-}: {
-  tabsUrlStateContainer: DiscoverTabsUrlContainer;
-}) => {
+const createMiddleware = ({ tabsStorageManager }: { tabsStorageManager: TabsStorageManager }) => {
   const listenerMiddleware = createListenerMiddleware();
 
   listenerMiddleware.startListening({
     actionCreator: internalStateSlice.actions.setTabs,
     effect: async (action) => {
       const { selectedTabId } = action.payload;
-      // Set the selected tab id as `_t` URL parameter
-      if (selectedTabId && tabsUrlStateContainer.get().selectedTabId !== selectedTabId) {
-        tabsUrlStateContainer.set({ selectedTabId });
-      }
+      await tabsStorageManager.pushSelectedTabIdToUrl(selectedTabId);
     },
   });
 
@@ -213,7 +206,7 @@ export interface InternalStateThunkDependencies {
   customizationContext: DiscoverCustomizationContext;
   runtimeStateManager: RuntimeStateManager;
   urlStateStorage: IKbnUrlStateStorage;
-  tabsUrlStateContainer: DiscoverTabsUrlContainer;
+  tabsStorageManager: TabsStorageManager;
 }
 
 export const createInternalStateStore = (options: InternalStateThunkDependencies) => {
