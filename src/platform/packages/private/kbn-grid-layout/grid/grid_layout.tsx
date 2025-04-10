@@ -29,6 +29,7 @@ import { GridRowHeader } from './grid_row/grid_row_header';
 import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
 import { GridPanel } from './grid_panel';
 import { getTopOffsetForRow, getTopOffsetForRowFooter } from './utils/calculations';
+import { GridRowDragPreview } from './grid_row/grid_row_drag_preview';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -278,6 +279,7 @@ export const GridLayout = ({
               return null;
             })}
             <GridPanelDragPreview />
+            <GridRowDragPreview/>
           </div>
         </div>
       </GridHeightSmoother>

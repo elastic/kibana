@@ -89,56 +89,53 @@ export const moveAction = (
   // if dragged row is above the not collapsed row and above some panels, 
   // move these panels to the dragged row - change the row's order, 
 
-  const draggedRowId = currentActiveRowEvent.id;
-  const draggedRow = currentLayout[draggedRowId];
-  const dropTargetRowId = getDropTargetRowId(currentPointer, gridLayoutStateManager);
-  const panelsToMove = getPanelsIdsToMove(currentPointer, gridLayoutStateManager, dropTargetRowId); 
+//   const draggedRowId = currentActiveRowEvent.id;
+//   const draggedRow = currentLayout[draggedRowId];
+//   const dropTargetRowId = getDropTargetRowId(currentPointer, gridLayoutStateManager);
+//   const panelsToMove = getPanelsIdsToMove(currentPointer, gridLayoutStateManager, dropTargetRowId); 
 
-  // now we have to calculate new panels positions, remove the panels from the previous row and add it to the one that's dragged
+//   // now we have to calculate new panels positions, remove the panels from the previous row and add it to the one that's dragged
 
-  if (dropTargetRowId) {
+//   if (dropTargetRowId) {
 
-  const nextLayout = cloneDeep(currentLayout);
+//   const nextLayout = cloneDeep(currentLayout);
 
-  function partitionObject(obj: GridRowData['panels'], panelIds: string[]) {
-  const picked = {};
-  const omitted = {};
-  const keySet = new Set(panelIds);
-  console.log(obj, keySet)
+//   function partitionObject(obj: GridRowData['panels'], panelIds: string[]) {
+//   const picked = {};
+//   const omitted = {};
+//   const keySet = new Set(panelIds);
+//   // console.log(obj, keySet)
 
-  for (const key in obj) {
-    if (keySet.has(key)) {
-      picked[key] = obj[key];
-    } else {
-      omitted[key] = obj[key];
-    }
-  }
+//   for (const key in obj) {
+//     if (keySet.has(key)) {
+//       picked[key] = obj[key];
+//     } else {
+//       omitted[key] = obj[key];
+//     }
+//   }
 
-  return [picked, omitted];
-}
+//   return [picked, omitted];
+// }
     
-const [pickedPanels, omittedPanels] = partitionObject(currentLayout[dropTargetRowId].panels, panelsToMove);
+// const [pickedPanels, omittedPanels] = partitionObject(currentLayout[dropTargetRowId].panels, panelsToMove);
 
-  nextLayout[draggedRowId].panels = {...currentLayout[draggedRowId].panels, ...pickedPanels};
-  nextLayout[dropTargetRowId].panels = omittedPanels
- if (!deepEqual(currentLayout, nextLayout)) {
-  console.log('nextLayout', nextLayout);
-      gridLayoutStateManager.proposedGridLayout$.next(nextLayout);
-    }
-
-
-
-}
+//   nextLayout[draggedRowId].panels = {...currentLayout[draggedRowId].panels, ...pickedPanels};
+//   nextLayout[dropTargetRowId].panels = omittedPanels
+//  if (!deepEqual(currentLayout, nextLayout)) {
+//   // console.log('nextLayout', nextLayout);
+//       gridLayoutStateManager.proposedGridLayout$.next(nextLayout);
+//     }
+// }
 
 
 
-  // if (!deepEqual(currentRowOrder, updatedRowOrder)) {
-  //   const updatedLayout = cloneDeep(currentLayout);
-  //   updatedRowOrder.forEach((id, index) => {
-  //     updatedLayout[id].order = index + 1;
-  //   });
-  //   gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
-  // }
+  if (!deepEqual(currentRowOrder, updatedRowOrder)) {
+    const updatedLayout = cloneDeep(currentLayout);
+    updatedRowOrder.forEach((id, index) => {
+      updatedLayout[id].order = index + 1;
+    });
+    gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+  }
 
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,

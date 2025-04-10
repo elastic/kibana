@@ -7,29 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { combineLatest, skip } from 'rxjs';
+import { getTopOffsetForRow } from '../utils/calculations';
 
-export const GridRowDragPreview = React.memo(({ rowId }: { rowId: string }) => {
+export const GridRowDragPreview = React.memo(() => {
+
+  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager } = useGridLayoutContext();
-
-  useEffect(
+    useEffect(
     () => {
+      /** Update the styles of the drag preview via a subscription to prevent re-renders */
+      const styleSubscription = combineLatest([
+        gridLayoutStateManager.activeRowEvent$,
+      ])
+        .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
+        .subscribe(([activeRowEvent]) => {
+
+          if (!dragPreviewRef.current) return;
+          const rowId = activeRowEvent?.id;
+          if (!rowId) return;
+          const currentLayout = gridLayoutStateManager.proposedGridLayout$.getValue() ?? gridLayoutStateManager.gridLayout$.getValue();
+          const offset = getTopOffsetForRow(rowId, currentLayout);
+
+          if (!activeRowEvent) {
+            dragPreviewRef.current.style.display = 'none';
+            dragPreviewRef.current.style.gridColumnStart = ``;
+            dragPreviewRef.current.style.gridColumnEnd = ``;
+            dragPreviewRef.current.style.gridRowStart = ``;
+            dragPreviewRef.current.style.gridRowEnd = ``;
+          } else {
+            dragPreviewRef.current.style.display = 'block';
+            dragPreviewRef.current.style.gridColumnStart = `1`;
+            dragPreviewRef.current.style.gridColumnEnd = `-1`;
+            dragPreviewRef.current.style.gridRowStart = `${offset + 1}`;
+            dragPreviewRef.current.style.gridRowEnd = `${offset + 3}`;
+          }
+        });
+
       return () => {
-        // when drag preview unmounts, this means the header was dropped - so, scroll to it
-        const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
-        headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        styleSubscription.unsubscribe();
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
-  return <div className={'kbnGridPanel--rowDragPreview'} css={styles} />;
+  return <div ref={dragPreviewRef} className={'kbnGridPanel--rowDragPreview'} css={styles} />;
 });
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
