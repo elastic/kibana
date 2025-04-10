@@ -29,7 +29,7 @@ export const IntegrationListView: React.FC<IntegrationListViewProps> = ({ integr
     },
     { field: 'description', name: 'Description' },
     {
-      name: 'Actions',
+      name: 'Actionshey',
       actions: [
         {
           name: 'Edit',
