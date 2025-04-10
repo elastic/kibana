@@ -7,79 +7,95 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeRange } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { TimeRange, TimeState } from '@kbn/es-query';
+import { BehaviorSubject, Observable, Subject, forkJoin, map, share } from 'rxjs';
+import { cloneDeep } from 'lodash';
+import useObservable from 'react-use/lib/useObservable';
 import type { Timefilter } from './timefilter';
+import { getAbsoluteTimeRange } from '../../../common';
+
+interface TimeStateUpdate {
+  timeState: TimeState;
+  refresh: 'shift' | 'override' | 'none';
+}
 
 export interface TimefilterHook {
-  timeRange: TimeRange;
-  absoluteTimeRange: {
-    start: number;
-    end: number;
+  timeState: TimeState;
+  refresh: () => void;
+  fetch$: Observable<TimeStateUpdate>;
+}
+
+function materializeTimeRange(timeRange: TimeRange): TimeState {
+  const asAbsolute = getAbsoluteTimeRange(timeRange);
+  const start = new Date(timeRange.from);
+  const end = new Date(timeRange.to);
+
+  return {
+    timeRange,
+    start: start.getTime(),
+    end: end.getTime(),
+    asAbsoluteTimeRange: {
+      ...asAbsolute,
+      mode: 'absolute',
+    },
   };
-  setTimeRange: React.Dispatch<React.SetStateAction<TimeRange>>;
-  refreshAbsoluteTimeRange: () => boolean;
 }
 
 export function createUseTimefilterHook(timefilter: Timefilter) {
-  return function useTimefilter(): TimefilterHook {
-    const [timeRange, setTimeRange] = useState(() => timefilter.getTime());
+  const initialTimeRange = timefilter.getTime();
 
-    const [absoluteTimeRange, setAbsoluteTimeRange] = useState(() => timefilter.getAbsoluteTime());
-    const absoluteTimeRangeRef = useRef(absoluteTimeRange);
+  const refresh$ = new Subject<boolean>();
 
-    useEffect(() => {
-      const timeUpdateSubscription = timefilter.getTimeUpdate$().subscribe({
-        next: () => {
-          setTimeRange(() => timefilter.getTime());
-          const newAbsoluteTimeRange = timefilter.getAbsoluteTime();
-          absoluteTimeRangeRef.current = newAbsoluteTimeRange;
-          setAbsoluteTimeRange(() => timefilter.getAbsoluteTime());
-        },
-      });
+  const currentTime$ = new BehaviorSubject(initialTimeRange);
 
-      return () => {
-        timeUpdateSubscription.unsubscribe();
-      };
-    }, []);
+  const timeState$ = new BehaviorSubject<TimeStateUpdate>({
+    timeState: materializeTimeRange(initialTimeRange),
+    refresh: 'shift' as const,
+  });
 
-    const setTimeRangeMemoized: React.Dispatch<React.SetStateAction<TimeRange>> = useCallback(
-      (nextOrCallback) => {
-        const val =
-          typeof nextOrCallback === 'function'
-            ? nextOrCallback(timefilter.getTime())
-            : nextOrCallback;
+  forkJoin([currentTime$, refresh$])
+    .pipe(
+      map(([range, fromRefresh]): TimeStateUpdate => {
+        const next = materializeTimeRange(getAbsoluteTimeRange(range));
+        const current = timeState$.value.timeState;
 
-        timefilter.setTime(val);
+        let refresh: TimeStateUpdate['refresh'] = fromRefresh ? 'override' : 'none';
+
+        if (current.start !== next.start || current.end !== next.end) {
+          refresh = 'shift';
+        }
+
+        return {
+          timeState: next,
+          refresh,
+        };
+      })
+    )
+    .subscribe({
+      next: (value) => {
+        timeState$.next(value);
       },
-      []
-    );
+    });
 
-    const refreshAbsoluteTimeRange = useCallback(() => {
-      const newAbsoluteTimeRange = timefilter.getAbsoluteTime();
-      if (
-        newAbsoluteTimeRange.from !== absoluteTimeRangeRef.current.from ||
-        newAbsoluteTimeRange.to !== absoluteTimeRangeRef.current.to
-      ) {
-        setAbsoluteTimeRange(newAbsoluteTimeRange);
-        absoluteTimeRangeRef.current = newAbsoluteTimeRange;
-        return true;
-      }
-      return false;
-    }, []);
+  timefilter.getFetch$().subscribe({
+    next: () => {
+      currentTime$.next(cloneDeep(currentTime$.value));
+    },
+  });
 
-    const asEpoch = useMemo(() => {
-      return {
-        start: new Date(absoluteTimeRange.from).getTime(),
-        end: new Date(absoluteTimeRange.to).getTime(),
-      };
-    }, [absoluteTimeRange]);
+  const timeStateConsumer$ = timeState$.pipe(share());
+
+  const refresh = () => {
+    refresh$.next(true);
+  };
+
+  return function useTimefilter(): TimefilterHook {
+    const { timeState } = useObservable(timeStateConsumer$, timeState$.value);
 
     return {
-      timeRange,
-      absoluteTimeRange: asEpoch,
-      setTimeRange: setTimeRangeMemoized,
-      refreshAbsoluteTimeRange,
+      timeState,
+      refresh,
+      fetch$: timeStateConsumer$,
     };
   };
 }

@@ -20,7 +20,6 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { DocumentsColumn } from './documents_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { RetentionColumn } from './retention_column';
-import { useTimefilter } from '../../hooks/use_timefilter';
 
 export function StreamsTreeTable({
   loading,
@@ -31,7 +30,6 @@ export function StreamsTreeTable({
 }) {
   const router = useStreamsAppRouter();
   const items = React.useMemo(() => flattenTrees(asTrees(streams ?? [])), [streams]);
-  const { timeRange, setTimeRange, refreshAbsoluteTimeRange } = useTimefilter();
 
   return (
     <EuiInMemoryTable
@@ -97,21 +95,7 @@ export function StreamsTreeTable({
         box: {
           incremental: true,
         },
-        toolsRight: (
-          <StreamsAppSearchBar
-            onQuerySubmit={({ dateRange }, isUpdate) => {
-              if (dateRange) {
-                setTimeRange(dateRange);
-                if (!isUpdate) {
-                  refreshAbsoluteTimeRange();
-                }
-              }
-            }}
-            onRefresh={refreshAbsoluteTimeRange}
-            dateRangeFrom={timeRange.from}
-            dateRangeTo={timeRange.to}
-          />
-        ),
+        toolsRight: <StreamsAppSearchBar />,
       }}
     />
   );

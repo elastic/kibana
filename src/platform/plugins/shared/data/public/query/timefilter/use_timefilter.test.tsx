@@ -48,8 +48,8 @@ describe('useTimefilter hook', () => {
   test('time range and absolute time range should have the right values', () => {
     const { result } = renderHook(() => useTimefilter());
 
-    expect(result.current.timeRange).toEqual(initialTimeRange);
-    expect(result.current.absoluteTimeRange).toEqual({
+    expect(result.current.timeState.timeRange).toEqual(initialTimeRange);
+    expect(result.current.timeState.asAbsoluteTimeRange).toEqual({
       start: new Date(initialAbsoluteTimeRange.from).getTime(),
       end: new Date(initialAbsoluteTimeRange.to).getTime(),
     });
@@ -76,38 +76,10 @@ describe('useTimefilter hook', () => {
       timeUpdateSubject.next();
     });
 
-    expect(result.current.timeRange).toEqual(updatedTimeRange);
-    expect(result.current.absoluteTimeRange).toEqual({
+    expect(result.current.timeState.timeRange).toEqual(updatedTimeRange);
+    expect(result.current.timeState.asAbsoluteTimeRange).toEqual({
       start: new Date(updatedAbsoluteTimeRange.from).getTime(),
       end: new Date(updatedAbsoluteTimeRange.to).getTime(),
-    });
-  });
-
-  test('setTimeRange should call through correctly', () => {
-    const { result } = renderHook(() => useTimefilter());
-
-    const newTimeRange = {
-      from: '2022-01-01T00:00:00Z',
-      to: '2022-01-02T00:00:00Z',
-    };
-
-    act(() => {
-      result.current.setTimeRange(newTimeRange);
-    });
-
-    expect(mockTimefilter.setTime).toHaveBeenCalledWith(newTimeRange);
-
-    // Test with callback form
-    act(() => {
-      result.current.setTimeRange((prevRange) => ({
-        ...prevRange,
-        from: '2022-02-01T00:00:00Z',
-      }));
-    });
-
-    expect(mockTimefilter.setTime).toHaveBeenCalledWith({
-      ...newTimeRange,
-      from: '2022-02-01T00:00:00Z',
     });
   });
 });

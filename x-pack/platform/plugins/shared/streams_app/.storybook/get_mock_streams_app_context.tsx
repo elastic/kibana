@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Subject } from 'rxjs';
 import { getChartsTheme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -35,17 +36,25 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
 
   const dataMock = dataPluginMock.createStartContract();
 
+  const start = new Date(new Date().getTime() - 15 * 60 * 1000);
+  const end = new Date();
+
   jest.spyOn(dataMock.query.timefilter.timefilter, 'useTimefilter').mockReturnValue({
-    timeRange: {
-      from: 'now-15m',
-      to: 'now',
+    timeState: {
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
+      asAbsoluteTimeRange: {
+        from: start.toISOString(),
+        to: end.toISOString(),
+        mode: 'absolute',
+      },
+      start: start.getTime(),
+      end: end.getTime(),
     },
-    absoluteTimeRange: {
-      start: new Date().getTime() - 15 * 60 * 1000,
-      end: new Date().getTime(),
-    },
-    setTimeRange: jest.fn(),
-    refreshAbsoluteTimeRange: jest.fn(),
+    fetch$: new Subject(),
+    refresh: jest.fn(),
   });
 
   return {

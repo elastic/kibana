@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { WiredStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAsyncSample } from '../../../hooks/queries/use_async_sample';
 import { PreviewTable } from '../preview_table';
 import { StreamsAppSearchBar } from '../../streams_app_search_bar';
@@ -32,11 +32,7 @@ export function PreviewPanel({
   definition: WiredStreamGetResponse;
   routingAppState: ReturnType<typeof useRoutingState>;
 }) {
-  const {
-    timeRange,
-    setTimeRange,
-    absoluteTimeRange: { start, end },
-  } = useTimefilter();
+  const { timeState, fetch$ } = useTimefilter();
 
   const {
     isLoadingDocuments,
@@ -50,11 +46,24 @@ export function PreviewPanel({
     condition: routingAppState.debouncedChildUnderEdit?.isNew
       ? routingAppState.debouncedChildUnderEdit.child.if
       : undefined,
-    start: start?.valueOf(),
-    end: end?.valueOf(),
+    start: timeState.start,
+    end: timeState.end,
     size: 100,
     streamDefinition: definition,
   });
+
+  useEffect(() => {
+    const subscription = fetch$.subscribe({
+      next: ({ refresh: refreshType }) => {
+        if (refreshType === 'override') {
+          refresh();
+        }
+      },
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [fetch$, refresh]);
 
   let content;
 
@@ -187,27 +196,7 @@ export function PreviewPanel({
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <StreamsAppSearchBar
-              onQuerySubmit={({ dateRange }, isUpdate) => {
-                if (!isUpdate) {
-                  refresh();
-                  return;
-                }
-
-                if (dateRange) {
-                  setTimeRange({
-                    from: dateRange.from,
-                    to: dateRange?.to,
-                    mode: dateRange.mode,
-                  });
-                }
-              }}
-              onRefresh={() => {
-                refresh();
-              }}
-              dateRangeFrom={timeRange.from}
-              dateRangeTo={timeRange.to}
-            />
+            <StreamsAppSearchBar showDatePicker />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

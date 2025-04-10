@@ -46,7 +46,7 @@ export function DashboardsTable({
     },
   } = useKibana();
 
-  const { timeRange } = useTimefilter();
+  const { timeState } = useTimefilter();
 
   const dashboardLocator = share.url.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
   const columns = useMemo((): Array<EuiBasicTableColumn<SanitizedDashboardAsset>> => {
@@ -67,7 +67,9 @@ export function DashboardsTable({
                   name: entityId,
                 });
               }
-              const url = dashboardLocator?.getRedirectUrl({ dashboardId: id, timeRange } || '');
+              const url = dashboardLocator?.getRedirectUrl(
+                { dashboardId: id, timeRange: timeState.timeRange } || ''
+              );
               if (url) {
                 application.navigateToUrl(url);
               }
@@ -104,7 +106,7 @@ export function DashboardsTable({
     entityId,
     savedObjectsTaggingUi,
     telemetryClient,
-    timeRange,
+    timeState,
   ]);
 
   const items = useMemo(() => {
