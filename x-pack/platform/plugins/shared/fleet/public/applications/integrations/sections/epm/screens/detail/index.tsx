@@ -48,6 +48,7 @@ import {
   useIntegrationsStateContext,
   useGetSettingsQuery,
   sendGetFileByPath,
+  useUpdateCustomIntegration,
 } from '../../../../hooks';
 import { useAgentless } from '../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
@@ -73,6 +74,7 @@ import { PermissionsError } from '../../../../layouts';
 
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 import { useIsFirstTimeAgentUserQuery } from './hooks';
+
 import { getInstallPkgRouteOptions } from './utils';
 import {
   BackLink,
@@ -131,6 +133,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
   useBreadcrumbs('integration_details_overview', { pkgTitle: packageTitle });
   return null;
 }
+const updateCustomIntegration = useUpdateCustomIntegration;
 
 export function Detail() {
   const theme = useEuiTheme();
@@ -403,10 +406,12 @@ export function Detail() {
   );
 
   const saveReadMeChanges = (updatedReadMe: string | undefined) => {
-    console.log('saving the changes', updatedReadMe);
     setIsEditReadMeOpen(false);
 
-    // TODO: save the updated read me content by calling the api as needed
+    //  Todo: need to call the api here, stil trying to figure out the 'best' way to handle this
+    updateCustomIntegration('435', [
+      { readMeData: updatedReadMe, categories: ['new', 'something'] },
+    ]);
 
     // refresh the UI by passing something down to the component that shows the readme content
 

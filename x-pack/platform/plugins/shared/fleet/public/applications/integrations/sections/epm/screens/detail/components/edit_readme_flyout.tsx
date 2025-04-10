@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import {
   EuiFlyout,
@@ -28,7 +28,7 @@ export const EditReadmeFlyout: React.FunctionComponent<{
   integrationName: string;
   onSave: (updatedReadMe: string | undefined) => void;
 }> = ({ onClose, integrationName, readMeContent, onSave }) => {
-  const [editedContent, setEditedContent] = React.useState(readMeContent);
+  const [editedContent, setEditedContent] = useState(readMeContent);
   const onParse = useCallback((err: any, {}) => {
     if (err) {
       // handle error
@@ -54,9 +54,9 @@ export const EditReadmeFlyout: React.FunctionComponent<{
       <EuiFlyoutBody>
         <EuiMarkdownEditor
           aria-label="Edit"
-          placeholder="Edit the readme content here..."
+          placeholder="Edit the README content here..."
           value={editedContent!}
-          onChange={(e) => setEditedContent}
+          onChange={setEditedContent}
           onParse={onParse}
           readOnly={false}
           height={600}

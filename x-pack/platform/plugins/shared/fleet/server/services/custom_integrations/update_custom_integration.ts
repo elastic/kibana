@@ -4,20 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { ElasticsearchClient } from '@kbn/core/server';
+export async function updateCustomIntegration(
+  esClient: ElasticsearchClient,
+  id: string,
+  fields: any[]
+) {
+  console.log('updating the integration!!');
 
-export async function updateCustomIntegration(esClient: any, id: string, fields: any[]) {
-  // const body = {
-  //   doc: {
-  //     fields,
-  //   },
-  // };
+  // TODO: figure out where the integration is actually stored so I can update it here. Presumably in ES, but idk? Need to update the readme doc in the docs section, and also categories
 
-  // const response = await esClient.update({
-  //   index: 'custom_integrations',
-  //   id,
-  //   body,
-  // });
-  // console.log('the response is', response);
   // return response;
-  return 'updated';
+  return { status: 'updated' };
 }

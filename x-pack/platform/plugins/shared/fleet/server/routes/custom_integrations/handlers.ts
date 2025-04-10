@@ -9,8 +9,8 @@
 import type { TypeOf } from '@kbn/config-schema';
 
 // import type { Script } from '@elastic/elasticsearch/lib/api/types';
-import { FleetRequestHandler } from '../../types';
-import { CustomIntegrationRequestSchema } from '../../types/models/custom_integrations';
+import type { FleetRequestHandler } from '../../types';
+import type { CustomIntegrationRequestSchema } from '../../types/models/custom_integrations';
 import { updateCustomIntegration } from '../../services/custom_integrations/update_custom_integration';
 export const updateCustomIntegrationHandler: FleetRequestHandler<
   TypeOf<typeof CustomIntegrationRequestSchema.body>
@@ -21,7 +21,7 @@ export const updateCustomIntegrationHandler: FleetRequestHandler<
   try {
     //  TODO: based on the passed in fields here, we need to update them accordingly. As of now, we are only taking readMeData and categories, so we will update them using esclient
     const { id, fields } = request.body; // placeholder
-    const { readMeData, categories } = fields[0]; // another placeholder for not
+    const { readMeData, categories } = fields[0]; // another placeholder for now
 
     // call the service here to do the actual logic
     const res = await updateCustomIntegration(esClient, id, fields);

@@ -129,6 +129,17 @@ export const useGetLimitedPackages = () => {
     version: API_VERSIONS.public.v1,
   });
 };
+export const useUpdateCustomIntegration = (id: string, fields: any[]) => {
+  return sendRequest({
+    path: epmRouteService.getUpdateCustomIntegrationsPath(),
+    method: 'put',
+    version: API_VERSIONS.public.v1,
+    body: {
+      id,
+      fields,
+    },
+  });
+};
 
 export const useGetPackageInfoByKeyQuery = (
   pkgName: string,

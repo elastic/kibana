@@ -141,6 +141,9 @@ export const epmRouteService = {
       pkgVersion
     );
   },
+  getUpdateCustomIntegrationsPath: () => {
+    return EPM_API_ROUTES.UPDATE_CUSTOM_INTEGRATIONS_PATTERN;
+  },
 };
 
 export const packagePolicyRouteService = {
