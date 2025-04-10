@@ -13,7 +13,7 @@ import { RequestHandlerContext } from '@kbn/core/server';
 
 jest.mock('../../fetcher');
 
-describe('handler', () => {
+describe('createHandler', () => {
   const mockIsRollupsEnabled = jest.fn();
   const mockContext = {
     core: coreMock.createRequestHandlerContext(),
@@ -33,7 +33,7 @@ describe('handler', () => {
     }));
   });
 
-  it('propagates allow_hidden query param to the actual indexPatterns.getFieldsForWildcard request', async () => {
+  it('uses the allow_hidden query parameter in indexPatterns.getFieldsForWildcard', async () => {
     const query = {
       allow_hidden: true,
       field_types: [],

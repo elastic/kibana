@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 
 jest.mock('./fetcher');
 
-describe('IndexPatternsApiServer - getFieldsForWildcard', () => {
+describe('IndexPatternsApiServer', () => {
   const coreRequestHandler = coreMock.createRequestHandlerContext();
   let getFieldsForWildcard: jest.Mock;
   let indexPatternsApiServer: IndexPatternsApiServer;
@@ -36,7 +36,7 @@ describe('IndexPatternsApiServer - getFieldsForWildcard', () => {
     );
   });
 
-  it('propagates allow_hidden query param to the actual indexPatterns.getFieldsForWildcard request', async () => {
+  it('uses the allowHidden parameter in indexPatternsApiServer.getFieldsForWildcard', async () => {
     const options = {
       allowHidden: true,
       allowNoIndex: true,
