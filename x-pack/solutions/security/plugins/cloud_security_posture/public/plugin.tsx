@@ -11,7 +11,10 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type {
   CspClientPluginStartDeps,
+  FindingMisconfigurationFlyoutFooterProps,
   FindingMisconfigurationFlyoutProps,
+  FindingsMisconfigurationFlyoutContentProps,
+  FindingsMisconfigurationFlyoutHeaderProps,
 } from '@kbn/cloud-security-posture';
 import { uiMetricService } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { CspLoadingState } from './components/csp_loading_state';
@@ -43,15 +46,9 @@ export const LazyCspFindingsMisconfigurationFlyoutHeader = lazy(
 export const LazyCspFindingsMisconfigurationFlyoutBody = lazy(
   () => import('./pages/configurations/findings_flyout/findings_right/content')
 );
-// export const LazyCspFindingsMisconfigurationFlyoutBody = lazy(() =>
-//   import('./pages/configurations/findings_flyout/findings_flyout').then((mod) => ({
-//     default: mod.FindingsRuleFlyoutBody,
-//   }))
-// );
-export const LazyCspFindingsMisconfigurationFlyoutFooter = lazy(() =>
-  import('./pages/configurations/findings_flyout/findings_flyout').then((mod) => ({
-    default: mod.FindingsRuleFlyoutFooter,
-  }))
+
+export const LazyCspFindingsMisconfigurationFlyoutFooter = lazy(
+  () => import('./pages/configurations/findings_flyout/findings_right/footer')
 );
 
 const CspRouterLazy = lazy(() => import('./application/csp_router'));
@@ -131,9 +128,15 @@ export class CspPlugin
               {props.children}
             </LazyCspFindingsMisconfigurationFlyout>
           ),
-          Header: (props) => <LazyCspFindingsMisconfigurationFlyoutHeader {...props} />,
-          Body: (props) => <LazyCspFindingsMisconfigurationFlyoutBody {...props} />,
-          Footer: (props) => <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />,
+          Header: (props: FindingsMisconfigurationFlyoutHeaderProps) => (
+            <LazyCspFindingsMisconfigurationFlyoutHeader {...props} />
+          ),
+          Body: (props: FindingsMisconfigurationFlyoutContentProps) => (
+            <LazyCspFindingsMisconfigurationFlyoutBody {...props} />
+          ),
+          Footer: (props: FindingMisconfigurationFlyoutFooterProps) => (
+            <LazyCspFindingsMisconfigurationFlyoutFooter {...props} />
+          ),
         };
       },
     };

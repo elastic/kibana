@@ -59,9 +59,8 @@ import type { ServicePanelExpandableFlyoutProps } from './entity_details/service
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
-import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/helper';
 import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
-import { FindingsMisconfigurationPanelTrial } from './csp_details/findings_flyout/findings_right';
+import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/findings_right';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -194,7 +193,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
   {
     key: MisconfigurationFindingsPanelKey,
     component: (props) => (
-      <FindingsMisconfigurationPanelTrial
+      <FindingsMisconfigurationPanel
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
       />
     ),

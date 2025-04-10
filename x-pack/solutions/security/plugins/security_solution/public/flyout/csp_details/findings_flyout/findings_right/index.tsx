@@ -8,29 +8,26 @@
 import React from 'react';
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer, EuiFlyoutFooter } from '@elastic/eui';
+import type {
+  FindingMisconfigurationFlyoutContentProps,
+  FindingMisconfigurationFlyoutProps,
+} from '@kbn/cloud-security-posture';
 import { CspEvaluationBadge } from '@kbn/cloud-security-posture';
 import { FlyoutNavigation } from '../../../shared/components/flyout_navigation';
 import { FlyoutHeader } from '../../../shared/components/flyout_header';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FlyoutBody } from '../../../shared/components/flyout_body';
-import { FlyoutFooter } from '../../../shared/components/flyout_footer';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FlyoutTitle } from '../../../shared/components/flyout_title';
-
-export interface FindingsMisconfigurationPanelProps extends Record<string, unknown> {
-  resourceId: string;
-  ruleId: string;
-}
-
 export interface FindingsMisconfigurationPanelExpandableFlyoutProps extends FlyoutPanelProps {
   key: 'findings-misconfiguration-panel';
-  params: FindingsMisconfigurationPanelProps;
+  params: FindingMisconfigurationFlyoutProps;
 }
 
-export const FindingsMisconfigurationPanelTrial = ({
+export const FindingsMisconfigurationPanel = ({
   resourceId,
   ruleId,
-}: FindingsMisconfigurationPanelProps) => {
+}: FindingMisconfigurationFlyoutProps) => {
   const { cloudSecurityPosture } = useKibana().services;
   const CspFlyout = cloudSecurityPosture.getCloudSecurityPostureMisconfigurationFlyout();
 
@@ -38,7 +35,7 @@ export const FindingsMisconfigurationPanelTrial = ({
     <>
       <FlyoutNavigation flyoutIsExpandable={false} />
       <CspFlyout.Component ruleId={ruleId} resourceId={resourceId}>
-        {({ finding, createRuleFn, tab, setTab, tabs }: any) => {
+        {({ finding, createRuleFn }: FindingMisconfigurationFlyoutContentProps) => {
           return (
             <>
               <FlyoutHeader>
@@ -50,7 +47,7 @@ export const FindingsMisconfigurationPanelTrial = ({
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs">
                         <b>{'Evaluated at '}</b>
-                        <PreferenceFormattedDate value={finding['@timestamp']} />
+                        <PreferenceFormattedDate value={new Date(finding['@timestamp'])} />
                         <EuiSpacer size="xs" />
                       </EuiText>
                     </EuiFlexItem>
@@ -59,13 +56,13 @@ export const FindingsMisconfigurationPanelTrial = ({
                     <FlyoutTitle title={finding.rule.name} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <CspFlyout.Header tab={tab} setTab={setTab} finding={finding} tabs={tabs} />
+                <CspFlyout.Header finding={finding} />
               </FlyoutHeader>
               <FlyoutBody>
-                <CspFlyout.Body tab={tab} data={finding} />
+                <CspFlyout.Body data={finding} />
               </FlyoutBody>
               <EuiFlyoutFooter>
-                <CspFlyout.Footer finding={finding} createRuleFn={createRuleFn} />
+                <CspFlyout.Footer createRuleFn={createRuleFn} />
               </EuiFlyoutFooter>
             </>
           );
@@ -75,4 +72,4 @@ export const FindingsMisconfigurationPanelTrial = ({
   );
 };
 
-FindingsMisconfigurationPanelTrial.displayName = 'FindingsMisconfigurationPanelTrial';
+FindingsMisconfigurationPanel.displayName = 'FindingsMisconfigurationPanel';

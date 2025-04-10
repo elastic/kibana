@@ -7,7 +7,15 @@
 
 import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel, EuiTabs, EuiTab, EuiCallOut, useEuiTheme, EuiFlexGroup } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTabs,
+  EuiTab,
+  EuiCallOut,
+  useEuiTheme,
+  EuiFlexGroup,
+  EuiFlyoutBody,
+} from '@elastic/eui';
 import {
   CSP_MISCONFIGURATIONS_DATASET,
   CspFinding,
@@ -22,7 +30,7 @@ import { i18n } from '@kbn/i18n';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
 import { isNativeCspFinding } from '@kbn/cloud-security-posture/src/utils/is_native_csp_finding';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { OverviewTab } from '../overview_tab_new';
+import { OverviewTab } from '../overview_tab';
 import { JsonTab } from '../json_tab';
 import { TableTab } from '../table_tab';
 
@@ -136,14 +144,14 @@ export const FindingsMisconfigurationFlyoutContent = ({ data }: { data: CspFindi
               position: relative;
             `}
           >
-            {/* <EuiFlyoutBody key={tab.id}> */}
-            {!isNativeCspFinding(data) && ['overview', 'rule'].includes(tab.id) && (
-              <div style={{ marginBottom: euiTheme.size.base }}>
-                <MissingFieldsCallout finding={data} />
-              </div>
-            )}
-            <FindingsTab tab={tab} finding={data} />
-            {/* </EuiFlyoutBody> */}
+            <EuiFlyoutBody key={tab.id}>
+              {!isNativeCspFinding(data) && ['overview', 'rule'].includes(tab.id) && (
+                <div style={{ marginBottom: euiTheme.size.base }}>
+                  <MissingFieldsCallout finding={data} />
+                </div>
+              )}
+              <FindingsTab tab={tab} finding={data} />
+            </EuiFlyoutBody>
           </EuiPanel>
         )}
       </EuiFlexGroup>

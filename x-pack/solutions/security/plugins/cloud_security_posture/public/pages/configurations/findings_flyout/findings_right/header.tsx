@@ -14,11 +14,14 @@ import {
   useEuiTheme,
   EuiBadge,
   EuiPanel,
+  EuiCopy,
+  EuiIcon,
 } from '@elastic/eui';
+import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { BenchmarkIcons } from '../findings_flyout';
 
 export interface FindingsMisconfigurationFlyoutHeaderProps {
-  finding: any;
+  finding: CspFinding;
 }
 
 export const FindingsMisconfigurationFlyoutHeader = ({
@@ -26,11 +29,11 @@ export const FindingsMisconfigurationFlyoutHeader = ({
 }: FindingsMisconfigurationFlyoutHeaderProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const rulesTags = finding?.rule.tags;
-  const resourceName = finding?.resource.name;
-  const vendor = finding?.observer.vendor;
-  const ruleBenchmarkId = finding?.rule.benchmark.id;
-  const ruleBenchmarkName = finding?.rule.benchmark.name;
+  const rulesTags = finding?.rule?.tags;
+  const resourceName = finding?.resource?.name;
+  const vendor = finding?.observer?.vendor;
+  const ruleBenchmarkId = finding?.rule?.benchmark?.id;
+  const ruleBenchmarkName = finding?.rule?.benchmark?.name;
 
   return (
     <>
@@ -58,7 +61,24 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                     <EuiFlexItem>
                       <b>Resource Name</b>
                     </EuiFlexItem>
-                    <EuiFlexItem> {resourceName} </EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiFlexGroup direction="row" gutterSize="none">
+                        {resourceName}
+                        <EuiCopy textToCopy={resourceName}>
+                          {(copy) => (
+                            <EuiIcon
+                              css={css`
+                                :hover {
+                                  cursor: pointer;
+                                }
+                              `}
+                              onClick={copy}
+                              type="copy"
+                            />
+                          )}
+                        </EuiCopy>
+                      </EuiFlexGroup>
+                    </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiPanel>
               </EuiFlexItem>
@@ -82,7 +102,6 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                         />
                       )}
                     </EuiFlexItem>
-                    {/* <EuiFlexItem> {framework} </EuiFlexItem> */}
                   </EuiFlexGroup>
                 </EuiPanel>
               </EuiFlexItem>
