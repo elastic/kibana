@@ -20,6 +20,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { KPIsSection } from './kpis/kpis_section';
 import { IntegrationSection } from './integrations/integration_section';
 import { SearchBarSection } from './search_bar/search_bar_section';
+import { TableSection } from './table/table_section';
 
 const DATAVIEW_ERROR = i18n.translate('xpack.securitySolution.alertSummary.dataViewError', {
   defaultMessage: 'Unable to create data view',
@@ -98,6 +99,8 @@ export const Wrapper = memo(({ packages }: WrapperProps) => {
               <SearchBarSection dataView={dataView} packages={packages} />
               <EuiSpacer />
               <KPIsSection dataView={dataView} />
+              <EuiSpacer />
+              <TableSection dataView={dataView} />
             </div>
           )}
         </>
