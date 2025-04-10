@@ -157,13 +157,13 @@ export const RemoteElasticSearchSchema = {
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
-      kibana_api_key: schema.maybe(secretRefSchema),
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
   kibana_url: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   kibana_api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  sync_uninstalled_integrations: schema.maybe(schema.boolean()),
 };
 
 const RemoteElasticSearchUpdateSchema = {
@@ -173,13 +173,13 @@ const RemoteElasticSearchUpdateSchema = {
   secrets: schema.maybe(
     schema.object({
       service_token: schema.maybe(secretRefSchema),
-      kibana_api_key: schema.maybe(secretRefSchema),
       ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
     })
   ),
   sync_integrations: schema.maybe(schema.boolean()),
   kibana_url: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   kibana_api_key: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  sync_uninstalled_integrations: schema.maybe(schema.boolean()),
 };
 
 /**
