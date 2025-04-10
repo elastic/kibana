@@ -12,6 +12,7 @@ import { combineLatest, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { GridPanelData, GridRowData } from '../types';
 
 export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -29,10 +30,15 @@ export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) =>
         .subscribe(([activePanel, proposedGridLayout]) => {
           if (!dragPreviewRef.current) return;
 
-          if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
+          const panel = !activePanel
+            ? undefined
+            : rowId === 'main'
+            ? (proposedGridLayout?.[activePanel.id] as GridPanelData)
+            : (proposedGridLayout?.[rowId] as GridRowData).panels[activePanel.id];
+
+          if (!panel) {
             dragPreviewRef.current.style.display = 'none';
           } else {
-            const panel = proposedGridLayout[rowId].panels[activePanel.id];
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;

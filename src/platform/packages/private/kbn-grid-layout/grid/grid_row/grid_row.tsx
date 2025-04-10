@@ -133,7 +133,7 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 
   return (
     <div
-      css={[styles.fullHeight, styles.gridWrapper]}
+      css={[styles.fullHeight, styles.gridWrapper, css({ gridRowStart: `${rowId}-start` })]}
       className={classNames('kbnGridRowContainer', {
         'kbnGridRowContainer--collapsed': isCollapsed,
       })}
@@ -171,7 +171,7 @@ const styles = {
   }),
   gridWrapper: css({
     gridColumnStart: 1,
-    gridColumnEnd: 'calc(var(--kbnGridColumnCount) + 1)', // full width
+    gridColumnEnd: -1, // full width
   }),
   grid: css({
     position: 'relative',

@@ -21,10 +21,10 @@ import { GridPanelData, GridRowData } from '../types';
 
 export interface GridPanelProps {
   panelId: string;
-  rowId?: string;
+  rowId: string;
 }
 
-export const GridPanel = React.memo(({ panelId, rowId = 'main' }: GridPanelProps) => {
+export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
   const { gridLayoutStateManager, useCustomDragHandle, renderPanelContents } =
     useGridLayoutContext();
 
@@ -82,13 +82,13 @@ export const GridPanel = React.memo(({ panelId, rowId = 'main' }: GridPanelProps
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
-
           let panel: GridPanelData;
           if (rowId === 'main') {
             panel = (proposedGridLayout ?? gridLayout)[panelId] as GridPanelData;
           } else {
             panel = ((proposedGridLayout ?? gridLayout)[rowId] as GridRowData)?.panels[panelId];
           }
+
           if (!ref || !panel) return;
 
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();

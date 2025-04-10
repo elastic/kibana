@@ -10,17 +10,25 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, map, distinctUntilChanged } from 'rxjs';
+import { combineLatest, map, distinctUntilChanged, pairwise } from 'rxjs';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import {
+  GridAccessMode,
+  GridLayoutData,
+  GridPanelData,
+  GridRowData,
+  GridSettings,
+  UseCustomDragHandle,
+} from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { getMainLayoutInOrder } from './utils/resolve_grid_row';
 import { GridPanel } from './grid_panel';
+import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -99,18 +107,46 @@ export const GridLayout = ({
   // }, [onLayoutChange]);
 
   useEffect(() => {
-    const mainSectionWidgetsSubscription = combineLatest([
+    const mainSectionWidgetsSubscription = gridLayoutStateManager.gridLayout$
+      .pipe(
+        map((gridLayout) => getMainLayoutInOrder(gridLayout)),
+        distinctUntilChanged(deepEqual)
+      )
+      .subscribe((widgets) => {
+        console.log('SET WIDGETS IN ORDER', widgets);
+        setWidgetsInOrder(widgets);
+      });
+
+    const mainSectionGridStyleSubscription = combineLatest([
       gridLayoutStateManager.proposedGridLayout$,
       gridLayoutStateManager.gridLayout$,
     ])
       .pipe(
         map(([proposedGridLayout, gridLayout]) =>
           getMainLayoutInOrder(proposedGridLayout ?? gridLayout)
-        ),
-        distinctUntilChanged(deepEqual)
+        )
       )
       .subscribe((widgets) => {
-        setWidgetsInOrder(widgets);
+        if (!layoutRef.current) return;
+
+        const currentLayout =
+          gridLayoutStateManager.proposedGridLayout$.getValue() ??
+          gridLayoutStateManager.gridLayout$.getValue();
+        let gridTemplateRows = '';
+        let maxRow = -Infinity;
+        widgets.forEach(({ id, type }) => {
+          if (type === 'panel') {
+            const panelData = currentLayout[id] as GridPanelData;
+            maxRow = Math.max(maxRow, panelData.row + panelData.height);
+          } else {
+            const sectionData = currentLayout[id] as GridRowData;
+            gridTemplateRows += `${
+              maxRow > 0 ? `repeat(${maxRow}, calc(var(--kbnGridRowHeight) * 1px))` : ''
+            } [${sectionData.id}-start] auto `;
+            maxRow = -Infinity;
+          }
+        });
+        layoutRef.current.style.gridTemplateRows = gridTemplateRows;
       });
 
     /**
@@ -138,6 +174,7 @@ export const GridLayout = ({
 
     return () => {
       mainSectionWidgetsSubscription.unsubscribe();
+      mainSectionGridStyleSubscription.unsubscribe();
       gridLayoutClassSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -171,8 +208,13 @@ export const GridLayout = ({
           ]}
         >
           {widgetsInOrder.map(({ id, type }) =>
-            type === 'section' ? <GridRow key={id} rowId={id} /> : <GridPanel panelId={id} />
+            type === 'section' ? (
+              <GridRow key={id} rowId={id} />
+            ) : (
+              <GridPanel key={id} panelId={id} rowId="main" />
+            )
           )}
+          <GridPanelDragPreview rowId={'main'} />
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>
@@ -183,7 +225,6 @@ const styles = {
   grid: css({
     display: 'grid',
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
-    gridTemplateRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     gridTemplateColumns: `repeat(
           var(--kbnGridColumnCount),
           calc(
