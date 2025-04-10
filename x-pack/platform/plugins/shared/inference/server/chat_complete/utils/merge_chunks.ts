@@ -41,7 +41,9 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
                 JSON.parse(toolCall.function.arguments)
               )
             );
-          } catch (e) {}
+          } catch (e) {
+            /* empty */
+          }
         } else {
           prevToolCall.function.name += toolCall.function.name;
           prevToolCall.function.arguments += toolCall.function.arguments;
