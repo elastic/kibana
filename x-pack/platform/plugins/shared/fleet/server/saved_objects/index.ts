@@ -1010,7 +1010,6 @@ export const getSavedObjectTypes = (
             },
           },
           latest_install_failed_attempts: { type: 'object', enabled: false },
-          latest_uninstall_failed_attempts: { type: 'object', enabled: false },
           latest_executed_state: { type: 'object', enabled: false },
           installed_kibana: {
             dynamic: false,
