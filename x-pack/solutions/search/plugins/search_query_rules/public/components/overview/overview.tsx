@@ -62,7 +62,7 @@ export const QueryRulesOverview = () => {
           restrictWidth
           color="primary"
           rightSideItems={[
-            <EuiFlexGroup alignItems="center">
+            <EuiFlexGroup alignItems="center" key="queryRulesOverviewHeaderButtons">
               <EuiFlexItem grow={false}>
                 <EuiLink
                   data-test-subj="queryRulesOverviewApiDocumentationLink"

@@ -6,3 +6,4 @@
  */
 
 export const QUERY_RULES_SETS_QUERY_KEY = 'query-rules-sets-fetch';
+export const QUERY_RULES_QUERY_RULESET_FETCH_KEY = 'query-rules-ruleset-fetch';

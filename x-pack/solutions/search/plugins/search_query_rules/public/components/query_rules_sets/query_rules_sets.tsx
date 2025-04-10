@@ -10,10 +10,15 @@ import React, { useState } from 'react';
 import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchQueryRulesSets } from '../../hooks/use_fetch_query_rules_sets';
+import { useKibana } from '../../hooks/use_kibana';
 
 export const QueryRulesSets = () => {
+  const {
+    services: { application, http },
+  } = useKibana();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
@@ -40,7 +45,9 @@ export const QueryRulesSets = () => {
         <EuiLink
           data-test-subj="queryRuleSetName"
           onClick={() => {
-            // Navigate to the ruleset details page
+            application.navigateToUrl(
+              http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/ruleset/${name}`)
+            );
           }}
         >
           {name}
