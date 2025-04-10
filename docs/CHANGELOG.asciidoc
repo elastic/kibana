@@ -11,6 +11,7 @@
 Review important information about the {kib} 8.x releases.
 
 * <<release-notes-8.18.0>>
+* <<release-notes-8.17.5>>
 * <<release-notes-8.17.4>>
 * <<release-notes-8.17.3>>
 * <<release-notes-8.17.2>>
@@ -365,6 +366,51 @@ Machine Learning::
 * Anomaly Explorer: Fixes handling of job group IDs when opening from dashboard panels ({kibana-pull}203224[#203224]).
 * AiOps: Fixes Log Rate Analysis embeddable error on the Alerts page ({kibana-pull}203093[#203093]).
 * Initializes saved objects on trained model page load ({kibana-pull}201426[#201426]).
+
+[[release-notes-8.17.5]]
+== {kib} 8.17.5
+
+The 8.17.5 release includes the following fixes.
+
+[float]
+[[enhancement-v8.17.5]]
+=== Enhancements
+Elastic Security solution::
+For the Elastic Security 8.17.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+
+[float]
+[[fixes-v8.17.5]]
+=== Fixes
+Dashboards and Visualizations::
+* Wraps text in search bars ({kibana-pull}217556[#217556]).
+* Updates the HTTP API response from 201 to 200 ({kibana-pull}217054[#217054]).
+* Fixes an issue with the state being dropped when editing visualize embeddables ({kibana-pull}216910[#216910]).
+* Fixes a race condition in `useBatchedPublishingSubjects` ({kibana-pull}216399[#216399]).
+* Fixes dragged elements becoming invisible when dragging-and-dropping in *Lens* ({kibana-pull}213928[#213928]).
+Data ingestion and Fleet::
+* Enables unenroll inactive agent tasks to unenroll some agents if the first set returned is equal to `UNENROLLMENT_BATCH_SIZE` ({kibana-pull}216283[#216283]).
+Elastic Observability Solution::
+* Fixes Alerts tab count in Monitor details ({kibana-pull}216761[#216761]).
+* Fixes the Save visualization action on the Monitors Overview tab ({kibana-pull}216695[#216695]).
+* Makes service inventory icons visible if the `agentName` is returned ({kibana-pull}216220[#216220]).
+* Fixes an issue with old time units persisting when updating monitor frequency ({kibana-pull}215823[#215823]).
+* Fixes the query for transaction marks ({kibana-pull}215819[#215819]).
+* Fixes the location filter in the status rule executor ({kibana-pull}215514[#215514]).
+* Adds missing `user_agent` version field and shows it on the trace summary ({kibana-pull}215403[#215403]).
+* Fixes the missing URL in the transaction summary ({kibana-pull}215397[#215397]).
+* Fixes the span link invalid filter ({kibana-pull}215322[#215322]).
+* Prevents `getChildrenGroupedByParentId` from including the parent in the children list ({kibana-pull}214957[#214957]).
+* Fixes entry waterfall transaction being treated as an orphan ({kibana-pull}214700[#214700]).
+* Fixes an issue with loading SLOs by status, SLI type, or instance ID ({kibana-pull}209910[#209910]).
+Elastic Security solution::
+For the Elastic Security 8.17.5 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Kibana platform::
+* Fixes the Share modal export icon focusable ({kibana-pull}217313[#217313]).
+Machine Learning::
+* Fixes the `Change Point Detection` embeddable ({kibana-pull}217178[#217178]).
+Management::
+* Fixes error message when previewing index templates used by data streams ({kibana-pull}217604[#217604]).
+* Fixes the search profiler resetting the index field when query is edited ({kibana-pull}215420[#215420]).
 
 [[release-notes-8.17.4]]
 == {kib} 8.17.4
