@@ -18,8 +18,8 @@ import {
   useEuiTheme,
   keys,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useAgent } from '../../hooks/use_agent';
+import { chatCommonLabels } from './i18n';
 
 interface ChatNewConversationPromptProps {
   agentId: string;
@@ -93,7 +93,11 @@ export const ChatNewConversationPrompt: React.FC<ChatNewConversationPromptProps>
             justifyContent="center"
           >
             <EuiFlexItem>
-              <EuiAvatar name={agent?.name ?? 'Assistant'} size="xl" type="user" />
+              <EuiAvatar
+                name={agent?.name ?? chatCommonLabels.assistant.defaultNameLabel}
+                size="xl"
+                type="user"
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="m" className={agentNameClassName}>
@@ -122,9 +126,7 @@ export const ChatNewConversationPrompt: React.FC<ChatNewConversationPromptProps>
                     value={message}
                     onChange={handleChange}
                     onKeyDown={handleTextAreaKeyDown}
-                    placeholder={i18n.translate('xpack.workchatApp.chatInputForm.placeholder', {
-                      defaultMessage: 'Ask anything',
-                    })}
+                    placeholder={chatCommonLabels.userInputBox.placeholder}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

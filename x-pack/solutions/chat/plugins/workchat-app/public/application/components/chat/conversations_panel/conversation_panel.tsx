@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ConversationSummary } from '../../../../../common/conversations';
 import { sortAndGroupConversations } from '../../../utils/sort_and_group_conversations';
-import { AgentBlock } from './agent_block';
+import { AssistantBlock } from './assistant_block';
 import { ConversationGroup } from './conversation_group';
 
 interface ConversationPanelProps {
@@ -105,7 +105,7 @@ export const ConversationPanel: React.FC<ConversationPanelProps> = ({
         responsive={false}
       >
         <EuiFlexItem grow={false} className={sectionBlockPaddingCLassName}>
-          <AgentBlock agentId={agentId} />
+          <AssistantBlock agentId={agentId} />
           <EuiSpacer size="l" />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className={sectionBlockPaddingCLassName}>

@@ -24,9 +24,9 @@ export const ChatConversationProgression: React.FC<ChatConversationMessageProps>
   const getText = (event: ProgressionEvent): string => {
     switch (event.data.step) {
       case 'planning':
-        return 'Thinking about which integration to use';
+        return 'Thinking about which tools to use';
       case 'retrieval':
-        return 'Calling relevant integrations';
+        return 'Calling relevant tools';
       case 'analysis':
         return 'Analysing the results';
       case 'generate_summary':

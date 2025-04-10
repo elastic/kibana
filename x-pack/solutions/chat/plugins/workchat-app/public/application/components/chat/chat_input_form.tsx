@@ -15,7 +15,7 @@ import {
   keys,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { chatCommonLabels } from './i18n';
 
 interface ChatInputFormProps {
   disabled: boolean;
@@ -75,9 +75,7 @@ export const ChatInputForm: React.FC<ChatInputFormProps> = ({ disabled, loading,
           value={message}
           onChange={handleChange}
           onKeyDown={handleTextAreaKeyDown}
-          placeholder={i18n.translate('xpack.workchatApp.chatInputForm.placeholder', {
-            defaultMessage: 'Ask anything',
-          })}
+          placeholder={chatCommonLabels.userInputBox.placeholder}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

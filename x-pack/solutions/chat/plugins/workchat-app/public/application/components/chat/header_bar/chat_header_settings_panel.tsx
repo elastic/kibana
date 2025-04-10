@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiButtonIcon, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { useConnectors } from '../../../hooks/use_connectors';
 
 interface ChatHeaderSettingsPanel {
@@ -56,7 +57,9 @@ export const ChatHeaderSettingsPanel: React.FC<ChatHeaderSettingsPanel> = ({
     return [
       {
         id: 0,
-        title: 'Connectors',
+        title: i18n.translate('workchatApp.chat.headerBar.connectorList.connectorsLabel', {
+          defaultMessage: 'Connectors',
+        }),
         items: connectors.map((connector) => {
           return {
             name: connector.name,

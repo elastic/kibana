@@ -11,4 +11,19 @@ export const chatCommonLabels = {
   newConversationLabel: i18n.translate('workchatApp.chat.conversations.newConversationLabel', {
     defaultMessage: 'New conversation',
   }),
+  userInputBox: {
+    placeholder: i18n.translate('xpack.workchatApp.chatInputForm.placeholder', {
+      defaultMessage: 'Ask anything',
+    }),
+  },
+  assistant: {
+    defaultNameLabel: i18n.translate('xpack.workchatApp.assistant.defaultNameLabel', {
+      defaultMessage: 'Assistant',
+    }),
+  },
+  assistantStatus: {
+    healthy: i18n.translate('workchatApp.chat.assistantStatus.healthy', {
+      defaultMessage: 'Healthy',
+    }),
+  },
 };

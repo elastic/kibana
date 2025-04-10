@@ -17,12 +17,13 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 import { useAgent } from '../../../hooks/use_agent';
+import { chatCommonLabels } from '../i18n';
 
-interface AgentBlockProps {
+interface AssistantBlockProps {
   agentId: string;
 }
 
-export const AgentBlock: React.FC<AgentBlockProps> = ({ agentId }) => {
+export const AssistantBlock: React.FC<AssistantBlockProps> = ({ agentId }) => {
   const { agent } = useAgent({ agentId });
   const { euiTheme } = useEuiTheme();
 
@@ -51,7 +52,7 @@ export const AgentBlock: React.FC<AgentBlockProps> = ({ agentId }) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiHealth color="success">
-              <EuiText size="xs">Healthy</EuiText>
+              <EuiText size="xs">{chatCommonLabels.assistantStatus.healthy}</EuiText>
             </EuiHealth>
           </EuiFlexItem>
         </EuiFlexGroup>

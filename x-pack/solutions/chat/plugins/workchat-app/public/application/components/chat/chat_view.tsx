@@ -10,14 +10,13 @@ import React, { useCallback, useState } from 'react';
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { ConversationEventChanges } from '../../../../common/chat_events';
-import { Chat } from './chat';
-import { ChatHeader } from './header_bar/chat_header';
-import { ConversationPanel } from './conversations_panel/conversation_panel';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useConversationList } from '../../hooks/use_conversation_list';
-import { useKibana } from '../../hooks/use_kibana';
-
-const newConversationId = 'new';
+import { useNavigation } from '../../hooks/use_navigation';
+import { appPaths } from '../../app_paths';
+import { ConversationPanel } from './conversations_panel/conversation_panel';
+import { ChatHeader } from './header_bar/chat_header';
+import { Chat } from './chat';
 
 interface WorkchatChatViewProps {
   agentId: string;
@@ -25,9 +24,7 @@ interface WorkchatChatViewProps {
 }
 
 export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, conversationId }) => {
-  const {
-    services: { application },
-  } = useKibana();
+  const { navigateToWorkchatUrl } = useNavigation();
 
   const { euiTheme } = useEuiTheme();
 
@@ -48,11 +45,11 @@ export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, con
   const onConversationUpdate = useCallback(
     (changes: ConversationEventChanges) => {
       if (!conversationId) {
-        application.navigateToApp('workchat', { path: `/agents/${agentId}/chat/${changes.id}` });
+        navigateToWorkchatUrl(appPaths.chat.conversation({ agentId, conversationId: changes.id }));
       }
       refreshConversations();
     },
-    [agentId, application, conversationId, refreshConversations]
+    [agentId, conversationId, refreshConversations, navigateToWorkchatUrl]
   );
 
   const [connectorId, setConnectorId] = useState<string>();
@@ -71,12 +68,12 @@ export const WorkchatChatView: React.FC<WorkchatChatViewProps> = ({ agentId, con
           conversations={conversations}
           activeConversationId={conversationId}
           onConversationSelect={(newConvId) => {
-            application.navigateToApp('workchat', { path: `/agents/${agentId}/chat/${newConvId}` });
+            navigateToWorkchatUrl(
+              appPaths.chat.conversation({ agentId, conversationId: newConvId })
+            );
           }}
           onNewConversationSelect={() => {
-            application.navigateToApp('workchat', {
-              path: `/agents/${agentId}/chat/${newConversationId}`,
-            });
+            navigateToWorkchatUrl(appPaths.chat.new({ agentId }));
           }}
         />
       </KibanaPageTemplate.Sidebar>
