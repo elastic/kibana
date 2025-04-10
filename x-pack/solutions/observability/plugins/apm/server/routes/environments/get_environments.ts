@@ -61,24 +61,25 @@ export async function getEnvironments({
     },
   };
 
-  const hasUnsetEnvironments = hasUnsetValueForField({
-    apmEventClient,
-    searchAggregatedTransactions,
-    serviceName,
-    fieldName: SERVICE_ENVIRONMENT,
-    start,
-    end,
-  });
+  const [hasUnsetEnvironments, resp] = await Promise.all([
+    hasUnsetValueForField({
+      apmEventClient,
+      searchAggregatedTransactions,
+      serviceName,
+      fieldName: SERVICE_ENVIRONMENT,
+      start,
+      end,
+    }),
+    apmEventClient.search(operationName, params),
+  ]);
 
-  const resp = await apmEventClient.search(operationName, params);
-  const aggs = resp.aggregations;
-  const environmentsBuckets = aggs?.environments.buckets || [];
+  const environmentsBuckets = resp.aggregations?.environments.buckets || [];
 
   const environments = environmentsBuckets.map(
     (environmentBucket) => environmentBucket.key as string
   );
 
-  if (await hasUnsetEnvironments) {
+  if (hasUnsetEnvironments) {
     environments.push(ENVIRONMENT_NOT_DEFINED.value);
   }
 
