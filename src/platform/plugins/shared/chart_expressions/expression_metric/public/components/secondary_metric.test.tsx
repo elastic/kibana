@@ -51,13 +51,14 @@ describe('Secondary metric', () => {
       expect(el).toBeInTheDocument();
     });
 
-    it('should return the N/A string if no value is provided', () => {
+    it('should return the empty string if no value is provided', () => {
       renderSecondaryMetric({
         row: { [id]: undefined },
         getMetricFormatter: jest.fn(() => () => undefined as unknown as string),
       });
-      const el = screen.getByText('N/A');
-      expect(el).toBeInTheDocument();
+      // Test id is the last resource here as the element will be empty
+      const el = screen.getByTestId('metric-secondary-element');
+      expect(el).toBeEmptyDOMElement();
     });
   });
 

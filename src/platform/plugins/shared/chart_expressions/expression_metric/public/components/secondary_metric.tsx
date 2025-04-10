@@ -188,7 +188,7 @@ export function SecondaryMetric({
   const secondaryValue = secondaryMetricColumn ? row[secondaryMetricColumn.id] : undefined;
 
   return (
-    <span>
+    <span data-test-subj="metric-secondary-element">
       {secondaryPrefix}
       {secondaryPrefix ? ' ' : ''}
       <SecondaryMetricValue
