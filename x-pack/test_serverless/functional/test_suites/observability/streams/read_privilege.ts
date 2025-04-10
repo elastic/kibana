@@ -6,13 +6,18 @@
  */
 
 import { WiredIngestUpsertRequest } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { DeploymentAgnosticFtrProviderContext } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
   createStreamsRepositoryCustomRoleClient,
-} from './helpers/repository_client';
-import { disableStreams, enableStreams, getStream, putStream } from './helpers/requests';
+} from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/streams/helpers/repository_client';
+import {
+  disableStreams,
+  enableStreams,
+  getStream,
+  putStream,
+} from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/apis/observability/streams/helpers/requests';
 
 const STREAM_NAME = 'logs.crud';
 const stream: WiredIngestUpsertRequest = {
@@ -36,7 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let adminApiClient: StreamsSupertestRepositoryClient;
   let customRoleApiClient: StreamsSupertestRepositoryClient;
 
-  describe('CRUD', () => {
+  describe('Read privilege', () => {
     before(async () => {
       await samlAuth.setCustomRole({
         elasticsearch: {
@@ -73,9 +78,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
-    describe('read streams', () => {
+    describe('Get streams', () => {
       it('fails when users has not read access', async () => {
         await getStream(customRoleApiClient, STREAM_NAME, 403);
+      });
+
+      it('succeed when users has read access', async () => {
+        await getStream(adminApiClient, STREAM_NAME, 200);
       });
     });
   });
