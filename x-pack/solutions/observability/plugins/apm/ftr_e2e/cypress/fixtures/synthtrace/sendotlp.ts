@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apmOtel, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 export function sendotlp({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
   const transactionName = 'parent-synth';
-  const transactionType = 'unknown';
 
-  const otelSendotlp = apmOtel
-    .service({
+  const otelSendotlp = apm
+    .otelService({
       name: 'sendotlp-otel-native-synth',
       sdkName: 'otlp',
       sdkLanguage: 'go',
@@ -24,9 +23,9 @@ export function sendotlp({ from, to }: { from: number; to: number }) {
     .rate(1)
     .generator((timestamp) => [
       otelSendotlp
-        .transaction({
-          transactionName,
-          transactionType,
+        .span({
+          name: transactionName,
+          kind: 'Server',
         })
         .defaults({
           'attributes.transaction.result': 'HTTP 2xx',
@@ -36,22 +35,21 @@ export function sendotlp({ from, to }: { from: number; to: number }) {
         .success()
         .children(
           otelSendotlp
-            .span({
-              spanName: 'child1',
-              spanType: 'external',
-              spanSubtype: 'http',
-              'attributes.http.request.method': 'GET',
+            .httpExitSpan({
+              destinationUrl: 'https://foo_service-otel-native-synth:8080',
+              method: 'GET',
+              name: 'child1',
+              statusCode: 200,
             })
             .duration(1000)
-            .destination('foo_service-otel-native-synth:8080')
             .success()
             .timestamp(timestamp)
         ),
 
       otelSendotlp
-        .transaction({
-          transactionName,
-          transactionType,
+        .span({
+          name: transactionName,
+          kind: 'Server',
         })
         .timestamp(timestamp)
         .duration(1000)
