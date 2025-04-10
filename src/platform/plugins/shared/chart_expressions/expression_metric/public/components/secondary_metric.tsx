@@ -24,7 +24,7 @@ export interface TrendConfig {
   borderColor?: string;
 }
 
-const notAvailable = i18n.translate('expressioMetricVis.secondaryMetric.notAvailable', {
+const notAvailable = i18n.translate('expressionMetricVis.secondaryMetric.notAvailable', {
   defaultMessage: 'N/A',
 });
 
