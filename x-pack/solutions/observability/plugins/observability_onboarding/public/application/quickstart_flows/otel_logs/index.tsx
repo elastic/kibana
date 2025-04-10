@@ -26,6 +26,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
@@ -41,6 +42,7 @@ const HOST_COMMAND = i18n.translate(
 );
 
 export const OtelLogsPanel: React.FC = () => {
+  const { onPageReady } = usePerformanceContext();
   const {
     data: apiKeyData,
     error,
@@ -64,6 +66,16 @@ export const OtelLogsPanel: React.FC = () => {
       context: { isServerless, stackVersion },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
+  useEffect(() => {
+    if (apiKeyData && setup) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Requests to get the environment and to generate API key succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [apiKeyData, onPageReady, setup]);
 
   const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
   const agentVersion =

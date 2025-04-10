@@ -14,11 +14,12 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
-  const { dashboard, timePicker, common, dashboardControls } = getPageObjects([
+  const { dashboard, timePicker, common, dashboardControls, header } = getPageObjects([
     'dashboard',
     'timePicker',
     'common',
     'dashboardControls',
+    'header',
   ]);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
@@ -26,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
+  const dashboardPanelActions = getService('dashboardPanelActions');
 
   describe('dashboard - add an value type ES|QL control', function () {
     before(async () => {
@@ -87,18 +89,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
 
+      await testSubjects.click('applyFlyoutButton');
+      await dashboard.waitForRenderComplete();
+    });
+
+    it('should update the Lens chart accordingly', async () => {
+      // now edit the panel and click on Cancel
+      await dashboardPanelActions.clickInlineEdit();
       // change the table to keep only the column with the control
       await esql.setEsqlEditorQuery(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest | KEEP geo.dest'
       );
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
 
       // save the changes
       await testSubjects.click('applyFlyoutButton');
-    });
-
-    it('should update the Lens chart accordingly', async () => {
+      await dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
       // change the control value
       await comboBox.set('esqlControlValuesDropdown', 'AO');
       await dashboard.waitForRenderComplete();

@@ -6,6 +6,7 @@
  */
 
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services, pageObjects } from './ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -15,6 +16,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [require.resolve('./tests')],
     servers: {
       ...kibanaFunctionalConfig.get('servers'),
