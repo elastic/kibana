@@ -30,6 +30,7 @@ export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
   const rowsBeforeHeight = rowsBefore.reduce((acc, row) => {
     return acc + getRowHeight(row);
   }, 0);
+
   return rowsBeforeHeight;
 };
 

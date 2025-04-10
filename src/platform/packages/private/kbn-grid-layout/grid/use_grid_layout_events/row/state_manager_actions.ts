@@ -8,9 +8,9 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { cloneDeep, pick } from 'lodash';
+import { cloneDeep, drop, pick } from 'lodash';
 
-import { GridLayoutStateManager } from '../../types';
+import { GridLayoutStateManager, GridRowData } from '../../types';
 import { getRowKeysInOrder } from '../../utils/resolve_grid_row';
 import { getSensorType } from '../sensors';
 import { PointerPosition, UserInteractionEvent } from '../types';
@@ -86,14 +86,59 @@ export const moveAction = (
       return midA - midB;
     }
   );
+  // if dragged row is above the not collapsed row and above some panels, 
+  // move these panels to the dragged row - change the row's order, 
 
-  if (!deepEqual(currentRowOrder, updatedRowOrder)) {
-    const updatedLayout = cloneDeep(currentLayout);
-    updatedRowOrder.forEach((id, index) => {
-      updatedLayout[id].order = index + 1;
-    });
-    gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+  const draggedRowId = currentActiveRowEvent.id;
+  const draggedRow = currentLayout[draggedRowId];
+  const dropTargetRowId = getDropTargetRowId(currentPointer, gridLayoutStateManager);
+  const panelsToMove = getPanelsIdsToMove(currentPointer, gridLayoutStateManager, dropTargetRowId); 
+
+  // now we have to calculate new panels positions, remove the panels from the previous row and add it to the one that's dragged
+
+  if (dropTargetRowId) {
+
+  const nextLayout = cloneDeep(currentLayout);
+
+  function partitionObject(obj: GridRowData['panels'], panelIds: string[]) {
+  const picked = {};
+  const omitted = {};
+  const keySet = new Set(panelIds);
+  console.log(obj, keySet)
+
+  for (const key in obj) {
+    if (keySet.has(key)) {
+      picked[key] = obj[key];
+    } else {
+      omitted[key] = obj[key];
+    }
   }
+
+  return [picked, omitted];
+}
+    
+const [pickedPanels, omittedPanels] = partitionObject(currentLayout[dropTargetRowId].panels, panelsToMove);
+
+  nextLayout[draggedRowId].panels = {...currentLayout[draggedRowId].panels, ...pickedPanels};
+  nextLayout[dropTargetRowId].panels = omittedPanels
+ if (!deepEqual(currentLayout, nextLayout)) {
+  console.log('nextLayout', nextLayout);
+      gridLayoutStateManager.proposedGridLayout$.next(nextLayout);
+    }
+
+
+
+}
+
+
+
+  // if (!deepEqual(currentRowOrder, updatedRowOrder)) {
+  //   const updatedLayout = cloneDeep(currentLayout);
+  //   updatedRowOrder.forEach((id, index) => {
+  //     updatedLayout[id].order = index + 1;
+  //   });
+  //   gridLayoutStateManager.proposedGridLayout$.next(updatedLayout);
+  // }
 
   gridLayoutStateManager.activeRowEvent$.next({
     ...currentActiveRowEvent,
@@ -103,3 +148,42 @@ export const moveAction = (
     },
   });
 };
+
+const getDropTargetRowId = (
+  currentPointer: PointerPosition,
+  gridLayoutStateManager: GridLayoutStateManager
+) => {
+
+// we want to find a row where headerRef is above the currentPointer and footerRef is below the currentPointer
+  const headerRef = Object.entries(gridLayoutStateManager.headerRefs.current).find(([id, ref]) => {
+    const footerRef = gridLayoutStateManager.footerRefs.current[id];
+    if (!footerRef || !ref) return false;
+    const { top } = ref.getBoundingClientRect();
+    const { bottom } = footerRef.getBoundingClientRect();
+    return top < currentPointer.clientY && bottom > currentPointer.clientY;
+  });
+  return headerRef ? headerRef[0] : undefined;
+}
+
+const getPanelsIdsToMove = (
+  currentPointer: PointerPosition, gridLayoutStateManager: GridLayoutStateManager, dropTargetRowId?: string) => {
+    if (!dropTargetRowId) return [];
+
+    const hoveredRow = gridLayoutStateManager.gridLayout$.getValue()[dropTargetRowId];
+    if (hoveredRow.isCollapsed) return [];
+
+  // panelRefsWithinTheDropTargettedRow that is not collapsed that have bigger top than currentPointer
+  const panelRefsWithinTheDropTargettedRow = Object.entries(hoveredRow.panels).filter(
+    ([panelId]) => {
+      const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
+      if (!panelRef) return false;
+      const { top } = panelRef.getBoundingClientRect();
+      return (
+        top > currentPointer.clientY 
+        // &&
+        // gridLayoutStateManager.gridLayout$.getValue()[panelRef.id].isCollapsed === false ! TODO: this has to be a row and we have to check which one is hovered over
+      );
+    }
+  );
+  return panelRefsWithinTheDropTargettedRow.map(([id]) => id);
+}
