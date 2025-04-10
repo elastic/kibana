@@ -5,46 +5,130 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
-import { EuiLoadingSpinner, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { useFetchAnonymizationFields } from '../assistant/api/anonymization_fields/use_fetch_anonymization_fields';
-import { useChatComplete } from '../assistant/api/chat_complete/use_chat_complete';
+import React, { FunctionComponent } from 'react';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { useAlertSummary } from './alert_summary/use_alert_summary';
+import type { PromptContext } from '../assistant/prompt_context/types';
+import { MessageText } from './message_text';
 import * as i18n from './translations';
 
-interface OwnProps {
+interface Props {
   alertId: string;
+  defaultConnectorId: string;
+  isContextReady: boolean;
+  promptContext: PromptContext;
+  showAnonymizedValues: boolean;
 }
 
-type Props = OwnProps;
-
-export const AlertSummary: FunctionComponent<Props> = ({ alertId }) => {
-  const { abortStream, isLoading, sendMessage } = useChatComplete();
-  const { data: anonymizationFields, isFetched: isFetchedAnonymizationFields } =
-    useFetchAnonymizationFields();
-  const [aiSummary, setAiSummary] = useState<string>('');
-
-  useEffect(() => {
-    const fetchSummary = async () => {
-      const rawResponse = await sendMessage({
-        message: `analyze this alert: ${alertId}`,
-        replacements: {},
-      });
-      console.log('rawResponse', rawResponse);
-      setAiSummary(rawResponse.response || i18n.NO_SUMMARY_AVAILABLE);
-    };
-
-    if (isFetchedAnonymizationFields) fetchSummary();
-    return () => {
-      abortStream();
-    };
-  }, [abortStream, alertId, isFetchedAnonymizationFields, sendMessage]);
+export const AlertSummary: FunctionComponent<Props> = ({
+  alertId,
+  defaultConnectorId,
+  isContextReady,
+  promptContext,
+  showAnonymizedValues,
+}) => {
+  const {
+    alertSummary,
+    recommendedActions,
+    hasAlertSummary,
+    fetchAISummary,
+    isLoading,
+    messageAndReplacements,
+  } = useAlertSummary({
+    alertId,
+    defaultConnectorId,
+    isContextReady,
+    promptContext,
+    showAnonymizedValues,
+  });
   return (
     <>
-      <EuiTitle size={'s'} data-test-subj="knowledge-base-settings">
+      <EuiTitle size={'s'}>
         <h2>{i18n.AI_SUMMARY}</h2>
       </EuiTitle>
-      <EuiSpacer size="xs" />
-      {isLoading ? <EuiLoadingSpinner size="m" /> : <EuiText size={'s'}>{aiSummary}</EuiText>}
+      <EuiSpacer size="s" />
+      {hasAlertSummary ? (
+        isLoading ? (
+          <>
+            <EuiText
+              color="subdued"
+              css={css`
+                font-style: italic;
+              `}
+              size="s"
+            >
+              {i18n.GENERATING}
+            </EuiText>
+            <EuiSkeletonText lines={3} size="s" />
+          </>
+        ) : (
+          <>
+            <MessageText content={alertSummary} contentReferences={null} />
+
+            <EuiSpacer size="m" />
+            {recommendedActions && (
+              <>
+                <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+                  <EuiText size="xs" color="subdued">
+                    {i18n.RECOMMENDED_ACTIONS}
+                  </EuiText>
+                  <EuiSpacer size="s" />
+                  <MessageText content={recommendedActions} contentReferences={null} />
+                </EuiPanel>
+                <EuiSpacer size="m" />
+              </>
+            )}
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={fetchAISummary}
+                  color="primary"
+                  size="m"
+                  data-test-subj="generateInsights"
+                  isLoading={messageAndReplacements == null}
+                >
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+                    <EuiFlexItem grow={false}>
+                      <AssistantIcon size="m" />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>{i18n.REGENERATE}</EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )
+      ) : (
+        <EuiFlexGroup gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={fetchAISummary}
+              color="primary"
+              size="m"
+              data-test-subj="generateInsights"
+              isLoading={messageAndReplacements == null}
+            >
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <AssistantIcon size="m" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{i18n.GENERATE}</EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
     </>
   );
 };

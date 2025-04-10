@@ -17,6 +17,7 @@ import type {
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
 import { isSupportedConnector } from '@kbn/inference-common';
 import { getDefaultAIConnectorSetting } from '@kbn/security-solution-plugin/server/ui_settings';
+import type { RawConnector } from '@kbn/inference-common/src/connectors/connectors';
 import { getEnabledProductFeatures } from '../common/pli/pli_features';
 
 import type { ServerlessSecurityConfig } from './config';
@@ -73,7 +74,10 @@ export class SecuritySolutionServerlessPlugin
     this.logger.info(`Security Solution running with product types:\n${productTypesStr}`);
   }
 
-  public setup(coreSetup: CoreSetup, pluginsSetup: SecuritySolutionServerlessPluginSetupDeps) {
+  public setup(
+    coreSetup: CoreSetup<SecuritySolutionServerlessPluginStartDeps>,
+    pluginsSetup: SecuritySolutionServerlessPluginSetupDeps
+  ) {
     this.config = createConfig(this.initializerContext, pluginsSetup.securitySolution);
 
     // Register product features
@@ -90,17 +94,17 @@ export class SecuritySolutionServerlessPlugin
     // Serverless Advanced Settings setup
     coreSetup
       .getStartServices()
-      .then(async ([coreStart, depsStart]) => {
+      .then(async ([_, depsStart]) => {
         await new Promise<void>(async (resolve) => {
           try {
             const fakeRequest = { headers: {} } as KibanaRequest;
             const actionsClient = await depsStart.actions.getActionsClientWithRequest(fakeRequest);
-            const aiConnectors = actionsClient.context.inMemoryConnectors.filter((connector) =>
-              isSupportedConnector(connector)
+            const aiConnectors = actionsClient.context.inMemoryConnectors.filter(
+              (connector: RawConnector) => isSupportedConnector(connector)
             );
             const defaultAIConnectorSetting = getDefaultAIConnectorSetting(aiConnectors);
             if (defaultAIConnectorSetting !== null) {
-              const didReg = await coreSetup.uiSettings.register(defaultAIConnectorSetting);
+              await coreSetup.uiSettings.register(defaultAIConnectorSetting);
             }
             resolve();
           } catch (error) {

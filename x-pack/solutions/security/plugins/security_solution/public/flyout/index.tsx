@@ -8,22 +8,25 @@
 import React, { memo, useCallback } from 'react';
 import { ExpandableFlyout, type ExpandableFlyoutProps } from '@kbn/expandable-flyout';
 import { useEuiTheme } from '@elastic/eui';
-import { AnonymizationSwitch } from './ai_for_soc/constants/anonymization_switch';
-import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import type { FindingsMisconfigurationPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
+import type { AIForSOCDetailsProps } from './ai_for_soc/types';
+import { AIForSOCDetailsProvider } from './ai_for_soc/context';
+import { AIForSOCPanel } from './ai_for_soc';
 import type { UniversalEntityPanelExpandableFlyoutProps } from './entity_details/universal_right';
 import { UniversalEntityPanel } from './entity_details/universal_right';
 import { SessionViewPanelProvider } from './document_details/session_view/context';
 import type { SessionViewPanelProps } from './document_details/session_view';
 import { SessionViewPanel } from './document_details/session_view';
 import type { NetworkExpandableFlyoutProps } from './network_details';
+import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import { Flyouts } from './document_details/shared/constants/flyouts';
 import {
-  DocumentDetailsIsolateHostPanelKey,
-  DocumentDetailsLeftPanelKey,
-  DocumentDetailsRightPanelKey,
-  DocumentDetailsPreviewPanelKey,
   DocumentDetailsAlertReasonPanelKey,
   DocumentDetailsAnalyzerPanelKey,
+  DocumentDetailsIsolateHostPanelKey,
+  DocumentDetailsLeftPanelKey,
+  DocumentDetailsPreviewPanelKey,
+  DocumentDetailsRightPanelKey,
   DocumentDetailsSessionViewPanelKey,
 } from './document_details/shared/constants/panel_keys';
 import type { IsolateHostPanelProps } from './document_details/isolate_host';
@@ -47,21 +50,22 @@ import type { HostPanelExpandableFlyoutProps } from './entity_details/host_right
 import { HostPanel, HostPreviewPanelKey } from './entity_details/host_right';
 import type { HostDetailsExpandableFlyoutProps } from './entity_details/host_details_left';
 import { HostDetailsPanel, HostDetailsPanelKey } from './entity_details/host_details_left';
-import { NetworkPanel, NetworkPanelKey, NetworkPreviewPanelKey } from './network_details';
 import type { AnalyzerPanelExpandableFlyoutProps } from './document_details/analyzer_panels';
 import { AnalyzerPanel } from './document_details/analyzer_panels';
 import {
-  UserPanelKey,
   HostPanelKey,
   ServicePanelKey,
   UniversalEntityPanelKey,
+  UserPanelKey,
 } from './entity_details/shared/constants';
 import type { ServicePanelExpandableFlyoutProps } from './entity_details/service_right';
 import { ServicePanel } from './entity_details/service_right';
 import type { ServiceDetailsExpandableFlyoutProps } from './entity_details/service_details_left';
 import { ServiceDetailsPanel, ServiceDetailsPanelKey } from './entity_details/service_details_left';
-import { AIForSOCDetailsProvider } from './ai_for_soc/context';
-import { AIForSOCPanel } from './ai_for_soc';
+import { FindingsMisconfigurationPanel } from './csp_details/findings_flyout/helper';
+import { MisconfigurationFindingsPanelKey } from './csp_details/findings_flyout/constants';
+import { IOCPanelKey } from './ai_for_soc/constants/panel_keys';
+import { AnonymizationSwitch } from './ai_for_soc/constants/anonymization_switch';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -192,9 +196,17 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
+    key: MisconfigurationFindingsPanelKey,
+    component: (props) => (
+      <FindingsMisconfigurationPanel
+        {...(props as FindingsMisconfigurationPanelExpandableFlyoutProps).params}
+      />
+    ),
+  },
+  {
     key: IOCPanelKey,
     component: (props) => (
-      <AIForSOCDetailsProvider {...(props as IOCDetailsProps).params}>
+      <AIForSOCDetailsProvider {...(props as AIForSOCDetailsProps).params}>
         <AIForSOCPanel />
       </AIForSOCDetailsProvider>
     ),
