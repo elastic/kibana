@@ -37,9 +37,6 @@ describe('injectReferencesIntoArtifacts', () => {
           refId: 'dashboard_2',
         },
       ],
-      investigation_guide: {
-        blob: '## Summary',
-      },
     };
     const refs: SavedObjectReference[] = [
       {
@@ -63,9 +60,6 @@ describe('injectReferencesIntoArtifacts', () => {
           id: '456',
         },
       ],
-      investigation_guide: {
-        blob: '## Summary',
-      },
     });
   });
 });
