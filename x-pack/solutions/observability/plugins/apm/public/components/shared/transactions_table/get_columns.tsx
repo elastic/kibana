@@ -63,7 +63,7 @@ export function getColumns({
   latencyAggregationType?: LatencyAggregationType;
   detailedStatisticsLoading: boolean;
   detailedStatistics?: TransactionGroupDetailedStatistics;
-  comparisonEnabled?: boolean;
+  comparisonEnabled: boolean;
   shouldShowSparkPlots?: boolean;
   showAlertsColumn: boolean;
   offset?: string;
@@ -138,8 +138,7 @@ export function getColumns({
                 ...query,
                 transactionName: name,
                 transactionType: type,
-                comparisonEnabled: !!comparisonEnabled,
-                showCriticalPath: false,
+                comparisonEnabled,
                 offset,
               },
             })}

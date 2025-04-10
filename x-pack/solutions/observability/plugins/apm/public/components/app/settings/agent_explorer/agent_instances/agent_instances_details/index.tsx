@@ -12,6 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { ValuesType } from 'utility-types';
 import type { TypeOf } from '@kbn/typed-react-router-config';
+import { getComparisonEnabled } from '../../../../../shared/time_comparison/get_comparison_enabled';
+import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../../../../common/environment_filter_values';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { MetricOverviewLink } from '../../../../../shared/links/apm/metric_overview_link';
@@ -69,7 +71,7 @@ export function getInstanceColumns(
                 }
               )}
             >
-              <EuiText style={{ width: `${unit * 24}px` }} size="s">
+              <EuiText css={{ width: `${unit * 24}px` }} size="s">
                 <p>
                   <FormattedMessage
                     defaultMessage="You can configure the service node name through {seeDocs}."
@@ -187,6 +189,13 @@ export function AgentInstancesDetails({
     query,
     query: { environment, rangeFrom, rangeTo, serviceGroup },
   } = useAnyOfApmParams('/services/{serviceName}/overview', '/services/{serviceName}/metrics');
+  const { core } = useApmPluginContext();
+
+  const defaultComparisonEnabled = getComparisonEnabled({
+    core,
+    urlComparisonEnabled: query.comparisonEnabled,
+  });
+
   return (
     <>
       <EuiInMemoryTable
@@ -200,7 +209,7 @@ export function AgentInstancesDetails({
             rangeFrom,
             rangeTo,
             serviceGroup,
-            comparisonEnabled: false,
+            comparisonEnabled: defaultComparisonEnabled,
           },
           agentDocsPageUrl
         )}
