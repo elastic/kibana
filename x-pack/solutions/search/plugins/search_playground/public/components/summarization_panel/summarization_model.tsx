@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import type { LLMModel } from '../../types';
 import { useManagementLink } from '../../hooks/use_management_link';
-import { i18n } from '@kbn/i18n';
 
 interface SummarizationModelProps {
   selectedModel?: LLMModel;
@@ -140,7 +140,7 @@ export const SummarizationModel: React.FC<SummarizationModelProps> = ({
                 defaultMessage: 'Manage connector',
               }
             )}
-          ></EuiButtonEmpty>
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFormRow>
