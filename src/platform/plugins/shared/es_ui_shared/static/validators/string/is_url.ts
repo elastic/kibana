@@ -10,8 +10,9 @@
 const protocolAndDomainRE = /^(?:\w+:)?\/\/(\S+)$/;
 const localhostDomainRE = /^localhost[\:?\d]*(?:[^\:?\d]\S*)?$/;
 const nonLocalhostDomainRE = /^[^\s\.]+\.\S{2,}$/;
+const domandWithoutDotsRE = /^[^\s\:\/]+(?:\:\d+)?/;
 
-export const isUrl = (string: string) => {
+export const isUrl = (string: string, allowDomainWithoutDots?: boolean) => {
   if (typeof string !== 'string') {
     return false;
   }
@@ -26,12 +27,12 @@ export const isUrl = (string: string) => {
     return false;
   }
 
-  if (
-    localhostDomainRE.test(everythingAfterProtocol) ||
-    nonLocalhostDomainRE.test(everythingAfterProtocol)
-  ) {
+  if (allowDomainWithoutDots && domandWithoutDotsRE.test(everythingAfterProtocol)) {
     return true;
   }
 
-  return false;
+  return (
+    localhostDomainRE.test(everythingAfterProtocol) ||
+    nonLocalhostDomainRE.test(everythingAfterProtocol)
+  );
 };

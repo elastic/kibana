@@ -93,6 +93,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           readOnly={readOnly}
           configFormSchema={openAiConfig}
           secretsFormSchema={openAiSecrets}
+          allowDomainWithoutDots={true}
         />
       )}
       {/* ^v These are intentionally not if/else because of the way the `config.defaultValue` renders */}
@@ -102,6 +103,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           readOnly={readOnly}
           configFormSchema={azureAiConfig}
           secretsFormSchema={azureAiSecrets}
+          allowDomainWithoutDots={true}
         />
       )}
       {config != null && config.apiProvider === OpenAiProviderType.Other && (
@@ -110,6 +112,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           readOnly={readOnly}
           configFormSchema={otherOpenAiConfig}
           secretsFormSchema={otherOpenAiSecrets}
+          allowDomainWithoutDots={true}
         />
       )}
       <UseField
