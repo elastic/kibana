@@ -211,6 +211,10 @@ export const DOWNLOAD_SOURCE_API_ROUTES = {
   DELETE_PATTERN: `${API_ROOT}/agent_download_sources/{sourceId}`,
 };
 
+export const REMOTE_SYNCED_INTEGRATIONS_API_ROUTES = {
+  STATUS_PATTERN: `${API_ROOT}/remote_synced_integrations/status`,
+};
+
 export const CREATE_STANDALONE_AGENT_API_KEY_ROUTE = `${INTERNAL_ROOT}/create_standalone_agent_api_key`;
 
 // Fleet debug routes
