@@ -474,14 +474,35 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (placeholder && !value && _editor) {
-      // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor);
+    if (!placeholder || !_editor) return;
+    const model = _editor.getModel();
+    const addPlaceholder = () => {
+      if (!_placeholderWidget.current) {
+        _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor);
+      }
+    };
+    const removePlaceholder = () => {
+      if (_placeholderWidget.current) {
+        _placeholderWidget.current.dispose();
+        _placeholderWidget.current = null;
+      }
+    };
+
+    if (!value) {
+      addPlaceholder();
     }
 
+    const onDidChangeContent = model?.onDidChangeContent(() => {
+      if (!model.getValue()) {
+        addPlaceholder();
+      } else {
+        removePlaceholder();
+      }
+    });
+
     return () => {
-      _placeholderWidget.current?.dispose();
-      _placeholderWidget.current = null;
+      onDidChangeContent?.dispose();
+      removePlaceholder();
     };
   }, [placeholder, value, euiTheme, _editor]);
 
