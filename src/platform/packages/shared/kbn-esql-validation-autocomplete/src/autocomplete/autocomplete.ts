@@ -16,7 +16,7 @@ import {
   type ESQLFunction,
   type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-types';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -49,6 +49,7 @@ import {
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
+  getControlSuggestionIfSupported,
 } from './factories';
 import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext } from '../shared/context';
@@ -74,6 +75,7 @@ import {
   FunctionParameter,
   FunctionDefinitionTypes,
   GetPolicyMetadataFn,
+  getLocationFromCommandOrOptionName,
 } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
@@ -106,7 +108,8 @@ export async function suggest(
 
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
-    resourceRetriever
+    resourceRetriever,
+    innerText
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
@@ -130,7 +133,8 @@ export async function suggest(
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
-          resourceRetriever
+          resourceRetriever,
+          innerText
         );
         recommendedQueriesSuggestions.push(
           ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
@@ -143,8 +147,21 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
+  // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492
+  const lastCharacterTyped = innerText[innerText.length - 1];
+  let controlSuggestions: SuggestionRawDefinition[] = [];
+  if (lastCharacterTyped === '?') {
+    controlSuggestions = getControlSuggestionIfSupported(
+      Boolean(supportsControls),
+      ESQLVariableType.VALUES,
+      getVariables
+    );
+
+    return controlSuggestions;
+  }
+
   if (astContext.type === 'expression') {
-    return getSuggestionsWithinCommandExpression(
+    const commandsSpecificSuggestions = await getSuggestionsWithinCommandExpression(
       innerText,
       ast,
       astContext,
@@ -158,9 +175,10 @@ export async function suggest(
       resourceRetriever,
       supportsControls
     );
+    return commandsSpecificSuggestions;
   }
   if (astContext.type === 'function') {
-    return getFunctionArgsSuggestions(
+    const functionsSpecificSuggestions = await getFunctionArgsSuggestions(
       innerText,
       ast,
       astContext,
@@ -171,6 +189,7 @@ export async function suggest(
       getVariables,
       supportsControls
     );
+    return functionsSpecificSuggestions;
   }
   if (astContext.type === 'list') {
     return getListArgsSuggestions(
@@ -186,12 +205,17 @@ export async function suggest(
 }
 
 export function getFieldsByTypeRetriever(
-  queryString: string,
-  resourceRetriever?: ESQLCallbacks
+  queryForFields: string,
+  resourceRetriever?: ESQLCallbacks,
+  fullQuery?: string
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
-  const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
+  const helpers = getFieldsByTypeHelper(queryForFields, resourceRetriever);
   const getVariables = resourceRetriever?.getVariables;
-  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const canSuggestVariables = resourceRetriever?.canSuggestVariables?.() ?? false;
+
+  const queryString = fullQuery ?? queryForFields;
+  const lastCharacterTyped = queryString[queryString.length - 1];
+  const lastCharIsQuestionMark = lastCharacterTyped === '?';
   return {
     getFieldsByType: async (
       expectedType: Readonly<string> | Readonly<string[]> = 'any',
@@ -200,7 +224,7 @@ export function getFieldsByTypeRetriever(
     ) => {
       const updatedOptions = {
         ...options,
-        supportsControls,
+        supportsControls: canSuggestVariables && !lastCharIsQuestionMark,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
       return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariables);
@@ -268,8 +292,7 @@ async function getSuggestionsWithinCommandExpression(
   ) {
     return await getSuggestionsToRightOfOperatorExpression({
       queryText: innerText,
-      commandName: astContext.command.name,
-      optionName: astContext.option?.name,
+      location: getLocationFromCommandOrOptionName(astContext.command.name),
       rootOperator: astContext.node,
       getExpressionType: (expression) =>
         getExpressionType(expression, references.fields, references.variables),
@@ -491,8 +514,7 @@ async function getFunctionArgsSuggestions(
     if (typesToSuggestNext.every((d) => !d.fieldsOnly)) {
       suggestions.push(
         ...getFunctionSuggestions({
-          command: command.name,
-          option: option?.name,
+          location: getLocationFromCommandOrOptionName(option?.name ?? command.name),
           returnTypes: canBeBooleanCondition
             ? ['any']
             : (getTypesFromParamDefs(typesToSuggestNext) as string[]),
@@ -596,8 +618,7 @@ async function getListArgsSuggestions(
         suggestions.push(
           ...(await getFieldsOrFunctionsSuggestions(
             [argType as string],
-            command.name,
-            undefined,
+            getLocationFromCommandOrOptionName(command.name),
             getFieldsByType,
             {
               functions: true,

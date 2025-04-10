@@ -19,10 +19,10 @@ import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import type { RuleServices, SecuritySharedParams } from '../types';
-import { createEnrichEventsFunction } from './enrichments';
-import type { ExperimentalFeatures } from '../../../../../common';
+import type { SecurityRuleServices, SecuritySharedParams } from '../types';
 import { getNumberOfSuppressedAlerts } from './get_number_of_suppressed_alerts';
+import type { EnrichEventsWrapper } from './enrichments/types';
+import { enrichEvents } from './enrichments';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;
@@ -44,19 +44,17 @@ export const bulkCreateWithSuppression = async <
   suppressionWindow,
   isSuppressionPerRuleExecution,
   maxAlerts,
-  experimentalFeatures,
   ruleType,
 }: {
   sharedParams: SecuritySharedParams;
   wrappedDocs: Array<WrappedFieldsLatest<T> & { subAlerts?: Array<WrappedFieldsLatest<T>> }>;
-  services: RuleServices;
+  services: SecurityRuleServices;
   suppressionWindow: string;
   isSuppressionPerRuleExecution?: boolean;
   maxAlerts?: number;
-  experimentalFeatures: ExperimentalFeatures;
   ruleType?: RuleType;
 }): Promise<GenericBulkCreateResponse<T>> => {
-  const { ruleExecutionLogger, alertWithSuppression, alertTimestampOverride } = sharedParams;
+  const { ruleExecutionLogger, alertTimestampOverride } = sharedParams;
   if (wrappedDocs.length === 0) {
     return {
       errors: [],
@@ -72,17 +70,17 @@ export const bulkCreateWithSuppression = async <
 
   const start = performance.now();
 
-  const enrichAlerts = createEnrichEventsFunction({
-    services,
-    logger: ruleExecutionLogger,
-  });
-
   let enrichmentsTimeStart = 0;
   let enrichmentsTimeFinish = 0;
-  const enrichAlertsWrapper: typeof enrichAlerts = async (alerts, params) => {
+  const enrichAlertsWrapper: EnrichEventsWrapper = async (alerts, params) => {
     enrichmentsTimeStart = performance.now();
     try {
-      const enrichedAlerts = await enrichAlerts(alerts, params, experimentalFeatures);
+      const enrichedAlerts = await enrichEvents({
+        services,
+        logger: sharedParams.ruleExecutionLogger,
+        events: alerts,
+        spaceId: params.spaceId,
+      });
       return enrichedAlerts;
     } catch (error) {
       ruleExecutionLogger.error(`Alerts enrichment failed: ${error}`);
@@ -103,7 +101,7 @@ export const bulkCreateWithSuppression = async <
   }));
 
   const { createdAlerts, errors, suppressedAlerts, alertsWereTruncated } =
-    await alertWithSuppression(
+    await services.alertWithSuppression(
       alerts,
       suppressionWindow,
       enrichAlertsWrapper,

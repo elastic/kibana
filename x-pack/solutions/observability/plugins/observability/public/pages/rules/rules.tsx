@@ -7,13 +7,12 @@
 
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared/src/common/hooks';
 import { RULES_LOGS_PATH, RULES_PATH, paths } from '../../../common/locators/paths';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -64,16 +63,11 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   );
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
-  const {
-    ruleTypesState: { data: ruleTypes },
-  } = useLoadRuleTypesQuery({
+  const { authorizedToCreateAnyRules } = useGetRuleTypesPermissions({
+    http,
+    toasts,
     filteredRuleTypes,
   });
-
-  const authorizedRuleTypes = [...ruleTypes.values()];
-  const authorizedToCreateAnyRules = authorizedRuleTypes.some(
-    (ruleType) => ruleType.authorizedConsumers[ALERTING_FEATURE_ID]?.all
-  );
 
   const { setScreenContext } = observabilityAIAssistant?.service || {};
 

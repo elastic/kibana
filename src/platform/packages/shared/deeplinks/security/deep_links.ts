@@ -27,6 +27,7 @@ export enum SecurityPageName {
    */
   cloudSecurityPostureBenchmarks = 'cloud_security_posture-benchmarks',
   cloudSecurityPostureDashboard = 'cloud_security_posture-dashboard',
+  cloudSecurityPostureVulnerabilityDashboard = 'cloud_security_posture-vulnerability_dashboard',
   cloudSecurityPostureFindings = 'cloud_security_posture-findings',
   cloudSecurityPostureRules = 'cloud_security_posture-rules',
   dashboards = 'dashboards',
@@ -86,4 +87,8 @@ export enum SecurityPageName {
   coverageOverview = 'coverage-overview',
   notes = 'notes',
   alertSummary = 'alert_summary',
+  configurations = 'configurations',
+  configurationsIntegrations = 'configurations-integrations',
+  configurationsAiSettings = 'configurations-ai_settings',
+  configurationsBasicRules = 'configurations-basic_rules',
 }
