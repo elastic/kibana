@@ -5,12 +5,8 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import {
-  StreamGetResponseBase,
-  streamGetResponseSchemaBase,
-  StreamUpsertRequestBase,
-  streamUpsertRequestSchemaBase,
-} from '../base/api';
+import { NonEmptyString } from '@kbn/zod-helpers';
+import { streamQuerySchema, type StreamQuery } from '../base/api';
 import {
   GroupBase,
   groupBaseSchema,
@@ -21,16 +17,17 @@ import {
 /**
  * Group get response
  */
-interface GroupStreamGetResponse extends StreamGetResponseBase {
+interface GroupStreamGetResponse {
+  dashboards: string[];
+  queries: StreamQuery[];
   stream: GroupStreamDefinitionBase;
 }
 
-const groupStreamGetResponseSchema: z.Schema<GroupStreamGetResponse> = z.intersection(
-  streamGetResponseSchemaBase,
-  z.object({
-    stream: groupStreamDefinitionBaseSchema,
-  })
-);
+const groupStreamGetResponseSchema: z.Schema<GroupStreamGetResponse> = z.object({
+  dashboards: z.array(NonEmptyString),
+  queries: z.array(streamQuerySchema),
+  stream: groupStreamDefinitionBaseSchema,
+});
 
 /**
  * Group object get response
@@ -49,23 +46,24 @@ const groupObjectUpsertRequestSchema = z.object({
 /**
  * Group upsert request
  */
-interface GroupStreamUpsertRequest extends StreamUpsertRequestBase {
+interface GroupStreamUpsertRequest {
+  dashboards: string[];
+  queries: StreamQuery[];
   stream: GroupStreamDefinitionBase;
 }
 
-const groupStreamUpsertRequestSchema: z.Schema<GroupStreamUpsertRequest> = z.intersection(
-  streamUpsertRequestSchemaBase,
-  z.object({
-    stream: groupStreamDefinitionBaseSchema,
-  })
-);
+const groupStreamUpsertRequestSchema: z.Schema<GroupStreamUpsertRequest> = z.object({
+  dashboards: z.array(NonEmptyString),
+  queries: z.array(streamQuerySchema),
+  stream: groupStreamDefinitionBaseSchema,
+});
 
 export {
-  type GroupStreamGetResponse,
-  type GroupObjectGetResponse,
-  type GroupStreamUpsertRequest,
-  type GroupObjectUpsertRequest,
+  groupObjectUpsertRequestSchema,
   groupStreamGetResponseSchema,
   groupStreamUpsertRequestSchema,
-  groupObjectUpsertRequestSchema,
+  type GroupObjectGetResponse,
+  type GroupObjectUpsertRequest,
+  type GroupStreamGetResponse,
+  type GroupStreamUpsertRequest,
 };

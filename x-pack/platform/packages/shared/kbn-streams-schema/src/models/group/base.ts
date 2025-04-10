@@ -7,15 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { StreamDefinitionBase } from '../base';
 
 interface GroupBase {
-  description?: string;
   members: string[];
 }
 
 const groupBaseSchema: z.Schema<GroupBase> = z.object({
-  description: z.optional(z.string()),
   members: z.array(NonEmptyString),
 });
 
@@ -27,18 +24,21 @@ const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.o
   group: groupBaseSchema,
 });
 
-type GroupStreamDefinition = StreamDefinitionBase & GroupStreamDefinitionBase;
+interface GroupStreamDefinition {
+  name: string;
+  group: GroupBase;
+}
 
-const groupStreamDefinitionSchema: z.Schema<GroupStreamDefinition> = z.intersection(
-  z.object({ name: NonEmptyString }),
-  groupStreamDefinitionBaseSchema
-);
+const groupStreamDefinitionSchema: z.Schema<GroupStreamDefinition> = z.object({
+  name: NonEmptyString,
+  group: groupBaseSchema,
+});
 
 export {
-  type GroupBase,
-  type GroupStreamDefinitionBase,
-  type GroupStreamDefinition,
   groupBaseSchema,
   groupStreamDefinitionBaseSchema,
   groupStreamDefinitionSchema,
+  type GroupBase,
+  type GroupStreamDefinition,
+  type GroupStreamDefinitionBase,
 };

@@ -6,13 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
-import {
-  StreamGetResponseBase,
-  StreamUpsertRequestBase,
-  streamGetResponseSchemaBase,
-  streamUpsertRequestSchemaBase,
-} from '../base/api';
+import { NonEmptyString } from '@kbn/zod-helpers';
+import { streamQuerySchema, type StreamQuery } from '../base/api';
 import {
   UnwiredIngest,
   UnwiredStreamDefinition,
@@ -26,6 +21,7 @@ import {
   wiredStreamDefinitionSchemaBase,
 } from './base';
 import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
+import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
 import {
   UnwiredIngestStreamEffectiveLifecycle,
   WiredIngestStreamEffectiveLifecycle,
@@ -46,6 +42,10 @@ interface UnwiredIngestResponse {
 }
 
 type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
+
+/**
+ * Ingest upsert request
+ */
 
 interface WiredIngestUpsertRequest {
   ingest: WiredIngest;
@@ -70,6 +70,10 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
   unwiredIngestUpsertRequestSchema,
 ]);
 
+/**
+ * Ingest Stream privileges schema
+ */
+
 interface IngestStreamPrivileges {
   // User can change everything about the stream
   manage: boolean;
@@ -81,59 +85,6 @@ interface IngestStreamPrivileges {
   simulate: boolean;
 }
 
-/**
- * Stream get response
- */
-interface WiredStreamGetResponse extends StreamGetResponseBase {
-  stream: WiredStreamDefinition;
-  inherited_fields: InheritedFieldDefinition;
-  effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
-  privileges: IngestStreamPrivileges;
-}
-
-interface UnwiredStreamGetResponse extends StreamGetResponseBase {
-  stream: UnwiredStreamDefinition;
-  elasticsearch_assets?: ElasticsearchAssets;
-  data_stream_exists: boolean;
-  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
-  privileges: IngestStreamPrivileges;
-}
-
-type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
-
-/**
- * Ingest stream upsert request
- */
-
-interface UnwiredStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: UnwiredIngestUpsertRequest;
-}
-
-interface WiredStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: WiredIngestUpsertRequest;
-}
-
-type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertRequest;
-
-const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z.intersection(
-  streamUpsertRequestSchemaBase,
-  z.object({
-    stream: unwiredStreamDefinitionSchemaBase,
-  })
-);
-
-const wiredStreamUpsertRequestSchema: z.Schema<WiredStreamUpsertRequest> = z.intersection(
-  streamUpsertRequestSchemaBase,
-  z.object({
-    stream: wiredStreamDefinitionSchemaBase,
-  })
-);
-
-const ingestStreamUpsertRequestSchema: z.Schema<IngestStreamUpsertRequest> = z.union([
-  wiredStreamUpsertRequestSchema,
-  unwiredStreamUpsertRequestSchema,
-]);
-
 const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object({
   manage: z.boolean(),
   monitor: z.boolean(),
@@ -141,48 +92,105 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
   simulate: z.boolean(),
 });
 
-const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.intersection(
-  streamGetResponseSchemaBase,
-  z.object({
-    stream: wiredStreamDefinitionSchema,
-    inherited_fields: inheritedFieldDefinitionSchema,
-    effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
-    privileges: ingestStreamPrivilegesSchema,
-  })
-);
+/**
+ * Ingest Stream Get response
+ */
+interface WiredStreamGetResponse {
+  dashboards: string[];
+  queries: StreamQuery[];
+  stream: WiredStreamDefinition;
+  inherited_fields: InheritedFieldDefinition;
+  effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
+  privileges: IngestStreamPrivileges;
+}
 
-const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.intersection(
-  streamGetResponseSchemaBase,
-  z.object({
-    stream: unwiredStreamDefinitionSchema,
-    elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
-    data_stream_exists: z.boolean(),
-    effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
-    privileges: ingestStreamPrivilegesSchema,
-  })
-);
+const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.object({
+  dashboards: z.array(NonEmptyString),
+  queries: z.array(streamQuerySchema),
+  stream: wiredStreamDefinitionSchema,
+  inherited_fields: inheritedFieldDefinitionSchema,
+  effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+  privileges: ingestStreamPrivilegesSchema,
+});
+
+interface UnwiredStreamGetResponse {
+  dashboards: string[];
+  queries: StreamQuery[];
+  stream: UnwiredStreamDefinition;
+  elasticsearch_assets?: ElasticsearchAssets;
+  data_stream_exists: boolean;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
+  privileges: IngestStreamPrivileges;
+}
+
+const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.object({
+  dashboards: z.array(NonEmptyString),
+  queries: z.array(streamQuerySchema),
+  stream: unwiredStreamDefinitionSchema,
+  elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
+  data_stream_exists: z.boolean(),
+  effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
+  privileges: ingestStreamPrivilegesSchema,
+});
+
+type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
 
 const ingestStreamGetResponseSchema: z.Schema<IngestStreamGetResponse> = z.union([
   wiredStreamGetResponseSchema,
   unwiredStreamGetResponseSchema,
 ]);
 
-export {
-  ingestStreamUpsertRequestSchema,
-  ingestUpsertRequestSchema,
-  ingestStreamGetResponseSchema,
+/**
+ * Ingest stream upsert request
+ */
+
+interface UnwiredStreamUpsertRequest {
+  dashboards: string[];
+  queries: StreamQuery[];
+  stream: UnwiredIngestUpsertRequest;
+}
+
+const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z.object({
+  dashboards: z.array(NonEmptyString),
+  queries: z.array(streamQuerySchema),
+  stream: unwiredStreamDefinitionSchemaBase,
+});
+
+interface WiredStreamUpsertRequest {
+  dashboards: string[];
+  queries: StreamQuery[];
+  stream: WiredIngestUpsertRequest;
+}
+
+const wiredStreamUpsertRequestSchema: z.Schema<WiredStreamUpsertRequest> = z.object({
+  dashboards: z.array(NonEmptyString),
+  queries: z.array(streamQuerySchema),
+  stream: wiredStreamDefinitionSchemaBase,
+});
+
+type IngestStreamUpsertRequest = WiredStreamUpsertRequest | UnwiredStreamUpsertRequest;
+
+const ingestStreamUpsertRequestSchema: z.Schema<IngestStreamUpsertRequest> = z.union([
   wiredStreamUpsertRequestSchema,
   unwiredStreamUpsertRequestSchema,
-  wiredStreamGetResponseSchema,
+]);
+
+export {
+  ingestStreamGetResponseSchema,
+  ingestStreamUpsertRequestSchema,
+  ingestUpsertRequestSchema,
   unwiredStreamGetResponseSchema,
+  unwiredStreamUpsertRequestSchema,
+  wiredStreamGetResponseSchema,
+  wiredStreamUpsertRequestSchema,
   type IngestGetResponse,
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,
   type IngestUpsertRequest,
+  type UnwiredIngestUpsertRequest,
   type UnwiredStreamGetResponse,
+  type UnwiredStreamUpsertRequest,
+  type WiredIngestUpsertRequest,
   type WiredStreamGetResponse,
   type WiredStreamUpsertRequest,
-  type UnwiredStreamUpsertRequest,
-  type UnwiredIngestUpsertRequest,
-  type WiredIngestUpsertRequest,
 };

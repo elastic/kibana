@@ -7,71 +7,64 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
+import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
-import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 
-interface IngestBase {
+interface WiredIngest {
   lifecycle: IngestStreamLifecycle;
   processing: ProcessorDefinition[];
-}
-
-interface WiredIngest extends IngestBase {
   wired: {
     fields: FieldDefinition;
     routing: RoutingDefinition[];
   };
 }
 
-interface UnwiredIngest extends IngestBase {
+const wiredIngestSchema: z.Schema<WiredIngest> = z.object({
+  lifecycle: ingestStreamLifecycleSchema,
+  processing: z.array(processorDefinitionSchema),
+  wired: z.object({
+    fields: fieldDefinitionSchema,
+    routing: z.array(routingDefinitionSchema),
+  }),
+});
+
+interface UnwiredIngest {
+  lifecycle: IngestStreamLifecycle;
+  processing: ProcessorDefinition[];
   unwired: {};
 }
 
-interface WiredStreamDefinitionBase {
+const unwiredIngestSchema: z.Schema<UnwiredIngest> = z.object({
+  lifecycle: ingestStreamLifecycleSchema,
+  processing: z.array(processorDefinitionSchema),
+  unwired: z.object({}),
+});
+
+interface WiredStreamDefinition {
+  name: string;
   ingest: WiredIngest;
 }
 
-interface UnwiredStreamDefinitionBase {
-  ingest: UnwiredIngest;
-}
-
-interface WiredStreamDefinition extends StreamDefinitionBase {
-  ingest: WiredIngest;
-}
-
-interface UnwiredStreamDefinition extends StreamDefinitionBase {
+interface UnwiredStreamDefinition {
+  name: string;
   ingest: UnwiredIngest;
 }
 
 type IngestStreamDefinition = WiredStreamDefinition | UnwiredStreamDefinition;
 
-const ingestBaseSchema: z.Schema<IngestBase> = z.object({
-  lifecycle: ingestStreamLifecycleSchema,
-  processing: z.array(processorDefinitionSchema),
-});
-
-const unwiredIngestSchema: z.Schema<UnwiredIngest> = z.intersection(
-  ingestBaseSchema,
-  z.object({
-    unwired: z.object({}),
-  })
-);
-
-const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
-  ingestBaseSchema,
-  z.object({
-    wired: z.object({
-      fields: fieldDefinitionSchema,
-      routing: z.array(routingDefinitionSchema),
-    }),
-  })
-);
+interface UnwiredStreamDefinitionBase {
+  ingest: UnwiredIngest;
+}
 
 const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.object({
   ingest: unwiredIngestSchema,
 });
+
+interface WiredStreamDefinitionBase {
+  ingest: WiredIngest;
+}
 
 const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.object({
   ingest: wiredIngestSchema,
@@ -102,17 +95,17 @@ const ingestStreamDefinitionSchemaBase: z.Schema<Omit<IngestStreamDefinition, 'n
 ]);
 
 export {
-  type WiredStreamDefinition,
-  wiredStreamDefinitionSchema,
-  wiredStreamDefinitionSchemaBase,
-  type UnwiredStreamDefinition,
-  unwiredStreamDefinitionSchema,
-  unwiredStreamDefinitionSchemaBase,
-  type IngestStreamDefinition,
   ingestStreamDefinitionSchema,
   ingestStreamDefinitionSchemaBase,
-  type WiredIngest,
-  wiredIngestSchema,
-  type UnwiredIngest,
   unwiredIngestSchema,
+  unwiredStreamDefinitionSchema,
+  unwiredStreamDefinitionSchemaBase,
+  wiredIngestSchema,
+  wiredStreamDefinitionSchema,
+  wiredStreamDefinitionSchemaBase,
+  type IngestStreamDefinition,
+  type UnwiredIngest,
+  type UnwiredStreamDefinition,
+  type WiredIngest,
+  type WiredStreamDefinition,
 };
