@@ -8,7 +8,6 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { ItemsBadge } from '../item_badge';
-import { NotAvailableEnvironment } from '../not_available_popover/not_available_environment';
 import {
   ENVIRONMENT_NOT_DEFINED_VALUE,
   getEnvironmentLabel,
@@ -19,19 +18,17 @@ interface Props {
   isMetricsSignalType?: boolean;
 }
 
-export function EnvironmentBadge({ environments = [], isMetricsSignalType = true }: Props) {
-  const _environments = environments.length
-    ? environments
-    : [getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE)];
-  return isMetricsSignalType || (_environments && _environments.length > 0) ? (
+export function EnvironmentBadge({ environments = [] }: Props) {
+  if (environments.length === 0) {
+    environments.push(getEnvironmentLabel(ENVIRONMENT_NOT_DEFINED_VALUE));
+  }
+  return (
     <ItemsBadge
-      items={_environments ?? []}
+      items={environments}
       multipleItemsMessage={i18n.translate('xpack.apm.servicesTable.environmentCount', {
-        values: { environmentCount: _environments.length },
+        values: { environmentCount: environments.length },
         defaultMessage: '{environmentCount, plural, one {1 environment} other {# environments}}',
       })}
     />
-  ) : (
-    <NotAvailableEnvironment />
   );
 }

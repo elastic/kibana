@@ -24,4 +24,9 @@ describe('EnvironmentBadge', () => {
     expectTextsInDocument(component, ['2 environments']);
     expectTextsNotInDocument(component, ['DEMO', 'DEV']);
   });
+  it('handles undefined environment', () => {
+    // @ts-ignore-next-line
+    const component = render(EnvironmentBadge({}));
+    expectTextsInDocument(component, ['Unset']);
+  });
 });
