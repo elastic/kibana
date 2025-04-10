@@ -20,6 +20,7 @@ import {
   setTabs,
   updateTabs,
   disconnectTab,
+  updateTabAppStateAndGlobalState,
 } from './actions';
 
 export type { DiscoverInternalState, TabState, InternalStateDataRequestParams } from './types';
@@ -43,6 +44,7 @@ export const internalStateActions = {
   appendAdHocDataViews,
   replaceAdHocDataViewWithId,
   initializeSession,
+  updateTabAppStateAndGlobalState,
 };
 
 export {

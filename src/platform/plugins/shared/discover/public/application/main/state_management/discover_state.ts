@@ -460,6 +460,12 @@ export function getDiscoverStateContainer({
       })
     );
 
+    const savedSearchChangesSubscription = savedSearchContainer.getCurrent$().subscribe(() => {
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.updateTabAppStateAndGlobalState)()
+      );
+    });
+
     // start subscribing to dataStateContainer, triggering data fetching
     const unsubscribeData = dataStateContainer.subscribe();
 
@@ -493,6 +499,7 @@ export function getDiscoverStateContainer({
     );
 
     internalStopSyncing = () => {
+      savedSearchChangesSubscription.unsubscribe();
       unsubscribeData();
       appStateUnsubscribe();
       appStateInitAndSyncUnsubscribe();

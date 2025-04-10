@@ -9,6 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
+import { throttle } from 'lodash';
 import {
   type PayloadAction,
   configureStore,
@@ -31,6 +32,9 @@ import {
 import { loadDataViewList, setTabs } from './actions';
 import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
+
+const MIDDLEWARE_THROTTLE_MS = 300;
+const MIDDLEWARE_THROTTLE_OPTIONS = { leading: false, trailing: true };
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
   dataViewId: undefined,
@@ -135,6 +139,18 @@ export const internalStateSlice = createSlice({
         tab.dataRequestParams = action.payload.dataRequestParams;
       }),
 
+    setTabAppStateAndGlobalState: (
+      state,
+      action: TabAction<{
+        appState: TabState['appState'] | undefined;
+        globalState: TabState['globalState'] | undefined;
+      }>
+    ) =>
+      withTab(state, action, (tab) => {
+        tab.appState = action.payload.appState;
+        tab.globalState = action.payload.globalState;
+      }),
+
     setOverriddenVisContextAfterInvalidation: (
       state,
       action: TabAction<{
@@ -191,9 +207,24 @@ const createMiddleware = ({ tabsStorageManager }: { tabsStorageManager: TabsStor
 
   listenerMiddleware.startListening({
     actionCreator: internalStateSlice.actions.setTabs,
-    effect: (action) => {
-      void tabsStorageManager.persistLocally(action.payload);
-    },
+    effect: throttle(
+      (action) => {
+        void tabsStorageManager.persistLocally(action.payload);
+      },
+      MIDDLEWARE_THROTTLE_MS,
+      MIDDLEWARE_THROTTLE_OPTIONS
+    ),
+  });
+
+  listenerMiddleware.startListening({
+    actionCreator: internalStateSlice.actions.setTabAppStateAndGlobalState,
+    effect: throttle(
+      (action) => {
+        tabsStorageManager.updateTabStateLocally(action.payload.tabId, action.payload);
+      },
+      MIDDLEWARE_THROTTLE_MS,
+      MIDDLEWARE_THROTTLE_OPTIONS
+    ),
   });
 
   return listenerMiddleware;
@@ -217,7 +248,6 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
   });
 
   const initialTabsState = options.tabsStorageManager.loadLocally({ defaultTabState });
-  // console.log('initialTabsState', initialTabsState);
   store.dispatch(setTabs(initialTabsState));
 
   return store;

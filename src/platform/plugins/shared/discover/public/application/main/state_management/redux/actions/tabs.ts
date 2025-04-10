@@ -111,6 +111,18 @@ export const updateTabs: InternalStateThunkActionCreator<[TabbedContentState], P
     );
   };
 
+export const updateTabAppStateAndGlobalState: InternalStateThunkActionCreator<[TabActionPayload]> =
+  ({ tabId }) =>
+  (dispatch, _, { urlStateStorage }) => {
+    dispatch(
+      internalStateSlice.actions.setTabAppStateAndGlobalState({
+        tabId,
+        appState: urlStateStorage.get(APP_STATE_URL_KEY) ?? undefined,
+        globalState: urlStateStorage.get(GLOBAL_STATE_URL_KEY) ?? undefined,
+      })
+    );
+  };
+
 export const disconnectTab: InternalStateThunkActionCreator<[TabActionPayload]> =
   ({ tabId }) =>
   (_, __, { runtimeStateManager }) => {

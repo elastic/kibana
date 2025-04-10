@@ -48,6 +48,10 @@ export interface TabsStorageManager {
   urlStateContainer: ReduxLikeStateContainer<TabsStorageState>;
   startUrlSync: () => () => void;
   persistLocally: (props: TabsInternalStatePayload) => Promise<void>;
+  updateTabStateLocally: (
+    tabId: string,
+    tabState: Pick<TabState, 'globalState' | 'appState'>
+  ) => void;
   loadLocally: (props: {
     defaultTabState: Omit<TabState, keyof TabItem>;
   }) => TabsInternalStatePayload;
@@ -101,6 +105,21 @@ export const getTabsStorageManager = ({
     await urlStateStorage.set(TABS_STATE_URL_KEY, { selectedTabId }); // can be called even before sync with URL started
   };
 
+  const toTabStateInStorage = (
+    tabState: TabState | TabStateInLocalStorage['tabState']
+  ): TabStateInLocalStorage => {
+    return {
+      tabState: {
+        id: tabState.id,
+        label: tabState.label,
+        dataViewId: tabState.dataViewId,
+        appState: tabState.appState,
+        globalState: tabState.globalState,
+      },
+      version: '1',
+    };
+  };
+
   const readFromLocalStorage = (): TabsStateInLocalStorage => {
     const storedTabsState = storage.get(TABS_LOCAL_STORAGE_KEY);
     let parsedTabsState: TabsStateInLocalStorage | null = null;
@@ -120,18 +139,7 @@ export const getTabsStorageManager = ({
 
   const persistLocally = async ({ allTabs, selectedTabId }: TabsInternalStatePayload) => {
     await pushSelectedTabIdToUrl(selectedTabId);
-    const tabsToPersist: TabStateInLocalStorage[] = allTabs.map((tabState) => {
-      return {
-        tabState: {
-          id: tabState.id,
-          label: tabState.label,
-          dataViewId: tabState.dataViewId,
-          appState: tabState.appState,
-          globalState: tabState.globalState,
-        },
-        version: '1',
-      };
-    });
+    const tabsToPersist: TabStateInLocalStorage[] = allTabs.map(toTabStateInStorage);
     const storedTabs = readFromLocalStorage();
     const storedOpenTabs = storedTabs.openTabs;
     const storedClosedTabs = storedTabs.closedTabs;
@@ -153,6 +161,31 @@ export const getTabsStorageManager = ({
     };
 
     storage.set(TABS_LOCAL_STORAGE_KEY, JSON.stringify(nextTabsInStorage));
+  };
+
+  const updateTabStateLocally: TabsStorageManager['updateTabStateLocally'] = (
+    tabId,
+    tabStatePartial
+  ) => {
+    let hasModifications = false;
+    const storedTabsState = readFromLocalStorage();
+    const updatedTabsState = {
+      ...storedTabsState,
+      openTabs: storedTabsState.openTabs.map((tab) => {
+        if (tab.tabState.id === tabId) {
+          hasModifications = true;
+          return toTabStateInStorage({
+            ...tab.tabState,
+            ...tabStatePartial,
+          });
+        }
+        return tab;
+      }),
+    };
+
+    if (hasModifications) {
+      storage.set(TABS_LOCAL_STORAGE_KEY, JSON.stringify(updatedTabsState));
+    }
   };
 
   const loadLocally = ({
@@ -209,6 +242,7 @@ export const getTabsStorageManager = ({
     urlStateContainer,
     startUrlSync,
     persistLocally,
+    updateTabStateLocally,
     loadLocally,
   };
 };
