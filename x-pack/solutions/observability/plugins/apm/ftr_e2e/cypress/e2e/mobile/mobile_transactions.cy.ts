@@ -30,29 +30,25 @@ describe('Mobile transactions page', () => {
     );
   });
 
-  beforeEach(() => {
-    cy.loginAsViewerUser();
-    cy.visitKibana(mobileTransactionsPageHref);
-    cy.waitUntilPageContentIsLoaded();
-  });
-
   after(() => {
     synthtrace.clean();
   });
 
-  it('when click on version tab shows correct table', () => {
+  it('when click on tab it shows the correct table for each tab', () => {
+    cy.loginAsViewerUser();
+    cy.visitKibana(mobileTransactionsPageHref);
+    cy.waitUntilPageContentIsLoaded();
+
     cy.getByTestSubj('apmAppVersionTab').click();
     cy.getByTestSubj('apmAppVersionTab').should('have.attr', 'aria-selected', 'true');
     cy.url().should('include', 'mobileSelectedTab=app_version_tab');
-  });
+    cy.waitUntilPageContentIsLoaded();
 
-  it('when click on OS version tab shows correct table', () => {
     cy.getByTestSubj('apmOsVersionTab').click();
     cy.getByTestSubj('apmOsVersionTab').should('have.attr', 'aria-selected', 'true');
     cy.url().should('include', 'mobileSelectedTab=os_version_tab');
-  });
+    cy.waitUntilPageContentIsLoaded();
 
-  it('when click on devices tab shows correct table', () => {
     cy.getByTestSubj('apmDevicesTab').click();
     cy.getByTestSubj('apmDevicesTab').should('have.attr', 'aria-selected', 'true');
     cy.url().should('include', 'mobileSelectedTab=devices_tab');
