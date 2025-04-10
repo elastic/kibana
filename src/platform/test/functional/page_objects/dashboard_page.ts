@@ -11,7 +11,7 @@ export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrService } from '../ftr_provider_context';
 import { CommonPageObject } from './common_page';
 
@@ -685,7 +685,7 @@ export class DashboardPageObject extends FtrService {
   }
 
   public async getPanels() {
-    return await this.find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+    return await this.testSubjects.findAll('dashboardPanel');
   }
 
   public async getPanelDimensions() {
