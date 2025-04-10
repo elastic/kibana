@@ -17,10 +17,12 @@ import { COMPARATORS } from '@kbn/alerting-comparators';
 import {
   MAX_SELECTABLE_SOURCE_FIELDS,
   MAX_SELECTABLE_GROUP_BY_TERMS,
-  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
-  ES_QUERY_MAX_HITS_PER_EXECUTION,
   MAX_HITS_FOR_GROUP_BY,
 } from '../../../common/constants';
+import {
+  ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS,
+  ES_QUERY_MAX_HITS_PER_EXECUTION,
+} from '../../../common/es_query';
 import type { EsQueryRuleParams, SearchType } from './types';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import {
