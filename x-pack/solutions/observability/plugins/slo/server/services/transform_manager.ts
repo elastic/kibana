@@ -151,7 +151,7 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async scheduleNowTransform(transformId: TransformId) {
+  private async scheduleNowTransform(transformId: TransformId) {
     this.scopedClusterClient.asSecondaryAuthUser.transform
       .scheduleNowTransform({ transform_id: transformId })
       .then(() => {

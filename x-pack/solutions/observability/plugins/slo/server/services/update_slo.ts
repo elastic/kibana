@@ -232,14 +232,18 @@ export class UpdateSLO {
       // Worst case we keep rolling up data for the previous revision number.
     }
 
-    await this.deleteRollupData(originalSlo.id, originalSlo.revision);
-    await this.deleteSummaryData(originalSlo.id, originalSlo.revision);
+    await Promise.all([
+      this.deleteRollupData(originalSlo.id, originalSlo.revision),
+      this.deleteSummaryData(originalSlo.id, originalSlo.revision),
+    ]);
   }
 
   private async deleteRollupData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
       index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],
@@ -252,6 +256,9 @@ export class UpdateSLO {
     await this.esClient.deleteByQuery({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
+      wait_for_completion: false,
+      conflicts: 'proceed',
+      slices: 'auto',
       query: {
         bool: {
           filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.revision': sloRevision } }],
