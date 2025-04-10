@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { getListOfSloSummaryIndices } from './summary_indices';
+import { getSLOSummaryIndices } from './get_slo_summary_indices';
 import { DEFAULT_STALE_SLO_THRESHOLD_HOURS, SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
-describe('getListOfSloSummaryIndices', () => {
-  it('should return default index if disabled', function () {
+describe('getSLOSummaryIndices', () => {
+  it('should return default local index if disabled', function () {
     const settings = {
       useAllRemoteClusters: false,
       selectedRemoteClusters: [],
       staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
     };
-    const result = getListOfSloSummaryIndices(settings, []);
-    expect(result).toBe(SUMMARY_DESTINATION_INDEX_PATTERN);
+    const result = getSLOSummaryIndices(settings, []);
+    expect(result).toStrictEqual([SUMMARY_DESTINATION_INDEX_PATTERN]);
   });
 
   it('should return all remote clusters when enabled', function () {
@@ -29,10 +29,12 @@ describe('getListOfSloSummaryIndices', () => {
       { name: 'cluster1', isConnected: true },
       { name: 'cluster2', isConnected: true },
     ];
-    const result = getListOfSloSummaryIndices(settings, clustersByName);
-    expect(result).toBe(
-      `${SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN},cluster2:${SUMMARY_DESTINATION_INDEX_PATTERN}`
-    );
+    const result = getSLOSummaryIndices(settings, clustersByName);
+    expect(result).toStrictEqual([
+      SUMMARY_DESTINATION_INDEX_PATTERN,
+      `cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
+      `cluster2:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
+    ]);
   });
 
   it('should return selected when enabled', function () {
@@ -45,9 +47,10 @@ describe('getListOfSloSummaryIndices', () => {
       { name: 'cluster1', isConnected: true },
       { name: 'cluster2', isConnected: true },
     ];
-    const result = getListOfSloSummaryIndices(settings, clustersByName);
-    expect(result).toBe(
-      `${SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`
-    );
+    const result = getSLOSummaryIndices(settings, clustersByName);
+    expect(result).toStrictEqual([
+      SUMMARY_DESTINATION_INDEX_PATTERN,
+      `cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`,
+    ]);
   });
 });
