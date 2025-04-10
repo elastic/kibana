@@ -115,17 +115,7 @@ export const NavigationPanel: FC = () => {
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
-      <div
-        className={panelWrapperClasses}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        onClick={() => {
-          if (!selectedNode && hoveredNode) {
-            open(hoveredNode, null);
-          }
-        }}
-      >
+      <div className={panelWrapperClasses} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
         <EuiFocusTrap autoFocus css={{ height: '100%' }}>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanel
