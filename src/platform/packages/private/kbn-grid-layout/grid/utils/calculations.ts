@@ -33,7 +33,6 @@ export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
   return rowsBeforeHeight;
 };
 
-
 export const getTopOffsetForRowFooter = (rowId: string, layout: GridLayoutData) => {
   // get all the rows before the current row using the order property
   const rowsBefore = Object.values(layout).filter((row) => row.order <= layout[rowId].order);

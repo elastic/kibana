@@ -32,7 +32,7 @@ describe('row state manager actions', () => {
         second: {} as any as HTMLDivElement,
         third: {} as any as HTMLDivElement,
       };
-       gridLayoutStateManager.footerRefs.current = {
+      gridLayoutStateManager.footerRefs.current = {
         second: {} as any as HTMLDivElement,
         third: {} as any as HTMLDivElement,
       };

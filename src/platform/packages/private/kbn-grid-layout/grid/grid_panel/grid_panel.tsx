@@ -68,7 +68,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
   useEffect(() => {
     return () => {
       // remove reference on unmount
-      delete gridLayoutStateManager.panelRefs.current[rowId][panelId];
+      delete gridLayoutStateManager.panelRefs.current[panelId];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -83,22 +83,26 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       ])
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[panelId];
           const activeLayout = proposedGridLayout ?? gridLayout;
-          const panel = activeLayout[rowId]?.panels[panelId];
-          if (panelId === activePanel?.id){
-            console.log(ref, panel)
+          const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+          const isPanelActive = activePanel?.id === panelId;
+          const row =
+            isPanelActive && currentInteractionEvent?.targetRow
+              ? currentInteractionEvent.targetRow
+              : rowId;
+          const panel = activeLayout[row]?.panels[panelId];
+          if (panelId === activePanel?.id) {
+            console.log(ref, panel);
           }
           if (!ref || !panel) return;
 
-          const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
           // console.log('subscription', currentInteractionEvent, activePanel);
 
-          const headerOffset = activeLayout[rowId].order === 0 ? 0 : 2;
-          const gridRowOffset = headerOffset + getTopOffsetForRow(rowId, activeLayout);
+          const headerOffset = activeLayout[row].order === 0 ? 0 : 2;
+          const gridRowOffset = headerOffset + getTopOffsetForRow(row, activeLayout);
 
           if (panelId === activePanel?.id) {
-            
             ref.classList.add('kbnGridPanel--active');
 
             // if the current panel is active, give it fixed positioning depending on the interaction event
@@ -160,7 +164,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
        */
       const expandedPanelSubscription = gridLayoutStateManager.expandedPanelId$.subscribe(
         (expandedPanelId) => {
-          const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+          const ref = gridLayoutStateManager.panelRefs.current[panelId];
           const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
           const panel = gridLayout[rowId].panels[panelId];
           if (!ref || !panel) return;
@@ -192,10 +196,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
   return (
     <div
       ref={(element) => {
-        if (!gridLayoutStateManager.panelRefs.current[rowId]) {
-          gridLayoutStateManager.panelRefs.current[rowId] = {};
-        }
-        gridLayoutStateManager.panelRefs.current[rowId][panelId] = element;
+        gridLayoutStateManager.panelRefs.current[panelId] = element;
       }}
       css={initialStyles}
       className="kbnGridPanel"

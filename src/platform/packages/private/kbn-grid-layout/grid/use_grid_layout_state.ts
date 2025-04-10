@@ -45,7 +45,7 @@ export const useGridLayoutState = ({
 } => {
   const headerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
   const footerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
-  const panelRefs = useRef<{ [rowId: string]: { [panelId: string]: HTMLDivElement | null } }>({});
+  const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
   const { euiTheme } = useEuiTheme();
 
   const expandedPanelId$ = useMemo(
@@ -153,7 +153,10 @@ export const useGridLayoutState = ({
         // todo: not use parentNode
         layoutRef.current.parentNode.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
         layoutRef.current.parentNode.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
-        layoutRef.current.parentNode.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
+        layoutRef.current.parentNode.style.setProperty(
+          '--kbnGridColumnWidth',
+          `${columnPixelWidth}`
+        );
         layoutRef.current.parentNode.style.setProperty('--kbnGridColumnCount', `${columnCount}`);
       });
 

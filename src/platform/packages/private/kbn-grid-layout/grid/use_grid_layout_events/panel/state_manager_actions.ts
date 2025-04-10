@@ -15,7 +15,7 @@ import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './ut
 import { resolveGridRow } from '../../utils/resolve_grid_row';
 import { isGridDataEqual } from '../../utils/equality_checks';
 import { PointerPosition, UserInteractionEvent } from '../types';
-import { getSensorType, isKeyboardEvent } from '../sensors';
+import { getSensorType } from '../sensors';
 
 export const startAction = (
   e: UserInteractionEvent,
@@ -24,7 +24,8 @@ export const startAction = (
   rowId: string,
   panelId: string
 ) => {
-  const panelRef = gridLayoutStateManager.panelRefs.current[rowId][panelId];
+  const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
+  console.log(panelRef);
   if (!panelRef) return;
 
   const panelRect = panelRef.getBoundingClientRect();
@@ -56,10 +57,10 @@ export const moveAction = (
     footerRefs: { current: gridRowFooters },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
-    // console.log('interactionEvent!', interactionEvent);
+  // console.log('interactionEvent!', interactionEvent);
   if (!interactionEvent || !runtimeSettings) {
     // if no interaction event return early
-    return; 
+    return;
   }
 
   const currentLayout = proposedGridLayout$.value;
@@ -100,8 +101,7 @@ export const moveAction = (
       if (!row) return;
       const rowTop = row.getBoundingClientRect().top;
       const rowBottom = gridRowFooters[id].getBoundingClientRect().bottom;
-      const overlap =
-        Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
+      const overlap = Math.min(previewBottom, rowBottom) - Math.max(previewRect.top, rowTop);
       if (overlap > highestOverlap) {
         highestOverlap = overlap;
         highestOverlapRowId = id;
@@ -122,7 +122,7 @@ export const moveAction = (
 
   // calculate the requested grid position
   const targetedGridRowHeader = gridRowHeaders[targetRowId];
-  const targetedGridLeft = targetedGridRowHeader?.getBoundingClientRect().left ?? 0; 
+  const targetedGridLeft = targetedGridRowHeader?.getBoundingClientRect().left ?? 0;
   const targetedGridTop = targetedGridRowHeader?.getBoundingClientRect().bottom ?? 0;
 
   const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
