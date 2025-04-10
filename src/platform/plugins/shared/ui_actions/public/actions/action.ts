@@ -23,7 +23,7 @@ export interface ActionExecutionMeta {
   /**
    * The event that caused the action to execute (e.g., mouse click, keyboard event)
    */
-  event?: MouseEvent;
+  event?: React.MouseEvent;
 }
 
 /**

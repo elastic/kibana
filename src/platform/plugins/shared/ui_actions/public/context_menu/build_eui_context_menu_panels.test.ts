@@ -501,10 +501,7 @@ test('it creates disabled actions', async () => {
 
 test('it calls execute with the provided event', async () => {
   const mockExecute = jest.fn();
-  const mockEvent = { nativeEvent: new MouseEvent('click') } as unknown as React.MouseEvent<
-    Element,
-    MouseEvent
-  >;
+  const mockMouseEvent = new MouseEvent('click') as unknown as React.MouseEvent;
 
   const actions = [
     createTestAction({
@@ -521,12 +518,12 @@ test('it calls execute with the provided event', async () => {
   // Simulate clicking the first menu item
   const firstMenuItem = menu[0].items![0];
   if (firstMenuItem.onClick) {
-    firstMenuItem.onClick(mockEvent as any);
+    firstMenuItem.onClick(mockMouseEvent as any);
   }
 
   expect(mockExecute).toHaveBeenCalledWith(
     expect.objectContaining({
-      event: mockEvent.nativeEvent,
+      event: mockMouseEvent,
     })
   );
 });

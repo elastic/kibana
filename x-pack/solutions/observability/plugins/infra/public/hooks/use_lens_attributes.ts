@@ -15,6 +15,8 @@ import {
   type LensConfig,
   LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils/config_builder';
+import { shouldHandleLinkEvent as shouldOpenInSameTab } from '@kbn/observability-shared-plugin/public';
+
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export type UseLensAttributesParams = LensConfig;
@@ -143,11 +145,9 @@ const getOpenInLensAction = (onExecute: (openInNewTab: boolean) => void): Action
       return true;
     },
     async execute({ event }: ActionExecutionContext): Promise<void> {
-      onExecute(event ? isModifiedEvent(event) : false);
+      const shouldOpenInNewTab = event ? !shouldOpenInSameTab(event) : true;
+      onExecute(shouldOpenInNewTab);
     },
     order: 100,
   };
 };
-
-const isModifiedEvent = (event: MouseEvent) =>
-  !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
