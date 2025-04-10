@@ -76,7 +76,6 @@ import {
   validateDynamicKafkaTopics,
   validateKibanaURL,
   validateKibanaAPIKey,
-  validateKibanaAPIKeySecret,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -104,7 +103,6 @@ export interface OutputFormInputsType {
   syncIntegrationsInput: ReturnType<typeof useSwitchInput>;
   kibanaURLInput: ReturnType<typeof useInput>;
   kibanaAPIKeyInput: ReturnType<typeof useInput>;
-  kibanaAPIKeySecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -291,12 +289,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const kibanaAPIKeyInput = useInput(
     (output as NewRemoteElasticsearchOutput)?.kibana_api_key ?? '',
     syncIntegrationsInput.value ? validateKibanaAPIKey : undefined,
-    isDisabled('kibana_api_key')
-  );
-
-  const kibanaAPIKeySecretInput = useSecretInput(
-    (output as NewRemoteElasticsearchOutput)?.secrets?.kibana_api_key ?? '',
-    syncIntegrationsInput.value ? validateKibanaAPIKeySecret : undefined,
     isDisabled('kibana_api_key')
   );
 
@@ -600,7 +592,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     serviceTokenInput,
     serviceTokenSecretInput,
     kibanaAPIKeyInput,
-    kibanaAPIKeySecretInput,
     syncIntegrationsInput,
     kibanaURLInput,
     sslCertificateInput,
@@ -663,7 +654,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     const serviceTokenValid = serviceTokenInput.validate();
     const serviceTokenSecretValid = serviceTokenSecretInput.validate();
     const kibanaAPIKeyValid = kibanaAPIKeyInput.validate();
-    const kibanaAPIKeySecretValid = kibanaAPIKeySecretInput.validate();
     const kibanaURLInputValid = kibanaURLInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
@@ -719,8 +709,8 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
           (serviceTokenSecretInput.value && serviceTokenSecretValid)) &&
         ((!syncIntegrationsInput.value && kibanaURLInputValid) ||
           (syncIntegrationsInput.value &&
-            ((kibanaAPIKeyInput.value && kibanaAPIKeyValid) ||
-              (kibanaAPIKeySecretInput.value && kibanaAPIKeySecretValid)) &&
+            kibanaAPIKeyInput.value &&
+            kibanaAPIKeyValid &&
             kibanaURLInputValid))
       );
     } else {
@@ -751,7 +741,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     serviceTokenInput,
     serviceTokenSecretInput,
     kibanaAPIKeyInput,
-    kibanaAPIKeySecretInput,
     syncIntegrationsInput,
     kibanaURLInput,
     sslCertificateInput,
@@ -981,12 +970,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 service_token: serviceTokenSecretInput.value,
               };
             }
-            if (!kibanaAPIKeyInput.value && kibanaAPIKeySecretInput.value) {
-              secrets = {
-                ...(secrets ?? {}),
-                kibana_api_key: kibanaAPIKeySecretInput.value,
-              };
-            }
+
             if (!sslKeyInput.value && sslKeySecretInput.value) {
               secrets = {
                 ...(secrets ?? {}),
@@ -1140,7 +1124,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
     kibanaAPIKeyInput.value,
-    kibanaAPIKeySecretInput.value,
     syncIntegrationsInput.value,
     kibanaURLInput.value,
     caTrustedFingerprintInput.value,
