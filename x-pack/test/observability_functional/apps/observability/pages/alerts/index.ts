@@ -78,7 +78,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     },
   };
 
-  describe('Observability alerts >', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/217739
+  describe.skip('Observability alerts >', function () {
     this.tags('includeFirefox');
     const testSubjects = getService('testSubjects');
     const retry = getService('retry');
