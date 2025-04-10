@@ -76,7 +76,7 @@ describe('api_key_utils', () => {
         api_key: 'apiKey',
       });
 
-      const result = await createApiKey([mockTask], request, true, coreStart.security);
+      const result = await createApiKey([mockTask], request, coreStart.security);
       const apiKeyResult = result.get('task');
       const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
@@ -107,7 +107,7 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(mockUser);
 
-      const result = await createApiKey([mockTask], request, true, coreStart.security);
+      const result = await createApiKey([mockTask], request, coreStart.security);
       const apiKeyResult = result.get('task');
       const decodedApiKey = Buffer.from(apiKeyResult!.apiKey, 'base64').toString();
       expect(decodedApiKey).toEqual('apiKeyId:apiKey');
@@ -117,26 +117,13 @@ describe('api_key_utils', () => {
       expect(coreStart.security.authc.apiKeys.grantAsInternalUser).not.toHaveBeenCalled();
     });
 
-    test('should throw if canEncryptSo is false', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const coreStart = coreMock.createStart();
-      await expect(
-        createApiKey([mockTask], request, false, coreStart.security)
-      ).rejects.toMatchObject({
-        message:
-          'Unable to create API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.',
-      });
-    });
-
     test('should throw if API keys are not enabled', async () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = coreMock.createStart();
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(false);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValue(null);
 
-      await expect(
-        createApiKey([mockTask], request, true, coreStart.security)
-      ).rejects.toMatchObject({
+      await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
         message: 'API keys are not enabled, cannot create API key.',
       });
     });
@@ -146,9 +133,7 @@ describe('api_key_utils', () => {
       const coreStart = coreMock.createStart();
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
 
-      await expect(
-        createApiKey([mockTask], request, true, coreStart.security)
-      ).rejects.toMatchObject({
+      await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
         message: 'Cannot authenticate current user.',
       });
     });
@@ -163,9 +148,7 @@ describe('api_key_utils', () => {
       coreStart.security.authc.apiKeys.areAPIKeysEnabled = jest.fn().mockReturnValueOnce(true);
       coreStart.security.authc.getCurrentUser = jest.fn().mockReturnValueOnce(mockUser);
       coreStart.security.authc.apiKeys.grantAsInternalUser = jest.fn().mockResolvedValueOnce(null);
-      await expect(
-        createApiKey([mockTask], request, true, coreStart.security)
-      ).rejects.toMatchObject({
+      await expect(createApiKey([mockTask], request, coreStart.security)).rejects.toMatchObject({
         message: 'Could not create API key.',
       });
     });
@@ -198,7 +181,6 @@ describe('api_key_utils', () => {
       const result = await getApiKeyAndUserScope(
         [mockTask],
         request,
-        true,
         coreStart.security,
         spacesStart
       );
@@ -235,7 +217,6 @@ describe('api_key_utils', () => {
       const result = await getApiKeyAndUserScope(
         [mockTask],
         request,
-        true,
         coreStart.security,
         spacesStart
       );
@@ -271,7 +252,6 @@ describe('api_key_utils', () => {
       const result = await getApiKeyAndUserScope(
         [mockTask],
         request,
-        true,
         coreStart.security,
         spacesStart
       );

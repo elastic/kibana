@@ -130,7 +130,7 @@ describe('TaskStore', () => {
   describe('schedule', () => {
     let store: TaskStore;
 
-    beforeAll(() => {
+    beforeEach(() => {
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -322,7 +322,6 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [task],
         request,
-        true,
         coreStart.security,
         spacesStart
       );
@@ -346,6 +345,41 @@ describe('TaskStore', () => {
         id: 'testid',
         version: '123',
       });
+    });
+
+    test('errors when scheduling a task with API key if unable to encrypt SO', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        spaces: spacesStart,
+        canEncryptSavedObjects: false,
+      });
+
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow(
+        'Unable to schedule task(s) with API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
     });
 
     test('errors if the task type is unknown', async () => {
@@ -2073,7 +2107,7 @@ describe('TaskStore', () => {
   describe('bulkSchedule', () => {
     let store: TaskStore;
 
-    beforeAll(() => {
+    beforeEach(() => {
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -2296,7 +2330,6 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [task1, task2],
         request,
-        true,
         coreStart.security,
         spacesStart
       );
@@ -2341,6 +2374,40 @@ describe('TaskStore', () => {
           version: '123',
         },
       ]);
+    });
+
+    test('errors when bulk scheduling a task with API key if unable to encrypt SO', async () => {
+      store = new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        requestTimeouts: {
+          update_by_query: 1000,
+        },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        spaces: spacesStart,
+        canEncryptSavedObjects: false,
+      });
+
+      const task1 = {
+        id: 'task1',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+
+      await expect(store.bulkSchedule([task1 as TaskInstance], { request })).rejects.toThrow(
+        'Unable to schedule task(s) with API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
     });
 
     test('errors if API key could not be created', async () => {
