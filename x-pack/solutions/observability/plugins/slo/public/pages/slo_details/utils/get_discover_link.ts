@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { IUiSettingsClient } from '@kbn/core/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { ALL_VALUE, kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Filter, FilterStateStore, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
-import { v4 } from 'uuid';
+import { kqlWithFiltersSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { isEmpty } from 'lodash';
-import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { IUiSettingsClient } from '@kbn/core/public';
+import { v4 } from 'uuid';
 
 function createDiscoverLocator({
   slo,
@@ -106,49 +106,40 @@ function createDiscoverLocator({
     });
   }
 
-  const groupBy = [slo.groupBy].flat();
+  if (!isEmpty(slo.groupings)) {
+    const groupingKeys = Object.keys(slo.groupings);
+    const groupingFilters = groupingKeys.map((key) => ({
+      meta: {
+        disabled: false,
+        negate: false,
+        alias: null,
+        key,
+        params: {
+          query: slo.groupings[key],
+        },
+        type: 'phrase',
+        index: indexId,
+      },
+      $state: {
+        store: FilterStateStore.APP_STATE,
+      },
+      query: {
+        match_phrase: {
+          [key]: slo.groupings[key],
+        },
+      },
+    }));
 
-  if (
-    !isEmpty(slo.groupings) &&
-    groupBy.length > 0 &&
-    groupBy.every((field) => field === ALL_VALUE) === false
-  ) {
-    groupBy.forEach((field) => {
-      filters.push({
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-          key: field,
-          params: {
-            query: slo.groupings[field],
-          },
-          type: 'phrase',
-          index: indexId,
-        },
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        query: {
-          match_phrase: {
-            [field]: slo.groupings[field],
-          },
-        },
-      });
-    });
+    filters.push(...groupingFilters);
   }
 
   const timeFieldName =
-    slo.indicator.type !== 'sli.apm.transactionDuration' &&
-    slo.indicator.type !== 'sli.apm.transactionErrorRate' &&
-    slo.indicator.type !== 'sli.synthetics.availability'
-      ? slo.indicator.params.timestampField
-      : '@timestamp';
+    'timestampField' in slo.indicator.params ? slo.indicator.params.timestampField : '@timestamp';
 
   return {
     timeRange,
     query: {
-      query: filterKuery || '',
+      query: filterKuery ?? '',
       language: 'kuery',
     },
     filters,

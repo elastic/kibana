@@ -7,59 +7,52 @@
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import React, { useRef } from 'react';
-import { useAnnotations } from '@kbn/observability-plugin/public';
-import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { useAnnotations } from '@kbn/observability-plugin/public';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { max, min } from 'lodash';
 import moment from 'moment';
-import { getBrushTimeBounds } from '../../../utils/slo/duration';
-import { TimeBounds } from '../types';
-import { useKibana } from '../../../hooks/use_kibana';
+import React, { useRef } from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { getBrushTimeBounds } from '../../../../utils/slo/duration';
+import { TimeBounds } from '../../types';
+import { MetricTimesliceAnnotation } from './metric_timeslice_annotation';
+import { GetPreviewDataResponseResults } from './types';
 
-export function EventsAreaChart({
-  slo,
-  data,
-  minValue,
-  maxValue,
-  annotation,
-  onBrushed,
-}: {
-  data?: GetPreviewDataResponse;
-  maxValue?: number | null;
-  minValue?: number | null;
+interface Props {
+  data: GetPreviewDataResponseResults;
   slo: SLOWithSummaryResponse;
-  annotation?: React.ReactNode;
   onBrushed?: (timeBounds: TimeBounds) => void;
-}) {
+}
+
+export function MetricTimesliceEventsChart({ slo, data, onBrushed }: Props) {
   const { charts, uiSettings } = useKibana().services;
+  const chartRef = useRef(null);
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
-  const chartRef = useRef(null);
-  const yAxisNumberFormat = slo.indicator.type === 'sli.metric.timeslice' ? '0,0[.00]' : '0,0';
-
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
+  const { ObservabilityAnnotations, annotations, wrapOnBrushEnd } = useAnnotations({
+    slo,
+  });
 
-  const threshold =
-    slo.indicator.type === 'sli.metric.timeslice'
-      ? slo.indicator.params.metric.threshold
-      : undefined;
+  if (slo.indicator.type !== 'sli.metric.timeslice') {
+    return null;
+  }
+
+  const values = data.map((row) => row.sliValue);
+  const maxValue = max(values);
+  const minValue = min(values);
+  const threshold = slo.indicator.params.metric.threshold;
 
   const domain = {
     fit: true,
-    min:
-      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
-    max:
-      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
+    min: min([threshold, minValue]) ?? NaN,
+    max: max([threshold, maxValue]) ?? NaN,
   };
-
-  const { ObservabilityAnnotations, annotations, wrapOnBrushEnd } = useAnnotations({
-    domain,
-    slo,
-  });
 
   return (
     <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>
@@ -89,8 +82,7 @@ export function EventsAreaChart({
           onBrushed?.(getBrushTimeBounds(brushArea));
         })}
       />
-      {annotation}
-
+      <MetricTimesliceAnnotation slo={slo} minValue={minValue} maxValue={maxValue} />
       <Axis
         id="bottom"
         position={Position.Bottom}
@@ -100,7 +92,7 @@ export function EventsAreaChart({
       <Axis
         id="left"
         position={Position.Left}
-        tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+        tickFormat={(d) => numeral(d).format('0,0[.00]')}
         domain={domain}
       />
       <AreaSeries
@@ -109,7 +101,7 @@ export function EventsAreaChart({
         yScaleType={ScaleType.Linear}
         xAccessor="date"
         yAccessors={['value']}
-        data={(data ?? []).map((datum) => ({
+        data={data.map((datum) => ({
           date: new Date(datum.date).getTime(),
           value: datum.sliValue,
         }))}
