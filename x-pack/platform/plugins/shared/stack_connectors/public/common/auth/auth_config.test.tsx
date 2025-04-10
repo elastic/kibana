@@ -480,4 +480,102 @@ describe('AuthConfig renders', () => {
       });
     });
   });
+
+  describe('AuthConfig with showOAuth2Option', () => {
+    it('does not render OAuth2 option by default (showOAuth2Option=false)', async () => {
+      const testFormData = {
+        config: {
+          hasAuth: false,
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} />
+        </AuthFormTestProvider>
+      );
+
+      // OAuth2 option should not be rendered
+      expect(screen.queryByTestId('authOAuth2')).not.toBeInTheDocument();
+    });
+
+    it.only('renders OAuth2 option when showOAuth2Option is explicitly set to true', async () => {
+      // const testFormData = {
+      //   config: {
+      //     hasAuth: false,
+      //     authType: null,
+      //     accessTokenUrl: '',
+      //     clientId: '',
+      //     clientSecret: '',
+      //     scope: '',
+      //   },
+      // };
+
+      const testFormData = {
+        config: {
+          hasAuth: true,
+          authType: 'oauth2',
+          accessTokenUrl: 'https://api.example.com/oauth/token',
+          clientId: 'client_id_123',
+        },
+        secret: {
+          clientSecret: 'read write', // This would overwrite the actual client secret!
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} showOAuth2Option={true} />
+        </AuthFormTestProvider>
+      );
+
+      // OAuth2 option should be rendered
+      expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
+      expect(await screen.findByText('OAuth 2.0')).toBeInTheDocument();
+    });
+
+    it('renders OAuth2 fields when authType is OAuth2 and showOAuth2Option=true', async () => {
+      const testFormData = {
+        config: {
+          hasAuth: true,
+          authType: AuthType.OAuth2,
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} showOAuth2Option={true} />
+        </AuthFormTestProvider>
+      );
+
+      // OAuth2 fields should be rendered
+      expect(await screen.findByTestId('authOAuth2')).toBeInTheDocument();
+      expect(await screen.findByTestId('accessTokenUrlAOuth2')).toBeInTheDocument();
+      expect(await screen.findByTestId('clientIdOAuth2')).toBeInTheDocument();
+      expect(await screen.findByTestId('clientSecretOAuth2')).toBeInTheDocument();
+      expect(await screen.findByTestId('ScopeOAuth2')).toBeInTheDocument();
+    });
+
+    it('does not render OAuth2 fields when authType is OAuth2 but showOAuth2Option=false', async () => {
+      const testFormData = {
+        config: {
+          hasAuth: true,
+          authType: AuthType.OAuth2,
+        },
+      };
+
+      render(
+        <AuthFormTestProvider defaultValue={testFormData} onSubmit={onSubmit}>
+          <AuthConfig readOnly={false} showOAuth2Option={false} />
+        </AuthFormTestProvider>
+      );
+
+      // OAuth2 fields should not be rendered
+      expect(screen.queryByTestId('authOAuth2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('accessTokenUrlAOuth2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('clientIdOAuth2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('clientSecretOAuth2')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('ScopeOAuth2')).not.toBeInTheDocument();
+    });
+  });
 });

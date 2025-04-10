@@ -157,3 +157,56 @@ export const EDIT_CA_CALLOUT = i18n.translate(
       'This connector has an existing certificate authority file. Upload a new one to replace it.',
   }
 );
+
+export const ACCESS_TOKEN_URL = i18n.translate(
+  'xpack.stackConnectors.components.auth.accessTokenUrlTextFieldLabel',
+  {
+    defaultMessage: 'Access token URL',
+    description: 'The URL to get the access token from',
+  }
+);
+export const ACCESS_TOKEN_URL_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredAccessTokenUrlText',
+  {
+    defaultMessage: 'Access token URL is required.',
+  }
+);
+export const CLIENT_ID = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientIdTextFieldLabel',
+  {
+    defaultMessage: 'Client ID',
+    description: 'The client ID to use for AOuth2 authentication',
+  }
+);
+export const CLIENT_ID_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredClientIdText',
+  {
+    defaultMessage: 'Client ID is required.',
+  }
+);
+export const CLIENT_SECRET = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Client secret',
+    description: 'The client secret to use for for AOuth2 authentication',
+  }
+);
+export const CLIENT_SECRET_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.auth.error.requiredClientSecretText',
+  {
+    defaultMessage: 'Client secret is required.',
+  }
+);
+export const SCOPE = i18n.translate(
+  'xpack.stackConnectors.components.auth.clientSecretTextFieldLabel',
+  {
+    defaultMessage: 'Scope',
+    description: 'The scope to use for for AOuth2 authentication',
+  }
+);
+export const AUTHENTICATION_OAUTH2 = i18n.translate(
+  'xpack.stackConnectors.components.auth.authenticationMethodOAuth2Label',
+  {
+    defaultMessage: 'OAuth 2.0',
+  }
+);

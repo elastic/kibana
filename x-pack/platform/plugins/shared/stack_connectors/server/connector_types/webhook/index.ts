@@ -11,6 +11,7 @@ import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
+import { AxiosHeaders } from 'axios';
 
 import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
@@ -26,6 +27,7 @@ import {
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { combineHeadersWithBasicAuthHeader } from '@kbn/actions-plugin/server/lib';
 
+import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token';
 import type {
   WebhookConnectorType,
   ActionParamsType,
@@ -39,6 +41,7 @@ import type { Result } from '../lib/result_type';
 import { isOk, promiseResult } from '../lib/result_type';
 import { ConfigSchema, ParamsSchema } from './schema';
 import { buildConnectorAuth } from '../../../common/auth/utils';
+import { AuthType } from '../../../common/auth/constants';
 import { SecretConfigurationSchema } from '../../../common/auth/schema';
 
 export const ConnectorTypeId = '.webhook';
@@ -130,9 +133,31 @@ function validateConnectorTypeConfig(
 export async function executor(
   execOptions: WebhookConnectorTypeExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> {
-  const { actionId, config, params, configurationUtilities, logger, connectorUsageCollector } =
-    execOptions;
-  const { method, url, headers = {}, hasAuth, authType, ca, verificationMode } = config;
+  const {
+    actionId,
+    config,
+    params,
+    configurationUtilities,
+    logger,
+    connectorUsageCollector,
+    services,
+  } = execOptions;
+
+  const connectorTokenClient = services.connectorTokenClient;
+
+  const {
+    method,
+    url,
+    headers = {},
+    hasAuth,
+    authType,
+    ca,
+    accessTokenUrl,
+    clientId,
+    scope,
+    verificationMode,
+  } = config;
+
   const { body: data } = params;
 
   const secrets: ConnectorTypeSecretsType = execOptions.secrets;
@@ -144,8 +169,66 @@ export async function executor(
     ca,
   });
 
+  console.log('secrets', secrets);
+
   const axiosInstance = axios.create();
 
+  // Handle OAuth 2.0 authentication
+  if (authType === AuthType.OAuth2) {
+    if (!connectorTokenClient) {
+      const serviceMessage = 'ConnectorTokenClient is not available for OAuth2 flow.';
+      logger.error(`Error executing webhook action "${actionId}": ${serviceMessage}`);
+      throw new Error('ERROR');
+    }
+    if (!accessTokenUrl || !clientId || !secrets.clientSecret) {
+      // do we need it? Maybe validation is enough?
+      const missingItems = [];
+      if (!accessTokenUrl) missingItems.push('Access Token URL');
+      if (!clientId) missingItems.push('Client ID');
+      if (!secrets.clientSecret) missingItems.push('Client Secret');
+
+      const serviceMessage = `Missing required OAuth2 configuration: ${missingItems.join(', ')}`;
+      logger.error(`Error executing webhook action "${actionId}": ${serviceMessage}`);
+      throw new Error('ERROR');
+    }
+    console.log('before axiosInstance.interceptors');
+    axiosInstance.interceptors.request.use(
+      async (axiosConfig) => {
+        const accessToken = await getOAuthClientCredentialsAccessToken({
+          connectorId: actionId,
+          logger,
+          configurationUtilities,
+          credentials: {
+            secrets: {
+              // <-- Fixed: Put clientSecret in secrets
+              clientSecret: secrets.clientSecret,
+            },
+            config: {
+              clientId: config.clientId,
+              scope: config.scope,
+            },
+          },
+          tokenUrl: config.accessTokenUrl,
+          connectorTokenClient,
+        });
+        console.log('after', accessToken);
+
+        if (!accessToken) {
+          throw new Error(`Unable to retrieve access token for connectorId: ${actionId}`);
+        }
+
+        axiosConfig.headers = new AxiosHeaders({
+          ...axiosConfig.headers,
+          Authorization: accessToken,
+        });
+        return axiosConfig;
+      },
+      (error) => {
+        return Promise.reject(error);
+      }
+    );
+  }
+  console.log('after axiosInstance.interceptors');
   const headersWithBasicAuth = combineHeadersWithBasicAuthHeader({
     username: basicAuth.auth?.username,
     password: basicAuth.auth?.password,
@@ -165,7 +248,7 @@ export async function executor(
       connectorUsageCollector,
     })
   );
-
+  console.log('RESULT', result);
   if (result == null) {
     return errorResultUnexpectedNullResponse(actionId);
   }
