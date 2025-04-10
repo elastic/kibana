@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-export { getEcsGroups } from './src/get_ecs_groups';
-export {
-  flattenObject,
-  unflattenObject,
-  getGroupByObject,
-  getFormattedGroupBy,
-} from './src/group_by_object_utils';
-export type { Group, FieldsObject } from './src/types';
+export interface Group {
+  field: string;
+  value: string;
+}
+
+export interface FieldsObject {
+  [x: string]: any;
+}

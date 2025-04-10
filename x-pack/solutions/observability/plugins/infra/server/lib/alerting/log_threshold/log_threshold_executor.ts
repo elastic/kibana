@@ -31,7 +31,12 @@ import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { getEcsGroups, type Group } from '@kbn/alerting-rule-utils';
+import {
+  getEcsGroups,
+  getGroupByObject,
+  unflattenObject,
+  type Group,
+} from '@kbn/alerting-rule-utils';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
@@ -65,8 +70,6 @@ import type { AdditionalContext } from '../common/utils';
 import {
   flattenAdditionalContext,
   getContextForRecoveredAlerts,
-  getGroupByObject,
-  unflattenObject,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import {

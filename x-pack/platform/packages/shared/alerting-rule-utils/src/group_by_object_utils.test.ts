@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { flattenObject, getFormattedGroupBy, getGroupByObject } from './utils';
+import {
+  flattenObject,
+  unflattenObject,
+  getFormattedGroupBy,
+  getGroupByObject,
+} from './group_by_object_utils';
 
 describe('FlattenObject', () => {
   it('flattens multi level item', () => {
@@ -53,6 +58,24 @@ describe('FlattenObject', () => {
       'key2.item6.itemA': [1, 2, 3],
       'key1.item1': 'value 1',
       'key1.item2.itemA': 'value 2',
+    });
+  });
+});
+
+describe('UnflattenObject', () => {
+  it('returns unflattened fields', () => {
+    const data = {
+      'key1.item1': 'value 1',
+      'key1.item2': 'value 2',
+      'key2.item1': 'value 3',
+      'key2.item2': 'value 4',
+    };
+
+    const unflattened = unflattenObject(data);
+
+    expect(unflattened).toEqual({
+      key1: { item1: 'value 1', item2: 'value 2' },
+      key2: { item1: 'value 3', item2: 'value 4' },
     });
   });
 });
