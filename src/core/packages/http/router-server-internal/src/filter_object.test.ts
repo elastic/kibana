@@ -26,6 +26,11 @@ test.each([
     output: [{ a: 1 }, { a: 2 }],
   },
   {
+    name: 'array of objects 2',
+    input: [[{ a: 1 }, { a: 2, b: 3 }, { a: { b: 2 } }], ['a.b']],
+    output: [{ a: { b: 2 } }],
+  },
+  {
     name: 'does not accept array selectors with array of objects',
     input: [[{ a: 1 }, { a: 2 }], ['0.a']],
     output: [],

@@ -50,7 +50,10 @@ export class KibanaResponse<T extends HttpResponsePayload | ResponseError = any>
  */
 export function filterResponseBody(filterPaths: string[], response: IKibanaResponse): void {
   const mutableResponse = response as Mutable<IKibanaResponse>;
-  if (filterPaths?.length && isPlainObject(mutableResponse.payload)) {
+  if (
+    filterPaths?.length &&
+    (isPlainObject(mutableResponse.payload) || Array.isArray(mutableResponse.payload))
+  ) {
     mutableResponse.payload = filterObject(mutableResponse.payload, filterPaths);
   }
 }

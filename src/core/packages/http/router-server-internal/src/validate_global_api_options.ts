@@ -28,7 +28,5 @@ export function validateGlobalApiOpts(request: Request): GlobalRouterRequestOpti
 
   if (filterPath) filterPathSchema.validate(filterPath);
 
-  return {
-    filterPath,
-  };
+  return { filterPath };
 }
