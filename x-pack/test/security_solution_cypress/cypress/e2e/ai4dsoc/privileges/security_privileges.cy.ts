@@ -6,13 +6,14 @@
  */
 
 import {
-  ATTACK_DISCOVERY_SUB_PRIVILEGE,
-  CASES_SUB_PRIVILEGE,
-  ELASTIC_AI_ASSISTANT_SUB_PRIVILEGE,
-  MACHINE_LEARNING_SUB_PRIVILEGE,
-  NOTES_SUB_PRIVILEGE,
-  SECURITY_SUB_PRIVILEGE,
-  TIMELINE_SUB_PRIVILEGE,
+  ATTACK_DISCOVERY_FEATURE,
+  CASES_FEATURE,
+  ELASTIC_AI_ASSISTANT_FEATURE,
+  MACHINE_LEARNING_FEATURE,
+  NOTES_FEATURE,
+  SECURITY_FEATURE,
+  SECURITY_FEATURE_SUB_PRIVILEGE_SWITCH,
+  TIMELINE_FEATURE,
 } from '../../../screens/custom_roles/assign_to_space_flyout';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -26,29 +27,31 @@ describe('Custom role creation', { tags: '@serverless' }, () => {
   });
 
   describe('Security privileges', () => {
-    it('should not show `Security` sub-privilege', () => {
+    it('should not show `Security` sub-privileges', () => {
       selectAllSpaces();
       // should not have Security sub-privileges
-      cy.get(SECURITY_SUB_PRIVILEGE).should('not.exist');
+      cy.get(SECURITY_FEATURE).should('exist');
+      cy.get(SECURITY_FEATURE).click();
+      cy.get(SECURITY_FEATURE_SUB_PRIVILEGE_SWITCH).should('not.exist');
     });
 
-    it('should not show `Timelines` and `Notes` sub-privilege', () => {
+    it('should not show `Timelines` and `Notes` features', () => {
       selectAllSpaces();
       // should not have Timeline/Notes sub-privileges
-      cy.get(TIMELINE_SUB_PRIVILEGE).should('not.exist');
-      cy.get(NOTES_SUB_PRIVILEGE).should('not.exist');
+      cy.get(TIMELINE_FEATURE).should('not.exist');
+      cy.get(NOTES_FEATURE).should('not.exist');
     });
 
-    it('should show `Cases`, `Machine Learning`, `Elastic AI Assistant` and `Attack discovery`', () => {
+    it('should show `Cases`, `Machine Learning`, `Elastic AI Assistant` and `Attack discovery` features', () => {
       selectAllSpaces();
       // should have Cases sub-privilege
-      cy.get(CASES_SUB_PRIVILEGE).should('exist');
+      cy.get(CASES_FEATURE).should('exist');
       // should have Machine Learning sub-privilege
-      cy.get(MACHINE_LEARNING_SUB_PRIVILEGE).should('exist');
+      cy.get(MACHINE_LEARNING_FEATURE).should('exist');
       // should have Elastic AI Assistant sub-privilege
-      cy.get(ELASTIC_AI_ASSISTANT_SUB_PRIVILEGE).should('exist');
+      cy.get(ELASTIC_AI_ASSISTANT_FEATURE).should('exist');
       // should have Attack Discovery sub-privilege
-      cy.get(ATTACK_DISCOVERY_SUB_PRIVILEGE).should('exist');
+      cy.get(ATTACK_DISCOVERY_FEATURE).should('exist');
     });
   });
 });

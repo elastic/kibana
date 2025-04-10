@@ -8,19 +8,22 @@
 export const SPACE_SELECTOR_COMBO_BOX = '[data-test-subj="spaceSelectorComboBox"]';
 
 // Privileges
-export const SECURITY_PRIVILEGE = '[data-test-subj="featureCategory_securitySolution"]';
+export const SECURITY_CATEGORY = '[data-test-subj="featureCategory_securitySolution"]';
 
 // Sub-privileges
-export const SECURITY_SUB_PRIVILEGE = '[data-test-subj="featureCategory_securitySolution_siemV2"]';
-export const CASES_SUB_PRIVILEGE =
+export const SECURITY_FEATURE = '[data-test-subj="featureCategory_securitySolution_siemV2"]';
+
+export const SECURITY_FEATURE_SUB_PRIVILEGE_SWITCH =
+  '[data-test-subj="securitySolution_siemV2_customizeSubFeaturesSwitchContainer"]';
+
+export const CASES_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionCasesV3"]';
-export const MACHINE_LEARNING_SUB_PRIVILEGE =
-  '[data-test-subj="featureCategory_securitySolution_ml"]';
-export const ELASTIC_AI_ASSISTANT_SUB_PRIVILEGE =
+export const MACHINE_LEARNING_FEATURE = '[data-test-subj="featureCategory_securitySolution_ml"]';
+export const ELASTIC_AI_ASSISTANT_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionAssistant"]';
-export const ATTACK_DISCOVERY_SUB_PRIVILEGE =
+export const ATTACK_DISCOVERY_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionAttackDiscovery"]';
-export const TIMELINE_SUB_PRIVILEGE =
+export const TIMELINE_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionTimeline"]';
-export const NOTES_SUB_PRIVILEGE =
+export const NOTES_FEATURE =
   '[data-test-subj="featureCategory_securitySolution_securitySolutionNotes"]';

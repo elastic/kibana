@@ -7,7 +7,7 @@
 
 import {
   SPACE_SELECTOR_COMBO_BOX,
-  SECURITY_PRIVILEGE,
+  SECURITY_CATEGORY,
 } from '../screens/custom_roles/assign_to_space_flyout';
 import { ASSIGN_TO_SPACE_BUTTON } from '../screens/custom_roles/custom_role_page';
 
@@ -20,5 +20,5 @@ export const selectAllSpaces = (): void => {
   cy.get(SPACE_SELECTOR_COMBO_BOX).type('{enter}');
 
   // expand security privileges
-  cy.get(SECURITY_PRIVILEGE).click();
+  cy.get(SECURITY_CATEGORY).click();
 };
