@@ -43,6 +43,7 @@ export const NavigationPanel: FC = () => {
     hoveredNode,
     hoverIn,
     hoverOut,
+    open,
   } = usePanel();
 
   // ESC key closes PanelNav
@@ -51,8 +52,14 @@ export const NavigationPanel: FC = () => {
       if (ev.key === keys.ESCAPE) {
         close();
       }
+
+      if (ev.key === keys.TAB) {
+        if (!selectedNode && hoveredNode) {
+          open(hoveredNode, null);
+        }
+      }
     },
-    [close]
+    [close, hoveredNode, open, selectedNode]
   );
 
   const onOutsideClick = useCallback(
@@ -108,7 +115,17 @@ export const NavigationPanel: FC = () => {
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <div className={panelWrapperClasses} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
+      <div
+        className={panelWrapperClasses}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+        onClick={() => {
+          if (!selectedNode && hoveredNode) {
+            open(hoveredNode, null);
+          }
+        }}
+      >
         <EuiFocusTrap autoFocus css={{ height: '100%' }}>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanel
