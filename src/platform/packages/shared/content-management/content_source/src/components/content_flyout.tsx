@@ -38,11 +38,13 @@ const flyoutBodyCss = css`
 export interface ContentSourceFlyoutProps {
   onClose: () => void;
   getContent: () => Promise<object>;
+  contentName: string;
 }
 
 export const ContentSourceFlyout: React.FC<ContentSourceFlyoutProps> = ({
   onClose,
   getContent,
+  contentName,
 }) => {
   const [{ content, loading, error }, setContent] = useState<{
     loading: boolean;
@@ -86,7 +88,10 @@ export const ContentSourceFlyout: React.FC<ContentSourceFlyoutProps> = ({
           <h2>
             <FormattedMessage
               id="contentManagement.contentSource.flyoutTitle"
-              defaultMessage="Export dashboard"
+              defaultMessage="Export {contentName} JSON source"
+              values={{
+                contentName,
+              }}
             />
           </h2>
         </EuiTitle>
@@ -111,7 +116,13 @@ export const ContentSourceFlyout: React.FC<ContentSourceFlyoutProps> = ({
                 icon={<EuiLoadingSpinner size="l" />}
               />
             ) : (
-              <EuiCodeBlock language="json" isCopyable overflowHeight="100%" isVirtualized>
+              <EuiCodeBlock
+                language="json"
+                lineNumbers
+                isCopyable
+                overflowHeight="100%"
+                isVirtualized
+              >
                 {JSON.stringify(content, null, 2)}
               </EuiCodeBlock>
             )}
@@ -144,7 +155,7 @@ export const ContentSourceFlyout: React.FC<ContentSourceFlyoutProps> = ({
             >
               <FormattedMessage
                 id="contentManagement.contentSource.flyoutDownloadButton"
-                defaultMessage="Download"
+                defaultMessage="Download file"
               />
             </EuiButton>
           </EuiFlexItem>
