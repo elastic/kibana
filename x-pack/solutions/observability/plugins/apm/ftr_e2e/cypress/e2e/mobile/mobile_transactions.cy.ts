@@ -42,12 +42,10 @@ describe('Mobile transactions page', () => {
     cy.getByTestSubj('apmAppVersionTab').click();
     cy.getByTestSubj('apmAppVersionTab').should('have.attr', 'aria-selected', 'true');
     cy.url().should('include', 'mobileSelectedTab=app_version_tab');
-    cy.waitUntilPageContentIsLoaded();
 
     cy.getByTestSubj('apmOsVersionTab').click();
     cy.getByTestSubj('apmOsVersionTab').should('have.attr', 'aria-selected', 'true');
     cy.url().should('include', 'mobileSelectedTab=os_version_tab');
-    cy.waitUntilPageContentIsLoaded();
 
     cy.getByTestSubj('apmDevicesTab').click();
     cy.getByTestSubj('apmDevicesTab').should('have.attr', 'aria-selected', 'true');
