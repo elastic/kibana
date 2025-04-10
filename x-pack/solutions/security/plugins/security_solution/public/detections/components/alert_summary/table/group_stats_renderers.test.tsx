@@ -5,55 +5,11 @@
  * 2.0.
  */
 
-import {
-  getIntegrationComponent,
-  groupStatsRenderer,
-  Integration,
-  INTEGRATION_ICON_TEST_ID,
-  INTEGRATION_LOADING_TEST_ID,
-} from './group_stats_renderers';
-import type { GenericBuckets } from '@kbn/grouping/src';
-import { render } from '@testing-library/react';
-import React from 'react';
+import { getIntegrationComponent, groupStatsRenderer } from './group_stats_renderers';
 import { useGetIntegrationFromRuleId } from '../../../hooks/alert_summary/use_get_integration_from_rule_id';
-import { usePackageIconType } from '@kbn/fleet-plugin/public/hooks';
 
 jest.mock('../../../hooks/alert_summary/use_get_integration_from_rule_id');
 jest.mock('@kbn/fleet-plugin/public/hooks');
-
-describe('Integration', () => {
-  it('should return a single integration icon', () => {
-    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
-      integration: {
-        title: 'title',
-        icons: [{ type: 'type', src: 'src' }],
-        name: 'name',
-        version: 'version',
-      },
-      isLoading: false,
-    });
-    (usePackageIconType as jest.Mock).mockReturnValue('iconType');
-
-    const bucket: GenericBuckets = { key: 'crowdstrike', doc_count: 10 };
-
-    const { getByTestId } = render(<Integration signalRuleIdBucket={bucket} />);
-
-    expect(getByTestId(INTEGRATION_ICON_TEST_ID)).toBeInTheDocument();
-  });
-
-  it('should return a single integration loading', () => {
-    (useGetIntegrationFromRuleId as jest.Mock).mockReturnValue({
-      integration: {},
-      isLoading: true,
-    });
-
-    const bucket: GenericBuckets = { key: 'crowdstrike', doc_count: 10 };
-
-    const { getByTestId } = render(<Integration signalRuleIdBucket={bucket} />);
-
-    expect(getByTestId(INTEGRATION_LOADING_TEST_ID)).toBeInTheDocument();
-  });
-});
 
 describe('getIntegrationComponent', () => {
   it('should return an empty array', () => {
@@ -80,13 +36,8 @@ describe('getIntegrationComponent', () => {
 
     expect(groupStatsItems.length).toBe(1);
     expect(groupStatsItems[0].component).toMatchInlineSnapshot(`
-      <Memo(Integration)
-        signalRuleIdBucket={
-          Object {
-            "doc_count": 10,
-            "key": "crowdstrike",
-          }
-        }
+      <Memo(IntegrationIcon)
+        ruleId="crowdstrike"
       />
     `);
   });

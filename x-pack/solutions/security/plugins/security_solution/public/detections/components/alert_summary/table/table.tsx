@@ -20,6 +20,7 @@ import type {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import { ActionsCell } from './actions_cell';
 import { AdditionalToolbarControls } from './additional_toolbar_controls';
 import { getDataViewStateFromIndexFields } from '../../../../common/containers/source/use_data_view';
 import { inputsSelectors } from '../../../../common/store';
@@ -71,6 +72,7 @@ const columns: EuiDataGridProps['columns'] = [
   },
 ];
 
+const ACTION_COLUMN_WIDTH = 64; // px
 const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 const RULE_TYPE_IDS = [ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID];
 const ROW_HEIGHTS_OPTIONS = { defaultHeight: 40 };
@@ -177,12 +179,14 @@ export const Table = memo(({ dataView, groupingFilters }: TableProps) => {
 
   return (
     <AlertsTable
+      actionsColumnWidth={ACTION_COLUMN_WIDTH}
       browserFields={browserFields}
       columns={columns}
       consumers={ALERT_TABLE_CONSUMERS}
       gridStyle={GRID_STYLE}
       id={TableId.alertsOnAlertSummaryPage}
       query={query}
+      renderActionsCell={ActionsCell}
       renderAdditionalToolbarControls={renderAdditionalToolbarControls}
       renderCellValue={CellValue}
       rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
