@@ -8,11 +8,11 @@
 import moment from 'moment';
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { TimeRangeBounds } from '@kbn/data-plugin/common';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { mockKibanaTimelinesService } from '../../../../mocks/mock_kibana_timelines_service';
 import { IndicatorsBarChart } from './barchart';
-import { ChartSeries } from '../../services/fetch_aggregated_indicators';
+import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
 
 const mockIndicators: ChartSeries[] = [
   {

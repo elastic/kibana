@@ -7,11 +7,13 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { EuiContextMenuPanel, EuiDataGrid, EuiDataGridColumn } from '@elastic/eui';
-import { EuiDataGridColumnVisibility } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiDataGrid } from '@elastic/eui';
+import type { EuiDataGridColumnVisibility } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { mockIndicatorsFiltersContext } from '../../../mocks/mock_indicators_filters_context';
 import { IndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
-import { generateMockIndicator, Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import { generateMockIndicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { FilterInButtonIcon, FilterInCellAction, FilterInContextMenu } from './filter_in';
 
 export default {

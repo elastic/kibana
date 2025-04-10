@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { generateMockFileIndicator, Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import { generateMockFileIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { render } from '@testing-library/react';
 import { IndicatorValueActions } from './indicator_value_actions';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';

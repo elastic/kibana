@@ -8,9 +8,9 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../mocks/test_providers';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import {
   generateMockIndicator,
-  Indicator,
   RawIndicatorFieldId,
 } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorsFlyoutTable } from './table_tab';

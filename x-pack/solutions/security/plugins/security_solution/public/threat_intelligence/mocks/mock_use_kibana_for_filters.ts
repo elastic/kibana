@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
 import * as hook from '../hooks/use_kibana';
 

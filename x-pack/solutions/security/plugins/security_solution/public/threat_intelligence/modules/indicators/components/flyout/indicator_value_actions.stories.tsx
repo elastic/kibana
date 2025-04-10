@@ -8,7 +8,8 @@
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
-import { generateMockFileIndicator, Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import { generateMockFileIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorValueActions } from './indicator_value_actions';
 import { IndicatorsFlyoutContext } from '../../hooks/use_flyout_context';
 

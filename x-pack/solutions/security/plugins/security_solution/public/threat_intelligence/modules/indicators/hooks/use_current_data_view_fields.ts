@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 
 /**

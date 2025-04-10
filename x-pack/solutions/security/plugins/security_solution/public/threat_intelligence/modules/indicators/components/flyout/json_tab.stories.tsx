@@ -7,10 +7,8 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import {
-  generateMockIndicator,
-  Indicator,
-} from '../../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
+import { generateMockIndicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorsFlyoutJson } from './json_tab';
 
 export default {

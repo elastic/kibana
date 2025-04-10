@@ -7,11 +7,12 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { mockKibanaTimelinesService } from '../../../mocks/mock_kibana_timelines_service';
-import { generateMockIndicator, Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
+import { generateMockIndicator } from '../../../../../common/threat_intelligence/types/indicator';
 import { AddToTimelineButtonIcon, AddToTimelineContextMenu } from './add_to_timeline';
 
 export default {

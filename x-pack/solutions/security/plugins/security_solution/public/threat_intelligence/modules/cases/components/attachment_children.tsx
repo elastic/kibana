@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { ExternalReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { AttachmentMetadata } from '../utils/attachments';
+import type { ExternalReferenceAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { AttachmentMetadata } from '../utils/attachments';
 import { CommentChildren } from './comment_children';
 
 /**

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { StoryFn } from '@storybook/react';
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorsFieldSelector } from './field_selector';
 

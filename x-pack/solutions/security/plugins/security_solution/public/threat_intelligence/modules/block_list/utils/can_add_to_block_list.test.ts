@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { Indicator } from '../../../../../common/threat_intelligence/types/indicator';
 import {
   generateMockFileIndicator,
-  Indicator,
   RawIndicatorFieldId,
 } from '../../../../../common/threat_intelligence/types/indicator';
 import { canAddToBlockList } from './can_add_to_block_list';
