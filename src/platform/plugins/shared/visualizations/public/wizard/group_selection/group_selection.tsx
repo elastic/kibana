@@ -27,7 +27,6 @@ import {
   EuiTabs,
   EuiTab,
   EuiIconTip,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
