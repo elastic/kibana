@@ -48,23 +48,20 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
       describe(scenario.id, () => {
         it('should get maintenance window correctly', async () => {
           const { body: createdMaintenanceWindow } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
+            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .send(createRequestBody);
 
           objectRemover.add(
             space.id,
             createdMaintenanceWindow.id,
-            'maintenance_window',
-            'alerting'
+            'rules/maintenance_window',
+            'alerting',
+            true
           );
 
           const response = await supertestWithoutAuth
-            .get(
-              `${getUrlPrefix(space.id)}/api/alerting/maintenance_window/${
-                createdMaintenanceWindow.id
-              }`
-            )
+            .get(`${getUrlPrefix(space.id)}/api/maintenance_window/${createdMaintenanceWindow.id}`)
             .auth(user.username, user.password);
 
           switch (scenario.id) {
@@ -75,7 +72,7 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `API [GET /api/alerting/maintenance_window/${createdMaintenanceWindow.id}] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]`,
+                message: `API [GET /api/maintenance_window/${createdMaintenanceWindow.id}] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]`,
                 statusCode: 403,
               });
               break;

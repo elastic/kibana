@@ -51,7 +51,7 @@ describe('archiveMaintenanceWindowRoute', () => {
       }
     );
 
-    expect(config.path).toEqual('/api/alerting/maintenance_window/{id}/_archive');
+    expect(config.path).toEqual('/api/maintenance_window/{id}/_archive');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",

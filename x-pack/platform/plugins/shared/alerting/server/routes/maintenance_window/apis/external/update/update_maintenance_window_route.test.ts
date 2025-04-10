@@ -75,7 +75,7 @@ describe('updateMaintenanceWindowRoute', () => {
       { params: updateRequestParams, body: updateRequestBody }
     );
 
-    expect(config.path).toEqual('/api/alerting/maintenance_window/{id}');
+    expect(config.path).toEqual('/api/maintenance_window/{id}');
     expect(config.options).toMatchInlineSnapshot(`
       Object {
         "access": "public",

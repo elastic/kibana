@@ -36,7 +36,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
       describe(scenario.id, () => {
         it('should handle archive maintenance window request appropriately', async () => {
           const { body: createdMaintenanceWindow } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
+            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .send(createRequestBody);
 
@@ -50,7 +50,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
 
           const response = await supertestWithoutAuth
             .post(
-              `${getUrlPrefix(space.id)}/api/alerting/maintenance_window/${
+              `${getUrlPrefix(space.id)}/api/maintenance_window/${
                 createdMaintenanceWindow.id
               }/_archive`
             )
@@ -66,7 +66,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `API [POST /api/alerting/maintenance_window/${createdMaintenanceWindow.id}/_archive] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
+                message: `API [POST /api/maintenance_window/${createdMaintenanceWindow.id}/_archive] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
                 statusCode: 403,
               });
               break;
@@ -90,7 +90,7 @@ export default function archiveMaintenanceWindowTests({ getService }: FtrProvide
       const space1 = UserAtSpaceScenarios[1].space.id;
 
       await supertest
-        .post(`${getUrlPrefix(space1)}/api/alerting/maintenance_window/foobar-id/_archive`)
+        .post(`${getUrlPrefix(space1)}/api/maintenance_window/foobar-id/_archive`)
         .set('kbn-xsrf', 'foo')
         .send({ archive: true })
         .expect(404);

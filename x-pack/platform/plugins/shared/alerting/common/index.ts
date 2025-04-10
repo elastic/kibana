@@ -209,6 +209,7 @@ export {
 
 export const LEGACY_BASE_ALERT_API_PATH = '/api/alerts';
 export const BASE_ALERTING_API_PATH = '/api/alerting';
+export const BASE_MAINTENANCE_WINDOW_API_PATH = '/api/maintenance_window';
 
 // Internal
 export const INTERNAL_BASE_ALERTING_API_PATH = '/internal/alerting' as const;
@@ -245,7 +246,6 @@ export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
   `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
 
 // External
-export const BASE_MAINTENANCE_WINDOW_API_PATH = `${BASE_ALERTING_API_PATH}/maintenance_window`;
 export const ARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_archive`;
 export const UNARCHIVE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}/_unarchive`;
 
