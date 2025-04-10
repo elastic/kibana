@@ -17,11 +17,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, isEqual } from 'lodash';
+import { Sample } from '@kbn/grok-ui';
+import { StreamsAppSearchBar } from '../../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { AssetImage } from '../../asset_image';
 import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
+  useStreamsEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import {
   PreviewDocsFilterOption,
@@ -29,7 +32,7 @@ import {
   previewDocsFilterOptions,
 } from './state_management/simulation_state_machine';
 import { selectPreviewDocuments } from './state_management/simulation_state_machine/selectors';
-import { StreamsAppSearchBar } from '../../streams_app_search_bar';
+import { isGrokProcessor } from './utils';
 
 export const ProcessorOutcomePreview = () => {
   const isLoading = useSimulatorSelector(
@@ -146,6 +149,17 @@ const OutcomePreviewTable = () => {
   const previewDocuments = useSimulatorSelector((snapshot) =>
     selectPreviewDocuments(snapshot.context)
   );
+  const draftProcessor = useStreamsEnrichmentSelector((state) => {
+    const draft = state.context.processorsRefs.find((p) => p.getSnapshot().matches('draft'));
+    return {
+      processor: draft?.getSnapshot().context.processor,
+      resources: draft?.getSnapshot().context.resources,
+    };
+  });
+
+  const grokCollection = useStreamsEnrichmentSelector(
+    (machineState) => machineState.context.grokCollection
+  );
 
   const previewColumns = useMemo(
     () => getTableColumns(processors, detectedFields ?? [], previewDocsFilter),
@@ -180,5 +194,27 @@ const OutcomePreviewTable = () => {
     );
   }
 
-  return <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />;
+  return draftProcessor?.processor && isGrokProcessor(draftProcessor.processor) ? (
+    <PreviewTable
+      documents={previewDocuments}
+      displayColumns={[draftProcessor.processor.grok.field]}
+      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      renderCellValue={(document, columnId) => {
+        const value = document[columnId];
+        if (typeof value === 'string') {
+          return (
+            <Sample
+              grokCollection={grokCollection}
+              draftGrokExpressions={draftProcessor.resources?.grokExpressions ?? []}
+              sample={value}
+            />
+          );
+        } else {
+          return undefined;
+        }
+      }}
+    />
+  ) : (
+    <MemoPreviewTable documents={previewDocuments} displayColumns={previewColumns} />
+  );
 };

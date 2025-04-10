@@ -13,9 +13,13 @@ import React, { useMemo } from 'react';
 export function PreviewTable({
   documents,
   displayColumns,
+  renderCellValue,
+  rowHeightsOptions,
 }: {
   documents: SampleDocument[];
   displayColumns?: string[];
+  renderCellValue?: (doc: SampleDocument, columnId: string) => React.ReactNode | undefined;
+  rowHeightsOptions?: any;
 }) {
   const columns = useMemo(() => {
     if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
@@ -54,11 +58,20 @@ export function PreviewTable({
       }}
       toolbarVisibility={false}
       rowCount={documents.length}
+      rowHeightsOptions={rowHeightsOptions ?? undefined}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
           return '';
         }
+
+        if (renderCellValue) {
+          const renderedValue = renderCellValue(doc, columnId);
+          if (renderedValue !== undefined) {
+            return renderedValue;
+          }
+        }
+
         const value = (doc as SampleDocument)[columnId];
         if (value === undefined || value === null) {
           return '';

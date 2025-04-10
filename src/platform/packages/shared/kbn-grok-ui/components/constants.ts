@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './expression';
-export * from './sample_input';
-export * from './sample_read_only';
+import { i18n } from '@kbn/i18n';
+
+export const semanticNameLabel = i18n.translate('kbn.grokUi.semanticNameLabel', {
+  defaultMessage: 'Semantic name:',
+});
+
+export const patternNameLabel = i18n.translate('kbn.grokUi.patternNameLabel', {
+  defaultMessage: 'Pattern:',
+});
+
+export const typeNameLabel = i18n.translate('kbn.grokUi.typeNameLabel', {
+  defaultMessage: 'Type:',
+});

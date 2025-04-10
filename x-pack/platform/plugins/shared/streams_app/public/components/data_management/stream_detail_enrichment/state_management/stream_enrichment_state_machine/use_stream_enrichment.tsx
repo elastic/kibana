@@ -71,6 +71,7 @@ export const useStreamEnrichmentEvents = () => {
 export const StreamEnrichmentContextProvider = ({
   children,
   definition,
+  grokCollection,
   ...deps
 }: React.PropsWithChildren<StreamEnrichmentServiceDependencies & StreamEnrichmentInput>) => {
   return (
@@ -81,10 +82,13 @@ export const StreamEnrichmentContextProvider = ({
         inspect: consoleInspector,
         input: {
           definition,
+          grokCollection,
         },
       }}
     >
-      <ListenForDefinitionChanges definition={definition}>{children}</ListenForDefinitionChanges>
+      <ListenForDefinitionChanges definition={definition} grokCollection={grokCollection}>
+        {children}
+      </ListenForDefinitionChanges>
     </StreamEnrichmentContext.Provider>
   );
 };

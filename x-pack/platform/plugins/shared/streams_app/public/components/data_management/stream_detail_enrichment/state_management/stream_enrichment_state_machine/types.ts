@@ -10,6 +10,7 @@ import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { Streams } from '@kbn/streams-schema';
 import { TimeState } from '@kbn/es-query';
 import { BehaviorSubject } from 'rxjs';
+import { GrokCollection } from '@kbn/grok-ui';
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
 import { PreviewDocsFilterOption, SimulationActorRef } from '../simulation_state_machine';
@@ -24,12 +25,14 @@ export interface StreamEnrichmentServiceDependencies {
 
 export interface StreamEnrichmentInput {
   definition: Streams.ingest.all.GetResponse;
+  grokCollection: GrokCollection;
 }
 
 export interface StreamEnrichmentContextType {
   definition: Streams.ingest.all.GetResponse;
   initialProcessorsRefs: ProcessorActorRef[];
   processorsRefs: ProcessorActorRef[];
+  grokCollection: GrokCollection;
   simulatorRef?: SimulationActorRef;
 }
 
