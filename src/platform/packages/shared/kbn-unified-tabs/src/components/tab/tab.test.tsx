@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Tab } from './tab';
 import { MAX_TAB_WIDTH, MIN_TAB_WIDTH } from '../../constants';
@@ -169,10 +169,12 @@ describe('Tab', () => {
     await userEvent.clear(input);
     await userEvent.type(input, 'new-label');
     expect(input).toHaveValue('new-label');
-    fireEvent.keyUp(input, { key: 'Escape' });
-    expect(onLabelEdited).not.toHaveBeenCalled();
+    await userEvent.keyboard('{escape}');
 
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-    expect(screen.queryByTestId(tabButtonTestSubj)).toHaveFocus();
+    await waitFor(() => {
+      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(tabButtonTestSubj)).toHaveFocus();
+      expect(onLabelEdited).not.toHaveBeenCalled();
+    });
   });
 });
