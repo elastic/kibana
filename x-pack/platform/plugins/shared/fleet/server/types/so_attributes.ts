@@ -190,6 +190,7 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   sync_integrations?: boolean;
   kibana_url?: string;
   kibana_api_key?: string;
+  sync_uninstalled_integrations?: boolean;
 }
 
 interface OutputSoLogstashAttributes extends OutputSoBaseAttributes {
