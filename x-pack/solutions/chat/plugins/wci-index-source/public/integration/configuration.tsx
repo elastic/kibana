@@ -39,7 +39,6 @@ export const IndexSourceConfigurationForm: React.FC<IntegrationConfigurationForm
     name: 'configuration.fields.filterFields',
   });
   const [query, setQuery] = useState('');
-  const [options, setOptions] = useState([] as string[]);
 
   const contextFieldsArray = useFieldArray({
     control,
