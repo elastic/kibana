@@ -319,89 +319,84 @@ function TrendEditor({
           defaultMessage: 'Trend',
         })}
       >
-        <EuiButtonGroup
-          isFullWidth
-          buttonSize="compressed"
-          legend={i18n.translate('xpack.lens.metric.secondary.trend.baseline', {
-            defaultMessage: 'Baseline',
-          })}
-          data-test-subj="lnsMetric_secondary_trend_baseline_buttons"
-          options={[
-            {
-              id: `${idPrefix}static`,
-              label: i18n.translate('xpack.lens.metric.secondary.trend.baseline.static', {
-                defaultMessage: 'Static value',
-              }),
-              'data-test-subj': 'lnsMetric_secondary_trend_baseline_static',
-            },
-            {
-              id: `${idPrefix}primary`,
-              label: i18n.translate('xpack.lens.metric.secondary.trend.baseline.primary', {
-                defaultMessage: 'Primary metric',
-              }),
-              'data-test-subj': 'lnsMetric_secondary_trend_baseline_primary',
-              isDisabled: !primaryMetricCanTrend,
-              toolTipContent: primaryMetricCanTrend
-                ? undefined
-                : i18n.translate('xpack.lens.metric.secondary.trend.baseline.primary.disabled', {
-                    defaultMessage: 'Primary metric must be numeric to use it as baseline',
-                  }),
-            },
-          ]}
-          idSelected={`${idPrefix}${
-            state.secondaryTrend?.baselineValue === 'primary' && primaryMetricCanTrend
-              ? 'primary'
-              : 'static'
-          }`}
-          onChange={(id) => {
-            const baselineMode = id.replace(idPrefix, '') as 'static' | 'primary';
-
-            const params = {
-              secondaryTrend: {
-                ...getDefaultTrendConfig(),
-                ...state.secondaryTrend,
-                baselineValue: baselineMode === 'primary' ? ('primary' as const) : 0,
+        <>
+          <EuiButtonGroup
+            isFullWidth
+            buttonSize="compressed"
+            legend={i18n.translate('xpack.lens.metric.secondary.trend.baseline', {
+              defaultMessage: 'Baseline',
+            })}
+            data-test-subj="lnsMetric_secondary_trend_baseline_buttons"
+            options={[
+              {
+                id: `${idPrefix}static`,
+                label: i18n.translate('xpack.lens.metric.secondary.trend.baseline.static', {
+                  defaultMessage: 'Static value',
+                }),
+                'data-test-subj': 'lnsMetric_secondary_trend_baseline_static',
               },
-            };
+              {
+                id: `${idPrefix}primary`,
+                label: i18n.translate('xpack.lens.metric.secondary.trend.baseline.primary', {
+                  defaultMessage: 'Primary metric',
+                }),
+                'data-test-subj': 'lnsMetric_secondary_trend_baseline_primary',
+                isDisabled: !primaryMetricCanTrend,
+                toolTipContent: primaryMetricCanTrend
+                  ? undefined
+                  : i18n.translate('xpack.lens.metric.secondary.trend.baseline.primary.disabled', {
+                      defaultMessage: 'Primary metric must be numeric to use it as baseline',
+                    }),
+              },
+            ]}
+            idSelected={`${idPrefix}${
+              state.secondaryTrend?.baselineValue === 'primary' && primaryMetricCanTrend
+                ? 'primary'
+                : 'static'
+            }`}
+            onChange={(id) => {
+              const baselineMode = id.replace(idPrefix, '') as 'static' | 'primary';
 
-            setState({
-              ...state,
-              ...params,
-            });
-          }}
-        />
-      </EuiFormRow>
-      {state.secondaryTrend?.baselineValue !== 'primary' ? (
-        <EuiFormRow
-          display="columnCompressed"
-          fullWidth
-          label={i18n.translate('xpack.lens.metric.secondary.trend.baseline.input', {
-            defaultMessage: 'Baseline',
-          })}
-        >
-          <DebouncedInput
-            data-test-subj="lnsMetric_secondary_trend_baseline_input"
-            compressed
-            fullWidth
-            defaultValue={'0'}
-            value={
-              typeof state.secondaryTrend?.baselineValue === 'number'
-                ? String(state.secondaryTrend.baselineValue)
-                : ''
-            }
-            onChange={(newValue) => {
-              setState({
-                ...state,
+              const params = {
                 secondaryTrend: {
                   ...getDefaultTrendConfig(),
                   ...state.secondaryTrend,
-                  baselineValue: Number(newValue),
+                  baselineValue: baselineMode === 'primary' ? ('primary' as const) : 0,
                 },
+              };
+
+              setState({
+                ...state,
+                ...params,
               });
             }}
           />
-        </EuiFormRow>
-      ) : null}
+          <EuiSpacer size="s" />
+          {state.secondaryTrend?.baselineValue !== 'primary' ? (
+            <DebouncedInput
+              data-test-subj="lnsMetric_secondary_trend_baseline_input"
+              compressed
+              fullWidth
+              defaultValue={'0'}
+              value={
+                typeof state.secondaryTrend?.baselineValue === 'number'
+                  ? String(state.secondaryTrend.baselineValue)
+                  : ''
+              }
+              onChange={(newValue) => {
+                setState({
+                  ...state,
+                  secondaryTrend: {
+                    ...getDefaultTrendConfig(),
+                    ...state.secondaryTrend,
+                    baselineValue: Number(newValue),
+                  },
+                });
+              }}
+            />
+          ) : null}
+        </>
+      </EuiFormRow>
     </>
   );
 }
