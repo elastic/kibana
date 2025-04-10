@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { INSTALLATION_STATUS, THREAT_INTELLIGENCE_CATEGORY } from '../utils/filter_integrations';
 
-const createWrapper = () => {
+const createWrapper = (): FC<PropsWithChildren<{}>> => {
   const queryClient = new QueryClient();
-  return ({ children }: { children: any }) => (
+  // eslint-disable-next-line react/display-name
+  return ({ children }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
 };
 
-const renderUseQuery = (result: { items: any[] }) =>
+const renderUseQuery = (result: { items: unknown[] }) =>
   renderHook(() => useQuery(['integrations'], () => result), {
     wrapper: createWrapper(),
   });
