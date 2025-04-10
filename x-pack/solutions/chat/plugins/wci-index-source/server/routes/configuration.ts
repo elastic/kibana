@@ -80,16 +80,16 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
       },
     },
     async (ctx, request, res) => {
+      const { elasticsearch } = await ctx.core;
+      let pattern = request.query.index || '';
+
+      if (pattern.length >= 3) {
+        pattern = `${pattern}*`;
+      }
+
+      const esClient = elasticsearch.client.asCurrentUser;
+
       try {
-        const { elasticsearch } = await ctx.core;
-        let pattern = request.query.index || '';
-
-        if (pattern.length >= 3) {
-          pattern = `${pattern}*`;
-        }
-
-        const esClient = elasticsearch.client.asCurrentUser;
-
         const response = await esClient.cat.indices({
           index: [pattern],
           h: 'index',
@@ -105,7 +105,14 @@ export const registerConfigurationRoutes = ({ router, core, logger }: RouteDepen
           },
         });
       } catch (e) {
-        logger.error(e);
+        // TODO: sigh, is there a better way?
+        if (e?.meta?.body?.error?.type === 'index_not_found_exception') {
+          return res.ok<SearchIndicesResponse>({
+            body: {
+              indexNames: [],
+            },
+          });
+        }
         throw e;
       }
     }
