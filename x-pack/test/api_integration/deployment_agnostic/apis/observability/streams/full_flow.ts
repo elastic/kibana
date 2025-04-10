@@ -471,7 +471,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             destination: 'logs.nginx.error',
             if: {
-              field: 'log',
+              field: 'attributes.log',
               operator: 'eq',
               value: 'error',
             },
