@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, VFC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
@@ -36,7 +36,7 @@ const IndicatorsPageProviders: FC<PropsWithChildren<unknown>> = ({ children }) =
   </IndicatorsFilters>
 );
 
-const IndicatorsPageContent: VFC = () => {
+const IndicatorsPageContent: FC = () => {
   const { blockListIndicatorValue } = useBlockListContext();
 
   const { sourcererDataView, browserFields } = useSourcererDataView();
@@ -114,7 +114,7 @@ const IndicatorsPageContent: VFC = () => {
   );
 };
 
-export const IndicatorsPage: VFC = () => (
+export const IndicatorsPage: FC = () => (
   <IndicatorsPageProviders>
     <IndicatorsPageContent />
   </IndicatorsPageProviders>
