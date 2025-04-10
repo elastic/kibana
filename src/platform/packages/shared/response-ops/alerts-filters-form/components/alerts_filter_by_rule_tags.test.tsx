@@ -81,7 +81,7 @@ describe('AlertsFilterByRuleTags', () => {
     );
     const comboboxInput = screen.getByTestId('comboBoxSearchInput');
     expect(comboboxInput).toHaveAttribute('aria-invalid', 'true');
-    expect(comboboxInput).toHaveAttribute('disabled');
+    expect(comboboxInput).toBeDisabled();
   });
 
   describe('filterMetadata', () => {
