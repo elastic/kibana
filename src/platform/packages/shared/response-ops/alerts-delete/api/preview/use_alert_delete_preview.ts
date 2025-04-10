@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import debounce from 'lodash/debounce';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types/rule_settings';
+import useDebounce from 'react-use/lib/useDebounce';
 import { alertDeletePreviewApiCall } from './alert_delete_preview_api_call';
 
 export type UseAlertDeletePreviewParams = RulesSettingsAlertDeleteProperties & {
@@ -25,7 +25,7 @@ export const useAlertDeletePreview = ({
   inactiveAlertDeleteThreshold,
   categoryIds,
 }: UseAlertDeletePreviewParams) => {
-  const [stableParams, setStableParams] = useState({
+  const [params, setParams] = useState({
     isActiveAlertDeleteEnabled,
     isInactiveAlertDeleteEnabled,
     activeAlertDeleteThreshold,
@@ -33,46 +33,37 @@ export const useAlertDeletePreview = ({
     categoryIds,
   });
 
-  // Will allow users to change the params without calling the API
-  // on each update. Instead, it will wait for 500ms after the last change.
-  const updateStableParams = useRef(
-    debounce((params) => {
-      setStableParams(params);
-    }, 500)
-  ).current;
-
-  useEffect(() => {
-    updateStableParams({
+  useDebounce(
+    () => {
+      setParams({
+        isActiveAlertDeleteEnabled,
+        isInactiveAlertDeleteEnabled,
+        activeAlertDeleteThreshold,
+        inactiveAlertDeleteThreshold,
+        categoryIds,
+      });
+    },
+    500,
+    [
       isActiveAlertDeleteEnabled,
       isInactiveAlertDeleteEnabled,
       activeAlertDeleteThreshold,
       inactiveAlertDeleteThreshold,
       categoryIds,
-    });
+    ]
+  );
 
-    return () => {
-      updateStableParams.cancel();
-    };
-  }, [
-    isActiveAlertDeleteEnabled,
-    isInactiveAlertDeleteEnabled,
-    activeAlertDeleteThreshold,
-    inactiveAlertDeleteThreshold,
-    updateStableParams,
-    categoryIds,
-  ]);
-
-  const key = ['alertDeletePreview', stableParams];
+  const key = ['alertDeletePreview', params];
 
   const { data } = useQuery({
     queryKey: key,
     queryFn: () => {
       return alertDeletePreviewApiCall({
         services: { http },
-        requestQuery: stableParams,
+        requestQuery: params,
       });
     },
-    enabled: stableParams.isActiveAlertDeleteEnabled || stableParams.isInactiveAlertDeleteEnabled,
+    enabled: params.isActiveAlertDeleteEnabled || params.isInactiveAlertDeleteEnabled,
   });
 
   return { affectedAlertsCount: data?.affectedAlertCount ?? 0 };

@@ -30,7 +30,6 @@ import {
 } from '@elastic/eui';
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { css } from '@emotion/react';
-import { AlertDeleteDescriptiveFormGroup } from '@kbn/response-ops-alerts-delete';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -251,11 +250,6 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
             />
           </>
         )}
-        <EuiSpacer />
-        <AlertDeleteDescriptiveFormGroup
-          services={{ http }}
-          categoryIds={['observability', 'management']}
-        />
       </>
     );
   };

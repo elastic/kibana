@@ -45,7 +45,7 @@ export const alertDeletePreviewQuerySchema = schema.object({
           schema.literal(alertDeleteCategoryIds.MANAGEMENT),
         ]),
         {
-          minSize: 2,
+          minSize: 1,
         }
       ),
       schema.literal(alertDeleteCategoryIds.SECURITY_SOLUTION),
