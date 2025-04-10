@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from '@kbn/core/server';
-import { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,

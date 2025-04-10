@@ -28,6 +28,7 @@ import { registerRoutes as registerMessageSigningServiceRoutes } from './message
 import { registerRoutes as registerUninstallTokenRoutes } from './uninstall_token';
 import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standalone_agent_api_key';
 import { registerRoutes as registerDebugRoutes } from './debug';
+import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 import { registerRoutes as registerCustomIntegrationsRoutes } from './custom_integrations';
 
 export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
@@ -51,6 +52,7 @@ export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: Fleet
   registerMessageSigningServiceRoutes(fleetAuthzRouter);
   registerUninstallTokenRoutes(fleetAuthzRouter, config);
   registerStandaloneAgentApiKeyRoutes(fleetAuthzRouter);
+  registerRemoteSyncedIntegrations(fleetAuthzRouter);
   registerDebugRoutes(fleetAuthzRouter);
   registerCustomIntegrationsRoutes(fleetAuthzRouter);
 

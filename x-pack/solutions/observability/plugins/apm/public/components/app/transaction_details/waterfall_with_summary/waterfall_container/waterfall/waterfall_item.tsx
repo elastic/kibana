@@ -11,7 +11,7 @@ import type { ReactNode } from 'react';
 import React, { useRef, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
-import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
+import { SPAN_ID, TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
 import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
@@ -23,6 +23,8 @@ import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { OrphanItemTooltipIcon } from './orphan_item_tooltip_icon';
+import { SpanMissingDestinationTooltip } from './span_missing_destination_tooltip';
+import { useWaterfallContext } from './context/use_waterfall';
 
 type ItemType = 'transaction' | 'span' | 'error';
 
@@ -47,7 +49,7 @@ const Container = styled.div<IContainerStyleProps>`
   margin-right: ${(props) => props.timelineMargins.right}px;
   margin-left: ${(props) =>
     props.hasToggle
-      ? props.timelineMargins.left - 30 // fix margin if there is a toggle
+      ? props.timelineMargins.left - 21 // fix margin if there is a toggle (toggle width is 20px)
       : props.timelineMargins.left}px;
   background-color: ${({ isSelected, theme }) =>
     isSelected ? theme.euiTheme.colors.lightestShade : 'initial'};
@@ -121,7 +123,7 @@ interface IWaterfallItemProps {
     width: number;
     color: string;
   }>;
-  onClick: (flyoutDetailTab: string) => unknown;
+  onClick?: (flyoutDetailTab: string) => unknown;
 }
 
 function PrefixIcon({ item }: { item: IWaterfallSpanOrTransaction }) {
@@ -226,6 +228,7 @@ export function WaterfallItem({
   segments,
 }: IWaterfallItemProps) {
   const [widthFactor, setWidthFactor] = useState(1);
+  const { isEmbeddable } = useWaterfallContext();
   const waterfallItemRef: React.RefObject<any> = useRef(null);
   useEffect(() => {
     if (waterfallItemRef?.current && marginLeftLevel) {
@@ -256,8 +259,10 @@ export function WaterfallItem({
       isSelected={isSelected}
       hasToggle={hasToggle}
       onClick={(e: React.MouseEvent) => {
-        e.stopPropagation();
-        onClick(waterfallItemFlyoutTab);
+        if (onClick) {
+          e.stopPropagation();
+          onClick(waterfallItemFlyoutTab);
+        }
       }}
     >
       <ItemBar // using inline styles instead of props to avoid generating a css class for each item
@@ -285,11 +290,17 @@ export function WaterfallItem({
           <PrefixIcon item={item} />
         </SpanActionToolTip>
         {item.isOrphan ? <OrphanItemTooltipIcon docType={item.docType} /> : null}
+        {item.missingDestination ? <SpanMissingDestinationTooltip /> : null}
         <HttpStatusCode item={item} />
         <NameLabel item={item} />
 
         <Duration item={item} />
-        <RelatedErrors item={item} errorCount={errorCount} />
+        {isEmbeddable ? (
+          <FailureBadge outcome={item.doc.event?.outcome} />
+        ) : (
+          <RelatedErrors item={item} errorCount={errorCount} />
+        )}
+
         {item.docType === 'span' && (
           <SyncBadge sync={item.doc.span.sync} agentName={item.doc.agent.name} />
         )}
@@ -322,8 +333,13 @@ function RelatedErrors({
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
-  if (item.doc.transaction?.id) {
-    kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
+  const transactionId = item.doc.transaction?.id;
+  const spanId = item.doc.span?.id;
+
+  if (item.docType === 'transaction' && spanId) {
+    kuery += ` and ${SPAN_ID} : "${spanId}"`;
+  } else if (transactionId) {
+    kuery += ` and ${TRANSACTION_ID} : "${transactionId}"`;
   }
 
   const mobileHref = apmRouter.link(`/mobile-services/{serviceName}/errors-and-crashes`, {

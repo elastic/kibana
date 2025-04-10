@@ -255,6 +255,10 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
           isCompatible: ({ field }) => field.name !== 'message',
         },
       ],
+    getPaginationConfig: (prev) => () => ({
+      ...prev(),
+      paginationMode: 'singlePage',
+    }),
   },
   resolve: (params) => {
     let indexPattern: string | undefined;
@@ -269,7 +273,7 @@ export const createExampleDataSourceProfileProvider = (): DataSourceProfileProvi
       indexPattern = params.dataView.getIndexPattern();
     }
 
-    if (indexPattern !== 'my-example-logs') {
+    if (indexPattern !== 'my-example-logs' && indexPattern !== 'my-example-logs,logstash*') {
       return { isMatch: false };
     }
 

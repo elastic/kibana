@@ -23,16 +23,16 @@ export function setElasticsearchRoute({
     .get({
       path: ELASTICSEARCH_CONFIG_ROUTE,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason: 'This route is opted out from authorization',
-          },
-        },
         validate: {},
       },
       async (context, request, response) => {

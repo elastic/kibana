@@ -7,12 +7,13 @@
 
 import expect from '@kbn/expect';
 import { asUnwiredStreamGetResponse } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
-import { fetchDocument, indexDocument } from './helpers/requests';
+import { fetchDocument, indexDocument, putStream } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -39,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const {
         body: { streams },
         status,
-      } = await apiClient.fetch('GET /api/streams');
+      } = await apiClient.fetch('GET /api/streams 2023-10-31');
 
       expect(status).to.eql(200);
 
@@ -56,13 +57,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows setting processing on classic streams', async () => {
-      const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
+      const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: {
             name: TEST_STREAM_NAME,
           },
           body: {
             dashboards: [],
+            queries: [],
             stream: {
               ingest: {
                 lifecycle: { inherit: {} },
@@ -88,7 +90,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(putResponse.body).to.have.property('acknowledged', true);
 
-      const getResponse = await apiClient.fetch('GET /api/streams/{name}', {
+      const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
         params: { path: { name: TEST_STREAM_NAME } },
       });
 
@@ -98,12 +100,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const {
         dashboards,
+        queries,
         stream,
         effective_lifecycle: effectiveLifecycle,
         elasticsearch_assets: elasticsearchAssets,
       } = body;
 
       expect(dashboards).to.eql([]);
+      expect(queries).to.eql([]);
 
       expect(stream).to.eql({
         name: TEST_STREAM_NAME,
@@ -126,33 +130,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 
-      expect(elasticsearchAssets).to.eql([
-        {
-          type: 'ingest_pipeline',
-          id: 'logs@default-pipeline',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@mappings',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@settings',
-        },
-        {
-          type: 'component_template',
-          id: 'logs@custom',
-        },
-        { type: 'component_template', id: 'ecs@mappings' },
-        {
-          type: 'index_template',
-          id: 'logs',
-        },
-        {
-          type: 'data_stream',
-          id: 'logs-test-default',
-        },
-      ]);
+      expect(elasticsearchAssets).to.eql({
+        ingestPipeline: 'logs@default-pipeline',
+        componentTemplates: ['logs@mappings', 'logs@settings', 'logs@custom', 'ecs@mappings'],
+        indexTemplate: 'logs',
+        dataStream: 'logs-test-default',
+      });
     });
 
     it('Executes processing on classic streams', async () => {
@@ -176,10 +159,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows removing processing on classic streams', async () => {
-      const response = await apiClient.fetch('PUT /api/streams/{name}', {
+      const response = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
         params: {
           path: { name: TEST_STREAM_NAME },
           body: {
+            queries: [],
             dashboards: [],
             stream: {
               ingest: {
@@ -214,7 +198,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows deleting classic streams', async () => {
-      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name}', {
+      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
         params: {
           path: {
             name: TEST_STREAM_NAME,
@@ -224,7 +208,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(deleteStreamResponse.status).to.eql(200);
 
-      const getStreamsResponse = await apiClient.fetch('GET /api/streams');
+      const getStreamsResponse = await apiClient.fetch('GET /api/streams 2023-10-31');
 
       expect(getStreamsResponse.status).to.eql(200);
 
@@ -232,6 +216,154 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         (stream) => stream.name === TEST_STREAM_NAME
       );
       expect(classicStream).to.eql(undefined);
+    });
+
+    describe('Classic streams sharing template/pipeline', () => {
+      const TEMPLATE_NAME = 'my-shared-template';
+      const FIRST_STREAM_NAME = 'mytest-first';
+      const SECOND_STREAM_NAME = 'mytest-second';
+
+      before(async () => {
+        await esClient.indices.putIndexTemplate({
+          name: TEMPLATE_NAME,
+          index_patterns: ['mytest*'],
+          priority: 1000,
+          template: {},
+          data_stream: {
+            allow_custom_routing: false,
+            hidden: false,
+          },
+        });
+      });
+
+      after(async () => {
+        await esClient.indices.deleteIndexTemplate({
+          name: TEMPLATE_NAME,
+        });
+      });
+
+      it('creates an ingest pipeline and updates the template when the first stream is created', async () => {
+        await esClient.indices.createDataStream({
+          name: FIRST_STREAM_NAME,
+        });
+
+        await putStream(apiClient, FIRST_STREAM_NAME, {
+          dashboards: [],
+          queries: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [
+                {
+                  grok: {
+                    if: { always: {} },
+                    field: 'message',
+                    patterns: [
+                      '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                    ],
+                  },
+                },
+              ],
+              unwired: {},
+            },
+          },
+        });
+
+        const templateResponse = await esClient.indices.getIndexTemplate({
+          name: TEMPLATE_NAME,
+        });
+        const template = templateResponse.index_templates[0];
+        expect(template.index_template.template?.settings?.index?.default_pipeline).to.equal(
+          'my-shared-template-pipeline'
+        );
+
+        const pipelineResponse = await esClient.ingest.getPipeline({
+          id: `${TEMPLATE_NAME}-pipeline`,
+        });
+        const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
+        expect(pipeline._meta?.managed_by).to.eql('streams');
+        expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-first@stream.processing');
+      });
+
+      it('updates the ingest pipeline when the second stream is created', async () => {
+        await esClient.indices.createDataStream({
+          name: SECOND_STREAM_NAME,
+        });
+
+        await putStream(apiClient, SECOND_STREAM_NAME, {
+          dashboards: [],
+          queries: [],
+          stream: {
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: [
+                {
+                  grok: {
+                    if: { always: {} },
+                    field: 'message',
+                    patterns: [
+                      '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                    ],
+                  },
+                },
+              ],
+              unwired: {},
+            },
+          },
+        });
+
+        const pipelineResponse = await esClient.ingest.getPipeline({
+          id: `${TEMPLATE_NAME}-pipeline`,
+        });
+        const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
+        expect(pipeline.processors?.map((processor) => processor.pipeline?.name)).to.eql([
+          'mytest-first@stream.processing',
+          'mytest-second@stream.processing',
+        ]);
+      });
+
+      it('updates the ingest pipeline when one of the streams is deleted', async () => {
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: FIRST_STREAM_NAME,
+            },
+          },
+        });
+
+        const pipelineResponse = await esClient.ingest.getPipeline({
+          id: `${TEMPLATE_NAME}-pipeline`,
+        });
+        const pipeline = pipelineResponse[`${TEMPLATE_NAME}-pipeline`];
+        expect(pipeline.processors?.[0].pipeline?.name).to.eql('mytest-second@stream.processing');
+      });
+
+      it('deletes the ingest pipeline and restores the template when both streams are deleted', async () => {
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: SECOND_STREAM_NAME,
+            },
+          },
+        });
+
+        const templateResponse = await esClient.indices.getIndexTemplate({
+          name: TEMPLATE_NAME,
+        });
+        const template = templateResponse.index_templates[0];
+        expect(template.index_template.template?.settings?.index?.default_pipeline).to.equal(
+          undefined
+        );
+
+        try {
+          await esClient.ingest.getPipeline({
+            id: `${TEMPLATE_NAME}-pipeline`,
+          });
+          throw new Error('Expected to throw due to missing pipeline');
+        } catch (error) {
+          expect(isNotFoundError(error)).to.eql(true);
+        }
+      });
     });
 
     describe('Classic stream without pipeline', () => {
@@ -260,8 +392,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await esClient.indices.deleteDataStream({
-          name: DATA_STREAM_NAME,
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: DATA_STREAM_NAME,
+            },
+          },
         });
 
         await esClient.indices.deleteIndexTemplate({
@@ -270,12 +406,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('Allows adding processing to classic streams without pipeline', async () => {
-        const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
           params: {
             path: {
               name: DATA_STREAM_NAME,
             },
             body: {
+              queries: [],
               dashboards: [],
               stream: {
                 ingest: {
@@ -318,6 +455,122 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message2: 'test',
           log: {
             level: 'error',
+          },
+        });
+      });
+    });
+
+    describe('Orphaned classic stream', () => {
+      const ORPHANED_STREAM_NAME = 'logs-orphaned-default';
+
+      before(async () => {
+        const doc = {
+          message: '2023-01-01T00:00:10.000Z error test',
+        };
+        const response = await indexDocument(esClient, ORPHANED_STREAM_NAME, doc);
+        expect(response.result).to.eql('created');
+        // PUT the stream to make sure it's a classic stream
+        await apiClient.fetch('PUT /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+            body: {
+              dashboards: [],
+              queries: [],
+              stream: {
+                ingest: {
+                  lifecycle: { inherit: {} },
+                  processing: [],
+                  unwired: {},
+                },
+              },
+            },
+          },
+        });
+        // delete the underlying data stream
+        await esClient.indices.deleteDataStream({
+          name: ORPHANED_STREAM_NAME,
+        });
+      });
+
+      it('should still be able to fetch the stream', async () => {
+        const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+      });
+
+      it('should still be able to fetch the dashboards for the stream', async () => {
+        const getResponse = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+      });
+
+      it('should still be possible to call _details', async () => {
+        const getResponse = await apiClient.fetch('GET /internal/streams/{name}/_details', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
+            query: {
+              start: '2023-01-01T00:00:00.000Z',
+              end: '2023-01-01T00:00:20.000Z',
+            },
+          },
+        });
+        expect(getResponse.status).to.eql(200);
+      });
+
+      it('same APIs should return 404 for actually non-existing streams', async () => {
+        const getStreamResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: 'non-existing-stream',
+            },
+          },
+        });
+        expect(getStreamResponse.status).to.eql(404);
+        const getDashboardsResponse = await apiClient.fetch(
+          'GET /api/streams/{name}/dashboards 2023-10-31',
+          {
+            params: {
+              path: {
+                name: 'non-existing-stream',
+              },
+            },
+          }
+        );
+        expect(getDashboardsResponse.status).to.eql(404);
+        const getDetailsResponse = await apiClient.fetch('GET /internal/streams/{name}/_details', {
+          params: {
+            path: {
+              name: 'non-existing-stream',
+            },
+            query: {
+              start: '2023-01-01T00:00:00.000Z',
+              end: '2023-01-01T00:00:20.000Z',
+            },
+          },
+        });
+        expect(getDetailsResponse.status).to.eql(404);
+      });
+
+      after(async () => {
+        await apiClient.fetch('DELETE /api/streams/{name} 2023-10-31', {
+          params: {
+            path: {
+              name: ORPHANED_STREAM_NAME,
+            },
           },
         });
       });

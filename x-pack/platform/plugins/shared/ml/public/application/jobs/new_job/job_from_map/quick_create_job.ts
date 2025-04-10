@@ -10,7 +10,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { MapApi } from '@kbn/maps-plugin/public';
 import type { MlApi } from '../../../services/ml_api_service';
 import {
@@ -42,10 +42,10 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     dataViews: DataViewsContract,
     kibanaConfig: IUiSettingsClient,
     timeFilter: TimefilterContract,
-    dashboardService: DashboardStart,
+    share: SharePluginStart,
     mlApi: MlApi
   ) {
-    super(dataViews, kibanaConfig, timeFilter, dashboardService, mlApi);
+    super(dataViews, kibanaConfig, timeFilter, share, mlApi);
   }
 
   public async createAndSaveGeoJob({

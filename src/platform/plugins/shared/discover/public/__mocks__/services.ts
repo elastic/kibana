@@ -16,7 +16,6 @@ import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
 import {
   analyticsServiceMock,
-  chromeServiceMock,
   coreMock,
   docLinksServiceMock,
   scopedHistoryMock,
@@ -46,7 +45,7 @@ import type { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createElement } from 'react';
 import { createContextAwarenessMocks } from '../context_awareness/__mocks__';
-import { DiscoverEBTManager } from '../services/discover_ebt_manager';
+import { DiscoverEBTManager } from '../plugin_imports/discover_ebt_manager';
 import { discoverSharedPluginMock } from '@kbn/discover-shared-plugin/public/mocks';
 import { createUrlTrackerMock } from './url_tracker.mock';
 
@@ -150,18 +149,19 @@ export function createDiscoverServicesMock(): DiscoverServices {
 
   corePluginMock.theme = theme;
   corePluginMock.chrome.getActiveSolutionNavId$.mockReturnValue(new BehaviorSubject(null));
+  corePluginMock.chrome.getChromeStyle$.mockReturnValue(new BehaviorSubject('classic'));
 
   return {
     analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     application: corePluginMock.application,
     core: corePluginMock,
     charts: chartPluginMock.createSetupContract(),
-    chrome: chromeServiceMock.createStartContract(),
+    chrome: corePluginMock.chrome,
     history: {
       location: {
         search: '',
       },
-      listen: jest.fn(),
+      listen: jest.fn(() => () => {}),
     },
     getScopedHistory: () => scopedHistoryMock.create(),
     data: dataPlugin,

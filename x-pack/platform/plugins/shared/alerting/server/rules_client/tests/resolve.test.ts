@@ -242,6 +242,7 @@ describe('resolve()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,
@@ -397,6 +398,7 @@ describe('resolve()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: jest.fn(),
         injectReferences: injectReferencesFn,

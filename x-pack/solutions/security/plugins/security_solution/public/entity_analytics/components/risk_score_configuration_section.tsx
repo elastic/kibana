@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiSuperDatePicker,
   EuiButton,
@@ -18,7 +18,6 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import * as i18n from '../translations';
 import { useConfigureSORiskEngineMutation } from '../api/hooks/use_configure_risk_engine_saved_object';
@@ -26,86 +25,45 @@ import { getEntityAnalyticsRiskScorePageStyles } from './risk_score_page_styles'
 
 export const RiskScoreConfigurationSection = ({
   includeClosedAlerts,
-  setIncludeClosedAlerts,
   from,
   to,
-  onDateChange,
 }: {
   includeClosedAlerts: boolean;
-  setIncludeClosedAlerts: (value: boolean) => void;
   from: string;
   to: string;
-  onDateChange: ({ start, end }: { start: string; end: string }) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const styles = getEntityAnalyticsRiskScorePageStyles(euiTheme);
-  const [start, setFrom] = useState(from);
-  const [end, setTo] = useState(to);
+  const [checked, setChecked] = useState(includeClosedAlerts);
   const [isLoading, setIsLoading] = useState(false);
   const [showBar, setShowBar] = useState(false);
   const { addSuccess } = useAppToasts();
-  const initialIncludeClosedAlerts = useRef(includeClosedAlerts);
-  const initialStart = useRef(from);
-  const initialEnd = useRef(to);
-
-  const [savedIncludeClosedAlerts, setSavedIncludeClosedAlerts] = useLocalStorage(
-    'includeClosedAlerts',
-    includeClosedAlerts ?? false
-  );
-  const [savedStart, setSavedStart] = useLocalStorage(
-    'entityAnalytics:riskScoreConfiguration:fromDate',
-    from
-  );
-  const [savedEnd, setSavedEnd] = useLocalStorage(
-    'entityAnalytics:riskScoreConfiguration:toDate',
-    to
-  );
+  const [start, setStart] = useState(from);
+  const [end, setEnd] = useState(to);
 
   useEffect(() => {
-    if (savedIncludeClosedAlerts !== null && savedIncludeClosedAlerts !== undefined) {
-      initialIncludeClosedAlerts.current = savedIncludeClosedAlerts;
-      setIncludeClosedAlerts(savedIncludeClosedAlerts);
-    }
-    if (savedStart && savedEnd) {
-      initialStart.current = savedStart;
-      initialEnd.current = savedEnd;
-      setFrom(savedStart);
-      setTo(savedEnd);
-    }
-  }, [savedIncludeClosedAlerts, savedStart, savedEnd, setIncludeClosedAlerts]);
+    setChecked(includeClosedAlerts);
+    setStart(from);
+    setEnd(to);
+  }, [includeClosedAlerts, from, to]);
 
-  const onRefresh = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
-    setFrom(newStart);
-    setTo(newEnd);
-    onDateChange({ start: newStart, end: newEnd });
-    checkForChanges(newStart, newEnd, includeClosedAlerts);
+  const handleDateChange = ({ start: newStart, end: newEnd }: { start: string; end: string }) => {
+    setShowBar(true);
+    setStart(newStart);
+    setEnd(newEnd);
   };
 
-  const handleToggle = () => {
-    const newValue = !includeClosedAlerts;
-    setIncludeClosedAlerts(newValue);
-    checkForChanges(start, end, newValue);
+  const onChange = () => {
+    setChecked((prev) => !prev);
+    setShowBar(true);
   };
-
-  const checkForChanges = (newStart: string, newEnd: string, newIncludeClosedAlerts: boolean) => {
-    if (
-      newStart !== initialStart.current ||
-      newEnd !== initialEnd.current ||
-      newIncludeClosedAlerts !== initialIncludeClosedAlerts.current
-    ) {
-      setShowBar(true);
-    } else {
-      setShowBar(false);
-    }
-  };
-
   const { mutate } = useConfigureSORiskEngineMutation();
 
   const handleSave = () => {
     setIsLoading(true);
     mutate(
       {
-        includeClosedAlerts,
+        includeClosedAlerts: checked,
         range: { start, end },
       },
       {
@@ -115,14 +73,6 @@ export const RiskScoreConfigurationSection = ({
             toastLifeTimeMs: 5000,
           });
           setIsLoading(false);
-
-          initialStart.current = start;
-          initialEnd.current = end;
-          initialIncludeClosedAlerts.current = includeClosedAlerts;
-
-          setSavedIncludeClosedAlerts(includeClosedAlerts);
-          setSavedStart(start);
-          setSavedEnd(end);
         },
         onError: () => {
           setIsLoading(false);
@@ -137,8 +87,8 @@ export const RiskScoreConfigurationSection = ({
         <div>
           <EuiSwitch
             label={i18n.INCLUDE_CLOSED_ALERTS_LABEL}
-            checked={includeClosedAlerts}
-            onChange={handleToggle}
+            checked={checked}
+            onChange={onChange}
             data-test-subj="includeClosedAlertsSwitch"
           />
         </div>
@@ -147,7 +97,7 @@ export const RiskScoreConfigurationSection = ({
           <EuiSuperDatePicker
             start={start}
             end={end}
-            onTimeChange={onRefresh}
+            onTimeChange={handleDateChange}
             width={'auto'}
             compressed={false}
             showUpdateButton={false}
@@ -169,9 +119,9 @@ export const RiskScoreConfigurationSection = ({
                   iconType="cross"
                   onClick={() => {
                     setShowBar(false);
-                    setFrom(initialStart.current);
-                    setTo(initialEnd.current);
-                    setIncludeClosedAlerts(initialIncludeClosedAlerts.current);
+                    setStart(start);
+                    setEnd(end);
+                    setChecked(includeClosedAlerts);
                   }}
                 >
                   {i18n.DISCARD_CHANGES}

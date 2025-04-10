@@ -6,7 +6,7 @@
  */
 
 import { uniq } from 'lodash';
-import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 export function getApmDataViewIndexPattern(apmIndices: APMIndices) {
   return uniq([apmIndices.transaction, apmIndices.span, apmIndices.error, apmIndices.metric]).join(

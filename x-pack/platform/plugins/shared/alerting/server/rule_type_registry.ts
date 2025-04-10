@@ -64,17 +64,16 @@ export interface RegistryRuleType
     | 'actionVariables'
     | 'category'
     | 'producer'
+    | 'solution'
     | 'minimumLicenseRequired'
     | 'isExportable'
     | 'ruleTaskTimeout'
     | 'defaultScheduleInterval'
     | 'doesSetRecoveryContext'
-    | 'fieldsForAAD'
     | 'alerts'
   > {
   id: string;
   enabledInLicense: boolean;
-  hasFieldsForAAD: boolean;
   hasAlertsMappings: boolean;
   validLegacyConsumers: string[];
 }
@@ -393,6 +392,7 @@ export class RuleTypeRegistry {
         actionVariables: _ruleType.actionVariables,
         category: _ruleType.category,
         producer: _ruleType.producer,
+        solution: _ruleType.solution,
         minimumLicenseRequired: _ruleType.minimumLicenseRequired,
         isExportable: _ruleType.isExportable,
         ruleTaskTimeout: _ruleType.ruleTaskTimeout,
@@ -403,8 +403,6 @@ export class RuleTypeRegistry {
           _ruleType.name,
           _ruleType.minimumLicenseRequired
         ).isValid,
-        fieldsForAAD: _ruleType.fieldsForAAD,
-        hasFieldsForAAD: Boolean(_ruleType.fieldsForAAD),
         hasAlertsMappings: !!_ruleType.alerts,
         ...(_ruleType.alerts ? { alerts: _ruleType.alerts } : {}),
         validLegacyConsumers: _ruleType.validLegacyConsumers,

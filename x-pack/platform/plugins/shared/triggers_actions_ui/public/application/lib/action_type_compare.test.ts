@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionType } from '../../types';
+import type { ActionType } from '../../types';
 import { actionTypeCompare } from './action_type_compare';
 
 test('should sort enabled action types first', async () => {

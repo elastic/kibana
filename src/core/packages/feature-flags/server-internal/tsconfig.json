@@ -20,5 +20,6 @@
     "@kbn/core-base-server-mocks",
     "@kbn/config-schema",
     "@kbn/config-mocks",
+    "@kbn/logging-mocks",
   ]
 }

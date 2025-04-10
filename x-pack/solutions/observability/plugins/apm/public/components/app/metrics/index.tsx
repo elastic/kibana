@@ -60,6 +60,8 @@ export function Metrics() {
     return (
       <JsonMetricsDashboard
         agentName={agentName}
+        telemetrySdkName={telemetrySdkName}
+        telemetrySdkLanguage={telemetrySdkLanguage}
         runtimeName={runtimeName}
         serverlessType={serverlessType}
         dataView={dataView}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypeRegistryContract } from './types';
+import type { ActionTypeRegistryContract } from './types';
 
 const createActionTypeRegistryMock = () => {
   const mocked: jest.Mocked<ActionTypeRegistryContract> = {

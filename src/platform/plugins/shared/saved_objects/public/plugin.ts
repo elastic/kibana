@@ -9,7 +9,6 @@
 
 import { CoreStart, Plugin } from '@kbn/core/public';
 
-import './index.scss';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { setStartServices } from './kibana_services';

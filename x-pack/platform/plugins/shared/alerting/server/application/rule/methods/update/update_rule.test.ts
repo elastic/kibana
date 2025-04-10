@@ -219,6 +219,7 @@ describe('update()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -1103,6 +1104,7 @@ describe('update()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       useSavedObjectReferences: {
         extractReferences: extractReferencesFn,
         injectReferences: injectReferencesFn,
@@ -1685,6 +1687,7 @@ describe('update()', () => {
       },
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validLegacyConsumers: [],
     });
     await expect(
@@ -2187,6 +2190,7 @@ describe('update()', () => {
         },
         category: 'test',
         producer: 'alerts',
+        solution: 'stack',
         validate: {
           params: { validate: (params) => params },
         },

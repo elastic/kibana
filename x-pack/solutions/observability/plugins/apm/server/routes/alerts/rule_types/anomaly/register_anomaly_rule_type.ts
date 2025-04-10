@@ -21,6 +21,7 @@ import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   getAlertDetailsUrl,
+  observabilityFeatureId,
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
@@ -120,6 +121,7 @@ export function registerAnomalyRuleType({
     },
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: APM_SERVER_FEATURE_ID,
+    solution: observabilityFeatureId,
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: async (
@@ -255,7 +257,7 @@ export function registerAnomalyRuleType({
             const job = mlJobs.find((j) => j.jobId === latest.job_id);
 
             if (!job) {
-              logger.warn(`Could not find matching job for job id ${latest.job_id}`);
+              logger.debug(`Could not find matching job for job id ${latest.job_id}`);
               return undefined;
             }
 

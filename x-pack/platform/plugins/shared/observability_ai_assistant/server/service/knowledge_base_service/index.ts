@@ -23,7 +23,7 @@ import { getSpaceQuery } from '../util/get_space_query';
 import {
   createInferenceEndpoint,
   deleteInferenceEndpoint,
-  getElserModelStatus,
+  getKbModelStatus,
   isInferenceEndpointMissingOrUnavailable,
 } from '../inference_endpoint';
 import { recallFromSearchConnectors } from './recall_from_search_connectors';
@@ -32,8 +32,9 @@ import { ObservabilityAIAssistantConfig } from '../../config';
 import {
   isKnowledgeBaseIndexWriteBlocked,
   isSemanticTextUnsupportedError,
+  reIndexKnowledgeBaseWithLock,
 } from './reindex_knowledge_base';
-import { scheduleKbSemanticTextMigrationTask } from '../task_manager_definitions/register_kb_semantic_text_migration_task';
+import { LockAcquisitionError } from '../distributed_lock_manager/lock_manager_client';
 
 interface Dependencies {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -46,8 +47,9 @@ interface Dependencies {
 
 export interface RecalledEntry {
   id: string;
+  title?: string;
   text: string;
-  score: number | null;
+  esScore: number | null;
   is_correction?: boolean;
   labels?: Record<string, string>;
 }
@@ -128,7 +130,7 @@ export class KnowledgeBaseService {
       is_correction: hit._source?.is_correction,
       labels: hit._source?.labels,
       title: hit._source?.title ?? hit._source?.doc_id, // use `doc_id` as fallback title for backwards compatibility
-      score: hit._score!,
+      esScore: hit._score!,
       id: hit._id!,
     }));
   }
@@ -192,7 +194,7 @@ export class KnowledgeBaseService {
 
     const sortedEntries = orderBy(
       documentsFromKb.concat(documentsFromConnectors),
-      'score',
+      'esScore',
       'desc'
     ).slice(0, limit.size ?? 20);
 
@@ -442,23 +444,20 @@ export class KnowledgeBaseService {
       }
 
       if (isSemanticTextUnsupportedError(error)) {
-        this.dependencies.core
-          .getStartServices()
-          .then(([_, pluginsStart]) => {
-            return scheduleKbSemanticTextMigrationTask({
-              taskManager: pluginsStart.taskManager,
-              logger: this.dependencies.logger,
-              runSoon: true,
-            });
-          })
-          .catch((e) => {
-            this.dependencies.logger.error(
-              `Failed to schedule knowledge base semantic text migration task: ${e}`
-            );
-          });
+        reIndexKnowledgeBaseWithLock({
+          core: this.dependencies.core,
+          logger: this.dependencies.logger,
+          esClient: this.dependencies.esClient,
+        }).catch((e) => {
+          if (error instanceof LockAcquisitionError) {
+            this.dependencies.logger.debug(`Re-indexing operation is already in progress`);
+            return;
+          }
+          this.dependencies.logger.error(`Failed to re-index knowledge base: ${e.message}`);
+        });
 
         throw serverUnavailable(
-          'The knowledge base is currently being re-indexed. Please try again later'
+          `The index "${resourceNames.aliases.kb}" does not support semantic text and must be reindexed. This re-index operation has been scheduled and will be started automatically. Please try again later.`
         );
       }
 
@@ -490,10 +489,18 @@ export class KnowledgeBaseService {
   };
 
   getStatus = async () => {
-    return getElserModelStatus({
+    const { enabled, errorMessage, endpoint, modelStats, kbState } = await getKbModelStatus({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,
     });
+
+    return {
+      enabled,
+      errorMessage,
+      endpoint,
+      modelStats,
+      kbState,
+    };
   };
 }

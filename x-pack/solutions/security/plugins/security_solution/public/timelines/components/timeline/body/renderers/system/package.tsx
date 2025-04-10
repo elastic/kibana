@@ -16,15 +16,17 @@ interface Props {
   packageName: string | null | undefined;
   packageSummary: string | null | undefined;
   packageVersion: string | null | undefined;
+  scopeId: string;
 }
 
 export const Package = React.memo<Props>(
-  ({ contextId, eventId, packageName, packageSummary, packageVersion }) => {
+  ({ contextId, eventId, packageName, packageSummary, packageVersion, scopeId }) => {
     if (packageName != null || packageSummary != null || packageVersion != null) {
       return (
         <>
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.name"
@@ -36,6 +38,7 @@ export const Package = React.memo<Props>(
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.version"
@@ -47,6 +50,7 @@ export const Package = React.memo<Props>(
           </TokensFlexItem>
           <TokensFlexItem grow={false} component="span">
             <DraggableBadge
+              scopeId={scopeId}
               contextId={contextId}
               eventId={eventId}
               field="system.audit.package.summary"

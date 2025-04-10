@@ -48,6 +48,7 @@ const initialState: GraphState = {
   refinePrompt: 'refinePrompt',
   replacements: {},
   unrefinedResults: mockUnrefinedResults,
+  continuePrompt: 'continuePrompt',
 };
 
 describe('discardPreviousRefinements', () => {

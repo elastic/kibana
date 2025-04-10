@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { HttpSetup, IHttpFetchError } from '@kbn/core/public';
+import type { HttpSetup, IHttpFetchError } from '@kbn/core/public';
 
-import {
-  ActionTypeExecutorResult,
-  INTERNAL_BASE_ACTION_API_PATH,
-  BASE_ACTION_API_PATH,
-} from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ACTION_API_PATH, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { API_INFO_ERROR } from './translations';
-import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
-import { ConnectorExecutorResult, rewriteResponseToCamelCase } from '../rewrite_response_body';
-import { Choice } from './types';
+import type { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
+import type { ConnectorExecutorResult } from '../rewrite_response_body';
+import { rewriteResponseToCamelCase } from '../rewrite_response_body';
+import type { Choice } from './types';
 
 export async function getChoices({
   http,

@@ -22,17 +22,17 @@ export function initializeZipShareableWorkpadRoute(deps: RouteInitializerDeps) {
     .post({
       path: API_ROUTE_SHAREABLE_ZIP,
       access: 'internal',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is only serving static files.',
+        },
+      },
     })
     .addVersion(
       {
         version: '1',
-        security: {
-          authz: {
-            enabled: false,
-            reason:
-              'This route is opted out from authorization because it is only serving static files.',
-          },
-        },
         validate: { request: { body: RenderedWorkpadSchema } },
       },
       async (_context, request, response) => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import { ConnectorToken } from '@kbn/actions-plugin/server/types';
+import type { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
+import type { ConnectorToken } from '@kbn/actions-plugin/server/types';
 import type { Logger } from '@kbn/logging';
 import { MicrosoftDefenderEndpointDoNotValidateResponseSchema } from '../../../common/microsoft_defender_endpoint/schema';
-import {
+import type {
   MicrosoftDefenderEndpointConfig,
   MicrosoftDefenderEndpointSecrets,
   MicrosoftDefenderEndpointApiTokenResponse,

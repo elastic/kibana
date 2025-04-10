@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
-import { Metric } from '@kbn/monitoring-collection-plugin/server';
+import type { Metric } from '@kbn/monitoring-collection-plugin/server';
 import { registerNodeCollector } from './register_node_collector';
-import { NodeActionsMetric } from './types';
+import type { NodeActionsMetric } from './types';
 import { IN_MEMORY_METRICS } from '.';
 import { inMemoryMetricsMock } from './in_memory_metrics.mock';
 

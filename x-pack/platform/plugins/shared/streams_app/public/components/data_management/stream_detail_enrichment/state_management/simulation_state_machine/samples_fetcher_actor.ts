@@ -6,8 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { Condition, FlattenRecord } from '@kbn/streams-schema';
+import { Condition, SampleDocument } from '@kbn/streams-schema';
 import { fromPromise, ErrorActorEvent } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { DateRangeContext } from '../../../../../state_management/date_range_state_machine';
@@ -22,21 +21,24 @@ export interface SamplesFetchInput {
 export function createSamplesFetchActor({
   streamsRepositoryClient,
 }: Pick<SimulationMachineDeps, 'streamsRepositoryClient'>) {
-  return fromPromise<FlattenRecord[], SamplesFetchInput>(async ({ input, signal }) => {
-    const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
-      signal,
-      params: {
-        path: { name: input.streamName },
-        body: {
-          if: input.condition,
-          start: input.absoluteTimeRange.start,
-          end: input.absoluteTimeRange.end,
-          size: 100,
+  return fromPromise<SampleDocument[], SamplesFetchInput>(async ({ input, signal }) => {
+    const samplesBody = await streamsRepositoryClient.fetch(
+      'POST /internal/streams/{name}/_sample',
+      {
+        signal,
+        params: {
+          path: { name: input.streamName },
+          body: {
+            if: input.condition,
+            start: input.absoluteTimeRange.start,
+            end: input.absoluteTimeRange.end,
+            size: 100,
+          },
         },
-      },
-    });
+      }
+    );
 
-    return samplesBody.documents.map(flattenObjectNestedLast) as FlattenRecord[];
+    return samplesBody.documents;
   });
 }
 

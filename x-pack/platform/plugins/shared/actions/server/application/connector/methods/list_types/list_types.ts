@@ -6,10 +6,10 @@
  */
 
 import Boom from '@hapi/boom';
-import { ActionsClientContext } from '../../../../actions_client';
-import { ConnectorType } from '../../types';
+import type { ActionsClientContext } from '../../../../actions_client';
+import type { ConnectorType } from '../../types';
 import { listTypesParamsSchema } from './schemas';
-import { ListTypesParams } from './types';
+import type { ListTypesParams } from './types';
 
 export async function listTypes(
   context: ActionsClientContext,
@@ -27,7 +27,7 @@ export async function listTypes(
 
   const filteredConnectorTypes = includeSystemActionTypes
     ? connectorTypes
-    : connectorTypes.filter((type) => !Boolean(type.isSystemActionType));
+    : connectorTypes.filter((type) => !type.isSystemActionType);
 
   return filteredConnectorTypes;
 }

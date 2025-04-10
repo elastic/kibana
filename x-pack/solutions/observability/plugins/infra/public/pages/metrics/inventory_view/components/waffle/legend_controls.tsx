@@ -259,10 +259,6 @@ export const LegendControls = ({
             checked={draftLegend.reverseColors}
             onChange={handleReverseColors}
             compressed
-            style={{
-              position: 'relative',
-              top: '8px',
-            }}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -281,10 +277,6 @@ export const LegendControls = ({
             checked={draftAuto}
             onChange={handleAutoChange}
             compressed
-            style={{
-              position: 'relative',
-              top: '8px',
-            }}
           />
         </EuiFormRow>
         <EuiFormRow

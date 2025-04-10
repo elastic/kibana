@@ -27,6 +27,12 @@ export function registerPipelinesListRoute(router: LogstashPluginRouter) {
   router.get(
     {
       path: '/api/logstash/pipelines',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
       options: {
         access: 'public',
         summary: `Get all managed Logstash pipelines`,

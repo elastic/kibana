@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { StoryProvidersComponent } from '../../../mocks/story_providers';
 import { generateMockUrlIndicator } from '../../../../common/types/indicator';
@@ -21,7 +21,7 @@ export default {
 
 const mockIndicator = generateMockUrlIndicator();
 
-export const ContextMenu: Story<void> = () => {
+export const ContextMenu: StoryFn = () => {
   const items = [<InvestigateInTimelineContextMenu data={mockIndicator} />];
 
   return (
@@ -31,7 +31,7 @@ export const ContextMenu: Story<void> = () => {
   );
 };
 
-export const ButtonIcon: Story<void> = () => {
+export const ButtonIcon: StoryFn = () => {
   return (
     <StoryProvidersComponent>
       <InvestigateInTimelineButtonIcon data={mockIndicator} />

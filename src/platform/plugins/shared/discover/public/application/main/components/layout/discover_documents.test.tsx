@@ -29,11 +29,16 @@ import { DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
-import { internalStateActions } from '../../state_management/redux';
+import type { ProfilesManager } from '../../../../context_awareness';
+import { CurrentTabProvider, internalStateActions } from '../../state_management/redux';
 
 const customisationService = createCustomizationService();
 
-async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
+async function mountComponent(
+  fetchStatus: FetchStatus,
+  hits: EsHitRecord[],
+  profilesManager?: ProfilesManager
+) {
   const services = discoverServiceMock;
 
   services.data.query.timefilter.timefilter.getTime = () => {
@@ -49,14 +54,16 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
     dataSource: createDataViewDataSource({ dataViewId: dataViewMock.id! }),
   });
   stateContainer.internalState.dispatch(
-    internalStateActions.setDataRequestParams({
-      timeRangeRelative: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
-      },
-      timeRangeAbsolute: {
-        from: '2020-05-14T11:05:13.590',
-        to: '2020-05-14T11:20:13.590',
+    stateContainer.injectCurrentTab(internalStateActions.setDataRequestParams)({
+      dataRequestParams: {
+        timeRangeRelative: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
+        timeRangeAbsolute: {
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        },
       },
     })
   );
@@ -72,13 +79,17 @@ async function mountComponent(fetchStatus: FetchStatus, hits: EsHitRecord[]) {
   };
 
   const component = mountWithIntl(
-    <KibanaContextProvider services={services}>
+    <KibanaContextProvider
+      services={{ ...services, profilesManager: profilesManager ?? services.profilesManager }}
+    >
       <DiscoverCustomizationProvider value={customisationService}>
-        <DiscoverMainProvider value={stateContainer}>
-          <EuiProvider>
-            <DiscoverDocuments {...props} />
-          </EuiProvider>
-        </DiscoverMainProvider>
+        <CurrentTabProvider currentTabId={stateContainer.getCurrentTab().id}>
+          <DiscoverMainProvider value={stateContainer}>
+            <EuiProvider highContrastMode={false}>
+              <DiscoverDocuments {...props} />
+            </EuiProvider>
+          </DiscoverMainProvider>
+        </CurrentTabProvider>
       </DiscoverCustomizationProvider>
     </KibanaContextProvider>
   );
