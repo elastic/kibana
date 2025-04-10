@@ -51,6 +51,9 @@
     "@kbn/core-saved-objects-server",
     "@kbn/alerting-rule-utils",
     "@kbn/response-ops-rule-params",
+    "@kbn/expressions-plugin",
+    "@kbn/esql-ast",
+    "@kbn/esql-validation-autocomplete",
   ],
   "exclude": ["target/**/*"]
 }
