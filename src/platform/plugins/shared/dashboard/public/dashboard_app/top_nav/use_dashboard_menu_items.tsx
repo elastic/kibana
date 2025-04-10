@@ -12,6 +12,7 @@ import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react'
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import useMountedState from 'react-use/lib/useMountedState';
 
+import { useOpenContentSource } from '@kbn/content-management-content-source';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { UI_SETTINGS } from '../../../common';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
@@ -40,6 +41,7 @@ export const useDashboardMenuItems = ({
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
   const dashboardApi = useDashboardApi();
+  const openContentSource = useOpenContentSource();
 
   const [dashboardTitle, hasOverlays, hasUnsavedChanges, lastSavedId, viewMode] =
     useBatchedPublishingSubjects(
@@ -66,6 +68,16 @@ export const useDashboardMenuItems = ({
     },
     [dashboardTitle, hasUnsavedChanges, lastSavedId, dashboardApi]
   );
+
+  /**
+   * Show Export flyout example
+   */
+  const showExport = useCallback(() => {
+    const close = openContentSource({
+      getContent: async () => dashboardApi.getSerializedState(),
+      onClose: () => close(),
+    });
+  }, [dashboardApi, openContentSource]);
 
   /**
    * Save the dashboard without any UI or popups.
@@ -195,6 +207,15 @@ export const useDashboardMenuItems = ({
         run: showShare,
       } as TopNavMenuData,
 
+      export: {
+        label: 'Export',
+        description: 'Export dashboard',
+        id: 'export',
+        testId: 'dashboardExportMenuItem',
+        disableButton: disableTopNav,
+        run: showExport,
+      },
+
       settings: {
         ...topNavStrings.settings,
         id: 'settings',
@@ -210,6 +231,7 @@ export const useDashboardMenuItems = ({
     lastSavedId,
     dashboardInteractiveSave,
     viewMode,
+    showExport,
     showShare,
     dashboardApi,
     setIsLabsShown,
@@ -282,7 +304,13 @@ export const useDashboardMenuItems = ({
     } else {
       editModeItems.push(menuItems.switchToViewMode, menuItems.interactiveSave);
     }
-    return [...labsMenuItem, menuItems.settings, ...shareMenuItem, ...editModeItems];
+    return [
+      ...labsMenuItem,
+      menuItems.settings,
+      ...shareMenuItem,
+      menuItems.export,
+      ...editModeItems,
+    ];
   }, [isLabsEnabled, menuItems, lastSavedId, showResetChange, resetChangesMenuItem]);
 
   return { viewModeTopNavConfig, editModeTopNavConfig };

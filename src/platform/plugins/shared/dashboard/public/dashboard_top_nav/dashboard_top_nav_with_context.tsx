@@ -8,10 +8,12 @@
  */
 
 import React from 'react';
+import { ContentSourceKibanaProvider } from '@kbn/content-management-content-source';
 import {
   InternalDashboardTopNav,
   InternalDashboardTopNavProps,
 } from './internal_dashboard_top_nav';
+import { coreServices } from '../services/kibana_services';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../dashboard_api/types';
 export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
@@ -20,7 +22,9 @@ export interface DashboardTopNavProps extends InternalDashboardTopNavProps {
 
 export const DashboardTopNavWithContext = (props: DashboardTopNavProps) => (
   <DashboardContext.Provider value={props.dashboardApi}>
-    <InternalDashboardTopNav {...props} />
+    <ContentSourceKibanaProvider core={coreServices}>
+      <InternalDashboardTopNav {...props} />
+    </ContentSourceKibanaProvider>
   </DashboardContext.Provider>
 );
 

@@ -55,6 +55,7 @@
     "@kbn/content-management-table-list-view-table",
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/content-management-content-editor",
+    "@kbn/content-management-content-source",
     "@kbn/serverless",
     "@kbn/no-data-page-plugin",
     "@kbn/react-kibana-mount",
