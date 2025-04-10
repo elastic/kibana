@@ -15,13 +15,13 @@ import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/typ
 import { PRECONFIGURED_CONNECTOR } from './translations';
 
 // aligns with OpenAiProviderType from '@kbn/stack-connectors-plugin/common/openai/types'
-enum OpenAiProviderType {
+export enum OpenAiProviderType {
   OpenAi = 'OpenAI',
   AzureAi = 'Azure OpenAI',
   Other = 'Other',
 }
 
-interface GenAiConfig {
+export interface GenAiConfig {
   apiProvider?: OpenAiProviderType;
   apiUrl?: string;
   defaultModel?: string;
@@ -29,26 +29,21 @@ interface GenAiConfig {
 
 /**
  * Returns the GenAiConfig for a given ActionConnector. Note that if the connector is preconfigured,
- * the config will be undefined as the connector is neither available nor editable.
+ * the config MAY be undefined if exposeConfig: true is absent
  *
  * @param connector
  */
-export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiConfig | undefined => {
-  if (!connector?.isPreconfigured) {
-    const config = (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
-    const { apiProvider, apiUrl, defaultModel } = config ?? {};
-
-    return {
-      apiProvider,
-      apiUrl,
-      defaultModel:
-        apiProvider === OpenAiProviderType.AzureAi
-          ? getAzureApiVersionParameter(apiUrl ?? '')
-          : defaultModel,
-    };
-  }
-
-  return undefined; // the connector is neither available nor editable
+export const getGenAiConfig = (connector: ActionConnector | undefined): GenAiConfig => {
+  const config = (connector as ActionConnectorProps<GenAiConfig, unknown>)?.config;
+  const { apiProvider, apiUrl, defaultModel } = config ?? {};
+  return {
+    apiProvider,
+    apiUrl,
+    defaultModel:
+      apiProvider === OpenAiProviderType.AzureAi
+        ? getAzureApiVersionParameter(apiUrl ?? '')
+        : defaultModel,
+  };
 };
 
 export const getActionTypeTitle = (actionType: ActionTypeModel): string => {

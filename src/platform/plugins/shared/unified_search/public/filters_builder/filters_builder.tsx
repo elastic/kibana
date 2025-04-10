@@ -35,7 +35,7 @@ export interface FiltersBuilderProps {
 const rootLevelConditionType = BooleanRelation.AND;
 const DEFAULT_MAX_DEPTH = 10;
 
-function FiltersBuilder({
+export function FiltersBuilder({
   onChange,
   dataView,
   filters,
@@ -149,7 +149,3 @@ function FiltersBuilder({
     </div>
   );
 }
-
-// React.lazy support
-// eslint-disable-next-line import/no-default-export
-export default FiltersBuilder;

@@ -54,6 +54,12 @@ export class SampleTaskManagerFixturePlugin
     router.get(
       {
         path: '/api/alerting_tasks/{taskId}',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           params: schema.object({
             taskId: schema.string(),
@@ -81,6 +87,12 @@ export class SampleTaskManagerFixturePlugin
     router.get(
       {
         path: `/api/ensure_tasks_index_refreshed`,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {},
       },
       async function (
@@ -99,6 +111,12 @@ export class SampleTaskManagerFixturePlugin
     router.post(
       {
         path: '/api/alerting_tasks/run_mark_tasks_as_unrecognized',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: {
           body: schema.object({}),
         },

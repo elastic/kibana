@@ -65,7 +65,7 @@ export async function validateFields({
   // operations on an unmapped field result in a failing query
   const availableMetadataFields = metaFields.filter((field) => fields[field]);
   if (availableMetadataFields.length < metaFields.length) {
-    logger.info(
+    logger.debug(
       `Ignoring unmapped metadata fields [${without(metaFields, ...availableMetadataFields).join(
         ', '
       )}] for source [source: ${source.id}, type: ${source.type_id}]`

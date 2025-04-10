@@ -342,6 +342,7 @@ exports[`UnifiedFieldList FieldItemButton renders properly with an action when d
     <EuiToolTip
       content="Add \\"bytes\\" field"
       delay="regular"
+      disableScreenReaderOutput={false}
       display="inlineBlock"
       position="top"
     >
@@ -397,6 +398,7 @@ exports[`UnifiedFieldList FieldItemButton renders properly with an action when s
     <EuiToolTip
       content="Remove \\"bytes\\" field"
       delay="regular"
+      disableScreenReaderOutput={false}
       display="inlineBlock"
       position="top"
     >

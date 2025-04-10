@@ -4,33 +4,48 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { IStorageClient } from '@kbn/storage-adapter';
-import { keyBy } from 'lodash';
+import { keyBy, partition } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   ASSET_TYPES,
   Asset,
   AssetLink,
+  AssetLinkRequest,
   AssetType,
-  DashboardAsset,
-  SloAsset,
-  RuleAsset,
+  AssetUnlinkRequest,
+  AssetWithoutUuid,
+  DashboardLink,
+  QueryAsset,
+  QueryLink,
+  RuleLink,
+  SloLink,
 } from '../../../../common/assets';
-import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from './fields';
+import {
+  ASSET_ID,
+  ASSET_TYPE,
+  ASSET_UUID,
+  QUERY_KQL_BODY,
+  QUERY_TITLE,
+  STREAM_NAME,
+} from './fields';
 import { AssetStorageSettings } from './storage_settings';
+import { AssetNotFoundError } from '../errors/asset_not_found_error';
 
 interface TermQueryOpts {
   queryEmptyString: boolean;
 }
 
+type TermQueryFieldValue = string | boolean | number | null;
+
 function termQuery<T extends string>(
   field: T,
-  value: string | boolean | number | undefined | null,
+  value: TermQueryFieldValue | undefined,
   opts: TermQueryOpts = { queryEmptyString: true }
 ): QueryDslQueryContainer[] {
   if (value === null || value === undefined || (!opts.queryEmptyString && value === '')) {
@@ -40,75 +55,125 @@ function termQuery<T extends string>(
   return [{ term: { [field]: value } }];
 }
 
+function termsQuery<T extends string>(
+  field: T,
+  values: Array<TermQueryFieldValue | undefined> | null | undefined
+): QueryDslQueryContainer[] {
+  if (values === null || values === undefined || values.length === 0) {
+    return [];
+  }
+
+  const filteredValues = values.filter(
+    (value) => value !== undefined
+  ) as unknown as TermQueryFieldValue[];
+
+  return [{ terms: { [field]: filteredValues } }];
+}
+
+function getUuid(name: string, asset: Pick<AssetLink, 'asset.id' | 'asset.type'>) {
+  return objectHash({
+    [STREAM_NAME]: name,
+    [ASSET_ID]: asset[ASSET_ID],
+    [ASSET_TYPE]: asset[ASSET_TYPE],
+  });
+}
+
+function toAssetLink<TAssetLink extends AssetLinkRequest>(
+  name: string,
+  asset: TAssetLink
+): TAssetLink & { [ASSET_UUID]: string } {
+  return {
+    ...asset,
+    [ASSET_UUID]: getUuid(name, asset),
+  };
+}
+
 function sloSavedObjectToAsset(
   sloId: string,
   savedObject: SavedObject<{ name: string; tags: string[] }>
-): SloAsset {
+) {
   return {
-    assetId: sloId,
-    label: savedObject.attributes.name,
+    [ASSET_ID]: sloId,
+    [ASSET_TYPE]: 'slo' as const,
+    title: savedObject.attributes.name,
     tags: savedObject.attributes.tags.concat(
       savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id)
     ),
-    assetType: 'slo',
   };
 }
 
 function dashboardSavedObjectToAsset(
   dashboardId: string,
   savedObject: SavedObject<{ title: string }>
-): DashboardAsset {
+) {
   return {
-    assetId: dashboardId,
-    label: savedObject.attributes.title,
+    [ASSET_ID]: dashboardId,
+    [ASSET_TYPE]: 'dashboard' as const,
+    title: savedObject.attributes.title,
     tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
-    assetType: 'dashboard',
   };
 }
 
-function ruleToAsset(ruleId: string, rule: SanitizedRule): RuleAsset {
+function ruleToAsset(ruleId: string, rule: SanitizedRule) {
   return {
-    assetType: 'rule',
-    assetId: ruleId,
-    label: rule.name,
+    [ASSET_TYPE]: 'rule' as const,
+    [ASSET_ID]: ruleId,
+    title: rule.name,
     tags: rule.tags,
   };
 }
 
-function getAssetDocument({
-  assetId,
-  entityId,
-  entityType,
-  assetType,
-}: AssetLink & { entityId: string; entityType: string }) {
-  const doc = {
-    'asset.id': assetId,
-    'asset.type': assetType,
-    'entity.id': entityId,
-    'entity.type': entityType,
-  };
+type StoredQueryLink = Omit<QueryLink, 'query'> & {
+  [QUERY_TITLE]: string;
+  [QUERY_KQL_BODY]: string;
+};
 
-  return {
-    _id: objectHash(doc),
-    ...doc,
-  };
-}
+export type StoredAssetLink = (SloLink | RuleLink | DashboardLink | StoredQueryLink) & {
+  [STREAM_NAME]: string;
+};
 
 interface AssetBulkIndexOperation {
-  index: { asset: AssetLink };
+  index: { asset: AssetLinkRequest };
 }
 interface AssetBulkDeleteOperation {
-  delete: { asset: AssetLink };
+  delete: { asset: AssetUnlinkRequest };
+}
+
+function fromStorage(link: StoredAssetLink): AssetLink {
+  if (link['asset.type'] === 'query') {
+    return {
+      ...link,
+      query: {
+        id: link['asset.id'],
+        title: link['query.title'],
+        kql: {
+          query: link['query.kql.query'],
+        },
+      },
+    } satisfies QueryLink;
+  }
+  return link;
+}
+
+function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
+  const link = toAssetLink(name, request);
+  if (link['asset.type'] === 'query') {
+    const { query, ...rest } = link;
+    return {
+      ...rest,
+      [STREAM_NAME]: name,
+      'query.title': query.title,
+      'query.kql.query': query.kql.query,
+    };
+  }
+
+  return {
+    ...link,
+    [STREAM_NAME]: name,
+  };
 }
 
 export type AssetBulkOperation = AssetBulkIndexOperation | AssetBulkDeleteOperation;
-
-export interface StoredAssetLink {
-  'asset.id': string;
-  'asset.type': AssetType;
-  'entity.id': string;
-  'entity.type': string;
-}
 
 export class AssetClient {
   constructor(
@@ -119,178 +184,132 @@ export class AssetClient {
     }
   ) {}
 
-  async linkAsset(
-    properties: {
-      entityId: string;
-      entityType: string;
-    } & AssetLink
-  ) {
-    const { _id: id, ...document } = getAssetDocument(properties);
+  async linkAsset(name: string, link: AssetLinkRequest) {
+    const document = toStorage(name, link);
 
     await this.clients.storageClient.index({
-      id,
+      id: document[ASSET_UUID],
       document,
     });
   }
 
-  async syncAssetList({
-    entityId,
-    entityType,
-    assetType,
-    assetIds,
-  }: {
-    entityId: string;
-    entityType: string;
-    assetType: AssetType;
-    assetIds: string[];
-  }) {
+  async syncAssetList(
+    name: string,
+    links: AssetLinkRequest[]
+  ): Promise<{ deleted: AssetLink[]; indexed: AssetLink[] }> {
     const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
         bool: {
-          filter: [
-            ...termQuery(ASSET_ENTITY_ID, entityId),
-            ...termQuery(ASSET_ENTITY_TYPE, entityType),
-            ...termQuery(ASSET_TYPE, assetType),
-          ],
+          filter: [...termQuery(STREAM_NAME, name)],
         },
       },
     });
 
-    const existingAssetLinks = assetsResponse.hits.hits.map((hit) => hit._source);
+    const existingAssetLinks = assetsResponse.hits.hits.map((hit) => {
+      return fromStorage(hit._source);
+    });
 
-    const newAssetIds = assetIds.filter(
-      (assetId) =>
-        !existingAssetLinks.some((existingAssetLink) => existingAssetLink['asset.id'] === assetId)
-    );
+    const newStoredLinks = links.map((link) => {
+      return toAssetLink(name, link);
+    });
 
-    const assetIdsToRemove = existingAssetLinks
-      .map((existingAssetLink) => existingAssetLink['asset.id'])
-      .filter((assetId) => !assetIds.includes(assetId));
+    const nextIds = newStoredLinks.map((link) => link[ASSET_UUID]);
 
-    await Promise.all([
-      ...newAssetIds.map((assetId) =>
-        this.linkAsset({
-          entityId,
-          entityType,
-          assetId,
-          assetType,
-        })
-      ),
-      ...assetIdsToRemove.map((assetId) =>
-        this.unlinkAsset({
-          entityId,
-          entityType,
-          assetId,
-          assetType,
-        })
-      ),
-    ]);
+    const docsToRemove = existingAssetLinks.filter((link) => !nextIds.includes(link[ASSET_UUID]));
+
+    const operations: AssetBulkOperation[] = [
+      ...docsToRemove.map((asset) => ({ delete: { asset } })),
+      ...newStoredLinks.map((asset) => ({ index: { asset } })),
+    ];
+
+    if (operations.length) {
+      await this.bulk(name, operations);
+    }
+
+    return {
+      deleted: docsToRemove,
+      indexed: newStoredLinks,
+    };
   }
 
-  async unlinkAsset(
-    properties: {
-      entityId: string;
-      entityType: string;
-    } & AssetLink
-  ) {
-    const { _id: id } = getAssetDocument(properties);
+  async unlinkAsset(name: string, asset: AssetUnlinkRequest) {
+    const id = getUuid(name, asset);
 
-    await this.clients.storageClient.delete({ id });
+    const { result } = await this.clients.storageClient.delete({ id });
+
+    if (result === 'not_found') {
+      throw new AssetNotFoundError(`${asset[ASSET_TYPE]} not found`);
+    }
   }
 
   async clean() {
     await this.clients.storageClient.clean();
   }
 
-  async getAssetIds({
-    entityId,
-    entityType,
-    assetType,
-  }: {
-    entityId: string;
-    entityType: 'stream';
-    assetType: AssetType;
-  }): Promise<string[]> {
+  async getAssetLinks<TAssetType extends AssetType>(
+    name: string,
+    types?: TAssetType[]
+  ): Promise<Array<Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>>> {
     const assetsResponse = await this.clients.storageClient.search({
       size: 10_000,
       track_total_hits: false,
       query: {
         bool: {
           filter: [
-            ...termQuery(ASSET_ENTITY_ID, entityId),
-            ...termQuery(ASSET_ENTITY_TYPE, entityType),
-            ...termQuery(ASSET_TYPE, assetType),
+            ...termQuery(STREAM_NAME, name),
+            ...(types?.length ? termsQuery(ASSET_TYPE, types) : []),
           ],
         },
       },
     });
 
-    return assetsResponse.hits.hits.map((hit) => hit._source['asset.id']);
+    return assetsResponse.hits.hits.map(
+      (hit) => fromStorage(hit._source) as Extract<AssetLink, { [ASSET_TYPE]: TAssetType }>
+    );
   }
 
-  async bulk(
-    { entityId, entityType }: { entityId: string; entityType: string },
-    operations: AssetBulkOperation[]
-  ) {
+  async bulk(name: string, operations: AssetBulkOperation[]) {
     return await this.clients.storageClient.bulk({
       operations: operations.map((operation) => {
-        const { _id, ...document } = getAssetDocument({
-          ...Object.values(operation)[0].asset,
-          entityId,
-          entityType,
-        });
-
         if ('index' in operation) {
+          const document = toStorage(name, Object.values(operation)[0].asset as AssetLinkRequest);
           return {
             index: {
               document,
-              _id,
+              _id: document[ASSET_UUID],
             },
           };
         }
 
+        const id = getUuid(name, operation.delete.asset);
         return {
           delete: {
-            _id,
+            _id: id,
           },
         };
       }),
     });
   }
 
-  async getAssets({
-    entityId,
-    entityType,
-  }: {
-    entityId: string;
-    entityType: 'stream';
-  }): Promise<Asset[]> {
-    const assetsResponse = await this.clients.storageClient.search({
-      size: 10_000,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(ASSET_ENTITY_ID, entityId),
-            ...termQuery(ASSET_ENTITY_TYPE, entityType),
-          ],
-        },
-      },
-    });
-
-    const assetLinks = assetsResponse.hits.hits.map((hit) => hit._source);
+  async getAssets(name: string): Promise<Asset[]> {
+    const assetLinks = await this.getAssetLinks(name);
 
     if (!assetLinks.length) {
       return [];
     }
 
+    const [queryAssetLinks, savedObjectAssetLinks] = partition(
+      assetLinks,
+      (link): link is QueryLink => link[ASSET_TYPE] === 'query'
+    );
+
     const idsByType = Object.fromEntries(
       Object.values(ASSET_TYPES).map((type) => [type, [] as string[]])
     ) as Record<AssetType, string[]>;
 
-    assetLinks.forEach((assetLink) => {
+    savedObjectAssetLinks.forEach((assetLink) => {
       const assetType = assetLink['asset.type'] as AssetType;
       const assetId = assetLink['asset.id'];
       idsByType[assetType].push(assetId);
@@ -307,7 +326,7 @@ export class AssetClient {
             .then((response) => {
               const dashboardsById = keyBy(response.saved_objects, 'id');
 
-              return idsByType.dashboard.flatMap((dashboardId): Asset[] => {
+              return idsByType.dashboard.flatMap((dashboardId) => {
                 const dashboard = dashboardsById[dashboardId];
                 if (dashboard && !dashboard.error) {
                   return [dashboardSavedObjectToAsset(dashboardId, dashboard)];
@@ -319,7 +338,7 @@ export class AssetClient {
       Promise.all(
         idsByType.rule.map((ruleId) => {
           return limiter(() =>
-            this.clients.rulesClient.get({ id: ruleId }).then((rule): Asset => {
+            this.clients.rulesClient.get({ id: ruleId }).then((rule) => {
               return ruleToAsset(ruleId, rule);
             })
           );
@@ -337,7 +356,7 @@ export class AssetClient {
             .then((soResponse) => {
               const sloDefinitionsById = keyBy(soResponse.saved_objects, 'slo.attributes.id');
 
-              return idsByType.slo.flatMap((sloId): Asset[] => {
+              return idsByType.slo.flatMap((sloId) => {
                 const sloDefinition = sloDefinitionsById[sloId];
                 if (sloDefinition && !sloDefinition.error) {
                   return [sloSavedObjectToAsset(sloId, sloDefinition)];
@@ -348,7 +367,25 @@ export class AssetClient {
         : [],
     ]);
 
-    return [...dashboards, ...rules, ...slos];
+    const savedObjectAssetsWithUuids = [...dashboards, ...rules, ...slos].map((asset) => {
+      return {
+        ...asset,
+        [ASSET_UUID]: getUuid(name, asset),
+      };
+    });
+
+    return [
+      ...savedObjectAssetsWithUuids,
+      ...queryAssetLinks.map((link): QueryAsset => {
+        return {
+          [ASSET_ID]: link[ASSET_ID],
+          [ASSET_UUID]: link[ASSET_UUID],
+          [ASSET_TYPE]: link[ASSET_TYPE],
+          query: link.query,
+          title: link.query.title,
+        };
+      }),
+    ];
   }
 
   async getSuggestions({
@@ -359,7 +396,7 @@ export class AssetClient {
     query: string;
     assetTypes?: AssetType[];
     tags?: string[];
-  }): Promise<{ hasMore: boolean; assets: Asset[] }> {
+  }): Promise<{ hasMore: boolean; assets: AssetWithoutUuid[] }> {
     const perPage = 101;
 
     const searchAll = !assetTypes;

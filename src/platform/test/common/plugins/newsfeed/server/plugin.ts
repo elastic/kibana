@@ -19,6 +19,12 @@ export class NewsFeedSimulatorPlugin implements Plugin {
     router.get(
       {
         path: `/api/_newsfeed-FTS-external-service-simulators/kibana/v${version}.json`,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: { authRequired: false },
       },
@@ -30,6 +36,12 @@ export class NewsFeedSimulatorPlugin implements Plugin {
     router.get(
       {
         path: '/api/_newsfeed-FTS-external-service-simulators/kibana/crash.json',
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: { authRequired: false },
       },
