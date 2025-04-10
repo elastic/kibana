@@ -50,10 +50,10 @@ export const parseYamlChangelog = (
 };
 
 export const getBreakingChanges = (changelog: ChangelogEntry[]) => {
-  return changelog.reduce<ChangelogEntry[]>((acc, entry) => {
+  return changelog.map((entry) => {
     const breakingChanges = entry.changes.filter(
       (change) => change.type === ChangelogChangeType.BreakingChange
     );
-    return [...acc, { ...entry, changes: breakingChanges }];
-  }, []);
+    return { ...entry, changes: breakingChanges };
+  });
 };

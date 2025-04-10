@@ -6,8 +6,18 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
 
-import { EuiButton, EuiCallOut, EuiCheckbox, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -28,6 +38,7 @@ export const UpdateAvailableCallout = ({
   toggleChangelogModal,
   breakingChanges,
 }: UpdateAvailableCalloutProps) => {
+  const { euiTheme } = useEuiTheme();
   const hasBreakingChanges = breakingChanges.changes.length > 0;
   const checkboxId = useGeneratedHtmlId({ prefix: 'understoodBreakingChangeCheckbox' });
   const defaultTitle = 'New version available';
@@ -53,15 +64,34 @@ export const UpdateAvailableCallout = ({
         }}
       />
       <EuiSpacer size="s" />
-      <EuiButton color="warning" onClick={toggleChangelogModal}>
-        <FormattedMessage
-          id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
-          defaultMessage="View changelog"
-        />
-      </EuiButton>
+      <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
+        {hasBreakingChanges && (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              color="warning"
+              css={css`
+                background-color: ${euiTheme.colors.backgroundFilledWarning};
+              `}
+            >
+              <FormattedMessage
+                id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
+                defaultMessage="Review breaking changes"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem grow={false}>
+          <EuiButton color="warning" onClick={toggleChangelogModal}>
+            <FormattedMessage
+              id="xpack.fleet.integration.settings.versionInfo.updatesAvailableChangelogLink"
+              defaultMessage="View changelog"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {hasBreakingChanges && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiCheckbox
             id={checkboxId}
             label="I've reviewed the breaking changes and understand the impact"
