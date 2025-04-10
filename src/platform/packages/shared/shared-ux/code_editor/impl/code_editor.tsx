@@ -37,6 +37,7 @@ import { remeasureFonts } from './remeasure_fonts';
 
 import { PlaceholderWidget } from './placeholder_widget';
 import { styles } from './editor.styles';
+import { useContextMenuUtils } from './use_context_menu_utils';
 
 export interface CodeEditorProps {
   /** Width of editor. Defaults to 100%. */
@@ -196,6 +197,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   classNameCss,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
 
   // We need to be able to mock the MonacoEditor in our test in order to not test implementation
   // detail and not have to call methods on the <CodeEditor /> component instance.
@@ -466,6 +468,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     },
     [editorWillUnmount]
   );
+
+  useEffect(() => {
+    if (_editor) {
+      registerContextMenuActions({
+        editor: _editor,
+      });
+    } else {
+      unregisterContextMenuActions();
+    }
+  }, [_editor]);
 
   useEffect(() => {
     return () => {
