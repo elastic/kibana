@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiCard,
   EuiFlexGroup,
@@ -25,6 +25,7 @@ import { INTEGRATION_APP_ID } from '../../../onboarding/components/onboarding_bo
 import entraIdIcon from '../../icons/entra_id.svg';
 import oktaIcon from '../../icons/okta.svg';
 import activeDirectoryIcon from '../../icons/active_directory.svg';
+import { IndexSelectorModal } from './select_index_modal';
 
 const INTEGRATIONS = [
   {
@@ -94,6 +95,8 @@ export const AddDataSourcePanel = () => {
     },
     [navigateTo, state]
   );
+
+  const [isIndexModalOpen, setIsIndexModalOpen] = useState(false);
 
   return (
     <EuiPanel paddingSize="xl" hasShadow={false} hasBorder={false}>
@@ -167,7 +170,15 @@ export const AddDataSourcePanel = () => {
                 defaultMessage="Select an index that contains relevant user activity data"
               />
             }
-            onClick={() => {}}
+            onClick={() => {
+              setIsIndexModalOpen(true);
+            }}
+          />
+          <IndexSelectorModal
+            isOpen={isIndexModalOpen}
+            onClose={() => {
+              setIsIndexModalOpen(false);
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={1}>

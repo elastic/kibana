@@ -184,6 +184,22 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     /**
+     * Search indices for privilege monitoring import
+     */
+    const searchPrivMonIndices = async (params: {
+      query: string | undefined;
+      signal?: AbortSignal;
+    }) =>
+      http.fetch<string[]>('/api/entity_analytics/monitoring/privileges/indices', {
+        version: API_VERSIONS.public.v1,
+        method: 'GET',
+        query: {
+          searchQuery: params.query,
+        },
+        signal: params.signal,
+      });
+
+    /**
      * Create asset criticality
      */
     const createAssetCriticality = async (
@@ -294,6 +310,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchRiskEnginePrivileges,
       fetchAssetCriticalityPrivileges,
       fetchEntityStorePrivileges,
+      searchPrivMonIndices,
       createAssetCriticality,
       deleteAssetCriticality,
       fetchAssetCriticality,
