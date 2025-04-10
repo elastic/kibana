@@ -67,4 +67,6 @@ export const ELASTIC_ASSISTANT_FIELD_ANONYMIZATION = `${ELASTIC_ASSISTANT}FieldA
 export const ELASTIC_ASSISTANT_ATTACK_DISCOVERY = `${ELASTIC_ASSISTANT}AttackDiscovery`;
 
 // Attack Discovery
+export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;

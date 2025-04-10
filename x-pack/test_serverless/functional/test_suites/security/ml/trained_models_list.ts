@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('page navigation', () => {
       it('renders trained models list', async () => {
-        await ml.navigation.navigateToMl();
         await ml.testExecution.logTestStep('should load the trained models page');
         await svlMl.navigation.security.navigateToTrainedModels();
 
