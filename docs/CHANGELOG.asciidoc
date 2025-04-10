@@ -390,8 +390,8 @@ Dashboards and Visualizations::
 Data ingestion and Fleet::
 * Enables unenroll inactive agent tasks to unenroll some agents if the first set returned is equal to `UNENROLLMENT_BATCH_SIZE` ({kibana-pull}216283[#216283]).
 Elastic Observability Solution::
-* Fixes Alerts tab count in Monitor details ({kibana-pull}216761[#216761]).
-* Fixes the Save visualization action on the Monitors Overview tab ({kibana-pull}216695[#216695]).
+* Fixes the Alerts tab count in Monitor details ({kibana-pull}216761[#216761]).
+* Fixes the *Save visualization* action on the Monitors Overview tab ({kibana-pull}216695[#216695]).
 * Makes service inventory icons visible if the `agentName` is returned ({kibana-pull}216220[#216220]).
 * Fixes an issue with old time units persisting when updating monitor frequency ({kibana-pull}215823[#215823]).
 * Fixes the query for transaction marks ({kibana-pull}215819[#215819]).
@@ -454,7 +454,7 @@ Sharing::
 * Reinstates switch to support generating public URLs for Embed when supported ({kibana-pull}207383[#207383]).
 
 [[release-notes-8.17.2]]
-
+== {kib} 8.17.2
 The 8.17.2 release includes the following bug fixes.
 
 [float]
