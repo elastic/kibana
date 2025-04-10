@@ -113,6 +113,10 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
             provider: apiProvider,
             model,
           },
+        }).catch(() => {
+          // If the conversation is not found, it means the connector was deleted
+          // and return null to avoid setting the conversation
+          return null;
         });
 
         if (conversation && onConversationChange != null) {

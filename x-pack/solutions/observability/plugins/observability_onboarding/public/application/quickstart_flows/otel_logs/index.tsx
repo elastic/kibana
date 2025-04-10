@@ -29,11 +29,13 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { ObservabilityOnboardingAppServices } from '../../..';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { MultiIntegrationInstallBanner } from './multi_integration_install_banner';
 import { EmptyPrompt } from '../shared/empty_prompt';
 import { FeedbackButtons } from '../shared/feedback_buttons';
+import { useFlowBreadcrumb } from '../../shared/use_flow_breadcrumbs';
 
 const HOST_COMMAND = i18n.translate(
   'xpack.observability_onboarding.otelLogsPanel.p.runTheCommandOnYourHostLabel',
@@ -44,6 +46,12 @@ const HOST_COMMAND = i18n.translate(
 );
 
 export const OtelLogsPanel: React.FC = () => {
+  useFlowBreadcrumb({
+    text: i18n.translate('xpack.observability_onboarding.autoDetectPanel.breadcrumbs.otelHost', {
+      defaultMessage: 'OpenTelemetry: Logs & Metrics',
+    }),
+  });
+  const { onPageReady } = usePerformanceContext();
   const {
     data: apiKeyData,
     error,
@@ -67,6 +75,16 @@ export const OtelLogsPanel: React.FC = () => {
       context: { isServerless, stackVersion },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
+
+  useEffect(() => {
+    if (apiKeyData && setup) {
+      onPageReady({
+        meta: {
+          description: `[ttfmp_onboarding] Requests to get the environment and to generate API key succeeded and the flow's UI has rendered`,
+        },
+      });
+    }
+  }, [apiKeyData, onPageReady, setup]);
 
   const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
   const agentVersion =

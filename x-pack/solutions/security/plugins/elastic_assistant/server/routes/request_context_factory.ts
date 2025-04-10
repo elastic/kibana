@@ -124,10 +124,11 @@ export class RequestContextFactory implements IRequestContextFactory {
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
           // uses internal user to interact with ML API
-          trainedModelsProvider: plugins.ml.trainedModelsProvider(
-            {} as KibanaRequest,
-            coreStart.savedObjects.createInternalRepository()
-          ),
+          getTrainedModelsProvider: () =>
+            plugins.ml.trainedModelsProvider(
+              {} as KibanaRequest,
+              coreStart.savedObjects.createInternalRepository()
+            ),
         });
       }),
 
