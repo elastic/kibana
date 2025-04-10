@@ -116,7 +116,7 @@ export const NavigationPanel: FC = () => {
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <div className={panelWrapperClasses} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
-        <EuiFocusTrap autoFocus css={{ height: '100%' }}>
+        <EuiFocusTrap autoFocus css={{ height: '100%' }} disabled={!!hoveredNode}>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanel
               className={panelClasses}
