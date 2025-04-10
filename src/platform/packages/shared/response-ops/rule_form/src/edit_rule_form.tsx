@@ -88,7 +88,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     fetchedFormData,
     connectors,
     connectorTypes,
-    aadTemplateFields,
+    alertFields,
     flappingSettings,
   } = useLoadDependencies({
     http,
@@ -195,7 +195,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
       initialRuleFormState={{
         connectors,
         connectorTypes,
-        aadTemplateFields,
+        alertFields,
         formData: {
           ...getDefaultFormData({
             ruleTypeId: fetchedFormData.ruleTypeId,
