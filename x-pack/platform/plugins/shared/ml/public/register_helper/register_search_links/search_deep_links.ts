@@ -20,7 +20,7 @@ function createDeepLinks(
 ) {
   return {
     getOverviewLinkDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isADEnabled && !mlCapabilities.isDFAEnabled) return null;
+      if (!isFullLicense) return null;
 
       return {
         id: 'overview',
@@ -32,14 +32,13 @@ function createDeepLinks(
     },
 
     getAnomalyDetectionDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isADEnabled) return null;
+      if (!isFullLicense || !mlCapabilities.isADEnabled) return null;
 
       return {
         id: 'anomalyDetection',
         title: i18n.translate('xpack.ml.deepLink.anomalyDetection', {
           defaultMessage: 'Anomaly Detection',
         }),
-        path: `/${ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE}`,
         deepLinks: [
           {
             id: 'anomalyExplorer',
@@ -60,21 +59,22 @@ function createDeepLinks(
             title: i18n.translate('xpack.ml.deepLink.suppliedConfigurations', {
               defaultMessage: 'Supplied configurations',
             }),
-            path: `/${ML_PAGES.SUPPLIED_CONFIGURATIONS}`,
+            // @deprecated since 9.1, kept here to redirect to new management page location
+            // TODO: Change redirect to management page once #213152 is resolved
+            path: `/supplied_configurations`,
           },
         ],
       };
     },
 
     getDataFrameAnalyticsDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isDFAEnabled) return null;
+      if (!isFullLicense || !mlCapabilities.isDFAEnabled) return null;
 
       return {
         id: 'dataFrameAnalytics',
         title: i18n.translate('xpack.ml.deepLink.dataFrameAnalytics', {
           defaultMessage: 'Data Frame Analytics',
         }),
-        path: `/${ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE}`,
         deepLinks: [
           {
             id: 'resultExplorer',
@@ -97,34 +97,17 @@ function createDeepLinks(
     getModelManagementDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!mlCapabilities.isDFAEnabled && !mlCapabilities.isNLPEnabled) return null;
 
-      const deepLinks: Array<AppDeepLink<LinkId>> = [
-        {
-          id: 'nodesOverview',
-          title: i18n.translate('xpack.ml.deepLink.trainedModels', {
-            defaultMessage: 'Trained Models',
-          }),
-          path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-        },
-      ];
-
       if (!isServerless) {
-        deepLinks.push({
+        return {
           id: 'nodes',
           title: i18n.translate('xpack.ml.deepLink.nodes', {
             defaultMessage: 'Nodes',
           }),
+          // TODO: Change redirect to management page once #213152 is resolved
           path: `/${ML_PAGES.NODES}`,
-        });
+        };
       }
-
-      return {
-        id: 'modelManagement',
-        title: i18n.translate('xpack.ml.deepLink.modelManagement', {
-          defaultMessage: 'Model Management',
-        }),
-        path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-        deepLinks,
-      };
+      return null;
     },
 
     getMemoryUsageDeepLink: (): AppDeepLink<LinkId> | null => {
@@ -135,35 +118,8 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.memoryUsage', {
           defaultMessage: 'Memory Usage',
         }),
+        // TODO: Change redirect to management page once #213152 is resolved
         path: `/${ML_PAGES.MEMORY_USAGE}`,
-      };
-    },
-
-    getSettingsDeepLink: (): AppDeepLink<LinkId> | null => {
-      if (!mlCapabilities.isADEnabled) return null;
-
-      return {
-        id: 'settings',
-        title: i18n.translate('xpack.ml.deepLink.settings', {
-          defaultMessage: 'Settings',
-        }),
-        path: `/${ML_PAGES.SETTINGS}`,
-        deepLinks: [
-          {
-            id: 'calendarSettings',
-            title: i18n.translate('xpack.ml.deepLink.calendarSettings', {
-              defaultMessage: 'Calendars',
-            }),
-            path: `/${ML_PAGES.CALENDARS_MANAGE}`,
-          },
-          {
-            id: 'filterListsSettings',
-            title: i18n.translate('xpack.ml.deepLink.filterListsSettings', {
-              defaultMessage: 'Filter Lists',
-            }),
-            path: `/${ML_PAGES.SETTINGS}`, // Link to settings page as read only users cannot view filter lists.
-          },
-        ],
       };
     },
 
@@ -211,6 +167,7 @@ function createDeepLinks(
         title: i18n.translate('xpack.ml.deepLink.notifications', {
           defaultMessage: 'Notifications',
         }),
+        // TODO: Change redirect to management page once #213152 is resolved
         path: `/${ML_PAGES.NOTIFICATIONS}`,
       };
     },
