@@ -3038,10 +3038,6 @@
               },
               {
                 "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/export.ts"
-              },
-              {
-                "plugin": "@kbn/core",
                 "path": "src/core/packages/ui-settings/server-internal/src/routes/get.ts"
               },
               {
@@ -3371,10 +3367,6 @@
               {
                 "plugin": "ruleRegistry",
                 "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_browser_fields_by_rule_type_ids.ts"
-              },
-              {
-                "plugin": "ruleRegistry",
-                "path": "x-pack/platform/plugins/shared/rule_registry/server/routes/get_aad_fields_by_rule_type.ts"
               },
               {
                 "plugin": "inference",
@@ -5379,10 +5371,6 @@
               {
                 "plugin": "@kbn/core",
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/migrate.ts"
-              },
-              {
-                "plugin": "@kbn/core",
-                "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/import.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -14170,6 +14158,10 @@
               {
                 "plugin": "automaticImport",
                 "path": "x-pack/platform/plugins/shared/automatic_import/server/__mocks__/mock_server.ts"
+              },
+              {
+                "plugin": "cloud",
+                "path": "x-pack/platform/plugins/shared/cloud/server/routes/get_cloud_data_route.test.ts"
               },
               {
                 "plugin": "canvas",
