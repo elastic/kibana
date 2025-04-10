@@ -27,6 +27,7 @@ import {
   EuiTabs,
   EuiTab,
   EuiIconTip,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
@@ -128,7 +129,7 @@ function GroupSelection({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle data-test-subj="groupModalHeader">
+        <EuiModalHeaderTitle data-test-subj="groupModalHeader" id="vis-wizard-modal-title">
           <FormattedMessage
             id="visualizations.newVisWizard.title"
             defaultMessage="Create visualization"
