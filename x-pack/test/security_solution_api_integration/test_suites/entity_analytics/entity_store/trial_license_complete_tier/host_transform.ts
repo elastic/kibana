@@ -5,14 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-} from '@kbn/core-http-common';
-import type { EcsHost } from "@elastic/ecs"
+import type { EcsHost } from '@elastic/ecs';
 import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
-import { EntityStoreUtils } from '../../utils';
-import type { GetEntityStoreStatusResponse } from '../../../../../../solutions/security/plugins/security_solution/common/api/entity_analytics/entity_store/status.gen.ts'
 
 const DATASTREAM_NAME: string = 'logs-elastic_agent.cloudbeat-test';
 const HOST_TRANSFORM_ID: string = 'entities-v1-latest-security_host_default';
@@ -26,14 +22,11 @@ export default function (providerContext: FtrProviderContext) {
   const dataView = dataViewRouteHelpersFactory(supertest);
 
   describe('Host transform logic', () => {
-
     describe('Entity Store is not installed by default', () => {
       it("Should return 200 and status 'not_installed'", async () => {
-        const { body } = await supertest
-          .get('/api/entity_store/status')
-          .expect(200);
+        const { body } = await supertest.get('/api/entity_store/status').expect(200);
 
-        const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse
+        const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
         expect(response.status).to.eql('not_installed');
       });
     });
@@ -45,7 +38,7 @@ export default function (providerContext: FtrProviderContext) {
         // Helps avoid "Error initializing entity store: Data view not found 'security-solution-default'"
         await dataView.create('security-solution');
         // Create a test index matching transform's pattern to store test documents
-        await es.indices.createDataStream({name: DATASTREAM_NAME});
+        await es.indices.createDataStream({ name: DATASTREAM_NAME });
 
         // Now we can enable the Entity Store...
         response = await supertest
@@ -57,17 +50,17 @@ export default function (providerContext: FtrProviderContext) {
 
         // and wait for it to start up
         await retry.waitForWithTimeout('Entity Store to initialize', TIMEOUT_MS, async () => {
-            const { body } = await supertest
-              .get('/api/entity_store/status')
-              .query({include_components: true})
-              .expect(200)
-            expect(body.status).to.eql('running');
-            return true;
+          const { body } = await supertest
+            .get('/api/entity_store/status')
+            .query({ include_components: true })
+            .expect(200);
+          expect(body.status).to.eql('running');
+          return true;
         });
       });
 
       after(async () => {
-        await es.indices.deleteDataStream({name: DATASTREAM_NAME});
+        await es.indices.deleteDataStream({ name: DATASTREAM_NAME });
         await dataView.delete('security-solution');
       });
 
@@ -78,10 +71,10 @@ export default function (providerContext: FtrProviderContext) {
       it("Should return 200 and status 'running' for all engines", async () => {
         const { body } = await supertest
           .get('/api/entity_store/status')
-          .query({include_components: true})
-          .expect(200)
+          .query({ include_components: true })
+          .expect(200);
 
-        const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse
+        const response: GetEntityStoreStatusResponse = body as GetEntityStoreStatusResponse;
         expect(response.status).to.eql('running');
         for (const engine of response.engines) {
           expect(engine.status).to.eql('started');
@@ -92,22 +85,20 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('Should successfully trigger a host transform', async () => {
-        const HOST_NAME: string = 'host-transform-test-ip'
-        const IPs: string[] = ['1.1.1.1', '2.2.2.2']
-        let response = await es.transform.getTransformStats({
+        const HOST_NAME: string = 'host-transform-test-ip';
+        const IPs: string[] = ['1.1.1.1', '2.2.2.2'];
+        const response = await es.transform.getTransformStats({
           transform_id: HOST_TRANSFORM_ID,
         });
         expect(response.count).to.eql(1);
-        let transform = response.transforms[0];
+        const transform = response.transforms[0];
         expect(transform.id).to.eql(HOST_TRANSFORM_ID);
         const triggerCount: number = transform.stats.trigger_count;
         const docsProcessed: number = transform.stats.documents_processed;
 
         // Create two documents with the same host.name, different IPs
-        for (let ip of IPs) {
-          const { result } = await es.index(
-            buildHostTransformDocument(HOST_NAME, {ip: ip})
-          );
+        for (const ip of IPs) {
+          const { result } = await es.index(buildHostTransformDocument(HOST_NAME, { ip }));
           expect(result).to.eql('created');
         }
 
@@ -118,31 +109,34 @@ export default function (providerContext: FtrProviderContext) {
         expect(acknowledged).to.be(true);
 
         await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
-          let response = await es.transform.getTransformStats({
+          const response = await es.transform.getTransformStats({
             transform_id: HOST_TRANSFORM_ID,
           });
-          let transform = response.transforms[0];
+          const transform = response.transforms[0];
           expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
           expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
           return true;
         });
 
-        await retry.waitForWithTimeout('Document to be processed and transformed', TIMEOUT_MS, async () => {
-          const result = await es.search({
-            index: INDEX_NAME,
-            query: {
-              term: {
-                "host.name": HOST_NAME,
+        await retry.waitForWithTimeout(
+          'Document to be processed and transformed',
+          TIMEOUT_MS,
+          async () => {
+            const result = await es.search({
+              index: INDEX_NAME,
+              query: {
+                term: {
+                  'host.name': HOST_NAME,
+                },
               },
-            },
-          })
-          expect(result.hits.total.value).to.eql(1);
-          expect(result.hits.hits[0]._source.host.name).to.eql(HOST_NAME);
-          expect(result.hits.hits[0]._source.host.ip).to.eql(IPs);
+            });
+            expect(result.hits.total.value).to.eql(1);
+            expect(result.hits.hits[0]._source.host.name).to.eql(HOST_NAME);
+            expect(result.hits.hits[0]._source.host.ip).to.eql(IPs);
 
-          return true;
-        })
-
+            return true;
+          }
+        );
       });
     });
   });
@@ -150,14 +144,14 @@ export default function (providerContext: FtrProviderContext) {
 
 function buildHostTransformDocument(name: string, host: EcsHost): Object {
   // Get timestamp without the millisecond part
-  const isoTimestamp: string = (new Date).toISOString().split('.')[0];
-  let document: Object = {
+  const isoTimestamp: string = new Date().toISOString().split('.')[0];
+  const document: Object = {
     index: DATASTREAM_NAME,
     document: {
       '@timestamp': isoTimestamp,
-      host: host,
+      host,
     },
-  }
+  };
   document.document.host.name = name;
-  return document
+  return document;
 }
