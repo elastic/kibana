@@ -140,19 +140,23 @@ export function SamlAuthProvider({ getService }: FtrProviderContext) {
       return sessionManager.getUserData(role);
     },
 
+    checkRoleIsSupported(role: string): void {
+      if (!supportedRoles.includes(role)) {
+        throw new Error(
+          `Role "${role}" is not supported for this deployment. Supported roles are: ${supportedRoles.join(
+            ', '
+          )}`
+        );
+      }
+    },
+
     async createM2mApiKeyWithDefaultRoleScope() {
       log.debug(`Creating API key for default role: [${DEFAULT_ROLE}]`);
       return this.createM2mApiKeyWithRoleScope(DEFAULT_ROLE);
     },
 
     async createM2mApiKeyWithRoleScope(role: string): Promise<RoleCredentials> {
-      if (!supportedRoles.includes(role)) {
-        throw new Error(
-          `Cannot create API key for non-existent role "${role}", supported roles are: ${supportedRoles.join(
-            ', '
-          )}`
-        );
-      }
+      this.checkRoleIsSupported(role);
       if (role === CUSTOM_ROLE && !isCustomRoleEnabled) {
         throw new Error(`Custom roles are not supported for the current deployment`);
       }
