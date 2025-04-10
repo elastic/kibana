@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { IntegrationType } from './src/constants';
+export { IntegrationType, Status } from './src/constants';
 export type { Integration, IntegrationConfiguration } from './src/integrations';
 export type { ToolCall } from './src/tool_calls';
 export {

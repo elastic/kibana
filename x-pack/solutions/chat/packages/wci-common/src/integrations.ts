@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { IntegrationType } from './constants';
+import { IntegrationType, Status } from './constants';
 
 export interface Integration {
   id: string;
   name: string;
   type: IntegrationType;
+  status: Status;
   description: string;
   configuration: IntegrationConfiguration;
   createdAt: string;

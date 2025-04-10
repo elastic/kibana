@@ -101,7 +101,6 @@ export const registerIntegrationsRoutes = ({ getServices, router, logger }: Rout
       const client = await integrationsService.getScopedClient({ request });
 
       const { type, name, description, configuration } = request.body;
-
       const integration = await client.create({
         type,
         name,

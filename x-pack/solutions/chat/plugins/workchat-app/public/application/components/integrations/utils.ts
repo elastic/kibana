@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationType } from '@kbn/wci-common';
+import { IntegrationType, Status } from '@kbn/wci-common';
 
 export const integrationTypeToLabel = (type: IntegrationType) => {
   switch (type) {
@@ -17,5 +17,16 @@ export const integrationTypeToLabel = (type: IntegrationType) => {
       return 'Salesforce';
     default:
       return type;
+  }
+};
+
+export const statusToLabel = (status: Status) => {
+  switch (status) {
+    case Status.Connected:
+      return 'Connected';
+    case Status.Error:
+      return 'Error';
+    default:
+      return status;
   }
 };
