@@ -362,6 +362,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -383,6 +384,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             ...body,
             stream: {
+              ...body.stream,
               ingest: {
                 ...body.stream.ingest,
                 wired: {
@@ -405,6 +407,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           dashboards: [],
           queries: [],
           stream: {
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],

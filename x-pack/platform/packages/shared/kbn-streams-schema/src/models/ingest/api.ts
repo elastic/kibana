@@ -48,20 +48,24 @@ type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
  */
 
 interface WiredIngestUpsertRequest {
+  description: string;
   ingest: WiredIngest;
 }
 
 interface UnwiredIngestUpsertRequest {
+  description: string;
   ingest: UnwiredIngest;
 }
 
 type IngestUpsertRequest = WiredIngestUpsertRequest | UnwiredIngestUpsertRequest;
 
 const wiredIngestUpsertRequestSchema: z.Schema<WiredIngestUpsertRequest> = z.object({
+  description: z.string(),
   ingest: wiredIngestSchema,
 });
 
 const unwiredIngestUpsertRequestSchema: z.Schema<UnwiredIngestUpsertRequest> = z.object({
+  description: z.string(),
   ingest: unwiredIngestSchema,
 });
 

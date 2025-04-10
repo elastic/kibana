@@ -276,6 +276,7 @@ export class StreamsClient {
           type: 'upsert',
           definition: {
             name,
+            description: '',
             ingest: {
               lifecycle: { inherit: {} },
               processing: [],
@@ -464,6 +465,7 @@ export class StreamsClient {
   private getDataStreamAsIngestStream(dataStream: IndicesDataStream): UnwiredStreamDefinition {
     const definition: UnwiredStreamDefinition = {
       name: dataStream.name,
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],
@@ -524,6 +526,7 @@ export class StreamsClient {
 
     return response.data_streams.map((dataStream) => ({
       name: dataStream.name,
+      description: '',
       ingest: {
         lifecycle: { inherit: {} },
         processing: [],

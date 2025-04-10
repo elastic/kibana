@@ -44,11 +44,13 @@ const unwiredIngestSchema: z.Schema<UnwiredIngest> = z.object({
 
 interface WiredStreamDefinition {
   name: string;
+  description: string;
   ingest: WiredIngest;
 }
 
 interface UnwiredStreamDefinition {
   name: string;
+  description: string;
   ingest: UnwiredIngest;
 }
 
@@ -56,18 +58,22 @@ type IngestStreamDefinition = WiredStreamDefinition | UnwiredStreamDefinition;
 
 interface UnwiredStreamDefinitionBase {
   ingest: UnwiredIngest;
+  description: string;
 }
 
 const unwiredStreamDefinitionSchemaBase: z.Schema<UnwiredStreamDefinitionBase> = z.object({
   ingest: unwiredIngestSchema,
+  description: z.string(),
 });
 
 interface WiredStreamDefinitionBase {
   ingest: WiredIngest;
+  description: string;
 }
 
 const wiredStreamDefinitionSchemaBase: z.Schema<WiredStreamDefinitionBase> = z.object({
   ingest: wiredIngestSchema,
+  description: z.string(),
 });
 
 const wiredStreamDefinitionSchema: z.Schema<WiredStreamDefinition> = z.intersection(

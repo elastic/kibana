@@ -21,6 +21,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const STREAM_NAME = 'logs.queries-test';
   const stream: WiredIngestUpsertRequest = {
+    description: '',
     ingest: {
       lifecycle: { inherit: {} },
       processing: [],

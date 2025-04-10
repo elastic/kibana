@@ -17,6 +17,7 @@ export const streamsStorageSettings = {
   schema: {
     properties: {
       name: types.keyword(),
+      description: types.text(),
       ingest: types.object({ enabled: false }),
       group: types.object({ enabled: false }),
     },

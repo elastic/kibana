@@ -136,6 +136,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
         type: 'upsert',
         definition: {
           name: parentId,
+          description: '',
           ingest: {
             lifecycle: { inherit: {} },
             processing: [],
@@ -164,6 +165,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
             type: 'upsert',
             definition: {
               name: routeTarget,
+              description: '',
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: [],
@@ -191,6 +193,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              ...parentStream.definition,
               name: parentId,
               ingest: {
                 ...parentStream.definition.ingest,
@@ -238,6 +241,7 @@ export class WiredStream extends StreamActiveRecord<WiredStreamDefinition> {
           cascadingChanges.push({
             type: 'upsert',
             definition: {
+              ...parentStream.definition,
               name: parentId,
               ingest: {
                 ...parentStream.definition.ingest,

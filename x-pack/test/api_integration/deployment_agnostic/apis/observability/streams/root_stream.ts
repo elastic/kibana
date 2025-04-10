@@ -16,6 +16,7 @@ import {
 
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
+  description: '',
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
@@ -62,6 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         dashboards: [],
         queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             processing: [
@@ -90,6 +92,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         dashboards: [],
         queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
@@ -116,6 +119,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         dashboards: [],
         queries: [],
         stream: {
+          description: '',
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {

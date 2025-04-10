@@ -11,6 +11,7 @@ export const LOGS_ROOT_STREAM_NAME = 'logs';
 
 export const rootStreamDefinition: WiredStreamDefinition = {
   name: LOGS_ROOT_STREAM_NAME,
+  description: '',
   ingest: {
     lifecycle: { dsl: {} },
     processing: [],
