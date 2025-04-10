@@ -11,9 +11,24 @@ import path from 'path';
 import Handlebars, { TemplateDelegate } from '@kbn/handlebars';
 import { assetPath } from '../../../constants';
 
+// see: https://handlebarsjs.com/guide/builtin-helpers.html
+const HBCompileOptions = {
+  knownHelpersOnly: true,
+  knownHelpers: {
+    helperMissing: false,
+    blockHelperMissing: false,
+    each: false,
+    if: true,
+    unless: false,
+    with: false,
+    log: false,
+    lookup: false,
+  },
+};
+
 async function compileTemplate<T>(pathToTemplate: string): Promise<TemplateDelegate<T>> {
   const contentsBuffer = await fs.readFile(pathToTemplate);
-  return Handlebars.compileAST(contentsBuffer.toString());
+  return Handlebars.compileAST(contentsBuffer.toString(), HBCompileOptions);
 }
 
 interface HeaderTemplateInput {
