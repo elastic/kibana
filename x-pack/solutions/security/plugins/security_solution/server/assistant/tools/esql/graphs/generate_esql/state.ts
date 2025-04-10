@@ -28,11 +28,11 @@ export const GenerateEsqlAnnotation = Annotation.Root({
   }),
   maximumValidationAttempts: Annotation<number>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => 5,
+    default: () => 4,
   }),
   maximumEsqlGenerationAttempts: Annotation<number>({
     reducer: (currentValue, newValue) => newValue ?? currentValue,
-    default: () => 5,
+    default: () => 4,
   }),
   selectedIndexPattern: Annotation<string | undefined | null>({
     reducer: (currentValue, newValue) => (newValue === undefined ? currentValue : newValue),

@@ -36,24 +36,9 @@ export const getSelectIndexPattern = ({
       });
     }
 
-    if (!childGraphOutput.selectedIndexPattern) {
-      return new Command({
-        update: {
-          selectedIndexPattern: null,
-          messages: [
-            new HumanMessage({
-              content: `We were unable to find an index pattern that is suitable for this query. Please provide a specific index pattern and the fields you want to query. These are some index patterns that could be used: \n\n${childGraphOutput.indexPatterns.join(
-                '\n'
-              )}`,
-            }),
-          ],
-        },
-      });
-    }
-
-    const analysis =
+    const compressedIndexMapping =
       childGraphOutput.selectedIndexPattern in childGraphOutput.indexPatternAnalysis
-        ? childGraphOutput.indexPatternAnalysis[childGraphOutput.selectedIndexPattern].analysis
+        ? childGraphOutput.indexPatternAnalysis[childGraphOutput.selectedIndexPattern].compressedIndexMapping
         : undefined;
 
     return new Command({
@@ -61,9 +46,9 @@ export const getSelectIndexPattern = ({
         selectedIndexPattern: childGraphOutput.selectedIndexPattern,
         messages: [
           new HumanMessage({
-            content: `We have analyzed multiple index patterns to see if they contain the data required for the query. The following index pattern should be used for the query verbaitum: '${
+            content: `We have analyzed multiple index patterns to see if they contain the data required for the query. The following index pattern should be used for the query verbatim: '${
               childGraphOutput.selectedIndexPattern
-            }'. ${analysis ? `Here is why it was selected: ${analysis}` : ''}`,
+            }'. ${compressedIndexMapping ? `This is the index mapping for it\n: ${compressedIndexMapping}` : ''}`,
           }),
         ],
       },

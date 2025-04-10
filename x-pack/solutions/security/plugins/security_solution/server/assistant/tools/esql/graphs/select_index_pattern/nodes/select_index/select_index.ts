@@ -10,22 +10,9 @@ import type {
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
 } from '@kbn/langchain/server';
-import { HumanMessage } from '@langchain/core/messages';
 import { Command } from '@langchain/langgraph';
 
-import { z } from '@kbn/zod';
 import type { SelectIndexPatternAnnotation } from '../../state';
-
-const SelectedIndexPattern = z
-  .object({
-    indexPattern: z
-      .string()
-      .optional()
-      .describe(
-        'The most appropriate index pattern for the query. It should be a single index pattern that is most appropriate for the query. If there are no index patterns that match the query, it should be undefined.'
-      ),
-  })
-  .describe('Object containing the final index pattern selected by the LLM');
 
 export const getSelectIndexPattern = ({
   createLlmInstance,
@@ -35,7 +22,6 @@ export const getSelectIndexPattern = ({
     | ActionsClientChatVertexAI
     | ActionsClientChatOpenAI;
 }) => {
-  const llm = createLlmInstance();
 
   return async (state: typeof SelectIndexPatternAnnotation.State) => {
     const indexPatternAnalysis = Object.values(state.indexPatternAnalysis);
@@ -62,27 +48,10 @@ export const getSelectIndexPattern = ({
       });
     }
 
-    const humanMessage = new HumanMessage({
-      content: `We have analyzed multiple index patterns to see if they contain the data required for the query. Using the analysis, please suggest an a single index pattern that is most appropriate for our query.
-
-Query: 
-
-${state.input}
-
-Analysis: 
-
-${candidateIndexPatterns
-  .map(({ indexPattern, analysis }) => `Index pattern '${indexPattern}'\n${analysis}`)
-  .join('\n\n')}`,
-    });
-
-    const result = await llm
-      .withStructuredOutput(SelectedIndexPattern, { name: 'selectedIndexPattern' })
-      .invoke([humanMessage]);
-
+    // More than one index pattern contains the required data, we will just pick the first one
     return new Command({
       update: {
-        selectedIndexPattern: result.indexPattern,
+        selectedIndexPattern: candidateIndexPatterns[0].indexPattern,
       },
     });
   };

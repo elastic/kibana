@@ -45,6 +45,7 @@ export const getNlToEsqlAgent = ({
         logger,
         tools: toolDefinitionToInference(tools),
         messages: inferenceMessages.messages,
+        system: "Just produce the query fenced by the esql tag. Don't explain it.",
       })
     )) as ChatCompletionMessageEvent;
 

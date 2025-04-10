@@ -71,12 +71,16 @@ export const shallowObjectViewTruncated = (
   return view;
 };
 
-export interface NestedObject {
-  [key: string]: NestedValue;
+interface TypedProperty {
+  type: string;
+  [key: string]: unknown;
 }
-export type NestedValue = string | NestedObject | undefined | NestedValue[];
 
-export const mapFieldDescriptorToNestedObject = <T extends { name: string }>(
+interface NestedObject {
+  [key: string]: TypedProperty | NestedObject;
+}
+
+export const mapFieldDescriptorToNestedObject = <T extends { name: string, type: string }>(
   arr: T[]
 ): NestedObject => {
   return arr.reduce<NestedObject>((acc, obj) => {
@@ -85,7 +89,7 @@ export const mapFieldDescriptorToNestedObject = <T extends { name: string }>(
       if (!(key in nested)) {
         nested[key] =
           index === keys.length - 1
-            ? Object.fromEntries(Object.entries(obj).filter(([k]) => k !== 'name'))
+            ? Object.fromEntries(Object.entries(obj).filter(([k]) => k !== 'name')) as TypedProperty
             : {};
       }
       return nested[key] as NestedObject;
@@ -93,3 +97,5 @@ export const mapFieldDescriptorToNestedObject = <T extends { name: string }>(
     return acc;
   }, {});
 };
+
+

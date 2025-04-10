@@ -33,7 +33,8 @@ export const getNlToEsqlAgentWithoutValidation = ({
         client: inference.getClient({ request }),
         connectorId,
         logger,
-        input: `${input}\n\nIn your response, state that the resulting query was generated as a best effort example, but we are unable to validate it, as an index with the appropriate fileds was not found.`,
+        input: `${input}`,
+        system: "Just produce the query fenced by the esql tag. Don't explain it.",
       })
     )) as ChatCompletionMessageEvent;
 

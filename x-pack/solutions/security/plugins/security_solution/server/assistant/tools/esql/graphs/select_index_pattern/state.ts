@@ -30,7 +30,7 @@ export const SelectIndexPatternAnnotation = Annotation.Root({
     default: () => [],
   }),
   indexPatternAnalysis: Annotation<
-    Record<string, { analysis: string; containsRequiredData: boolean; indexPattern: string }>
+    Record<string, { compressedIndexMapping: string; containsRequiredData: boolean; indexPattern: string }>
   >({
     reducer: (currentValue, newValue) => ({ ...currentValue, ...newValue }),
     default: () => ({}),

@@ -14,37 +14,18 @@ import {
   getNestedValue,
   mapFieldDescriptorToNestedObject,
 } from './inspect_index_utils';
+import { convertObjectFormat } from './compress_mapping';
 
 export const toolDetails = {
   name: 'inspect_index_mapping',
-  description: `Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index. Call this tool repeatedly to inspect nested fields.
-This is an example of the fields in logs-*:
-\`\`\`
-{"field1":{"type":"keyword"},"field2":{"nested_field":{"type":"keyword"}}}
-\`\`\`
-To get the properties of the root object, call the tool with an empty string as the key. For example:
-\`\`\`
-{"indexName":"logs-*","key":""}
-\`\`\`
-Output:
-\`\`\`
-{"field1":{"type":"keyword"},"field2":{"nested_field":"Object"}}
-\`\`\
-The tool can be called repeatedly to explore the nested fields. For example:
-\`\`\`
-{"indexName":"logs-*","key":"field2.nested_field"}
-\`\`\`
-Output:
-\`\`\`
-{"type":"keyword"}
-\`\`\``,
+  description: `Use this tool when there is a "verification_exception Unknown column" error or to see which fields and types are used in the index.`
 };
 
 export const getInspectIndexMappingTool = ({ esClient }: { esClient: ElasticsearchClient }) => {
   const indexPatternsFetcher = new IndexPatternsFetcher(esClient);
 
   return tool(
-    async ({ indexPattern, key }) => {
+    async ({ indexPattern }) => {
       const { fields } = await indexPatternsFetcher.getFieldsForWildcard({
         pattern: indexPattern,
         fieldCapsOptions: {
@@ -53,14 +34,11 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
         },
       });
 
-      const nestedObject = mapFieldDescriptorToNestedObject(fields);
-      const value = getNestedValue(nestedObject, key);
-      const shallowObjectView = shallowObjectViewTruncated(value, 30000);
-      const message = `The key '${key}' in the index pattern '${indexPattern}' has the following fields:\n${JSON.stringify(
-        shallowObjectView,
-        null,
-        2
-      )}`;
+      const prunedFields = fields.map(p=>({name:p.name, type: p.esTypes[0]}))
+      const nestedObject = mapFieldDescriptorToNestedObject(prunedFields);
+      const result = convertObjectFormat(nestedObject);
+  
+      const message = `The index pattern '${indexPattern}' has the following keys and types:\n${result}`;
 
       return message;
     },
@@ -72,13 +50,6 @@ export const getInspectIndexMappingTool = ({ esClient }: { esClient: Elasticsear
           .string()
           .describe(
             `The index name to get the properties of. For example "logs-*" or "traces.default.2022-01-01"`
-          ),
-        key: z
-          .string()
-          .optional()
-          .default('')
-          .describe(
-            `The field to get the properties of. Use an empty string to get the root object or key1.key2 to get nested properties.`
           ),
       }),
     }
