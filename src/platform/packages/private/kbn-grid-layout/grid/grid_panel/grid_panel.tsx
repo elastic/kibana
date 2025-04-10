@@ -17,35 +17,11 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
-import { GridLayoutData, GridRowData } from '../types';
+import { getTopOffsetForRow } from '../utils/calculations';
 
 export interface GridPanelProps {
   panelId: string;
   rowId: string;
-}
-
-export const getRowHeight = (row: GridRowData) => {
-  // for the elements build like: 
-  // {id: '10', row: 58, column: 0, width: 24, height: 11}
-  // we need to find the element that has the highest row + height value
-  if (row.isCollapsed) return 2;
-  const panelsHeight =  Object.values(row.panels).reduce((acc, panel) => {
-    const panelEnd = panel.row + panel.height;
-    if (!acc) return panelEnd;
-    return Math.max(acc, panelEnd);
-  }, 0);
-  const headerHeight = row.order === 0 ? 0 : 2;
-  return panelsHeight + headerHeight;
-}
-
-export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
-  // get all the rows before the current row using the order property
-  const rowsBefore = Object.values(layout).filter((row) => row.order < layout[rowId].order);
-  // get the height of all the rows before the current row
-  const rowsBeforeHeight = rowsBefore.reduce((acc, row) => {
-    return acc + getRowHeight(row);
-  }, 0);
-  return rowsBeforeHeight;
 }
 
 export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {

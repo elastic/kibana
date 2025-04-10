@@ -12,7 +12,7 @@ import { combineLatest, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
-import { getTopOffsetForRow } from './grid_panel';
+import { getTopOffsetForRow } from '../utils/calculations';
 
 export const GridPanelDragPreview = React.memo(() => {
   const { gridLayoutStateManager } = useGridLayoutContext();

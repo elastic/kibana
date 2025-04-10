@@ -27,7 +27,7 @@ import { deleteRow } from '../utils/row_management';
 import { DeleteGridRowModal } from './delete_grid_row_modal';
 import { GridRowDragPreview } from './grid_row_drag_preview';
 import { GridRowTitle } from './grid_row_title';
-import { getTopOffsetForRow } from '../grid_panel/grid_panel';
+import { getTopOffsetForRow } from '../utils/calculations';
 
 export interface GridRowHeaderProps {
   rowId: string;
@@ -152,9 +152,12 @@ export const GridRowHeader = React.memo(({ rowId, toggleIsCollapsed }: GridRowHe
   }, [gridLayoutStateManager]);
 
   return (
-    <div  id={`kbnGridRow-${rowId}`}
-        role="region"
-        aria-labelledby={`kbnGridRowTitle-${rowId}`}  style={styless}>
+    <div 
+      id={`kbnGridRow-${rowId}`}
+      role="region"
+      aria-labelledby={`kbnGridRowTitle-${rowId}`}  
+      style={styless}
+    >
       <EuiFlexGroup
         gutterSize="xs"
         responsive={false}
