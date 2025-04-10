@@ -305,6 +305,9 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [isLoading, isDisabled, snoozeButtonAriaLabel, togglePopover]);
 
   const button = useMemo(() => {
+    if (!isScheduled && !isSnoozed && !isSnoozedIndefinitely && !isRuleEditable) {
+      return null;
+    }
     if (!isSnoozeValid) {
       return (
         <InvalidSnoozeButton
@@ -325,10 +328,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     if (isSnoozed) {
       return snoozedButton;
     }
-    if (isRuleEditable) {
-      return unsnoozedButton;
-    }
-    return null;
+    return unsnoozedButton;
   }, [
     isSnoozeValid,
     isScheduled,
