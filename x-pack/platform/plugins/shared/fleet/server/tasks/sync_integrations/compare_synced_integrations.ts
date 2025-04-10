@@ -21,6 +21,8 @@ import type {
   IngestGetPipelineResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { API_VERSIONS } from '../../../common';
+
 import { appContextService } from '../../services';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { outputService } from '../../services';
@@ -337,7 +339,7 @@ export const getRemoteSyncedIntegrationsStatus = async (
   }
 };
 
-export const getRemoteSyncedIntegrationsInfoByOutput = async (
+export const getRemoteSyncedIntegrationsInfoByOutputId = async (
   soClient: SavedObjectsClientContract,
   outputId: string
 ): Promise<GetRemoteSyncedIntegrationsStatusResponse> => {
@@ -349,8 +351,11 @@ export const getRemoteSyncedIntegrationsInfoByOutput = async (
   }
   try {
     const output = await outputService.get(soClient, outputId);
-    if (output.type !== 'remote_elasticsearch') {
+    if (!output) {
       throw new FleetNotFoundError(`No output found with id ${outputId}`);
+    }
+    if (output?.type !== 'remote_elasticsearch') {
+      throw new FleetError(`Output ${outputId} is not a remote elasticsearch output`);
     }
 
     const {
@@ -362,8 +367,8 @@ export const getRemoteSyncedIntegrationsInfoByOutput = async (
     if (!syncIntegrations) {
       throw new FleetError(`Synced integrations not enabled`);
     }
-    if (!kibanaUrl) {
-      throw new FleetError(`Remote url not available`);
+    if (!kibanaUrl || kibanaUrl === '') {
+      throw new FleetError(`Remote kibana url not available`);
     }
     if (!kibanaApiKey) {
       throw new FleetError(`Kibana api key for ${kibanaUrl} not found`);
@@ -373,6 +378,7 @@ export const getRemoteSyncedIntegrationsInfoByOutput = async (
         'kbn-xsrf': 'true',
         'User-Agent': `Kibana/${appContextService.getKibanaVersion()} node-fetch`,
         'Content-Type': 'application/json',
+        'Elastic-Api-Version': API_VERSIONS.public.v1,
         Authorization: `ApiKey ${kibanaApiKey}`,
       },
       method: 'GET',
@@ -381,11 +387,9 @@ export const getRemoteSyncedIntegrationsInfoByOutput = async (
     logger.info(`Fetching ${kibanaUrl}/api/fleet/remote_synced_integrations/status`);
 
     const res = await fetch(url, options);
-    const body = await res.json();
 
-    if (body.error) {
-      throw new FleetError(`${body.error}, status: ${body?.status}`);
-    }
+    const body = res ? await res.json() : {};
+
     return body as GetRemoteSyncedIntegrationsStatusResponse;
   } catch (error) {
     logger.error(`${error}`);
