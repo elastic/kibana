@@ -27,12 +27,14 @@ export const getIndexSourceIntegrationDefinition = ({
     createIntegration: async ({
       request,
       description,
+      integrationId,
       configuration,
     }): Promise<WorkChatIntegration> => {
       const [coreStart] = await core.getStartServices();
       const elasticsearchClient = coreStart.elasticsearch.client.asScoped(request).asCurrentUser;
 
       const mcpServer = await createMcpServer({
+        integrationId,
         configuration,
         description,
         elasticsearchClient,

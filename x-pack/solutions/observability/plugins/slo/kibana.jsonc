@@ -40,7 +40,8 @@
       "uiActions",
       "unifiedSearch",
       "usageCollection",
-      "fieldsMetadata"
+      "fieldsMetadata",
+      "apmSourcesAccess"
     ],
     "optionalPlugins": [
       "cloud",
