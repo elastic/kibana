@@ -17,10 +17,9 @@ const TOTAL_ALERTS_CELL_COUNT = 440;
 const DISABLED_ALERTS_CHECKBOX = 6;
 const ENABLED_ALERTS_CHECKBOX = 4;
 
-export default ({ getService }: FtrProviderContext) => {
+export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const find = getService('find');
-  const { alertControls } = getPageObjects(['alertControls']);
   const PageObjects = getPageObjects(['home', 'common']);
   const supertest = getService('supertest');
   const browser = getService('browser');
