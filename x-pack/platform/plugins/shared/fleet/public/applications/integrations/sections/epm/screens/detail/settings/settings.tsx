@@ -52,6 +52,7 @@ import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 import { ChangelogModal } from './changelog_modal';
 import { UpdateAvailableCallout } from './update_available_callout';
+import { BreakingChangesFlyout } from './breaking_changes_flyout';
 
 const SettingsTitleCell = styled.td`
   padding-right: ${(props) => props.theme.eui.euiSizeXL};
@@ -95,6 +96,7 @@ export const SettingsPage: React.FC<Props> = memo(
     const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
     const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
     const [isBreakingChangesUnderstood, setIsBreakingChangesUnderstood] = useState(false);
+    const [isBreakingChangesFlyoutOpen, setIsBreakingChangesFlyoutOpen] = useState(false);
 
     const toggleChangelogModal = useCallback(() => {
       setIsChangelogModalOpen(!isChangelogModalOpen);
@@ -306,6 +308,7 @@ export const SettingsPage: React.FC<Props> = memo(
                           changes: breakingChanges,
                           isUnderstood: isBreakingChangesUnderstood,
                           toggleIsUnderstood: () => setIsBreakingChangesUnderstood((prev) => !prev),
+                          onOpen: () => setIsBreakingChangesFlyoutOpen(true),
                         }}
                       />
                       <EuiSpacer size="l" />
@@ -488,6 +491,12 @@ export const SettingsPage: React.FC<Props> = memo(
             />
           )}
         </EuiPortal>
+        {isBreakingChangesFlyoutOpen && (
+          <BreakingChangesFlyout
+            breakingChanges={breakingChanges}
+            onClose={() => setIsBreakingChangesFlyoutOpen(false)}
+          />
+        )}
       </>
     );
   }

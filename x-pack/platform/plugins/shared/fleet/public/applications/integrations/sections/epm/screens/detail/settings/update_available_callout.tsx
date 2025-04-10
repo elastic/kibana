@@ -30,6 +30,7 @@ interface UpdateAvailableCalloutProps {
     changes: ChangelogEntry[];
     isUnderstood: boolean;
     toggleIsUnderstood: () => void;
+    onOpen: () => void;
   };
 }
 
@@ -72,6 +73,7 @@ export const UpdateAvailableCallout = ({
               css={css`
                 background-color: ${euiTheme.colors.backgroundFilledWarning};
               `}
+              onClick={breakingChanges.onOpen}
             >
               <FormattedMessage
                 id="xpack.fleet.integrations.settings.versionInfo.reviewBreakingChangesButton"
