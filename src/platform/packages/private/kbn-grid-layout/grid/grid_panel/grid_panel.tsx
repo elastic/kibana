@@ -87,11 +87,21 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           const activeLayout = proposedGridLayout ?? gridLayout;
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
           const isPanelActive = activePanel?.id === panelId;
-          const row =
+          let row =
             isPanelActive && currentInteractionEvent?.targetRow
               ? currentInteractionEvent.targetRow
               : rowId;
-          const panel = activeLayout[row]?.panels[panelId];
+
+          let panel = activeLayout[row]?.panels[panelId];
+          if (!panel) {
+            // search for panel in each of the `activeLayout[row]` - save panel to panel variable and row to row variable
+            Object.entries(activeLayout).forEach(([rowId, rowData]) => {
+              if (rowData.panels[panelId]) {
+                panel = rowData.panels[panelId];
+                row = rowId;
+              }
+            });
+          }
           if (panelId === activePanel?.id) {
             console.log(ref, panel);
           }
@@ -102,7 +112,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
           const headerOffset = activeLayout[row].order === 0 ? 0 : 2;
           const gridRowOffset = headerOffset + getTopOffsetForRow(row, activeLayout);
 
-          if (panelId === activePanel?.id) {
+          if (isPanelActive) {
             ref.classList.add('kbnGridPanel--active');
 
             // if the current panel is active, give it fixed positioning depending on the interaction event

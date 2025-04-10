@@ -62,7 +62,7 @@ export const useGridLayoutPanelEvents = ({
     } = gridLayoutStateManager;
     // make sure the user hasn't started another interaction in the meantime
     if (id === panelId && rowId === targetRow && type === interactionType) {
-      // commitAction(gridLayoutStateManager);
+      commitAction(gridLayoutStateManager);
     }
   }, [gridLayoutStateManager, panelId, rowId, interactionType]);
 

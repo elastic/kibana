@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
+import { combineLatest, pairwise, map, distinctUntilChanged, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -287,16 +287,38 @@ export const GridLayout = ({
 
 const GhostFooter = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
-  const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-  const topOffset = getTopOffsetForRowFooter(rowId, gridLayout);
   const styles = {
-    gridColumnStart: 1,
-    gridColumnEnd: -1,
-    gridRowStart: topOffset + 1,
-    gridRowEnd: topOffset + 3,
     pointerEvents: 'none' as const,
     height: '0px',
   };
+    
+   useEffect(
+    () => {
+      /** Update the styles of the drag preview via a subscription to prevent re-renders */
+      const styleSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.proposedGridLayout$,
+      ])
+        .subscribe(([gridLayout, proposedGridLayout]) => {
+          const footerRef = gridLayoutStateManager.footerRefs.current[rowId]
+          if (!footerRef) return;
+          const currentGridLayout = proposedGridLayout || gridLayout
+          const topOffset = getTopOffsetForRowFooter(rowId, currentGridLayout);
+            footerRef.style.display = 'block';
+            footerRef.style.gridColumnStart = `1`;
+            footerRef.style.gridColumnEnd = `-1`;
+            footerRef.style.gridRowStart = `${topOffset + 1}`;
+            footerRef.style.gridRowEnd = `${topOffset + 3}`;
+
+        });
+
+      return () => {
+        styleSubscription.unsubscribe();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   return (
     <div
       style={styles}
@@ -304,7 +326,7 @@ const GhostFooter = ({ rowId }: { rowId: string }) => {
       ref={(element: HTMLDivElement | null) =>
         (gridLayoutStateManager.footerRefs.current[rowId] = element)
       }
-    /> // this used only for calculating the position of the row
+    /> // this is used only for calculating the position of the row
   );
 };
 
@@ -329,24 +351,39 @@ const GridRowHeaderWrapper = ({
     collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
   }, [isCollapsed]);
 
-  // memoization here causes that the layout doesn't refresh when another row is collapsed, but we have to find a performant way of memoizing it
+  
+   useEffect(
+    () => {
+      /** Update the styles of the drag preview via a subscription to prevent re-renders */
+      const styleSubscription = combineLatest([
+        gridLayoutStateManager.gridLayout$,
+        gridLayoutStateManager.proposedGridLayout$,
+      ])
+        .subscribe(([gridLayout, proposedGridLayout]) => {
+          const headerRef = gridLayoutStateManager.headerRefs.current[rowId]
+          console.log(headerRef)
+          if (!headerRef) return;
+          const currentGridLayout = proposedGridLayout || gridLayout
+            const topOffset = getTopOffsetForRow(rowId, currentGridLayout);
+            headerRef.style.display = 'block';
+            headerRef.style.gridColumnStart = `1`;
+            headerRef.style.gridColumnEnd = `-1`;
+            headerRef.style.gridRowStart = `${topOffset + 1}`;
+            headerRef.style.gridRowEnd = `${topOffset + 3}`;
 
-  // const styles = useMemo(() => {
-  const gridLayout = gridLayoutStateManager.gridLayout$.getValue();
-  const topOffset = getTopOffsetForRow(rowId, gridLayout);
-  const styles = {
-    gridColumnStart: 1,
-    gridColumnEnd: -1,
-    gridRowStart: topOffset + 1,
-    gridRowEnd: topOffset + 3,
-  };
+        });
 
-  // }, [gridLayoutStateManager]);
+      return () => {
+        styleSubscription.unsubscribe();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
   return (
     <div
       className={classNames({ 'kbnGridRowHeader--collapsed': isCollapsed })}
-      style={styles}
       id={`kbnGridRow-${rowId}`}
       role="region"
       aria-labelledby={`kbnGridRowTitle-${rowId}`}
