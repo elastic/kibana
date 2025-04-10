@@ -12,42 +12,39 @@ import React, { useEffect, useRef } from 'react';
 import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { useGridLayoutContext } from '../use_grid_layout_context';
 import { combineLatest, skip } from 'rxjs';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 import { getTopOffsetForRow } from '../utils/calculations';
 
 export const GridRowDragPreview = React.memo(() => {
-
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager } = useGridLayoutContext();
-    useEffect(
+  useEffect(
     () => {
       /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = combineLatest([
-        gridLayoutStateManager.activeRowEvent$,
-      ])
+      const styleSubscription = combineLatest([gridLayoutStateManager.activeRowEvent$])
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe(([activeRowEvent]) => {
-
           if (!dragPreviewRef.current) return;
           const rowId = activeRowEvent?.id;
-          if (!rowId) return;
-          const currentLayout = gridLayoutStateManager.proposedGridLayout$.getValue() ?? gridLayoutStateManager.gridLayout$.getValue();
-          const offset = getTopOffsetForRow(rowId, currentLayout);
-
-          if (!activeRowEvent) {
+          if (!rowId) {
             dragPreviewRef.current.style.display = 'none';
             dragPreviewRef.current.style.gridColumnStart = ``;
             dragPreviewRef.current.style.gridColumnEnd = ``;
             dragPreviewRef.current.style.gridRowStart = ``;
             dragPreviewRef.current.style.gridRowEnd = ``;
-          } else {
-            dragPreviewRef.current.style.display = 'block';
-            dragPreviewRef.current.style.gridColumnStart = `1`;
-            dragPreviewRef.current.style.gridColumnEnd = `-1`;
-            dragPreviewRef.current.style.gridRowStart = `${offset + 1}`;
-            dragPreviewRef.current.style.gridRowEnd = `${offset + 3}`;
+            return;
           }
+          const currentLayout =
+            gridLayoutStateManager.proposedGridLayout$.getValue() ??
+            gridLayoutStateManager.gridLayout$.getValue();
+          const offset = getTopOffsetForRow(rowId, currentLayout);
+
+          dragPreviewRef.current.style.display = 'block';
+          dragPreviewRef.current.style.gridColumnStart = `1`;
+          dragPreviewRef.current.style.gridColumnEnd = `-1`;
+          dragPreviewRef.current.style.gridRowStart = `${offset + 1}`;
+          dragPreviewRef.current.style.gridRowEnd = `${offset + 3}`;
         });
 
       return () => {
@@ -67,6 +64,8 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     height: euiTheme.size.xl,
     margin: `${euiTheme.size.s} 0px`,
     position: 'relative',
+    display: 'none',
+    pointerEvents: 'none',
   });
 
 GridRowDragPreview.displayName = 'KbnGridLayoutRowDragPreview';

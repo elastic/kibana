@@ -38,10 +38,10 @@ export const useGridLayoutRowEvents = ({ rowId }: { rowId: string }) => {
   const startingPointer = useRef<PointerPosition>({ clientX: 0, clientY: 0 });
 
   const onEnd = useCallback(() => {
-    commitAction(gridLayoutStateManager)
+    commitAction(gridLayoutStateManager);
     const headerRef = gridLayoutStateManager.headerRefs.current[rowId];
     headerRef?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, [gridLayoutStateManager]);
+  }, [gridLayoutStateManager, rowId]);
   const onCancel = useCallback(
     () => cancelAction(gridLayoutStateManager),
     [gridLayoutStateManager]

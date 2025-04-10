@@ -279,7 +279,7 @@ export const GridLayout = ({
               return null;
             })}
             <GridPanelDragPreview />
-            <GridRowDragPreview/>
+            <GridRowDragPreview />
           </div>
         </div>
       </GridHeightSmoother>
