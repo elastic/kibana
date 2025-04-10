@@ -6,6 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { parseArchive } from '@kbn/streams-plugin/server/lib/content';
+import { Readable } from 'stream';
+import { INDEX_PLACEHOLDER, findIndexPatterns } from '@kbn/content-packs-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -13,9 +16,6 @@ import {
 } from './helpers/repository_client';
 import { disableStreams, enableStreams, linkDashboard, exportContent } from './helpers/requests';
 import { loadDashboards, unloadDashboards } from './helpers/dashboards';
-import { parseArchive } from '@kbn/streams-plugin/server/lib/content';
-import { Readable } from 'stream';
-import { INDEX_PLACEHOLDER, findIndexPatterns } from '@kbn/content-packs-schema';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

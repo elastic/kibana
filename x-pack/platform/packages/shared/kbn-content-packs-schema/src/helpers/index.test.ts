@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { replaceESQLIndexPattern } from './';
+import { replaceESQLIndexPattern } from '.';
 
 describe('content packs schema helpers', () => {
   describe('replaceESQLIndexPattern', () => {

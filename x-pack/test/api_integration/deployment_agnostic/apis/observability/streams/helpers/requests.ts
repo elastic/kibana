@@ -11,9 +11,9 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { StreamUpsertRequest } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { StreamsSupertestRepositoryClient } from './repository_client';
 import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
 import { Readable } from 'stream';
+import { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_enable 2023-10-31').expect(200);
