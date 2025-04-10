@@ -43,11 +43,11 @@ export const getGroupByObject = (
   const groupKeyValueMappingsObject: Record<string, object> = {};
   if (groupBy) {
     groupValueSet.forEach((groupValueStr) => {
-      const groupValuesArray = groupValueStr.split(',');
+      const groupValueArray = groupValueStr.split(',');
       groupKeyValueMappingsObject[groupValueStr] = unflattenObject(
         Array.isArray(groupBy)
           ? groupBy.reduce((result, groupKey, index) => {
-              return { ...result, [groupKey]: groupValuesArray[index]?.trim() };
+              return { ...result, [groupKey]: groupValueArray[index]?.trim() };
             }, {})
           : { [groupBy]: groupValueStr }
       );
