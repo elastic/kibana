@@ -26,7 +26,7 @@ export function EnvironmentBadge({ environments = [] }: Props) {
     <ItemsBadge
       items={environments}
       multipleItemsMessage={i18n.translate('xpack.apm.servicesTable.environmentCount', {
-        values: { environmentCount: _environments.length },
+        values: { environmentCount: environments.length },
         defaultMessage: '{environmentCount, plural, one {1 environment} other {# environments}}',
       })}
     />
