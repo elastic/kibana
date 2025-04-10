@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { PanelSelectedNode } from '@kbn/core-chrome-browser';
 
 export const useHoverOpener = ({
