@@ -130,58 +130,73 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.CreateArchives);
   }
 
+  if (
+    options.downloadCloudDependencies &&
+    (options.createDockerCloud || options.createDockerCloudFIPS)
+  ) {
+    // control w/ --skip-cloud-dependencies-download
+    await run(Tasks.DownloadCloudDependencies);
+  }
+
+  const artifactTasks = [];
+
   if (options.createDebPackage || options.createRpmPackage) {
     await run(Tasks.CreatePackageConfig);
+
+    if (options.createDebPackage) {
+      // control w/ --deb or --skip-os-packages
+      artifactTasks.push(run(Tasks.CreateDebPackage));
+    }
+    if (options.createRpmPackage) {
+      // control w/ --rpm or --skip-os-packages
+      artifactTasks.push(run(Tasks.CreateRpmPackage));
+    }
   }
-  if (options.createDebPackage) {
-    // control w/ --deb or --skip-os-packages
-    await run(Tasks.CreateDebPackage);
-  }
-  if (options.createRpmPackage) {
-    // control w/ --rpm or --skip-os-packages
-    await run(Tasks.CreateRpmPackage);
-  }
+
   if (options.createDockerUBI) {
     // control w/ --docker-images or --skip-docker-ubi or --skip-os-packages
-    await run(Tasks.CreateDockerUBI);
+    artifactTasks.push(run(Tasks.CreateDockerUBI));
   }
 
   if (options.createDockerWolfi) {
     // control w/ --docker-images or --skip-docker-wolfi or --skip-os-packages
-    await run(Tasks.CreateDockerWolfi);
+    artifactTasks.push(run(Tasks.CreateDockerWolfi));
   }
+
   if (options.createDockerCloud) {
     // control w/ --docker-images and --skip-docker-cloud
-    if (options.downloadCloudDependencies) {
-      // control w/ --skip-cloud-dependencies-download
-      await run(Tasks.DownloadCloudDependencies);
-    }
-    await run(Tasks.CreateDockerCloud);
+    artifactTasks.push(run(Tasks.CreateDockerCloud));
   }
 
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
-    await run(Tasks.CreateDockerServerless);
+    artifactTasks.push(run(Tasks.CreateDockerServerless));
   }
 
   if (options.createDockerFIPS) {
     // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
-    await run(Tasks.CreateDockerFIPS);
+    artifactTasks.push(run(Tasks.CreateDockerFIPS));
   }
 
   if (options.createDockerCloudFIPS) {
     // control w/ --docker-images and --skip-docker-cloud-fips
-    if (options.downloadCloudDependencies) {
-      // control w/ --skip-cloud-dependencies-download
-      await run(Tasks.DownloadCloudDependencies);
-    }
-    await run(Tasks.CreateDockerCloudFIPS);
+    artifactTasks.push(run(Tasks.CreateDockerCloudFIPS));
   }
 
   if (options.createDockerContexts) {
     // control w/ --skip-docker-contexts
-    await run(Tasks.CreateDockerContexts);
+    artifactTasks.push(run(Tasks.CreateDockerContexts));
   }
+
+  // Run all artifact tasks in parallel
+  await Promise.allSettled(
+    artifactTasks.map((p) =>
+      p.catch((e) => {
+        log.error(e);
+        throw e;
+      })
+    )
+  );
 
   /**
    * finalize artifacts by writing sha1sums of each into the target directory
