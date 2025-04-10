@@ -110,6 +110,23 @@ export class UnifiedTabsPageObject extends FtrService {
     });
   }
 
+  public async enterNewTabLabel(newLabel: string) {
+    await this.retry.waitFor('the tab label to be editable', async () => {
+      return Boolean(
+        await this.find.byCssSelector('[data-test-subj^="unifiedTabs_editTabLabelInput_"]')
+      );
+    });
+    const labelElement = await this.find.byCssSelector(
+      '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
+    );
+    await labelElement.clearValue();
+    await labelElement.type(newLabel);
+    await this.browser.pressKeys(this.browser.keys.ENTER);
+    await this.retry.waitFor('the tab label to change', async () => {
+      return (await this.getSelectedTab())?.label === newLabel;
+    });
+  }
+
   public async editTabLabel(index: number, newLabel: string) {
     const tabElements = await this.getTabElements();
     if (index < 0 || index >= tabElements.length) {
@@ -120,20 +137,7 @@ export class UnifiedTabsPageObject extends FtrService {
       '[data-test-subj^="unifiedTabs_selectTabBtn_"]'
     );
     await controlElement.doubleClick();
-    await this.retry.waitFor('the tab label to be editable', async () => {
-      return Boolean(
-        await tabElement.findByCssSelector('[data-test-subj^="unifiedTabs_editTabLabelInput_"]')
-      );
-    });
-    const labelElement = await tabElement.findByCssSelector(
-      '[data-test-subj^="unifiedTabs_editTabLabelInput_"]'
-    );
-    await labelElement.clearValue();
-    await labelElement.type(newLabel);
-    await this.browser.pressKeys(this.browser.keys.ENTER);
-    await this.retry.waitFor('the tab label to change', async () => {
-      return (await this.getSelectedTab())?.label === newLabel;
-    });
+    await this.enterNewTabLabel(newLabel);
   }
 
   public async getContextMenuItems() {

@@ -17,13 +17,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
-
-  const bringFocusWithKeyboardToSelectedTab = async () => {
-    await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.TAB).perform();
-  };
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   const openTabContextMenuWithKeyboard = async () => {
     await browser.getActions().keyDown(Key.SHIFT).sendKeys(browser.keys.F10).perform();
+    await browser.getActions().keyUp(Key.SHIFT).perform();
+    await retry.waitFor('open tab context menu', async () => {
+      return await testSubjects.exists('unifiedTabs_tabMenuItem_enterRenamingMode');
+    });
   };
 
   describe('Managing Unified Tabs', () => {
@@ -81,6 +83,25 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       ]);
     });
 
+    it('can edit tab label with keyboard events', async () => {
+      expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
+      await unifiedTabs.createNewTab();
+      await openTabContextMenuWithKeyboard();
+      await browser.pressKeys(browser.keys.ARROW_DOWN);
+      await browser.pressKeys(browser.keys.ENTER);
+      await unifiedTabs.enterNewTabLabel('Test label');
+      expect(await unifiedTabs.getTabLabels()).to.eql([
+        'Untitled session 1',
+        'Untitled session 2',
+        'Untitled session 3',
+        'Untitled session 4',
+        'Untitled session 5',
+        'Untitled session 6',
+        'Untitled session 7',
+        'Test label',
+      ]);
+    });
+
     it('should support mouse events for navigating between tabs', async () => {
       expect(await unifiedTabs.getNumberOfTabs()).to.be(7);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 1');
@@ -108,7 +129,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await unifiedTabs.createNewTab();
       expect(await unifiedTabs.getNumberOfTabs()).to.be(8);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 8');
-      await bringFocusWithKeyboardToSelectedTab();
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 6');
@@ -141,7 +161,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         'Untitled session 7',
         'Untitled session 8',
       ]);
-      await bringFocusWithKeyboardToSelectedTab();
       await browser.pressKeys(browser.keys.ARROW_LEFT);
       expect((await unifiedTabs.getSelectedTab())?.label).to.be('Untitled session 7');
       await browser.pressKeys(browser.keys.SPACE);
