@@ -8,7 +8,7 @@
  */
 
 export { AlertDeleteModal } from './components/modal';
-export { AlertDeleteDescriptiveFormGroup } from './components/rule_settings_section';
+export { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_group';
 
 export {
   type UseAlertDeletePreviewParams,

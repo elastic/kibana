@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { AlertDeleteDescriptiveFormGroup } from './rule_settings_section';
+import { AlertDeleteDescriptiveFormGroup } from './descriptive_form_group';
 import * as i18n from '../translations';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 

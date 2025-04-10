@@ -12,7 +12,7 @@ import type { StoryObj } from '@storybook/react';
 import { EuiButton } from '@elastic/eui';
 import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import { HttpStart } from '@kbn/core/public';
-import { AlertDeleteDescriptiveFormGroup } from './components/rule_settings_section';
+import { AlertDeleteDescriptiveFormGroup } from './components/descriptive_form_group';
 import { AlertDeleteModal } from './components/modal';
 
 const http = {

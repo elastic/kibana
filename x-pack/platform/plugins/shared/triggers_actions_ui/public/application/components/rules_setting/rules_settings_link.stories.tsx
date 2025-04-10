@@ -19,13 +19,15 @@ export default {
   component: RulesSettingsLink,
 } as Meta<Args>;
 
-const Template: StoryFn<Args> = () => {
-  return <RulesSettingsLink />;
+const Template: StoryFn<Args> = ({ alertDeleteCategoryIds }) => {
+  return <RulesSettingsLink alertDeleteCategoryIds={alertDeleteCategoryIds} />;
 };
 
-export const withAllPermission: StoryObj = {
+export const withAllPermission: StoryObj<Args> = {
   render: Template,
-
+  args: {
+    alertDeleteCategoryIds: ['management'],
+  },
   decorators: [
     (StoryComponent, context) => (
       <StorybookContextDecorator
@@ -49,7 +51,7 @@ export const withAllPermission: StoryObj = {
   ],
 };
 
-export const withReadPermission: StoryObj = {
+export const withReadPermission: StoryObj<Args> = {
   render: Template,
 
   decorators: [
@@ -75,7 +77,7 @@ export const withReadPermission: StoryObj = {
   ],
 };
 
-export const withNoPermission: StoryObj = {
+export const withNoPermission: StoryObj<Args> = {
   render: Template,
 
   decorators: [
