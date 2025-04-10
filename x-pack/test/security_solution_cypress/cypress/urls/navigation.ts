@@ -65,6 +65,7 @@ export const MACHINE_LEARNING_LANDING_URL = '/app/security/ml';
 // Detection and Response
 export const DETECTION_AND_RESPONSE_URL = '/app/security/detection_response';
 export const ALERTS_URL = '/app/security/alerts';
+export const ALERT_SUMMARY_URL = '/app/security/alert_summary';
 export const EXCEPTIONS_URL = '/app/security/exceptions';
 export const CREATE_RULE_URL = '/app/security/rules/create';
 export const ENTITY_ANALYTICS_MANAGEMENT_URL = '/app/security/entity_analytics_management';
