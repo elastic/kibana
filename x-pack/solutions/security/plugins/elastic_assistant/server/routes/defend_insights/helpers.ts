@@ -6,14 +6,15 @@
  */
 
 import type { Document } from '@langchain/core/documents';
-import type {
+import {
   AnalyticsServiceSetup,
   AuthenticatedUser,
   KibanaRequest,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type {
+import {
   ApiConfig,
   ContentReferencesStore,
   DefendInsightGenerationInterval,
@@ -21,6 +22,10 @@ import type {
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
+  DEFEND_INSIGHTS_ID,
+  DefendInsightStatus,
+  DefendInsightType,
+  DefendInsightsGetRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -29,13 +34,8 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DEFEND_INSIGHTS_ID,
-  DefendInsightStatus,
-  DefendInsightType,
-  DefendInsightsGetRequestQuery,
-} from '@kbn/elastic-assistant-common';
 
+import { getDefendInsightsPrompt } from '../../lib/defend_insights/graphs/default_defend_insights_graph/nodes/helpers/prompts';
 import type { GraphState } from '../../lib/defend_insights/graphs/default_defend_insights_graph/types';
 import type { GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';
@@ -156,6 +156,9 @@ export function getAssistantToolParams({
     temperature: 0, // zero temperature because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
   });
 
   return {
@@ -264,6 +267,18 @@ export async function createDefendInsight(
   };
 }
 
+const extractInsightsForTelemetryReporting = (
+  insightType: DefendInsightType,
+  insights: DefendInsights
+): string[] => {
+  switch (insightType) {
+    case DefendInsightType.Enum.incompatible_antivirus:
+      return insights.map((insight) => insight.group);
+    default:
+      return [];
+  }
+};
+
 export async function updateDefendInsights({
   anonymizedEvents,
   apiConfig,
@@ -275,6 +290,7 @@ export async function updateDefendInsights({
   logger,
   startTime,
   telemetry,
+  insightType,
 }: {
   anonymizedEvents: Document[];
   apiConfig: ApiConfig;
@@ -286,6 +302,7 @@ export async function updateDefendInsights({
   logger: Logger;
   startTime: Moment;
   telemetry: AnalyticsServiceSetup;
+  insightType: DefendInsightType;
 }) {
   try {
     const currentInsight = await dataClient.getDefendInsight({
@@ -319,13 +336,19 @@ export async function updateDefendInsights({
       defendInsightUpdateProps: updateProps,
       authenticatedUser,
     });
+
     telemetry.reportEvent(DEFEND_INSIGHT_SUCCESS_EVENT.eventType, {
       actionTypeId: apiConfig.actionTypeId,
       eventsContextCount: updateProps.eventsContextCount,
       insightsGenerated: updateProps.insights?.length ?? 0,
+      insightsDetails: extractInsightsForTelemetryReporting(
+        insightType,
+        updateProps.insights || []
+      ),
       durationMs,
       model: apiConfig.model,
       provider: apiConfig.provider,
+      insightType,
     });
   } catch (updateErr) {
     logger.error(updateErr);
@@ -400,6 +423,7 @@ export const invokeDefendInsightsGraph = async ({
   size,
   start,
   end,
+  savedObjectsClient,
 }: {
   insightType: DefendInsightType;
   endpointIds: string[];
@@ -416,6 +440,7 @@ export const invokeDefendInsightsGraph = async ({
   size?: number;
   start?: string;
   end?: string;
+  savedObjectsClient: SavedObjectsClientContract;
 }): Promise<{
   anonymizedEvents: Document[];
   insights: DefendInsights | null;
@@ -443,11 +468,23 @@ export const invokeDefendInsightsGraph = async ({
     temperature: 0,
     timeout: connectorTimeout,
     traceOptions,
+    telemetryMetadata: {
+      pluginId: 'security_defend_insights',
+    },
   });
 
   if (llm == null) {
     throw new Error('LLM is required for Defend insights');
   }
+
+  const defendInsightsPrompts = await getDefendInsightsPrompt({
+    type: insightType,
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    model,
+    provider: llmType,
+    savedObjectsClient,
+  });
 
   const graph = getDefaultDefendInsightsGraph({
     insightType,
@@ -457,6 +494,7 @@ export const invokeDefendInsightsGraph = async ({
     llm,
     logger,
     onNewReplacements,
+    prompts: defendInsightsPrompts,
     replacements: latestReplacements,
     size,
     start,

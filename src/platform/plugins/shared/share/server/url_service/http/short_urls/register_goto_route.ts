@@ -18,6 +18,12 @@ export const registerGotoRoute = (router: IRouter, core: CoreSetup) => {
   core.http.resources.register(
     {
       path: '/goto/{id}',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route handles redirection',
+        },
+      },
       validate: {
         params: schema.object({
           id: schema.string({

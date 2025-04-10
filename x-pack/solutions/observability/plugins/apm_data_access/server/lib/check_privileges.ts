@@ -7,13 +7,21 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
-import { mapValues } from 'lodash';
-import type { APMIndices } from '..';
+import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 
 export interface ApmDataAccessPrivilegesCheck {
   request: KibanaRequest;
   security?: SecurityPluginStart;
-  getApmIndices: () => Promise<APMIndices>;
+  getApmIndices: (request: KibanaRequest) => Promise<APMIndices>;
+}
+
+export function convertIndiciesToPrivilege(apmIndices: APMIndices) {
+  return Object.values(apmIndices)
+    .flatMap((value) => value.split(','))
+    .reduce<Record<string, string[]>>((obj, item, index) => {
+      obj[item] = ['read'];
+      return obj;
+    }, {});
 }
 
 export async function checkPrivileges({
@@ -27,16 +35,15 @@ export async function checkPrivileges({
   }
 
   const [apmIndices, checkPrivilegesFn] = await Promise.all([
-    getApmIndices(),
+    getApmIndices(request),
     authorization.checkPrivilegesDynamicallyWithRequest(request),
   ]);
 
   const { hasAllRequested } = await checkPrivilegesFn({
     elasticsearch: {
       cluster: [],
-      index: mapValues(apmIndices, () => ['read']),
+      index: convertIndiciesToPrivilege(apmIndices),
     },
   });
-
   return hasAllRequested;
 }

@@ -83,6 +83,7 @@ import type { Assets } from './assets';
 import type { Investigations } from './investigations';
 import type { MachineLearning } from './machine_learning';
 import type { SiemMigrations } from './siem_migrations';
+import type { Configurations } from './configurations';
 
 import type { Dashboards } from './dashboards';
 import type { BreadcrumbsNav } from './common/breadcrumbs/types';
@@ -91,7 +92,6 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
 import type { OnboardingService } from './onboarding/service';
-import type { SolutionNavigation } from './app/solution_navigation/solution_navigation';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
 
@@ -219,7 +219,6 @@ export interface PluginStart {
   getUpselling: () => UpsellingService;
   setOnboardingSettings: OnboardingService['setSettings'];
   setIsSolutionNavigationEnabled: (isSolutionNavigationEnabled: boolean) => void;
-  getSolutionNavigation: () => Promise<SolutionNavigation>;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
@@ -246,6 +245,7 @@ export interface SubPlugins {
   investigations: Investigations;
   machineLearning: MachineLearning;
   siemMigrations: SiemMigrations;
+  configurations: Configurations;
 }
 
 // TODO: find a better way to defined these types
@@ -269,4 +269,5 @@ export interface StartedSubPlugins {
   investigations: ReturnType<Investigations['start']>;
   machineLearning: ReturnType<MachineLearning['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
+  configurations: ReturnType<Configurations['start']>;
 }

@@ -18,6 +18,7 @@ export function MachineLearningNavigationProvider({
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
+  const managementMenu = getService('managementMenu');
 
   return {
     async navigateToMl() {
@@ -34,28 +35,39 @@ export function MachineLearningNavigationProvider({
       });
     },
 
-    async navigateToStackManagement({ expectMlLink = true }: { expectMlLink?: boolean } = {}) {
-      await retry.tryForTime(60 * 1000, async () => {
-        await PageObjects.common.navigateToApp('management');
-        if (expectMlLink) {
-          await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
+    async navigateToStackManagementMlSection(
+      sectionId: string,
+      pageSubject: string,
+      spaceId?: string
+    ) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if (spaceId) {
+          await PageObjects.common.navigateToApp('management', { basePath: `/s/${spaceId}` });
         } else {
-          await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
+          await PageObjects.common.navigateToApp('management');
         }
+
+        const sections = await managementMenu.getSections();
+        const mlSection = sections.find((section) => section.sectionId === 'ml');
+        expect(mlSection).to.not.be(undefined);
+        expect(mlSection?.sectionLinks).to.contain(
+          sectionId,
+          `Expected Stack Management ML to have section ${sectionId}`
+        );
+        await testSubjects.click(sectionId);
+        await testSubjects.existOrFail(pageSubject, { timeout: 2000 });
       });
+    },
+
+    async assertStackManagementMlSectionNotExist() {
+      await PageObjects.common.navigateToApp('management');
+      await testSubjects.missingOrFail('ml');
     },
 
     async navigateToDiscoverViaAppsMenu() {
       await retry.tryForTime(60 * 1000, async () => {
         await appsMenu.clickLink('Discover');
         await PageObjects.discover.waitForDiscoverAppOnScreen();
-      });
-    },
-
-    async navigateToStackManagementViaAppsMenu() {
-      await retry.tryForTime(60 * 1000, async () => {
-        await appsMenu.clickLink('Stack Management');
-        await testSubjects.existOrFail('jobsListLink', { timeout: 2000 });
       });
     },
 
@@ -102,12 +114,9 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~overview', expectedValue);
     },
 
-    async assertNotificationsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~notifications', expectedValue);
-    },
-
-    async assertAnomalyDetectionTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~anomalyDetection', expectedValue);
+    async assertAnomalyDetectionTabsEnabled(expectedValue: boolean) {
+      await this.assertAnomalyExplorerNavItemEnabled(expectedValue);
+      await this.assertSingleMetricViewerNavItemEnabled(expectedValue);
     },
 
     async assertAnomalyExplorerNavItemEnabled(expectedValue: boolean) {
@@ -118,48 +127,110 @@ export function MachineLearningNavigationProvider({
       await this.assertTabEnabled('~mlMainTab & ~singleMetricViewer', expectedValue);
     },
 
-    async assertDataFrameAnalyticsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalytics', expectedValue);
+    async assertDataFrameAnalyticsTabsEnabled(expectedValue: boolean) {
+      await this.assertDataFrameAnalyticsResultsExplorerTabEnabled(expectedValue);
+      await this.assertDataFrameAnalyticsMapTabEnabled(expectedValue);
+    },
+
+    async assertDataFrameAnalyticsResultsExplorerTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalyticsResultsExplorer', expectedValue);
+    },
+
+    async assertDataFrameAnalyticsMapTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalyticsMap', expectedValue);
+    },
+
+    async assertAnomalyDetectionNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('anomaly_detection', expectedValue);
+    },
+
+    async assertDataFrameAnalyticsNavItemEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('analytics', expectedValue);
     },
 
     async assertTrainedModelsNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~trainedModels', expectedValue);
-    },
-
-    async assertNodesNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~nodesOverview', expectedValue);
+      await this.assertTabEnabled('trained_models', expectedValue);
     },
 
     async assertDataVisualizerTabEnabled(expectedValue: boolean) {
       await this.assertTabEnabled('~mlMainTab & ~dataVisualizer', expectedValue);
     },
 
-    async assertFileDataVisualizerNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~fileDataVisualizer', expectedValue);
+    async assertADSettingsTabExists(shouldExist: boolean) {
+      if (shouldExist) {
+        await testSubjects.existOrFail('ad_settings');
+      } else {
+        await testSubjects.missingOrFail('ad_settings');
+      }
     },
 
-    async assertIndexDataVisualizerNavItemEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~indexDataVisualizer', expectedValue);
-    },
-
-    async assertSettingsTabEnabled(expectedValue: boolean) {
-      await this.assertTabEnabled('~mlMainTab & ~settings', expectedValue);
+    async navigateToStackManagement({ expectMlLink = true }: { expectMlLink?: boolean } = {}) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await PageObjects.common.navigateToApp('management');
+        if (expectMlLink) {
+          await testSubjects.existOrFail('anomaly_detection', { timeout: 2000 });
+        } else {
+          await testSubjects.missingOrFail('anomaly_detection', { timeout: 2000 });
+        }
+      });
     },
 
     async navigateToOverview() {
-      await this.navigateToArea('~mlMainTab & ~overview', 'mlPageOverview');
+      await this.navigateToArea('~mlMainTab & ~overview', 'mlAppPageOverview');
+    },
+
+    async navigateToOverviewTab() {
+      await testSubjects.click('mlManagementOverviewPageTabs overview');
     },
 
     async navigateToNotifications() {
-      await this.navigateToArea('~mlMainTab & ~notifications', 'mlPageNotifications');
+      await this.navigateToStackManagementMlSection('overview', 'mlStackManagementOverviewPage');
+      await testSubjects.click('mlManagementOverviewPageTabs notifications');
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.existOrFail('mlNotificationsTable loaded');
+      });
     },
 
-    async navigateToMemoryUsage() {
-      await this.navigateToArea('~mlMainTab & ~nodesOverview', 'mlPageMemoryUsage');
+    async navigateToMemoryUsageManagement() {
+      await this.navigateToStackManagementMlSection('overview', 'mlStackManagementOverviewPage');
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click('mlManagementOverviewPageTabs overview');
+        await testSubjects.existOrFail('mlMemoryUsagePanel');
+      });
+    },
+
+    async navigateToNotificationsTab() {
+      await this.navigateToStackManagementMlSection('overview', 'mlStackManagementOverviewPage');
+      await retry.tryForTime(5 * 1000, async () => {
+        await testSubjects.click('mlManagementOverviewPageTabs notifications');
+        await testSubjects.existOrFail('mlNotificationsTable loaded');
+      });
     },
 
     async navigateToAnomalyDetection() {
       await this.navigateToArea('~mlMainTab & ~anomalyDetection', 'mlPageJobManagement');
+    },
+
+    async navigateToAnomalyExplorerWithSideNav() {
+      await this.navigateToArea('~mlMainTab & ~anomalyExplorer', 'mlAnomalyDetectionEmptyState');
+    },
+
+    async navigateToSingleMetricViewerWithSideNav() {
+      await this.navigateToArea('~mlMainTab & ~singleMetricViewer', 'mlNoSingleMetricJobsFound');
+    },
+
+    async navigateToDfaMapWithSideNav() {
+      await this.navigateToArea(
+        '~mlMainTab & ~dataFrameAnalyticsMap',
+        'mlNoDataFrameAnalyticsFound'
+      );
+    },
+
+    async navigateToDfaResultsExplorerWithSideNav() {
+      await this.navigateToArea(
+        '~mlMainTab & ~dataFrameAnalyticsResultsExplorer',
+        'mlNoDataFrameAnalyticsFound'
+      );
     },
 
     async navigateToAnomalyExplorer(
@@ -186,13 +257,16 @@ export function MachineLearningNavigationProvider({
       );
     },
 
-    async navigateToDataFrameAnalytics() {
-      await this.navigateToArea('~mlMainTab & ~dataFrameAnalytics', 'mlPageDataFrameAnalytics');
+    async navigateToDataFrameAnalytics(spaceId?: string) {
+      await this.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList', spaceId);
     },
 
-    async navigateToTrainedModels() {
-      await this.navigateToMl();
-      await this.navigateToArea('~mlMainTab & ~trainedModels', 'mlModelsTableContainer');
+    async navigateToTrainedModels(spaceId?: string) {
+      await this.navigateToStackManagementMlSection(
+        'trained_models',
+        'mlModelsTableContainer',
+        spaceId
+      );
     },
 
     async navigateToModelManagementNodeList() {
@@ -201,67 +275,50 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToDataVisualizer() {
+      await this.navigateToMl();
+      await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
+    },
+
+    async navigateToDataVisualizerFromAppsMenu() {
+      await this.navigateToMlViaAppsMenu();
       await this.navigateToArea('~mlMainTab & ~dataVisualizer', 'mlPageDataVisualizerSelector');
     },
 
     async navigateToDataESQLDataVisualizer() {
-      await this.navigateToArea('~mlMainTab & ~esqlDataVisualizer', 'dataVisualizerIndexPage');
+      await testSubjects.click('mlDataVisualizerSelectESQLButton');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('dataVisualizerIndexPage');
+      });
     },
 
     async navigateToDataDrift() {
-      await this.navigateToArea('~mlMainTab & ~dataDrift', 'mlPageDataDrift');
+      await testSubjects.click('mlDataVisualizerSelectDataDriftButton');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('mlPageDataDrift');
+      });
     },
 
     async navigateToSuppliedConfigurations() {
-      await this.navigateToArea(
-        '~mlMainTab & ~suppliedConfigurations',
-        'mlPageSuppliedConfigurations'
-      );
-    },
+      await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list');
 
-    async navigateToJobManagement() {
-      await this.navigateToAnomalyDetection();
-    },
-
-    async navigateToSettings() {
-      await this.navigateToArea('~mlMainTab & ~settings', 'mlPageSettings');
-    },
-
-    async navigateToStackManagementJobsListPage() {
-      // clicks the jobsListLink and loads the jobs list page
-      await testSubjects.click('jobsListLink');
       await retry.tryForTime(60 * 1000, async () => {
-        // verify that the overall page is present
-        await testSubjects.existOrFail('mlPageStackManagementJobsList');
-        // verify that the default tab with the anomaly detection jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable');
+        await testSubjects.existOrFail('mlSuppliedConfigurationsButton');
+
+        await testSubjects.click('mlSuppliedConfigurationsButton');
+        await testSubjects.existOrFail('mlPageSuppliedConfigurations');
       });
     },
 
-    async navigateToStackManagementInsuficientLicensePage() {
-      // clicks the jobsListLink and loads the jobs list page
-      await testSubjects.click('jobsListLink');
-      await retry.tryForTime(60 * 1000, async () => {
-        // verify that the overall page is present
-        await testSubjects.existOrFail('mlPageInsufficientLicense');
-      });
+    async navigateToJobManagement(spaceId?: string) {
+      await this.navigateToStackManagementMlSection('anomaly_detection', 'ml-jobs-list', spaceId);
     },
 
-    async navigateToStackManagementJobsListPageAnomalyDetectionTab() {
-      // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementAnomalyDetectionTab');
+    async navigateToADSettings(spaceId?: string) {
+      await this.navigateToJobManagement(spaceId);
+      await testSubjects.existOrFail('mlAnomalyDetectionSettingsButton');
       await retry.tryForTime(60 * 1000, async () => {
-        // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable-anomaly-detector loaded');
-      });
-    },
-
-    async navigateToStackManagementJobsListPageAnalyticsTab() {
-      // clicks the `Analytics` tab and loads the analytics list page
-      await testSubjects.click('mlStackManagementAnalyticsTab');
-      await retry.tryForTime(60 * 1000, async () => {
-        // verify that the empty prompt for analytics jobs list got loaded
-        await testSubjects.existOrFail('mlSpacesManagementTable-data-frame-analytics loaded');
+        await testSubjects.click('mlAnomalyDetectionSettingsButton');
+        await testSubjects.existOrFail('mlPageSettings');
       });
     },
 

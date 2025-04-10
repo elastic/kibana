@@ -92,6 +92,7 @@ export interface AgentSOAttributes {
   tags?: string[];
   components?: FleetServerAgentComponent[];
   packages?: string[];
+  namespaces?: string[];
 }
 
 export interface FleetProxySOAttributes {
@@ -182,7 +183,6 @@ export interface OutputSoRemoteElasticsearchAttributes extends OutputSoBaseAttri
   service_token?: string;
   secrets?: {
     service_token?: { id: string };
-    kibana_api_key?: { id: string };
     ssl?: {
       key?: { id: string };
     };

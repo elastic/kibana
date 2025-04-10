@@ -9,14 +9,9 @@ import expect from '@kbn/expect';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { Spaces, Superuser } from '../../../scenarios';
-import {
-  getUrlPrefix,
-  getEventLog,
-  getTestRuleData,
-  TaskManagerDoc,
-  ObjectRemover,
-} from '../../../../common/lib';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import type { TaskManagerDoc } from '../../../../common/lib';
+import { getUrlPrefix, getEventLog, getTestRuleData, ObjectRemover } from '../../../../common/lib';
+import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertingAndActionsTelemetryTests({ getService }: FtrProviderContext) {
@@ -28,8 +23,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const configService = getService('config');
 
-  // Failing: See https://github.com/elastic/kibana/issues/202564
-  describe.skip('test telemetry', () => {
+  describe('test telemetry', () => {
     const objectRemover = new ObjectRemover(supertest);
     const esQueryRuleId: { [key: string]: string } = {};
     const simulator = new OpenAISimulator({
@@ -243,28 +237,6 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             actions: [],
           },
         });
-        // ES query rule
-        esQueryRuleId[space.id] = await createRule({
-          space: space.id,
-          ruleOverwrites: {
-            rule_type_id: '.es-query',
-            schedule: { interval: '1h' },
-            throttle: null,
-            params: {
-              size: 100,
-              timeWindowSize: 5,
-              timeWindowUnit: 'm',
-              thresholdComparator: '>',
-              threshold: [0],
-              searchType: 'esqlQuery',
-              esqlQuery: {
-                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
-              },
-              timeField: 'date_epoch_millis',
-            },
-            actions: [],
-          },
-        });
         // MW with both toggles off
         await createMaintenanceWindow({ spaceId: space.id });
         // MW with 'Repeat' toggle on and 'Filter alerts' toggle on
@@ -287,7 +259,7 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
             notify_when: 'onActiveAlert',
             throttle: null,
             params: {
-              index: '.kibana-alerting-test-data',
+              index: 'kibana-alerting-test-data',
               reference: 'test',
             },
             actions: [
@@ -301,6 +273,29 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
         });
 
         rulesWithAAD.push(ruleWithAadId);
+
+        // ES query rule
+        esQueryRuleId[space.id] = await createRule({
+          space: space.id,
+          ruleOverwrites: {
+            rule_type_id: '.es-query',
+            schedule: { interval: '1h' },
+            throttle: null,
+            params: {
+              size: 100,
+              timeWindowSize: 5,
+              timeWindowUnit: 'm',
+              thresholdComparator: '>',
+              threshold: [0],
+              searchType: 'esqlQuery',
+              esqlQuery: {
+                esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+              },
+              timeField: 'date_epoch_millis',
+            },
+            actions: [],
+          },
+        });
       }
     }
 
@@ -592,8 +587,14 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_mw_with_repeat_toggle_on).to.equal(3);
 
       // AAD alert counts
-      expect(telemetry.count_alerts_total).to.be(6);
-      expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(6);
+      const numAADexecutions =
+        telemetry.count_rules_executions_by_type_per_day['test__always-firing-alert-as-data'];
+
+      // each rule execution reports 2 active alerts
+      expect(telemetry.count_alerts_total).to.be(numAADexecutions * 2);
+      expect(telemetry.count_alerts_by_rule_type['test__always-firing-alert-as-data']).to.be(
+        numAADexecutions * 2
+      );
     }
 
     it('should retrieve telemetry data in the expected format', async () => {

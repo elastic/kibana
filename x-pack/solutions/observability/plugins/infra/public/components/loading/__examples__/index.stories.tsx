@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Meta, Story } from '@storybook/react/types-6-0';
+import type { StoryFn, Meta } from '@storybook/react';
 import React from 'react';
 import { InfraLoadingPanel } from '..';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../test_utils/use_global_storybook_theme';
@@ -18,4 +18,6 @@ export default {
   ],
 } as Meta;
 
-export const LoadingPanel: Story = () => <InfraLoadingPanel text="test" width={200} height={200} />;
+export const LoadingPanel: StoryFn = () => (
+  <InfraLoadingPanel text="test" width={200} height={200} />
+);

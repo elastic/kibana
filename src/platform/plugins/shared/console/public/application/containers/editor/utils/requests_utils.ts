@@ -9,6 +9,7 @@
 
 import { monaco, ParsedRequest } from '@kbn/monaco';
 import { parse } from 'hjson';
+import { i18n } from '@kbn/i18n';
 import { constructUrl } from '../../../../lib/es';
 import type { MetricsTracker } from '../../../../types';
 import type { DevToolsVariable } from '../../../components';
@@ -141,7 +142,8 @@ export const getRequestEndLineNumber = ({
 export const getAutoIndentedRequests = (
   requests: AdjustedParsedRequest[],
   selectedText: string,
-  allText: string
+  allText: string,
+  addToastWarning: (text: string) => void
 ): string => {
   const selectedTextLines = selectedText.split(`\n`);
   const allTextLines = allText.split(`\n`);
@@ -162,10 +164,16 @@ export const getAutoIndentedRequests = (
       const firstLine = cleanUpWhitespaces(requestLines[0]);
       formattedTextLines.push(firstLine);
       const dataLines = requestLines.slice(1);
-      if (dataLines.some((line) => containsComments(line))) {
+      if (containsComments(dataLines.join(''))) {
         // If data has comments, add it as it is - without formatting
         // TODO: Format requests with comments https://github.com/elastic/kibana/issues/182138
         formattedTextLines.push(...dataLines);
+        addToastWarning(
+          i18n.translate('console.notification.monaco.warning.nonSupportedAutoindentation', {
+            defaultMessage:
+              'Auto-indentation is currently not supported for requests containing comments. Please remove comments to enable formatting.',
+          })
+        );
       } else {
         // If no comments, indent data
         if (requestLines.length > 1) {
@@ -224,8 +232,27 @@ export const getRequestFromEditor = (
   return { method: upperCaseMethod, url, data };
 };
 
-export const containsComments = (text: string) => {
-  return text.indexOf('//') >= 0 || text.indexOf('/*') >= 0;
+export const containsComments = (requestData: string) => {
+  let insideString = false;
+  let prevChar = '';
+  for (let i = 0; i < requestData.length; i++) {
+    const char = requestData[i];
+    const nextChar = requestData[i + 1];
+
+    if (!insideString && char === '"') {
+      insideString = true;
+    } else if (insideString && char === '"' && prevChar !== '\\') {
+      insideString = false;
+    } else if (!insideString) {
+      if (char === '/' && (nextChar === '/' || nextChar === '*')) {
+        return true;
+      }
+    }
+
+    prevChar = char;
+  }
+
+  return false;
 };
 
 export const indentData = (dataString: string): string => {

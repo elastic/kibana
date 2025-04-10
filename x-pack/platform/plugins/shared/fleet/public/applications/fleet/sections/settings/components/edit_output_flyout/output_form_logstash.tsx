@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiSpacer, EuiLink } from '@elastic/eui';
+import { EuiSpacer, EuiLink, EuiSwitch, EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -18,7 +18,7 @@ import { MultiRowInput } from '../multi_row_input';
 import type { OutputFormInputsType } from './use_output_form';
 
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
-import { SSLFormSection } from './ssl_form_section';
+import { SSLFormSection, type FormType } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
@@ -76,7 +76,37 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         </>
       )}
       <EuiSpacer size="m" />
-      <LogstashInstructions />
+      <EuiSwitch
+        label={i18n.translate('xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchLabel', {
+          defaultMessage: 'Enable SSL',
+        })}
+        {...inputs.logstashEnableSSLInput.props}
+      />
+      {!inputs.logstashEnableSSLInput.value && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiCallOut
+            title={i18n.translate(
+              'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutTitle',
+              { defaultMessage: 'Proceed with caution!' }
+            )}
+            color="warning"
+            iconType="warning"
+          >
+            <p>
+              {i18n.translate(
+                'xpack.fleet.settings.editOutputFlyout.logstashSSLSwitchCalloutMessage',
+                {
+                  defaultMessage:
+                    'Using SSL/TLS ensures that your Elastic Agents send encrypted data to trusted Logstash servers, and that your Logstash servers receive data from trusted Elastic Agent clients.',
+                }
+              )}
+            </p>
+          </EuiCallOut>
+        </>
+      )}
+      <EuiSpacer size="m" />
+      <LogstashInstructions isSSLEnabled={inputs.logstashEnableSSLInput.value} />
       <EuiSpacer size="m" />
       <MultiRowInput
         placeholder={i18n.translate(
@@ -107,12 +137,16 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         })}
         {...inputs.logstashHostsInput.props}
       />
-      <SSLFormSection
-        inputs={inputs}
-        useSecretsStorage={useSecretsStorage}
-        isConvertedToSecret={isConvertedToSecret.sslKey}
-        onToggleSecretAndClearValue={onToggleSecretAndClearValue}
-      />
+      <EuiSpacer size="m" />
+      {inputs.logstashEnableSSLInput.value && (
+        <SSLFormSection
+          inputs={inputs}
+          useSecretsStorage={useSecretsStorage}
+          isConvertedToSecret={isConvertedToSecret.sslKey}
+          onToggleSecretAndClearValue={onToggleSecretAndClearValue}
+          type={inputs.typeInput.value as FormType}
+        />
+      )}
     </>
   );
 };

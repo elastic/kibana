@@ -15,10 +15,10 @@ import {
   EuiForm,
   EuiToolTip,
 } from '@elastic/eui';
-import type { Meta, Story } from '@storybook/react';
-import React, { useCallback, useEffect, useState } from 'react';
+import type { StoryFn, Meta, StoryObj } from '@storybook/react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
-import { useArgs } from '@storybook/addons';
+import { useArgs } from '@storybook/preview-api';
 import {
   getPaths,
   getServiceMapNodes,
@@ -42,7 +42,9 @@ const stories: Meta<{}> = {
   decorators: [(wrappedStory) => <MockApmPluginStorybook>{wrappedStory()}</MockApmPluginStorybook>],
 };
 
-export const GenerateMap: Story<{}> = () => {
+export default stories;
+
+export const GenerateMap: StoryFn<{}> = () => {
   const [size, setSize] = useState<number>(10);
   const [json, setJson] = useState<string>('');
   const [elements, setElements] = useState<any[]>(
@@ -100,16 +102,13 @@ export const GenerateMap: Story<{}> = () => {
   );
 };
 
-interface MapFromJSONArgs {
-  json: unknown;
-}
 const assertJSON: (json?: any) => asserts json is ServiceMapResponse = (json) => {
   if (!!json && !('elements' in json || 'spans' in json)) {
     throw new Error('invalid json');
   }
 };
 
-const MapFromJSONTemplate: Story<MapFromJSONArgs> = (args) => {
+const MapFromJSONTemplate = () => {
   const [{ json }, updateArgs] = useArgs();
 
   const [error, setError] = useState<string | undefined>();
@@ -192,15 +191,17 @@ const MapFromJSONTemplate: Story<MapFromJSONArgs> = (args) => {
   );
 };
 
-export const MapFromJSON = MapFromJSONTemplate.bind({});
-MapFromJSON.argTypes = {
-  json: {
-    defaultValue: exampleResponseTodo,
-    control: 'object',
+export const MapFromJSON: StoryObj<typeof MapFromJSONTemplate> = {
+  render: MapFromJSONTemplate,
+  argTypes: {
+    json: {
+      defaultValue: exampleResponseTodo,
+      control: 'object',
+    },
   },
 };
 
-export const TodoApp: Story<{}> = () => {
+export const TodoApp: StoryFn<{}> = () => {
   return (
     <div>
       <Cytoscape elements={exampleResponseTodo.elements} height={window.innerHeight}>
@@ -210,7 +211,7 @@ export const TodoApp: Story<{}> = () => {
   );
 };
 
-export const OpbeansAndBeats: Story<{}> = () => {
+export const OpbeansAndBeats: StoryFn<{}> = () => {
   return (
     <div>
       <Cytoscape elements={exampleResponseOpbeansBeats.elements} height={window.innerHeight}>
@@ -220,7 +221,7 @@ export const OpbeansAndBeats: Story<{}> = () => {
   );
 };
 
-export const HipsterStore: Story<{}> = () => {
+export const HipsterStore: StoryFn<{}> = () => {
   return (
     <div>
       <Cytoscape elements={exampleResponseHipsterStore.elements} height={window.innerHeight}>
@@ -229,5 +230,3 @@ export const HipsterStore: Story<{}> = () => {
     </div>
   );
 };
-
-export default stories;

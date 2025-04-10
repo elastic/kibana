@@ -26,12 +26,14 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
-      await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+      await esArchiver.load(
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
       );
       await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });

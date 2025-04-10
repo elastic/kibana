@@ -61,6 +61,12 @@
     "initialize-server:siem_migrations:trial_complete": "node ./scripts/index.js server siem_migrations trial_license_complete_tier",
     "run-tests:siem_migrations:trial_complete": "node ./scripts/index.js runner siem_migrations trial_license_complete_tier",
 
+    "initialize-server:ai4dsoc": "node ./scripts/index.js server ai4dsoc search_ai_lake_tier",
+    "run-tests:ai4dsoc": "node ./scripts/index.js runner ai4dsoc search_ai_lake_tier",
+
+    "ai4dsoc_cases:server:serverless": "npm run initialize-server:ai4dsoc cases serverless",
+    "ai4dsoc_cases:runner:serverless": "npm run run-tests:ai4dsoc cases serverless serverlessEnv",
+
     "genai_kb_entries:server:serverless": "npm run initialize-server:genai:trial_complete knowledge_base/entries serverless",
     "genai_kb_entries:runner:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless serverlessEnv",
     "genai_kb_entries:qa:serverless": "npm run run-tests:genai:trial_complete knowledge_base/entries serverless qaPeriodicEnv",

@@ -29,11 +29,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('extension getCellRenderers', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('ES|QL mode', () => {

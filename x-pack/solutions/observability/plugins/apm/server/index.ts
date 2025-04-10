@@ -36,7 +36,6 @@ const configSchema = schema.object({
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     maxTraceItems: schema.number({ defaultValue: 5000 }),
-    serviceMapApiV2Enabled: schema.boolean({ defaultValue: false }),
   }),
   searchAggregatedTransactions: schema.oneOf(
     [
@@ -63,6 +62,9 @@ const configSchema = schema.object({
     serverless: schema.boolean({ defaultValue: false }),
   }),
   managedServiceUrl: offeringBasedSchema({
+    serverless: schema.string({ defaultValue: '' }),
+  }),
+  managedOtlpServiceUrl: offeringBasedSchema({
     serverless: schema.string({ defaultValue: '' }),
   }),
   featureFlags: schema.object({

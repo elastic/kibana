@@ -812,6 +812,82 @@
     "functions": [
       {
         "parentPluginId": "@kbn/scout",
+        "id": "def-common.browserAuthFixture",
+        "type": "Function",
+        "tags": [],
+        "label": "browserAuthFixture",
+        "description": [
+          "\nThe \"browserAuth\" fixture simplifies the process of logging into Kibana with\ndifferent roles during tests. It uses the \"samlAuth\" fixture to create an authentication session\nfor the specified role and the \"context\" fixture to update the cookie with the role-scoped session."
+        ],
+        "signature": [
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          " & { browserAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
+          "; }, ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & { log: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutLogger",
+            "text": "ScoutLogger"
+          },
+          "; config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; esClient: ",
+          "default",
+          "; kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; samlAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
+          "; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
         "id": "def-common.createLazyPageObject",
         "type": "Function",
         "tags": [],
@@ -1020,104 +1096,214 @@
       },
       {
         "parentPluginId": "@kbn/scout",
-        "id": "def-common.ingestSynthtraceDataHook",
+        "id": "def-common.globalSetupHook",
         "type": "Function",
         "tags": [],
-        "label": "ingestSynthtraceDataHook",
+        "label": "globalSetupHook",
         "description": [],
         "signature": [
-          "(config: ",
-          "FullConfig",
-          "<{}, {}>, data: SynthtraceIngestionData) => Promise<void>"
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          ", ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & { log: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutLogger",
+            "text": "ScoutLogger"
+          },
+          "; config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; esClient: ",
+          "default",
+          "; kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; samlAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
+          "; } & { esArchiver: ",
+          "EsArchiverFixture",
+          "; } & ",
+          "SynthtraceFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
+          "; }>"
         ],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/synthtrace_ingestion.ts",
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestSynthtraceDataHook.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "FullConfig",
-              "<{}, {}>"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/synthtrace_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestSynthtraceDataHook.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "SynthtraceIngestionData"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/synthtrace_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/scout",
-        "id": "def-common.ingestTestDataHook",
+        "id": "def-common.lighthouseTest",
         "type": "Function",
         "tags": [],
-        "label": "ingestTestDataHook",
+        "label": "lighthouseTest",
         "description": [],
         "signature": [
-          "(config: ",
-          "FullConfig",
-          "<{}, {}>, archives: string[]) => Promise<void>"
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          " & { browserAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
+          "; } & { page: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutPage",
+            "text": "ScoutPage"
+          },
+          "; log: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutLogger",
+            "text": "ScoutLogger"
+          },
+          "; } & { pageObjects: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.PageObjects",
+            "text": "PageObjects"
+          },
+          "; } & { validateTags: void; } & { perfTracker: ",
+          "PerformanceTracker",
+          "; } & { context: ",
+          "BrowserContext",
+          "; } & { lighthouse: ",
+          "LighthouseFixture",
+          "; }, ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & { log: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutLogger",
+            "text": "ScoutLogger"
+          },
+          "; config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; esClient: ",
+          "default",
+          "; kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; samlAuth: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
+          },
+          "; } & { esArchiver: ",
+          "EsArchiverFixture",
+          "; } & { uiSettings: ",
+          "UiSettingsFixture",
+          "; } & ",
+          "SynthtraceFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
+          "; } & { kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; } & { config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
+          "; } & { debuggingPort: number; } & { debuggingPort: number; }>"
         ],
-        "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestTestDataHook.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "FullConfig",
-              "<{}, {}>"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ingestTestDataHook.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "archives",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1280,6 +1466,41 @@
       },
       {
         "parentPluginId": "@kbn/scout",
+        "id": "def-common.mergeTests",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeTests",
+        "description": [
+          "\nMerges fixtures"
+        ],
+        "signature": [
+          "(tests: List) => MergedTestType<List>"
+        ],
+        "path": "node_modules/playwright/types/test.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.mergeTests.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "tests",
+            "description": [],
+            "signature": [
+              "List"
+            ],
+            "path": "node_modules/playwright/types/test.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
         "id": "def-common.spaceTest",
         "type": "Function",
         "tags": [],
@@ -1292,7 +1513,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1349,16 +1576,22 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
-          "; } & { fleetApi: ",
-          "FleetApiFixture",
+          "; } & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { log: ",
           {
             "pluginId": "@kbn/scout",
@@ -1379,6 +1612,14 @@
           "ScoutSpaceParallelFixture",
           "; } & { scoutSpace: ",
           "ScoutSpaceParallelFixture",
+          "; config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
@@ -1400,7 +1641,13 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "BrowserAuthFixture",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.BrowserAuthFixture",
+            "text": "BrowserAuthFixture"
+          },
           "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
@@ -1425,7 +1672,9 @@
             "section": "def-common.PageObjects",
             "text": "PageObjects"
           },
-          "; } & { validateTags: void; }, ",
+          "; } & { validateTags: void; } & { perfTracker: ",
+          "PerformanceTracker",
+          "; }, ",
           "PlaywrightWorkerArgs",
           " & ",
           "PlaywrightWorkerOptions",
@@ -1465,11 +1714,11 @@
           },
           "; samlAuth: ",
           {
-            "pluginId": "@kbn/test",
+            "pluginId": "@kbn/scout",
             "scope": "common",
-            "docId": "kibKbnTestPluginApi",
-            "section": "def-common.SamlSessionManager",
-            "text": "SamlSessionManager"
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.SamlAuth",
+            "text": "SamlAuth"
           },
           "; } & { esArchiver: ",
           "EsArchiverFixture",
@@ -1477,8 +1726,14 @@
           "UiSettingsFixture",
           "; } & ",
           "SynthtraceFixture",
-          " & { fleetApi: ",
-          "FleetApiFixture",
+          " & { apiServices: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          },
           "; } & { kbnUrl: ",
           {
             "pluginId": "@kbn/scout",
@@ -1487,15 +1742,733 @@
             "section": "def-common.KibanaUrl",
             "text": "KibanaUrl"
           },
+          "; } & { config: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutTestConfig",
+            "text": "ScoutTestConfig"
+          },
           "; }>"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.test",
+        "type": "Function",
+        "tags": [],
+        "label": "test",
+        "description": [
+          "\nThese tests are executed in Playwright environment that launches the browser\nand provides a fresh page to each test."
+        ],
+        "signature": [
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          ", ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          ">"
+        ],
+        "path": "node_modules/playwright/types/test.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.ApiServicesFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "ApiServicesFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/apis/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ApiServicesFixture.fleet",
+            "type": "Object",
+            "tags": [],
+            "label": "fleet",
+            "description": [],
+            "signature": [
+              "FleetApiService"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/apis/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.BrowserAuthFixture",
+        "type": "Interface",
+        "tags": [],
+        "label": "BrowserAuthFixture",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.BrowserAuthFixture.loginAsViewer",
+            "type": "Function",
+            "tags": [],
+            "label": "loginAsViewer",
+            "description": [
+              "\nLogs in as a user with viewer-only permissions."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "A Promise that resolves once the cookie in browser is set."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.BrowserAuthFixture.loginAsAdmin",
+            "type": "Function",
+            "tags": [],
+            "label": "loginAsAdmin",
+            "description": [
+              "\nLogs in as a user with administrative privileges"
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "A Promise that resolves once the cookie in browser is set."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.BrowserAuthFixture.loginAsPrivilegedUser",
+            "type": "Function",
+            "tags": [],
+            "label": "loginAsPrivilegedUser",
+            "description": [
+              "\nLogs in as a user with elevated, but not admin, permissions."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": [
+              "A Promise that resolves once the cookie in browser is set."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.BrowserAuthFixture.loginAs",
+            "type": "Function",
+            "tags": [],
+            "label": "loginAs",
+            "description": [
+              "\nLogs in as a user with a role."
+            ],
+            "signature": [
+              "(role: string) => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.BrowserAuthFixture.loginAs.$1",
+                "type": "string",
+                "tags": [],
+                "label": "role",
+                "description": [
+                  "- A role object that defines the Kibana and ES previleges."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A Promise that resolves once the cookie in browser is set."
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.BrowserAuthFixture.loginWithCustomRole",
+            "type": "Function",
+            "tags": [],
+            "label": "loginWithCustomRole",
+            "description": [
+              "\nLogs in as a user with a custom role."
+            ],
+            "signature": [
+              "(role: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaRole",
+                "text": "KibanaRole"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.BrowserAuthFixture.loginWithCustomRole.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "role",
+                "description": [
+                  "- A role object that defines the Kibana and ES previleges. Role will re-created if it doesn't exist."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.KibanaRole",
+                    "text": "KibanaRole"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/test/browser_auth/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "A Promise that resolves once the cookie in browser is set."
+            ]
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.CDPSession",
+        "type": "Interface",
+        "tags": [],
+        "label": "CDPSession",
+        "description": [
+          "\nThe `CDPSession` instances are used to talk raw Chrome Devtools Protocol:\n- protocol methods can be called with `session.send` method.\n- protocol events can be subscribed to with `session.on` method.\n\nUseful links:\n- Documentation on DevTools Protocol can be found here:\n  [DevTools Protocol Viewer](https://chromedevtools.github.io/devtools-protocol/).\n- Getting Started with DevTools Protocol:\n  https://github.com/aslushnikov/getting-started-with-cdp/blob/master/README.md\n\n```js\nconst client = await page.context().newCDPSession(page);\nawait client.send('Animation.enable');\nclient.on('Animation.animationCreated', () => console.log('Animation created!'));\nconst response = await client.send('Animation.getPlaybackRate');\nconsole.log('playback rate is ' + response.playbackRate);\nawait client.send('Animation.setPlaybackRate', {\n  playbackRate: response.playbackRate / 2\n});\n```\n"
+        ],
+        "signature": [
+          "CDPSession"
+        ],
+        "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CDPSession.on",
+            "type": "Function",
+            "tags": [],
+            "label": "on",
+            "description": [],
+            "signature": [
+              "<T extends symbol | keyof ",
+              "Protocol",
+              ".Events>(event: T, listener: (payload: T extends symbol ? any : ",
+              "Protocol",
+              ".Events[T extends keyof ",
+              "Protocol",
+              ".Events ? T : never]) => void) => this"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.on.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.on.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "(payload: T extends symbol ? any : ",
+                  "Protocol",
+                  ".Events[T extends keyof ",
+                  "Protocol",
+                  ".Events ? T : never]) => void"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CDPSession.addListener",
+            "type": "Function",
+            "tags": [],
+            "label": "addListener",
+            "description": [],
+            "signature": [
+              "<T extends symbol | keyof ",
+              "Protocol",
+              ".Events>(event: T, listener: (payload: T extends symbol ? any : ",
+              "Protocol",
+              ".Events[T extends keyof ",
+              "Protocol",
+              ".Events ? T : never]) => void) => this"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.addListener.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.addListener.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "(payload: T extends symbol ? any : ",
+                  "Protocol",
+                  ".Events[T extends keyof ",
+                  "Protocol",
+                  ".Events ? T : never]) => void"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CDPSession.off",
+            "type": "Function",
+            "tags": [],
+            "label": "off",
+            "description": [],
+            "signature": [
+              "<T extends symbol | keyof ",
+              "Protocol",
+              ".Events>(event: T, listener: (payload: T extends symbol ? any : ",
+              "Protocol",
+              ".Events[T extends keyof ",
+              "Protocol",
+              ".Events ? T : never]) => void) => this"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.off.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.off.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "(payload: T extends symbol ? any : ",
+                  "Protocol",
+                  ".Events[T extends keyof ",
+                  "Protocol",
+                  ".Events ? T : never]) => void"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CDPSession.removeListener",
+            "type": "Function",
+            "tags": [],
+            "label": "removeListener",
+            "description": [],
+            "signature": [
+              "<T extends symbol | keyof ",
+              "Protocol",
+              ".Events>(event: T, listener: (payload: T extends symbol ? any : ",
+              "Protocol",
+              ".Events[T extends keyof ",
+              "Protocol",
+              ".Events ? T : never]) => void) => this"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.removeListener.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.removeListener.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "(payload: T extends symbol ? any : ",
+                  "Protocol",
+                  ".Events[T extends keyof ",
+                  "Protocol",
+                  ".Events ? T : never]) => void"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CDPSession.once",
+            "type": "Function",
+            "tags": [],
+            "label": "once",
+            "description": [],
+            "signature": [
+              "<T extends symbol | keyof ",
+              "Protocol",
+              ".Events>(event: T, listener: (payload: T extends symbol ? any : ",
+              "Protocol",
+              ".Events[T extends keyof ",
+              "Protocol",
+              ".Events ? T : never]) => void) => this"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.once.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "event",
+                "description": [],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.once.$2",
+                "type": "Function",
+                "tags": [],
+                "label": "listener",
+                "description": [],
+                "signature": [
+                  "(payload: T extends symbol ? any : ",
+                  "Protocol",
+                  ".Events[T extends keyof ",
+                  "Protocol",
+                  ".Events ? T : never]) => void"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CDPSession.send",
+            "type": "Function",
+            "tags": [],
+            "label": "send",
+            "description": [],
+            "signature": [
+              "<T extends keyof ",
+              "Protocol",
+              ".CommandParameters>(method: T, params?: ",
+              "Protocol",
+              ".CommandParameters[T] | undefined) => Promise<",
+              "Protocol",
+              ".CommandReturnValues[T]>"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.send.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "method",
+                "description": [
+                  "Protocol method name."
+                ],
+                "signature": [
+                  "T"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.CDPSession.send.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "params",
+                "description": [
+                  "Optional method parameters."
+                ],
+                "signature": [
+                  "Protocol",
+                  ".CommandParameters[T] | undefined"
+                ],
+                "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.CDPSession.detach",
+            "type": "Function",
+            "tags": [],
+            "label": "detach",
+            "description": [
+              "\nDetaches the CDPSession from the target. Once detached, the CDPSession object won't emit any events and can't be\nused to send messages."
+            ],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "node_modules/playwright/node_modules/playwright-core/types/types.d.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.ElasticsearchRoleDescriptor",
+        "type": "Interface",
+        "tags": [],
+        "label": "ElasticsearchRoleDescriptor",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ElasticsearchRoleDescriptor.cluster",
+            "type": "Array",
+            "tags": [],
+            "label": "cluster",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ElasticsearchRoleDescriptor.indices",
+            "type": "Array",
+            "tags": [],
+            "label": "indices",
+            "description": [],
+            "signature": [
+              "{ names: string[]; privileges: string[]; allow_restricted_indices?: boolean | undefined; }[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ElasticsearchRoleDescriptor.applications",
+            "type": "Array",
+            "tags": [],
+            "label": "applications",
+            "description": [],
+            "signature": [
+              "{ application: string; privileges: string[]; resources: string[]; }[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ElasticsearchRoleDescriptor.run_as",
+            "type": "Array",
+            "tags": [],
+            "label": "run_as",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.KibanaRole",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaRole",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaRole.elasticsearch",
+            "type": "Object",
+            "tags": [],
+            "label": "elasticsearch",
+            "description": [],
+            "signature": [
+              "{ cluster: string[]; indices: { names: string[]; privileges: string[]; allow_restricted_indices?: boolean | undefined; }[]; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.KibanaRole.kibana",
+            "type": "Array",
+            "tags": [],
+            "label": "kibana",
+            "description": [],
+            "signature": [
+              "{ base: string[]; feature: Record<string, string[]>; spaces: string[]; }[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/common/services/custom_role.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/scout",
         "id": "def-common.Locator",
@@ -5970,6 +6943,127 @@
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.PageObjects.collapsibleNav",
+            "type": "Object",
+            "tags": [],
+            "label": "collapsibleNav",
+            "description": [],
+            "signature": [
+              "CollapsibleNav"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/page_objects/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.SamlAuth",
+        "type": "Interface",
+        "tags": [],
+        "label": "SamlAuth",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/core_fixtures.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlAuth.session",
+            "type": "Object",
+            "tags": [],
+            "label": "session",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.SamlSessionManager",
+                "text": "SamlSessionManager"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlAuth.customRoleName",
+            "type": "string",
+            "tags": [],
+            "label": "customRoleName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.SamlAuth.setCustomRole",
+            "type": "Function",
+            "tags": [],
+            "label": "setCustomRole",
+            "description": [],
+            "signature": [
+              "(role: ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaRole",
+                "text": "KibanaRole"
+              },
+              " | ",
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ElasticsearchRoleDescriptor",
+                "text": "ElasticsearchRoleDescriptor"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/core_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout",
+                "id": "def-common.SamlAuth.setCustomRole.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "role",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.KibanaRole",
+                    "text": "KibanaRole"
+                  },
+                  " | ",
+                  {
+                    "pluginId": "@kbn/scout",
+                    "scope": "common",
+                    "docId": "kibKbnScoutPluginApi",
+                    "section": "def-common.ElasticsearchRoleDescriptor",
+                    "text": "ElasticsearchRoleDescriptor"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/worker/core_fixtures.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -5993,7 +7087,13 @@
             "label": "browserAuth",
             "description": [],
             "signature": [
-              "BrowserAuthFixture"
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.BrowserAuthFixture",
+                "text": "BrowserAuthFixture"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
             "deprecated": false,
@@ -6058,17 +7158,6 @@
         "tags": [],
         "label": "ScoutParallelWorkerFixtures",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/scout",
-            "scope": "common",
-            "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutParallelWorkerFixtures",
-            "text": "ScoutParallelWorkerFixtures"
-          },
-          " extends ",
-          "ApiParallelWorkerFixtures"
-        ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -6180,6 +7269,26 @@
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6201,7 +7310,7 @@
           },
           " extends Pick<",
           "PlaywrightTestConfig",
-          "<{}, {}>, \"workers\" | \"testDir\" | \"globalSetup\">"
+          "<{}, {}>, \"workers\" | \"testDir\">"
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
         "deprecated": false,
@@ -6227,20 +7336,6 @@
             "description": [],
             "signature": [
               "2 | 1 | 3 | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutPlaywrightOptions.globalSetup",
-            "type": "string",
-            "tags": [],
-            "label": "globalSetup",
-            "description": [],
-            "signature": [
-              "string | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
@@ -6413,11 +7508,14 @@
           },
           {
             "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutTestConfig.license",
+            "id": "def-common.ScoutTestConfig.cloudHostName",
             "type": "string",
             "tags": [],
-            "label": "license",
+            "label": "cloudHostName",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6428,6 +7526,17 @@
             "type": "string",
             "tags": [],
             "label": "cloudUsersFilePath",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutTestConfig.license",
+            "type": "string",
+            "tags": [],
+            "label": "license",
             "description": [],
             "path": "src/platform/packages/shared/kbn-scout/src/types/test_config.d.ts",
             "deprecated": false,
@@ -6497,7 +7606,13 @@
             "label": "browserAuth",
             "description": [],
             "signature": [
-              "BrowserAuthFixture"
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.BrowserAuthFixture",
+                "text": "BrowserAuthFixture"
+              }
             ],
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
@@ -6551,6 +7666,20 @@
             "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutTestFixtures.perfTracker",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "perfTracker",
+            "description": [],
+            "signature": [
+              "void"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6590,6 +7719,20 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutTestOptions.configName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "configName",
+            "description": [],
+            "signature": [
+              "\"local\" | \"cloud_ech\" | \"cloud_mki\""
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.ScoutTestOptions.VALID_CONFIG_MARKER",
             "type": "boolean",
             "tags": [],
@@ -6618,7 +7761,13 @@
             "text": "ScoutWorkerFixtures"
           },
           " extends ",
-          "ApiFixtures"
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ApiServicesFixture",
+            "text": "ApiServicesFixture"
+          }
         ],
         "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
         "deprecated": false,
@@ -6748,6 +7897,26 @@
           },
           {
             "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutWorkerFixtures.apiServices",
+            "type": "Object",
+            "tags": [],
+            "label": "apiServices",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.ApiServicesFixture",
+                "text": "ApiServicesFixture"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
             "id": "def-common.ScoutWorkerFixtures.apmSynthtraceEsClient",
             "type": "Object",
             "tags": [],
@@ -6803,8 +7972,8 @@
                 "pluginId": "@kbn/apm-synthtrace-client",
                 "scope": "common",
                 "docId": "kibKbnApmSynthtraceClientPluginApi",
-                "section": "def-common.OtelDocument",
-                "text": "OtelDocument"
+                "section": "def-common.ApmOtelFields",
+                "text": "ApmOtelFields"
               },
               ">"
             ],
@@ -6897,6 +8066,20 @@
             "type": "Array",
             "tags": [],
             "label": "DEPLOYMENT_AGNOSTIC",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/packages/shared/kbn-scout/src/playwright/tags.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.tags.PERFORMANCE",
+            "type": "Array",
+            "tags": [],
+            "label": "PERFORMANCE",
             "description": [],
             "signature": [
               "string[]"

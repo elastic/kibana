@@ -8,7 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type { ComponentMeta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { EuiPanel } from '@elastic/eui';
 import { SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
@@ -93,7 +93,7 @@ export const getStory = (
         </FieldRowProvider>
       ),
     ],
-  } as ComponentMeta<typeof Component>);
+  } as Meta<typeof Component>);
 
 /**
  * Default argument values for a {@link FieldInput} Storybook story.

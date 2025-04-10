@@ -35,6 +35,11 @@ export const MOCK_REINDEX_DEPRECATION: EnrichedDeprecationInfo = {
   index: 'reindex_index',
   correctiveAction: {
     type: 'reindex',
+    metadata: {
+      isClosedIndex: false,
+      isFrozenIndex: false,
+      isInDataStream: false,
+    },
   },
 };
 

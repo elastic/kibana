@@ -8,17 +8,15 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { useGetCaseConfiguration } from './use_get_case_configuration';
 import * as api from './api';
-import type { AppMockRenderer } from '../../common/mock';
-import { mockedTestProvidersOwner, createAppMockRenderer } from '../../common/mock';
+
+import { TestProviders, mockedTestProvidersOwner } from '../../common/mock';
 import { initialConfiguration } from './utils';
+import React from 'react';
 
 jest.mock('./api');
 
 describe('Use get case configuration hook', () => {
-  let appMockRender: AppMockRenderer;
-
   beforeEach(() => {
-    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
   });
 
@@ -36,7 +34,7 @@ describe('Use get case configuration hook', () => {
     ]);
 
     const { result } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     /**
@@ -58,7 +56,7 @@ describe('Use get case configuration hook', () => {
     ]);
 
     const { result } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     /**
@@ -73,7 +71,7 @@ describe('Use get case configuration hook', () => {
     spy.mockResolvedValue([]);
 
     const { result } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: TestProviders,
     });
 
     /**
@@ -83,13 +81,12 @@ describe('Use get case configuration hook', () => {
   });
 
   it('returns the initial configuration if the owner is undefined', async () => {
-    appMockRender = createAppMockRenderer({ owner: [] });
     const spy = jest.spyOn(api, 'getCaseConfigure');
 
     spy.mockResolvedValue([]);
 
     const { result } = renderHook(() => useGetCaseConfiguration(), {
-      wrapper: appMockRender.AppWrapper,
+      wrapper: (props) => <TestProviders {...props} owner={[]} />,
     });
 
     /**

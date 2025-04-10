@@ -83,7 +83,6 @@ import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import type { IRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
 import { createRuleMonitoringService } from './lib/detection_engine/rule_monitoring';
-import type { CreateRuleOptions } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import {
   isLegacyNotificationRuleExecutor,
@@ -325,19 +324,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     let ruleDataClient: IRuleDataClient | null = null;
     let previewRuleDataClient: IRuleDataClient | null = null;
 
-    // rule options are used both to create and preview rules.
-    const ruleOptions: CreateRuleOptions = {
-      experimentalFeatures,
-      logger: this.logger,
-      ml: plugins.ml,
-      eventsTelemetry: this.telemetryEventsSender,
-      licensing: plugins.licensing,
-      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
-        endpointAppContextService: this.endpointAppContextService,
-        osqueryCreateActionService: plugins.osquery.createActionService,
-      }),
-    };
-
     const ruleDataServiceOptions = {
       feature: SERVER_APP_ID,
       registrationContext: 'security',
@@ -375,42 +361,40 @@ export class Plugin implements ISecuritySolutionPlugin {
       experimentalFeatures: config.experimentalFeatures,
       alerting: plugins.alerting,
       analytics: core.analytics,
+      eventsTelemetry: this.telemetryEventsSender,
+      licensing: plugins.licensing,
+      scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
+        endpointAppContextService: this.endpointAppContextService,
+        osqueryCreateActionService: plugins.osquery?.createActionService,
+      }),
     };
 
     const securityRuleTypeWrapper = createSecurityRuleTypeWrapper(securityRuleTypeOptions);
 
-    plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType({ ...ruleOptions })));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createEqlAlertType()));
     if (!experimentalFeatures.esqlRulesDisabled) {
-      plugins.alerting.registerType(
-        securityRuleTypeWrapper(createEsqlAlertType({ ...ruleOptions }))
-      );
+      plugins.alerting.registerType(securityRuleTypeWrapper(createEsqlAlertType()));
     }
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
-          ...ruleOptions,
           id: SAVED_QUERY_RULE_TYPE_ID,
           name: 'Saved Query Rule',
         })
       )
     );
-    plugins.alerting.registerType(
-      securityRuleTypeWrapper(createIndicatorMatchAlertType(ruleOptions))
-    );
-    plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(ruleOptions)));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createIndicatorMatchAlertType()));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createMlAlertType(plugins.ml)));
     plugins.alerting.registerType(
       securityRuleTypeWrapper(
         createQueryAlertType({
-          ...ruleOptions,
           id: QUERY_RULE_TYPE_ID,
           name: 'Custom Query Rule',
         })
       )
     );
-    plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
-    plugins.alerting.registerType(
-      securityRuleTypeWrapper(createNewTermsAlertType({ ...ruleOptions }))
-    );
+    plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType()));
+    plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType()));
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(
@@ -423,7 +407,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       ruleDataService,
       logger,
       ruleDataClient,
-      ruleOptions,
       core.getStartServices,
       securityRuleTypeOptions,
       previewRuleDataClient,
@@ -619,8 +602,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
-      assistantAttackDiscoverySchedulingEnabled:
-        config.experimentalFeatures.assistantAttackDiscoverySchedulingEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

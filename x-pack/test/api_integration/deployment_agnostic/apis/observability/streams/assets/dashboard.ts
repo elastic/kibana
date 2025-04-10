@@ -22,8 +22,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   const SPACE_ID = 'default';
   const ARCHIVES = [
-    'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
-    'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json',
+    'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
     'x-pack/test/api_integration/fixtures/kbn_archiver/streams/tagged_dashboard.json',
   ];
 
@@ -53,23 +53,29 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   async function linkDashboard(id: string) {
-    const response = await apiClient.fetch('PUT /api/streams/{name}/dashboards/{dashboardId}', {
-      params: { path: { name: 'logs', dashboardId: id } },
-    });
+    const response = await apiClient.fetch(
+      'PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+      {
+        params: { path: { name: 'logs', dashboardId: id } },
+      }
+    );
 
     expect(response.status).to.be(200);
   }
 
   async function unlinkDashboard(id: string) {
-    const response = await apiClient.fetch('DELETE /api/streams/{name}/dashboards/{dashboardId}', {
-      params: { path: { name: 'logs', dashboardId: id } },
-    });
+    const response = await apiClient.fetch(
+      'DELETE /api/streams/{name}/dashboards/{dashboardId} 2023-10-31',
+      {
+        params: { path: { name: 'logs', dashboardId: id } },
+      }
+    );
 
     expect(response.status).to.be(200);
   }
 
   async function bulkLinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
       params: {
         path: { name: 'logs' },
         body: {
@@ -88,7 +94,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   }
 
   async function bulkUnlinkDashboard(...ids: string[]) {
-    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
+    const response = await apiClient.fetch('POST /api/streams/{name}/dashboards/_bulk 2023-10-31', {
       params: {
         path: { name: 'logs' },
         body: {
@@ -129,12 +135,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       after(async () => {
-        await unloadDashboards();
         await unlinkDashboard(SEARCH_DASHBOARD_ID);
+        await unloadDashboards();
       });
 
       it('lists the dashboard in the stream response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}', {
+        const response = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
 
@@ -144,7 +150,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('lists the dashboard in the dashboards get response', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
 
@@ -161,7 +167,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('dropped all dashboards', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -171,10 +177,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('recovers on write and lists the linked dashboard ', async () => {
-          await unlinkDashboard(SEARCH_DASHBOARD_ID);
           await linkDashboard(SEARCH_DASHBOARD_ID);
 
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -190,7 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('no longer lists the dashboard as a linked asset', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -214,7 +219,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('shows the linked dashboards', async () => {
-        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
           params: { path: { name: 'logs' } },
         });
 
@@ -227,7 +232,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
 
         it('only shows the remaining linked dashboard', async () => {
-          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards', {
+          const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
             params: { path: { name: 'logs' } },
           });
 
@@ -235,6 +240,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           expect(response.body.dashboards[0].id).to.eql(BASIC_DASHBOARD_ID);
         });
+      });
+    });
+
+    describe('on class stream that has not been touched yet', () => {
+      before(async () => {
+        await esClient.indices.createDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      after(async () => {
+        await esClient.indices.deleteDataStream({
+          name: 'logs-testlogs-default',
+        });
+      });
+      it('does not list any dashboards but returns 200', async () => {
+        const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+          params: { path: { name: 'logs-testlogs-default' } },
+        });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.dashboards.length).to.eql(0);
       });
     });
 
@@ -253,7 +279,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       describe('after creating multiple dashboards', () => {
         it('suggests dashboards to link', async () => {
           const response = await apiClient.fetch(
-            'POST /api/streams/{name}/dashboards/_suggestions',
+            'POST /internal/streams/{name}/dashboards/_suggestions',
             {
               params: { path: { name: 'logs' }, body: { tags: [] }, query: { query: '' } },
             }
@@ -265,7 +291,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('filters suggested dashboards based on tags', async () => {
           const response = await apiClient.fetch(
-            'POST /api/streams/{name}/dashboards/_suggestions',
+            'POST /internal/streams/{name}/dashboards/_suggestions',
             {
               params: { path: { name: 'logs' }, body: { tags: [TAG_ID] }, query: { query: '' } },
             }
@@ -277,7 +303,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         it('filters suggested dashboards based on the query', async () => {
           const response = await apiClient.fetch(
-            'POST /api/streams/{name}/dashboards/_suggestions',
+            'POST /internal/streams/{name}/dashboards/_suggestions',
             {
               params: {
                 path: { name: 'logs' },

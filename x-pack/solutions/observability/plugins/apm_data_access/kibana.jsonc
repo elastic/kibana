@@ -13,7 +13,8 @@
       "apm_data_access"
     ],
     "requiredPlugins": [
-      "data"
+      "data",
+      "apmSourcesAccess"
     ],
     "optionalPlugins": [
       "security"

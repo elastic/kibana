@@ -17,7 +17,7 @@ import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 export function StreamDetailDashboardsView({
   definition,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
 }) {
   const [query, setQuery] = useState('');
 
@@ -33,7 +33,7 @@ export function StreamDetailDashboardsView({
 
   const filteredDashboards = useMemo(() => {
     return linkedDashboards.filter((dashboard) => {
-      return dashboard.label.toLowerCase().includes(query.toLowerCase());
+      return dashboard.title.toLowerCase().includes(query.toLowerCase());
     });
   }, [linkedDashboards, query]);
 
@@ -53,7 +53,7 @@ export function StreamDetailDashboardsView({
                   setIsUnlinkLoading(true);
 
                   await removeDashboards(selectedDashboards);
-                  await dashboardsFetch.refresh();
+                  dashboardsFetch.refresh();
 
                   setSelectedDashboards([]);
                 } finally {
@@ -91,6 +91,7 @@ export function StreamDetailDashboardsView({
       </EuiFlexItem>
       <EuiFlexItem>
         <DashboardsTable
+          entityId={definition?.stream.name}
           dashboards={filteredDashboards}
           loading={dashboardsFetch.loading}
           selectedDashboards={selectedDashboards}
@@ -102,7 +103,7 @@ export function StreamDetailDashboardsView({
             entityId={definition.stream.name}
             onAddDashboards={async (dashboards) => {
               await addDashboards(dashboards);
-              await dashboardsFetch.refresh();
+              dashboardsFetch.refresh();
               setIsAddDashboardFlyoutOpen(false);
             }}
             onClose={() => {

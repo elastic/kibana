@@ -10,8 +10,8 @@ import { fireEvent, screen } from '@testing-library/react';
 import type { UserRepresentationProps } from './removable_user';
 import { RemovableUser } from './removable_user';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
-import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions } from '../../common/mock';
+
+import { noUpdateCasesPermissions, renderWithTestingProviders } from '../../common/mock';
 
 describe('UserRepresentation', () => {
   const dataTestSubjGroup = `user-profile-assigned-user-${userProfiles[0].user.username}-remove-group`;
@@ -20,25 +20,22 @@ describe('UserRepresentation', () => {
   const dataTestSubjCrossUnknown = `user-profile-assigned-user-unknownId-remove-button`;
 
   let defaultProps: UserRepresentationProps;
-  let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     defaultProps = {
       assignee: { uid: userProfiles[0].uid, profile: userProfiles[0] },
       onRemoveAssignee: jest.fn(),
     };
-
-    appMockRender = createAppMockRenderer();
   });
 
   it('does not show the cross button when the user is not hovering over the row', () => {
-    appMockRender.render(<RemovableUser {...defaultProps} />);
+    renderWithTestingProviders(<RemovableUser {...defaultProps} />);
 
     expect(screen.queryByTestId(dataTestSubjCross)).toHaveStyle('opacity: 0');
   });
 
   it('show the cross button when the user is hovering over the row', () => {
-    appMockRender.render(<RemovableUser {...defaultProps} />);
+    renderWithTestingProviders(<RemovableUser {...defaultProps} />);
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
 
@@ -46,7 +43,7 @@ describe('UserRepresentation', () => {
   });
 
   it('show the cross button when hovering over the row of an unknown user', () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableUser {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
     );
 
@@ -56,7 +53,7 @@ describe('UserRepresentation', () => {
   });
 
   it('shows and then removes the cross button when the user hovers and removes the mouse from over the row', () => {
-    appMockRender.render(<RemovableUser {...defaultProps} />);
+    renderWithTestingProviders(<RemovableUser {...defaultProps} />);
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
     expect(screen.getByTestId(dataTestSubjCross)).toHaveStyle('opacity: 1');
@@ -66,7 +63,7 @@ describe('UserRepresentation', () => {
   });
 
   it("renders unknown for the user's information", () => {
-    appMockRender.render(
+    renderWithTestingProviders(
       <RemovableUser {...{ ...defaultProps, assignee: { uid: 'unknownId' } }} />
     );
 
@@ -74,8 +71,9 @@ describe('UserRepresentation', () => {
   });
 
   it('does not show the cross button when the user is hovering over the row and does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
-    appMockRender.render(<RemovableUser {...defaultProps} />);
+    renderWithTestingProviders(<RemovableUser {...defaultProps} />, {
+      wrapperProps: { permissions: noUpdateCasesPermissions() },
+    });
 
     fireEvent.mouseEnter(screen.getByTestId(dataTestSubjGroup));
 

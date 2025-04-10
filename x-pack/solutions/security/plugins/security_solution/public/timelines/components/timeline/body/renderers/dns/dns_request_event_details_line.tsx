@@ -30,6 +30,7 @@ interface Props {
   userDomain: string | null | undefined;
   userName: string | null | undefined;
   winlogEventId: string | null | undefined;
+  scopeId: string;
 }
 
 export const DnsRequestEventDetailsLine = React.memo<Props>(
@@ -48,11 +49,13 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
     userDomain,
     userName,
     winlogEventId,
+    scopeId,
   }) => {
     return (
       <>
         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="none" wrap={true}>
           <UserHostWorkingDir
+            scopeId={scopeId}
             contextId={contextId}
             eventId={id}
             hostName={hostName}
@@ -68,6 +71,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="dns.question.name"
@@ -86,6 +90,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="dns.question.type"
@@ -104,6 +109,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="dns.resolved_ip"
@@ -125,6 +131,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               </TokensFlexItem>
               <TokensFlexItem component="span" grow={false}>
                 <DraggableBadge
+                  scopeId={scopeId}
                   contextId={contextId}
                   eventId={id}
                   field="dns.response_code"
@@ -145,6 +152,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
 
           <TokensFlexItem component="span" grow={false}>
             <ProcessDraggableWithNonExistentProcess
+              scopeId={scopeId}
               contextId={contextId}
               endgamePid={undefined}
               endgameProcessName={undefined}
@@ -160,6 +168,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               {!isNillEmptyOrNotFinite(eventCode) ? (
                 <TokensFlexItem component="span" grow={false}>
                   <DraggableBadge
+                    scopeId={scopeId}
                     contextId={contextId}
                     eventId={id}
                     field="event.code"
@@ -171,6 +180,7 @@ export const DnsRequestEventDetailsLine = React.memo<Props>(
               ) : (
                 <TokensFlexItem component="span" grow={false}>
                   <DraggableBadge
+                    scopeId={scopeId}
                     contextId={contextId}
                     eventId={id}
                     iconType="logoWindows"
