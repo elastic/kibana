@@ -93,8 +93,8 @@ export function RoutingStreamEntry({
         )}
         <EuiFlexItem grow={false}>
           <EuiLink
-            href={router.link('/{key}/{tab}/{subtab}', {
-              path: { key: child.destination, tab: 'management', subtab: 'route' },
+            href={router.link('/{key}/management/{tab}', {
+              path: { key: child.destination, tab: 'route' },
             })}
             data-test-subj="streamsAppRoutingStreamEntryButton"
           >
