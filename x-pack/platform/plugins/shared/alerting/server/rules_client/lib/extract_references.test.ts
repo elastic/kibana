@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { RecoveredActionGroup } from '../../../common';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { extractReferences } from './extract_references';
