@@ -50,9 +50,9 @@ export const EditContextPanel: React.FC = () => {
     [onChangeSourceFields, sourceFields, usageTracker]
   );
 
-  const handleDocSizeButtonGroupChange = (docSize: number) => {
+  const handleDocSizeButtonGroupChange = (value: number) => {
     usageTracker?.click(AnalyticsEvents.editContextDocSizeChanged);
-    onChangeSize(docSize);
+    onChangeSize(value);
   };
 
   return (
