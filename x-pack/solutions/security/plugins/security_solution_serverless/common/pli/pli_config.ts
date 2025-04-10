@@ -22,7 +22,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.alertsSummary,
       ProductFeatureKey.configurations,
     ],
-    // neither of these addons are available in ai_soc product line
+    // neither of these tiers are available in ai_soc product line
     essentials: [],
     complete: [],
   },
