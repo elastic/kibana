@@ -12,8 +12,9 @@ import { combineLatest, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 import { useGridLayoutContext } from '../use_grid_layout_context';
+import { getTopOffsetForRow } from './grid_panel';
 
-export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) => {
+export const GridPanelDragPreview = React.memo(() => {
   const { gridLayoutStateManager } = useGridLayoutContext();
 
   const dragPreviewRef = useRef<HTMLDivElement | null>(null);
@@ -28,6 +29,12 @@ export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) =>
         .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
         .subscribe(([activePanel, proposedGridLayout]) => {
           if (!dragPreviewRef.current) return;
+          const interactionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+          const rowId = interactionEvent?.targetRow
+          if (!rowId || !proposedGridLayout) return;
+
+          const offset = getTopOffsetForRow(rowId, proposedGridLayout);
+          console.log('offset', offset);
 
           if (!activePanel || !proposedGridLayout?.[rowId].panels[activePanel.id]) {
             dragPreviewRef.current.style.display = 'none';
@@ -36,8 +43,8 @@ export const GridPanelDragPreview = React.memo(({ rowId }: { rowId: string }) =>
             dragPreviewRef.current.style.display = 'block';
             dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
             dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
-            dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            dragPreviewRef.current.style.gridRowStart = `${panel.row + 1 + offset}`;
+            dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height + offset}`;
           }
         });
 

@@ -47,7 +47,6 @@ export const getGridLayoutStateManagerMock = (overrides?: Partial<GridLayoutStat
       keyboardDragTopLimit: 0,
     }),
     panelRefs: { current: {} },
-    rowRefs: { current: {} },
     headerRefs: { current: {} },
     accessMode$: new BehaviorSubject<GridAccessMode>('EDIT'),
     interactionEvent$: new BehaviorSubject<PanelInteractionEvent | undefined>(undefined),

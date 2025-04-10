@@ -299,8 +299,8 @@ export const renderGridExampleApp = (
 const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
   const gridColor = transparentize(euiTheme.colors.backgroundFilledAccentSecondary, 0.2);
   return css({
-    // background for grid row that is being targetted
-    '.kbnGridRow--targeted': {
+    // background for grid layout when active
+    '&.kbnGridLayout--active': {
       backgroundPosition: `top calc((var(--kbnGridGutterSize) / 2) * -1px) left calc((var(--kbnGridGutterSize) / 2) * -1px)`,
       backgroundSize: `calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px) calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px)`,
       backgroundImage: `linear-gradient(to right, ${gridColor} 1px, transparent 1px), linear-gradient(to bottom, ${gridColor} 1px, transparent 1px)`,

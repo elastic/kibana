@@ -10,18 +10,21 @@
 import classNames from 'classnames';
 import deepEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { combineLatest, pairwise, map, distinctUntilChanged } from 'rxjs';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
-import { GridAccessMode, GridLayoutData, GridSettings, UseCustomDragHandle } from './types';
+import { GridAccessMode, GridLayoutData, GridPanelData, GridSettings, UseCustomDragHandle } from './types';
 import { GridLayoutContext, GridLayoutContextType } from './use_grid_layout_context';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
-import { getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
+import { getPanelKeysInOrder, getRowKeysInOrder, resolveGridRow } from './utils/resolve_grid_row';
+import { GridRowHeader } from './grid_row/grid_row_header';
+import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
+import { GridPanel } from './grid_panel';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -51,7 +54,35 @@ export const GridLayout = ({
     accessMode,
   });
 
+  // offset layout vs saved layout (?)
+  // we'd have an object here withz
+
+  const rows = gridLayoutStateManager.gridLayout$.value;
+
   const [rowIdsInOrder, setRowIdsInOrder] = useState<string[]>(getRowKeysInOrder(layout));
+
+  //TODO: move this to state so the updates are not so frequent
+  const headersAndPanelsIds = rowIdsInOrder.flatMap((rowId) => {
+    let headerAndPanels = []
+    const row = rows[rowId];
+    const panels = row.panels;
+    const panelIdsInOrder = getPanelKeysInOrder(panels);
+    if (row.order!==0){
+      headerAndPanels.push(['header', rowId, row.isCollapsed])
+    }
+    return [...headerAndPanels ,...panelIdsInOrder.map((panelId) => [panelId, rowId, row.isCollapsed])];
+  })
+  console.log(headersAndPanelsIds)
+
+
+
+  //  const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
+  //   getPanelKeysInOrder(rows[rowIdsInOrder[0]].panels)
+  // );
+  // const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
+
+
+
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
@@ -154,6 +185,38 @@ export const GridLayout = ({
     [renderPanelContents, useCustomDragHandle, gridLayoutStateManager]
   );
 
+      useEffect(() => {
+      /**
+       * When the user is interacting with an element, the page can grow, but it cannot
+       * shrink. This is to stop a behaviour where the page would scroll up automatically
+       * making the panel shrink or grow unpredictably.
+       */
+      const interactionStyleSubscription = combineLatest([
+        gridLayoutStateManager.interactionEvent$,
+      ]).subscribe(([ interactionEvent]) => {
+        if (!layoutRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
+        if (!interactionEvent) {
+          layoutRef.current.classList.remove('kbnGridLayout--active'); // todo: fix how these styles display for header - should they be visible for the whole page till the bottom?
+          return;
+        }
+        layoutRef.current.classList.add('kbnGridLayout--active');
+      });
+
+      return () => {
+        interactionStyleSubscription.unsubscribe();
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+
+  const toggleIsCollapsed = useCallback((rowwId: string) => {
+    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+    newLayout[rowwId].isCollapsed = !newLayout[rowwId].isCollapsed;
+    gridLayoutStateManager.gridLayout$.next(newLayout);
+  }, [gridLayoutStateManager.gridLayout$]);
+
+
+
   return (
     <GridLayoutContext.Provider value={memoizedContext}>
       <GridHeightSmoother>
@@ -168,15 +231,46 @@ export const GridLayout = ({
             styles.hasActivePanel,
             styles.singleColumn,
             styles.hasExpandedPanel,
+            stylesRow.fullHeight,
+            stylesRow.grid,
           ]}
         >
-          {rowIdsInOrder.map((rowId) => (
-            <GridRow key={rowId} rowId={rowId} />
-          ))}
+          {headersAndPanelsIds.map(([typeId, rowId, isCollapsed]) => {
+            if (typeId === 'header') {
+              return <GridRowHeader rowId={rowId} toggleIsCollapsed={toggleIsCollapsed} key={rowId} />
+            }
+            if (!isCollapsed) {
+              return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />
+            }
+            return null;
+            })}
+          <GridPanelDragPreview />
         </div>
       </GridHeightSmoother>
     </GridLayoutContext.Provider>
   );
+};
+
+ // <GridRow key={rowId} rowId={rowId} toggleIsCollapsed={toggleIsCollapsed}/>
+
+const stylesRow = {
+  fullHeight: css({
+    height: '100%',
+  }),
+  grid: css({
+    position: 'relative',
+    justifyItems: 'stretch',
+    display: 'grid',
+    gap: 'calc(var(--kbnGridGutterSize) * 1px)',
+    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
+    gridTemplateColumns: `repeat(
+          var(--kbnGridColumnCount),
+          calc(
+            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
+              var(--kbnGridColumnCount)
+          )
+        )`,
+  }),
 };
 
 const styles = {

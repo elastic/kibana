@@ -33,11 +33,13 @@ export const GridHeightSmoother = React.memo(
 
         if (!interactionEvent) {
           smoothHeightRef.current.style.minHeight = `${dimensions.height}px`;
+          smoothHeightRef.current.classList.remove('kbnGridLayout--active');
           return;
         }
         smoothHeightRef.current.style.minHeight = `${
           smoothHeightRef.current.getBoundingClientRect().height
         }px`;
+        smoothHeightRef.current.classList.add('kbnGridLayout--active');
       });
 
       return () => {
@@ -49,7 +51,7 @@ export const GridHeightSmoother = React.memo(
     return (
       <div
         ref={smoothHeightRef}
-        className={'kbnGridWrapper'}
+        className="kbnGridWrapper"
         css={[styles.heightSmoothing, styles.hasActivePanel]}
       >
         {children}

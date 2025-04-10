@@ -9,10 +9,9 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
-import { css } from '@emotion/react';
 
 import { GridPanelDragPreview } from '../grid_panel/grid_panel_drag_preview';
 import { GridPanel } from '../grid_panel';
@@ -22,11 +21,11 @@ import { getPanelKeysInOrder } from '../utils/resolve_grid_row';
 
 export interface GridRowProps {
   rowId: string;
+  toggleIsCollapsed
 }
 
-export const GridRow = React.memo(({ rowId }: GridRowProps) => {
+export const GridRow = React.memo(({ rowId, toggleIsCollapsed }: GridRowProps) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
-  const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
   const currentRow = gridLayoutStateManager.gridLayout$.value[rowId];
 
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
@@ -36,19 +35,7 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
 
   useEffect(
     () => {
-      /** Update the styles of the grid row via a subscription to prevent re-renders */
-      const interactionStyleSubscription = gridLayoutStateManager.interactionEvent$
-        .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-        .subscribe((interactionEvent) => {
-          const rowRef = gridLayoutStateManager.rowRefs.current[rowId];
-          if (!rowRef) return;
-          const targetRow = interactionEvent?.targetRow;
-          if (rowId === targetRow && interactionEvent) {
-            rowRef.classList.add('kbnGridRow--targeted');
-          } else {
-            rowRef.classList.remove('kbnGridRow--targeted');
-          }
-        });
+    
 
       /**
        * This subscription ensures that the row will re-render when one of the following changes:
@@ -103,7 +90,6 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
       });
 
       return () => {
-        interactionStyleSubscription.unsubscribe();
         gridLayoutSubscription.unsubscribe();
         rowStateSubscription.unsubscribe();
       };
@@ -111,76 +97,24 @@ export const GridRow = React.memo(({ rowId }: GridRowProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [rowId]
   );
-
-  const toggleIsCollapsed = useCallback(() => {
-    const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-    newLayout[rowId].isCollapsed = !newLayout[rowId].isCollapsed;
-    gridLayoutStateManager.gridLayout$.next(newLayout);
-  }, [rowId, gridLayoutStateManager.gridLayout$]);
-
-  useEffect(() => {
-    /**
-     * Set `aria-expanded` without passing the expanded state as a prop to `GridRowHeader` in order
-     * to prevent `GridRowHeader` from rerendering when this state changes
-     */
-    if (!collapseButtonRef.current) return;
-    collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
-  }, [isCollapsed]);
-
   return (
-    <div
-      css={styles.fullHeight}
-      className={classNames('kbnGridRowContainer', {
-        'kbnGridRowContainer--collapsed': isCollapsed,
-      })}
-    >
-      {currentRow.order !== 0 && (
-        <GridRowHeader
-          rowId={rowId}
-          toggleIsCollapsed={toggleIsCollapsed}
-          collapseButtonRef={collapseButtonRef}
-        />
-      )}
-      {!isCollapsed && (
-        <div
-          id={`kbnGridRow-${rowId}`}
-          className={'kbnGridRow'}
-          ref={(element: HTMLDivElement | null) =>
-            (gridLayoutStateManager.rowRefs.current[rowId] = element)
-          }
-          css={[styles.fullHeight, styles.grid]}
-          role="region"
-          aria-labelledby={`kbnGridRowTitle-${rowId}`}
-        >
-          {/* render the panels **in order** for accessibility, using the memoized panel components */}
-          {panelIdsInOrder.map((panelId) => (
-            <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
-          ))}
-          <GridPanelDragPreview rowId={rowId} />
-        </div>
-      )}
-    </div>
+    < >
+      
+        {currentRow.order !== 0 && (
+          <GridRowHeader rowId={rowId} toggleIsCollapsed={toggleIsCollapsed} />
+        )}
+        {!isCollapsed && (
+          <>
+            {/* render the panels **in order** for accessibility, using the memoized panel components */}
+            {panelIdsInOrder.map((panelId) => (
+              <GridPanel key={panelId} panelId={panelId} rowId={rowId} />
+            ))}
+            <GridPanelDragPreview rowId={rowId} />
+          </>
+        )}
+      </>
   );
 });
 
-const styles = {
-  fullHeight: css({
-    height: '100%',
-  }),
-  grid: css({
-    position: 'relative',
-    justifyItems: 'stretch',
-    display: 'grid',
-    gap: 'calc(var(--kbnGridGutterSize) * 1px)',
-    gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
-    gridTemplateColumns: `repeat(
-          var(--kbnGridColumnCount),
-          calc(
-            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
-              var(--kbnGridColumnCount)
-          )
-        )`,
-  }),
-};
 
 GridRow.displayName = 'KbnGridLayoutRow';

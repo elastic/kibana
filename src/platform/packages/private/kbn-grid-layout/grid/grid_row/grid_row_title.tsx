@@ -30,14 +30,12 @@ export const GridRowTitle = React.memo(
     editTitleOpen,
     setEditTitleOpen,
     toggleIsCollapsed,
-    collapseButtonRef,
   }: {
     readOnly: boolean;
     rowId: string;
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
-    toggleIsCollapsed: () => void;
-    collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
+    toggleIsCollapsed: (rowId: string) => void;
   }) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
 
@@ -81,18 +79,20 @@ export const GridRowTitle = React.memo(
       },
       [rowId, setEditTitleOpen, gridLayoutStateManager.gridLayout$]
     );
+    const toggleIsCollapsedMemoized = useCallback(() => {
+      toggleIsCollapsed(rowId);
+    }, [rowId, toggleIsCollapsed]);
 
     return (
       <>
         <EuiFlexItem grow={false} css={styles.titleButton}>
           <EuiButtonEmpty
-            buttonRef={collapseButtonRef}
             color="text"
             aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
               defaultMessage: 'Toggle collapse',
             })}
             iconType={'arrowDown'}
-            onClick={toggleIsCollapsed}
+            onClick={toggleIsCollapsedMemoized}
             size="m"
             id={`kbnGridRowTitle-${rowId}`}
             aria-controls={`kbnGridRow-${rowId}`}

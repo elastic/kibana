@@ -17,10 +17,35 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { DefaultDragHandle } from './drag_handle/default_drag_handle';
 import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './grid_panel_resize_handle';
+import { GridLayoutData, GridRowData } from '../types';
 
 export interface GridPanelProps {
   panelId: string;
   rowId: string;
+}
+
+export const getRowHeight = (row: GridRowData) => {
+  // for the elements build like: 
+  // {id: '10', row: 58, column: 0, width: 24, height: 11}
+  // we need to find the element that has the highest row + height value
+  if (row.isCollapsed) return 2;
+  const panelsHeight =  Object.values(row.panels).reduce((acc, panel) => {
+    const panelEnd = panel.row + panel.height;
+    if (!acc) return panelEnd;
+    return Math.max(acc, panelEnd);
+  }, 0);
+  const headerHeight = row.order === 0 ? 0 : 2;
+  return panelsHeight + headerHeight;
+}
+
+export const getTopOffsetForRow = (rowId: string, layout: GridLayoutData) => {
+  // get all the rows before the current row using the order property
+  const rowsBefore = Object.values(layout).filter((row) => row.order < layout[rowId].order);
+  // get the height of all the rows before the current row
+  const rowsBeforeHeight = rowsBefore.reduce((acc, row) => {
+    return acc + getRowHeight(row);
+  }, 0);
+  return rowsBeforeHeight;
 }
 
 export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
@@ -32,8 +57,19 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
 
   /** Set initial styles based on state at mount to prevent styles from "blipping" */
   const initialStyles = useMemo(() => {
-    const initialPanel = (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-      gridLayoutStateManager.gridLayout$.getValue())[rowId].panels[panelId];
+    const activeLayout = gridLayoutStateManager.proposedGridLayout$.getValue() ??
+      gridLayoutStateManager.gridLayout$.getValue()
+    const panelRow = activeLayout[rowId];
+    // we don't add header to the first rowId so we don't account for this height
+    const headerOffset = panelRow.order === 0 ? 0 : 2;
+
+
+
+    const initialPanel = activeLayout[rowId].panels[panelId];
+
+      // offset of the element including the header and the previous rows
+    console.log(gridLayoutStateManager)
+    const gridRowOffset = headerOffset + getTopOffsetForRow(rowId, activeLayout);
     return css`
       position: relative;
       height: calc(
@@ -45,8 +81,8 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
       );
       grid-column-start: ${initialPanel.column + 1};
       grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
-      grid-row-start: ${initialPanel.row + 1};
-      grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
+      grid-row-start: ${initialPanel.row + 1 + gridRowOffset};
+      grid-row-end: ${initialPanel.row + 1 + initialPanel.height + gridRowOffset};
       .kbnGridPanel--dragHandle,
       .kbnGridPanel--resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
@@ -74,10 +110,15 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
         .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
         .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
           const ref = gridLayoutStateManager.panelRefs.current[rowId][panelId];
-          const panel = (proposedGridLayout ?? gridLayout)[rowId]?.panels[panelId];
+          const activeLayout = proposedGridLayout ?? gridLayout;
+          const panel = activeLayout[rowId]?.panels[panelId];
           if (!ref || !panel) return;
 
           const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
+
+
+          const headerOffset = activeLayout[rowId].order === 0 ? 0 : 2;
+          const gridRowOffset = headerOffset + getTopOffsetForRow(rowId, activeLayout);
 
           if (panelId === activePanel?.id) {
             ref.classList.add('kbnGridPanel--active');
@@ -97,10 +138,9 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
                 draggingPosition.bottom - draggingPosition.top,
                 runtimeSettings.rowHeight
               )}px`;
-
               // undo any "lock to grid" styles **except** for the top left corner, which stays locked
               ref.style.gridColumnStart = `${panel.column + 1}`;
-              ref.style.gridRowStart = `${panel.row + 1}`;
+              ref.style.gridRowStart = `${panel.row + 1 + gridRowOffset}`;
               ref.style.gridColumnEnd = `auto`;
               ref.style.gridRowEnd = `auto`;
             } else {
@@ -131,8 +171,8 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
             // and render the panel locked to the grid
             ref.style.gridColumnStart = `${panel.column + 1}`;
             ref.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            ref.style.gridRowStart = `${panel.row + 1}`;
-            ref.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            ref.style.gridRowStart = `${panel.row + 1 + gridRowOffset}`;
+            ref.style.gridRowEnd = `${panel.row + 1 + panel.height + gridRowOffset}`;
           }
         });
 

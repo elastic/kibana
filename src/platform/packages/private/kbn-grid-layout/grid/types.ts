@@ -87,7 +87,6 @@ export interface GridLayoutStateManager {
   interactionEvent$: BehaviorSubject<PanelInteractionEvent | undefined>;
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
-  rowRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{
     [rowId: string]: { [panelId: string]: HTMLDivElement | null };
