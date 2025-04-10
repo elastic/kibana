@@ -61,7 +61,7 @@ export function DegradedDocsRuleType(): RuleType<
     actionGroups: [THRESHOLD_MET_GROUP],
     category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
-    minimumLicenseRequired: 'basic', // Check the license type
+    minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: getRuleExecutor(),
     doesSetRecoveryContext: true,

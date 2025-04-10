@@ -232,7 +232,7 @@ export const RuleForm: React.FunctionComponent<
 
       <EuiExpression
         data-test-subj="datasetQualityRuleCountExpression"
-        description={'PERCENTAGE'} // TODO: Should it be PERCENTAGE or RATE
+        description={'PERCENTAGE'}
         value={degradedDocsLabel}
         display="columns"
         onClick={() => {}}
