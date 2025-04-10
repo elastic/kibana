@@ -76,20 +76,6 @@ exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
               .css-262k8j-inputDisplayClassName{margin-right:8px;overflow:hidden;text-overflow:ellipsis;}
             </style>
             <style
-              data-emotion="css"
-              data-s=""
-            >
-              
-              .css-1bfft7d-className{}
-            </style>
-            <style
-              data-emotion="css"
-              data-s=""
-            >
-              
-              .css-1bfft7d-className .euiAccordion__childWrapper{-webkit-transition:none;transition:none;}
-            </style>
-            <style
               data-emotion="css-global"
               data-s=""
             >

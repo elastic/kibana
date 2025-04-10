@@ -147,7 +147,7 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
             </div>
           </div>
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -368,7 +368,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             </div>
           </div>
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -561,7 +561,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             </div>
           </div>
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
@@ -755,7 +755,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
             </div>
           </div>
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-m-flexStart-stretch-row-euiPageHeaderContent__rightSideItems"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero-euiPageHeaderContent__rightSideItem"
