@@ -7,8 +7,7 @@ WorkChat application plugin
 
 ### Langsmith tracing
 
-Enablong langsmith tracing can be done by adding the corresponding langsmith configuration
-to your Kibana dev config file:
+Enabling langsmith tracing can be done by adding the corresponding entry to your Kibana dev config file:
 
 ```yaml
 xpack.workchatApp.tracing.langsmith:
