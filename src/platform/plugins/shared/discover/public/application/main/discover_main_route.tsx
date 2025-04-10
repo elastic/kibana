@@ -71,7 +71,12 @@ export const DiscoverMainRoute = ({
   );
 
   // syncing with the _t part URL
-  const [tabsStorageManager] = useState(() => getTabsStorageManager({ urlStateStorage }));
+  const [tabsStorageManager] = useState(() =>
+    getTabsStorageManager({
+      urlStateStorage,
+      storage: services.storage,
+    })
+  );
 
   useEffect(() => {
     const stopUrlSync = tabsStorageManager.startUrlSync();

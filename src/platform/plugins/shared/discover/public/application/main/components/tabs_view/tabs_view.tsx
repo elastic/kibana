@@ -35,6 +35,7 @@ export const TabsView = (props: DiscoverSessionViewProps) => {
     <UnifiedTabs
       services={services}
       initialItems={initialItems}
+      initialSelectedItemId={currentTabId}
       onChanged={(updateState) => dispatch(internalStateActions.updateTabs(updateState))}
       createItem={() => createTabItem(allTabs)}
       getPreviewData={(item) => {

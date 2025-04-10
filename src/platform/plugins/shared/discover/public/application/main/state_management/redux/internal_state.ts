@@ -29,8 +29,7 @@ import {
   type TabState,
 } from './types';
 import { loadDataViewList, setTabs } from './actions';
-import { selectAllTabs, selectTab } from './selectors';
-import { createTabItem } from './utils';
+import { selectTab } from './selectors';
 import type { TabsStorageManager } from '../tabs_storage_manager';
 
 export const defaultTabState: Omit<TabState, keyof TabItem> = {
@@ -192,9 +191,8 @@ const createMiddleware = ({ tabsStorageManager }: { tabsStorageManager: TabsStor
 
   listenerMiddleware.startListening({
     actionCreator: internalStateSlice.actions.setTabs,
-    effect: async (action) => {
-      const { selectedTabId } = action.payload;
-      await tabsStorageManager.pushSelectedTabIdToUrl(selectedTabId);
+    effect: (action) => {
+      void tabsStorageManager.persistLocally(action.payload);
     },
   });
 
@@ -218,13 +216,9 @@ export const createInternalStateStore = (options: InternalStateThunkDependencies
       ),
   });
 
-  // TODO: Read from URL for initializing the initial selected tab or create a default one
-  // TEMPORARY: Create initial default tab
-  const defaultTab: TabState = {
-    ...defaultTabState,
-    ...createTabItem(selectAllTabs(store.getState())),
-  };
-  store.dispatch(setTabs({ allTabs: [defaultTab], selectedTabId: defaultTab.id }));
+  const initialTabsState = options.tabsStorageManager.loadLocally({ defaultTabState });
+  // console.log('initialTabsState', initialTabsState);
+  store.dispatch(setTabs(initialTabsState));
 
   return store;
 };
