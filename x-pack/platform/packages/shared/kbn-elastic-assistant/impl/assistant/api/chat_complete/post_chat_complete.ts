@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
+import { HttpFetchQuery, HttpSetup } from '@kbn/core-http-browser';
 import {
   API_VERSIONS,
   MessageMetadata,
@@ -23,7 +23,7 @@ export interface PostChatCompleteParams {
   message: string;
   promptIds?: PromptIds;
   replacements: Replacements;
-  query?: string;
+  query?: HttpFetchQuery;
   signal?: AbortSignal | undefined;
   traceOptions?: TraceOptions;
 }
@@ -50,10 +50,7 @@ export const postChatComplete = async ({
   traceOptions,
 }: PostChatCompleteParams): Promise<ChatCompleteResponse> => {
   try {
-    const path = `/internal/elastic_assistant/actions/connector/${connectorId}/_execute${
-      query ? `?${query}` : ''
-    }`;
-
+    const path = `/internal/elastic_assistant/actions/connector/${connectorId}/_execute`;
     const requestBody = {
       actionTypeId,
       alertsIndexPattern,
@@ -81,6 +78,7 @@ export const postChatComplete = async ({
       method: 'POST',
       body: JSON.stringify(requestBody),
       signal,
+      query,
       version: API_VERSIONS.internal.v1,
     });
     if (response.status !== 'ok' || !response.data) {

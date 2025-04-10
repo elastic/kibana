@@ -7,15 +7,17 @@
 
 import { useCallback, useMemo, useRef, useState } from 'react';
 import { PromptIds, Replacements } from '@kbn/elastic-assistant-common';
+import { HttpFetchQuery } from '@kbn/core-http-browser';
 import { EXECUTE_ACTION_TIMEOUT } from '../../use_send_message';
 import { ChatCompleteResponse, postChatComplete } from './post_chat_complete';
 import { useAssistantContext, useLoadConnectors } from '../../../..';
 import { FETCH_MESSAGE_TIMEOUT_ERROR } from '../../use_send_message/translations';
+
 interface SendMessageProps {
   message: string;
   promptIds?: PromptIds;
   replacements: Replacements;
-  query?: string;
+  query?: HttpFetchQuery;
 }
 interface UseChatComplete {
   abortStream: () => void;
