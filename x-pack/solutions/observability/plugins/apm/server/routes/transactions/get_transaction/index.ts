@@ -23,7 +23,7 @@ import {
   AT_TIMESTAMP,
   PROCESSOR_NAME,
   SPAN_LINKS,
-  TRANSACTION_AGENT_MARKS,
+  TRANSACTION_MARKS_AGENT,
   SERVICE_LANGUAGE_NAME,
   URL_FULL,
   HTTP_REQUEST_METHOD,
@@ -105,7 +105,7 @@ export async function getTransaction({
       },
     },
     fields: [...requiredFields, ...optionalFields],
-    _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
+    _source: [SPAN_LINKS, TRANSACTION_MARKS_AGENT],
   });
 
   const hit = maybe(resp.hits.hits[0]);
@@ -117,9 +117,9 @@ export async function getTransaction({
   const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
 
   const source =
-    'span' in hit._source && 'transaction' in hit._source
+    'span' in hit._source || 'transaction' in hit._source
       ? (hit._source as {
-          transaction: Pick<Required<Transaction>['transaction'], 'marks'>;
+          transaction?: Pick<Required<Transaction>['transaction'], 'marks'>;
           span?: Pick<Required<Transaction>['span'], 'links'>;
         })
       : undefined;
@@ -128,7 +128,7 @@ export async function getTransaction({
     ...event,
     transaction: {
       ...event.transaction,
-      marks: source?.transaction.marks,
+      marks: source?.transaction?.marks,
     },
     processor: {
       name: 'transaction',

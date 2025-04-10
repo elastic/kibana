@@ -47,7 +47,7 @@ export const useIngestionRate = ({
   stats,
   timeRange,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
 }) => {
@@ -60,7 +60,7 @@ export const useIngestionRate = ({
 
   const ingestionRateFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition || !stats) {
+      if (!stats) {
         return;
       }
 
@@ -146,7 +146,7 @@ export const useIngestionRatePerTier = ({
   stats,
   timeRange,
 }: {
-  definition?: IngestStreamGetResponse;
+  definition: IngestStreamGetResponse;
   stats?: DataStreamStats;
   timeRange: TimeRange;
 }) => {
@@ -164,7 +164,7 @@ export const useIngestionRatePerTier = ({
 
   const ingestionRateFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition || !stats) {
+      if (!stats) {
         return;
       }
 
