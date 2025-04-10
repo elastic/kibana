@@ -19,6 +19,10 @@ import type { MaintenanceWindowClientMock } from '../maintenance_window_client.m
 import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import type { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
+import {
+  alertDeletionClientMock,
+  type AlertDeletionClientMock,
+} from '../alert_deletion/alert_deletion_client.mock';
 
 export function mockHandlerArguments(
   {
@@ -29,6 +33,7 @@ export function mockHandlerArguments(
     listTypes: listTypesRes = [],
     getFrameworkHealth,
     areApiKeysEnabled,
+    alertDeletionClient,
   }: {
     rulesClient?: RulesClientMock;
     actionsClient?: ActionsClientMock;
@@ -38,6 +43,7 @@ export function mockHandlerArguments(
     getFrameworkHealth?: jest.MockInstance<Promise<AlertsHealth>, []> &
       (() => Promise<AlertsHealth>);
     areApiKeysEnabled?: () => Promise<boolean>;
+    alertDeletionClient?: AlertDeletionClientMock;
   },
   request: unknown,
   response?: Array<MethodKeysOf<KibanaResponseFactory>>
@@ -66,6 +72,9 @@ export function mockHandlerArguments(
         },
         getFrameworkHealth,
         areApiKeysEnabled: areApiKeysEnabled ? areApiKeysEnabled : () => Promise.resolve(true),
+        getAlertDeletionClient() {
+          return alertDeletionClient || alertDeletionClientMock.create();
+        },
       },
       actions: {
         getActionsClient() {

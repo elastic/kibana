@@ -168,6 +168,7 @@ describe('previewTask', () => {
           isInactiveAlertDeleteEnabled: true,
           activeAlertDeleteThreshold: 1,
           inactiveAlertDeleteThreshold: 30,
+          // @ts-expect-error invalid category ID
           categoryIds: ['invalid-category', 'management'],
         },
         'space-1'

@@ -53,9 +53,7 @@ describe('alertDeletePreviewRoute', () => {
     );
 
     (rulesClient.getSpaceId as jest.Mock).mockResolvedValueOnce('default');
-    (alertDeletionClient.previewTask as jest.Mock).mockResolvedValueOnce({
-      affectedAlertCount: 100,
-    });
+    (alertDeletionClient.previewTask as jest.Mock).mockResolvedValueOnce(100);
 
     const [context, req, res] = mockHandlerArguments(
       {
