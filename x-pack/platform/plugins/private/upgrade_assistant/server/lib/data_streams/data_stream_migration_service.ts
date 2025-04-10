@@ -367,8 +367,8 @@ export const dataStreamMigrationServiceFactory = ({
                 },
               });
 
-              // @ts-ignore - Value is guaranteed to exist
               const oldestTimestamp =
+                // @ts-ignore - value doesnt exist in the es type yet
                 timestampResponse.aggregations?.oldest_incompatible_doc?.value;
 
               if (
