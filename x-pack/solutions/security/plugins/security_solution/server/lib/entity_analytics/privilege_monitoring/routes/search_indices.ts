@@ -8,8 +8,8 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
 import { take } from 'lodash/fp';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   API_VERSIONS,
   APP_ID,
@@ -17,12 +17,10 @@ import {
   INCLUDE_INDEX_PATTERN,
 } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import { SearchPrivilegesIndicesRequestQuery } from '../../../../../common/api/entity_analytics/monitoring';
 
 // Return a subset of all indices that contain the user.name field
 const LIMIT = 20;
-
-// TODO create API spec and generate types from it
-// import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 // Indices that are exclude from the search
 const PRE_EXCLUDE_INDICES: string[] = [
@@ -31,7 +29,7 @@ const PRE_EXCLUDE_INDICES: string[] = [
 ];
 
 // Indices that are excludes from the search result (This patterns can't be excluded from the search)
-const POST_EXCLUDE_INDICES = ['.ds-', '.internal.'];
+const POST_EXCLUDE_INDICES = ['.']; // internal indices
 
 export const searchPrivilegeMonitoringIndicesRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -53,9 +51,7 @@ export const searchPrivilegeMonitoringIndicesRoute = (
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            query: schema.object({
-              searchQuery: schema.maybe(schema.string()),
-            }),
+            query: buildRouteValidationWithZod(SearchPrivilegesIndicesRequestQuery),
           },
         },
       },
