@@ -28,7 +28,7 @@ export function validatePlayground(playground: PlaygroundSavedObject): string[] 
   } catch (e) {
     errors.push(
       i18n.translate('xpack.searchPlayground.esQueryJSONError', {
-        defaultMessage: 'Elasticsearch query JSON is not valid JSON\n{jsonParseError}',
+        defaultMessage: 'Elasticsearch query JSON is invalid\n{jsonParseError}',
         values: { jsonParseError: e.message },
       })
     );
@@ -39,7 +39,7 @@ export function validatePlayground(playground: PlaygroundSavedObject): string[] 
     } catch (e) {
       errors.push(
         i18n.translate('xpack.searchPlayground.userESQueryJSONError', {
-          defaultMessage: 'User Elasticsearch query JSON is not valid JSON\n{jsonParseError}',
+          defaultMessage: 'User Elasticsearch query JSON is invalid\n{jsonParseError}',
           values: { jsonParseError: e.message },
         })
       );
