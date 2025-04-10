@@ -19,7 +19,7 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ChartSizeEvent } from '@kbn/chart-expressions-common';
-import { createPerformanceTracker } from '@kbn/analytics';
+import { createPerformanceTracker, PERFORMANCE_TRACKER_MARKS } from '@kbn/analytics';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
@@ -106,7 +106,7 @@ export const getDatatableRenderer = (dependencies: {
       instance: 'lens_datatable_renderer',
     });
 
-    performanceTracker.mark('preFlight');
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
 
@@ -119,7 +119,7 @@ export const getDatatableRenderer = (dependencies: {
     const { hasCompatibleActions, isInteractive, getCompatibleCellValueActions } = handlers;
 
     const renderComplete = () => {
-      performanceTracker.mark('renderComplete');
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
       trackUiCounterEvents('table', handlers.getExecutionContext());
       handlers.done();
     };
@@ -168,7 +168,7 @@ export const getDatatableRenderer = (dependencies: {
       getColumnsFilterable(config.data, handlers),
     ]);
 
-    performanceTracker.mark('renderStart');
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     ReactDOM.render(
       <KibanaRenderContextProvider {...startServices}>

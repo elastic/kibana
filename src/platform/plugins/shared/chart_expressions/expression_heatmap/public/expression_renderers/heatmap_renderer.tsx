@@ -15,7 +15,7 @@ import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { createPerformanceTracker, METRIC_TYPE } from '@kbn/analytics';
+import { createPerformanceTracker, METRIC_TYPE, PERFORMANCE_TRACKER_MARKS } from '@kbn/analytics';
 import {
   ChartSizeEvent,
   extractContainerType,
@@ -67,7 +67,7 @@ export const heatmapRenderer: (
       instance: EXPRESSION_HEATMAP_NAME,
     });
 
-    performanceTracker.mark('preFlight');
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
     const { core, plugins } = getStartDeps();
 
@@ -85,7 +85,7 @@ export const heatmapRenderer: (
     };
 
     const renderComplete = () => {
-      performanceTracker.mark('renderComplete');
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
 
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -121,7 +121,7 @@ export const heatmapRenderer: (
     const { HeatmapComponent } = await import('../components/heatmap_component');
     const { isInteractive } = handlers;
 
-    performanceTracker.mark('renderStart');
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     render(
       <KibanaRenderContextProvider {...core}>

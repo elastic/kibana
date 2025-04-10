@@ -23,4 +23,5 @@ export {
   createPerformanceTracker,
   getPerformanceTrackersByType,
   getPerformanceTrackersGroupedById,
+  PERFORMANCE_TRACKER_MARKS,
 } from './src/performance/performance_tracker';

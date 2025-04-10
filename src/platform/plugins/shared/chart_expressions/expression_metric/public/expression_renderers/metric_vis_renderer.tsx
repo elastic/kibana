@@ -14,7 +14,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { css } from '@emotion/react';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { createPerformanceTracker, METRIC_TYPE } from '@kbn/analytics';
+import { createPerformanceTracker, METRIC_TYPE, PERFORMANCE_TRACKER_MARKS } from '@kbn/analytics';
 import type { IInterpreterRenderHandlers, Datatable } from '@kbn/expressions-plugin/common';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
@@ -62,7 +62,7 @@ export const getMetricVisRenderer = (
         instance: EXPRESSION_METRIC_NAME,
       });
 
-      performanceTracker.mark('preFlight');
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
       const { core, plugins } = deps.getStartDeps();
 
@@ -78,7 +78,7 @@ export const getMetricVisRenderer = (
           )
         : false;
       const renderComplete = () => {
-        performanceTracker.mark('renderComplete');
+        performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
 
         const executionContext = handlers.getExecutionContext();
         const containerType = extractContainerType(executionContext);
@@ -95,7 +95,7 @@ export const getMetricVisRenderer = (
 
       const { MetricVis } = await import('../components/metric_vis');
 
-      performanceTracker.mark('renderStart');
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
       render(
         <KibanaRenderContextProvider {...core}>

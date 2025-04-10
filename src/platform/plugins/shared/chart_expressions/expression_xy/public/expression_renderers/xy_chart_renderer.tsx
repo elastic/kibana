@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createPerformanceTracker, METRIC_TYPE } from '@kbn/analytics';
+import { createPerformanceTracker, METRIC_TYPE, PERFORMANCE_TRACKER_MARKS } from '@kbn/analytics';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
@@ -209,7 +209,7 @@ export const getXyChartRenderer = ({
       instance: 'xyVis',
     });
 
-    performanceTracker.mark('preFlight');
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.PRE_RENDER);
 
     const deps = await getStartDeps();
 
@@ -240,7 +240,7 @@ export const getXyChartRenderer = ({
     );
 
     const renderComplete = () => {
-      performanceTracker.mark('renderComplete');
+      performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_COMPLETE);
 
       const executionContext = handlers.getExecutionContext();
       const containerType = extractContainerType(executionContext);
@@ -270,7 +270,7 @@ export const getXyChartRenderer = ({
       height: '100%',
     });
 
-    performanceTracker.mark('renderStart');
+    performanceTracker.mark(PERFORMANCE_TRACKER_MARKS.RENDER_START);
 
     ReactDOM.render(
       <KibanaRenderContextProvider {...deps.startServices}>

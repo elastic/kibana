@@ -10,6 +10,14 @@
 import { v4 as uuidv4 } from 'uuid';
 import { groupBy } from 'lodash';
 
+export const PERFORMANCE_TRACKER_MARKS = {
+  PRE_RENDER: 'preRender',
+  RENDER_START: 'renderStart',
+  RENDER_COMPLETE: 'renderComplete',
+} as const;
+export type PerformanceTrackerMarks =
+  (typeof PERFORMANCE_TRACKER_MARKS)[keyof typeof PERFORMANCE_TRACKER_MARKS];
+
 interface PerformanceTrackerOptions {
   type: string;
   instance: string;
@@ -20,7 +28,8 @@ export const createPerformanceTracker = ({ type, instance }: PerformanceTrackerO
   const createMarkName = (name: string) => `${type}:${instance}:${name}`;
 
   return {
-    mark: (name: string) => performance.mark(createMarkName(name), { detail: { id } }),
+    mark: (name: PerformanceTrackerMarks) =>
+      performance.mark(createMarkName(name), { detail: { id } }),
   };
 };
 
