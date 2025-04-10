@@ -16,6 +16,8 @@ import {
   EuiPanel,
   EuiCopy,
   EuiIcon,
+  EuiTextTruncate,
+  EuiToolTip,
 } from '@elastic/eui';
 import { CspFinding } from '@kbn/cloud-security-posture-common';
 import { BenchmarkIcons } from '../findings_flyout';
@@ -63,20 +65,26 @@ export const FindingsMisconfigurationFlyoutHeader = ({
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiFlexGroup direction="row" gutterSize="none">
-                        {resourceName}
-                        <EuiCopy textToCopy={resourceName}>
-                          {(copy) => (
-                            <EuiIcon
-                              css={css`
-                                :hover {
-                                  cursor: pointer;
-                                }
-                              `}
-                              onClick={copy}
-                              type="copy"
-                            />
-                          )}
-                        </EuiCopy>
+                        <EuiFlexItem>
+                          <EuiToolTip content={resourceName} position="top">
+                            <EuiTextTruncate text={resourceName} />
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiCopy textToCopy={resourceName}>
+                            {(copy) => (
+                              <EuiIcon
+                                css={css`
+                                  :hover {
+                                    cursor: pointer;
+                                  }
+                                `}
+                                onClick={copy}
+                                type="copy"
+                              />
+                            )}
+                          </EuiCopy>
+                        </EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiFlexItem>
                   </EuiFlexGroup>
