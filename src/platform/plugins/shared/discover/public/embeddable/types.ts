@@ -98,10 +98,7 @@ export type SearchEmbeddableRuntimeState = SearchEmbeddableSerializedAttributes 
     nonPersistedDisplayOptions?: NonPersistedDisplayOptions;
   };
 
-export type SearchEmbeddableApi = DefaultEmbeddableApi<
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableRuntimeState
-> &
+export type SearchEmbeddableApi = DefaultEmbeddableApi<SearchEmbeddableSerializedState> &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
