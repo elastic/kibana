@@ -15,7 +15,6 @@ import { SummarizationPanel } from './summarization_panel/summarization_panel';
 
 export const ChatSidebar: React.FC = () => {
   const { euiTheme } = useEuiTheme();
-
   const panels = [
     {
       title: i18n.translate('xpack.searchPlayground.sidebar.summarizationTitle', {
