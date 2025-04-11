@@ -75,7 +75,7 @@ describe('useKnowledgeBase', () => {
 
     // Trigger install
     act(() => {
-      result.current.install({ modelId: '.elser_model_2', taskType: 'sparse_embedding' });
+      result.current.install('.elser-2-elasticsearch');
     });
 
     // Wait for error state
