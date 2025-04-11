@@ -78,7 +78,9 @@ export async function getKbModelStatus({
   if (!inferenceId) {
     try {
       inferenceId = await getInferenceIdFromWriteIndex(esClient);
+      logger.debug(`Using existing inference id "${inferenceId}" from write index`);
     } catch (error) {
+      logger.debug(`Inference id not found: ${error.message}`);
       return {
         endpoint: { inference_id: inferenceId },
         ready: false,
@@ -91,10 +93,15 @@ export async function getKbModelStatus({
   let endpoint: InferenceInferenceEndpointInfo;
   try {
     endpoint = await getInferenceEndpoint({ esClient, inferenceId });
+    logger.debug(
+      `Inference endpoint "${inferenceId}" found with model id "${endpoint?.service_settings?.model_id}"`
+    );
   } catch (error) {
     if (!isInferenceEndpointMissingOrUnavailable(error)) {
       throw error;
     }
+
+    logger.debug(`Inference endpoint "${inferenceId}" not found or unavailable: ${error.message}`);
     return {
       ready: false,
       enabled,
@@ -103,13 +110,16 @@ export async function getKbModelStatus({
     };
   }
 
+  const modelId = endpoint?.service_settings?.model_id;
   let trainedModelStatsResponse: MlGetTrainedModelsStatsResponse;
   try {
     trainedModelStatsResponse = await esClient.asInternalUser.ml.getTrainedModelsStats({
-      model_id: endpoint.service_settings?.model_id,
+      model_id: modelId,
     });
   } catch (error) {
-    logger.debug(`Failed to get model stats: ${error.message}`);
+    logger.debug(
+      `Failed to get model stats for model "${modelId}" and inference id ${inferenceId}: ${error.message}`
+    );
     return {
       ready: false,
       enabled,
