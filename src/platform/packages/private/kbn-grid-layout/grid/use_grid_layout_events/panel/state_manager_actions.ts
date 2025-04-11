@@ -53,7 +53,7 @@ export const moveAction = (
     proposedGridLayout$,
     activePanel$,
     headerRefs: { current: gridRowHeaders },
-    footerRefs: { current: gridRowFooters },
+    rowEndMarkRefs: { current: gridRowFooters },
   } = gridLayoutStateManager;
   const interactionEvent = interactionEvent$.value;
   if (!interactionEvent || !runtimeSettings) {

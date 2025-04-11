@@ -17,7 +17,6 @@ import { GridHeightSmoother } from './grid_height_smoother';
 import {
   GridAccessMode,
   GridLayoutData,
-  GridLayoutStateManager,
   GridSettings,
   UseCustomDragHandle,
 } from './types';
@@ -29,8 +28,8 @@ import { GridPanelDragPreview } from './grid_panel/grid_panel_drag_preview';
 import { GridPanel } from './grid_panel';
 
 import { GridRowDragPreview } from './grid_row/grid_row_drag_preview';
-import { HeaderGhost, GridRowHeaderWrapper } from './grid_row/grid_row_header_wrapper';
-import { GhostFooter } from './grid_row/grid_row_ghost';
+import { GridRowStartMark, GridRowHeaderWrapper } from './grid_row/grid_row_header_wrapper';
+import { GridRowEndMark } from './grid_row/grid_row_ghost';
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -43,30 +42,24 @@ export type GridLayoutProps = {
 
 type GridElementData = [string, string, boolean];
 
-const getGridElementData = (
-  gridLayoutStateManager: GridLayoutStateManager,
-  layout?: GridLayoutData
+const getGridsElementData = (
+  layout: GridLayoutData
 ) => {
-  const currentLayout =
-    layout ||
-    gridLayoutStateManager.proposedGridLayout$.getValue() ||
-    gridLayoutStateManager.gridLayout$.getValue();
-  const rowIdsInOrder = getRowKeysInOrder(layout || currentLayout);
+  const rowIdsInOrder = getRowKeysInOrder(layout);
   const flattenedGridElements: GridElementData[] = rowIdsInOrder.flatMap((rowId) => {
-    const row = currentLayout[rowId];
-    const panels = row.panels;
-    const panelIdsInOrder = getPanelKeysInOrder(panels);
-
-    const headerElement: GridElementData = [
-      row.order === 0 ? 'header-ghost' : 'header',
+    const row = layout[rowId];
+    const panelIdsInOrder = getPanelKeysInOrder(row.panels);
+    const startMark: GridElementData = [
+      !row.isCollapsible ? 'row-start-mark' : 'header',
       rowId,
       row.isCollapsed,
     ];
-    const footerElement: GridElementData = ['footer-ghost', rowId, row.isCollapsed];
+    const panelElements = row.isCollapsed ? [] : panelIdsInOrder.map((panelId): GridElementData => [panelId, rowId, row.isCollapsed])
+    const endMark: GridElementData[] =  row.isCollapsed ? [] : [['row-end-mark', rowId, row.isCollapsed]];
     return [
-      headerElement,
-      ...panelIdsInOrder.map((panelId): GridElementData => [panelId, rowId, row.isCollapsed]),
-      footerElement,
+      startMark,
+      ...panelElements,
+      ...endMark,
     ];
   });
   return flattenedGridElements;
@@ -95,8 +88,14 @@ export const GridLayout = ({
   // we'd have an object here withz
 
   const [gridElements, setGridElements] = useState<GridElementData[]>(() =>
-    getGridElementData(gridLayoutStateManager, layout)
+    getGridsElementData(layout)
   );
+  // we use ref because subscription is inside of the stable useEffect so the state would be stale 
+  const gridElementsRef = useRef(gridElements);
+  // Keep ref in sync with state
+  useEffect(() => {
+    gridElementsRef.current = gridElements;
+  }, [gridElements]);
 
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
@@ -129,8 +128,9 @@ export const GridLayout = ({
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
-          const newGridElements = getGridElementData(gridLayoutStateManager);
-          if (gridElements.join() !== newGridElements.join()) {
+          console.log(layoutAfter);
+          const newGridElements = getGridsElementData(layoutAfter);
+          if (gridElementsRef.current.join() !== newGridElements.join()) {
             setGridElements(newGridElements);
           }
         }
@@ -206,10 +206,11 @@ export const GridLayout = ({
   }, []);
 
   const toggleIsCollapsed = useCallback(
-    (rowwId: string) => {
+    (rId: string) => {
       const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-      newLayout[rowwId].isCollapsed = !newLayout[rowwId].isCollapsed;
+      newLayout[rId].isCollapsed = !newLayout[rId].isCollapsed;
       gridLayoutStateManager.gridLayout$.next(newLayout);
+      
     },
     [gridLayoutStateManager.gridLayout$]
   );
@@ -237,17 +238,11 @@ export const GridLayout = ({
                       isCollapsed={!!isCollapsed}
                     />
                   );
-                case 'header-ghost':
-                  return <HeaderGhost key={typeId} rowId={rowId} />;
-                case 'footer-ghost':
-                  if (isCollapsed) {
-                    return null;
-                  }
-                  return <GhostFooter rowId={rowId} key={`${rowId}-footer`} />;
+                case 'row-start-mark':
+                  return <GridRowStartMark key={typeId} rowId={rowId} />;
+                case 'row-end-mark':
+                  return <GridRowEndMark rowId={rowId} key={`${rowId}-footer`} />;
                 default:
-                  if (isCollapsed) {
-                    return null;
-                  }
                   return <GridPanel key={typeId} panelId={typeId} rowId={rowId} />;
               }
             })}

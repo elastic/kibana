@@ -53,11 +53,23 @@ export const cancelAction = ({ activeRowEvent$, proposedGridLayout$ }: GridLayou
   proposedGridLayout$.next(undefined);
 };
 
+const getRowMidPoint = (headerRef: HTMLDivElement | null, footerRef: HTMLDivElement | null) => {
+  if (!headerRef) return 0;
+  if (!footerRef) {
+    const { top, height } = headerRef.getBoundingClientRect();
+    return top + height / 2;
+  } 
+  const top = headerRef.getBoundingClientRect().top;
+  const bottom = footerRef.getBoundingClientRect().bottom;
+  return top + (bottom - top) / 2;
+}
+
 export const moveAction = (
   gridLayoutStateManager: GridLayoutStateManager,
   startingPointer: PointerPosition,
   currentPointer: PointerPosition
 ) => {
+
   const currentActiveRowEvent = gridLayoutStateManager.activeRowEvent$.getValue();
   if (!currentActiveRowEvent) return;
 
@@ -66,22 +78,14 @@ export const moveAction = (
     gridLayoutStateManager.gridLayout$.getValue();
   const currentRowOrder = getRowKeysInOrder(currentLayout);
   currentRowOrder.shift(); // drop first row since nothing can go above it
-  const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current).sort(
+
+  // drop first header since nothing can go above it 
+  const updatedRowOrder = Object.keys(gridLayoutStateManager.headerRefs.current).slice(1).sort(
     (idA, idB) => {
       // if expanded, get dimensions of row; otherwise, use the header
-      const rowRefA = currentLayout[idA].isCollapsed
-        ? gridLayoutStateManager.headerRefs.current[idA]
-        : gridLayoutStateManager.headerRefs.current[idA]; // TODO: this should be calculated from the expanded row height (getRowHeight?)
-      const rowRefB = currentLayout[idB].isCollapsed
-        ? gridLayoutStateManager.headerRefs.current[idB]
-        : gridLayoutStateManager.headerRefs.current[idB]; // TODO: this should be calculated from the expanded row height ()
-
-      if (!rowRefA || !rowRefB) return 0;
-      // switch the order when the dragged row goes beyond the mid point of the row it's compared against
-      const { top: topA, height: heightA } = rowRefA.getBoundingClientRect();
-      const { top: topB, height: heightB } = rowRefB.getBoundingClientRect();
-      const midA = topA + heightA / 2;
-      const midB = topB + heightB / 2;
+      const midA = getRowMidPoint(gridLayoutStateManager.headerRefs.current[idA], gridLayoutStateManager.rowEndMarkRefs.current[idA]);
+      const midB = getRowMidPoint(gridLayoutStateManager.headerRefs.current[idB], gridLayoutStateManager.rowEndMarkRefs.current[idB]);
+      if (!midA || !midB) return 0;
 
       return midA - midB;
     }

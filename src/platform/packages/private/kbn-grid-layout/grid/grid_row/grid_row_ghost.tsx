@@ -12,7 +12,7 @@ import { combineLatest } from 'rxjs';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { getTopOffsetForRowFooter } from '../utils/calculations';
 
-export const GhostFooter = ({ rowId }: { rowId: string }) => {
+export const GridRowEndMark = ({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   const styles = {
     pointerEvents: 'none' as const,
@@ -26,7 +26,7 @@ export const GhostFooter = ({ rowId }: { rowId: string }) => {
         gridLayoutStateManager.gridLayout$,
         gridLayoutStateManager.proposedGridLayout$,
       ]).subscribe(([gridLayout, proposedGridLayout]) => {
-        const elRef = gridLayoutStateManager.footerRefs.current[rowId];
+        const elRef = gridLayoutStateManager.rowEndMarkRefs.current[rowId];
         if (!elRef) return;
         const currentGridLayout = proposedGridLayout || gridLayout;
         const topOffset = getTopOffsetForRowFooter(rowId, currentGridLayout);
@@ -49,7 +49,7 @@ export const GhostFooter = ({ rowId }: { rowId: string }) => {
       style={styles}
       className="kbnGridRowFooter--ghost"
       ref={(element: HTMLDivElement | null) =>
-        (gridLayoutStateManager.footerRefs.current[rowId] = element)
+        (gridLayoutStateManager.rowEndMarkRefs.current[rowId] = element)
       }
     /> // this is used only for calculating the position of the row
   );

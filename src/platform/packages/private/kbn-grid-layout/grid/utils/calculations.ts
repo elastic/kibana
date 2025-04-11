@@ -19,7 +19,7 @@ export const getRowHeight = (row: GridRowData) => {
     if (!acc) return panelEnd;
     return Math.max(acc, panelEnd);
   }, 0);
-  const headerHeight = row.order === 0 ? 0 : 2;
+  const headerHeight = !row.isCollapsible ? 0 : 2;
   return panelsHeight + headerHeight;
 };
 

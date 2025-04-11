@@ -42,7 +42,7 @@ export const GridPanel = React.memo(({ panelId, rowId }: GridPanelProps) => {
     const initialPanel = activeLayout[rowId].panels[panelId];
 
     // offset of the element including the header and the previous rows
-    const headerOffset = panelRow.order === 0 ? 0 : 2;
+    const headerOffset = !panelRow.isCollapsible ? 0 : 2;
     const gridRowOffset = headerOffset + getTopOffsetForRow(rowId, activeLayout);
     return css`
       position: relative;

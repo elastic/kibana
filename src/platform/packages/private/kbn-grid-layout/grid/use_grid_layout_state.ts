@@ -44,7 +44,7 @@ export const useGridLayoutState = ({
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const headerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
-  const footerRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
+  const rowEndMarkRefs = useRef<{ [rowId: string]: HTMLDivElement | null }>({});
   const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
   const { euiTheme } = useEuiTheme();
 
@@ -100,7 +100,7 @@ export const useGridLayoutState = ({
     return {
       layoutRef,
       headerRefs,
-      footerRefs,
+      rowEndMarkRefs,
       panelRefs,
       proposedGridLayout$,
       gridLayout$,

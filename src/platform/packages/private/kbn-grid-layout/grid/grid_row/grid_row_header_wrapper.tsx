@@ -20,11 +20,10 @@ export interface GridRowHeaderProps {
   collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 
-export const HeaderGhost = React.memo(({ rowId }: { rowId: string }) => {
+export const GridRowStartMark = React.memo(({ rowId }: { rowId: string }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
   return (
     <div
-      className="kbnGridRowHeader--ghost" // this used only for calculating the position of the row
       style={{
         gridColumnStart: 1,
         gridColumnEnd: -1,

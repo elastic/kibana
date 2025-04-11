@@ -107,7 +107,7 @@ export const GridRowHeader = React.memo(
             headerRef.style.width = `${width}px`;
             headerRef.style.top = `${activeRowEvent.startingPosition.top}px`;
             headerRef.style.left = `${activeRowEvent.startingPosition.left}px`;
-            headerRef.style.zIndex = `10000`; // todo
+            headerRef.style.zIndex = `1`; // todo
           } else if (type === 'update') {
             headerRef.style.transform = `translate(${activeRowEvent.translate.left}px, ${activeRowEvent.translate.top}px)`;
           } else {

@@ -28,6 +28,7 @@ export interface GridRowData {
   order: number;
   title: string;
   isCollapsed: boolean;
+  isCollapsible: boolean;
   panels: {
     [key: string]: GridPanelData;
   };
@@ -88,7 +89,7 @@ export interface GridLayoutStateManager {
 
   layoutRef: React.MutableRefObject<HTMLDivElement | null>;
   headerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
-  footerRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
+  rowEndMarkRefs: React.MutableRefObject<{ [rowId: string]: HTMLDivElement | null }>;
   panelRefs: React.MutableRefObject<{ [panelId: string]: HTMLDivElement | null }>;
 }
 

@@ -158,6 +158,7 @@ export const GridExample = ({
         defaultMessage: 'New collapsible section',
       }),
       collapsed: false,
+      isCollapsible: true,
     };
     mockDashboardApi.rows$.next(rows);
 
@@ -325,9 +326,14 @@ const layoutStyles = ({ euiTheme }: UseEuiTheme) => {
         backgroundColor: `${transparentize(euiTheme.colors.accentSecondary, 0.05)}`,
       },
     },
+    '.kbnGridRowHeader': {
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+      outline: `${euiTheme.colors.backgroundBaseSubdued} 5px solid`
+    },
     // styling for what the grid row header looks like when being dragged
     '.kbnGridRowHeader--active': {
       backgroundColor: euiTheme.colors.backgroundBasePlain,
+      outline: 'none', 
       border: `1px solid ${euiTheme.border.color}`,
       borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium}`,
       paddingLeft: '8px',
