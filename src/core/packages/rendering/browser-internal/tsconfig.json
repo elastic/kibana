@@ -29,7 +29,8 @@
     "@kbn/core-theme-browser",
     "@kbn/core-rendering-browser",
     "@kbn/core-user-profile-browser",
-    "@kbn/core-user-profile-browser-mocks"
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/global-redirect-app-links"
   ],
   "exclude": [
     "target/**/*",

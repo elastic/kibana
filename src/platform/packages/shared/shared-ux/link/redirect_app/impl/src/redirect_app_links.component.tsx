@@ -7,11 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useRef, MouseEventHandler, useCallback } from 'react';
+import React, { FC, useRef } from 'react';
 
 import type { RedirectAppLinksComponentProps } from '@kbn/shared-ux-link-redirect-app-types';
-
-import { navigateToUrlClickHandler } from './click_handler';
 import { redirectAppLinksStyles } from './redirect_app_links.styles';
 
 /**
@@ -34,21 +32,10 @@ export const RedirectAppLinks: FC<RedirectAppLinksComponentProps> = ({
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleClick: MouseEventHandler<HTMLDivElement> = useCallback(
-    (event) =>
-      navigateToUrlClickHandler({
-        event,
-        currentAppId,
-        navigateToUrl,
-        container: containerRef.current,
-      }),
-    [currentAppId, navigateToUrl]
-  );
-
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events
     <div
-      onClick={handleClick}
+      // intentionally noop for now as it is taken care of by GlobalRedirectAppLinks
+      // onClick={handleClick}
       ref={containerRef}
       css={redirectAppLinksStyles}
       data-test-subj="kbnRedirectAppLink"
