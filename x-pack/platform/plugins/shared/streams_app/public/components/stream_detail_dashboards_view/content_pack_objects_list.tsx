@@ -54,21 +54,3 @@ export function ContentPackObjectsList({
     />
   );
 }
-
-export function includeReferences(
-  allObjects: ContentPackEntry[],
-  selectedObjects: ContentPackEntry[]
-) {
-  return selectedObjects.flatMap((object) => {
-    if (object.type !== 'saved_object') {
-      return [object];
-    }
-
-    const references = compact(
-      uniqBy(object.references, (ref) => ref.id).map((ref) =>
-        allObjects.find(({ id }) => id === ref.id)
-      )
-    );
-    return [...references, object];
-  });
-}
