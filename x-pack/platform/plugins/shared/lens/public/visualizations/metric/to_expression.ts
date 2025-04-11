@@ -162,7 +162,7 @@ export const toExpression = (
   const secondaryPrefix =
     isSecondaryDynamicColorMode && secondaryTrend.baselineValue === 'primary'
       ? i18n.translate('xpack.lens.metric.secondaryMetric.prefixOverride.label', {
-          defaultMessage: 'Changed to',
+          defaultMessage: 'Change',
         })
       : state.secondaryPrefix;
 
