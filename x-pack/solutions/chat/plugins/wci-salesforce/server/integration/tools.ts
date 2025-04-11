@@ -172,9 +172,9 @@ export async function getById({
   id: string;
 }): Promise<ToolContentResult[]> {
   let query: QueryDslQueryContainer = {};
-  if (dataSource == 'support_case') {
+  if (dataSource === 'support_case') {
     query = buildQuery({ id }, baseObjectMappings, 'support_case');
-  } else if (dataSource == 'account') {
+  } else if (dataSource === 'account') {
     query = buildQuery({ id }, baseObjectMappings, 'account');
   } else {
     query = buildQuery({ id }, baseObjectMappings);
