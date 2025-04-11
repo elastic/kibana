@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json.schemastore.org/swcrc",
+  "$schema": "https://swc.rs/schema.json",
   "jsc": {
     "parser": {
       "syntax": "typescript",
@@ -15,11 +15,19 @@
       "topLevelAwait": false,
       "importMeta": false
     },
-    "transform": null,
     "target": "es5",
     "loose": true,
     "externalHelpers": false,
-    "keepClassNames": false
+    "keepClassNames": false,
+    "transform": {
+      "legacyDecorator": true,
+      "decoratorMetadata": true
+    },
+  },
+  "module": {
+    "type": "commonjs",
+    "strict": true,
+    "noInterop": false
   },
   "minify": true
 }

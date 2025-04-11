@@ -242,11 +242,11 @@ export function getWebpackConfig(
           test: /\.(js|tsx?)$/,
           exclude: /node_modules/,
           use: {
-            loader: 'babel-loader',
+            loader: 'swc-loader',
             options: {
-              babelrc: false,
-              envName: worker.dist ? 'production' : 'development',
-              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+              // babelrc: false,
+              // envName: worker.dist ? 'production' : 'development',
+              // presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
             },
           },
         },

@@ -29,7 +29,7 @@ import {
   ParsedDllManifest,
 } from '../common';
 import { BundleRemoteModule } from './bundle_remote_module';
-import { isRuntimeModule } from '../common/webpack_helpers';
+import { isRuntimeModule, isContextModule } from '../common/webpack_helpers';
 
 interface InputFileSystem {
   readFile: (
@@ -195,6 +195,10 @@ export class PopulateBundleCachePlugin {
             }
 
             if (isExternalModule(module) || isIgnoredModule(module) || isRuntimeModule(module)) {
+              continue;
+            }
+
+            if (isContextModule(module)) {
               continue;
             }
 

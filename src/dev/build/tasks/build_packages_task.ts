@@ -122,6 +122,7 @@ export const BuildPackages: Task = {
 
     const transformConfig: TransformConfig = {
       disableSourceMaps: true,
+      useSwc: true,
     };
 
     await withFastAsyncTransform(transformConfig, async (transform) => {

@@ -17,6 +17,7 @@ module.exports = (
   }
 ) => {
   return {
+    sourceType: 'unambiguous',
     presets: [
       [
         require.resolve('@babel/preset-env'),

@@ -9,6 +9,7 @@
 
 export interface TransformConfig {
   disableSourceMaps?: boolean;
+  useSwc?: boolean;
 }
 
 export interface WorkerData {

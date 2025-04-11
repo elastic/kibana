@@ -46,8 +46,13 @@ function getSwcOptions(path, config = {}) {
     swcrc: false,
     sourceMaps: babelOptions.sourceMaps === 'both' ? true : babelOptions.sourceMaps,
     filename: babelOptions.filename,
-    plugin: babelOptions.plugins,
     jsc: {
+      loose: true,
+      target: 'es2015',
+      transform: {
+        legacyDecorator: true,
+        decoratorMetadata: true,
+      },
       parser: isTypescript
         ? {
             syntax: 'typescript',
@@ -57,10 +62,11 @@ function getSwcOptions(path, config = {}) {
             syntax: 'ecmascript',
             jsx: true,
           },
-      loose: true,
     },
     module: {
       type: 'commonjs',
+      strict: true,
+      noInterop: false,
     },
   };
 }

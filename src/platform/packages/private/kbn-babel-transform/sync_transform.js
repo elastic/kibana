@@ -9,8 +9,10 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const swc = require('@swc/core');
+const babel = require('@babel/core');
 
 const { getSwcOptions } = require('./options');
+const { getBabelOptions } = require('./options');
 
 /**
  * transform the source code at the given path with babel
@@ -21,11 +23,21 @@ const { getSwcOptions } = require('./options');
  * @returns
  */
 function transformCode(path, source, config = {}) {
-  const swcOptions = getSwcOptions(path, config);
-  const result =
-    source === undefined
-      ? swc.transformFileSync(path, swcOptions)
-      : swc.transformSync(source, swcOptions);
+  const useSwc = config.useSwc;
+  let result;
+  if (useSwc) {
+    const swcOptions = getSwcOptions(path, config);
+    result =
+      source === undefined
+        ? swc.transformFileSync(path, swcOptions)
+        : swc.transformSync(source, swcOptions);
+  } else {
+    const options = getBabelOptions(path, config);
+    result =
+      source === undefined
+        ? babel.transformFileSync(path, options)
+        : babel.transformSync(source, options);
+  }
 
   if (!result || !result.code) {
     throw new Error(`babel failed to transpile [${path}]`);
