@@ -17,20 +17,24 @@ const groupBaseSchema: z.Schema<GroupBase> = z.object({
 });
 
 interface GroupStreamDefinitionBase {
+  description: string;
   group: GroupBase;
 }
 
 const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.object({
+  description: z.string(),
   group: groupBaseSchema,
 });
 
 interface GroupStreamDefinition {
   name: string;
+  description: string;
   group: GroupBase;
 }
 
 const groupStreamDefinitionSchema: z.Schema<GroupStreamDefinition> = z.object({
   name: NonEmptyString,
+  description: z.string(),
   group: groupBaseSchema,
 });
 

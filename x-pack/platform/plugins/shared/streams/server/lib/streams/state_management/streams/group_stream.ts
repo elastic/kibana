@@ -50,7 +50,7 @@ export class GroupStream extends StreamActiveRecord<GroupStreamDefinition> {
 
     // Deduplicate members
     this._definition = {
-      name: definition.name,
+      ...definition,
       group: {
         ...definition.group,
         members: Array.from(new Set(definition.group.members)),

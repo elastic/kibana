@@ -112,6 +112,8 @@ export {
   type IngestStreamDefinition,
   type UnwiredIngest,
   type UnwiredStreamDefinition,
+  type UnwiredStreamDefinitionBase,
   type WiredIngest,
   type WiredStreamDefinition,
+  type WiredStreamDefinitionBase,
 };

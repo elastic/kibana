@@ -41,6 +41,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs', 'logs.test2', 'logs'],
                   },
@@ -61,6 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group-too' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs.test2'],
                   },
@@ -81,6 +83,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs', 'non-existent-stream'],
                   },
@@ -100,6 +103,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs', 'test-group'],
                   },
@@ -119,6 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'test-group' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs', 'test-group-too'],
                   },
@@ -152,6 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response.body).to.eql({
           stream: {
             name: 'test-group',
+            description: '',
             group: {
               members: ['logs', 'logs.test2'],
             },
@@ -165,7 +171,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await apiClient
           .fetch('PUT /api/streams/{name}/_group 2023-10-31', {
             params: {
-              path: { name: 'test-group-3' },
+              path: { name: 'test-group' },
               body: {
                 group: {
                   members: ['logs.test2'],
@@ -176,7 +182,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
         expect(response.body).to.eql({
           acknowledged: true,
-          result: 'created',
+          result: 'updated',
         });
       });
 
@@ -184,7 +190,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await apiClient
           .fetch('GET /api/streams/{name}/_group 2023-10-31', {
             params: {
-              path: { name: 'test-group-3' },
+              path: { name: 'test-group' },
             },
           })
           .expect(200);
@@ -195,10 +201,24 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('unsuccessfully upserts a GroupStream from _group when the GroupStream does not exists', async () => {
+        await apiClient
+          .fetch('PUT /api/streams/{name}/_group 2023-10-31', {
+            params: {
+              path: { name: 'inexistant' },
+              body: {
+                group: {
+                  members: ['logs.test2'],
+                },
+              },
+            },
+          })
+          .expect(404);
+      });
+
       it('successfully lists a GroupStream', async () => {
         const response = await apiClient.fetch('GET /api/streams 2023-10-31').expect(200);
         expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
-        expect(response.body.streams.some((stream) => stream.name === 'test-group-3')).to.eql(true);
       });
 
       it('unsuccessfully creates a group stream with the same name as a unwired stream', async () => {
@@ -209,6 +229,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'metrics-test-test' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs'],
                   },
@@ -228,6 +249,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               path: { name: 'logs.group' },
               body: {
                 stream: {
+                  description: '',
                   group: {
                     members: ['logs'],
                   },

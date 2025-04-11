@@ -14,9 +14,10 @@ import {
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { createServerRoute } from '../../create_server_route';
-import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import { omit } from 'lodash';
 import { QueryAsset } from '../../../../common/assets';
+import { ASSET_ID, ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import { createServerRoute } from '../../create_server_route';
 
 const readIngestRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/_ingest 2023-10-31',
@@ -87,18 +88,17 @@ const upsertIngestRoute = createServerRoute({
       request,
     });
 
+    const name = params.path.name;
+    const streamDefinition = await streamsClient.getStream(name);
+
     if (
-      isWiredStreamDefinition({ name: params.path.name, ...params.body }) &&
+      isWiredStreamDefinition({ ...streamDefinition, ...params.body }) &&
       !(await streamsClient.isStreamsEnabled())
     ) {
       throw badData('Streams are not enabled for Wired streams.');
     }
 
-    const name = params.path.name;
-
     const assets = await assetClient.getAssets(name);
-
-    const ingestUpsertRequest = params.body;
 
     const dashboards = assets
       .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
@@ -110,8 +110,11 @@ const upsertIngestRoute = createServerRoute({
 
     const upsertRequest = {
       dashboards,
-      stream: ingestUpsertRequest,
       queries,
+      stream: {
+        ...omit(streamDefinition, 'name'),
+        ...params.body,
+      },
     } as StreamUpsertRequest;
 
     return await streamsClient.upsertStream({

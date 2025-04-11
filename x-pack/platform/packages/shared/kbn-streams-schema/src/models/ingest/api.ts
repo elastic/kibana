@@ -19,6 +19,8 @@ import {
   wiredIngestSchema,
   wiredStreamDefinitionSchema,
   wiredStreamDefinitionSchemaBase,
+  type UnwiredStreamDefinitionBase,
+  type WiredStreamDefinitionBase,
 } from './base';
 import { ElasticsearchAssets, elasticsearchAssetsSchema } from './common';
 import { InheritedFieldDefinition, inheritedFieldDefinitionSchema } from './fields';
@@ -48,24 +50,20 @@ type IngestGetResponse = WiredIngestResponse | UnwiredIngestResponse;
  */
 
 interface WiredIngestUpsertRequest {
-  description: string;
   ingest: WiredIngest;
 }
 
 interface UnwiredIngestUpsertRequest {
-  description: string;
   ingest: UnwiredIngest;
 }
 
 type IngestUpsertRequest = WiredIngestUpsertRequest | UnwiredIngestUpsertRequest;
 
 const wiredIngestUpsertRequestSchema: z.Schema<WiredIngestUpsertRequest> = z.object({
-  description: z.string(),
   ingest: wiredIngestSchema,
 });
 
 const unwiredIngestUpsertRequestSchema: z.Schema<UnwiredIngestUpsertRequest> = z.object({
-  description: z.string(),
   ingest: unwiredIngestSchema,
 });
 
@@ -151,7 +149,7 @@ const ingestStreamGetResponseSchema: z.Schema<IngestStreamGetResponse> = z.union
 interface UnwiredStreamUpsertRequest {
   dashboards: string[];
   queries: StreamQuery[];
-  stream: UnwiredIngestUpsertRequest;
+  stream: UnwiredStreamDefinitionBase;
 }
 
 const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z.object({
@@ -163,7 +161,7 @@ const unwiredStreamUpsertRequestSchema: z.Schema<UnwiredStreamUpsertRequest> = z
 interface WiredStreamUpsertRequest {
   dashboards: string[];
   queries: StreamQuery[];
-  stream: WiredIngestUpsertRequest;
+  stream: WiredStreamDefinitionBase;
 }
 
 const wiredStreamUpsertRequestSchema: z.Schema<WiredStreamUpsertRequest> = z.object({

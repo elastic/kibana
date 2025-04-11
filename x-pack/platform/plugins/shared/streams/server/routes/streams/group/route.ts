@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
 import {
   GroupObjectGetResponse,
@@ -13,9 +12,11 @@ import {
   GroupStreamUpsertRequest,
   isGroupStreamDefinition,
 } from '@kbn/streams-schema';
-import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
+import { z } from '@kbn/zod';
+import { omit } from 'lodash';
 import { QueryAsset } from '../../../../common/assets';
+import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
+import { createServerRoute } from '../../create_server_route';
 
 const readGroupRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/_group 2023-10-31',
@@ -87,9 +88,8 @@ const upsertGroupRoute = createServerRoute({
     }
 
     const { name } = params.path;
+    const streamDefinition = await streamsClient.getStream(name);
     const assets = await assetClient.getAssets(name);
-
-    const groupUpsertRequest = params.body;
 
     const dashboards = assets
       .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
@@ -101,8 +101,11 @@ const upsertGroupRoute = createServerRoute({
 
     const upsertRequest = {
       dashboards,
-      stream: groupUpsertRequest,
       queries,
+      stream: {
+        ...omit(streamDefinition, 'name'),
+        ...params.body,
+      },
     } as GroupStreamUpsertRequest;
 
     return await streamsClient.upsertStream({

@@ -8,7 +8,7 @@ import { Client } from '@elastic/elasticsearch';
 import { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { StreamUpsertRequest } from '@kbn/streams-schema';
+import { IngestUpsertRequest, StreamUpsertRequest } from '@kbn/streams-schema';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import { StreamsSupertestRepositoryClient } from './repository_client';
@@ -98,6 +98,38 @@ export async function getStream(
           name,
         },
       },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function putIngest(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  body: IngestUpsertRequest,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
+      params: {
+        path: {
+          name,
+        },
+        body,
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
+
+export async function getIngest(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}/_ingest 2023-10-31', {
+      params: { path: { name } },
     })
     .expect(expectStatusCode)
     .then((response) => response.body);
