@@ -533,7 +533,7 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           options: connectors.map(({ id }) => id),
           optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
           category: [APP_ID],
-          requiresPageReload: false,
+          requiresPageReload: true,
           schema: schema.string(),
           solution: 'security',
         },
