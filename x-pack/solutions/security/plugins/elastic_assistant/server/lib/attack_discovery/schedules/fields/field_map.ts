@@ -171,11 +171,11 @@ export const attackDiscoveryAlertFieldMap: FieldMap = {
   [ALERT_ATTACK_DISCOVERY_USERS_ID]: {
     type: 'keyword',
     array: false,
-    required: true,
+    required: false,
   },
   [ALERT_ATTACK_DISCOVERY_USERS_NAME]: {
     type: 'keyword',
     array: false,
-    required: false,
+    required: true,
   },
 } as const;
