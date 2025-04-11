@@ -11,7 +11,7 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 // @ts-expect-error
-const nodeLibsBrowser = require('node-libs-browser');
+// const nodeLibsBrowser = require('node-libs-browser');
 const nodeStdlibBrowser = require('node-stdlib-browser');
 
 /**
@@ -20,7 +20,7 @@ const nodeStdlibBrowser = require('node-stdlib-browser');
  */
 const getStdLibBrowserPackage = (pkgName) => {
   // @ts-expect-error
-  return nodeStdlibBrowser[pkgName];
+  return require.resolve(nodeStdlibBrowser[pkgName]);
 };
 
 const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
@@ -30,15 +30,19 @@ const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
   apply(compiler) {
     compiler.options.plugins.push(
       new compiler.webpack.ProvidePlugin({
-        Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
-        console: nodeLibsBrowser.console,
-        process: nodeLibsBrowser.process,
+        // Buffer: [nodeLibsBrowser.buffer, 'Buffer'],
+        Buffer: [getStdLibBrowserPackage('buffer'), 'Buffer'],
+        // console: nodeLibsBrowser.console,
+        console: getStdLibBrowserPackage('console'),
+        // process: nodeLibsBrowser.process,
+        process: getStdLibBrowserPackage('process'),
       })
     );
 
     compiler.options.resolve.fallback = {
       assert: getStdLibBrowserPackage('assert'),
-      buffer: nodeLibsBrowser.buffer,
+      // buffer: nodeLibsBrowser.buffer,
+      buffer: getStdLibBrowserPackage('buffer'),
       child_process: false,
       cluster: false,
       console: false,
@@ -56,7 +60,7 @@ const NodeLibsBrowserPlugin = class NodeLibsBrowserPlugin {
       os: getStdLibBrowserPackage('os'),
       path: getStdLibBrowserPackage('path'),
       punycode: getStdLibBrowserPackage('punycode'),
-      process: nodeLibsBrowser.process,
+      process: getStdLibBrowserPackage('process'),
       querystring: getStdLibBrowserPackage('querystring'),
       readline: false,
       repl: false,
