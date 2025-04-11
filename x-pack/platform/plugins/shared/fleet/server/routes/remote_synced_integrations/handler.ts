@@ -9,11 +9,9 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { GetRemoteSyncedIntegrationsStatusResponse } from '../../../common/types';
-import {
-  getRemoteSyncedIntegrationsStatus,
-  getRemoteSyncedIntegrationsInfoByOutputId,
-} from '../../tasks/sync_integrations/compare_synced_integrations';
+import { getRemoteSyncedIntegrationsStatus } from '../../tasks/sync_integrations/compare_synced_integrations';
 import type { GetRemoteSyncedIntegrationsInfoRequestSchema } from '../../types';
+import { getRemoteSyncedIntegrationsInfoByOutputId } from '../../tasks/sync_integrations/get_remote_status';
 
 export const getRemoteSyncedIntegrationsStatusHandler: RequestHandler<undefined> = async (
   context,
